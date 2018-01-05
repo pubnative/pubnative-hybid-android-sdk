@@ -44,10 +44,6 @@ public class AdRequest {
     @Expose
     @NonNull private final String zoneId;
 
-    @SerializedName("idfa")
-    @Expose
-    @NonNull private final String idfa;
-
     @SerializedName("gid")
     @Expose
     @NonNull private final String gid;
