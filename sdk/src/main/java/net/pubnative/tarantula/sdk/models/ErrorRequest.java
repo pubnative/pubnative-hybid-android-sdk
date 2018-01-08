@@ -10,9 +10,10 @@ import com.google.gson.annotations.SerializedName;
  * Created by erosgarciaponte on 08.01.18.
  */
 
-public class AdRequest {
-    // Transient means don't serialize / send this over the wire
-    @NonNull private transient final String mAdUnitId;
+public class ErrorRequest {
+    @SerializedName("message")
+    @Expose
+    @NonNull private final String mMessage;
 
     @SerializedName("v")
     @Expose
@@ -21,10 +22,6 @@ public class AdRequest {
     @SerializedName("sdk_v")
     @Expose
     @NonNull private final String mSdkVersion;
-
-    @SerializedName("app_v")
-    @Expose
-    @NonNull private final String mAppVersion;
 
     @SerializedName("ifa")
     @Expose
@@ -90,17 +87,15 @@ public class AdRequest {
     @Expose
     @Nullable private final Boolean mTest;
 
-    private AdRequest(@NonNull String adUnitId, @NonNull String version, @NonNull String sdkVersion,
-                      @NonNull String appVersion, @NonNull String ifa, @NonNull Boolean lmt,
-                      @NonNull String vendorId, @NonNull String timeZone, @NonNull String locale,
-                      @NonNull String orientation, @NonNull Integer widthPx, @NonNull Integer heightPx,
-                      @NonNull String browserAgent, @NonNull String model, @NonNull String connectivity,
-                      @NonNull String carrier, @Nullable Integer sessionDepth, @Nullable Integer latitude,
-                      @Nullable Integer longitude, @Nullable Boolean test) {
-        mAdUnitId = adUnitId;
+    private ErrorRequest(@NonNull String message, @NonNull String version, @NonNull String sdkVersion, @NonNull String ifa,
+                         @NonNull Boolean lmt, @NonNull String vendorId, @NonNull String timeZone, @NonNull String locale,
+                         @NonNull String orientation, @NonNull Integer widthPx, @NonNull Integer heightPx,
+                         @NonNull String browserAgent, @NonNull String model, @NonNull String connectivity,
+                         @NonNull String carrier, @Nullable Integer sessionDepth, @Nullable Integer latitude,
+                         @Nullable Integer longitude, @Nullable Boolean test) {
+        mMessage = message;
         mVersion = version;
         mSdkVersion = sdkVersion;
-        mAppVersion = appVersion;
         mIFA = ifa;
         mLMT = lmt;
         mVendorId = vendorId;
@@ -119,16 +114,10 @@ public class AdRequest {
         mTest = test;
     }
 
-    @NonNull
-    public String getAdUnitId() {
-        return mAdUnitId;
-    }
-
     public static class Builder {
-        @NonNull private final String mAdUnitId;
+        @NonNull private final String mMessage;
         @NonNull private final String mVersion;
         @NonNull private final String mSdkVersion;
-        @NonNull private final String mAppVersion;
         @NonNull private final String mIFA;
         @NonNull private final Boolean mLMT;
         @NonNull private final String mVendorId;
@@ -146,16 +135,14 @@ public class AdRequest {
         @Nullable private Integer mLongitude;
         @Nullable private Boolean mTest;
 
-        public Builder(@NonNull String adUnitId, @NonNull String version, @NonNull String sdkVersion,
-                       @NonNull String appVersion, @NonNull String ifa, @NonNull Boolean lmt,
-                       @NonNull String vendorId, @NonNull String timeZone, @NonNull String locale,
+        public Builder(@NonNull String message, @NonNull String version, @NonNull String sdkVersion, @NonNull String ifa,
+                       @NonNull Boolean lmt, @NonNull String vendorId, @NonNull String timeZone, @NonNull String locale,
                        @NonNull String orientation, @NonNull Integer widthPx, @NonNull Integer heightPx,
                        @NonNull String browserAgent, @NonNull String model, @NonNull String connectivity,
                        @NonNull String carrier, @NonNull Integer sessionDepth) {
-            mAdUnitId = adUnitId;
+            mMessage = message;
             mVersion = version;
             mSdkVersion = sdkVersion;
-            mAppVersion = appVersion;
             mIFA = ifa;
             mLMT = lmt;
             mVendorId = vendorId;
@@ -171,25 +158,25 @@ public class AdRequest {
             mSessionDepth = sessionDepth;
         }
 
-        public AdRequest.Builder withLatitude(@Nullable Integer latitude) {
+        public ErrorRequest.Builder withLatitude(@Nullable Integer latitude) {
             mLatitude = latitude;
             return this;
         }
 
-        public AdRequest.Builder withLongitude(@Nullable Integer longitude) {
+        public ErrorRequest.Builder withLongitude(@Nullable Integer longitude) {
             mLongitude = longitude;
             return this;
         }
 
-        public AdRequest.Builder withTest(@Nullable Boolean test) {
+        public ErrorRequest.Builder withTest(@Nullable Boolean test) {
             mTest = test;
             return this;
         }
 
-        public AdRequest build() {
-            return new AdRequest(mAdUnitId, mVersion, mSdkVersion, mAppVersion, mIFA, mLMT, mVendorId,
-                    mTimeZone, mLocale, mOrientation, mWidthPx, mHeightPx, mBrowserAgent, mModel,
-                    mConnectivity, mCarrier, mSessionDepth, mLatitude, mLongitude, mTest);
+        public ErrorRequest build() {
+            return new ErrorRequest(mMessage, mVersion, mSdkVersion, mIFA, mLMT, mVendorId, mTimeZone, mLocale, mOrientation,
+                    mWidthPx, mHeightPx, mBrowserAgent, mModel, mConnectivity, mCarrier, mSessionDepth, mLatitude, mLongitude,
+                    mTest);
         }
     }
 }
