@@ -39,10 +39,14 @@ public final class MRAIDOrientationProperties {
 
     public String forceOrientationString() {
         switch (forceOrientation) {
-            case FORCE_ORIENTATION_PORTRAIT : return "portrait";
-            case FORCE_ORIENTATION_LANDSCAPE: return "landscape";
-            case FORCE_ORIENTATION_NONE: return "none";
-            default: return "error";
+            case FORCE_ORIENTATION_PORTRAIT:
+                return "portrait";
+            case FORCE_ORIENTATION_LANDSCAPE:
+                return "landscape";
+            case FORCE_ORIENTATION_NONE:
+                return "none";
+            default:
+                return "error";
         }
     }
 }
