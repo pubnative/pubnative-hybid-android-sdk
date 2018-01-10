@@ -9,6 +9,8 @@ import net.pubnative.tarantula.sdk.Tarantula;
 import net.pubnative.tarantula.sdk.models.Ad;
 import net.pubnative.tarantula.sdk.models.AdRequest;
 import net.pubnative.tarantula.sdk.models.AdRequestFactory;
+import net.pubnative.tarantula.sdk.models.api.PNAPIAdRequest;
+import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
 import net.pubnative.tarantula.sdk.utils.CheckUtils;
 import net.pubnative.tarantula.sdk.utils.Logger;
 import net.pubnative.tarantula.sdk.utils.RefreshTimer;
@@ -21,7 +23,7 @@ import io.reactivex.functions.Consumer;
 
 public class RequestManager {
     public interface RequestListener {
-        void onRequestSuccess(@NonNull Ad ad);
+        void onRequestSuccess(@NonNull PNAPIV3AdModel ad);
         void onRequestFail(@NonNull Throwable throwable);
     }
 
@@ -31,7 +33,7 @@ public class RequestManager {
     @NonNull private final AdCache mAdCache;
     @NonNull private final AdRequestFactory mAdRequestFactory;
     @NonNull private final RefreshTimer mRefreshTimer;
-    @Nullable private String mAdUnitId;
+    @Nullable private String mZoneId;
     @Nullable private RequestListener mRequestListener;
     private boolean mIsDestroyed;
 
@@ -54,8 +56,8 @@ public class RequestManager {
         mRequestListener = requestListener;
     }
 
-    public void setAdUnitId(@Nullable String adUnitId) {
-        mAdUnitId = adUnitId;
+    public void setZoneId(@Nullable String zoneId) {
+        mZoneId = zoneId;
     }
 
     public void requestAd() {
@@ -64,7 +66,7 @@ public class RequestManager {
             return;
         }
 
-        if (!CheckUtils.NoThrow.checkNotNull(mAdUnitId, "adUnitId cannot be null")) {
+        if (!CheckUtils.NoThrow.checkNotNull(mZoneId, "zoneId cannot be null")) {
             return;
         }
 
@@ -72,18 +74,18 @@ public class RequestManager {
             return;
         }
 
-        mAdRequestFactory.createAdRequest(mAdUnitId)
-                .subscribe(new Consumer<AdRequest>() {
+        mAdRequestFactory.createAdRequest(mZoneId)
+                .subscribe(new Consumer<PNAPIAdRequest>() {
                     @Override
-                    public void accept(AdRequest adRequest) throws Exception {
+                    public void accept(PNAPIAdRequest adRequest) throws Exception {
                         requestAdFromApi(adRequest);
                     }
                 });
     }
 
     @VisibleForTesting
-    void requestAdFromApi(@NonNull final AdRequest adRequest) {
-        Logger.d(TAG, "Requesting ad for ad unit id: " + adRequest.getAdUnitId());
+    void requestAdFromApi(@NonNull final PNAPIAdRequest adRequest) {
+        Logger.d(TAG, "Requesting ad for ad unit id: " + adRequest.zoneid);
         mApiClient.getAd(adRequest)
                 .subscribe(new Consumer<Ad>() {
                     @Override
@@ -92,8 +94,8 @@ public class RequestManager {
                             return;
                         }
 
-                        Logger.d(TAG, "Received ad response for ad unit id: " + adRequest.getAdUnitId());
-                        mAdCache.put(adRequest.getAdUnitId(), ad);
+                        Logger.d(TAG, "Received ad response for zone id: " + adRequest.zoneid);
+                        mAdCache.put(adRequest.zoneid, ad);
                         if (mRequestListener != null) {
                             mRequestListener.onRequestSuccess(ad);
                         }
@@ -108,7 +110,7 @@ public class RequestManager {
                             return;
                         }
 
-                        Logger.w(TAG, "Failed to receive ad response for ad unit id: " + adRequest.getAdUnitId(), throwable);
+                        Logger.w(TAG, "Failed to receive ad response for zone id: " + adRequest.zoneid, throwable);
                         if (mRequestListener != null) {
                             mRequestListener.onRequestFail(throwable);
                         }

@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 
 import net.pubnative.tarantula.sdk.Tarantula;
 import net.pubnative.tarantula.sdk.models.Ad;
+import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
 import net.pubnative.tarantula.sdk.mraid.MRAIDBanner;
 import net.pubnative.tarantula.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.tarantula.sdk.mraid.MRAIDView;
@@ -19,7 +20,7 @@ import net.pubnative.tarantula.sdk.utils.UrlHandler;
 
 public class MraidBannerPresenter implements BannerPresenter, MRAIDViewListener, MRAIDNativeFeatureListener {
     @NonNull private final Context mContext;
-    @NonNull private final Ad mAd;
+    @NonNull private final PNAPIV3AdModel mAd;
     @NonNull private final UrlHandler mUrlHandlerDelegate;
     @NonNull private final String[] mSupportedNativeFeatures;
 
@@ -27,7 +28,7 @@ public class MraidBannerPresenter implements BannerPresenter, MRAIDViewListener,
     @Nullable private MRAIDBanner mMRAIDBanner;
     private boolean mIsDestroyed;
 
-    public MraidBannerPresenter(@NonNull Context context, @NonNull Ad ad) {
+    public MraidBannerPresenter(@NonNull Context context, @NonNull PNAPIV3AdModel ad) {
         mContext = context;
         mAd = ad;
         mUrlHandlerDelegate = new UrlHandler(context);
@@ -41,7 +42,7 @@ public class MraidBannerPresenter implements BannerPresenter, MRAIDViewListener,
 
     @NonNull
     @Override
-    public Ad getAd() {
+    public PNAPIV3AdModel getAd() {
         return mAd;
     }
 
@@ -51,6 +52,9 @@ public class MraidBannerPresenter implements BannerPresenter, MRAIDViewListener,
             return;
         }
 
+        if (mAd.getAssetUrl(PNAPIAsset.HTML_BANNER) != null) {
+
+        }
         mMRAIDBanner = new MRAIDBanner(mContext, "http://" + Tarantula.HOST + "/", mAd.getCreative(), mSupportedNativeFeatures,
                 this, this);
     }

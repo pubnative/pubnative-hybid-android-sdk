@@ -15,6 +15,7 @@ import net.pubnative.tarantula.sdk.banner.presenter.BannerPresenter;
 import net.pubnative.tarantula.sdk.banner.presenter.BannerPresenterFactory;
 import net.pubnative.tarantula.sdk.banner.view.BannerView;
 import net.pubnative.tarantula.sdk.models.Ad;
+import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
 import net.pubnative.tarantula.sdk.utils.CheckUtils;
 
 /**
@@ -22,6 +23,8 @@ import net.pubnative.tarantula.sdk.utils.CheckUtils;
  */
 
 public class BannerController implements RequestManager.RequestListener, BannerPresenter.Listener {
+    private static final int REFRESH_TIME_SECONDS = 60;
+
     @NonNull private final BannerPresenterFactory mBannerPresenterFactory;
     @NonNull private final RequestManager mRequestManager;
 
@@ -47,13 +50,13 @@ public class BannerController implements RequestManager.RequestListener, BannerP
         mListener = listener;
     }
 
-    public void load(@NonNull String adUnitId, @NonNull BannerView bannerAdView) {
+    public void load(@NonNull String zoneId, @NonNull BannerView bannerAdView) {
         if (!CheckUtils.NoThrow.checkArgument(Tarantula.isInitialized(), "MaxAds SDK has not been initialized. " +
                 "Please call MaxAds#initialize in your application's onCreate method.")) {
             return;
         }
 
-        if (!CheckUtils.NoThrow.checkNotNull(adUnitId, "adUnitId cannot be null")) {
+        if (!CheckUtils.NoThrow.checkNotNull(zoneId, "adUnitId cannot be null")) {
             return;
         }
 
@@ -66,24 +69,24 @@ public class BannerController implements RequestManager.RequestListener, BannerP
         }
 
         mBannerAdView = bannerAdView;
-        mRequestManager.setAdUnitId(adUnitId);
+        mRequestManager.setZoneId(zoneId);
         mRequestManager.requestAd();
         mRequestManager.stopRefreshTimer();
     }
 
     @VisibleForTesting
-    void showAd(@NonNull Ad ad) {
+    void showAd(@NonNull PNAPIV3AdModel ad) {
         if (mIsDestroyed) {
             return;
         }
 
-        // TODO (steffan): there is a low probability bug here if ads are requested rapidly that the mNextBannerPresenter
+        // TODO there is a low probability bug here if ads are requested rapidly that the mNextBannerPresenter
         // will continue to change before it can be loaded into the view. This means that there will be BannerPresenters
         // without a strong reference to them attempting to be loaded. It's possible for them to be garbage collected before
         // being displayed
         mNextBannerPresenter = mBannerPresenterFactory.createBannerPresenter(ad, this);
         if (mNextBannerPresenter == null) {
-            mRequestManager.startRefreshTimer(ad.getRefreshTimeSeconds());
+            mRequestManager.startRefreshTimer(REFRESH_TIME_SECONDS);
 
             if (mListener != null && mBannerAdView != null) {
                 mListener.onBannerError(mBannerAdView);
@@ -112,7 +115,7 @@ public class BannerController implements RequestManager.RequestListener, BannerP
 
     // RequestManager.RequestListener
     @Override
-    public void onRequestSuccess(@NonNull Ad ad) {
+    public void onRequestSuccess(@NonNull PNAPIV3AdModel ad) {
         if (mIsDestroyed) {
             return;
         }

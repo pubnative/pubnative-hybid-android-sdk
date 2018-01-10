@@ -5,6 +5,7 @@ import android.support.annotation.VisibleForTesting;
 
 import net.pubnative.tarantula.sdk.Tarantula;
 import net.pubnative.tarantula.sdk.api.ApiClient;
+import net.pubnative.tarantula.sdk.models.api.PNAPIV3DataModel;
 
 import java.util.List;
 
@@ -14,7 +15,6 @@ import java.util.List;
 
 public class AdTracker {
     private enum Type {
-        SELECTED("selected"),
         IMPRESSION("impression"),
         CLICK("click");
 
@@ -37,39 +37,24 @@ public class AdTracker {
     @NonNull
     private final ApiClient mApiClient;
     @NonNull
-    private final List<String> mSelectedUrls;
+    private final List<PNAPIV3DataModel> mImpressionUrls;
     @NonNull
-    private final List<String> mImpressionUrls;
-    @NonNull
-    private final List<String> mClickUrls;
-    private boolean mSelectedTracked;
+    private final List<PNAPIV3DataModel> mClickUrls;
     private boolean mImpressionTracked;
     private boolean mClickTracked;
 
-    public AdTracker(@NonNull List<String> selectedUrls,
-                     @NonNull List<String> impressionUrls,
-                     @NonNull List<String> clickUrls) {
-        this(Tarantula.getApiClient(), selectedUrls, impressionUrls, clickUrls);
+    public AdTracker(@NonNull List<PNAPIV3DataModel> impressionUrls,
+                     @NonNull List<PNAPIV3DataModel> clickUrls) {
+        this(Tarantula.getApiClient(), impressionUrls, clickUrls);
     }
 
     @VisibleForTesting
     AdTracker(@NonNull ApiClient apiClient,
-              @NonNull List<String> selectedUrls,
-              @NonNull List<String> impressionUrls,
-              @NonNull List<String> clickUrls) {
+              @NonNull List<PNAPIV3DataModel> impressionUrls,
+              @NonNull List<PNAPIV3DataModel> clickUrls) {
         mApiClient = apiClient;
-        mSelectedUrls = selectedUrls;
         mImpressionUrls = impressionUrls;
         mClickUrls = clickUrls;
-    }
-
-    public void trackSelected() {
-        if (mSelectedTracked) {
-            return;
-        }
-
-        trackUrls(mSelectedUrls, Type.SELECTED);
-        mSelectedTracked = true;
     }
 
     public void trackImpression() {
@@ -94,10 +79,10 @@ public class AdTracker {
         mApiClient.trackError(errorMessage);
     }
 
-    private void trackUrls(@NonNull List<String> urls, @NonNull Type type) {
-        for (final String url : urls) {
+    private void trackUrls(@NonNull List<PNAPIV3DataModel> urls, @NonNull Type type) {
+        for (final PNAPIV3DataModel url : urls) {
             Logger.d(TAG, "Tracking " + type.toString() + " url: " + url);
-            mApiClient.trackUrl(url);
+            mApiClient.trackUrl(url.getURL());
         }
     }
 }

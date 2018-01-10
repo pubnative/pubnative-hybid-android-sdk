@@ -5,8 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
-import net.pubnative.tarantula.sdk.models.Ad;
-import net.pubnative.tarantula.sdk.models.Winner;
+import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
 import net.pubnative.tarantula.sdk.utils.AdTracker;
 import net.pubnative.tarantula.sdk.utils.Logger;
 
@@ -23,32 +22,29 @@ public class BannerPresenterFactory {
     }
 
     @Nullable
-    public BannerPresenter createBannerPresenter(@NonNull Ad ad,
+    public BannerPresenter createBannerPresenter(@NonNull PNAPIV3AdModel ad,
                                                  @NonNull BannerPresenter.Listener bannerPresenterListener) {
-        final BannerPresenter bannerPresenter = fromCreativeType(ad.getWinner().getCreativeType(), ad);
+        final BannerPresenter bannerPresenter = fromCreativeType(ad.assetgroupid, ad);
         if (bannerPresenter == null) {
             return null;
         }
 
         final BannerPresenterDecorator bannerPresenterDecorator = new BannerPresenterDecorator(bannerPresenter,
-                new AdTracker(ad.getSelectedUrls(), ad.getImpressionUrls(), ad.getClickUrls()), bannerPresenterListener);
+                new AdTracker(ad.getBeacons(PNAPIV3AdModel.Beacon.IMPRESSION), ad.getBeacons(PNAPIV3AdModel.Beacon.CLICK)), bannerPresenterListener);
         bannerPresenter.setListener(bannerPresenterDecorator);
         return bannerPresenterDecorator;
     }
 
     @Nullable
     @VisibleForTesting
-    BannerPresenter fromCreativeType(@NonNull Winner.CreativeType creativeType, @NonNull Ad ad) {
-        switch (creativeType) {
-            case HTML: {
+    BannerPresenter fromCreativeType(int assetGroupId, @NonNull PNAPIV3AdModel ad) {
+        switch (assetGroupId) {
+            case 10:
+            case 12: {
                 return new MraidBannerPresenter(mContext, ad);
             }
-            case EMPTY: {
-                Logger.d(TAG, "Banner creative type is empty");
-                return null;
-            }
             default: {
-                Logger.e(TAG, "Incompatible creative type: " + creativeType + ", for banner ad format.");
+                Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for banner ad format.");
                 return null;
             }
         }

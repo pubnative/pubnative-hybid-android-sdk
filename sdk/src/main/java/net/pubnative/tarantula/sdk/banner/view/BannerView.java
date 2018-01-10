@@ -41,8 +41,8 @@ public class BannerView extends FrameLayout {
         mBannerController.setListener(listener);
     }
 
-    public void load(@NonNull String adUnitId) {
-        mBannerController.load(adUnitId, this);
+    public void load(@NonNull String zoneId) {
+        mBannerController.load(zoneId, this);
     }
 
     public void destroy() {

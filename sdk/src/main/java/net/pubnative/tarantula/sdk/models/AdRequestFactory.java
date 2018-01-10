@@ -8,6 +8,7 @@ import com.google.android.gms.ads.identifier.AdvertisingIdClient;
 import net.pubnative.tarantula.sdk.DeviceInfo;
 import net.pubnative.tarantula.sdk.Tarantula;
 import net.pubnative.tarantula.sdk.managers.SessionDepthManager;
+import net.pubnative.tarantula.sdk.models.api.PNAPIAdRequest;
 
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
@@ -31,12 +32,15 @@ public class AdRequestFactory {
     }
 
     @NonNull
-    public Observable<AdRequest> createAdRequest(@NonNull final String adUnitId) {
+    public Observable<PNAPIAdRequest> createAdRequest(@NonNull final String adUnitId) {
         return mDeviceInfo.getAdvertisingInfo()
-                .map(new Function<AdvertisingIdClient.Info, AdRequest>() {
+                .map(new Function<AdvertisingIdClient.Info, PNAPIAdRequest>() {
                     @Override
-                    public AdRequest apply(AdvertisingIdClient.Info info) throws Exception {
-                        return new AdRequest.Builder(
+                    public PNAPIAdRequest apply(AdvertisingIdClient.Info info) throws Exception {
+                        PNAPIAdRequest adRequest = new PNAPIAdRequest();
+
+                        return adRequest;
+                        /*return new AdRequest.Builder(
                                 adUnitId,
                                 Tarantula.API_VERSION,
                                 Tarantula.SDK_VERSION,
@@ -54,7 +58,7 @@ public class AdRequestFactory {
                                 mDeviceInfo.getConnectivity().toString(),
                                 mDeviceInfo.getCarrierName(),
                                 mSessionDepthManager.getSessionDepth())
-                                .build();
+                                .build();*/
                     }
                 });
     }

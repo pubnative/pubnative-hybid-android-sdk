@@ -9,6 +9,9 @@ import net.pubnative.tarantula.sdk.models.AdRequest;
 import net.pubnative.tarantula.sdk.models.AdResponse;
 import net.pubnative.tarantula.sdk.models.ErrorRequest;
 import net.pubnative.tarantula.sdk.models.ErrorRequestFactory;
+import net.pubnative.tarantula.sdk.models.api.PNAPIAdRequest;
+import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
+import net.pubnative.tarantula.sdk.models.api.PNAPIV3ResponseModel;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -50,22 +53,27 @@ public class ApiClient {
         mApiService = retrofit.create(ApiService.class);
     }
 
-    public Observable<Ad> getAd(@NonNull final AdRequest adRequest) {
+    public Observable<PNAPIV3AdModel> getAd(@NonNull final PNAPIAdRequest adRequest) {
         Tarantula.getSessionDepthManager().incrementSessionDepth();
-        return mApiService.getAd(adRequest.getAdUnitId(), adRequest)
+        return mApiService.getAd(adRequest.apptoken, adRequest.os, adRequest.osver,
+                adRequest.devicemodel, adRequest.dnt, adRequest.al, adRequest.mf, adRequest.zoneid,
+                adRequest.uid, adRequest.adcount, adRequest.locale, adRequest.latitude,
+                adRequest.longitude, adRequest.gender, adRequest.age, adRequest.bundleid,
+                adRequest.keywords, adRequest.coppa, adRequest.gid, adRequest.gidmd5,
+                adRequest.gidsha1)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .retryWhen(new ExponentialBackoff(Jitter.DEFAULT, 2, 30, TimeUnit.SECONDS, 100))
-                .map(new Function<Response<AdResponse>, Ad>() {
+                .map(new Function<Response<PNAPIV3ResponseModel>, PNAPIV3AdModel>() {
                     @Nullable
                     @Override
-                    public Ad apply(Response<AdResponse> response) throws Exception {
-                        final AdResponse adResponse = response.body();
-                        if (adResponse == null) {
+                    public PNAPIV3AdModel apply(Response<PNAPIV3ResponseModel> response) throws Exception {
+                        final PNAPIV3ResponseModel adResponse = response.body();
+                        if (adResponse == null || adResponse.ads == null || adResponse.ads.isEmpty()) {
                             return null;
                         }
 
-                        return Ad.from(adRequest.getAdUnitId(), adResponse);
+                        return adResponse.ads.get(0);
                     }
                 });
     }
