@@ -18,9 +18,9 @@ import okhttp3.Interceptor;
  */
 
 public class Tarantula {
-    @NonNull public static final String API_VERSION = "1";
-    @NonNull public static final String SDK_VERSION = "0.5.0";
-    @NonNull public static final String HOST = "ads.maxads.io";
+    @NonNull public static final String API_VERSION = "v3";
+    @NonNull public static final String SDK_VERSION = "0.1.0";
+    @NonNull public static final String HOST = "api.pubnative.net/api/v3/";
 
     @NonNull private static ApiClient sApiClient;
     @SuppressLint("StaticFieldLeak")
