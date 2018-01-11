@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import net.pubnative.tarantula.sdk.Tarantula;
+import net.pubnative.tarantula.sdk.api.BannerRequestManager;
 import net.pubnative.tarantula.sdk.api.RequestManager;
 import net.pubnative.tarantula.sdk.banner.presenter.BannerPresenter;
 import net.pubnative.tarantula.sdk.banner.presenter.BannerPresenterFactory;
@@ -40,7 +41,7 @@ public class BannerController implements RequestManager.RequestListener, BannerP
     private boolean mIsDestroyed;
 
     public BannerController(@NonNull Context context) {
-        this(new BannerPresenterFactory(context), new RequestManager());
+        this(new BannerPresenterFactory(context), new BannerRequestManager());
     }
 
     @VisibleForTesting

@@ -21,7 +21,7 @@ import io.reactivex.functions.Consumer;
  * Created by erosgarciaponte on 08.01.18.
  */
 
-public class RequestManager {
+public abstract class RequestManager {
     public interface RequestListener {
         void onRequestSuccess(@NonNull PNAPIV3AdModel ad);
 
@@ -82,7 +82,7 @@ public class RequestManager {
             return;
         }
 
-        mAdRequestFactory.createAdRequest(mZoneId)
+        mAdRequestFactory.createAdRequest(mZoneId, getAdSize())
                 .subscribe(new Consumer<PNAPIAdRequest>() {
                     @Override
                     public void accept(PNAPIAdRequest adRequest) throws Exception {
@@ -149,4 +149,6 @@ public class RequestManager {
         mRequestListener = null;
         mIsDestroyed = true;
     }
+
+    protected abstract String getAdSize();
 }

@@ -58,7 +58,7 @@ public class ApiClient {
         Tarantula.getSessionDepthManager().incrementSessionDepth();
         return mApiService.getAd(adRequest.apptoken, adRequest.os, adRequest.osver,
                 adRequest.devicemodel, adRequest.dnt, adRequest.al, adRequest.mf, adRequest.zoneid,
-                adRequest.uid, adRequest.adcount, adRequest.locale, adRequest.latitude,
+                adRequest.testMode, adRequest.locale, adRequest.latitude,
                 adRequest.longitude, adRequest.gender, adRequest.age, adRequest.bundleid,
                 adRequest.keywords, adRequest.coppa, adRequest.gid, adRequest.gidmd5,
                 adRequest.gidsha1)

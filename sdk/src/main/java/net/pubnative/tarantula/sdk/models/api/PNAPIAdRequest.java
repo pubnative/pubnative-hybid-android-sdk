@@ -40,14 +40,6 @@ public class PNAPIAdRequest {
     @Expose
     public String zoneid;
 
-    @SerializedName("uid")
-    @Expose
-    public String uid;
-
-    @SerializedName("adcount")
-    @Expose
-    public String adcount;
-
     @SerializedName("locale")
     @Expose
     public String locale;
@@ -91,4 +83,8 @@ public class PNAPIAdRequest {
     @SerializedName("gidsha1")
     @Expose
     public String gidsha1;
+
+    @SerializedName("test")
+    @Expose
+    public String testMode;
 }

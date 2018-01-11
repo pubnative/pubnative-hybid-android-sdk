@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
 import net.pubnative.tarantula.sdk.Tarantula;
+import net.pubnative.tarantula.sdk.api.InterstitialRequestManager;
 import net.pubnative.tarantula.sdk.api.RequestManager;
 import net.pubnative.tarantula.sdk.interstitial.presenter.InterstitialPresenter;
 import net.pubnative.tarantula.sdk.interstitial.presenter.InterstitialPresenterFactory;
@@ -33,7 +34,7 @@ public class Interstitial implements RequestManager.RequestListener, Interstitia
     private boolean mIsDestroyed;
 
     public Interstitial(@NonNull Activity activity) {
-        this(new InterstitialPresenterFactory(activity), new RequestManager());
+        this(new InterstitialPresenterFactory(activity), new InterstitialRequestManager());
     }
 
     @VisibleForTesting

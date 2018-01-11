@@ -1,4 +1,8 @@
 <resources>
-    <string name="app_name">Demo</string>
+    <string name="app_name">Tarantula demo</string>
     <string name="action_settings">Settings</string>
+
+    <string name="mraid_banner">MRAID Banner</string>
+    <string name="mraid_interstitial">MRAID Interstitial</string>
+    <string name="video_interstitial">Video Interstitial</string>
 </resources>

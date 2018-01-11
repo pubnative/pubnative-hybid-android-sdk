@@ -22,32 +22,52 @@ public class Tarantula {
     @NonNull public static final String SDK_VERSION = "0.1.0";
     @NonNull public static final String HOST = "api.pubnative.net/api/v3/";
 
+    @NonNull private static String sAppToken;
     @NonNull private static ApiClient sApiClient;
     @SuppressLint("StaticFieldLeak")
     @NonNull private static DeviceInfo sDeviceInfo;
     @NonNull private static SessionDepthManager sSessionDepthManager;
     @NonNull private static AdCache sAdCache;
     private static boolean sInitialized;
+    private static boolean sCoppaEnabled = false;
+    private static boolean sTestMode = false;
+    private static String sAge;
+    private static String sGender;
+    private static String sKeywords;
+    private static String sBundleId;
 
     /**
      * This method must be called to initialize the SDK before request ads.
      */
-    public static void initialize(@NonNull Application application) {
-        initialize(application, Collections.<Interceptor>emptyList(), Collections.<Interceptor>emptyList());
+    public static void initialize(@NonNull String appToken, @NonNull Application application) {
+        initialize(appToken, application, Collections.<Interceptor>emptyList(), Collections.<Interceptor>emptyList());
     }
 
     /**
      * For testing and debugging purposes only.
      */
     @VisibleForTesting
-    public static void initialize(@NonNull Application application,
+    public static void initialize(@NonNull String appToken,
+                                  @NonNull Application application,
                                   @NonNull List<Interceptor> applicationInterceptors,
                                   @NonNull List<Interceptor> networkInterceptors) {
+        sAppToken = appToken;
+        sBundleId = application.getPackageName();
         sApiClient = new ApiClient(applicationInterceptors, networkInterceptors);
         sDeviceInfo = new DeviceInfo(application.getApplicationContext());
         sSessionDepthManager = new SessionDepthManager(application);
         sAdCache = new AdCache();
         sInitialized = true;
+    }
+
+    @NonNull
+    public static String getAppToken() {
+        return sAppToken;
+    }
+
+    @NonNull
+    public static String getBundleId() {
+        return sBundleId;
     }
 
     @NonNull
@@ -72,5 +92,45 @@ public class Tarantula {
 
     public static boolean isInitialized() {
         return sInitialized;
+    }
+
+    public static void setCoppaEnabled(boolean isEnabled) {
+        sCoppaEnabled = isEnabled;
+    }
+
+    public static boolean isCoppaEnabled() {
+        return sCoppaEnabled;
+    }
+
+    public static void setTestMode(boolean isEnabled) {
+        sTestMode = isEnabled;
+    }
+
+    public static boolean isTestMode() {
+        return sTestMode;
+    }
+
+    public static void setAge(String age) {
+        sAge = age;
+    }
+
+    public static String getAge() {
+        return sAge;
+    }
+
+    public static void setGender(String gender) {
+        sGender = gender;
+    }
+
+    public static String getGender() {
+        return sGender;
+    }
+
+    public static void setKeywords(String keywords) {
+        sKeywords = keywords;
+    }
+
+    public static String getKeywords() {
+        return sKeywords;
     }
 }
