@@ -15,4 +15,8 @@ public class Constants {
 
     public static final String INTERSTITIAL_VIDEO_PLACEMENT = "tarantula-video-interstitial";
     public static final String INTERSTITIAL_VIDEO_ZONE_ID = "4";
+
+    public static final String MOPUB_MRAID_BANNER_AD_UNIT = "";
+    public static final String MOPUB_MRAID_INTERSTITIAL_AD_UNIT = "";
+    public static final String MOPUB_VIDEO_INTERSTITIAL_AD_UNIT = "";
 }

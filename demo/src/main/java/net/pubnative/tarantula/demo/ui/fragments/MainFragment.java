@@ -19,6 +19,7 @@ import net.pubnative.tarantula.sdk.api.BannerRequestManager;
 import net.pubnative.tarantula.sdk.api.InterstitialRequestManager;
 import net.pubnative.tarantula.sdk.api.RequestManager;
 import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
+import net.pubnative.tarantula.sdk.utils.PrebidUtils;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -61,10 +62,10 @@ public class MainFragment extends Fragment implements MoPubView.BannerAdListener
         mMopubView.setBannerAdListener(this);
         mMopubView.setAutorefreshEnabled(false);
 
-        mMraidInterstitial = new MoPubInterstitial(getActivity(), "");
+        mMraidInterstitial = new MoPubInterstitial(getActivity(), Constants.MOPUB_MRAID_INTERSTITIAL_AD_UNIT);
         mMraidInterstitial.setInterstitialAdListener(this);
 
-        mVideoInterstitial = new MoPubInterstitial(getActivity(), "");
+        mVideoInterstitial = new MoPubInterstitial(getActivity(), Constants.MOPUB_VIDEO_INTERSTITIAL_AD_UNIT);
         mVideoInterstitial.setInterstitialAdListener(this);
 
         view.findViewById(R.id.button_banner_mraid).setOnClickListener(new View.OnClickListener() {
@@ -77,14 +78,14 @@ public class MainFragment extends Fragment implements MoPubView.BannerAdListener
         view.findViewById(R.id.button_interstitial_mraid).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                loadMraidInterstitial();
             }
         });
 
         view.findViewById(R.id.button_interstitial_video).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                loadVideoInterstitial();
             }
         });
     }
@@ -101,14 +102,13 @@ public class MainFragment extends Fragment implements MoPubView.BannerAdListener
             @Override
             public void onRequestSuccess(@NonNull PNAPIV3AdModel ad) {
                 mBannerAd = ad;
-                mMopubView.setAdUnitId("");
-                mMopubView.setKeywords("");
+                mMopubView.setAdUnitId(Constants.MOPUB_MRAID_BANNER_AD_UNIT);
+                mMopubView.setKeywords(PrebidUtils.getPrebidKeywords(ad));
                 mMopubView.loadAd();
             }
 
             @Override
             public void onRequestFail(@NonNull Throwable throwable) {
-                Log.e("Eros", "onRequestFail");
                 mBannerRequestManager.startRefreshTimer(RequestManager.DEFAULT_REFRESH_TIME_SECONDS);
             }
         });
@@ -121,7 +121,7 @@ public class MainFragment extends Fragment implements MoPubView.BannerAdListener
         mMraidInterstitialRequestManager.setRequestListener(new RequestManager.RequestListener() {
             @Override
             public void onRequestSuccess(@NonNull PNAPIV3AdModel ad) {
-                mMraidInterstitial.setKeywords("");
+                mMraidInterstitial.setKeywords(PrebidUtils.getPrebidKeywords(ad));
                 mMraidInterstitial.load();
             }
 
@@ -139,7 +139,7 @@ public class MainFragment extends Fragment implements MoPubView.BannerAdListener
         mVideoInterstitialRequestManager.setRequestListener(new RequestManager.RequestListener() {
             @Override
             public void onRequestSuccess(@NonNull PNAPIV3AdModel ad) {
-                mVideoInterstitial.setKeywords("");
+                mVideoInterstitial.setKeywords(PrebidUtils.getPrebidKeywords(ad));
                 mVideoInterstitial.load();
             }
 
