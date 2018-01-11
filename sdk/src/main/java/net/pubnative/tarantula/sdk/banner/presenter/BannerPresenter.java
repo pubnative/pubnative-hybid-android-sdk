@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.view.View;
 
 import net.pubnative.tarantula.sdk.models.Ad;
+import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
@@ -13,13 +14,18 @@ import net.pubnative.tarantula.sdk.models.Ad;
 public interface BannerPresenter {
     interface Listener {
         void onBannerLoaded(@NonNull BannerPresenter bannerPresenter, @NonNull View banner);
+
         void onBannerClicked(@NonNull BannerPresenter bannerPresenter);
+
         void onBannerError(@NonNull BannerPresenter bannerPresenter);
     }
 
     void setListener(@Nullable Listener listener);
+
     @NonNull
-    Ad getAd();
+    PNAPIV3AdModel getAd();
+
     void load();
+
     void destroy();
 }

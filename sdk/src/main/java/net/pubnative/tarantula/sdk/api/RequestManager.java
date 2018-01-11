@@ -24,17 +24,25 @@ import io.reactivex.functions.Consumer;
 public class RequestManager {
     public interface RequestListener {
         void onRequestSuccess(@NonNull PNAPIV3AdModel ad);
+
         void onRequestFail(@NonNull Throwable throwable);
     }
 
-    @NonNull private static final String TAG = RequestManager.class.getSimpleName();
+    @NonNull
+    private static final String TAG = RequestManager.class.getSimpleName();
     public static final int DEFAULT_REFRESH_TIME_SECONDS = 60;
-    @NonNull private final ApiClient mApiClient;
-    @NonNull private final AdCache mAdCache;
-    @NonNull private final AdRequestFactory mAdRequestFactory;
-    @NonNull private final RefreshTimer mRefreshTimer;
-    @Nullable private String mZoneId;
-    @Nullable private RequestListener mRequestListener;
+    @NonNull
+    private final ApiClient mApiClient;
+    @NonNull
+    private final AdCache mAdCache;
+    @NonNull
+    private final AdRequestFactory mAdRequestFactory;
+    @NonNull
+    private final RefreshTimer mRefreshTimer;
+    @Nullable
+    private String mZoneId;
+    @Nullable
+    private RequestListener mRequestListener;
     private boolean mIsDestroyed;
 
     public RequestManager() {
@@ -87,9 +95,9 @@ public class RequestManager {
     void requestAdFromApi(@NonNull final PNAPIAdRequest adRequest) {
         Logger.d(TAG, "Requesting ad for ad unit id: " + adRequest.zoneid);
         mApiClient.getAd(adRequest)
-                .subscribe(new Consumer<Ad>() {
+                .subscribe(new Consumer<PNAPIV3AdModel>() {
                     @Override
-                    public void accept(@NonNull Ad ad) throws Exception {
+                    public void accept(@NonNull PNAPIV3AdModel ad) throws Exception {
                         if (mIsDestroyed) {
                             return;
                         }

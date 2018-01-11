@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 
 import net.pubnative.tarantula.sdk.Tarantula;
 import net.pubnative.tarantula.sdk.models.Ad;
+import net.pubnative.tarantula.sdk.models.api.PNAPIAsset;
 import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
 import net.pubnative.tarantula.sdk.mraid.MRAIDBanner;
 import net.pubnative.tarantula.sdk.mraid.MRAIDNativeFeatureListener;
@@ -19,13 +20,19 @@ import net.pubnative.tarantula.sdk.utils.UrlHandler;
  */
 
 public class MraidBannerPresenter implements BannerPresenter, MRAIDViewListener, MRAIDNativeFeatureListener {
-    @NonNull private final Context mContext;
-    @NonNull private final PNAPIV3AdModel mAd;
-    @NonNull private final UrlHandler mUrlHandlerDelegate;
-    @NonNull private final String[] mSupportedNativeFeatures;
+    @NonNull
+    private final Context mContext;
+    @NonNull
+    private final PNAPIV3AdModel mAd;
+    @NonNull
+    private final UrlHandler mUrlHandlerDelegate;
+    @NonNull
+    private final String[] mSupportedNativeFeatures;
 
-    @Nullable private BannerPresenter.Listener mListener;
-    @Nullable private MRAIDBanner mMRAIDBanner;
+    @Nullable
+    private BannerPresenter.Listener mListener;
+    @Nullable
+    private MRAIDBanner mMRAIDBanner;
     private boolean mIsDestroyed;
 
     public MraidBannerPresenter(@NonNull Context context, @NonNull PNAPIV3AdModel ad) {
@@ -53,10 +60,13 @@ public class MraidBannerPresenter implements BannerPresenter, MRAIDViewListener,
         }
 
         if (mAd.getAssetUrl(PNAPIAsset.HTML_BANNER) != null) {
-
+            mMRAIDBanner = new MRAIDBanner(mContext, mAd.getAssetUrl(PNAPIAsset.HTML_BANNER), "", mSupportedNativeFeatures,
+                    this, this);
+        } else if (mAd.getAssetHtml(PNAPIAsset.HTML_BANNER) != null) {
+            mMRAIDBanner = new MRAIDBanner(mContext, "", mAd.getAssetHtml(PNAPIAsset.HTML_BANNER), mSupportedNativeFeatures,
+                    this, this);
         }
-        mMRAIDBanner = new MRAIDBanner(mContext, "http://" + Tarantula.HOST + "/", mAd.getCreative(), mSupportedNativeFeatures,
-                this, this);
+
     }
 
     @Override
@@ -122,7 +132,7 @@ public class MraidBannerPresenter implements BannerPresenter, MRAIDViewListener,
         }
 
         mUrlHandlerDelegate.handleUrl(url);
-        // TODO (steffan): will this always count as a click? Are there other cases that should be considered a click?
+        // TODO will this always count as a click? Are there other cases that should be considered a click?
         if (mListener != null) {
             mListener.onBannerClicked(this);
         }

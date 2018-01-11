@@ -17,11 +17,15 @@ import net.pubnative.tarantula.sdk.views.HtmlWebView;
  */
 
 public class InterstitialActivity extends Activity {
-    @NonNull public static final String HTML_KEY = "html_key";
-    @NonNull public static final String BROADCAST_ID_KEY = "broadcast_id_key";
+    @NonNull
+    public static final String HTML_KEY = "html_key";
+    @NonNull
+    public static final String BROADCAST_ID_KEY = "broadcast_id_key";
 
-    @NonNull private InterstitialActivityPresenter mInterstitialActivityPresenter;
-    @Nullable private String mHtml;
+    @NonNull
+    private InterstitialActivityPresenter mInterstitialActivityPresenter;
+    @Nullable
+    private String mHtml;
     private long mBroadcastId;
 
     @Override

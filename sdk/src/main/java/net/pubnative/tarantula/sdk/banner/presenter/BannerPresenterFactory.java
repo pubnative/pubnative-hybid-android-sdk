@@ -14,8 +14,10 @@ import net.pubnative.tarantula.sdk.utils.Logger;
  */
 
 public class BannerPresenterFactory {
-    @NonNull private static final String TAG = BannerPresenterFactory.class.getSimpleName();
-    @NonNull private final Context mContext;
+    @NonNull
+    private static final String TAG = BannerPresenterFactory.class.getSimpleName();
+    @NonNull
+    private final Context mContext;
 
     public BannerPresenterFactory(@NonNull Context context) {
         mContext = context;

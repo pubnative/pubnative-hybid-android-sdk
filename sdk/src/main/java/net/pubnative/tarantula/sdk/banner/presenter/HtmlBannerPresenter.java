@@ -7,6 +7,8 @@ import android.view.View;
 
 import net.pubnative.tarantula.sdk.Tarantula;
 import net.pubnative.tarantula.sdk.models.Ad;
+import net.pubnative.tarantula.sdk.models.api.PNAPIAsset;
+import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
 import net.pubnative.tarantula.sdk.views.HtmlWebView;
 import net.pubnative.tarantula.sdk.views.HtmlWebViewClient;
 
@@ -15,11 +17,14 @@ import net.pubnative.tarantula.sdk.views.HtmlWebViewClient;
  */
 
 public class HtmlBannerPresenter implements BannerPresenter, View.OnClickListener {
-    @NonNull private final HtmlWebView mHtmlWebView;
-    @NonNull private final Ad mAd;
-    @Nullable private BannerPresenter.Listener mListener;
+    @NonNull
+    private final HtmlWebView mHtmlWebView;
+    @NonNull
+    private final PNAPIV3AdModel mAd;
+    @Nullable
+    private BannerPresenter.Listener mListener;
 
-    public HtmlBannerPresenter(@NonNull Context context, @NonNull Ad ad) {
+    public HtmlBannerPresenter(@NonNull Context context, @NonNull PNAPIV3AdModel ad) {
         mAd = ad;
         mHtmlWebView = new HtmlWebView(context);
         mHtmlWebView.setWebViewClient(new HtmlWebViewClient(context));
@@ -33,15 +38,26 @@ public class HtmlBannerPresenter implements BannerPresenter, View.OnClickListene
 
     @NonNull
     @Override
-    public Ad getAd() {
+    public PNAPIV3AdModel getAd() {
         return mAd;
     }
 
     @Override
     public void load() {
-        mHtmlWebView.loadDataWithBaseURL("http://" + Tarantula.HOST + "/", mAd.getCreative(), "text/html", "utf-8", null);
-        if (mListener != null) {
-            mListener.onBannerLoaded(this, mHtmlWebView);
+        if (mAd.getAssetUrl(PNAPIAsset.HTML_BANNER) != null) {
+            mHtmlWebView.loadDataWithBaseURL(mAd.getAssetUrl(PNAPIAsset.HTML_BANNER), "", "text/html", "utf-8", null);
+            if (mListener != null) {
+                mListener.onBannerLoaded(this, mHtmlWebView);
+            }
+        } else if (mAd.getAssetHtml(PNAPIAsset.HTML_BANNER) != null) {
+            mHtmlWebView.loadData(mAd.getAssetHtml(PNAPIAsset.HTML_BANNER), "text/html", "utf-8");
+            if (mListener != null) {
+                mListener.onBannerLoaded(this, mHtmlWebView);
+            }
+        } else {
+            if (mListener != null) {
+                mListener.onBannerError(this);
+            }
         }
     }
 

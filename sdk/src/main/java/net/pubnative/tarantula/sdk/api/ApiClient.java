@@ -33,7 +33,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class ApiClient {
-    @NonNull private final ApiService mApiService;
+    @NonNull
+    private final ApiService mApiService;
 
     public ApiClient(@NonNull List<Interceptor> applicationInterceptors, @NonNull List<Interceptor> networkInterceptors) {
         final OkHttpClient.Builder builder = new OkHttpClient.Builder();

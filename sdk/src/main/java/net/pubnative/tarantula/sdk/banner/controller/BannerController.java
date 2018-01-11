@@ -14,7 +14,6 @@ import net.pubnative.tarantula.sdk.api.RequestManager;
 import net.pubnative.tarantula.sdk.banner.presenter.BannerPresenter;
 import net.pubnative.tarantula.sdk.banner.presenter.BannerPresenterFactory;
 import net.pubnative.tarantula.sdk.banner.view.BannerView;
-import net.pubnative.tarantula.sdk.models.Ad;
 import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
 import net.pubnative.tarantula.sdk.utils.CheckUtils;
 
@@ -25,13 +24,19 @@ import net.pubnative.tarantula.sdk.utils.CheckUtils;
 public class BannerController implements RequestManager.RequestListener, BannerPresenter.Listener {
     private static final int REFRESH_TIME_SECONDS = 60;
 
-    @NonNull private final BannerPresenterFactory mBannerPresenterFactory;
-    @NonNull private final RequestManager mRequestManager;
+    @NonNull
+    private final BannerPresenterFactory mBannerPresenterFactory;
+    @NonNull
+    private final RequestManager mRequestManager;
 
-    @Nullable private BannerView mBannerAdView;
-    @Nullable private BannerPresenter mCurrentBannerPresenter;
-    @Nullable private BannerPresenter mNextBannerPresenter;
-    @Nullable private BannerView.Listener mListener;
+    @Nullable
+    private BannerView mBannerAdView;
+    @Nullable
+    private BannerPresenter mCurrentBannerPresenter;
+    @Nullable
+    private BannerPresenter mNextBannerPresenter;
+    @Nullable
+    private BannerView.Listener mListener;
     private boolean mIsDestroyed;
 
     public BannerController(@NonNull Context context) {
@@ -56,7 +61,7 @@ public class BannerController implements RequestManager.RequestListener, BannerP
             return;
         }
 
-        if (!CheckUtils.NoThrow.checkNotNull(zoneId, "adUnitId cannot be null")) {
+        if (!CheckUtils.NoThrow.checkNotNull(zoneId, "zone id cannot be null")) {
             return;
         }
 
@@ -147,7 +152,7 @@ public class BannerController implements RequestManager.RequestListener, BannerP
         mCurrentBannerPresenter = mNextBannerPresenter;
         mNextBannerPresenter = null;
 
-        mRequestManager.startRefreshTimer(bannerPresenter.getAd().getRefreshTimeSeconds());
+        mRequestManager.startRefreshTimer(REFRESH_TIME_SECONDS);
 
         if (mBannerAdView != null) {
             mBannerAdView.removeAllViews();
@@ -178,7 +183,7 @@ public class BannerController implements RequestManager.RequestListener, BannerP
             return;
         }
 
-        mRequestManager.startRefreshTimer(bannerPresenter.getAd().getRefreshTimeSeconds());
+        mRequestManager.startRefreshTimer(REFRESH_TIME_SECONDS);
 
         if (mListener != null && mBannerAdView != null) {
             mListener.onBannerError(mBannerAdView);

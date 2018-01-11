@@ -23,18 +23,29 @@
 
 package net.pubnative.tarantula.sdk.models.api;
 
+import android.content.Context;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.View;
+
+import net.pubnative.tarantula.sdk.views.PNAPIContentInfoView;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PNAPIV3AdModel implements Serializable {
 
+    private static final String TAG = PNAPIV3AdModel.class.getSimpleName();
+    private static final String DATA_CONTENTINFO_LINK_KEY = "link";
+    private static final String DATA_CONTENTINFO_ICON_KEY = "icon";
+
     //==============================================================================================
     // Fields
     //==============================================================================================
 
     public String link;
-    public int                    assetgroupid;
+    public int assetgroupid;
     public List<PNAPIV3DataModel> assets;
     public List<PNAPIV3DataModel> beacons;
     public List<PNAPIV3DataModel> meta;
@@ -49,7 +60,7 @@ public class PNAPIV3AdModel implements Serializable {
     public interface Beacon {
 
         String IMPRESSION = "impression";
-        String CLICK      = "click";
+        String CLICK = "click";
     }
 
     //==============================================================================================
@@ -98,5 +109,78 @@ public class PNAPIV3AdModel implements Serializable {
             }
         }
         return result;
+    }
+
+    public String getAssetUrl(String asset) {
+        String result = null;
+        PNAPIV3DataModel data = getAsset(asset);
+        if (data != null) {
+            result = data.getURL();
+        }
+        return result;
+    }
+
+    public String getAssetHtml(String asset) {
+        String result = null;
+        PNAPIV3DataModel data = getAsset(asset);
+        if (data != null) {
+            result = data.getHtml();
+        }
+        return result;
+    }
+
+    public String getVast() {
+        String result = null;
+        PNAPIV3DataModel data = getAsset(PNAPIAsset.VAST);
+        if (data != null) {
+            result = data.getStringField("vast2");
+        }
+        return result;
+    }
+
+    public View getContentInfo(Context context) {
+        PNAPIContentInfoView result = null;
+        PNAPIV3DataModel data = getMeta(PNAPIMeta.CONTENT_INFO);
+        if (data == null) {
+            Log.e(TAG, "getContentInfo - contentInfo data not found");
+        } else if (TextUtils.isEmpty(data.getStringField(DATA_CONTENTINFO_ICON_KEY))) {
+            Log.e(TAG, "getContentInfo - contentInfo icon not found");
+        } else if (TextUtils.isEmpty(data.getStringField(DATA_CONTENTINFO_LINK_KEY))) {
+            Log.e(TAG, "getContentInfo - contentInfo link not found");
+        } else if (TextUtils.isEmpty(data.getText())) {
+            Log.e(TAG, "getContentInfo - contentInfo text not found");
+        } else {
+            result = new PNAPIContentInfoView(context);
+            result.setIconUrl(data.getStringField(DATA_CONTENTINFO_ICON_KEY));
+            result.setIconClickUrl(data.getStringField(DATA_CONTENTINFO_LINK_KEY));
+            result.setContextText(data.getText());
+            result.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ((PNAPIContentInfoView) view).openLayout();
+                }
+            });
+        }
+        return result;
+    }
+
+    /**
+     * Gets content info icon url
+     *
+     * @return icon url of content info
+     */
+    public String getContentInfoIconUrl() {
+        PNAPIV3DataModel data = getMeta(PNAPIMeta.CONTENT_INFO);
+        return data.getStringField(DATA_CONTENTINFO_ICON_KEY);
+    }
+
+    /**
+     * Gets content info click url
+     *
+     * @return click url of content info
+     */
+    public String getContentInfoClickUrl() {
+        PNAPIV3DataModel data = getMeta(PNAPIMeta.CONTENT_INFO);
+        return data.getStringField(DATA_CONTENTINFO_LINK_KEY);
     }
 }

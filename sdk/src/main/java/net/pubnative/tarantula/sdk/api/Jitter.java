@@ -9,8 +9,10 @@ import java.util.Random;
  */
 
 public interface Jitter {
-    Jitter DEFAULT  = new Jitter() {
-        @NonNull private final Random mRandom = new Random();
+    Jitter DEFAULT = new Jitter() {
+        @NonNull
+        private final Random mRandom = new Random();
+
         /**
          * @return a random value inside [0.85, 1.15] every time it's called
          */
