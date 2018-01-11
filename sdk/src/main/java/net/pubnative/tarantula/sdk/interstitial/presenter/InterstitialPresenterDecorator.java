@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import net.pubnative.tarantula.sdk.models.Ad;
+import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
 import net.pubnative.tarantula.sdk.utils.AdTracker;
 import net.pubnative.tarantula.sdk.utils.CheckUtils;
 import net.pubnative.tarantula.sdk.utils.Logger;
@@ -34,7 +35,7 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
 
     @NonNull
     @Override
-    public Ad getAd() {
+    public PNAPIV3AdModel getAd() {
         return mInterstitialPresenter.getAd();
     }
 
@@ -44,8 +45,7 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             return;
         }
 
-        Logger.d(TAG, "Loading interstitial presenter for ad unit id: " + getAd().getAdUnitId());
-        mAdTrackingDelegate.trackSelected();
+        //Logger.d(TAG, "Loading interstitial presenter for ad unit id: " + getAd().getAdUnitId());
         mInterstitialPresenter.load();
     }
 
@@ -55,13 +55,13 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             return;
         }
 
-        Logger.d(TAG, "Showing interstitial presenter for ad unit id: " + getAd().getAdUnitId());
+        //Logger.d(TAG, "Showing interstitial presenter for ad unit id: " + getAd().getAdUnitId());
         mInterstitialPresenter.show();
     }
 
     @Override
     public void destroy() {
-        Logger.d(TAG, "Destroying interstitial presenter for ad unit id: " + getAd().getAdUnitId());
+        //Logger.d(TAG, "Destroying interstitial presenter for ad unit id: " + getAd().getAdUnitId());
         mInterstitialPresenter.destroy();
         mIsDestroyed = true;
     }
@@ -72,7 +72,7 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             return;
         }
 
-        Logger.d(TAG, "Interstitial loaded for ad unit id: " + getAd().getAdUnitId());
+        //ogger.d(TAG, "Interstitial loaded for ad unit id: " + getAd().getAdUnitId());
         mListener.onInterstitialLoaded(interstitialPresenter);
     }
 
@@ -82,7 +82,7 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             return;
         }
 
-        Logger.d(TAG, "Interstitial shown for ad unit id: " + getAd().getAdUnitId());
+        //Logger.d(TAG, "Interstitial shown for ad unit id: " + getAd().getAdUnitId());
         mAdTrackingDelegate.trackImpression();
         mListener.onInterstitialShown(interstitialPresenter);
     }
@@ -93,7 +93,7 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             return;
         }
 
-        Logger.d(TAG, "Interstitial clicked for ad unit id: " + getAd().getAdUnitId());
+        //Logger.d(TAG, "Interstitial clicked for ad unit id: " + getAd().getAdUnitId());
         mAdTrackingDelegate.trackClick();
         mListener.onInterstitialClicked(interstitialPresenter);
     }
@@ -104,7 +104,7 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             return;
         }
 
-        Logger.d(TAG, "Interstitial dismissed for ad unit id: " + getAd().getAdUnitId());
+        //Logger.d(TAG, "Interstitial dismissed for ad unit id: " + getAd().getAdUnitId());
         mListener.onInterstitialDismissed(interstitialPresenter);
     }
 
@@ -114,7 +114,8 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             return;
         }
 
-        String errorMessage = "Interstitial error for ad unit id: " + getAd().getAdUnitId();
+        //String errorMessage = "Interstitial error for ad unit id: " + getAd().getAdUnitId();
+        String errorMessage = "Interstitial error for zone id: ";
         Logger.d(TAG, errorMessage);
         mAdTrackingDelegate.trackError(errorMessage);
         mListener.onInterstitialError(interstitialPresenter);

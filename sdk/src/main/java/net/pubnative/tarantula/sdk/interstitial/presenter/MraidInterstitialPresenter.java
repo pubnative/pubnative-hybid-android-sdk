@@ -6,6 +6,8 @@ import android.support.annotation.Nullable;
 
 import net.pubnative.tarantula.sdk.Tarantula;
 import net.pubnative.tarantula.sdk.models.Ad;
+import net.pubnative.tarantula.sdk.models.api.PNAPIAsset;
+import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
 import net.pubnative.tarantula.sdk.mraid.MRAIDInterstitial;
 import net.pubnative.tarantula.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.tarantula.sdk.mraid.MRAIDView;
@@ -19,7 +21,7 @@ import net.pubnative.tarantula.sdk.utils.UrlHandler;
 
 public class MraidInterstitialPresenter implements InterstitialPresenter, MRAIDViewListener, MRAIDNativeFeatureListener {
     @NonNull private final Activity mActivity;
-    @NonNull private final Ad mAd;
+    @NonNull private final PNAPIV3AdModel mAd;
     @NonNull private final UrlHandler mUrlHandlerDelegate;
     @NonNull private final String[] mSupportedNativeFeatures;
 
@@ -27,7 +29,7 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, MRAIDV
     @Nullable private MRAIDInterstitial mMRAIDInterstitial;
     private boolean mIsDestroyed;
 
-    public MraidInterstitialPresenter(@NonNull Activity activity, @NonNull Ad ad) {
+    public MraidInterstitialPresenter(@NonNull Activity activity, @NonNull PNAPIV3AdModel ad) {
         mActivity = activity;
         mAd = ad;
         mUrlHandlerDelegate = new UrlHandler(activity);
@@ -41,7 +43,7 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, MRAIDV
 
     @NonNull
     @Override
-    public Ad getAd() {
+    public PNAPIV3AdModel getAd() {
         return mAd;
     }
 
@@ -51,8 +53,13 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, MRAIDV
             return;
         }
 
-        mMRAIDInterstitial = new MRAIDInterstitial(mActivity, "http://" + Tarantula.HOST + "/", mAd.getCreative(),
-                mSupportedNativeFeatures, this, this);
+        if (mAd.getAssetUrl(PNAPIAsset.HTML_BANNER) != null) {
+            mMRAIDInterstitial = new MRAIDInterstitial(mActivity, mAd.getAssetUrl(PNAPIAsset.HTML_BANNER), "",
+                    mSupportedNativeFeatures, this, this);
+        } else if (mAd.getAssetHtml(PNAPIAsset.HTML_BANNER) != null) {
+            mMRAIDInterstitial = new MRAIDInterstitial(mActivity, "", mAd.getAssetHtml(PNAPIAsset.HTML_BANNER),
+                    mSupportedNativeFeatures, this, this);
+        }
     }
 
     @Override
@@ -135,7 +142,7 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, MRAIDV
         }
 
         mUrlHandlerDelegate.handleUrl(url);
-        // TODO (steffan): will this always count as a click? Are there other cases that should be considered a click?
+        // TODO will this always count as a click? Are there other cases that should be considered a click?
         if (mListener != null) {
             mListener.onInterstitialClicked(this);
         }

@@ -10,6 +10,7 @@ import net.pubnative.tarantula.sdk.api.RequestManager;
 import net.pubnative.tarantula.sdk.interstitial.presenter.InterstitialPresenter;
 import net.pubnative.tarantula.sdk.interstitial.presenter.InterstitialPresenterFactory;
 import net.pubnative.tarantula.sdk.models.Ad;
+import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
 import net.pubnative.tarantula.sdk.utils.CheckUtils;
 
 /**
@@ -47,13 +48,13 @@ public class Interstitial implements RequestManager.RequestListener, Interstitia
         mListener = listener;
     }
 
-    public void load(@NonNull String adUnitId) {
-        if (!CheckUtils.NoThrow.checkArgument(Tarantula.isInitialized(), "MaxAds SDK has not been initialized. " +
-                "Please call MaxAds#initialize in your application's onCreate method.")) {
+    public void load(@NonNull String zoneId) {
+        if (!CheckUtils.NoThrow.checkArgument(Tarantula.isInitialized(), "Tarantula SDK has not been initialized. " +
+                "Please call Tarantula#initialize in your application's onCreate method.")) {
             return;
         }
 
-        if (!CheckUtils.NoThrow.checkNotNull(adUnitId, "adUnitId cannot be null")) {
+        if (!CheckUtils.NoThrow.checkNotNull(zoneId, "zone id cannot be null")) {
             return;
         }
 
@@ -61,12 +62,12 @@ public class Interstitial implements RequestManager.RequestListener, Interstitia
             return;
         }
 
-        mRequestManager.setAdUnitId(adUnitId);
+        mRequestManager.setZoneId(zoneId);
         mRequestManager.requestAd();
     }
 
     @VisibleForTesting
-    void loadInterstitial(@NonNull Ad ad) {
+    void loadInterstitial(@NonNull PNAPIV3AdModel ad) {
         if (mIsDestroyed) {
             return;
         }
@@ -102,7 +103,7 @@ public class Interstitial implements RequestManager.RequestListener, Interstitia
 
     // RequestManager.RequestListener
     @Override
-    public void onRequestSuccess(@NonNull Ad ad) {
+    public void onRequestSuccess(@NonNull PNAPIV3AdModel ad) {
         if (mIsDestroyed) {
             return;
         }

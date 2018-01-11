@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import net.pubnative.tarantula.sdk.models.Ad;
+import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
 
 /**
  * Created by erosgarciaponte on 09.01.18.
@@ -20,7 +21,7 @@ public interface InterstitialPresenter {
 
     void setListener(@Nullable Listener listener);
     @NonNull
-    Ad getAd();
+    PNAPIV3AdModel getAd();
     void load();
     void show();
     void destroy();

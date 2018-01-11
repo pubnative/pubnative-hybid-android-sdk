@@ -16,10 +16,10 @@ import net.pubnative.tarantula.sdk.interstitial.presenter.InterstitialPresenter;
 
 public class InterstitialBroadcastReceiver extends BroadcastReceiver {
     @NonNull public static final String BROADCAST_ID = "broadcastId";
-    @NonNull public static final String INTERSTITIAL_SHOW = "io.maxads.ads.interstitial.show";
-    @NonNull public static final String INTERSTITIAL_CLICK = "io.maxads.ads.interstitial.click";
-    @NonNull public static final String INTERSTITIAL_DISMISS = "io.maxads.ads.interstitial.dismiss";
-    @NonNull public static final String INTERSTITIAL_ERROR = "io.maxads.ads.interstitial.error";
+    @NonNull public static final String INTERSTITIAL_SHOW = "net.pubnative.tarantula.interstitial.show";
+    @NonNull public static final String INTERSTITIAL_CLICK = "net.pubnative.tarantula.interstitial.click";
+    @NonNull public static final String INTERSTITIAL_DISMISS = "net.pubnative.tarantula.interstitial.dismiss";
+    @NonNull public static final String INTERSTITIAL_ERROR = "net.pubnative.tarantula.interstitial.error";
 
     @NonNull private final Context mContext;
     @NonNull private final InterstitialPresenter mInterstitialPresenter;
