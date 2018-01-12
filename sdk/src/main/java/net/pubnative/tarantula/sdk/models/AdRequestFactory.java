@@ -64,7 +64,7 @@ public class AdRequestFactory {
                         adRequest.bundleid = Tarantula.getBundleId();
                         adRequest.testMode = Tarantula.isTestMode() ? "1" : "0";
                         adRequest.al = adSize;
-                        adRequest.mf = "revenuemodel,contentinfo";
+                        adRequest.mf = "points,revenuemodel,contentinfo";
 
                         return adRequest;
                     }

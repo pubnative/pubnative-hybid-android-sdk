@@ -18,5 +18,4 @@ public class Constants {
 
     public static final String MOPUB_MRAID_BANNER_AD_UNIT = "b8b82260e1b84a9ba361e03c21ce4caf";
     public static final String MOPUB_MRAID_INTERSTITIAL_AD_UNIT = "0bd7ea20185547f2bd29a9574bfce917";
-    public static final String MOPUB_VIDEO_INTERSTITIAL_AD_UNIT = "";
 }

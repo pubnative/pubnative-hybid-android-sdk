@@ -39,6 +39,7 @@ public class Ad implements Serializable {
     private static final String TAG = Ad.class.getSimpleName();
     private static final String DATA_CONTENTINFO_LINK_KEY = "link";
     private static final String DATA_CONTENTINFO_ICON_KEY = "icon";
+    private static final String DATA_POINTS_NUMBER_KEY = "number";
 
     //==============================================================================================
     // Fields
@@ -182,5 +183,12 @@ public class Ad implements Serializable {
     public String getContentInfoClickUrl() {
         AdData data = getMeta(APIMeta.CONTENT_INFO);
         return data.getStringField(DATA_CONTENTINFO_LINK_KEY);
+    }
+
+    public String getECPM() {
+        AdData adData = getMeta(APIMeta.POINTS);
+        Double points = adData.getNumberField(DATA_POINTS_NUMBER_KEY);
+        String pointsVal = String.valueOf(points.intValue());
+        return pointsVal;
     }
 }
