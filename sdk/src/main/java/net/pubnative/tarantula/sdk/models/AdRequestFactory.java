@@ -10,7 +10,6 @@ import com.google.android.gms.ads.identifier.AdvertisingIdClient;
 import net.pubnative.tarantula.sdk.DeviceInfo;
 import net.pubnative.tarantula.sdk.Tarantula;
 import net.pubnative.tarantula.sdk.managers.SessionDepthManager;
-import net.pubnative.tarantula.sdk.models.api.PNAPIAdRequest;
 import net.pubnative.tarantula.sdk.utils.PNCrypto;
 
 import java.util.Locale;
@@ -37,12 +36,12 @@ public class AdRequestFactory {
     }
 
     @NonNull
-    public Observable<PNAPIAdRequest> createAdRequest(@NonNull final String zoneid, @NonNull final String adSize) {
+    public Observable<AdRequest> createAdRequest(@NonNull final String zoneid, @NonNull final String adSize) {
         return mDeviceInfo.getAdvertisingInfo()
-                .map(new Function<AdvertisingIdClient.Info, PNAPIAdRequest>() {
+                .map(new Function<AdvertisingIdClient.Info, AdRequest>() {
                     @Override
-                    public PNAPIAdRequest apply(AdvertisingIdClient.Info info) throws Exception {
-                        PNAPIAdRequest adRequest = new PNAPIAdRequest();
+                    public AdRequest apply(AdvertisingIdClient.Info info) throws Exception {
+                        AdRequest adRequest = new AdRequest();
                         adRequest.zoneid = zoneid;
                         adRequest.apptoken = Tarantula.getAppToken();
                         adRequest.os = "android";

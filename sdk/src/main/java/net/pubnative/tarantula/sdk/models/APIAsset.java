@@ -1,9 +1,9 @@
-package net.pubnative.tarantula.sdk.models.api;
+package net.pubnative.tarantula.sdk.models;
 
 /**
  * Interface with all possible Asset fields
  */
-public interface PNAPIAsset {
+public interface APIAsset {
 
     String TITLE           = "title";
     String DESCRIPTION     = "description";

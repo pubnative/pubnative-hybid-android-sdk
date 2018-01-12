@@ -15,7 +15,7 @@ import net.pubnative.tarantula.sdk.api.RequestManager;
 import net.pubnative.tarantula.sdk.banner.presenter.BannerPresenter;
 import net.pubnative.tarantula.sdk.banner.presenter.BannerPresenterFactory;
 import net.pubnative.tarantula.sdk.banner.view.BannerView;
-import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
+import net.pubnative.tarantula.sdk.models.Ad;
 import net.pubnative.tarantula.sdk.utils.CheckUtils;
 
 /**
@@ -81,7 +81,7 @@ public class BannerController implements RequestManager.RequestListener, BannerP
     }
 
     @VisibleForTesting
-    void showAd(@NonNull PNAPIV3AdModel ad) {
+    void showAd(@NonNull Ad ad) {
         if (mIsDestroyed) {
             return;
         }
@@ -121,7 +121,7 @@ public class BannerController implements RequestManager.RequestListener, BannerP
 
     // RequestManager.RequestListener
     @Override
-    public void onRequestSuccess(@NonNull PNAPIV3AdModel ad) {
+    public void onRequestSuccess(@NonNull Ad ad) {
         if (mIsDestroyed) {
             return;
         }

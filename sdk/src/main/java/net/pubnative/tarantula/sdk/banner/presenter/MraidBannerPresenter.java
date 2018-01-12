@@ -4,10 +4,8 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import net.pubnative.tarantula.sdk.Tarantula;
+import net.pubnative.tarantula.sdk.models.APIAsset;
 import net.pubnative.tarantula.sdk.models.Ad;
-import net.pubnative.tarantula.sdk.models.api.PNAPIAsset;
-import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
 import net.pubnative.tarantula.sdk.mraid.MRAIDBanner;
 import net.pubnative.tarantula.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.tarantula.sdk.mraid.MRAIDView;
@@ -23,7 +21,7 @@ public class MraidBannerPresenter implements BannerPresenter, MRAIDViewListener,
     @NonNull
     private final Context mContext;
     @NonNull
-    private final PNAPIV3AdModel mAd;
+    private final Ad mAd;
     @NonNull
     private final UrlHandler mUrlHandlerDelegate;
     @NonNull
@@ -35,7 +33,7 @@ public class MraidBannerPresenter implements BannerPresenter, MRAIDViewListener,
     private MRAIDBanner mMRAIDBanner;
     private boolean mIsDestroyed;
 
-    public MraidBannerPresenter(@NonNull Context context, @NonNull PNAPIV3AdModel ad) {
+    public MraidBannerPresenter(@NonNull Context context, @NonNull Ad ad) {
         mContext = context;
         mAd = ad;
         mUrlHandlerDelegate = new UrlHandler(context);
@@ -49,7 +47,7 @@ public class MraidBannerPresenter implements BannerPresenter, MRAIDViewListener,
 
     @NonNull
     @Override
-    public PNAPIV3AdModel getAd() {
+    public Ad getAd() {
         return mAd;
     }
 
@@ -59,11 +57,11 @@ public class MraidBannerPresenter implements BannerPresenter, MRAIDViewListener,
             return;
         }
 
-        if (mAd.getAssetUrl(PNAPIAsset.HTML_BANNER) != null) {
-            mMRAIDBanner = new MRAIDBanner(mContext, mAd.getAssetUrl(PNAPIAsset.HTML_BANNER), "", mSupportedNativeFeatures,
+        if (mAd.getAssetUrl(APIAsset.HTML_BANNER) != null) {
+            mMRAIDBanner = new MRAIDBanner(mContext, mAd.getAssetUrl(APIAsset.HTML_BANNER), "", mSupportedNativeFeatures,
                     this, this);
-        } else if (mAd.getAssetHtml(PNAPIAsset.HTML_BANNER) != null) {
-            mMRAIDBanner = new MRAIDBanner(mContext, "", mAd.getAssetHtml(PNAPIAsset.HTML_BANNER), mSupportedNativeFeatures,
+        } else if (mAd.getAssetHtml(APIAsset.HTML_BANNER) != null) {
+            mMRAIDBanner = new MRAIDBanner(mContext, "", mAd.getAssetHtml(APIAsset.HTML_BANNER), mSupportedNativeFeatures,
                     this, this);
         }
 

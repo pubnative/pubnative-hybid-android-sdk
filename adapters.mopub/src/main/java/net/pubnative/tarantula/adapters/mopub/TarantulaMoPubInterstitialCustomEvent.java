@@ -11,7 +11,7 @@ import com.mopub.mobileads.MoPubErrorCode;
 import net.pubnative.tarantula.sdk.Tarantula;
 import net.pubnative.tarantula.sdk.interstitial.presenter.InterstitialPresenter;
 import net.pubnative.tarantula.sdk.interstitial.presenter.InterstitialPresenterFactory;
-import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
+import net.pubnative.tarantula.sdk.models.Ad;
 import net.pubnative.tarantula.sdk.utils.Logger;
 
 import java.util.Map;
@@ -61,7 +61,7 @@ public class TarantulaMoPubInterstitialCustomEvent extends CustomEventInterstiti
             return;
         }
 
-        final PNAPIV3AdModel ad = Tarantula.getAdCache().remove(zoneIdKey);
+        final Ad ad = Tarantula.getAdCache().remove(zoneIdKey);
         if (ad == null) {
             Logger.e(TAG, "Could not find an ad in the cache for zone id with key " + zoneIdKey);
             mInterstitialListener.onInterstitialFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);

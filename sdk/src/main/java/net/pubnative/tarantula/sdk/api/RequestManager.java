@@ -6,11 +6,9 @@ import android.support.annotation.VisibleForTesting;
 
 import net.pubnative.tarantula.sdk.AdCache;
 import net.pubnative.tarantula.sdk.Tarantula;
-import net.pubnative.tarantula.sdk.models.Ad;
-import net.pubnative.tarantula.sdk.models.AdRequest;
 import net.pubnative.tarantula.sdk.models.AdRequestFactory;
-import net.pubnative.tarantula.sdk.models.api.PNAPIAdRequest;
-import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
+import net.pubnative.tarantula.sdk.models.AdRequest;
+import net.pubnative.tarantula.sdk.models.Ad;
 import net.pubnative.tarantula.sdk.utils.CheckUtils;
 import net.pubnative.tarantula.sdk.utils.Logger;
 import net.pubnative.tarantula.sdk.utils.RefreshTimer;
@@ -23,7 +21,7 @@ import io.reactivex.functions.Consumer;
 
 public abstract class RequestManager {
     public interface RequestListener {
-        void onRequestSuccess(@NonNull PNAPIV3AdModel ad);
+        void onRequestSuccess(@NonNull Ad ad);
 
         void onRequestFail(@NonNull Throwable throwable);
     }
@@ -83,21 +81,21 @@ public abstract class RequestManager {
         }
 
         mAdRequestFactory.createAdRequest(mZoneId, getAdSize())
-                .subscribe(new Consumer<PNAPIAdRequest>() {
+                .subscribe(new Consumer<AdRequest>() {
                     @Override
-                    public void accept(PNAPIAdRequest adRequest) throws Exception {
+                    public void accept(AdRequest adRequest) throws Exception {
                         requestAdFromApi(adRequest);
                     }
                 });
     }
 
     @VisibleForTesting
-    void requestAdFromApi(@NonNull final PNAPIAdRequest adRequest) {
+    void requestAdFromApi(@NonNull final AdRequest adRequest) {
         Logger.d(TAG, "Requesting ad for ad unit id: " + adRequest.zoneid);
         mApiClient.getAd(adRequest)
-                .subscribe(new Consumer<PNAPIV3AdModel>() {
+                .subscribe(new Consumer<Ad>() {
                     @Override
-                    public void accept(@NonNull PNAPIV3AdModel ad) throws Exception {
+                    public void accept(@NonNull Ad ad) throws Exception {
                         if (mIsDestroyed) {
                             return;
                         }

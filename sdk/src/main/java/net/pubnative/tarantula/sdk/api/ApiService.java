@@ -1,18 +1,13 @@
 package net.pubnative.tarantula.sdk.api;
 
-import android.support.annotation.NonNull;
-
-import net.pubnative.tarantula.sdk.models.AdRequest;
-import net.pubnative.tarantula.sdk.models.AdResponse;
 import net.pubnative.tarantula.sdk.models.ErrorRequest;
-import net.pubnative.tarantula.sdk.models.api.PNAPIV3ResponseModel;
+import net.pubnative.tarantula.sdk.models.AdResponse;
 
 import io.reactivex.Observable;
 import retrofit2.Response;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
-import retrofit2.http.Path;
 import retrofit2.http.Query;
 import retrofit2.http.Url;
 
@@ -23,7 +18,7 @@ import retrofit2.http.Url;
 public interface ApiService {
 
     @POST("native")
-    Observable<Response<PNAPIV3ResponseModel>> getAd(
+    Observable<Response<AdResponse>> getAd(
             @Query("apptoken") String apptoken,
             @Query("os") String os,
             @Query("osver") String osver,

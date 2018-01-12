@@ -1,195 +1,90 @@
 package net.pubnative.tarantula.sdk.models;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Created by erosgarciaponte on 08.01.18.
+ * Created by erosgarciaponte on 10.01.18.
  */
 
 public class AdRequest {
-    // Transient means don't serialize / send this over the wire
-    @NonNull private transient final String mAdUnitId;
-
-    @SerializedName("v")
+    @SerializedName("apptoken")
     @Expose
-    @NonNull private final String mVersion;
+    public String apptoken;
 
-    @SerializedName("sdk_v")
+    @SerializedName("os")
     @Expose
-    @NonNull private final String mSdkVersion;
+    public String os;
 
-    @SerializedName("app_v")
+    @SerializedName("osver")
     @Expose
-    @NonNull private final String mAppVersion;
+    public String osver;
 
-    @SerializedName("ifa")
+    @SerializedName("devicemodel")
     @Expose
-    @NonNull private final String mIFA;
+    public String devicemodel;
 
-    @SerializedName("lmt")
+    @SerializedName("dnt")
     @Expose
-    @NonNull private final Boolean mLMT;
+    public String dnt;
 
-    @SerializedName("vendor_id")
+    @SerializedName("al")
     @Expose
-    @NonNull private final String mVendorId;
+    public String al;
 
-    @SerializedName("tz")
+    @SerializedName("mf")
     @Expose
-    @NonNull private final String mTimeZone;
+    public String mf;
+
+    @SerializedName("zoneid")
+    @Expose
+    public String zoneid;
 
     @SerializedName("locale")
     @Expose
-    @NonNull private final String mLocale;
+    public String locale;
 
-    @SerializedName("orientation")
+    @SerializedName("lat")
     @Expose
-    @NonNull private final String mOrientation;
+    public String latitude;
 
-    @SerializedName("w")
+    @SerializedName("long")
     @Expose
-    @NonNull private final Integer mWidthPx;
+    public String longitude;
 
-    @SerializedName("h")
+    @SerializedName("gender")
     @Expose
-    @NonNull private final Integer mHeightPx;
+    public String gender;
 
-    @SerializedName("browser_agent")
+    @SerializedName("age")
     @Expose
-    @NonNull private final String mBrowserAgent;
+    public String age;
 
-    @SerializedName("model")
+    @SerializedName("bundleid")
     @Expose
-    @NonNull private final String mModel;
+    public String bundleid;
 
-    @SerializedName("connectivity")
+    @SerializedName("keywords")
     @Expose
-    @NonNull private final String mConnectivity;
+    public String keywords;
 
-    @SerializedName("carrier")
+    @SerializedName("coppa")
     @Expose
-    @NonNull private final String mCarrier;
+    public String coppa;
 
-    @SerializedName("session_depth")
+    @SerializedName("gid")
     @Expose
-    @Nullable private final Integer mSessionDepth;
+    public String gid;
 
-    @SerializedName("latitude")
+    @SerializedName("gidmd5")
     @Expose
-    @Nullable private final Integer mLatitude;
+    public String gidmd5;
 
-    @SerializedName("longitude")
+    @SerializedName("gidsha1")
     @Expose
-    @Nullable private final Integer mLongitude;
+    public String gidsha1;
 
     @SerializedName("test")
     @Expose
-    @Nullable private final Boolean mTest;
-
-    private AdRequest(@NonNull String adUnitId, @NonNull String version, @NonNull String sdkVersion,
-                      @NonNull String appVersion, @NonNull String ifa, @NonNull Boolean lmt,
-                      @NonNull String vendorId, @NonNull String timeZone, @NonNull String locale,
-                      @NonNull String orientation, @NonNull Integer widthPx, @NonNull Integer heightPx,
-                      @NonNull String browserAgent, @NonNull String model, @NonNull String connectivity,
-                      @NonNull String carrier, @Nullable Integer sessionDepth, @Nullable Integer latitude,
-                      @Nullable Integer longitude, @Nullable Boolean test) {
-        mAdUnitId = adUnitId;
-        mVersion = version;
-        mSdkVersion = sdkVersion;
-        mAppVersion = appVersion;
-        mIFA = ifa;
-        mLMT = lmt;
-        mVendorId = vendorId;
-        mTimeZone = timeZone;
-        mLocale = locale;
-        mOrientation = orientation;
-        mWidthPx = widthPx;
-        mHeightPx = heightPx;
-        mBrowserAgent = browserAgent;
-        mModel = model;
-        mConnectivity = connectivity;
-        mCarrier = carrier;
-        mSessionDepth = sessionDepth;
-        mLatitude = latitude;
-        mLongitude = longitude;
-        mTest = test;
-    }
-
-    @NonNull
-    public String getAdUnitId() {
-        return mAdUnitId;
-    }
-
-    public static class Builder {
-        @NonNull private final String mAdUnitId;
-        @NonNull private final String mVersion;
-        @NonNull private final String mSdkVersion;
-        @NonNull private final String mAppVersion;
-        @NonNull private final String mIFA;
-        @NonNull private final Boolean mLMT;
-        @NonNull private final String mVendorId;
-        @NonNull private final String mTimeZone;
-        @NonNull private final String mLocale;
-        @NonNull private final String mOrientation;
-        @NonNull private final Integer mWidthPx;
-        @NonNull private final Integer mHeightPx;
-        @NonNull private final String mBrowserAgent;
-        @NonNull private final String mModel;
-        @NonNull private final String mConnectivity;
-        @NonNull private final String mCarrier;
-        @NonNull private Integer mSessionDepth;
-        @Nullable private Integer mLatitude;
-        @Nullable private Integer mLongitude;
-        @Nullable private Boolean mTest;
-
-        public Builder(@NonNull String adUnitId, @NonNull String version, @NonNull String sdkVersion,
-                       @NonNull String appVersion, @NonNull String ifa, @NonNull Boolean lmt,
-                       @NonNull String vendorId, @NonNull String timeZone, @NonNull String locale,
-                       @NonNull String orientation, @NonNull Integer widthPx, @NonNull Integer heightPx,
-                       @NonNull String browserAgent, @NonNull String model, @NonNull String connectivity,
-                       @NonNull String carrier, @NonNull Integer sessionDepth) {
-            mAdUnitId = adUnitId;
-            mVersion = version;
-            mSdkVersion = sdkVersion;
-            mAppVersion = appVersion;
-            mIFA = ifa;
-            mLMT = lmt;
-            mVendorId = vendorId;
-            mTimeZone = timeZone;
-            mLocale = locale;
-            mOrientation = orientation;
-            mWidthPx = widthPx;
-            mHeightPx = heightPx;
-            mBrowserAgent = browserAgent;
-            mModel = model;
-            mConnectivity = connectivity;
-            mCarrier = carrier;
-            mSessionDepth = sessionDepth;
-        }
-
-        public AdRequest.Builder withLatitude(@Nullable Integer latitude) {
-            mLatitude = latitude;
-            return this;
-        }
-
-        public AdRequest.Builder withLongitude(@Nullable Integer longitude) {
-            mLongitude = longitude;
-            return this;
-        }
-
-        public AdRequest.Builder withTest(@Nullable Boolean test) {
-            mTest = test;
-            return this;
-        }
-
-        public AdRequest build() {
-            return new AdRequest(mAdUnitId, mVersion, mSdkVersion, mAppVersion, mIFA, mLMT, mVendorId,
-                    mTimeZone, mLocale, mOrientation, mWidthPx, mHeightPx, mBrowserAgent, mModel,
-                    mConnectivity, mCarrier, mSessionDepth, mLatitude, mLongitude, mTest);
-        }
-    }
+    public String testMode;
 }

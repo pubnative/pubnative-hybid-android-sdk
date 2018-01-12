@@ -5,7 +5,7 @@ import android.support.annotation.VisibleForTesting;
 
 import net.pubnative.tarantula.sdk.Tarantula;
 import net.pubnative.tarantula.sdk.api.ApiClient;
-import net.pubnative.tarantula.sdk.models.api.PNAPIV3DataModel;
+import net.pubnative.tarantula.sdk.models.AdData;
 
 import java.util.List;
 
@@ -37,21 +37,21 @@ public class AdTracker {
     @NonNull
     private final ApiClient mApiClient;
     @NonNull
-    private final List<PNAPIV3DataModel> mImpressionUrls;
+    private final List<AdData> mImpressionUrls;
     @NonNull
-    private final List<PNAPIV3DataModel> mClickUrls;
+    private final List<AdData> mClickUrls;
     private boolean mImpressionTracked;
     private boolean mClickTracked;
 
-    public AdTracker(@NonNull List<PNAPIV3DataModel> impressionUrls,
-                     @NonNull List<PNAPIV3DataModel> clickUrls) {
+    public AdTracker(@NonNull List<AdData> impressionUrls,
+                     @NonNull List<AdData> clickUrls) {
         this(Tarantula.getApiClient(), impressionUrls, clickUrls);
     }
 
     @VisibleForTesting
     AdTracker(@NonNull ApiClient apiClient,
-              @NonNull List<PNAPIV3DataModel> impressionUrls,
-              @NonNull List<PNAPIV3DataModel> clickUrls) {
+              @NonNull List<AdData> impressionUrls,
+              @NonNull List<AdData> clickUrls) {
         mApiClient = apiClient;
         mImpressionUrls = impressionUrls;
         mClickUrls = clickUrls;
@@ -79,8 +79,8 @@ public class AdTracker {
         mApiClient.trackError(errorMessage);
     }
 
-    private void trackUrls(@NonNull List<PNAPIV3DataModel> urls, @NonNull Type type) {
-        for (final PNAPIV3DataModel url : urls) {
+    private void trackUrls(@NonNull List<AdData> urls, @NonNull Type type) {
+        for (final AdData url : urls) {
             Logger.d(TAG, "Tracking " + type.toString() + " url: " + url);
             mApiClient.trackUrl(url.getURL());
         }

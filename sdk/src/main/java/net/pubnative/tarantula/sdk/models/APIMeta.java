@@ -1,9 +1,9 @@
-package net.pubnative.tarantula.sdk.models.api;
+package net.pubnative.tarantula.sdk.models;
 
 /**
  * Interface with all possible Meta fields
  */
-public interface PNAPIMeta {
+public interface APIMeta {
 
     String POINTS        = "points";
     String REVENUE_MODEL = "revenuemodel";

@@ -6,8 +6,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
 import net.pubnative.tarantula.sdk.models.Ad;
-import net.pubnative.tarantula.sdk.models.Winner;
-import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
 import net.pubnative.tarantula.sdk.utils.AdTracker;
 import net.pubnative.tarantula.sdk.utils.Logger;
 
@@ -27,7 +25,7 @@ public class InterstitialPresenterFactory {
 
     @Nullable
     public InterstitialPresenter createInterstitialPresenter(
-            @NonNull PNAPIV3AdModel ad,
+            @NonNull Ad ad,
             @NonNull InterstitialPresenter.Listener interstitialPresenterListener) {
 
         final InterstitialPresenter interstitialPresenter = fromCreativeType(ad.assetgroupid, ad);
@@ -37,15 +35,15 @@ public class InterstitialPresenterFactory {
 
         final InterstitialPresenterDecorator interstitialPresenterDecorator =
                 new InterstitialPresenterDecorator(interstitialPresenter, new AdTracker(
-                        ad.getBeacons(PNAPIV3AdModel.Beacon.IMPRESSION),
-                        ad.getBeacons(PNAPIV3AdModel.Beacon.CLICK)), interstitialPresenterListener);
+                        ad.getBeacons(Ad.Beacon.IMPRESSION),
+                        ad.getBeacons(Ad.Beacon.CLICK)), interstitialPresenterListener);
         interstitialPresenter.setListener(interstitialPresenterDecorator);
         return interstitialPresenterDecorator;
     }
 
     @Nullable
     @VisibleForTesting
-    InterstitialPresenter fromCreativeType(int assetGroupId, @NonNull PNAPIV3AdModel ad) {
+    InterstitialPresenter fromCreativeType(int assetGroupId, @NonNull Ad ad) {
         switch (assetGroupId) {
             case 21: {
                 return new MraidInterstitialPresenter(mActivity, ad);

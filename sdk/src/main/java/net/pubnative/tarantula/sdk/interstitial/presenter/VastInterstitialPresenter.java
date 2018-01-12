@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 
 import net.pubnative.tarantula.sdk.interstitial.vast.VASTPlayer;
 import net.pubnative.tarantula.sdk.models.Ad;
-import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
 import net.pubnative.tarantula.sdk.utils.CheckUtils;
 
 /**
@@ -15,13 +14,13 @@ import net.pubnative.tarantula.sdk.utils.CheckUtils;
 
 public class VastInterstitialPresenter implements InterstitialPresenter, VASTPlayer.VASTPlayerListener {
     @NonNull private final Activity mActivity;
-    @NonNull private final PNAPIV3AdModel mAd;
+    @NonNull private final Ad mAd;
 
     @Nullable private VASTPlayer mVastPlayer;
     @Nullable private InterstitialPresenter.Listener mListener;
     private boolean mIsDestroyed;
 
-    public VastInterstitialPresenter(@NonNull Activity activity, @NonNull PNAPIV3AdModel ad) {
+    public VastInterstitialPresenter(@NonNull Activity activity, @NonNull Ad ad) {
         mActivity = activity;
         mAd = ad;
     }
@@ -33,7 +32,7 @@ public class VastInterstitialPresenter implements InterstitialPresenter, VASTPla
 
     @NonNull
     @Override
-    public PNAPIV3AdModel getAd() {
+    public Ad getAd() {
         return mAd;
     }
 

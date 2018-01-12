@@ -11,7 +11,6 @@ import net.pubnative.tarantula.sdk.api.RequestManager;
 import net.pubnative.tarantula.sdk.interstitial.presenter.InterstitialPresenter;
 import net.pubnative.tarantula.sdk.interstitial.presenter.InterstitialPresenterFactory;
 import net.pubnative.tarantula.sdk.models.Ad;
-import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
 import net.pubnative.tarantula.sdk.utils.CheckUtils;
 
 /**
@@ -68,7 +67,7 @@ public class Interstitial implements RequestManager.RequestListener, Interstitia
     }
 
     @VisibleForTesting
-    void loadInterstitial(@NonNull PNAPIV3AdModel ad) {
+    void loadInterstitial(@NonNull Ad ad) {
         if (mIsDestroyed) {
             return;
         }
@@ -104,7 +103,7 @@ public class Interstitial implements RequestManager.RequestListener, Interstitia
 
     // RequestManager.RequestListener
     @Override
-    public void onRequestSuccess(@NonNull PNAPIV3AdModel ad) {
+    public void onRequestSuccess(@NonNull Ad ad) {
         if (mIsDestroyed) {
             return;
         }

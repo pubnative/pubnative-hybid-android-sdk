@@ -11,7 +11,7 @@ import com.mopub.mobileads.MoPubErrorCode;
 import net.pubnative.tarantula.sdk.Tarantula;
 import net.pubnative.tarantula.sdk.banner.presenter.BannerPresenter;
 import net.pubnative.tarantula.sdk.banner.presenter.BannerPresenterFactory;
-import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
+import net.pubnative.tarantula.sdk.models.Ad;
 import net.pubnative.tarantula.sdk.utils.Logger;
 
 import java.util.Map;
@@ -54,7 +54,7 @@ public class TarantulaMoPubBannerCustomEvent extends CustomEventBanner implement
             return;
         }
 
-        final PNAPIV3AdModel ad = Tarantula.getAdCache().remove(zoneIdKey);
+        final Ad ad = Tarantula.getAdCache().remove(zoneIdKey);
         if (ad == null) {
             Logger.e(TAG, "Could not find an ad in the cache for zone id with key: " + zoneIdKey);
             mBannerListener.onBannerFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);

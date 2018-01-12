@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +17,7 @@ import net.pubnative.tarantula.demo.R;
 import net.pubnative.tarantula.sdk.api.BannerRequestManager;
 import net.pubnative.tarantula.sdk.api.InterstitialRequestManager;
 import net.pubnative.tarantula.sdk.api.RequestManager;
-import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
+import net.pubnative.tarantula.sdk.models.Ad;
 import net.pubnative.tarantula.sdk.utils.PrebidUtils;
 
 /**
@@ -32,7 +31,7 @@ public class MainFragment extends Fragment implements MoPubView.BannerAdListener
     private MoPubInterstitial mMraidInterstitial;
     private MoPubInterstitial mVideoInterstitial;
 
-    private PNAPIV3AdModel mBannerAd;
+    private Ad mBannerAd;
     private RequestManager mBannerRequestManager;
     private RequestManager mMraidInterstitialRequestManager;
     private RequestManager mVideoInterstitialRequestManager;
@@ -100,7 +99,7 @@ public class MainFragment extends Fragment implements MoPubView.BannerAdListener
         mBannerRequestManager.setZoneId(Constants.BANNER_MRAID_ZONE_ID);
         mBannerRequestManager.setRequestListener(new RequestManager.RequestListener() {
             @Override
-            public void onRequestSuccess(@NonNull PNAPIV3AdModel ad) {
+            public void onRequestSuccess(@NonNull Ad ad) {
                 mBannerAd = ad;
                 mMopubView.setAdUnitId(Constants.MOPUB_MRAID_BANNER_AD_UNIT);
                 mMopubView.setKeywords(PrebidUtils.getPrebidKeywords(ad));
@@ -120,7 +119,7 @@ public class MainFragment extends Fragment implements MoPubView.BannerAdListener
         mMraidInterstitialRequestManager.setZoneId(Constants.INTERSTITIAL_MRAID_ZONE_ID);
         mMraidInterstitialRequestManager.setRequestListener(new RequestManager.RequestListener() {
             @Override
-            public void onRequestSuccess(@NonNull PNAPIV3AdModel ad) {
+            public void onRequestSuccess(@NonNull Ad ad) {
                 mMraidInterstitial.setKeywords(PrebidUtils.getPrebidKeywords(ad));
                 mMraidInterstitial.load();
             }
@@ -138,7 +137,7 @@ public class MainFragment extends Fragment implements MoPubView.BannerAdListener
         mVideoInterstitialRequestManager.setZoneId(Constants.INTERSTITIAL_VIDEO_ZONE_ID);
         mVideoInterstitialRequestManager.setRequestListener(new RequestManager.RequestListener() {
             @Override
-            public void onRequestSuccess(@NonNull PNAPIV3AdModel ad) {
+            public void onRequestSuccess(@NonNull Ad ad) {
                 mVideoInterstitial.setKeywords(PrebidUtils.getPrebidKeywords(ad));
                 mVideoInterstitial.load();
             }

@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import net.pubnative.tarantula.sdk.models.Ad;
-import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
 import net.pubnative.tarantula.sdk.utils.AdTracker;
 import net.pubnative.tarantula.sdk.utils.CheckUtils;
 import net.pubnative.tarantula.sdk.utils.Logger;
@@ -35,7 +34,7 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
 
     @NonNull
     @Override
-    public PNAPIV3AdModel getAd() {
+    public Ad getAd() {
         return mInterstitialPresenter.getAd();
     }
 

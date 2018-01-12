@@ -4,10 +4,8 @@ import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import net.pubnative.tarantula.sdk.Tarantula;
+import net.pubnative.tarantula.sdk.models.APIAsset;
 import net.pubnative.tarantula.sdk.models.Ad;
-import net.pubnative.tarantula.sdk.models.api.PNAPIAsset;
-import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
 import net.pubnative.tarantula.sdk.mraid.MRAIDInterstitial;
 import net.pubnative.tarantula.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.tarantula.sdk.mraid.MRAIDView;
@@ -21,7 +19,7 @@ import net.pubnative.tarantula.sdk.utils.UrlHandler;
 
 public class MraidInterstitialPresenter implements InterstitialPresenter, MRAIDViewListener, MRAIDNativeFeatureListener {
     @NonNull private final Activity mActivity;
-    @NonNull private final PNAPIV3AdModel mAd;
+    @NonNull private final Ad mAd;
     @NonNull private final UrlHandler mUrlHandlerDelegate;
     @NonNull private final String[] mSupportedNativeFeatures;
 
@@ -29,7 +27,7 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, MRAIDV
     @Nullable private MRAIDInterstitial mMRAIDInterstitial;
     private boolean mIsDestroyed;
 
-    public MraidInterstitialPresenter(@NonNull Activity activity, @NonNull PNAPIV3AdModel ad) {
+    public MraidInterstitialPresenter(@NonNull Activity activity, @NonNull Ad ad) {
         mActivity = activity;
         mAd = ad;
         mUrlHandlerDelegate = new UrlHandler(activity);
@@ -43,7 +41,7 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, MRAIDV
 
     @NonNull
     @Override
-    public PNAPIV3AdModel getAd() {
+    public Ad getAd() {
         return mAd;
     }
 
@@ -53,11 +51,11 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, MRAIDV
             return;
         }
 
-        if (mAd.getAssetUrl(PNAPIAsset.HTML_BANNER) != null) {
-            mMRAIDInterstitial = new MRAIDInterstitial(mActivity, mAd.getAssetUrl(PNAPIAsset.HTML_BANNER), "",
+        if (mAd.getAssetUrl(APIAsset.HTML_BANNER) != null) {
+            mMRAIDInterstitial = new MRAIDInterstitial(mActivity, mAd.getAssetUrl(APIAsset.HTML_BANNER), "",
                     mSupportedNativeFeatures, this, this);
-        } else if (mAd.getAssetHtml(PNAPIAsset.HTML_BANNER) != null) {
-            mMRAIDInterstitial = new MRAIDInterstitial(mActivity, "", mAd.getAssetHtml(PNAPIAsset.HTML_BANNER),
+        } else if (mAd.getAssetHtml(APIAsset.HTML_BANNER) != null) {
+            mMRAIDInterstitial = new MRAIDInterstitial(mActivity, "", mAd.getAssetHtml(APIAsset.HTML_BANNER),
                     mSupportedNativeFeatures, this, this);
         }
     }

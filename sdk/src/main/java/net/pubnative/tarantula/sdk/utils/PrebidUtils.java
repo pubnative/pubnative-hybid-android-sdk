@@ -1,6 +1,6 @@
 package net.pubnative.tarantula.sdk.utils;
 
-import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
+import net.pubnative.tarantula.sdk.models.Ad;
 
 /**
  * Created by erosgarciaponte on 11.01.18.
@@ -18,7 +18,7 @@ public final class PrebidUtils {
         String PN_BID_XXX = "pn_bidXXX";
     }
 
-    public static String getPrebidKeywords(PNAPIV3AdModel ad) {
+    public static String getPrebidKeywords(Ad ad) {
         StringBuilder stringBuilder = new StringBuilder();
         return stringBuilder.toString();
     }

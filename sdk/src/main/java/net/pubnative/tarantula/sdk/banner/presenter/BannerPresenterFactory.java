@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
-import net.pubnative.tarantula.sdk.models.api.PNAPIV3AdModel;
+import net.pubnative.tarantula.sdk.models.Ad;
 import net.pubnative.tarantula.sdk.utils.AdTracker;
 import net.pubnative.tarantula.sdk.utils.Logger;
 
@@ -24,7 +24,7 @@ public class BannerPresenterFactory {
     }
 
     @Nullable
-    public BannerPresenter createBannerPresenter(@NonNull PNAPIV3AdModel ad,
+    public BannerPresenter createBannerPresenter(@NonNull Ad ad,
                                                  @NonNull BannerPresenter.Listener bannerPresenterListener) {
         final BannerPresenter bannerPresenter = fromCreativeType(ad.assetgroupid, ad);
         if (bannerPresenter == null) {
@@ -32,14 +32,14 @@ public class BannerPresenterFactory {
         }
 
         final BannerPresenterDecorator bannerPresenterDecorator = new BannerPresenterDecorator(bannerPresenter,
-                new AdTracker(ad.getBeacons(PNAPIV3AdModel.Beacon.IMPRESSION), ad.getBeacons(PNAPIV3AdModel.Beacon.CLICK)), bannerPresenterListener);
+                new AdTracker(ad.getBeacons(Ad.Beacon.IMPRESSION), ad.getBeacons(Ad.Beacon.CLICK)), bannerPresenterListener);
         bannerPresenter.setListener(bannerPresenterDecorator);
         return bannerPresenterDecorator;
     }
 
     @Nullable
     @VisibleForTesting
-    BannerPresenter fromCreativeType(int assetGroupId, @NonNull PNAPIV3AdModel ad) {
+    BannerPresenter fromCreativeType(int assetGroupId, @NonNull Ad ad) {
         switch (assetGroupId) {
             case 10:
             case 12: {

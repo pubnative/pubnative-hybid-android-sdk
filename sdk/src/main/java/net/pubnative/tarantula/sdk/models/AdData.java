@@ -21,11 +21,52 @@
 // SOFTWARE.
 //
 
-package net.pubnative.tarantula.sdk.models.api;
+package net.pubnative.tarantula.sdk.models;
 
+import java.io.Serializable;
 import java.util.Map;
 
-public class PNAPIV3ExtModel {
+public class AdData implements Serializable {
 
-    protected Map meta;
+    public String type;
+    public Map data;
+
+    public String getText() {
+
+        return getStringField("text");
+    }
+
+    public Double getNumber() {
+
+        return getNumberField("number");
+    }
+
+    public String getURL() {
+
+        return getStringField("url");
+    }
+
+    public String getHtml() {
+
+        return getStringField("html");
+    }
+
+    public String getStringField(String field) {
+
+        return (String) getDataField(field);
+    }
+
+    public Double getNumberField(String field) {
+
+        return (Double) getDataField(field);
+    }
+
+    protected Object getDataField(String dataField) {
+
+        Object result = null;
+        if (data != null && data.containsKey(dataField)) {
+            result = data.get(dataField);
+        }
+        return result;
+    }
 }

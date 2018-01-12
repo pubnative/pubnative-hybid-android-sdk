@@ -1,100 +1,186 @@
+// The MIT License (MIT)
+//
+// Copyright (c) 2016 PubNative GmbH
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+
 package net.pubnative.tarantula.sdk.models;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
+import android.content.Context;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.View;
 
-import java.util.Collections;
+import net.pubnative.tarantula.sdk.views.PNAPIContentInfoView;
+
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by erosgarciaponte on 08.01.18.
- */
+public class Ad implements Serializable {
 
-public class Ad {
-    @NonNull
-    private final String mAdUnitId;
-    @Nullable
-    private final String mCreative;
-    @NonNull
-    private final String mPrebidKeywords;
-    @NonNull
-    private final Integer mRefreshTimeSeconds;
-    @NonNull
-    private final List<String> mImpressionUrls;
-    @NonNull
-    private final List<String> mClickUrls;
-    @NonNull
-    private final List<String> mSelectedUrls;
-    @NonNull
-    private final List<String> mErrorUrls;
-    @NonNull
-    private final Winner mWinner;
+    private static final String TAG = Ad.class.getSimpleName();
+    private static final String DATA_CONTENTINFO_LINK_KEY = "link";
+    private static final String DATA_CONTENTINFO_ICON_KEY = "icon";
 
-    public static Ad from(@NonNull String adUnitId, @NonNull AdResponse adResponse) {
-        return new Ad(adUnitId, adResponse.creative, adResponse.prebidKeywords, adResponse.refresh,
-                adResponse.impressionUrls, adResponse.clickUrls, adResponse.selectedUrls, adResponse.errorUrls,
-                Winner.from(adResponse.winnerResponse));
+    //==============================================================================================
+    // Fields
+    //==============================================================================================
+
+    public String link;
+    public int assetgroupid;
+    public List<AdData> assets;
+    public List<AdData> beacons;
+    public List<AdData> meta;
+
+    //==============================================================================================
+    // Interfaces
+    //==============================================================================================
+
+    /**
+     * Interface containing all possible Beacons
+     */
+    public interface Beacon {
+
+        String IMPRESSION = "impression";
+        String CLICK = "click";
     }
 
-    @VisibleForTesting
-    public Ad(@NonNull String adUnitId, @Nullable String creative, @NonNull String prebidKeywords,
-              @NonNull Integer refreshTimeSeconds, @Nullable List<String> impressionUrls, @Nullable List<String> clickUrls,
-              @Nullable List<String> selectedUrls, @Nullable List<String> errorUrls, @NonNull Winner winner) {
+    //==============================================================================================
+    // Asset
+    //==============================================================================================
+    public AdData getAsset(String type) {
 
-        mAdUnitId = adUnitId;
-        mCreative = creative;
-        mPrebidKeywords = prebidKeywords;
-        mRefreshTimeSeconds = refreshTimeSeconds;
-        mImpressionUrls = impressionUrls == null ? Collections.<String>emptyList() : impressionUrls;
-        mClickUrls = clickUrls == null ? Collections.<String>emptyList() : clickUrls;
-        mSelectedUrls = selectedUrls == null ? Collections.<String>emptyList() : selectedUrls;
-        mErrorUrls = errorUrls == null ? Collections.<String>emptyList() : errorUrls;
-        mWinner = winner;
+        return find(type, assets);
     }
 
-    @NonNull
-    public String getAdUnitId() {
-        return mAdUnitId;
+    public AdData getMeta(String type) {
+
+        return find(type, meta);
     }
 
-    @Nullable
-    public String getCreative() {
-        return mCreative;
+    public List<AdData> getBeacons(String type) {
+
+        return findAll(type, beacons);
     }
 
-    @NonNull
-    public String getPrebidKeywords() {
-        return mPrebidKeywords;
+    protected AdData find(String type, List<AdData> list) {
+
+        AdData result = null;
+        if (list != null) {
+            for (AdData data : list) {
+                if (type.equals(data.type)) {
+                    result = data;
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
-    @NonNull
-    public Integer getRefreshTimeSeconds() {
-        return mRefreshTimeSeconds;
+    protected List<AdData> findAll(String type, List<AdData> list) {
+
+        List<AdData> result = null;
+        if (list != null) {
+            for (AdData data : list) {
+                if (type.equals(data.type)) {
+                    if (result == null) {
+                        result = new ArrayList<AdData>();
+                    }
+                    result.add(data);
+                }
+            }
+        }
+        return result;
     }
 
-    @NonNull
-    public List<String> getImpressionUrls() {
-        return mImpressionUrls;
+    public String getAssetUrl(String asset) {
+        String result = null;
+        AdData data = getAsset(asset);
+        if (data != null) {
+            result = data.getURL();
+        }
+        return result;
     }
 
-    @NonNull
-    public List<String> getClickUrls() {
-        return mClickUrls;
+    public String getAssetHtml(String asset) {
+        String result = null;
+        AdData data = getAsset(asset);
+        if (data != null) {
+            result = data.getHtml();
+        }
+        return result;
     }
 
-    @NonNull
-    public List<String> getSelectedUrls() {
-        return mSelectedUrls;
+    public String getVast() {
+        String result = null;
+        AdData data = getAsset(APIAsset.VAST);
+        if (data != null) {
+            result = data.getStringField("vast2");
+        }
+        return result;
     }
 
-    @NonNull
-    public List<String> getErrorUrls() {
-        return mErrorUrls;
+    public View getContentInfo(Context context) {
+        PNAPIContentInfoView result = null;
+        AdData data = getMeta(APIMeta.CONTENT_INFO);
+        if (data == null) {
+            Log.e(TAG, "getContentInfo - contentInfo data not found");
+        } else if (TextUtils.isEmpty(data.getStringField(DATA_CONTENTINFO_ICON_KEY))) {
+            Log.e(TAG, "getContentInfo - contentInfo icon not found");
+        } else if (TextUtils.isEmpty(data.getStringField(DATA_CONTENTINFO_LINK_KEY))) {
+            Log.e(TAG, "getContentInfo - contentInfo link not found");
+        } else if (TextUtils.isEmpty(data.getText())) {
+            Log.e(TAG, "getContentInfo - contentInfo text not found");
+        } else {
+            result = new PNAPIContentInfoView(context);
+            result.setIconUrl(data.getStringField(DATA_CONTENTINFO_ICON_KEY));
+            result.setIconClickUrl(data.getStringField(DATA_CONTENTINFO_LINK_KEY));
+            result.setContextText(data.getText());
+            result.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ((PNAPIContentInfoView) view).openLayout();
+                }
+            });
+        }
+        return result;
     }
 
-    @NonNull
-    public Winner getWinner() {
-        return mWinner;
+    /**
+     * Gets content info icon url
+     *
+     * @return icon url of content info
+     */
+    public String getContentInfoIconUrl() {
+        AdData data = getMeta(APIMeta.CONTENT_INFO);
+        return data.getStringField(DATA_CONTENTINFO_ICON_KEY);
+    }
+
+    /**
+     * Gets content info click url
+     *
+     * @return click url of content info
+     */
+    public String getContentInfoClickUrl() {
+        AdData data = getMeta(APIMeta.CONTENT_INFO);
+        return data.getStringField(DATA_CONTENTINFO_LINK_KEY);
     }
 }
