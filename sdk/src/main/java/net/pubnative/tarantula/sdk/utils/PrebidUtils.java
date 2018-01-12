@@ -12,7 +12,7 @@ public final class PrebidUtils {
 
     public interface KEYS {
         String PN = "m_pn";
-        String PN_ZONE_ID = "pn_zone";
+        String PN_ZONE_ID = "pn_zone_id";
         String PN_BID_X = "pn_bidX";
         String PN_BID_XX = "pn_bidXX";
         String PN_BID_XXX = "pn_bidXXX";

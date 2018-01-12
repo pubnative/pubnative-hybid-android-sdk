@@ -17,6 +17,10 @@ public class TarantulaDemoApplication extends MultiDexApplication {
         super.onCreate();
 
         Tarantula.initialize(Constants.APP_TOKEN, this);
+        Tarantula.setTestMode(true);
+        Tarantula.setCoppaEnabled(false);
+        Tarantula.setAge("27");
+        Tarantula.setGender("male");
     }
 
     @Override

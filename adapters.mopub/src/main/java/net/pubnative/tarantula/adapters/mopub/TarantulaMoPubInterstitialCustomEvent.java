@@ -25,7 +25,7 @@ public class TarantulaMoPubInterstitialCustomEvent extends CustomEventInterstiti
     private static final String TAG = TarantulaMoPubInterstitialCustomEvent.class.getSimpleName();
 
     @NonNull
-    private static final String ZONE_ID_KEY = "zone_id";
+    private static final String ZONE_ID_KEY = "pn_zone_id";
     @Nullable
     private CustomEventInterstitialListener mInterstitialListener;
     @Nullable

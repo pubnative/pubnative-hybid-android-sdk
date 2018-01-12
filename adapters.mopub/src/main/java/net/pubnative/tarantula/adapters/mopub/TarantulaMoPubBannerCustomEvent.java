@@ -25,7 +25,7 @@ public class TarantulaMoPubBannerCustomEvent extends CustomEventBanner implement
     private static final String TAG = TarantulaMoPubBannerCustomEvent.class.getSimpleName();
 
     @NonNull
-    private static final String ZONE_ID_KEY = "zone_id";
+    private static final String ZONE_ID_KEY = "pn_zone_id";
     @Nullable
     private CustomEventBannerListener mBannerListener;
     @Nullable
