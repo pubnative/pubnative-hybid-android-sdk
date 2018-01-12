@@ -5,4 +5,6 @@
     <string name="mraid_banner">MRAID Banner</string>
     <string name="mraid_interstitial">MRAID Interstitial</string>
     <string name="video_interstitial">Video Interstitial</string>
+    <string name="mraid_medium">MRAID Medium</string>
+    <string name="video_medium">Video Medium</string>
 </resources>

@@ -1,35 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context="net.pubnative.tarantula.demo.ui.fragments.MainFragment"
     tools:showIn="@layout/activity_main">
 
-    <Button
-        android:id="@+id/button_banner_mraid"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:text="@string/mraid_banner"
-        />
+        android:orientation="vertical">
 
-    <com.mopub.mobileads.MoPubView
-        android:id="@+id/mopub_ad"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"/>
+        <Button
+            android:id="@+id/button_banner_mraid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:text="@string/mraid_banner" />
 
-    <Button
-        android:id="@+id/button_interstitial_mraid"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:text="@string/mraid_interstitial"
-        />
+        <com.mopub.mobileads.MoPubView
+            android:id="@+id/mopub_banner"
+            android:layout_width="match_parent"
+            android:layout_height="50dp" />
 
-</LinearLayout>
+        <Button
+            android:id="@+id/button_medium_mraid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/mraid_medium" />
+
+        <com.mopub.mobileads.MoPubView
+            android:id="@+id/mopub_mrect"
+            android:layout_width="match_parent"
+            android:layout_height="250dp" />
+
+        <Button
+            android:id="@+id/button_interstitial_mraid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/mraid_interstitial" />
+    </LinearLayout>
+
+</ScrollView>

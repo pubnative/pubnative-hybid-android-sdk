@@ -16,6 +16,7 @@ import net.pubnative.tarantula.demo.Constants;
 import net.pubnative.tarantula.demo.R;
 import net.pubnative.tarantula.sdk.api.BannerRequestManager;
 import net.pubnative.tarantula.sdk.api.InterstitialRequestManager;
+import net.pubnative.tarantula.sdk.api.MRectRequestManager;
 import net.pubnative.tarantula.sdk.api.RequestManager;
 import net.pubnative.tarantula.sdk.models.Ad;
 import net.pubnative.tarantula.sdk.utils.PrebidUtils;
@@ -23,15 +24,14 @@ import net.pubnative.tarantula.sdk.utils.PrebidUtils;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainFragment extends Fragment implements MoPubView.BannerAdListener, MoPubInterstitial.InterstitialAdListener {
+public class MainFragment extends Fragment implements MoPubInterstitial.InterstitialAdListener {
 
-    private static final int REFRESH_SECONDS = 60;
-
-    private MoPubView mMopubView;
+    private MoPubView mMopubBanner;
+    private MoPubView mMopubMRect;
     private MoPubInterstitial mMraidInterstitial;
 
-    private Ad mBannerAd;
     private RequestManager mBannerRequestManager;
+    private RequestManager mMRectRequestManager;
     private RequestManager mMraidInterstitialRequestManager;
 
     public MainFragment() {
@@ -41,6 +41,7 @@ public class MainFragment extends Fragment implements MoPubView.BannerAdListener
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBannerRequestManager = new BannerRequestManager();
+        mMRectRequestManager = new MRectRequestManager();
         mMraidInterstitialRequestManager = new InterstitialRequestManager();
     }
 
@@ -54,9 +55,13 @@ public class MainFragment extends Fragment implements MoPubView.BannerAdListener
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mMopubView = view.findViewById(R.id.mopub_ad);
-        mMopubView.setBannerAdListener(this);
-        mMopubView.setAutorefreshEnabled(false);
+        mMopubBanner = view.findViewById(R.id.mopub_banner);
+        mMopubBanner.setBannerAdListener(mBannerListener);
+        mMopubBanner.setAutorefreshEnabled(false);
+
+        mMopubMRect = view.findViewById(R.id.mopub_mrect);
+        mMopubMRect.setBannerAdListener(mMRectListener);
+        mMopubMRect.setAutorefreshEnabled(false);
 
         mMraidInterstitial = new MoPubInterstitial(getActivity(), Constants.MOPUB_MRAID_INTERSTITIAL_AD_UNIT);
         mMraidInterstitial.setInterstitialAdListener(this);
@@ -65,6 +70,13 @@ public class MainFragment extends Fragment implements MoPubView.BannerAdListener
             @Override
             public void onClick(View v) {
                 loadMraidBanner();
+            }
+        });
+
+        view.findViewById(R.id.button_medium_mraid).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadMraidMedium();
             }
         });
 
@@ -79,7 +91,8 @@ public class MainFragment extends Fragment implements MoPubView.BannerAdListener
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mMopubView.destroy();
+        mMopubBanner.destroy();
+        mMopubMRect.destroy();
     }
 
     private void loadMraidBanner() {
@@ -87,19 +100,37 @@ public class MainFragment extends Fragment implements MoPubView.BannerAdListener
         mBannerRequestManager.setRequestListener(new RequestManager.RequestListener() {
             @Override
             public void onRequestSuccess(@NonNull Ad ad) {
-                mBannerAd = ad;
-                mMopubView.setAdUnitId(Constants.MOPUB_MRAID_BANNER_AD_UNIT);
-                mMopubView.setKeywords(PrebidUtils.getPrebidKeywords(ad, Constants.BANNER_MRAID_ZONE_ID));
-                mMopubView.loadAd();
+                mMopubBanner.setAdUnitId(Constants.MOPUB_MRAID_BANNER_AD_UNIT);
+                mMopubBanner.setKeywords(PrebidUtils.getPrebidKeywords(ad, Constants.BANNER_MRAID_ZONE_ID));
+                mMopubBanner.loadAd();
             }
 
             @Override
             public void onRequestFail(@NonNull Throwable throwable) {
-                //mBannerRequestManager.startRefreshTimer(RequestManager.DEFAULT_REFRESH_TIME_SECONDS);
+
             }
         });
 
         mBannerRequestManager.requestAd();
+    }
+
+    private void loadMraidMedium() {
+        mMRectRequestManager.setZoneId(Constants.MEDIUM_MRAID_ZONE_ID);
+        mMRectRequestManager.setRequestListener(new RequestManager.RequestListener() {
+            @Override
+            public void onRequestSuccess(@NonNull Ad ad) {
+                mMopubMRect.setAdUnitId(Constants.MOPUB_MRAID_MEDIUM_AD_UNIT);
+                mMopubMRect.setKeywords(PrebidUtils.getPrebidKeywords(ad, Constants.MEDIUM_MRAID_ZONE_ID));
+                mMopubMRect.loadAd();
+            }
+
+            @Override
+            public void onRequestFail(@NonNull Throwable throwable) {
+
+            }
+        });
+
+        mMRectRequestManager.requestAd();
     }
 
     private void loadMraidInterstitial() {
@@ -113,38 +144,66 @@ public class MainFragment extends Fragment implements MoPubView.BannerAdListener
 
             @Override
             public void onRequestFail(@NonNull Throwable throwable) {
-                mMraidInterstitialRequestManager.startRefreshTimer(RequestManager.DEFAULT_REFRESH_TIME_SECONDS);
+
             }
         });
 
         mMraidInterstitialRequestManager.requestAd();
     }
 
-    // MoPubView.BannerAdListener
-    @Override
-    public void onBannerLoaded(MoPubView banner) {
-        //mBannerRequestManager.startRefreshTimer(REFRESH_SECONDS);
-    }
+    private final MoPubView.BannerAdListener mBannerListener = new MoPubView.BannerAdListener() {
+        @Override
+        public void onBannerLoaded(MoPubView banner) {
 
-    @Override
-    public void onBannerFailed(MoPubView banner, MoPubErrorCode errorCode) {
-        //mBannerRequestManager.startRefreshTimer(REFRESH_SECONDS);
-    }
+        }
 
-    @Override
-    public void onBannerClicked(MoPubView banner) {
+        @Override
+        public void onBannerFailed(MoPubView banner, MoPubErrorCode errorCode) {
 
-    }
+        }
 
-    @Override
-    public void onBannerExpanded(MoPubView banner) {
+        @Override
+        public void onBannerClicked(MoPubView banner) {
 
-    }
+        }
 
-    @Override
-    public void onBannerCollapsed(MoPubView banner) {
+        @Override
+        public void onBannerExpanded(MoPubView banner) {
 
-    }
+        }
+
+        @Override
+        public void onBannerCollapsed(MoPubView banner) {
+
+        }
+    };
+
+    private final MoPubView.BannerAdListener mMRectListener = new MoPubView.BannerAdListener() {
+        @Override
+        public void onBannerLoaded(MoPubView banner) {
+
+        }
+
+        @Override
+        public void onBannerFailed(MoPubView banner, MoPubErrorCode errorCode) {
+
+        }
+
+        @Override
+        public void onBannerClicked(MoPubView banner) {
+
+        }
+
+        @Override
+        public void onBannerExpanded(MoPubView banner) {
+
+        }
+
+        @Override
+        public void onBannerCollapsed(MoPubView banner) {
+
+        }
+    };
 
     // MoPubInterstitial.InterstitialAdListener
     @Override
