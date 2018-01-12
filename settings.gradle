@@ -1,1 +1,1 @@
-include ':sdk', ':demo'
+include ':sdk', ':demo', ':adapters.mopub'
