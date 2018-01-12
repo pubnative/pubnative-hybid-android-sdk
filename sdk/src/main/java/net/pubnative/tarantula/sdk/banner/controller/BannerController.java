@@ -57,8 +57,8 @@ public class BannerController implements RequestManager.RequestListener, BannerP
     }
 
     public void load(@NonNull String zoneId, @NonNull BannerView bannerAdView) {
-        if (!CheckUtils.NoThrow.checkArgument(Tarantula.isInitialized(), "MaxAds SDK has not been initialized. " +
-                "Please call MaxAds#initialize in your application's onCreate method.")) {
+        if (!CheckUtils.NoThrow.checkArgument(Tarantula.isInitialized(), "Tarantula SDK has not been initialized. " +
+                "Please call Tarantula#initialize in your application's onCreate method.")) {
             return;
         }
 
