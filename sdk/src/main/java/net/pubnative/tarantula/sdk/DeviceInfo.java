@@ -9,17 +9,17 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Looper;
+import android.os.Process;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
-import com.google.android.gms.ads.identifier.AdvertisingIdClient;
-
 import net.pubnative.tarantula.sdk.utils.Logger;
+import net.pubnative.tarantula.sdk.utils.TarantulaAdvertisingIdClient;
 
 import java.util.Locale;
 import java.util.TimeZone;
@@ -72,12 +72,20 @@ public class DeviceInfo {
         }
     }
 
-    @NonNull private static final String TAG = DeviceInfo.class.getSimpleName();
-    @NonNull private static final String UNKNOWN_APP_VERSION_IDENTIFIER = "UNKNOWN";
-    @NonNull private final Context mContext;
-    @NonNull private final String mUserAgent;
-    @Nullable private final ConnectivityManager mConnectivityManager;
-    @Nullable private final TelephonyManager mTelephonyManager;
+    @NonNull
+    private static final String TAG = DeviceInfo.class.getSimpleName();
+    @NonNull
+    private static final String UNKNOWN_APP_VERSION_IDENTIFIER = "UNKNOWN";
+    @NonNull
+    private final Context mContext;
+    @NonNull
+    private final String mUserAgent;
+    @NonNull
+    private String mAdvertisingId;
+    @Nullable
+    private final ConnectivityManager mConnectivityManager;
+    @Nullable
+    private final TelephonyManager mTelephonyManager;
 
     public DeviceInfo(@NonNull Context context) {
         mContext = context.getApplicationContext();
@@ -93,6 +101,22 @@ public class DeviceInfo {
 
         mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         mTelephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+
+        fetchAdvertisingId();
+    }
+
+    private void fetchAdvertisingId() {
+        TarantulaAdvertisingIdClient client = new TarantulaAdvertisingIdClient();
+        client.request(mContext, new TarantulaAdvertisingIdClient.Listener() {
+            @Override
+            public void onPNAdvertisingIdFinish(String advertisingId) {
+                if (TextUtils.isEmpty(advertisingId)) {
+                    mAdvertisingId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+                } else {
+                    mAdvertisingId = advertisingId;
+                }
+            }
+        });
     }
 
     /**
@@ -105,17 +129,11 @@ public class DeviceInfo {
      */
     @SuppressLint("HardwareIds")
     @NonNull
-    public Observable<AdvertisingIdClient.Info> getAdvertisingInfo() {
-        return Observable.defer(new Callable<ObservableSource<? extends AdvertisingIdClient.Info>>() {
+    public Observable<String> getAdvertisingInfo() {
+        return Observable.defer(new Callable<ObservableSource<? extends String>>() {
             @Override
-            public ObservableSource<AdvertisingIdClient.Info> call() throws Exception {
-                try {
-                    final AdvertisingIdClient.Info advertisingIdInfo = AdvertisingIdClient.getAdvertisingIdInfo(mContext);
-                    return Observable.just(advertisingIdInfo);
-                } catch (Exception ignored) {
-                }
-                return Observable.just(new AdvertisingIdClient.Info(
-                        Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID), false));
+            public ObservableSource<String> call() throws Exception {
+                return Observable.just(mAdvertisingId);
             }
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
@@ -174,11 +192,18 @@ public class DeviceInfo {
         return Build.MODEL;
     }
 
+    private boolean checkPermission(String permission) {
+        if (permission == null) {
+            throw new IllegalArgumentException("permission is null");
+        }
+
+        return mContext.checkPermission(permission, android.os.Process.myPid(), Process.myUid())
+                != PackageManager.PERMISSION_GRANTED;
+    }
+
     @NonNull
     public Connectivity getConnectivity() {
-        if (mConnectivityManager == null ||
-                ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_NETWORK_STATE)
-                        != PackageManager.PERMISSION_GRANTED) {
+        if (mConnectivityManager == null || checkPermission(Manifest.permission.ACCESS_NETWORK_STATE)) {
             return Connectivity.NONE;
         }
 

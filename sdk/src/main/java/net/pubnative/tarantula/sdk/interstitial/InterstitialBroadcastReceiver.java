@@ -6,9 +6,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 
 import net.pubnative.tarantula.sdk.interstitial.presenter.InterstitialPresenter;
+import net.pubnative.tarantula.sdk.utils.TarantulaLocalBroadcastManager;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
@@ -39,11 +39,11 @@ public class InterstitialBroadcastReceiver extends BroadcastReceiver {
     }
 
     public void register(@NonNull IntentFilter intentFilter) {
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(this, intentFilter);
+        TarantulaLocalBroadcastManager.getInstance(mContext).registerReceiver(this, intentFilter);
     }
 
     public void unregister() {
-        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
+        TarantulaLocalBroadcastManager.getInstance(mContext).unregisterReceiver(this);
     }
 
     @Override

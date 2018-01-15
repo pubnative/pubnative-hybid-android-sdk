@@ -24,12 +24,12 @@ public class AdCache {
     }
 
     @Nullable
-    public Ad remove(@NonNull String adUnitKey) {
-        return mAdMap.remove(adUnitKey);
+    public Ad remove(@NonNull String zoneId) {
+        return mAdMap.remove(zoneId);
     }
 
-    public void put(@NonNull String adUnitKey, @NonNull Ad ad) {
-        Logger.d(TAG, "AdCache putting ad for adUnitKey: " + adUnitKey);
-        mAdMap.put(adUnitKey, ad);
+    public void put(@NonNull String zoneId, @NonNull Ad ad) {
+        Logger.d(TAG, "AdCache putting ad for zone id: " + zoneId);
+        mAdMap.put(zoneId, ad);
     }
 }

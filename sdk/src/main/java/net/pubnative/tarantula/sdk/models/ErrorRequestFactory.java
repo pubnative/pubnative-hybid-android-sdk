@@ -2,8 +2,6 @@ package net.pubnative.tarantula.sdk.models;
 
 import android.support.annotation.NonNull;
 
-import com.google.android.gms.ads.identifier.AdvertisingIdClient;
-
 import net.pubnative.tarantula.sdk.DeviceInfo;
 import net.pubnative.tarantula.sdk.Tarantula;
 import net.pubnative.tarantula.sdk.managers.SessionDepthManager;
@@ -29,15 +27,15 @@ public class ErrorRequestFactory {
     @NonNull
     public Observable<ErrorRequest> createErrorRequest(@NonNull final String message) {
         return mDeviceInfo.getAdvertisingInfo()
-                .map(new Function<AdvertisingIdClient.Info, ErrorRequest>() {
+                .map(new Function<String, ErrorRequest>() {
                     @Override
-                    public ErrorRequest apply(AdvertisingIdClient.Info info) throws Exception {
+                    public ErrorRequest apply(String info) throws Exception {
                         return new ErrorRequest.Builder(
                                 message,
                                 Tarantula.API_VERSION,
                                 Tarantula.SDK_VERSION,
-                                info.getId(),
-                                info.isLimitAdTrackingEnabled(),
+                                info,
+                                false,
                                 "",
                                 mDeviceInfo.getTimeZoneShortDisplayName(),
                                 mDeviceInfo.getLocale().toString(),

@@ -5,8 +5,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 
-import com.google.android.gms.ads.identifier.AdvertisingIdClient;
-
 import net.pubnative.tarantula.sdk.DeviceInfo;
 import net.pubnative.tarantula.sdk.Tarantula;
 import net.pubnative.tarantula.sdk.managers.SessionDepthManager;
@@ -38,9 +36,9 @@ public class AdRequestFactory {
     @NonNull
     public Observable<AdRequest> createAdRequest(@NonNull final String zoneid, @NonNull final String adSize) {
         return mDeviceInfo.getAdvertisingInfo()
-                .map(new Function<AdvertisingIdClient.Info, AdRequest>() {
+                .map(new Function<String, AdRequest>() {
                     @Override
-                    public AdRequest apply(AdvertisingIdClient.Info info) throws Exception {
+                    public AdRequest apply(String info) throws Exception {
                         AdRequest adRequest = new AdRequest();
                         adRequest.zoneid = zoneid;
                         adRequest.apptoken = Tarantula.getAppToken();
@@ -49,12 +47,12 @@ public class AdRequestFactory {
                         adRequest.devicemodel = Build.MODEL;
                         adRequest.coppa = Tarantula.isCoppaEnabled() ? "1" : "0";
 
-                        if (Tarantula.isCoppaEnabled() || TextUtils.isEmpty(info.getId()) || info.isLimitAdTrackingEnabled()) {
+                        if (Tarantula.isCoppaEnabled() || TextUtils.isEmpty(info)) {
                             adRequest.dnt = "1";
                         } else {
-                            adRequest.gid = info.getId();
-                            adRequest.gidmd5 = PNCrypto.md5(info.getId());
-                            adRequest.gidsha1 = PNCrypto.sha1(info.getId());
+                            adRequest.gid = info;
+                            adRequest.gidmd5 = PNCrypto.md5(info);
+                            adRequest.gidsha1 = PNCrypto.sha1(info);
                         }
 
                         adRequest.locale = Locale.getDefault().getLanguage();

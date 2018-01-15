@@ -91,7 +91,7 @@ public class BannerPresenterDecorator implements BannerPresenter, BannerPresente
         //String errorMessage = "Banner error for zone id: " + getAd().getAdUnitId();
         String errorMessage = "Banner error for zone id: ";
         Logger.d(TAG, errorMessage);
-        mAdTrackingDelegate.trackError(errorMessage);
+        //mAdTrackingDelegate.trackError(errorMessage);
         mListener.onBannerError(bannerPresenter);
     }
 }

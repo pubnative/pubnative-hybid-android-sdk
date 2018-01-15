@@ -3,10 +3,10 @@ package net.pubnative.tarantula.sdk.interstitial.presenter;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.v4.content.LocalBroadcastManager;
 
 import net.pubnative.tarantula.sdk.interstitial.InterstitialBroadcastReceiver;
 import net.pubnative.tarantula.sdk.interstitial.view.InterstitialActivityViewModule;
+import net.pubnative.tarantula.sdk.utils.TarantulaLocalBroadcastManager;
 
 /**
  * Created by erosgarciaponte on 09.01.18.
@@ -45,7 +45,7 @@ public class InterstitialActivityPresenter implements InterstitialActivityViewMo
     private void broadcastAction(@NonNull String action) {
         Intent intent = new Intent(action);
         intent.putExtra(InterstitialBroadcastReceiver.BROADCAST_ID, mBroadcastId);
-        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+        TarantulaLocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
     }
 
     @Override

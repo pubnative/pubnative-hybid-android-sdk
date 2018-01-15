@@ -88,7 +88,7 @@ public class MRectPresenterDecorator implements MRectPresenter, MRectPresenter.L
 
         String errorMessage = "MRect error for zone id: ";
         Logger.d(TAG, errorMessage);
-        mAdTrackingDelegate.trackError(errorMessage);
+        //mAdTrackingDelegate.trackError(errorMessage);
         mListener.onMRectError(mRectPresenter);
     }
 }
