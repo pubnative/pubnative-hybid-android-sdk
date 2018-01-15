@@ -1,6 +1,5 @@
 package net.pubnative.tarantula.sdk.utils;
 
-import net.pubnative.tarantula.sdk.models.APIMeta;
 import net.pubnative.tarantula.sdk.models.Ad;
 
 /**
@@ -8,8 +7,6 @@ import net.pubnative.tarantula.sdk.models.Ad;
  */
 
 public final class PrebidUtils {
-    // Sample:
-    // "m_max:true,max_adunit:ag9zfm1heGFkcy0xNTY1MTlyEwsSBkFkVW5pdBiAgICAvKGCCQw,max_bidX:000,max_bidXX:000,max_bidXXX:003"
 
     public interface KEYS {
         String PN = "m_pn";
