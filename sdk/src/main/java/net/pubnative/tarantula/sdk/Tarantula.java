@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 
 import net.pubnative.tarantula.sdk.api.ApiClient;
-import net.pubnative.tarantula.sdk.managers.SessionDepthManager;
 
 import java.util.Collections;
 import java.util.List;
@@ -24,7 +23,6 @@ public class Tarantula {
     @NonNull private static ApiClient sApiClient;
     @SuppressLint("StaticFieldLeak")
     @NonNull private static DeviceInfo sDeviceInfo;
-    @NonNull private static SessionDepthManager sSessionDepthManager;
     @NonNull private static AdCache sAdCache;
     private static boolean sInitialized;
     private static boolean sCoppaEnabled = false;
@@ -53,7 +51,6 @@ public class Tarantula {
         sBundleId = application.getPackageName();
         sApiClient = new ApiClient(applicationInterceptors, networkInterceptors);
         sDeviceInfo = new DeviceInfo(application.getApplicationContext());
-        sSessionDepthManager = new SessionDepthManager(application);
         sAdCache = new AdCache();
         sInitialized = true;
     }
@@ -76,11 +73,6 @@ public class Tarantula {
     @NonNull
     public static DeviceInfo getDeviceInfo() {
         return sDeviceInfo;
-    }
-
-    @NonNull
-    public static SessionDepthManager getSessionDepthManager() {
-        return sSessionDepthManager;
     }
 
     @NonNull

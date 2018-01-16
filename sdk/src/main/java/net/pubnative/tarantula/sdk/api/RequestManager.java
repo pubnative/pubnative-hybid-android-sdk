@@ -11,9 +11,6 @@ import net.pubnative.tarantula.sdk.models.AdRequest;
 import net.pubnative.tarantula.sdk.models.Ad;
 import net.pubnative.tarantula.sdk.utils.CheckUtils;
 import net.pubnative.tarantula.sdk.utils.Logger;
-import net.pubnative.tarantula.sdk.utils.RefreshTimer;
-
-import io.reactivex.functions.Consumer;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
@@ -28,15 +25,12 @@ public abstract class RequestManager {
 
     @NonNull
     private static final String TAG = RequestManager.class.getSimpleName();
-    public static final int DEFAULT_REFRESH_TIME_SECONDS = 60;
     @NonNull
     private final ApiClient mApiClient;
     @NonNull
     private final AdCache mAdCache;
     @NonNull
     private final AdRequestFactory mAdRequestFactory;
-    @NonNull
-    private final RefreshTimer mRefreshTimer;
     @Nullable
     private String mZoneId;
     @Nullable
@@ -44,18 +38,16 @@ public abstract class RequestManager {
     private boolean mIsDestroyed;
 
     public RequestManager() {
-        this(Tarantula.getApiClient(), Tarantula.getAdCache(), new AdRequestFactory(), new RefreshTimer());
+        this(Tarantula.getApiClient(), Tarantula.getAdCache(), new AdRequestFactory());
     }
 
     @VisibleForTesting
     RequestManager(@NonNull ApiClient apiClient,
                    @NonNull AdCache adCache,
-                   @NonNull AdRequestFactory adRequestFactory,
-                   @NonNull RefreshTimer refreshTimer) {
+                   @NonNull AdRequestFactory adRequestFactory) {
         mApiClient = apiClient;
         mAdCache = adCache;
         mAdRequestFactory = adRequestFactory;
-        mRefreshTimer = refreshTimer;
     }
 
     public void setRequestListener(@Nullable RequestListener requestListener) {
@@ -115,26 +107,7 @@ public abstract class RequestManager {
         });
     }
 
-    public void startRefreshTimer(long delaySeconds) {
-        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "RequestManager has been destroyed")) {
-            return;
-        }
-
-        delaySeconds = delaySeconds > 0 ? delaySeconds : DEFAULT_REFRESH_TIME_SECONDS;
-        mRefreshTimer.start(delaySeconds, new Consumer<Long>() {
-            @Override
-            public void accept(Long aLong) throws Exception {
-                requestAd();
-            }
-        });
-    }
-
-    public void stopRefreshTimer() {
-        mRefreshTimer.stop();
-    }
-
     public void destroy() {
-        mRefreshTimer.stop();
         mRequestListener = null;
         mIsDestroyed = true;
     }

@@ -23,12 +23,6 @@ import net.pubnative.tarantula.sdk.utils.TarantulaAdvertisingIdClient;
 
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.concurrent.Callable;
-
-import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by erosgarciaponte on 08.01.18.

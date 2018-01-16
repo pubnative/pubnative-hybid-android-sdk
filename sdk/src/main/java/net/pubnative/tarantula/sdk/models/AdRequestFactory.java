@@ -7,13 +7,7 @@ import android.text.TextUtils;
 
 import net.pubnative.tarantula.sdk.DeviceInfo;
 import net.pubnative.tarantula.sdk.Tarantula;
-import net.pubnative.tarantula.sdk.managers.SessionDepthManager;
 import net.pubnative.tarantula.sdk.utils.PNCrypto;
-
-import java.util.Locale;
-
-import io.reactivex.Observable;
-import io.reactivex.functions.Function;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
@@ -21,21 +15,19 @@ import io.reactivex.functions.Function;
 
 public class AdRequestFactory {
     @NonNull private final DeviceInfo mDeviceInfo;
-    @NonNull private final SessionDepthManager mSessionDepthManager;
 
     public AdRequestFactory() {
-        this(Tarantula.getDeviceInfo(), Tarantula.getSessionDepthManager());
+        this(Tarantula.getDeviceInfo());
     }
 
     @VisibleForTesting
-    AdRequestFactory(@NonNull DeviceInfo deviceInfo, @NonNull SessionDepthManager sessionDepthManager) {
+    AdRequestFactory(@NonNull DeviceInfo deviceInfo) {
         mDeviceInfo = deviceInfo;
-        mSessionDepthManager = sessionDepthManager;
     }
 
     @NonNull
     public AdRequest createAdRequest(@NonNull final String zoneid, @NonNull final String adSize) {
-        String advertisingId = Tarantula.getDeviceInfo().getAdvertisingId();
+        String advertisingId = mDeviceInfo.getAdvertisingId();
 
         AdRequest adRequest = new AdRequest();
         adRequest.zoneid = zoneid;
@@ -53,7 +45,7 @@ public class AdRequestFactory {
             adRequest.gidsha1 = PNCrypto.sha1(advertisingId);
         }
 
-        adRequest.locale = Tarantula.getDeviceInfo().getLocale().getLanguage();
+        adRequest.locale = mDeviceInfo.getLocale().getLanguage();
         adRequest.age = Tarantula.getAge();
         adRequest.gender = Tarantula.getGender();
         adRequest.keywords = Tarantula.getKeywords();

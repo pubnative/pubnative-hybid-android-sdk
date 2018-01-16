@@ -53,7 +53,6 @@ public class ApiClient {
     }
 
     public void getAd(@NonNull final AdRequest adRequest, final AdRequestListener listener) {
-        Tarantula.getSessionDepthManager().incrementSessionDepth();
         Call<AdResponse> call = mApiService.getAd(adRequest.apptoken, adRequest.os, adRequest.osver,
                 adRequest.devicemodel, adRequest.dnt, adRequest.al, adRequest.mf, adRequest.zoneid,
                 adRequest.testMode, adRequest.locale, adRequest.latitude,

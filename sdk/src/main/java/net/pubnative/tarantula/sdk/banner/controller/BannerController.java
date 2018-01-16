@@ -77,7 +77,6 @@ public class BannerController implements RequestManager.RequestListener, BannerP
         mBannerAdView = bannerAdView;
         mRequestManager.setZoneId(zoneId);
         mRequestManager.requestAd();
-        mRequestManager.stopRefreshTimer();
     }
 
     @VisibleForTesting
@@ -92,8 +91,6 @@ public class BannerController implements RequestManager.RequestListener, BannerP
         // being displayed
         mNextBannerPresenter = mBannerPresenterFactory.createBannerPresenter(ad, this);
         if (mNextBannerPresenter == null) {
-            mRequestManager.startRefreshTimer(REFRESH_TIME_SECONDS);
-
             if (mListener != null && mBannerAdView != null) {
                 mListener.onBannerError(mBannerAdView);
             }
@@ -135,8 +132,6 @@ public class BannerController implements RequestManager.RequestListener, BannerP
             return;
         }
 
-        mRequestManager.startRefreshTimer(RequestManager.DEFAULT_REFRESH_TIME_SECONDS);
-
         if (mListener != null && mBannerAdView != null) {
             mListener.onBannerError(mBannerAdView);
         }
@@ -152,8 +147,6 @@ public class BannerController implements RequestManager.RequestListener, BannerP
         destroyBannerPresenter(mCurrentBannerPresenter);
         mCurrentBannerPresenter = mNextBannerPresenter;
         mNextBannerPresenter = null;
-
-        mRequestManager.startRefreshTimer(REFRESH_TIME_SECONDS);
 
         if (mBannerAdView != null) {
             mBannerAdView.removeAllViews();
@@ -183,8 +176,6 @@ public class BannerController implements RequestManager.RequestListener, BannerP
         if (mIsDestroyed) {
             return;
         }
-
-        mRequestManager.startRefreshTimer(REFRESH_TIME_SECONDS);
 
         if (mListener != null && mBannerAdView != null) {
             mListener.onBannerError(mBannerAdView);
