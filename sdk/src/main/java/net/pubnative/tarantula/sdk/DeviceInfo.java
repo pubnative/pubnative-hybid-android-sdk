@@ -129,14 +129,8 @@ public class DeviceInfo {
      */
     @SuppressLint("HardwareIds")
     @NonNull
-    public Observable<String> getAdvertisingInfo() {
-        return Observable.defer(new Callable<ObservableSource<? extends String>>() {
-            @Override
-            public ObservableSource<String> call() throws Exception {
-                return Observable.just(mAdvertisingId);
-            }
-        }).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+    public String getAdvertisingId() {
+        return mAdvertisingId;
     }
 
     @NonNull

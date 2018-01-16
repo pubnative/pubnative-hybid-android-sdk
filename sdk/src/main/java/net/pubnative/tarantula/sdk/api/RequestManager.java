@@ -72,7 +72,7 @@ public abstract class RequestManager {
             return;
         }
 
-        if (!CheckUtils.NoThrow.checkNotNull(mZoneId, "zoneId cannot be null")) {
+        if (!CheckUtils.NoThrow.checkNotNull(mZoneId, "zone id cannot be null")) {
             return;
         }
 
@@ -80,48 +80,39 @@ public abstract class RequestManager {
             return;
         }
 
-        mAdRequestFactory.createAdRequest(mZoneId, getAdSize())
-                .subscribe(new Consumer<AdRequest>() {
-                    @Override
-                    public void accept(AdRequest adRequest) throws Exception {
-                        requestAdFromApi(adRequest);
-                    }
-                });
+        AdRequest adRequest = mAdRequestFactory.createAdRequest(mZoneId, getAdSize());
+        requestAdFromApi(adRequest);
     }
 
     @VisibleForTesting
     void requestAdFromApi(@NonNull final AdRequest adRequest) {
-        Logger.d(TAG, "Requesting ad for ad unit id: " + adRequest.zoneid);
-        mApiClient.getAd(adRequest)
-                .subscribe(new Consumer<Ad>() {
-                    @Override
-                    public void accept(@NonNull Ad ad) throws Exception {
-                        if (mIsDestroyed) {
-                            return;
-                        }
+        Logger.d(TAG, "Requesting ad for zone id: " + adRequest.zoneid);
+        mApiClient.getAd(adRequest, new ApiClient.AdRequestListener() {
+            @Override
+            public void onSuccess(Ad ad) {
+                if (mIsDestroyed) {
+                    return;
+                }
 
-                        Logger.d(TAG, "Received ad response for zone id: " + adRequest.zoneid);
-                        mAdCache.put(adRequest.zoneid, ad);
-                        if (mRequestListener != null) {
-                            mRequestListener.onRequestSuccess(ad);
-                        }
-                    }
-                }, new Consumer<Throwable>() {
-                    /**
-                     * Handles failed network requests and empty responses
-                     */
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
-                        if (mIsDestroyed) {
-                            return;
-                        }
+                Logger.d(TAG, "Received ad response for zone id: " + adRequest.zoneid);
+                mAdCache.put(adRequest.zoneid, ad);
+                if (mRequestListener != null) {
+                    mRequestListener.onRequestSuccess(ad);
+                }
+            }
 
-                        Logger.w(TAG, "Failed to receive ad response for zone id: " + adRequest.zoneid, throwable);
-                        if (mRequestListener != null) {
-                            mRequestListener.onRequestFail(throwable);
-                        }
-                    }
-                });
+            @Override
+            public void onFailure(Throwable throwable) {
+                if (mIsDestroyed) {
+                    return;
+                }
+
+                Logger.w(TAG, "Failed to receive ad response for zone id: " + adRequest.zoneid, throwable);
+                if (mRequestListener != null) {
+                    mRequestListener.onRequestFail(throwable);
+                }
+            }
+        });
     }
 
     public void startRefreshTimer(long delaySeconds) {

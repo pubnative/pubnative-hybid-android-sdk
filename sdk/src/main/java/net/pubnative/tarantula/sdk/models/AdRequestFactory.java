@@ -34,38 +34,34 @@ public class AdRequestFactory {
     }
 
     @NonNull
-    public Observable<AdRequest> createAdRequest(@NonNull final String zoneid, @NonNull final String adSize) {
-        return mDeviceInfo.getAdvertisingInfo()
-                .map(new Function<String, AdRequest>() {
-                    @Override
-                    public AdRequest apply(String info) throws Exception {
-                        AdRequest adRequest = new AdRequest();
-                        adRequest.zoneid = zoneid;
-                        adRequest.apptoken = Tarantula.getAppToken();
-                        adRequest.os = "android";
-                        adRequest.osver = Build.VERSION.RELEASE;
-                        adRequest.devicemodel = Build.MODEL;
-                        adRequest.coppa = Tarantula.isCoppaEnabled() ? "1" : "0";
+    public AdRequest createAdRequest(@NonNull final String zoneid, @NonNull final String adSize) {
+        String advertisingId = Tarantula.getDeviceInfo().getAdvertisingId();
 
-                        if (Tarantula.isCoppaEnabled() || TextUtils.isEmpty(info)) {
-                            adRequest.dnt = "1";
-                        } else {
-                            adRequest.gid = info;
-                            adRequest.gidmd5 = PNCrypto.md5(info);
-                            adRequest.gidsha1 = PNCrypto.sha1(info);
-                        }
+        AdRequest adRequest = new AdRequest();
+        adRequest.zoneid = zoneid;
+        adRequest.apptoken = Tarantula.getAppToken();
+        adRequest.os = "android";
+        adRequest.osver = Build.VERSION.RELEASE;
+        adRequest.devicemodel = Build.MODEL;
+        adRequest.coppa = Tarantula.isCoppaEnabled() ? "1" : "0";
 
-                        adRequest.locale = Locale.getDefault().getLanguage();
-                        adRequest.age = Tarantula.getAge();
-                        adRequest.gender = Tarantula.getGender();
-                        adRequest.keywords = Tarantula.getKeywords();
-                        adRequest.bundleid = Tarantula.getBundleId();
-                        adRequest.testMode = Tarantula.isTestMode() ? "1" : "0";
-                        adRequest.al = adSize;
-                        adRequest.mf = "points,revenuemodel,contentinfo";
+        if (Tarantula.isCoppaEnabled() || TextUtils.isEmpty(advertisingId)) {
+            adRequest.dnt = "1";
+        } else {
+            adRequest.gid = advertisingId;
+            adRequest.gidmd5 = PNCrypto.md5(advertisingId);
+            adRequest.gidsha1 = PNCrypto.sha1(advertisingId);
+        }
 
-                        return adRequest;
-                    }
-                });
+        adRequest.locale = Tarantula.getDeviceInfo().getLocale().getLanguage();
+        adRequest.age = Tarantula.getAge();
+        adRequest.gender = Tarantula.getGender();
+        adRequest.keywords = Tarantula.getKeywords();
+        adRequest.bundleid = Tarantula.getBundleId();
+        adRequest.testMode = Tarantula.isTestMode() ? "1" : "0";
+        adRequest.al = adSize;
+        adRequest.mf = "points,revenuemodel,contentinfo";
+
+        return adRequest;
     }
 }
