@@ -1,20 +1,17 @@
 package net.pubnative.tarantula.sdk.utils;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 /**
  * Created by erosgarciaponte on 05.01.18.
  */
 
 public class CheckUtils {
-    @NonNull private static final String TAG = CheckUtils.class.getSimpleName();
+    private static final String TAG = CheckUtils.class.getSimpleName();
 
-    public static void checkArgument(boolean expression, @NonNull String errorMessage) {
+    public static void checkArgument(boolean expression, String errorMessage) {
         checkArgumentImpl(expression, true, errorMessage);
     }
 
-    public static void checkNotNull(@Nullable Object reference, @NonNull String errorMessage) {
+    public static void checkNotNull(Object reference, String errorMessage) {
         checkNotNullImpl(reference, true, errorMessage);
     }
 
@@ -25,16 +22,16 @@ public class CheckUtils {
             sStrictMode = strictMode;
         }
 
-        public static boolean checkArgument(boolean expression, @NonNull String errorMessage) {
+        public static boolean checkArgument(boolean expression, String errorMessage) {
             return checkArgumentImpl(expression, sStrictMode, errorMessage);
         }
 
-        public static boolean checkNotNull(@Nullable Object reference, @NonNull String errorMessage) {
+        public static boolean checkNotNull(Object reference, String errorMessage) {
             return checkNotNullImpl(reference, sStrictMode, errorMessage);
         }
     }
 
-    private static boolean checkArgumentImpl(boolean expression, boolean isThrowable, @NonNull String errorMessage) {
+    private static boolean checkArgumentImpl(boolean expression, boolean isThrowable, String errorMessage) {
         if (expression) {
             return true;
         }
@@ -47,8 +44,8 @@ public class CheckUtils {
         return false;
     }
 
-    private static boolean checkNotNullImpl(@Nullable Object reference, boolean isThrowable,
-                                            @NonNull String errorMessage) {
+    private static boolean checkNotNullImpl(Object reference, boolean isThrowable,
+                                            String errorMessage) {
         if (reference != null) {
             return true;
         }

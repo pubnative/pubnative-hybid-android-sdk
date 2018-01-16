@@ -1,8 +1,5 @@
 package net.pubnative.tarantula.sdk.interstitial.presenter;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import net.pubnative.tarantula.sdk.models.Ad;
 import net.pubnative.tarantula.sdk.utils.AdTracker;
 import net.pubnative.tarantula.sdk.utils.CheckUtils;
@@ -13,26 +10,25 @@ import net.pubnative.tarantula.sdk.utils.Logger;
  */
 
 public class InterstitialPresenterDecorator implements InterstitialPresenter, InterstitialPresenter.Listener {
-    @NonNull private static final String TAG = InterstitialPresenterDecorator.class.getSimpleName();
-    @NonNull private final InterstitialPresenter mInterstitialPresenter;
-    @NonNull private final AdTracker mAdTrackingDelegate;
-    @NonNull private final InterstitialPresenter.Listener mListener;
+    private static final String TAG = InterstitialPresenterDecorator.class.getSimpleName();
+    private final InterstitialPresenter mInterstitialPresenter;
+    private final AdTracker mAdTrackingDelegate;
+    private final InterstitialPresenter.Listener mListener;
     private boolean mIsDestroyed;
 
-    public InterstitialPresenterDecorator(@NonNull InterstitialPresenter interstitialPresenter,
-                                          @NonNull AdTracker adTrackingDelegate,
-                                          @NonNull InterstitialPresenter.Listener listener) {
+    public InterstitialPresenterDecorator(InterstitialPresenter interstitialPresenter,
+                                          AdTracker adTrackingDelegate,
+                                          InterstitialPresenter.Listener listener) {
         mInterstitialPresenter = interstitialPresenter;
         mAdTrackingDelegate = adTrackingDelegate;
         mListener = listener;
     }
 
     @Override
-    public void setListener(@Nullable InterstitialPresenter.Listener listener) {
+    public void setListener(InterstitialPresenter.Listener listener) {
         // We set the listener in the constructor instead
     }
 
-    @NonNull
     @Override
     public Ad getAd() {
         return mInterstitialPresenter.getAd();
@@ -66,7 +62,7 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
     }
 
     @Override
-    public void onInterstitialLoaded(@NonNull InterstitialPresenter interstitialPresenter) {
+    public void onInterstitialLoaded(InterstitialPresenter interstitialPresenter) {
         if (mIsDestroyed) {
             return;
         }
@@ -76,7 +72,7 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
     }
 
     @Override
-    public void onInterstitialShown(@NonNull InterstitialPresenter interstitialPresenter) {
+    public void onInterstitialShown(InterstitialPresenter interstitialPresenter) {
         if (mIsDestroyed) {
             return;
         }
@@ -87,7 +83,7 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
     }
 
     @Override
-    public void onInterstitialClicked(@NonNull InterstitialPresenter interstitialPresenter) {
+    public void onInterstitialClicked(InterstitialPresenter interstitialPresenter) {
         if (mIsDestroyed) {
             return;
         }
@@ -98,7 +94,7 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
     }
 
     @Override
-    public void onInterstitialDismissed(@NonNull InterstitialPresenter interstitialPresenter) {
+    public void onInterstitialDismissed(InterstitialPresenter interstitialPresenter) {
         if (mIsDestroyed) {
             return;
         }
@@ -108,7 +104,7 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
     }
 
     @Override
-    public void onInterstitialError(@NonNull InterstitialPresenter interstitialPresenter) {
+    public void onInterstitialError(InterstitialPresenter interstitialPresenter) {
         if (mIsDestroyed) {
             return;
         }

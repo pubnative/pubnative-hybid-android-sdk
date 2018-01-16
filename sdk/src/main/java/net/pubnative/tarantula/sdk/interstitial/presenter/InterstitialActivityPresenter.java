@@ -2,7 +2,6 @@ package net.pubnative.tarantula.sdk.interstitial.presenter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
 
 import net.pubnative.tarantula.sdk.interstitial.InterstitialBroadcastReceiver;
 import net.pubnative.tarantula.sdk.interstitial.view.InterstitialActivityViewModule;
@@ -13,14 +12,14 @@ import net.pubnative.tarantula.sdk.utils.TarantulaLocalBroadcastManager;
  */
 
 public class InterstitialActivityPresenter implements InterstitialActivityViewModule.Listener {
-    @NonNull private final Context mContext;
-    @NonNull private final InterstitialActivityViewModule mInterstitialActivityViewModule;
-    @NonNull private final String mHtml;
+    private final Context mContext;
+    private final InterstitialActivityViewModule mInterstitialActivityViewModule;
+    private final String mHtml;
     private final long mBroadcastId;
 
-    public InterstitialActivityPresenter(@NonNull Context context,
-                                         @NonNull InterstitialActivityViewModule interstitialActivityViewModule,
-                                         @NonNull String html,
+    public InterstitialActivityPresenter(Context context,
+                                         InterstitialActivityViewModule interstitialActivityViewModule,
+                                         String html,
                                          long broadcastId) {
         mContext = context;
         mInterstitialActivityViewModule = interstitialActivityViewModule;
@@ -42,7 +41,7 @@ public class InterstitialActivityPresenter implements InterstitialActivityViewMo
         broadcastAction(InterstitialBroadcastReceiver.INTERSTITIAL_DISMISS);
     }
 
-    private void broadcastAction(@NonNull String action) {
+    private void broadcastAction(String action) {
         Intent intent = new Intent(action);
         intent.putExtra(InterstitialBroadcastReceiver.BROADCAST_ID, mBroadcastId);
         TarantulaLocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);

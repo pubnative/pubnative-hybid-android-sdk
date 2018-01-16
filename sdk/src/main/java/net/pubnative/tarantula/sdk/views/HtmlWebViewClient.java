@@ -1,7 +1,6 @@
 package net.pubnative.tarantula.sdk.views;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -12,9 +11,9 @@ import net.pubnative.tarantula.sdk.utils.UrlHandler;
  */
 
 public class HtmlWebViewClient extends WebViewClient{
-    @NonNull private final UrlHandler mUrlHandler;
+    private final UrlHandler mUrlHandler;
 
-    public HtmlWebViewClient(@NonNull Context context) {
+    public HtmlWebViewClient(Context context) {
         mUrlHandler = new UrlHandler(context);
     }
 

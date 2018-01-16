@@ -1,8 +1,6 @@
 package net.pubnative.tarantula.sdk.banner.view;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
@@ -14,21 +12,20 @@ import net.pubnative.tarantula.sdk.banner.controller.BannerController;
 
 public class BannerView extends FrameLayout {
     public interface Listener {
-        void onBannerLoaded(@NonNull BannerView bannerAdView);
+        void onBannerLoaded(BannerView bannerAdView);
 
-        void onBannerClicked(@NonNull BannerView bannerAdView);
+        void onBannerClicked(BannerView bannerAdView);
 
-        void onBannerError(@NonNull BannerView bannerAdView);
+        void onBannerError(BannerView bannerAdView);
     }
 
-    @NonNull
     private final BannerController mBannerController;
 
-    public BannerView(@NonNull Context context) {
+    public BannerView(Context context) {
         this(context, null);
     }
 
-    public BannerView(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public BannerView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         mBannerController = new BannerController(context);
@@ -37,11 +34,11 @@ public class BannerView extends FrameLayout {
         setVerticalScrollBarEnabled(false);
     }
 
-    public void setListener(@Nullable Listener listener) {
+    public void setListener(Listener listener) {
         mBannerController.setListener(listener);
     }
 
-    public void load(@NonNull String zoneId) {
+    public void load(String zoneId) {
         mBannerController.load(zoneId, this);
     }
 

@@ -1,8 +1,6 @@
 package net.pubnative.tarantula.sdk.models;
 
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 
 import net.pubnative.tarantula.sdk.DeviceInfo;
@@ -14,19 +12,17 @@ import net.pubnative.tarantula.sdk.utils.PNCrypto;
  */
 
 public class AdRequestFactory {
-    @NonNull private final DeviceInfo mDeviceInfo;
+    private final DeviceInfo mDeviceInfo;
 
     public AdRequestFactory() {
         this(Tarantula.getDeviceInfo());
     }
 
-    @VisibleForTesting
-    AdRequestFactory(@NonNull DeviceInfo deviceInfo) {
+    AdRequestFactory(DeviceInfo deviceInfo) {
         mDeviceInfo = deviceInfo;
     }
 
-    @NonNull
-    public AdRequest createAdRequest(@NonNull final String zoneid, @NonNull final String adSize) {
+    public AdRequest createAdRequest(final String zoneid, final String adSize) {
         String advertisingId = mDeviceInfo.getAdvertisingId();
 
         AdRequest adRequest = new AdRequest();

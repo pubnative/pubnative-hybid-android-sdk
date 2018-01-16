@@ -1,8 +1,5 @@
 package net.pubnative.tarantula.sdk.interstitial.presenter;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import net.pubnative.tarantula.sdk.models.Ad;
 
 /**
@@ -11,15 +8,14 @@ import net.pubnative.tarantula.sdk.models.Ad;
 
 public interface InterstitialPresenter {
     interface Listener {
-        void onInterstitialLoaded(@NonNull InterstitialPresenter interstitialPresenter);
-        void onInterstitialShown(@NonNull InterstitialPresenter interstitialPresenter);
-        void onInterstitialClicked(@NonNull InterstitialPresenter interstitialPresenter);
-        void onInterstitialDismissed(@NonNull InterstitialPresenter interstitialPresenter);
-        void onInterstitialError(@NonNull InterstitialPresenter interstitialPresenter);
+        void onInterstitialLoaded(InterstitialPresenter interstitialPresenter);
+        void onInterstitialShown(InterstitialPresenter interstitialPresenter);
+        void onInterstitialClicked(InterstitialPresenter interstitialPresenter);
+        void onInterstitialDismissed(InterstitialPresenter interstitialPresenter);
+        void onInterstitialError(InterstitialPresenter interstitialPresenter);
     }
 
-    void setListener(@Nullable Listener listener);
-    @NonNull
+    void setListener(Listener listener);
     Ad getAd();
     void load();
     void show();

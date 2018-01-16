@@ -1,8 +1,6 @@
 package net.pubnative.tarantula.sdk.banner.presenter;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import net.pubnative.tarantula.sdk.models.APIAsset;
 import net.pubnative.tarantula.sdk.models.Ad;
@@ -18,22 +16,16 @@ import net.pubnative.tarantula.sdk.utils.UrlHandler;
  */
 
 public class MraidBannerPresenter implements BannerPresenter, MRAIDViewListener, MRAIDNativeFeatureListener {
-    @NonNull
     private final Context mContext;
-    @NonNull
     private final Ad mAd;
-    @NonNull
     private final UrlHandler mUrlHandlerDelegate;
-    @NonNull
     private final String[] mSupportedNativeFeatures;
 
-    @Nullable
     private BannerPresenter.Listener mListener;
-    @Nullable
     private MRAIDBanner mMRAIDBanner;
     private boolean mIsDestroyed;
 
-    public MraidBannerPresenter(@NonNull Context context, @NonNull Ad ad) {
+    public MraidBannerPresenter(Context context, Ad ad) {
         mContext = context;
         mAd = ad;
         mUrlHandlerDelegate = new UrlHandler(context);
@@ -41,11 +33,10 @@ public class MraidBannerPresenter implements BannerPresenter, MRAIDViewListener,
     }
 
     @Override
-    public void setListener(@Nullable Listener listener) {
+    public void setListener(Listener listener) {
         mListener = listener;
     }
 
-    @NonNull
     @Override
     public Ad getAd() {
         return mAd;

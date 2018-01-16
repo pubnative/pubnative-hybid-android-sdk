@@ -1,8 +1,6 @@
 package net.pubnative.tarantula.sdk.mrect.view;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
@@ -14,21 +12,20 @@ import net.pubnative.tarantula.sdk.mrect.controller.MRectController;
 
 public class MRectView extends FrameLayout {
     public interface Listener {
-        void onMRectLoaded(@NonNull MRectView mRectAdView);
+        void onMRectLoaded(MRectView mRectAdView);
 
-        void onMRectClicked(@NonNull MRectView mRectAdView);
+        void onMRectClicked(MRectView mRectAdView);
 
-        void onMRectError(@NonNull MRectView mRectAdView);
+        void onMRectError(MRectView mRectAdView);
     }
 
-    @NonNull
     private final MRectController mMRectController;
 
-    public MRectView(@NonNull Context context) {
+    public MRectView(Context context) {
         this(context, null);
     }
 
-    public MRectView(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public MRectView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         mMRectController = new MRectController(context);
@@ -37,11 +34,11 @@ public class MRectView extends FrameLayout {
         setVerticalScrollBarEnabled(false);
     }
 
-    public void setListener(@Nullable Listener listener) {
+    public void setListener(Listener listener) {
         mMRectController.setListener(listener);
     }
 
-    public void load(@NonNull String zoneId) {
+    public void load(String zoneId) {
         mMRectController.load(zoneId, this);
     }
 

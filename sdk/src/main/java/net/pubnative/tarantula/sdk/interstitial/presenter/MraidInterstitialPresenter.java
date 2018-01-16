@@ -1,8 +1,6 @@
 package net.pubnative.tarantula.sdk.interstitial.presenter;
 
 import android.app.Activity;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import net.pubnative.tarantula.sdk.models.APIAsset;
 import net.pubnative.tarantula.sdk.models.Ad;
@@ -18,16 +16,16 @@ import net.pubnative.tarantula.sdk.utils.UrlHandler;
  */
 
 public class MraidInterstitialPresenter implements InterstitialPresenter, MRAIDViewListener, MRAIDNativeFeatureListener {
-    @NonNull private final Activity mActivity;
-    @NonNull private final Ad mAd;
-    @NonNull private final UrlHandler mUrlHandlerDelegate;
-    @NonNull private final String[] mSupportedNativeFeatures;
+    private final Activity mActivity;
+    private final Ad mAd;
+    private final UrlHandler mUrlHandlerDelegate;
+    private final String[] mSupportedNativeFeatures;
 
-    @Nullable private InterstitialPresenter.Listener mListener;
-    @Nullable private MRAIDInterstitial mMRAIDInterstitial;
+    private InterstitialPresenter.Listener mListener;
+    private MRAIDInterstitial mMRAIDInterstitial;
     private boolean mIsDestroyed;
 
-    public MraidInterstitialPresenter(@NonNull Activity activity, @NonNull Ad ad) {
+    public MraidInterstitialPresenter(Activity activity, Ad ad) {
         mActivity = activity;
         mAd = ad;
         mUrlHandlerDelegate = new UrlHandler(activity);
@@ -35,11 +33,10 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, MRAIDV
     }
 
     @Override
-    public void setListener(@Nullable Listener listener) {
+    public void setListener(Listener listener) {
         mListener = listener;
     }
 
-    @NonNull
     @Override
     public Ad getAd() {
         return mAd;

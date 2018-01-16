@@ -1,9 +1,6 @@
 package net.pubnative.tarantula.sdk.banner.controller;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,38 +22,31 @@ import net.pubnative.tarantula.sdk.utils.CheckUtils;
 public class BannerController implements RequestManager.RequestListener, BannerPresenter.Listener {
     private static final int REFRESH_TIME_SECONDS = 60;
 
-    @NonNull
     private final BannerPresenterFactory mBannerPresenterFactory;
-    @NonNull
     private final RequestManager mRequestManager;
 
-    @Nullable
     private BannerView mBannerAdView;
-    @Nullable
     private BannerPresenter mCurrentBannerPresenter;
-    @Nullable
     private BannerPresenter mNextBannerPresenter;
-    @Nullable
     private BannerView.Listener mListener;
     private boolean mIsDestroyed;
 
-    public BannerController(@NonNull Context context) {
+    public BannerController(Context context) {
         this(new BannerPresenterFactory(context), new BannerRequestManager());
     }
 
-    @VisibleForTesting
-    BannerController(@NonNull BannerPresenterFactory bannerPresenterFactory,
-                     @NonNull RequestManager requestManager) {
+    BannerController(BannerPresenterFactory bannerPresenterFactory,
+                     RequestManager requestManager) {
         mBannerPresenterFactory = bannerPresenterFactory;
         mRequestManager = requestManager;
         mRequestManager.setRequestListener(this);
     }
 
-    public void setListener(@Nullable BannerView.Listener listener) {
+    public void setListener(BannerView.Listener listener) {
         mListener = listener;
     }
 
-    public void load(@NonNull String zoneId, @NonNull BannerView bannerAdView) {
+    public void load(String zoneId, BannerView bannerAdView) {
         if (!CheckUtils.NoThrow.checkArgument(Tarantula.isInitialized(), "Tarantula SDK has not been initialized. " +
                 "Please call Tarantula#initialize in your application's onCreate method.")) {
             return;
@@ -79,8 +69,7 @@ public class BannerController implements RequestManager.RequestListener, BannerP
         mRequestManager.requestAd();
     }
 
-    @VisibleForTesting
-    void showAd(@NonNull Ad ad) {
+    void showAd(Ad ad) {
         if (mIsDestroyed) {
             return;
         }
@@ -110,7 +99,7 @@ public class BannerController implements RequestManager.RequestListener, BannerP
         mIsDestroyed = true;
     }
 
-    private void destroyBannerPresenter(@Nullable BannerPresenter bannerPresenter) {
+    private void destroyBannerPresenter(BannerPresenter bannerPresenter) {
         if (bannerPresenter != null) {
             bannerPresenter.destroy();
         }
@@ -118,7 +107,7 @@ public class BannerController implements RequestManager.RequestListener, BannerP
 
     // RequestManager.RequestListener
     @Override
-    public void onRequestSuccess(@NonNull Ad ad) {
+    public void onRequestSuccess(Ad ad) {
         if (mIsDestroyed) {
             return;
         }
@@ -127,7 +116,7 @@ public class BannerController implements RequestManager.RequestListener, BannerP
     }
 
     @Override
-    public void onRequestFail(@NonNull Throwable throwable) {
+    public void onRequestFail(Throwable throwable) {
         if (mIsDestroyed) {
             return;
         }
@@ -139,7 +128,7 @@ public class BannerController implements RequestManager.RequestListener, BannerP
 
     // BannerPresenter.Listener
     @Override
-    public void onBannerLoaded(@NonNull BannerPresenter bannerPresenter, @NonNull View banner) {
+    public void onBannerLoaded(BannerPresenter bannerPresenter, View banner) {
         if (mIsDestroyed) {
             return;
         }
@@ -161,7 +150,7 @@ public class BannerController implements RequestManager.RequestListener, BannerP
     }
 
     @Override
-    public void onBannerClicked(@NonNull BannerPresenter bannerPresenter) {
+    public void onBannerClicked(BannerPresenter bannerPresenter) {
         if (mIsDestroyed) {
             return;
         }
@@ -172,7 +161,7 @@ public class BannerController implements RequestManager.RequestListener, BannerP
     }
 
     @Override
-    public void onBannerError(@NonNull BannerPresenter bannerPresenter) {
+    public void onBannerError(BannerPresenter bannerPresenter) {
         if (mIsDestroyed) {
             return;
         }

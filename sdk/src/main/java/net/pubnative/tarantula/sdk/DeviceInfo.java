@@ -11,8 +11,6 @@ import android.os.Build;
 import android.os.Looper;
 import android.os.Process;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.webkit.WebSettings;
@@ -34,10 +32,9 @@ public class DeviceInfo {
         LANDSCAPE("landscape"),
         NONE("none");
 
-        @NonNull
         private final String mOrientation;
 
-        Orientation(@NonNull String orientation) {
+        Orientation(String orientation) {
             mOrientation = orientation;
         }
 
@@ -53,10 +50,9 @@ public class DeviceInfo {
         WWAN("wwan"),
         NONE("none");
 
-        @NonNull
         private final String mConnectivity;
 
-        Connectivity(@NonNull String connectivity) {
+        Connectivity(String connectivity) {
             mConnectivity = connectivity;
         }
 
@@ -66,22 +62,15 @@ public class DeviceInfo {
         }
     }
 
-    @NonNull
     private static final String TAG = DeviceInfo.class.getSimpleName();
-    @NonNull
     private static final String UNKNOWN_APP_VERSION_IDENTIFIER = "UNKNOWN";
-    @NonNull
     private final Context mContext;
-    @NonNull
     private final String mUserAgent;
-    @NonNull
     private String mAdvertisingId;
-    @Nullable
     private final ConnectivityManager mConnectivityManager;
-    @Nullable
     private final TelephonyManager mTelephonyManager;
 
-    public DeviceInfo(@NonNull Context context) {
+    public DeviceInfo(Context context) {
         mContext = context.getApplicationContext();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
@@ -122,12 +111,10 @@ public class DeviceInfo {
      * @return
      */
     @SuppressLint("HardwareIds")
-    @NonNull
     public String getAdvertisingId() {
         return mAdvertisingId;
     }
 
-    @NonNull
     public String getAppVersion() {
         try {
             return mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0).versionName;
@@ -137,17 +124,14 @@ public class DeviceInfo {
         }
     }
 
-    @NonNull
     public Locale getLocale() {
         return mContext.getResources().getConfiguration().locale;
     }
 
-    @NonNull
     public String getTimeZoneShortDisplayName() {
         return TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT);
     }
 
-    @NonNull
     public Orientation getOrientation() {
         switch (mContext.getResources().getConfiguration().orientation) {
             case Configuration.ORIENTATION_PORTRAIT: {
@@ -170,12 +154,10 @@ public class DeviceInfo {
         return mContext.getResources().getDisplayMetrics().heightPixels;
     }
 
-    @NonNull
     public String getBrowserAgent() {
         return mUserAgent;
     }
 
-    @NonNull
     public String getModel() {
         return Build.MODEL;
     }
@@ -189,7 +171,6 @@ public class DeviceInfo {
                 != PackageManager.PERMISSION_GRANTED;
     }
 
-    @NonNull
     public Connectivity getConnectivity() {
         if (mConnectivityManager == null || checkPermission(Manifest.permission.ACCESS_NETWORK_STATE)) {
             return Connectivity.NONE;
@@ -216,7 +197,6 @@ public class DeviceInfo {
         }
     }
 
-    @NonNull
     public String getCarrierName() {
         if (mTelephonyManager == null) {
             return "";

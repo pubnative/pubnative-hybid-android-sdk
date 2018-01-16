@@ -1,7 +1,5 @@
 package net.pubnative.tarantula.sdk.api;
 
-import android.support.annotation.NonNull;
-
 import net.pubnative.tarantula.sdk.Tarantula;
 import net.pubnative.tarantula.sdk.models.AdRequest;
 import net.pubnative.tarantula.sdk.models.Ad;
@@ -32,10 +30,9 @@ public class ApiClient {
         void onFailure(Throwable throwable);
     }
 
-    @NonNull
     private final ApiService mApiService;
 
-    public ApiClient(@NonNull List<Interceptor> applicationInterceptors, @NonNull List<Interceptor> networkInterceptors) {
+    public ApiClient(List<Interceptor> applicationInterceptors, List<Interceptor> networkInterceptors) {
         final OkHttpClient.Builder builder = new OkHttpClient.Builder();
         for (Interceptor applicationInterceptor : applicationInterceptors) {
             builder.addInterceptor(applicationInterceptor);
@@ -52,7 +49,7 @@ public class ApiClient {
         mApiService = retrofit.create(ApiService.class);
     }
 
-    public void getAd(@NonNull final AdRequest adRequest, final AdRequestListener listener) {
+    public void getAd(final AdRequest adRequest, final AdRequestListener listener) {
         Call<AdResponse> call = mApiService.getAd(adRequest.apptoken, adRequest.os, adRequest.osver,
                 adRequest.devicemodel, adRequest.dnt, adRequest.al, adRequest.mf, adRequest.zoneid,
                 adRequest.testMode, adRequest.locale, adRequest.latitude,
@@ -83,7 +80,7 @@ public class ApiClient {
         });
     }
 
-    public void trackUrl(@NonNull String url, final TrackUrlListener listener) {
+    public void trackUrl(String url, final TrackUrlListener listener) {
         Call<Void> call = mApiService.trackUrl(url);
         call.enqueue(new Callback<Void>() {
             @Override

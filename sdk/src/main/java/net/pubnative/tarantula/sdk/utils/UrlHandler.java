@@ -2,8 +2,6 @@ package net.pubnative.tarantula.sdk.utils;
 
 import android.content.Context;
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import java.util.Locale;
 
@@ -12,18 +10,18 @@ import java.util.Locale;
  */
 
 public class UrlHandler {
-    @NonNull private static final String TAG = UrlHandler.class.getSimpleName();
+    private static final String TAG = UrlHandler.class.getSimpleName();
 
-    @NonNull private final IntentHandler mIntentHandler;
+    private final IntentHandler mIntentHandler;
 
-    public UrlHandler(@NonNull Context context) {
+    public UrlHandler(Context context) {
         mIntentHandler = new IntentHandler(context);
     }
 
     /**
      * https://developer.android.com/distribute/marketing-tools/linking-to-google-play.html
      */
-    public void handleUrl(@Nullable String url) {
+    public void handleUrl(String url) {
         if (url == null) {
             return;
         }

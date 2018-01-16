@@ -1,6 +1,5 @@
 package net.pubnative.tarantula.sdk.views;
 
-import android.support.annotation.NonNull;
 import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.WebView;
@@ -10,9 +9,9 @@ import android.webkit.WebView;
  */
 
 public class WebViewClickDetector implements View.OnTouchListener {
-    @NonNull private final WebView mWebView;
+    private final WebView mWebView;
 
-    public WebViewClickDetector(@NonNull WebView webView) {
+    public WebViewClickDetector(WebView webView) {
         mWebView = webView;
     }
 

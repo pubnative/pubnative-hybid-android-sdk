@@ -1,9 +1,5 @@
 package net.pubnative.tarantula.sdk.api;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
-
 import net.pubnative.tarantula.sdk.AdCache;
 import net.pubnative.tarantula.sdk.Tarantula;
 import net.pubnative.tarantula.sdk.models.AdRequestFactory;
@@ -18,22 +14,16 @@ import net.pubnative.tarantula.sdk.utils.Logger;
 
 public abstract class RequestManager {
     public interface RequestListener {
-        void onRequestSuccess(@NonNull Ad ad);
+        void onRequestSuccess(Ad ad);
 
-        void onRequestFail(@NonNull Throwable throwable);
+        void onRequestFail(Throwable throwable);
     }
 
-    @NonNull
     private static final String TAG = RequestManager.class.getSimpleName();
-    @NonNull
     private final ApiClient mApiClient;
-    @NonNull
     private final AdCache mAdCache;
-    @NonNull
     private final AdRequestFactory mAdRequestFactory;
-    @Nullable
     private String mZoneId;
-    @Nullable
     private RequestListener mRequestListener;
     private boolean mIsDestroyed;
 
@@ -41,20 +31,19 @@ public abstract class RequestManager {
         this(Tarantula.getApiClient(), Tarantula.getAdCache(), new AdRequestFactory());
     }
 
-    @VisibleForTesting
-    RequestManager(@NonNull ApiClient apiClient,
-                   @NonNull AdCache adCache,
-                   @NonNull AdRequestFactory adRequestFactory) {
+    RequestManager(ApiClient apiClient,
+                   AdCache adCache,
+                   AdRequestFactory adRequestFactory) {
         mApiClient = apiClient;
         mAdCache = adCache;
         mAdRequestFactory = adRequestFactory;
     }
 
-    public void setRequestListener(@Nullable RequestListener requestListener) {
+    public void setRequestListener(RequestListener requestListener) {
         mRequestListener = requestListener;
     }
 
-    public void setZoneId(@Nullable String zoneId) {
+    public void setZoneId(String zoneId) {
         mZoneId = zoneId;
     }
 
@@ -76,8 +65,7 @@ public abstract class RequestManager {
         requestAdFromApi(adRequest);
     }
 
-    @VisibleForTesting
-    void requestAdFromApi(@NonNull final AdRequest adRequest) {
+    void requestAdFromApi(final AdRequest adRequest) {
         Logger.d(TAG, "Requesting ad for zone id: " + adRequest.zoneid);
         mApiClient.getAd(adRequest, new ApiClient.AdRequestListener() {
             @Override

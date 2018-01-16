@@ -1,8 +1,6 @@
 package net.pubnative.tarantula.sdk.interstitial.presenter;
 
 import android.app.Activity;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import net.pubnative.tarantula.sdk.interstitial.vast.VASTPlayer;
 import net.pubnative.tarantula.sdk.models.Ad;
@@ -13,24 +11,23 @@ import net.pubnative.tarantula.sdk.utils.CheckUtils;
  */
 
 public class VastInterstitialPresenter implements InterstitialPresenter, VASTPlayer.VASTPlayerListener {
-    @NonNull private final Activity mActivity;
-    @NonNull private final Ad mAd;
+    private final Activity mActivity;
+    private final Ad mAd;
 
-    @Nullable private VASTPlayer mVastPlayer;
-    @Nullable private InterstitialPresenter.Listener mListener;
+    private VASTPlayer mVastPlayer;
+    private InterstitialPresenter.Listener mListener;
     private boolean mIsDestroyed;
 
-    public VastInterstitialPresenter(@NonNull Activity activity, @NonNull Ad ad) {
+    public VastInterstitialPresenter(Activity activity, Ad ad) {
         mActivity = activity;
         mAd = ad;
     }
 
     @Override
-    public void setListener(@Nullable Listener listener) {
+    public void setListener(Listener listener) {
         mListener = listener;
     }
 
-    @NonNull
     @Override
     public Ad getAd() {
         return mAd;

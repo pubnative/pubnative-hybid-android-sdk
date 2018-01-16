@@ -1,7 +1,5 @@
 package net.pubnative.tarantula.sdk.banner.presenter;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.view.View;
 
 import net.pubnative.tarantula.sdk.models.Ad;
@@ -12,16 +10,15 @@ import net.pubnative.tarantula.sdk.models.Ad;
 
 public interface BannerPresenter {
     interface Listener {
-        void onBannerLoaded(@NonNull BannerPresenter bannerPresenter, @NonNull View banner);
+        void onBannerLoaded(BannerPresenter bannerPresenter, View banner);
 
-        void onBannerClicked(@NonNull BannerPresenter bannerPresenter);
+        void onBannerClicked(BannerPresenter bannerPresenter);
 
-        void onBannerError(@NonNull BannerPresenter bannerPresenter);
+        void onBannerError(BannerPresenter bannerPresenter);
     }
 
-    void setListener(@Nullable Listener listener);
+    void setListener(Listener listener);
 
-    @NonNull
     Ad getAd();
 
     void load();
