@@ -23,12 +23,6 @@ import net.pubnative.tarantula.sdk.utils.TarantulaAdvertisingIdClient;
 
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.concurrent.Callable;
-
-import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
@@ -129,14 +123,8 @@ public class DeviceInfo {
      */
     @SuppressLint("HardwareIds")
     @NonNull
-    public Observable<String> getAdvertisingInfo() {
-        return Observable.defer(new Callable<ObservableSource<? extends String>>() {
-            @Override
-            public ObservableSource<String> call() throws Exception {
-                return Observable.just(mAdvertisingId);
-            }
-        }).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+    public String getAdvertisingId() {
+        return mAdvertisingId;
     }
 
     @NonNull

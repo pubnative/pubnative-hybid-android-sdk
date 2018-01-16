@@ -1,28 +1,20 @@
 package net.pubnative.tarantula.sdk.api;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import net.pubnative.tarantula.sdk.Tarantula;
-import net.pubnative.tarantula.sdk.models.ErrorRequest;
-import net.pubnative.tarantula.sdk.models.ErrorRequestFactory;
 import net.pubnative.tarantula.sdk.models.AdRequest;
 import net.pubnative.tarantula.sdk.models.Ad;
 import net.pubnative.tarantula.sdk.models.AdResponse;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
-import io.reactivex.schedulers.Schedulers;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
@@ -30,6 +22,16 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class ApiClient {
+    public interface AdRequestListener {
+        void onSuccess(Ad ad);
+        void onFailure(Throwable throwable);
+    }
+
+    public interface TrackUrlListener {
+        void onSuccess();
+        void onFailure(Throwable throwable);
+    }
+
     @NonNull
     private final ApiService mApiService;
 
@@ -45,55 +47,58 @@ public class ApiClient {
         final Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://" + Tarantula.HOST)
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .client(builder.build())
                 .build();
         mApiService = retrofit.create(ApiService.class);
     }
 
-    public Observable<Ad> getAd(@NonNull final AdRequest adRequest) {
-        Tarantula.getSessionDepthManager().incrementSessionDepth();
-        return mApiService.getAd(adRequest.apptoken, adRequest.os, adRequest.osver,
+    public void getAd(@NonNull final AdRequest adRequest, final AdRequestListener listener) {
+        Call<AdResponse> call = mApiService.getAd(adRequest.apptoken, adRequest.os, adRequest.osver,
                 adRequest.devicemodel, adRequest.dnt, adRequest.al, adRequest.mf, adRequest.zoneid,
                 adRequest.testMode, adRequest.locale, adRequest.latitude,
                 adRequest.longitude, adRequest.gender, adRequest.age, adRequest.bundleid,
                 adRequest.keywords, adRequest.coppa, adRequest.gid, adRequest.gidmd5,
-                adRequest.gidsha1)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .retryWhen(new ExponentialBackoff(Jitter.DEFAULT, 2, 30, TimeUnit.SECONDS, 100))
-                .map(new Function<Response<AdResponse>, Ad>() {
-                    @Nullable
-                    @Override
-                    public Ad apply(Response<AdResponse> response) throws Exception {
-                        final AdResponse adResponse = response.body();
-                        if (adResponse == null || adResponse.ads == null || adResponse.ads.isEmpty()) {
-                            return null;
-                        }
-
-                        return adResponse.ads.get(0);
+                adRequest.gidsha1);
+        call.enqueue(new Callback<AdResponse>() {
+            @Override
+            public void onResponse(Call<AdResponse> call, Response<AdResponse> response) {
+                if (listener != null) {
+                    if (response != null
+                            && response.body() != null
+                            && response.body().ads != null
+                            && !response.body().ads.isEmpty()) {
+                        listener.onSuccess(response.body().ads.get(0));
+                    } else {
+                        listener.onFailure(new Throwable("Tarantula - No fill"));
                     }
-                });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AdResponse> call, Throwable t) {
+                if (listener != null) {
+                    listener.onFailure(t);
+                }
+            }
+        });
     }
 
-    public void trackUrl(@NonNull String url) {
-        mApiService.trackUrl(url)
-                .subscribeOn(Schedulers.io())
-                .retryWhen(new ExponentialBackoff(Jitter.DEFAULT, 2, 30, TimeUnit.SECONDS, 100))
-                .subscribe();
-    }
+    public void trackUrl(@NonNull String url, final TrackUrlListener listener) {
+        Call<Void> call = mApiService.trackUrl(url);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (listener != null) {
+                    listener.onSuccess();
+                }
+            }
 
-    public void trackError(@NonNull String message) {
-        new ErrorRequestFactory()
-                .createErrorRequest(message)
-                .subscribe(new Consumer<ErrorRequest>() {
-                    @Override
-                    public void accept(ErrorRequest errorRequest) throws Exception {
-                        mApiService.trackError(errorRequest)
-                                .subscribeOn(Schedulers.io())
-                                .retryWhen(new ExponentialBackoff(Jitter.DEFAULT, 2, 30, TimeUnit.SECONDS, 100))
-                                .subscribe();
-                    }
-                });
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                if (listener != null) {
+                    listener.onFailure(t);
+                }
+            }
+        });
     }
 }

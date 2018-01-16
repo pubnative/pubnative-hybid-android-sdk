@@ -75,14 +75,20 @@ public class AdTracker {
         mClickTracked = true;
     }
 
-    public void trackError(@NonNull String errorMessage) {
-        mApiClient.trackError(errorMessage);
-    }
-
     private void trackUrls(@NonNull List<AdData> urls, @NonNull Type type) {
         for (final AdData url : urls) {
             Logger.d(TAG, "Tracking " + type.toString() + " url: " + url);
-            mApiClient.trackUrl(url.getURL());
+            mApiClient.trackUrl(url.getURL(), new ApiClient.TrackUrlListener() {
+                @Override
+                public void onSuccess() {
+
+                }
+
+                @Override
+                public void onFailure(Throwable throwable) {
+
+                }
+            });
         }
     }
 }

@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 
 import net.pubnative.tarantula.sdk.api.ApiClient;
-import net.pubnative.tarantula.sdk.managers.SessionDepthManager;
 
 import java.util.Collections;
 import java.util.List;
@@ -18,15 +17,12 @@ import okhttp3.Interceptor;
  */
 
 public class Tarantula {
-    @NonNull public static final String API_VERSION = "v3";
-    @NonNull public static final String SDK_VERSION = "0.1.0";
     @NonNull public static final String HOST = "api.pubnative.net/api/v3/";
 
     @NonNull private static String sAppToken;
     @NonNull private static ApiClient sApiClient;
     @SuppressLint("StaticFieldLeak")
     @NonNull private static DeviceInfo sDeviceInfo;
-    @NonNull private static SessionDepthManager sSessionDepthManager;
     @NonNull private static AdCache sAdCache;
     private static boolean sInitialized;
     private static boolean sCoppaEnabled = false;
@@ -55,7 +51,6 @@ public class Tarantula {
         sBundleId = application.getPackageName();
         sApiClient = new ApiClient(applicationInterceptors, networkInterceptors);
         sDeviceInfo = new DeviceInfo(application.getApplicationContext());
-        sSessionDepthManager = new SessionDepthManager(application);
         sAdCache = new AdCache();
         sInitialized = true;
     }
@@ -78,11 +73,6 @@ public class Tarantula {
     @NonNull
     public static DeviceInfo getDeviceInfo() {
         return sDeviceInfo;
-    }
-
-    @NonNull
-    public static SessionDepthManager getSessionDepthManager() {
-        return sSessionDepthManager;
     }
 
     @NonNull

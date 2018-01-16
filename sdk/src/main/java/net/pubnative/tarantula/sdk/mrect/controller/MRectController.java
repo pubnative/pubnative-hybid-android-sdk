@@ -77,7 +77,6 @@ public class MRectController implements RequestManager.RequestListener, MRectPre
         mMRectAdView = mRectAdView;
         mRequestManager.setZoneId(zoneId);
         mRequestManager.requestAd();
-        mRequestManager.stopRefreshTimer();
     }
 
     @VisibleForTesting
@@ -92,8 +91,6 @@ public class MRectController implements RequestManager.RequestListener, MRectPre
         // being displayed
         mNextMRectPresenter = mMRectPresenterFactory.createMRectPresenter(ad, this);
         if (mNextMRectPresenter == null) {
-            mRequestManager.startRefreshTimer(REFRESH_TIME_SECONDS);
-
             if (mListener != null && mMRectAdView != null) {
                 mListener.onMRectError(mMRectAdView);
             }
@@ -135,8 +132,6 @@ public class MRectController implements RequestManager.RequestListener, MRectPre
             return;
         }
 
-        mRequestManager.startRefreshTimer(RequestManager.DEFAULT_REFRESH_TIME_SECONDS);
-
         if (mListener != null && mMRectAdView != null) {
             mListener.onMRectError(mMRectAdView);
         }
@@ -152,8 +147,6 @@ public class MRectController implements RequestManager.RequestListener, MRectPre
         destroyMRectPresenter(mCurrentMRectPresenter);
         mCurrentMRectPresenter = mNextMRectPresenter;
         mNextMRectPresenter = null;
-
-        mRequestManager.startRefreshTimer(REFRESH_TIME_SECONDS);
 
         if (mMRectAdView != null) {
             mMRectAdView.removeAllViews();
@@ -183,8 +176,6 @@ public class MRectController implements RequestManager.RequestListener, MRectPre
         if (mIsDestroyed) {
             return;
         }
-
-        mRequestManager.startRefreshTimer(REFRESH_TIME_SECONDS);
 
         if (mListener != null && mMRectAdView != null) {
             mListener.onMRectError(mMRectAdView);
