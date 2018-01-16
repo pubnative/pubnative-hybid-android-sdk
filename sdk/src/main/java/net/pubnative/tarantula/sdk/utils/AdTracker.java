@@ -75,10 +75,6 @@ public class AdTracker {
         mClickTracked = true;
     }
 
-    public void trackError(@NonNull String errorMessage) {
-        mApiClient.trackError(errorMessage);
-    }
-
     private void trackUrls(@NonNull List<AdData> urls, @NonNull Type type) {
         for (final AdData url : urls) {
             Logger.d(TAG, "Tracking " + type.toString() + " url: " + url);

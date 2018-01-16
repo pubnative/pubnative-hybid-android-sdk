@@ -1,11 +1,8 @@
 package net.pubnative.tarantula.sdk.api;
 
-import net.pubnative.tarantula.sdk.models.ErrorRequest;
 import net.pubnative.tarantula.sdk.models.AdResponse;
 
-import io.reactivex.Observable;
-import retrofit2.Response;
-import retrofit2.http.Body;
+import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
@@ -18,7 +15,7 @@ import retrofit2.http.Url;
 public interface ApiService {
 
     @POST("native")
-    Observable<Response<AdResponse>> getAd(
+    Call<AdResponse> getAd(
             @Query("apptoken") String apptoken,
             @Query("os") String os,
             @Query("osver") String osver,
@@ -42,8 +39,5 @@ public interface ApiService {
     );
 
     @GET
-    Observable<Response<Void>> trackUrl(@Url String url);
-
-    @POST("/events/client-error")
-    Observable<Response<Void>> trackError(@Body ErrorRequest errorRequest);
+    Call<Void> trackUrl(@Url String url);
 }
