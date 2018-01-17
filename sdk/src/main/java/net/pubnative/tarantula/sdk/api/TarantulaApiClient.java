@@ -4,13 +4,13 @@ import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import com.google.gson.Gson;
-
 import net.pubnative.tarantula.sdk.Tarantula;
 import net.pubnative.tarantula.sdk.models.Ad;
 import net.pubnative.tarantula.sdk.models.AdRequest;
 import net.pubnative.tarantula.sdk.models.AdResponse;
 import net.pubnative.tarantula.sdk.network.TarantulaHttpRequest;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -172,7 +172,7 @@ public class TarantulaApiClient {
         AdResponse apiResponseModel = null;
         Exception parseException = null;
         try {
-            apiResponseModel = new Gson().fromJson(result, AdResponse.class);
+            apiResponseModel = new AdResponse(new JSONObject(result));
         } catch (Exception exception) {
             parseException = exception;
         } catch (Error error) {
