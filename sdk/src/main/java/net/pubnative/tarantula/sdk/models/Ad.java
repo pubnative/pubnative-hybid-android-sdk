@@ -28,7 +28,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 
-import net.pubnative.tarantula.sdk.views.PNAPIContentInfoView;
+import net.pubnative.tarantula.sdk.views.TarantulaAPIContentInfoView;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -140,7 +140,7 @@ public class Ad implements Serializable {
     }
 
     public View getContentInfo(Context context) {
-        PNAPIContentInfoView result = null;
+        TarantulaAPIContentInfoView result = null;
         AdData data = getMeta(APIMeta.CONTENT_INFO);
         if (data == null) {
             Log.e(TAG, "getContentInfo - contentInfo data not found");
@@ -151,14 +151,14 @@ public class Ad implements Serializable {
         } else if (TextUtils.isEmpty(data.getText())) {
             Log.e(TAG, "getContentInfo - contentInfo text not found");
         } else {
-            result = new PNAPIContentInfoView(context);
+            result = new TarantulaAPIContentInfoView(context);
             result.setIconUrl(data.getStringField(DATA_CONTENTINFO_ICON_KEY));
             result.setIconClickUrl(data.getStringField(DATA_CONTENTINFO_LINK_KEY));
             result.setContextText(data.getText());
             result.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    ((PNAPIContentInfoView) view).openLayout();
+                    ((TarantulaAPIContentInfoView) view).openLayout();
                 }
             });
         }

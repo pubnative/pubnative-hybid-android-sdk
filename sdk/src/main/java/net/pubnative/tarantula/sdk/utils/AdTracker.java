@@ -1,7 +1,7 @@
 package net.pubnative.tarantula.sdk.utils;
 
 import net.pubnative.tarantula.sdk.Tarantula;
-import net.pubnative.tarantula.sdk.api.ApiClient;
+import net.pubnative.tarantula.sdk.api.TarantulaApiClient;
 import net.pubnative.tarantula.sdk.models.AdData;
 
 import java.util.List;
@@ -29,7 +29,7 @@ public class AdTracker {
     }
 
     private static final String TAG = AdTracker.class.getSimpleName();
-    private final ApiClient mApiClient;
+    private final TarantulaApiClient mApiClient;
     private final List<AdData> mImpressionUrls;
     private final List<AdData> mClickUrls;
     private boolean mImpressionTracked;
@@ -40,7 +40,7 @@ public class AdTracker {
         this(Tarantula.getApiClient(), impressionUrls, clickUrls);
     }
 
-    AdTracker(ApiClient apiClient,
+    AdTracker(TarantulaApiClient apiClient,
               List<AdData> impressionUrls,
               List<AdData> clickUrls) {
         mApiClient = apiClient;
@@ -69,7 +69,7 @@ public class AdTracker {
     private void trackUrls(List<AdData> urls, Type type) {
         for (final AdData url : urls) {
             Logger.d(TAG, "Tracking " + type.toString() + " url: " + url);
-            mApiClient.trackUrl(url.getURL(), new ApiClient.TrackUrlListener() {
+            mApiClient.trackUrl(url.getURL(), new TarantulaApiClient.TrackUrlListener() {
                 @Override
                 public void onSuccess() {
 

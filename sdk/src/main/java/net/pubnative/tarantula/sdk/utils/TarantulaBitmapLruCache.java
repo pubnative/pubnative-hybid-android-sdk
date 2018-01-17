@@ -4,9 +4,9 @@ import android.graphics.Bitmap;
 import android.text.TextUtils;
 import android.util.LruCache;
 
-public class PNBitmapLruCache {
+public class TarantulaBitmapLruCache {
 
-    public static final String TAG = PNBitmapLruCache.class.getSimpleName();
+    public static final String TAG = TarantulaBitmapLruCache.class.getSimpleName();
 
     private static final int BYTES_IN_KILOBYTES = 1024;
     private static final int MAX_MEMORY_SIZE = 30 * 1024 * 1024; // 30MB

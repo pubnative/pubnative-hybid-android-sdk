@@ -5,7 +5,7 @@ import android.text.TextUtils;
 
 import net.pubnative.tarantula.sdk.DeviceInfo;
 import net.pubnative.tarantula.sdk.Tarantula;
-import net.pubnative.tarantula.sdk.utils.PNCrypto;
+import net.pubnative.tarantula.sdk.utils.TarantulaCrypto;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
@@ -37,8 +37,8 @@ public class AdRequestFactory {
             adRequest.dnt = "1";
         } else {
             adRequest.gid = advertisingId;
-            adRequest.gidmd5 = PNCrypto.md5(advertisingId);
-            adRequest.gidsha1 = PNCrypto.sha1(advertisingId);
+            adRequest.gidmd5 = TarantulaCrypto.md5(advertisingId);
+            adRequest.gidsha1 = TarantulaCrypto.sha1(advertisingId);
         }
 
         adRequest.locale = mDeviceInfo.getLocale().getLanguage();
