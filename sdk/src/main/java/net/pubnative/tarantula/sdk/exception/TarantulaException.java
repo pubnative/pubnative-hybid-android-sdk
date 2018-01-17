@@ -10,33 +10,33 @@ import java.util.Map;
  */
 
 public class TarantulaException extends Exception {
-    public static final String      TAG                          = TarantulaException.class.getSimpleName();
+    public static final String TAG = TarantulaException.class.getSimpleName();
     //==============================================================================================
     // Request Exceptions
     //==============================================================================================
-    public static final TarantulaException REQUEST_NO_INTERNET          = new TarantulaException(1000, "Internet connection is not available");
-    public static final TarantulaException REQUEST_PARAMETERS_INVALID   = new TarantulaException(1001, "Invalid execute parameters");
-    public static final TarantulaException REQUEST_NO_FILL              = new TarantulaException(1002, "No fill");
-    public static final TarantulaException REQUEST_CONFIG_INVALID       = new TarantulaException(1005, "Null or invalid config");
-    public static final TarantulaException REQUEST_CONFIG_EMPTY         = new TarantulaException(1006, "Retrieved config contains null element");
-    public static final TarantulaException REQUEST_LOADING              = new TarantulaException(1007, "Currently loading");
-    public static final TarantulaException REQUEST_SHOWN                = new TarantulaException(1008, "Already shown");
+    public static final TarantulaException REQUEST_NO_INTERNET = new TarantulaException(1000, "Internet connection is not available");
+    public static final TarantulaException REQUEST_PARAMETERS_INVALID = new TarantulaException(1001, "Invalid execute parameters");
+    public static final TarantulaException REQUEST_NO_FILL = new TarantulaException(1002, "No fill");
+    public static final TarantulaException REQUEST_CONFIG_INVALID = new TarantulaException(1005, "Null or invalid config");
+    public static final TarantulaException REQUEST_CONFIG_EMPTY = new TarantulaException(1006, "Retrieved config contains null element");
+    public static final TarantulaException REQUEST_LOADING = new TarantulaException(1007, "Currently loading");
+    public static final TarantulaException REQUEST_SHOWN = new TarantulaException(1008, "Already shown");
     //==============================================================================================
     // Adapter Exceptions
     //==============================================================================================
-    public static final TarantulaException ADAPTER_MISSING_DATA         = new TarantulaException(2000, "Null context or adapter data provided");
-    public static final TarantulaException ADAPTER_ILLEGAL_ARGUMENTS    = new TarantulaException(2001, "Invalid data provided");
-    public static final TarantulaException ADAPTER_TIMEOUT              = new TarantulaException(2002, "adapter timeout");
-    public static final TarantulaException ADAPTER_NOT_FOUND            = new TarantulaException(2003, "adapter not found");
+    public static final TarantulaException ADAPTER_MISSING_DATA = new TarantulaException(2000, "Null context or adapter data provided");
+    public static final TarantulaException ADAPTER_ILLEGAL_ARGUMENTS = new TarantulaException(2001, "Invalid data provided");
+    public static final TarantulaException ADAPTER_TIMEOUT = new TarantulaException(2002, "adapter timeout");
+    public static final TarantulaException ADAPTER_NOT_FOUND = new TarantulaException(2003, "adapter not found");
     public static final TarantulaException ADAPTER_TYPE_NOT_IMPLEMENTED = new TarantulaException(2004, "adapter doesn't implements this type");
-    public static final TarantulaException ADAPTER_NO_FILL              = new TarantulaException(2005, "adapter did not fill the request");
+    public static final TarantulaException ADAPTER_NO_FILL = new TarantulaException(2005, "adapter did not fill the request");
     //==============================================================================================
     // Placement Exceptions
     //==============================================================================================
-    public static final TarantulaException PLACEMENT_FREQUENCY_CAP      = new TarantulaException(3001, "Too many ads: frequency");
-    public static final TarantulaException PLACEMENT_PACING_CAP         = new TarantulaException(3002, "Too many ads: pacing");
-    public static final TarantulaException PLACEMENT_DISABLED           = new TarantulaException(3003, "Placement is disabled");
-    public static final TarantulaException PLACEMENT_NOT_FOUND          = new TarantulaException(3004, "Placement not found");
+    public static final TarantulaException PLACEMENT_FREQUENCY_CAP = new TarantulaException(3001, "Too many ads: frequency");
+    public static final TarantulaException PLACEMENT_PACING_CAP = new TarantulaException(3002, "Too many ads: pacing");
+    public static final TarantulaException PLACEMENT_DISABLED = new TarantulaException(3003, "Placement is disabled");
+    public static final TarantulaException PLACEMENT_NOT_FOUND = new TarantulaException(3004, "Placement not found");
     //==============================================================================================
     // Private fields
     //==============================================================================================

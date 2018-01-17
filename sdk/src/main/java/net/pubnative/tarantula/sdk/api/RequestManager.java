@@ -20,7 +20,7 @@ public abstract class RequestManager {
     }
 
     private static final String TAG = RequestManager.class.getSimpleName();
-    private final ApiClient mApiClient;
+    private final TarantulaApiClient mApiClient;
     private final AdCache mAdCache;
     private final AdRequestFactory mAdRequestFactory;
     private String mZoneId;
@@ -31,7 +31,7 @@ public abstract class RequestManager {
         this(Tarantula.getApiClient(), Tarantula.getAdCache(), new AdRequestFactory());
     }
 
-    RequestManager(ApiClient apiClient,
+    RequestManager(TarantulaApiClient apiClient,
                    AdCache adCache,
                    AdRequestFactory adRequestFactory) {
         mApiClient = apiClient;
@@ -67,7 +67,7 @@ public abstract class RequestManager {
 
     void requestAdFromApi(final AdRequest adRequest) {
         Logger.d(TAG, "Requesting ad for zone id: " + adRequest.zoneid);
-        mApiClient.getAd(adRequest, new ApiClient.AdRequestListener() {
+        mApiClient.getAd(adRequest, new TarantulaApiClient.AdRequestListener() {
             @Override
             public void onSuccess(Ad ad) {
                 if (mIsDestroyed) {

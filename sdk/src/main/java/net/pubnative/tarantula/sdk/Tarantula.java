@@ -3,12 +3,7 @@ package net.pubnative.tarantula.sdk;
 import android.annotation.SuppressLint;
 import android.app.Application;
 
-import net.pubnative.tarantula.sdk.api.ApiClient;
-
-import java.util.Collections;
-import java.util.List;
-
-import okhttp3.Interceptor;
+import net.pubnative.tarantula.sdk.api.TarantulaApiClient;
 
 /**
  * Created by erosgarciaponte on 05.01.18.
@@ -16,9 +11,10 @@ import okhttp3.Interceptor;
 
 public class Tarantula {
     public static final String HOST = "api.pubnative.net/api/v3/";
+    public static final String BASE_URL = "https://api.pubnative.net/api/v3/native";
 
     private static String sAppToken;
-    private static ApiClient sApiClient;
+    private static TarantulaApiClient sApiClient;
     @SuppressLint("StaticFieldLeak")
     private static DeviceInfo sDeviceInfo;
     private static AdCache sAdCache;
@@ -33,20 +29,11 @@ public class Tarantula {
     /**
      * This method must be called to initialize the SDK before request ads.
      */
-    public static void initialize(String appToken, Application application) {
-        initialize(appToken, application, Collections.<Interceptor>emptyList(), Collections.<Interceptor>emptyList());
-    }
-
-    /**
-     * For testing and debugging purposes only.
-     */
     public static void initialize(String appToken,
-                                  Application application,
-                                  List<Interceptor> applicationInterceptors,
-                                  List<Interceptor> networkInterceptors) {
+                                  Application application) {
         sAppToken = appToken;
         sBundleId = application.getPackageName();
-        sApiClient = new ApiClient(applicationInterceptors, networkInterceptors);
+        sApiClient = new TarantulaApiClient(application);
         sDeviceInfo = new DeviceInfo(application.getApplicationContext());
         sAdCache = new AdCache();
         sInitialized = true;
@@ -60,7 +47,7 @@ public class Tarantula {
         return sBundleId;
     }
 
-    public static ApiClient getApiClient() {
+    public static TarantulaApiClient getApiClient() {
         return sApiClient;
     }
 
