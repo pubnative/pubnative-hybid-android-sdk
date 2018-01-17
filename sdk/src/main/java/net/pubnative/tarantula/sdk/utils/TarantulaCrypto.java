@@ -6,9 +6,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
 
-public class PNCrypto {
+public class TarantulaCrypto {
 
-    private static final String TAG = PNCrypto.class.getSimpleName();
+    private static final String TAG = TarantulaCrypto.class.getSimpleName();
 
     /**
      * Encrypts the given input string using SHA-1 algorithm

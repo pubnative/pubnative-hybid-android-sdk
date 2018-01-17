@@ -15,11 +15,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import net.pubnative.tarantula.sdk.R;
-import net.pubnative.tarantula.sdk.utils.PNBitmapDownloader;
+import net.pubnative.tarantula.sdk.utils.TarantulaBitmapDownloader;
 
-public class PNAPIContentInfoView extends RelativeLayout implements View.OnClickListener {
+public class TarantulaAPIContentInfoView extends RelativeLayout implements View.OnClickListener {
 
-    private static final String TAG = PNAPIContentInfoView.class.getSimpleName();
+    private static final String TAG = TarantulaAPIContentInfoView.class.getSimpleName();
 
     private RelativeLayout mContainerView;
     private TextView mContentInfoText;
@@ -34,17 +34,17 @@ public class PNAPIContentInfoView extends RelativeLayout implements View.OnClick
         }
     };
 
-    public PNAPIContentInfoView(Context context) {
+    public TarantulaAPIContentInfoView(Context context) {
         super(context);
         init(context);
     }
 
-    public PNAPIContentInfoView(Context context, AttributeSet attrs) {
+    public TarantulaAPIContentInfoView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context);
     }
 
-    public PNAPIContentInfoView(Context context, AttributeSet attrs, int defStyle) {
+    public TarantulaAPIContentInfoView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init(context);
     }
@@ -67,7 +67,7 @@ public class PNAPIContentInfoView extends RelativeLayout implements View.OnClick
     }
 
     public void setIconUrl(String iconUrl) {
-        new PNBitmapDownloader().download(iconUrl, mContentInfoIcon.getWidth(), mContentInfoIcon.getHeight(), new PNBitmapDownloader.DownloadListener() {
+        new TarantulaBitmapDownloader().download(iconUrl, mContentInfoIcon.getWidth(), mContentInfoIcon.getHeight(), new TarantulaBitmapDownloader.DownloadListener() {
             @Override
             public void onDownloadFinish(String url, Bitmap bitmap) {
                 mContentInfoIcon.setImageBitmap(bitmap);

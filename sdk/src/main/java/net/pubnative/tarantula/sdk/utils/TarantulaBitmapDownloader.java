@@ -14,18 +14,19 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class PNBitmapDownloader {
+public class TarantulaBitmapDownloader {
 
-    private static final String TAG = PNBitmapDownloader.class.getSimpleName();
+    private static final String TAG = TarantulaBitmapDownloader.class.getSimpleName();
 
     private DownloadListener mDownloadListener;
     private String mURL;
     private Handler mHandler;
-    private int              mHeight;
-    private int              mWidth;
+    private int mHeight;
+    private int mWidth;
 
     private Runnable downloadTask = new Runnable() {
         HttpURLConnection connection = null;
+
         @Override
         public void run() {
             try {
@@ -43,7 +44,7 @@ public class PNBitmapDownloader {
                 Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, getBitmapOptionsDecodingBounds(false));
                 inputStream.close();
 
-                PNBitmapLruCache.addBitmapToMemoryCache(mURL, bitmap);
+                TarantulaBitmapLruCache.addBitmapToMemoryCache(mURL, bitmap);
                 invokeLoad(bitmap);
             } catch (Error error) {
                 invokeFail(new Exception(error.toString()));
@@ -63,7 +64,7 @@ public class PNBitmapDownloader {
             try {
                 Uri uri = Uri.parse(mURL);
                 Bitmap bitmap = BitmapFactory.decodeFile(uri.getEncodedPath(), getBitmapOptionsDecodingBounds(false));
-                PNBitmapLruCache.addBitmapToMemoryCache(mURL, bitmap);
+                TarantulaBitmapLruCache.addBitmapToMemoryCache(mURL, bitmap);
                 invokeLoad(bitmap);
             } catch (Error error) {
                 invokeFail(new Exception(error.toString()));
@@ -131,7 +132,7 @@ public class PNBitmapDownloader {
         new Thread(loadFromFileSystemTask).start();
     }
 
-    private BitmapFactory.Options getBitmapOptionsDecodingBounds (boolean decodeBounds) {
+    private BitmapFactory.Options getBitmapOptionsDecodingBounds(boolean decodeBounds) {
 
         final BitmapFactory.Options options = new BitmapFactory.Options();
         if (mWidth > 0 && mHeight > 0 && !decodeBounds) {
@@ -163,7 +164,7 @@ public class PNBitmapDownloader {
             // Calculate the largest inSampleSize value that is a power of 2 and keeps both
             // height and width larger than the requested height and width.
             while ((halfHeight / result) >= reqHeight
-                   && (halfWidth / result) >= reqWidth) {
+                    && (halfWidth / result) >= reqWidth) {
                 result *= 2;
             }
         }
