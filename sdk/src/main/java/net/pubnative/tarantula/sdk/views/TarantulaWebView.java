@@ -5,7 +5,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Build;
-import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.WindowManager;
@@ -40,29 +39,29 @@ public class TarantulaWebView extends WebView {
         enablePlugins(false);
         setWebChromeClient(new WebChromeClient() {
             @Override
-            public boolean onJsAlert(@NonNull final WebView view, @NonNull final String url, @NonNull final String message,
-                                     @NonNull final JsResult result) {
+            public boolean onJsAlert(final WebView view, final String url, final String message,
+                                     final JsResult result) {
                 result.confirm();
                 return true;
             }
 
             @Override
-            public boolean onJsConfirm(@NonNull final WebView view, @NonNull final String url, @NonNull final String message,
-                                       @NonNull final JsResult result) {
+            public boolean onJsConfirm(final WebView view, final String url, final String message,
+                                       final JsResult result) {
                 result.confirm();
                 return true;
             }
 
             @Override
-            public boolean onJsPrompt(@NonNull final WebView view, @NonNull final String url, @NonNull final String message,
-                                      @NonNull final String defaultValue, @NonNull final JsPromptResult result) {
+            public boolean onJsPrompt(final WebView view, final String url, final String message,
+                                      final String defaultValue, final JsPromptResult result) {
                 result.confirm();
                 return true;
             }
 
             @Override
-            public boolean onJsBeforeUnload(@NonNull final WebView view, @NonNull final String url,
-                                            @NonNull final String message, @NonNull final JsResult result) {
+            public boolean onJsBeforeUnload(final WebView view, final String url,
+                                            final String message, final JsResult result) {
                 result.confirm();
                 return true;
             }
@@ -107,7 +106,7 @@ public class TarantulaWebView extends WebView {
      * On KitKat, when a WebView with HTML5 video is is destroyed it can deadlock the WebView thread until another
      * hardware accelerated WebView is added to the view hierarchy.
      */
-    private void fixWebViewDeadlock(@NonNull Context context) {
+    private void fixWebViewDeadlock(Context context) {
         if (Build.VERSION.SDK_INT != Build.VERSION_CODES.KITKAT) {
             return;
         }

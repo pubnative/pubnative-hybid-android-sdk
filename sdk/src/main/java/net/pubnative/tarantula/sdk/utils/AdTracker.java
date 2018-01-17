@@ -1,8 +1,5 @@
 package net.pubnative.tarantula.sdk.utils;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.VisibleForTesting;
-
 import net.pubnative.tarantula.sdk.Tarantula;
 import net.pubnative.tarantula.sdk.api.ApiClient;
 import net.pubnative.tarantula.sdk.models.AdData;
@@ -18,10 +15,9 @@ public class AdTracker {
         IMPRESSION("impression"),
         CLICK("click");
 
-        @NonNull
         private final String mType;
 
-        Type(@NonNull String type) {
+        Type(String type) {
             mType = type;
         }
 
@@ -32,26 +28,21 @@ public class AdTracker {
         }
     }
 
-    @NonNull
     private static final String TAG = AdTracker.class.getSimpleName();
-    @NonNull
     private final ApiClient mApiClient;
-    @NonNull
     private final List<AdData> mImpressionUrls;
-    @NonNull
     private final List<AdData> mClickUrls;
     private boolean mImpressionTracked;
     private boolean mClickTracked;
 
-    public AdTracker(@NonNull List<AdData> impressionUrls,
-                     @NonNull List<AdData> clickUrls) {
+    public AdTracker(List<AdData> impressionUrls,
+                     List<AdData> clickUrls) {
         this(Tarantula.getApiClient(), impressionUrls, clickUrls);
     }
 
-    @VisibleForTesting
-    AdTracker(@NonNull ApiClient apiClient,
-              @NonNull List<AdData> impressionUrls,
-              @NonNull List<AdData> clickUrls) {
+    AdTracker(ApiClient apiClient,
+              List<AdData> impressionUrls,
+              List<AdData> clickUrls) {
         mApiClient = apiClient;
         mImpressionUrls = impressionUrls;
         mClickUrls = clickUrls;
@@ -75,7 +66,7 @@ public class AdTracker {
         mClickTracked = true;
     }
 
-    private void trackUrls(@NonNull List<AdData> urls, @NonNull Type type) {
+    private void trackUrls(List<AdData> urls, Type type) {
         for (final AdData url : urls) {
             Logger.d(TAG, "Tracking " + type.toString() + " url: " + url);
             mApiClient.trackUrl(url.getURL(), new ApiClient.TrackUrlListener() {

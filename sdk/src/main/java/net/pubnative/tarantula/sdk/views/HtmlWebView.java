@@ -3,7 +3,6 @@ package net.pubnative.tarantula.sdk.views;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
-import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 
 /**
@@ -11,7 +10,7 @@ import android.util.AttributeSet;
  */
 
 public class HtmlWebView extends TarantulaWebView {
-    public HtmlWebView(@NonNull Context context) {
+    public HtmlWebView(Context context) {
         this(context, null);
     }
 

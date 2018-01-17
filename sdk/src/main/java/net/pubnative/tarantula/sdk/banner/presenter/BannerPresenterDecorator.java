@@ -1,7 +1,5 @@
 package net.pubnative.tarantula.sdk.banner.presenter;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.view.View;
 
 import net.pubnative.tarantula.sdk.models.Ad;
@@ -14,30 +12,25 @@ import net.pubnative.tarantula.sdk.utils.Logger;
  */
 
 public class BannerPresenterDecorator implements BannerPresenter, BannerPresenter.Listener {
-    @NonNull
     private static final String TAG = BannerPresenterDecorator.class.getSimpleName();
-    @NonNull
     private final BannerPresenter mBannerPresenter;
-    @NonNull
     private final AdTracker mAdTrackingDelegate;
-    @NonNull
     private final BannerPresenter.Listener mListener;
     private boolean mIsDestroyed;
 
-    public BannerPresenterDecorator(@NonNull BannerPresenter bannerPresenter,
-                                    @NonNull AdTracker adTrackingDelegate,
-                                    @NonNull BannerPresenter.Listener listener) {
+    public BannerPresenterDecorator(BannerPresenter bannerPresenter,
+                                    AdTracker adTrackingDelegate,
+                                    BannerPresenter.Listener listener) {
         mBannerPresenter = bannerPresenter;
         mAdTrackingDelegate = adTrackingDelegate;
         mListener = listener;
     }
 
     @Override
-    public void setListener(@Nullable Listener listener) {
+    public void setListener(Listener listener) {
         // We set the listener in the constructor instead
     }
 
-    @NonNull
     @Override
     public Ad getAd() {
         return mBannerPresenter.getAd();
@@ -61,7 +54,7 @@ public class BannerPresenterDecorator implements BannerPresenter, BannerPresente
     }
 
     @Override
-    public void onBannerLoaded(@NonNull BannerPresenter bannerPresenter, @NonNull View banner) {
+    public void onBannerLoaded(BannerPresenter bannerPresenter, View banner) {
         if (mIsDestroyed) {
             return;
         }
@@ -72,7 +65,7 @@ public class BannerPresenterDecorator implements BannerPresenter, BannerPresente
     }
 
     @Override
-    public void onBannerClicked(@NonNull BannerPresenter bannerPresenter) {
+    public void onBannerClicked(BannerPresenter bannerPresenter) {
         if (mIsDestroyed) {
             return;
         }
@@ -83,7 +76,7 @@ public class BannerPresenterDecorator implements BannerPresenter, BannerPresente
     }
 
     @Override
-    public void onBannerError(@NonNull BannerPresenter bannerPresenter) {
+    public void onBannerError(BannerPresenter bannerPresenter) {
         if (mIsDestroyed) {
             return;
         }

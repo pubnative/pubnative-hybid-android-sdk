@@ -3,8 +3,6 @@ package net.pubnative.tarantula.sdk.interstitial.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import net.pubnative.tarantula.sdk.R;
 import net.pubnative.tarantula.sdk.interstitial.presenter.InterstitialActivityPresenter;
@@ -17,19 +15,15 @@ import net.pubnative.tarantula.sdk.views.HtmlWebView;
  */
 
 public class InterstitialActivity extends Activity {
-    @NonNull
     public static final String HTML_KEY = "html_key";
-    @NonNull
     public static final String BROADCAST_ID_KEY = "broadcast_id_key";
 
-    @NonNull
     private InterstitialActivityPresenter mInterstitialActivityPresenter;
-    @Nullable
     private String mHtml;
     private long mBroadcastId;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_interstitial);

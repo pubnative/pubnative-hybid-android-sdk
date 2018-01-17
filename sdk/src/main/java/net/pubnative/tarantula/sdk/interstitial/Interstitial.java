@@ -1,9 +1,6 @@
 package net.pubnative.tarantula.sdk.interstitial;
 
 import android.app.Activity;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 
 import net.pubnative.tarantula.sdk.Tarantula;
 import net.pubnative.tarantula.sdk.api.InterstitialRequestManager;
@@ -19,36 +16,35 @@ import net.pubnative.tarantula.sdk.utils.CheckUtils;
 
 public class Interstitial implements RequestManager.RequestListener, InterstitialPresenter.Listener {
     public interface Listener {
-        void onInterstitialLoaded(@NonNull Interstitial interstitial);
-        void onInterstitialShown(@NonNull Interstitial interstitial);
-        void onInterstitialClicked(@NonNull Interstitial interstitial);
-        void onInterstitialDismissed(@NonNull Interstitial interstitial);
-        void onInterstitialError(@NonNull Interstitial interstitial);
+        void onInterstitialLoaded(Interstitial interstitial);
+        void onInterstitialShown(Interstitial interstitial);
+        void onInterstitialClicked(Interstitial interstitial);
+        void onInterstitialDismissed(Interstitial interstitial);
+        void onInterstitialError(Interstitial interstitial);
     }
 
-    @NonNull private final InterstitialPresenterFactory mInterstitialPresenterFactory;
-    @NonNull private final RequestManager mRequestManager;
-    @Nullable private InterstitialPresenter mInterstitialPresenter;
-    @Nullable private Listener mListener;
+    private final InterstitialPresenterFactory mInterstitialPresenterFactory;
+    private final RequestManager mRequestManager;
+    private InterstitialPresenter mInterstitialPresenter;
+    private Listener mListener;
     private boolean mIsDestroyed;
 
-    public Interstitial(@NonNull Activity activity) {
+    public Interstitial(Activity activity) {
         this(new InterstitialPresenterFactory(activity), new InterstitialRequestManager());
     }
 
-    @VisibleForTesting
-    Interstitial(@NonNull InterstitialPresenterFactory interstitialPresenterFactory,
-                 @NonNull RequestManager requestManager) {
+    Interstitial(InterstitialPresenterFactory interstitialPresenterFactory,
+                 RequestManager requestManager) {
         mInterstitialPresenterFactory = interstitialPresenterFactory;
         mRequestManager = requestManager;
         mRequestManager.setRequestListener(this);
     }
 
-    public void setListener(@Nullable Listener listener) {
+    public void setListener(Listener listener) {
         mListener = listener;
     }
 
-    public void load(@NonNull String zoneId) {
+    public void load(String zoneId) {
         if (!CheckUtils.NoThrow.checkArgument(Tarantula.isInitialized(), "Tarantula SDK has not been initialized. " +
                 "Please call Tarantula#initialize in your application's onCreate method.")) {
             return;
@@ -66,8 +62,7 @@ public class Interstitial implements RequestManager.RequestListener, Interstitia
         mRequestManager.requestAd();
     }
 
-    @VisibleForTesting
-    void loadInterstitial(@NonNull Ad ad) {
+    void loadInterstitial(Ad ad) {
         if (mIsDestroyed) {
             return;
         }
@@ -103,7 +98,7 @@ public class Interstitial implements RequestManager.RequestListener, Interstitia
 
     // RequestManager.RequestListener
     @Override
-    public void onRequestSuccess(@NonNull Ad ad) {
+    public void onRequestSuccess(Ad ad) {
         if (mIsDestroyed) {
             return;
         }
@@ -112,7 +107,7 @@ public class Interstitial implements RequestManager.RequestListener, Interstitia
     }
 
     @Override
-    public void onRequestFail(@NonNull Throwable throwable) {
+    public void onRequestFail(Throwable throwable) {
         if (mIsDestroyed) {
             return;
         }
@@ -124,7 +119,7 @@ public class Interstitial implements RequestManager.RequestListener, Interstitia
 
     // Interstitial.Listener
     @Override
-    public void onInterstitialLoaded(@NonNull InterstitialPresenter interstitialPresenter) {
+    public void onInterstitialLoaded(InterstitialPresenter interstitialPresenter) {
         if (mIsDestroyed) {
             return;
         }
@@ -135,7 +130,7 @@ public class Interstitial implements RequestManager.RequestListener, Interstitia
     }
 
     @Override
-    public void onInterstitialShown(@NonNull InterstitialPresenter interstitialPresenter) {
+    public void onInterstitialShown(InterstitialPresenter interstitialPresenter) {
         if (mIsDestroyed) {
             return;
         }
@@ -146,7 +141,7 @@ public class Interstitial implements RequestManager.RequestListener, Interstitia
     }
 
     @Override
-    public void onInterstitialClicked(@NonNull InterstitialPresenter interstitialPresenter) {
+    public void onInterstitialClicked(InterstitialPresenter interstitialPresenter) {
         if (mIsDestroyed) {
             return;
         }
@@ -157,7 +152,7 @@ public class Interstitial implements RequestManager.RequestListener, Interstitia
     }
 
     @Override
-    public void onInterstitialDismissed(@NonNull InterstitialPresenter interstitialPresenter) {
+    public void onInterstitialDismissed(InterstitialPresenter interstitialPresenter) {
         if (mIsDestroyed) {
             return;
         }
@@ -173,7 +168,7 @@ public class Interstitial implements RequestManager.RequestListener, Interstitia
     }
 
     @Override
-    public void onInterstitialError(@NonNull InterstitialPresenter interstitialPresenter) {
+    public void onInterstitialError(InterstitialPresenter interstitialPresenter) {
         if (mIsDestroyed) {
             return;
         }

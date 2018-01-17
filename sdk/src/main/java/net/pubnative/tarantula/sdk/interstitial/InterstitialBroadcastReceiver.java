@@ -4,8 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import net.pubnative.tarantula.sdk.interstitial.presenter.InterstitialPresenter;
 import net.pubnative.tarantula.sdk.utils.TarantulaLocalBroadcastManager;
@@ -15,30 +13,30 @@ import net.pubnative.tarantula.sdk.utils.TarantulaLocalBroadcastManager;
  */
 
 public class InterstitialBroadcastReceiver extends BroadcastReceiver {
-    @NonNull public static final String BROADCAST_ID = "broadcastId";
-    @NonNull public static final String INTERSTITIAL_SHOW = "net.pubnative.tarantula.interstitial.show";
-    @NonNull public static final String INTERSTITIAL_CLICK = "net.pubnative.tarantula.interstitial.click";
-    @NonNull public static final String INTERSTITIAL_DISMISS = "net.pubnative.tarantula.interstitial.dismiss";
-    @NonNull public static final String INTERSTITIAL_ERROR = "net.pubnative.tarantula.interstitial.error";
+    public static final String BROADCAST_ID = "broadcastId";
+    public static final String INTERSTITIAL_SHOW = "net.pubnative.tarantula.interstitial.show";
+    public static final String INTERSTITIAL_CLICK = "net.pubnative.tarantula.interstitial.click";
+    public static final String INTERSTITIAL_DISMISS = "net.pubnative.tarantula.interstitial.dismiss";
+    public static final String INTERSTITIAL_ERROR = "net.pubnative.tarantula.interstitial.error";
 
-    @NonNull private final Context mContext;
-    @NonNull private final InterstitialPresenter mInterstitialPresenter;
+    private final Context mContext;
+    private final InterstitialPresenter mInterstitialPresenter;
     private final long mBroadcastId;
-    @Nullable private InterstitialPresenter.Listener mListener;
+    private InterstitialPresenter.Listener mListener;
 
-    public InterstitialBroadcastReceiver(@NonNull Context context,
-                                         @NonNull InterstitialPresenter interstitialPresenter,
+    public InterstitialBroadcastReceiver(Context context,
+                                         InterstitialPresenter interstitialPresenter,
                                          long broadcastId) {
         mContext = context;
         mInterstitialPresenter = interstitialPresenter;
         mBroadcastId = broadcastId;
     }
 
-    public void setListener(@Nullable InterstitialPresenter.Listener listener) {
+    public void setListener(InterstitialPresenter.Listener listener) {
         mListener = listener;
     }
 
-    public void register(@NonNull IntentFilter intentFilter) {
+    public void register(IntentFilter intentFilter) {
         TarantulaLocalBroadcastManager.getInstance(mContext).registerReceiver(this, intentFilter);
     }
 

@@ -1,9 +1,6 @@
 package net.pubnative.tarantula.sdk.interstitial.presenter;
 
 import android.app.Activity;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 
 import net.pubnative.tarantula.sdk.models.Ad;
 import net.pubnative.tarantula.sdk.utils.AdTracker;
@@ -14,19 +11,16 @@ import net.pubnative.tarantula.sdk.utils.Logger;
  */
 
 public class InterstitialPresenterFactory {
-    @NonNull
     private static final String TAG = InterstitialPresenterFactory.class.getSimpleName();
-    @NonNull
     private final Activity mActivity;
 
-    public InterstitialPresenterFactory(@NonNull Activity activity) {
+    public InterstitialPresenterFactory(Activity activity) {
         mActivity = activity;
     }
 
-    @Nullable
     public InterstitialPresenter createInterstitialPresenter(
-            @NonNull Ad ad,
-            @NonNull InterstitialPresenter.Listener interstitialPresenterListener) {
+            Ad ad,
+            InterstitialPresenter.Listener interstitialPresenterListener) {
 
         final InterstitialPresenter interstitialPresenter = fromCreativeType(ad.assetgroupid, ad);
         if (interstitialPresenter == null) {
@@ -41,9 +35,7 @@ public class InterstitialPresenterFactory {
         return interstitialPresenterDecorator;
     }
 
-    @Nullable
-    @VisibleForTesting
-    InterstitialPresenter fromCreativeType(int assetGroupId, @NonNull Ad ad) {
+    InterstitialPresenter fromCreativeType(int assetGroupId, Ad ad) {
         switch (assetGroupId) {
             case 21: {
                 return new MraidInterstitialPresenter(mActivity, ad);

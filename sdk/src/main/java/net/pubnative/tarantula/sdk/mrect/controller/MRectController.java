@@ -1,9 +1,6 @@
 package net.pubnative.tarantula.sdk.mrect.controller;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,38 +22,31 @@ import net.pubnative.tarantula.sdk.utils.CheckUtils;
 public class MRectController implements RequestManager.RequestListener, MRectPresenter.Listener {
     private static final int REFRESH_TIME_SECONDS = 60;
 
-    @NonNull
     private final MRectPresenterFactory mMRectPresenterFactory;
-    @NonNull
     private final RequestManager mRequestManager;
 
-    @Nullable
     private MRectView mMRectAdView;
-    @Nullable
     private MRectPresenter mCurrentMRectPresenter;
-    @Nullable
     private MRectPresenter mNextMRectPresenter;
-    @Nullable
     private MRectView.Listener mListener;
     private boolean mIsDestroyed;
 
-    public MRectController(@NonNull Context context) {
+    public MRectController(Context context) {
         this(new MRectPresenterFactory(context), new MRectRequestManager());
     }
 
-    @VisibleForTesting
-    MRectController(@NonNull MRectPresenterFactory mRectPresenterFactory,
-                    @NonNull RequestManager requestManager) {
+    MRectController(MRectPresenterFactory mRectPresenterFactory,
+                    RequestManager requestManager) {
         mMRectPresenterFactory = mRectPresenterFactory;
         mRequestManager = requestManager;
         mRequestManager.setRequestListener(this);
     }
 
-    public void setListener(@Nullable MRectView.Listener listener) {
+    public void setListener(MRectView.Listener listener) {
         mListener = listener;
     }
 
-    public void load(@NonNull String zoneId, @NonNull MRectView mRectAdView) {
+    public void load(String zoneId, MRectView mRectAdView) {
         if (!CheckUtils.NoThrow.checkArgument(Tarantula.isInitialized(), "Tarantula SDK has not been initialized. " +
                 "Please call Tarantula#initialize in your application's onCreate method.")) {
             return;
@@ -79,8 +69,7 @@ public class MRectController implements RequestManager.RequestListener, MRectPre
         mRequestManager.requestAd();
     }
 
-    @VisibleForTesting
-    void showAd(@NonNull Ad ad) {
+    void showAd(Ad ad) {
         if (mIsDestroyed) {
             return;
         }
@@ -110,7 +99,7 @@ public class MRectController implements RequestManager.RequestListener, MRectPre
         mIsDestroyed = true;
     }
 
-    private void destroyMRectPresenter(@Nullable MRectPresenter mRectPresenter) {
+    private void destroyMRectPresenter(MRectPresenter mRectPresenter) {
         if (mRectPresenter != null) {
             mRectPresenter.destroy();
         }
@@ -118,7 +107,7 @@ public class MRectController implements RequestManager.RequestListener, MRectPre
 
     // RequestManager.RequestListener
     @Override
-    public void onRequestSuccess(@NonNull Ad ad) {
+    public void onRequestSuccess(Ad ad) {
         if (mIsDestroyed) {
             return;
         }
@@ -127,7 +116,7 @@ public class MRectController implements RequestManager.RequestListener, MRectPre
     }
 
     @Override
-    public void onRequestFail(@NonNull Throwable throwable) {
+    public void onRequestFail(Throwable throwable) {
         if (mIsDestroyed) {
             return;
         }
@@ -139,7 +128,7 @@ public class MRectController implements RequestManager.RequestListener, MRectPre
 
     // MRectPresenter.Listener
     @Override
-    public void onMRectLoaded(@NonNull MRectPresenter mRectPresenter, @NonNull View mRect) {
+    public void onMRectLoaded(MRectPresenter mRectPresenter, View mRect) {
         if (mIsDestroyed) {
             return;
         }
@@ -161,7 +150,7 @@ public class MRectController implements RequestManager.RequestListener, MRectPre
     }
 
     @Override
-    public void onMRectClicked(@NonNull MRectPresenter mRectPresenter) {
+    public void onMRectClicked(MRectPresenter mRectPresenter) {
         if (mIsDestroyed) {
             return;
         }
@@ -172,7 +161,7 @@ public class MRectController implements RequestManager.RequestListener, MRectPre
     }
 
     @Override
-    public void onMRectError(@NonNull MRectPresenter mRectPresenter) {
+    public void onMRectError(MRectPresenter mRectPresenter) {
         if (mIsDestroyed) {
             return;
         }

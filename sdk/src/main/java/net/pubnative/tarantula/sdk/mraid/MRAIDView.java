@@ -17,9 +17,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.annotation.IntDef;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.DisplayMetrics;
@@ -85,7 +82,6 @@ public class MRAIDView extends RelativeLayout {
     private static final String MRAID_LOG_TAG = MRAIDView.class.getSimpleName();
 
     // used to define state of the MRAID advertisement
-    @IntDef({STATE_LOADING, STATE_DEFAULT, STATE_EXPANDED, STATE_RESIZED, STATE_HIDDEN})
     @Retention(RetentionPolicy.SOURCE)
     public @interface MRAIDState {
     }
@@ -136,7 +132,6 @@ public class MRAIDView extends RelativeLayout {
     private WebView webViewPart2;
 
     // reference to the webview currently being presented to the user
-    @Nullable
     private WebView currentWebView;
 
 
@@ -1531,7 +1526,7 @@ public class MRAIDView extends RelativeLayout {
     }
 
     @Override
-    protected void onVisibilityChanged(@NonNull View changedView, int visibility) {
+    protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
         MRAIDLog.d(MRAID_LOG_TAG, "onVisibilityChanged " + getVisibilityString(visibility));
         setViewable(visibility);

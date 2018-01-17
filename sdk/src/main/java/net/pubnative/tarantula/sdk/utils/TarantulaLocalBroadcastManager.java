@@ -7,7 +7,6 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -73,8 +72,7 @@ public final class TarantulaLocalBroadcastManager {
     private static final Object mLock = new Object();
     private static TarantulaLocalBroadcastManager mInstance;
 
-    @NonNull
-    public static TarantulaLocalBroadcastManager getInstance(@NonNull Context context) {
+    public static TarantulaLocalBroadcastManager getInstance(Context context) {
         synchronized (mLock) {
             if (mInstance == null) {
                 mInstance = new TarantulaLocalBroadcastManager(context.getApplicationContext());
@@ -108,8 +106,8 @@ public final class TarantulaLocalBroadcastManager {
      *
      * @see #unregisterReceiver
      */
-    public void registerReceiver(@NonNull BroadcastReceiver receiver,
-                                 @NonNull IntentFilter filter) {
+    public void registerReceiver(BroadcastReceiver receiver,
+                                 IntentFilter filter) {
         synchronized (mReceivers) {
             ReceiverRecord entry = new ReceiverRecord(filter, receiver);
             ArrayList<ReceiverRecord> filters = mReceivers.get(receiver);
@@ -139,7 +137,7 @@ public final class TarantulaLocalBroadcastManager {
      *
      * @see #registerReceiver
      */
-    public void unregisterReceiver(@NonNull BroadcastReceiver receiver) {
+    public void unregisterReceiver(BroadcastReceiver receiver) {
         synchronized (mReceivers) {
             final ArrayList<ReceiverRecord> filters = mReceivers.remove(receiver);
             if (filters == null) {
@@ -182,7 +180,7 @@ public final class TarantulaLocalBroadcastManager {
      * broadcast receivers.  (Note tha delivery may not ultimately take place if one of those
      * receivers is unregistered before it is dispatched.)
      */
-    public boolean sendBroadcast(@NonNull Intent intent) {
+    public boolean sendBroadcast(Intent intent) {
         synchronized (mReceivers) {
             final String action = intent.getAction();
             final String type = intent.resolveTypeIfNeeded(
@@ -258,7 +256,7 @@ public final class TarantulaLocalBroadcastManager {
      * the Intent this function will block and immediately dispatch them before
      * returning.
      */
-    public void sendBroadcastSync(@NonNull Intent intent) {
+    public void sendBroadcastSync(Intent intent) {
         if (sendBroadcast(intent)) {
             executePendingBroadcasts();
         }
