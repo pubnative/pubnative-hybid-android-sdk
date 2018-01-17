@@ -23,13 +23,24 @@
 
 package net.pubnative.tarantula.sdk.models;
 
+import net.pubnative.tarantula.sdk.utils.json.BindField;
+import net.pubnative.tarantula.sdk.utils.json.JsonModel;
+
+import org.json.JSONObject;
+
 import java.io.Serializable;
 import java.util.Map;
 
-public class AdData implements Serializable {
+public class AdData extends JsonModel implements Serializable {
 
+    @BindField
     public String type;
-    public Map data;
+    @BindField
+    public Map<String, Object> data;
+
+    public AdData(JSONObject jsonObject) throws Exception {
+        fromJson(jsonObject);
+    }
 
     public String getText() {
 
@@ -38,7 +49,7 @@ public class AdData implements Serializable {
 
     public Double getNumber() {
 
-        return getNumberField("number");
+        return getDoubleField("number");
     }
 
     public String getURL() {
@@ -56,9 +67,14 @@ public class AdData implements Serializable {
         return (String) getDataField(field);
     }
 
-    public Double getNumberField(String field) {
+    public Double getDoubleField(String field) {
 
         return (Double) getDataField(field);
+    }
+
+    public Integer getIntField(String field) {
+
+        return (Integer) getDataField(field);
     }
 
     protected Object getDataField(String dataField) {

@@ -28,13 +28,17 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 
+import net.pubnative.tarantula.sdk.utils.json.BindField;
+import net.pubnative.tarantula.sdk.utils.json.JsonModel;
 import net.pubnative.tarantula.sdk.views.TarantulaAPIContentInfoView;
+
+import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Ad implements Serializable {
+public class Ad extends JsonModel implements Serializable {
 
     private static final String TAG = Ad.class.getSimpleName();
     private static final String DATA_CONTENTINFO_LINK_KEY = "link";
@@ -44,11 +48,15 @@ public class Ad implements Serializable {
     //==============================================================================================
     // Fields
     //==============================================================================================
-
+    @BindField
     public String link;
+    @BindField
     public int assetgroupid;
+    @BindField
     public List<AdData> assets;
+    @BindField
     public List<AdData> beacons;
+    @BindField
     public List<AdData> meta;
 
     //==============================================================================================
@@ -62,6 +70,10 @@ public class Ad implements Serializable {
 
         String IMPRESSION = "impression";
         String CLICK = "click";
+    }
+
+    public Ad(JSONObject jsonObject) throws Exception {
+        fromJson(jsonObject);
     }
 
     //==============================================================================================
@@ -187,8 +199,8 @@ public class Ad implements Serializable {
 
     public String getECPM() {
         AdData adData = getMeta(APIMeta.POINTS);
-        Double points = adData.getNumberField(DATA_POINTS_NUMBER_KEY);
-        String pointsVal = String.valueOf(points.intValue());
+        Integer points = adData.getIntField(DATA_POINTS_NUMBER_KEY);
+        String pointsVal = String.valueOf(points);
         return pointsVal;
     }
 }

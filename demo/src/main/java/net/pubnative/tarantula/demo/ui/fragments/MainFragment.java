@@ -93,6 +93,7 @@ public class MainFragment extends Fragment implements MoPubInterstitial.Intersti
         super.onDestroy();
         mMopubBanner.destroy();
         mMopubMRect.destroy();
+        mMraidInterstitial.destroy();
     }
 
     private void loadMraidBanner() {
