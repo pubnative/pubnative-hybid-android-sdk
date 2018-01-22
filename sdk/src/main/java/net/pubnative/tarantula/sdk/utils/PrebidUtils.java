@@ -2,11 +2,14 @@ package net.pubnative.tarantula.sdk.utils;
 
 import net.pubnative.tarantula.sdk.models.Ad;
 
+import java.util.Locale;
+
 /**
  * Created by erosgarciaponte on 11.01.18.
  */
 
 public final class PrebidUtils {
+    private static final double ECPM_POINTS_DIVIDER = 1000.0;
 
     public interface KEYS {
         String PN = "m_pn";
@@ -19,8 +22,8 @@ public final class PrebidUtils {
         stringBuilder.append(KEYS.PN).append(':').append("true").append(',');
         stringBuilder.append(KEYS.PN_ZONE_ID).append(':').append(zoneId).append(',');
 
-        String reversedECPM = new StringBuilder(ad.getECPM()).reverse().toString();
-        StringBuilder bidECPM = new StringBuilder("0000").replace(0, reversedECPM.length(), reversedECPM).reverse();
+        Double eCPM = ad.getECPM().doubleValue() / ECPM_POINTS_DIVIDER;
+        String bidECPM = String.format(Locale.ENGLISH, "%.3f", eCPM);
 
         stringBuilder.append(KEYS.PN_BID).append(':').append(bidECPM);
 
