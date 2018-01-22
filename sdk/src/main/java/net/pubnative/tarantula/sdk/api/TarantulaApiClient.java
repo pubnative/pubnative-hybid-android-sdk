@@ -184,7 +184,6 @@ public class TarantulaApiClient {
             listener.onFailure(new Exception("TarantulaApiClient - Parse error"));
         } else if (AdResponse.Status.OK.equals(apiResponseModel.status)) {
             // STATUS 'OK'
-            List<Ad> resultModels = null;
             if (apiResponseModel.ads != null && !apiResponseModel.ads.isEmpty()) {
                 listener.onSuccess(apiResponseModel.ads.get(0));
             } else {

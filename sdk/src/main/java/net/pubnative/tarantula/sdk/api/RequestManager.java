@@ -87,7 +87,7 @@ public abstract class RequestManager {
                     return;
                 }
 
-                Logger.w(TAG, "Failed to receive ad response for zone id: " + adRequest.zoneid, throwable);
+                Logger.w(TAG, throwable.getMessage());
                 if (mRequestListener != null) {
                     mRequestListener.onRequestFail(throwable);
                 }
