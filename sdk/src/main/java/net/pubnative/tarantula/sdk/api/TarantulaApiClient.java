@@ -91,7 +91,7 @@ public class TarantulaApiClient {
         } catch (Exception exception) {
             parseException = exception;
         } catch (Error error) {
-            parseException = new Exception("Response can not be parsed!", error);
+            parseException = new Exception("Response cannot be parsed", error);
         }
         if (parseException != null) {
             listener.onFailure(parseException);
@@ -106,7 +106,7 @@ public class TarantulaApiClient {
             }
         } else {
             // STATUS 'ERROR'
-            listener.onFailure(new Exception("PNAPIRequest - Server error: " + apiResponseModel.error_message));
+            listener.onFailure(new Exception("Tarantula - Server error: " + apiResponseModel.error_message));
         }
     }
 }
