@@ -197,10 +197,8 @@ public class Ad extends JsonModel implements Serializable {
         return data.getStringField(DATA_CONTENTINFO_LINK_KEY);
     }
 
-    public String getECPM() {
+    public Integer getECPM() {
         AdData adData = getMeta(APIMeta.POINTS);
-        Integer points = adData.getIntField(DATA_POINTS_NUMBER_KEY);
-        String pointsVal = String.valueOf(points);
-        return pointsVal;
+        return adData.getIntField(DATA_POINTS_NUMBER_KEY);
     }
 }

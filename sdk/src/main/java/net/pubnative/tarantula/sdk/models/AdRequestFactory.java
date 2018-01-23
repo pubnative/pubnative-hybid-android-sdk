@@ -7,6 +7,8 @@ import net.pubnative.tarantula.sdk.DeviceInfo;
 import net.pubnative.tarantula.sdk.Tarantula;
 import net.pubnative.tarantula.sdk.utils.TarantulaCrypto;
 
+import java.util.List;
+
 /**
  * Created by erosgarciaponte on 08.01.18.
  */
@@ -48,8 +50,14 @@ public class AdRequestFactory {
         adRequest.bundleid = Tarantula.getBundleId();
         adRequest.testMode = Tarantula.isTestMode() ? "1" : "0";
         adRequest.al = adSize;
-        adRequest.mf = "points,revenuemodel,contentinfo";
+        adRequest.mf = getDefaultMetaFields();
 
         return adRequest;
+    }
+
+    private String getDefaultMetaFields() {
+        String[] metaFields = new String[] {APIMeta.POINTS, APIMeta.REVENUE_MODEL, APIMeta.CONTENT_INFO};
+        String result = TextUtils.join(",", metaFields);
+        return result;
     }
 }
