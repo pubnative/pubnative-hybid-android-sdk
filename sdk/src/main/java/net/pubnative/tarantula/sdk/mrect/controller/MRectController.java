@@ -14,16 +14,16 @@ import net.pubnative.tarantula.sdk.mrect.presenter.MRectPresenter;
 import net.pubnative.tarantula.sdk.mrect.presenter.MRectPresenterFactory;
 import net.pubnative.tarantula.sdk.mrect.view.MRectView;
 import net.pubnative.tarantula.sdk.utils.CheckUtils;
+import net.pubnative.tarantula.sdk.utils.TarantulaInitializationHelper;
 
 /**
  * Created by erosgarciaponte on 12.01.18.
  */
 
 public class MRectController implements RequestManager.RequestListener, MRectPresenter.Listener {
-    private static final int REFRESH_TIME_SECONDS = 60;
-
     private final MRectPresenterFactory mMRectPresenterFactory;
     private final RequestManager mRequestManager;
+    private final TarantulaInitializationHelper mInitializationHelper;
 
     private MRectView mMRectAdView;
     private MRectPresenter mCurrentMRectPresenter;
@@ -32,14 +32,15 @@ public class MRectController implements RequestManager.RequestListener, MRectPre
     private boolean mIsDestroyed;
 
     public MRectController(Context context) {
-        this(new MRectPresenterFactory(context), new MRectRequestManager());
+        this(new MRectPresenterFactory(context), new MRectRequestManager(), new TarantulaInitializationHelper());
     }
 
     MRectController(MRectPresenterFactory mRectPresenterFactory,
-                    RequestManager requestManager) {
+                    RequestManager requestManager, TarantulaInitializationHelper initializationHelper) {
         mMRectPresenterFactory = mRectPresenterFactory;
         mRequestManager = requestManager;
         mRequestManager.setRequestListener(this);
+        mInitializationHelper = initializationHelper;
     }
 
     public void setListener(MRectView.Listener listener) {
@@ -47,7 +48,7 @@ public class MRectController implements RequestManager.RequestListener, MRectPre
     }
 
     public void load(String zoneId, MRectView mRectAdView) {
-        if (!CheckUtils.NoThrow.checkArgument(Tarantula.isInitialized(), "Tarantula SDK has not been initialized. " +
+        if (!CheckUtils.NoThrow.checkArgument(mInitializationHelper.isInitialized(), "Tarantula SDK has not been initialized. " +
                 "Please call Tarantula#initialize in your application's onCreate method.")) {
             return;
         }

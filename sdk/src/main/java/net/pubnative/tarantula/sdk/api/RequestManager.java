@@ -7,6 +7,7 @@ import net.pubnative.tarantula.sdk.models.AdRequest;
 import net.pubnative.tarantula.sdk.models.Ad;
 import net.pubnative.tarantula.sdk.utils.CheckUtils;
 import net.pubnative.tarantula.sdk.utils.Logger;
+import net.pubnative.tarantula.sdk.utils.TarantulaInitializationHelper;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
@@ -23,20 +24,23 @@ public abstract class RequestManager {
     private final TarantulaApiClient mApiClient;
     private final AdCache mAdCache;
     private final AdRequestFactory mAdRequestFactory;
+    private final TarantulaInitializationHelper mInitializationHelper;
     private String mZoneId;
     private RequestListener mRequestListener;
     private boolean mIsDestroyed;
 
     public RequestManager() {
-        this(Tarantula.getApiClient(), Tarantula.getAdCache(), new AdRequestFactory());
+        this(Tarantula.getApiClient(), Tarantula.getAdCache(), new AdRequestFactory(), new TarantulaInitializationHelper());
     }
 
     RequestManager(TarantulaApiClient apiClient,
                    AdCache adCache,
-                   AdRequestFactory adRequestFactory) {
+                   AdRequestFactory adRequestFactory,
+                   TarantulaInitializationHelper initializationHelper) {
         mApiClient = apiClient;
         mAdCache = adCache;
         mAdRequestFactory = adRequestFactory;
+        mInitializationHelper = initializationHelper;
     }
 
     public void setRequestListener(RequestListener requestListener) {
@@ -48,7 +52,7 @@ public abstract class RequestManager {
     }
 
     public void requestAd() {
-        if (!CheckUtils.NoThrow.checkArgument(Tarantula.isInitialized(), "Tarantula SDK has not been initialized. " +
+        if (!CheckUtils.NoThrow.checkArgument(mInitializationHelper.isInitialized(), "Tarantula SDK has not been initialized. " +
                 "Please call Tarantula#initialize in your application's onCreate method.")) {
             return;
         }
