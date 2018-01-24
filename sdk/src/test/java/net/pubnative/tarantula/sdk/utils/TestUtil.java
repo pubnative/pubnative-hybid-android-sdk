@@ -17,6 +17,19 @@ import java.util.List;
 public class TestUtil {
     public static AdRequest createTestAdRequest() {
         AdRequest request = new AdRequest();
+        request.apptoken = "dde3c298b47648459f8ada4a982fa92d";
+        request.os = "android";
+        request.osver = "8.1.0";
+        request.dnt = "0";
+        request.mf = "points,revenuemodel,contentinfo";
+        request.al = "s";
+        request.gid = "d98374d3-3b69-4a4b-a2c1-9dcb4c588849";
+        request.zoneid = "2";
+        request.bundleid = "net.pubnative.tarantula.demo";
+        request.testMode = "0";
+        request.locale = "en";
+        request.gidmd5 = "e74483c4b5e6dc78e088d9fb0243ae66";
+        request.gidsha1 = "96e380195959b8e7e05d6c6029154dc99e7fe954";
         return request;
     }
 
