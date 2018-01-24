@@ -8,6 +8,8 @@ android {
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -20,4 +22,9 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.robolectric:robolectric:3.5.1'
+    testImplementation 'org.mockito:mockito-core:2.11.0'
+    testImplementation "com.google.truth:truth:0.36"
 }
