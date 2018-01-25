@@ -1,0 +1,23 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: pubnative/android:26_20171206
+
+    working_directory: ~/sdk
+
+    environment:
+      TERM: dumb
+      _JAVA_OPTIONS: "-Xmx1400m -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:ParallelGCThreads=2 -Djava.util.concurrent.ForkJoinPool.common.parallelism=2"
+
+    steps:
+      - checkout
+      - restore_cache:
+          key: sdk-{{ .Branch }}
+      - run:
+          name: Run Tests
+          command: ./gradlew clean testDebug
+      - save_cache:
+          key: sdk-{{ .Branch }}
+          paths:
+            - "/usr/local/android-sdk"
