@@ -8,6 +8,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.CustomEvent;
 import com.mopub.mobileads.MoPubErrorCode;
 import com.mopub.mobileads.MoPubInterstitial;
 import com.mopub.mobileads.MoPubView;
@@ -70,6 +72,7 @@ public class MainFragment extends Fragment implements MoPubInterstitial.Intersti
             @Override
             public void onClick(View v) {
                 loadMraidBanner();
+                Answers.getInstance().logCustom(new CustomEvent("request_mraid_banner"));
             }
         });
 
@@ -77,6 +80,7 @@ public class MainFragment extends Fragment implements MoPubInterstitial.Intersti
             @Override
             public void onClick(View v) {
                 loadMraidMedium();
+                Answers.getInstance().logCustom(new CustomEvent("request_mraid_mrect"));
             }
         });
 
@@ -84,6 +88,7 @@ public class MainFragment extends Fragment implements MoPubInterstitial.Intersti
             @Override
             public void onClick(View v) {
                 loadMraidInterstitial();
+                Answers.getInstance().logCustom(new CustomEvent("request_mraid_interstitial"));
             }
         });
     }

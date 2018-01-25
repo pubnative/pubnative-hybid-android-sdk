@@ -4,6 +4,8 @@ import android.content.Context;
 import android.support.multidex.MultiDex;
 import android.support.multidex.MultiDexApplication;
 
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 import net.pubnative.tarantula.sdk.Tarantula;
 
 /**
@@ -14,6 +16,7 @@ public class TarantulaDemoApplication extends MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
 
         Tarantula.initialize(Constants.APP_TOKEN, this);
         Tarantula.setTestMode(true);

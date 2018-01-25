@@ -21,3 +21,9 @@ jobs:
           key: sdk-{{ .Branch }}
           paths:
             - "/usr/local/android-sdk"
+      - deploy:
+          name: Deploy to Fabric
+          command:
+            if [ "${CIRCLE_BRANCH}" == "master" ] || [ "${CIRCLE_BRANCH}" == "beta" ] || [ "${CIRCLE_BRANCH}" == "development" || [ "${CIRCLE_BRANCH}" == "development-setup_fabric" ] ; then
+              if [ ! -z $IS_BETA ] ; then ./gradlew assembleDebug crashlyticsUploadDistributionDebug ; fi
+            fi
