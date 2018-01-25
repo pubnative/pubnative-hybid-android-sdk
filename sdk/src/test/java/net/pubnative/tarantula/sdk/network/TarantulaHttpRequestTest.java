@@ -2,8 +2,6 @@ package net.pubnative.tarantula.sdk.network;
 
 import android.os.Handler;
 
-import net.pubnative.tarantula.sdk.BuildConfig;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;

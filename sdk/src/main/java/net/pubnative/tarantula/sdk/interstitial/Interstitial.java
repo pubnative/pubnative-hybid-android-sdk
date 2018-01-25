@@ -2,7 +2,6 @@ package net.pubnative.tarantula.sdk.interstitial;
 
 import android.app.Activity;
 
-import net.pubnative.tarantula.sdk.Tarantula;
 import net.pubnative.tarantula.sdk.api.InterstitialRequestManager;
 import net.pubnative.tarantula.sdk.api.RequestManager;
 import net.pubnative.tarantula.sdk.interstitial.presenter.InterstitialPresenter;

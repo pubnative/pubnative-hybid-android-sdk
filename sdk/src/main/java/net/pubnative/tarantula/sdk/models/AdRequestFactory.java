@@ -7,8 +7,6 @@ import net.pubnative.tarantula.sdk.DeviceInfo;
 import net.pubnative.tarantula.sdk.Tarantula;
 import net.pubnative.tarantula.sdk.utils.TarantulaCrypto;
 
-import java.util.List;
-
 /**
  * Created by erosgarciaponte on 08.01.18.
  */

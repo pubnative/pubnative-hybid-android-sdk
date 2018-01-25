@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import net.pubnative.tarantula.sdk.Tarantula;
 import net.pubnative.tarantula.sdk.api.MRectRequestManager;
 import net.pubnative.tarantula.sdk.api.RequestManager;
 import net.pubnative.tarantula.sdk.models.Ad;
