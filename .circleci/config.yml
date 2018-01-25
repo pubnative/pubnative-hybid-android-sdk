@@ -21,3 +21,15 @@ jobs:
           key: sdk-{{ .Branch }}
           paths:
             - "/usr/local/android-sdk"
+      - deploy:
+          name: Deploy to Fabric
+          command:
+            if [ "${CIRCLE_BRANCH}" == "master" ] || [ "${CIRCLE_BRANCH}" == "beta" ] || [ "${CIRCLE_BRANCH}" == "development" ] ; then
+              if [ ! -z $IS_BETA ] ; then ./gradlew assembleDebug crashlyticsUploadDistributionDebug ; fi
+            fi
+      - deploy:
+          name: Deploy to Bintray
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ] || [ "${CIRCLE_BRANCH}" == "beta" ] || [ "${CIRCLE_BRANCH}" == "development" ] ; then
+              ./gradlew bintrayUpload
+            fi
