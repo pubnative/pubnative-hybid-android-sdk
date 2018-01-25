@@ -42,10 +42,14 @@ apply plugin: 'maven-publish'
 publishing {
     publications {
         Production(MavenPublication) {
-            artifact("$buildDir/outputs/aar/pnlite-sdk.aar")
             groupId project.group
             artifactId project.name
             version version_name
+
+            android.libraryVariants.all { variant ->
+                if (variant.buildType.name == "debug") return
+                artifact variant.outputs[0].packageLibrary // This is the aar library
+            }
 
             //The publication doesn't know about our dependencies, so we have to manually add them to the pom
             pom.withXml {
@@ -61,10 +65,14 @@ publishing {
             }
         }
         Sandbox(MavenPublication) {
-            artifact("$buildDir/outputs/aar/pnlite-sdk-beta.aar")
             groupId project.group
             artifactId project.name
             version version_name
+
+            android.libraryVariants.all { variant ->
+                if (variant.buildType.name == "debug") return
+                artifact variant.outputs[0].packageLibrary // This is the aar library
+            }
 
             //The publication doesn't know about our dependencies, so we have to manually add them to the pom
             pom.withXml {
