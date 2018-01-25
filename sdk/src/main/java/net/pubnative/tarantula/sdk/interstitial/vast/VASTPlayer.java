@@ -40,11 +40,11 @@ public class VASTPlayer {
     private Context context;
 
     public interface VASTPlayerListener {
-        public void vastReady();
-        public void vastError(int error);
-        public void vastClick();
-        public void vastComplete();
-        public void vastDismiss();
+        void vastReady();
+        void vastError(int error);
+        void vastClick();
+        void vastComplete();
+        void vastDismiss();
     }
 
     public static VASTPlayerListener listener;

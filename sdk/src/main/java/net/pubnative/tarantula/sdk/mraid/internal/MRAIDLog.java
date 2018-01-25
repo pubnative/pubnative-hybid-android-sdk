@@ -20,7 +20,7 @@ public class MRAIDLog {
 
         private int value;
 
-        private LOG_LEVEL(int value) {
+        LOG_LEVEL(int value) {
             this.value = value;
 
         }

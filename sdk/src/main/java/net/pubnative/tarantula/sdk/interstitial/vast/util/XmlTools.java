@@ -47,7 +47,6 @@ public class XmlTools {
 
         } catch (Exception e) {
             VASTLog.e(TAG, e.getMessage(), e);
-            ;
         }
     }
 

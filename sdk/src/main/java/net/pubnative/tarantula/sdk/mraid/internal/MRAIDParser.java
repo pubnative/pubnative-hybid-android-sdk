@@ -78,22 +78,25 @@ public class MRAIDParser {
     }
 
     private boolean checkParamsForCommand(String command, Map<String, String> params) {
-        if (command.equals("createCalendarEvent")) {
-            return params.containsKey("eventJSON");
-        } else if (command.equals("open") || command.equals("playVideo") || command.equals("storePicture")) {
-            return params.containsKey("url");
-        } else if (command.equals("setOrientationProperties")) {
-            return params.containsKey("allowOrientationChange") &&
-                    params.containsKey("forceOrientation");
-        } else if (command.equals("setResizeProperties")) {
-            return params.containsKey("width") &&
-                    params.containsKey("height") &&
-                    params.containsKey("offsetX") &&
-                    params.containsKey("offsetY") &&
-                    params.containsKey("customClosePosition") &&
-                    params.containsKey("allowOffscreen");
-        } else if (command.equals("useCustomClose")) {
-            return params.containsKey("useCustomClose");
+        switch (command) {
+            case "createCalendarEvent":
+                return params.containsKey("eventJSON");
+            case "open":
+            case "playVideo":
+            case "storePicture":
+                return params.containsKey("url");
+            case "setOrientationProperties":
+                return params.containsKey("allowOrientationChange") &&
+                        params.containsKey("forceOrientation");
+            case "setResizeProperties":
+                return params.containsKey("width") &&
+                        params.containsKey("height") &&
+                        params.containsKey("offsetX") &&
+                        params.containsKey("offsetY") &&
+                        params.containsKey("customClosePosition") &&
+                        params.containsKey("allowOffscreen");
+            case "useCustomClose":
+                return params.containsKey("useCustomClose");
         }
         return true;
     }

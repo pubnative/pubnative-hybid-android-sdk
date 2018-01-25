@@ -918,7 +918,7 @@ public class VASTActivity extends Activity implements MediaPlayer.OnCompletionLi
 
     private void processEvent(TRACKING_EVENTS_TYPE eventName) {
         VASTLog.i(TAG, "entered Processing Event: " + eventName);
-        List<String> urls = (List<String>) mTrackingEventMap.get(eventName);
+        List<String> urls = mTrackingEventMap.get(eventName);
 
         fireUrls(urls);
 

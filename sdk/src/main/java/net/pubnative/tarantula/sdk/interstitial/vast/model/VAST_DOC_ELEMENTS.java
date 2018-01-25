@@ -12,7 +12,7 @@ public enum VAST_DOC_ELEMENTS {
 
     private String value;
 
-    private VAST_DOC_ELEMENTS(String value) {
+    VAST_DOC_ELEMENTS(String value) {
         this.value = value;
 
     }

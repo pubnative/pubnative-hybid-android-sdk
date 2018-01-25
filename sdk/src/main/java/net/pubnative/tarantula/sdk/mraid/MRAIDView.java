@@ -854,7 +854,7 @@ public class MRAIDView extends RelativeLayout {
         setCloseRegionPosition(expandedView);
 
         MRAIDLog.d("hz-m MRAIDView - expandHelper - adding contentview to activity " + context);
-        ((Activity) showActivity).addContentView(expandedView, new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        showActivity.addContentView(expandedView, new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
         isExpandingFromDefault = true;
         isExpanded = true;
@@ -911,7 +911,7 @@ public class MRAIDView extends RelativeLayout {
         expandedView.removeAllViews();
 
         // get the content view for the current context
-        FrameLayout rootView = (FrameLayout) ((Activity) context).findViewById(android.R.id.content);
+        FrameLayout rootView = ((Activity) context).findViewById(android.R.id.content);
         rootView.removeView(expandedView);
         expandedView = null;
         closeRegion = null;
@@ -965,7 +965,7 @@ public class MRAIDView extends RelativeLayout {
 
     private void removeResizeView() {
         resizedView.removeAllViews();
-        FrameLayout rootView = (FrameLayout) ((Activity) context).findViewById(android.R.id.content);
+        FrameLayout rootView = ((Activity) context).findViewById(android.R.id.content);
         rootView.removeView(resizedView);
         resizedView = null;
         closeRegion = null;
@@ -1318,8 +1318,6 @@ public class MRAIDView extends RelativeLayout {
         public void onShowCustomView(View view, CustomViewCallback callback) {
             MRAIDLog.d("hz-m MRAIDView ChromeClient - showCustomView");
         }
-
-        ;
 
         public void onCloseWindow(WebView window) {
             MRAIDLog.d("hz-m MRAIDView ChromeClient - onCloseWindow");
