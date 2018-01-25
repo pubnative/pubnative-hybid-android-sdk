@@ -27,7 +27,7 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:27.0.2'
-    implementation project(':sdk')
+    implementation project(':lite.sdk')
     implementation('com.mopub:mopub-sdk:4.19.0@aar') {
         transitive = true
         exclude module: 'libAvid-mopub' // To exclude AVID
