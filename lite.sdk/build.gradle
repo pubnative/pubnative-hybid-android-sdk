@@ -1,5 +1,6 @@
-apply plugin: 'com.android.library'
-
+//==================================================================================================
+// PROJECT
+//==================================================================================================
 def project_name = project.name
 def version_name = project.version
 if (System.getenv("IS_BETA")) {
@@ -7,6 +8,11 @@ if (System.getenv("IS_BETA")) {
     project_name = "${project_name}.beta"
 }
 version = version_name
+
+//==================================================================================================
+// ANDROID
+//==================================================================================================
+apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 27
@@ -23,62 +29,53 @@ android {
     buildTypes {
         release {
             minifyEnabled System.getenv("CI") ? true : false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'lite.sdk.pro'
         }
     }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.robolectric:robolectric:3.5.1'
     testImplementation 'org.mockito:mockito-core:2.11.0'
     testImplementation "com.google.truth:truth:0.36"
 }
 
+//--------------------------------------------------------------------------------------------------
+// MAVEN
+//--------------------------------------------------------------------------------------------------
 apply plugin: 'maven-publish'
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.rootProject.files(android.getBootClasspath().join(File.pathSeparator))
+    options.memberLevel = JavadocMemberLevel.PUBLIC
+}
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
 
 publishing {
     publications {
-        Production(MavenPublication) {
+        aar(MavenPublication) {
             groupId project.group
             artifactId project.name
             version version_name
-
+            artifact javadocJar
+            if (!System.getenv("IS_BETA")) {
+                artifact sourcesJar
+            }
             android.libraryVariants.all { variant ->
                 if (variant.buildType.name == "debug") return
                 artifact variant.outputs[0].packageLibrary // This is the aar library
             }
-
-            //The publication doesn't know about our dependencies, so we have to manually add them to the pom
             pom.withXml {
                 def dependenciesNode = asNode().appendNode('dependencies')
-
-                //Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
-                configurations.compile.allDependencies.each {
-                    def dependencyNode = dependenciesNode.appendNode('dependency')
-                    dependencyNode.appendNode('groupId', it.group)
-                    dependencyNode.appendNode('artifactId', it.name)
-                    dependencyNode.appendNode('version', it.version)
-                }
-            }
-        }
-        Sandbox(MavenPublication) {
-            groupId project.group
-            artifactId project.name
-            version version_name
-
-            android.libraryVariants.all { variant ->
-                if (variant.buildType.name == "debug") return
-                artifact variant.outputs[0].packageLibrary // This is the aar library
-            }
-
-            //The publication doesn't know about our dependencies, so we have to manually add them to the pom
-            pom.withXml {
-                def dependenciesNode = asNode().appendNode('dependencies')
-
-                //Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
                 configurations.compile.allDependencies.each {
                     def dependencyNode = dependenciesNode.appendNode('dependency')
                     dependencyNode.appendNode('groupId', it.group)
@@ -90,23 +87,26 @@ publishing {
     }
 }
 
+//--------------------------------------------------------------------------------------------------
+// BINTRAY
+//--------------------------------------------------------------------------------------------------
 apply plugin: 'com.jfrog.bintray'
 
 bintray {
-    // Get Bintray credential from environment variable
-    user = System.getenv('BINTRAY_USER')
-    key = System.getenv('BINTRAY_API_KEY')
+    user = System.getenv("BINTRAY_USER")
+    key = System.getenv("BINTRAY_API_KEY")
+    publish = System.getenv("IS_BETA") ? true : false
     override = true
     publications = ['aar']
-    configurations = ['archives']
     pkg {
-        repo = 'maven'
-        name = project_name
+        configurations = ['archives']
         userOrg = 'pubnative'
-        licenses = ['MIT']
+        repo = 'maven'
         desc = 'PubNative Lite SDK'
         websiteUrl = "https://pubnative.net"
-        publish = System.getenv("IS_BETA") ? true : false
+        name = project_name
+        licenses = ['MIT']
+        labels = ['android', 'advertising', 'sdk', 'pubnative', 'ads', 'development']
         version {
             name = version_name
             vcsTag = version_name
@@ -114,6 +114,4 @@ bintray {
             vcsUrl = System.getenv("CIRCLE_REPOSITORY_URL")
         }
     }
-    publications = ['Production', 'Sandbox']
-
 }

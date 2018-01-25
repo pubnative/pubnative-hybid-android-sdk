@@ -4,7 +4,7 @@ jobs:
     docker:
       - image: pubnative/android:26_20171206
 
-    working_directory: ~/sdk
+    working_directory: ~/lite.sdk
 
     environment:
       TERM: dumb
