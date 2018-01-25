@@ -1,5 +1,12 @@
 apply plugin: 'com.android.library'
 
+def project_name = project.name
+def version_name = project.version
+if (System.getenv("IS_BETA")) {
+    version_name = "${version_name}-${branchName}.${buildNumber}"
+    project_name = "${project_name}.beta"
+}
+
 android {
     compileSdkVersion 27
 
@@ -8,8 +15,8 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 1
-        versionName "1.0"
+        versionCode System.getenv("CIRCLE_BUILD_NUM") ? System.getenv("CIRCLE_BUILD_NUM").toInteger() : 1
+        versionName version_name
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -28,7 +35,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:27.0.2'
     implementation project(':lite.sdk')
-    implementation('com.mopub:mopub-sdk:4.19.0@aar') {
+    provided('com.mopub:mopub-sdk:4.19.0@aar') {
         transitive = true
         exclude module: 'libAvid-mopub' // To exclude AVID
         exclude module: 'moat-mobile-app-kit' // To exclude Moat

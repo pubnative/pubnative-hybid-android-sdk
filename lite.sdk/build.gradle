@@ -101,7 +101,7 @@ bintray {
     configurations = ['archives']
     pkg {
         repo = 'maven'
-        name = project.name
+        name = project_name
         userOrg = 'pubnative'
         licenses = ['MIT']
         desc = 'PubNative Lite SDK'
