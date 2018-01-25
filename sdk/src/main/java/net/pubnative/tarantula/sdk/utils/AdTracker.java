@@ -35,6 +35,8 @@ public class AdTracker {
     private boolean mImpressionTracked;
     private boolean mClickTracked;
 
+    private TarantulaApiClient.TrackUrlListener mTrackUrlListener;
+
     public AdTracker(List<AdData> impressionUrls,
                      List<AdData> clickUrls) {
         this(Tarantula.getApiClient(), impressionUrls, clickUrls);
@@ -46,6 +48,22 @@ public class AdTracker {
         mApiClient = apiClient;
         mImpressionUrls = impressionUrls;
         mClickUrls = clickUrls;
+
+        mTrackUrlListener = new TarantulaApiClient.TrackUrlListener() {
+            @Override
+            public void onSuccess() {
+
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+
+            }
+        };
+    }
+
+    public void setTrackUrlListener(TarantulaApiClient.TrackUrlListener listener) {
+        this.mTrackUrlListener = listener;
     }
 
     public void trackImpression() {
@@ -69,17 +87,7 @@ public class AdTracker {
     private void trackUrls(List<AdData> urls, Type type) {
         for (final AdData url : urls) {
             Logger.d(TAG, "Tracking " + type.toString() + " url: " + url);
-            mApiClient.trackUrl(url.getURL(), new TarantulaApiClient.TrackUrlListener() {
-                @Override
-                public void onSuccess() {
-
-                }
-
-                @Override
-                public void onFailure(Throwable throwable) {
-
-                }
-            });
+            mApiClient.trackUrl(url.getURL(), mTrackUrlListener);
         }
     }
 }

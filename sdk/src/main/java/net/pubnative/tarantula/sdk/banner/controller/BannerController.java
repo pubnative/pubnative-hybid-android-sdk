@@ -14,16 +14,16 @@ import net.pubnative.tarantula.sdk.banner.presenter.BannerPresenterFactory;
 import net.pubnative.tarantula.sdk.banner.view.BannerView;
 import net.pubnative.tarantula.sdk.models.Ad;
 import net.pubnative.tarantula.sdk.utils.CheckUtils;
+import net.pubnative.tarantula.sdk.utils.TarantulaInitializationHelper;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
  */
 
 public class BannerController implements RequestManager.RequestListener, BannerPresenter.Listener {
-    private static final int REFRESH_TIME_SECONDS = 60;
-
     private final BannerPresenterFactory mBannerPresenterFactory;
     private final RequestManager mRequestManager;
+    private final TarantulaInitializationHelper mInitializationHelper;
 
     private BannerView mBannerAdView;
     private BannerPresenter mCurrentBannerPresenter;
@@ -32,14 +32,15 @@ public class BannerController implements RequestManager.RequestListener, BannerP
     private boolean mIsDestroyed;
 
     public BannerController(Context context) {
-        this(new BannerPresenterFactory(context), new BannerRequestManager());
+        this(new BannerPresenterFactory(context), new BannerRequestManager(), new TarantulaInitializationHelper());
     }
 
     BannerController(BannerPresenterFactory bannerPresenterFactory,
-                     RequestManager requestManager) {
+                     RequestManager requestManager, TarantulaInitializationHelper initializationHelper) {
         mBannerPresenterFactory = bannerPresenterFactory;
         mRequestManager = requestManager;
         mRequestManager.setRequestListener(this);
+        mInitializationHelper = initializationHelper;
     }
 
     public void setListener(BannerView.Listener listener) {
@@ -47,7 +48,7 @@ public class BannerController implements RequestManager.RequestListener, BannerP
     }
 
     public void load(String zoneId, BannerView bannerAdView) {
-        if (!CheckUtils.NoThrow.checkArgument(Tarantula.isInitialized(), "Tarantula SDK has not been initialized. " +
+        if (!CheckUtils.NoThrow.checkArgument(mInitializationHelper.isInitialized(), "Tarantula SDK has not been initialized. " +
                 "Please call Tarantula#initialize in your application's onCreate method.")) {
             return;
         }

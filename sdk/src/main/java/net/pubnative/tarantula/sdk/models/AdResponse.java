@@ -24,6 +24,10 @@ public class AdResponse extends JsonModel {
         String OK    = "ok";
     }
 
+    public AdResponse() {
+
+    }
+
     public AdResponse(JSONObject jsonObject) throws Exception {
 
         fromJson(jsonObject);

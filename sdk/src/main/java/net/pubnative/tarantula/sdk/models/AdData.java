@@ -38,6 +38,10 @@ public class AdData extends JsonModel implements Serializable {
     @BindField
     public Map<String, Object> data;
 
+    public AdData() {
+
+    }
+
     public AdData(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
     }

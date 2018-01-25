@@ -3,6 +3,7 @@ package net.pubnative.tarantula.sdk.banner.presenter;
 import android.content.Context;
 
 import net.pubnative.tarantula.sdk.models.Ad;
+import net.pubnative.tarantula.sdk.models.ApiAssetGroupType;
 import net.pubnative.tarantula.sdk.utils.AdTracker;
 import net.pubnative.tarantula.sdk.utils.Logger;
 
@@ -33,8 +34,8 @@ public class BannerPresenterFactory {
 
     BannerPresenter fromCreativeType(int assetGroupId, Ad ad) {
         switch (assetGroupId) {
-            case 10:
-            case 12: {
+            case ApiAssetGroupType.MRAID_BANNER_1:
+            case ApiAssetGroupType.MRAID_BANNER_2: {
                 return new MraidBannerPresenter(mContext, ad);
             }
             default: {

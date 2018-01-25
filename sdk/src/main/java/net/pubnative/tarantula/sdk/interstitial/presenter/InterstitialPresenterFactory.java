@@ -3,6 +3,7 @@ package net.pubnative.tarantula.sdk.interstitial.presenter;
 import android.app.Activity;
 
 import net.pubnative.tarantula.sdk.models.Ad;
+import net.pubnative.tarantula.sdk.models.ApiAssetGroupType;
 import net.pubnative.tarantula.sdk.utils.AdTracker;
 import net.pubnative.tarantula.sdk.utils.Logger;
 
@@ -37,13 +38,13 @@ public class InterstitialPresenterFactory {
 
     InterstitialPresenter fromCreativeType(int assetGroupId, Ad ad) {
         switch (assetGroupId) {
-            case 21: {
+            case ApiAssetGroupType.MRAID_INTERSTITIAL: {
                 return new MraidInterstitialPresenter(mActivity, ad);
             }
-            case 15:
-            case 18:
-            case 19:
-            case 20: {
+            case ApiAssetGroupType.VAST_INTERSTITIAL_1:
+            case ApiAssetGroupType.VAST_INTERSTITIAL_2:
+            case ApiAssetGroupType.VAST_INTERSTITIAL_3:
+            case ApiAssetGroupType.VAST_INTERSTITIAL_4: {
                 return new VastInterstitialPresenter(mActivity, ad);
             }
             default: {

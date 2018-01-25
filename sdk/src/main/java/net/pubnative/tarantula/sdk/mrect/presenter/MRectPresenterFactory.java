@@ -3,6 +3,7 @@ package net.pubnative.tarantula.sdk.mrect.presenter;
 import android.content.Context;
 
 import net.pubnative.tarantula.sdk.models.Ad;
+import net.pubnative.tarantula.sdk.models.ApiAssetGroupType;
 import net.pubnative.tarantula.sdk.utils.AdTracker;
 import net.pubnative.tarantula.sdk.utils.Logger;
 
@@ -33,7 +34,7 @@ public class MRectPresenterFactory {
 
     MRectPresenter fromCreativeType(int assetGroupId, Ad ad) {
         switch (assetGroupId) {
-            case 8: {
+            case ApiAssetGroupType.MRAID_MRECT: {
                 return new MraidMRectPresenter(mContext, ad);
             }
             default: {

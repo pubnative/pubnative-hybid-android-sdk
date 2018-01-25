@@ -9,6 +9,7 @@ import net.pubnative.tarantula.sdk.interstitial.presenter.InterstitialPresenter;
 import net.pubnative.tarantula.sdk.interstitial.presenter.InterstitialPresenterFactory;
 import net.pubnative.tarantula.sdk.models.Ad;
 import net.pubnative.tarantula.sdk.utils.CheckUtils;
+import net.pubnative.tarantula.sdk.utils.TarantulaInitializationHelper;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
@@ -26,18 +27,20 @@ public class Interstitial implements RequestManager.RequestListener, Interstitia
     private final InterstitialPresenterFactory mInterstitialPresenterFactory;
     private final RequestManager mRequestManager;
     private InterstitialPresenter mInterstitialPresenter;
+    private TarantulaInitializationHelper mInitializationHelper;
     private Listener mListener;
     private boolean mIsDestroyed;
 
     public Interstitial(Activity activity) {
-        this(new InterstitialPresenterFactory(activity), new InterstitialRequestManager());
+        this(new InterstitialPresenterFactory(activity), new InterstitialRequestManager(), new TarantulaInitializationHelper());
     }
 
     Interstitial(InterstitialPresenterFactory interstitialPresenterFactory,
-                 RequestManager requestManager) {
+                 RequestManager requestManager, TarantulaInitializationHelper initializationHelper) {
         mInterstitialPresenterFactory = interstitialPresenterFactory;
         mRequestManager = requestManager;
         mRequestManager.setRequestListener(this);
+        mInitializationHelper = initializationHelper;
     }
 
     public void setListener(Listener listener) {
@@ -45,7 +48,7 @@ public class Interstitial implements RequestManager.RequestListener, Interstitia
     }
 
     public void load(String zoneId) {
-        if (!CheckUtils.NoThrow.checkArgument(Tarantula.isInitialized(), "Tarantula SDK has not been initialized. " +
+        if (!CheckUtils.NoThrow.checkArgument(mInitializationHelper.isInitialized(), "Tarantula SDK has not been initialized. " +
                 "Please call Tarantula#initialize in your application's onCreate method.")) {
             return;
         }
