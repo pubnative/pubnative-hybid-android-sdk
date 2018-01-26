@@ -5,7 +5,7 @@ android {
     compileSdkVersion 27
 
     defaultConfig {
-        applicationId "net.pubnative.tarantula.demo"
+        applicationId "net.pubnative.lite.demo"
         minSdkVersion 16
         targetSdkVersion 27
         versionCode System.getenv("CIRCLE_BUILD_NUM") ? System.getenv("CIRCLE_BUILD_NUM").toInteger() : 1
