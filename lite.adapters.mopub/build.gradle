@@ -27,19 +27,11 @@ android {
     }
 }
 
-configurations{
-    provided
-}
-
-android.libraryVariants.all {
-    variant -> variant.javaCompile.classpath += configurations.provided
-}
-
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:27.0.2'
     implementation project(':lite.sdk')
-    provided('com.mopub:mopub-sdk:4.19.0@aar') {
+    compileOnly('com.mopub:mopub-sdk:4.19.0@aar') {
         transitive = true
         exclude module: 'libAvid-mopub' // To exclude AVID
         exclude module: 'moat-mobile-app-kit' // To exclude Moat
