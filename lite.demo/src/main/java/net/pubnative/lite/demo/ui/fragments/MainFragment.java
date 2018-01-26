@@ -15,7 +15,7 @@ import com.mopub.mobileads.MoPubInterstitial;
 import com.mopub.mobileads.MoPubView;
 
 import net.pubnative.lite.demo.Constants;
-import net.pubnative.tarantula.demo.R;
+import net.pubnative.lite.demo.R;
 import net.pubnative.lite.sdk.api.BannerRequestManager;
 import net.pubnative.lite.sdk.api.InterstitialRequestManager;
 import net.pubnative.lite.sdk.api.MRectRequestManager;

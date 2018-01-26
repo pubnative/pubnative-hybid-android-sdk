@@ -5,6 +5,7 @@ import android.support.multidex.MultiDex;
 import android.support.multidex.MultiDexApplication;
 
 import com.crashlytics.android.Crashlytics;
+
 import io.fabric.sdk.android.Fabric;
 
 import net.pubnative.lite.sdk.PNLite;

@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
-import net.pubnative.tarantula.demo.R;
+import net.pubnative.lite.demo.R;
 
 public class MainActivity extends AppCompatActivity {
 
