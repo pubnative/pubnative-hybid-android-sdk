@@ -15,7 +15,6 @@ public class JsonModelFieldCache {
     }
 
     /**
-     *
      * @param model class that extends PNJSONModel
      * @return true if fields are already cached, false otherwise
      */
@@ -24,7 +23,6 @@ public class JsonModelFieldCache {
     }
 
     /**
-     *
      * @param model class that extends PNJSONModel
      * @return Map with cached field metadata
      */
@@ -33,8 +31,7 @@ public class JsonModelFieldCache {
     }
 
     /**
-     *
-     * @param model class that extends PNJSONModel
+     * @param model  class that extends PNJSONModel
      * @param fields Map with metadata of the class fields
      */
     public static void setFields(Class<?> model, HashMap<String, JsonModel.JsonModelMetadata> fields) {

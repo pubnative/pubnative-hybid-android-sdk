@@ -101,6 +101,7 @@ public class XmlTools {
 
         return xml;
     }
+
     public static Document stringToDocument(String doc) {
         VASTLog.d(TAG, "stringToDocument");
 

@@ -277,7 +277,7 @@ public abstract class JsonModel {
         return object;
     }
 
-    protected  <T extends JsonModel> T castObject(JSONObject object, Class<T> type) throws Exception {
+    protected <T extends JsonModel> T castObject(JSONObject object, Class<T> type) throws Exception {
         if (object == null) {
             return null;
         } else {

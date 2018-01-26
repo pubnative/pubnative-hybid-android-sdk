@@ -11,12 +11,12 @@ public class VASTLog {
 
     public enum LOG_LEVEL {
 
-        verbose (1),
-        debug (2),
-        info (3),
-        warning (4),
-        error (5),
-        none (6);
+        verbose(1),
+        debug(2),
+        info(3),
+        warning(4),
+        error(5),
+        none(6);
 
         private int value;
 
@@ -66,12 +66,12 @@ public class VASTLog {
 
     public static void e(String tag, String msg, Throwable tr) {
         if (LEVEL.getValue() <= LOG_LEVEL.error.getValue()) {
-            Log.e(tag, msg, tr );
+            Log.e(tag, msg, tr);
         }
     }
 
     public static void setLoggingLevel(LOG_LEVEL logLevel) {
-        Log.i(TAG, "Changing logging level from :"+LEVEL+". To:"+logLevel);
+        Log.i(TAG, "Changing logging level from :" + LEVEL + ". To:" + logLevel);
         LEVEL = logLevel;
     }
 

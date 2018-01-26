@@ -29,14 +29,12 @@ public class DefaultMediaPicker implements VASTMediaPicker {
     private int deviceArea;
     private Context context;
 
-    public DefaultMediaPicker(Context context)
-    {
+    public DefaultMediaPicker(Context context) {
         this.context = context;
         setDeviceWidthHeight();
     }
 
-    public DefaultMediaPicker(int width, int height)
-    {
+    public DefaultMediaPicker(int width, int height) {
         setDeviceWidthHeight(width, height);
     }
 
@@ -45,7 +43,7 @@ public class DefaultMediaPicker implements VASTMediaPicker {
     // given a list of MediaFiles, select the most appropriate one.
     public VASTMediaFile pickVideo(List<VASTMediaFile> mediaFiles) {
         //make sure that the list of media files contains the correct attributes
-        if  (mediaFiles == null || prefilterMediaFiles(mediaFiles) == 0) {
+        if (mediaFiles == null || prefilterMediaFiles(mediaFiles) == 0) {
             return null;
         }
         Collections.sort(mediaFiles, new AreaComparator());
@@ -54,7 +52,7 @@ public class DefaultMediaPicker implements VASTMediaPicker {
     }
 
 	/*
-	 * This method filters the list of mediafiles and return the count.
+     * This method filters the list of mediafiles and return the count.
 	 * Validate that the media file objects contain the required attributes for the Default Media Picker processing.
 	 *
 	 * 		Required attributes:
@@ -157,12 +155,12 @@ public class DefaultMediaPicker implements VASTMediaPicker {
             // get the difference between the area of the MediaFile and the area of the screen
             int obj1Diff = Math.abs(obj1Area - deviceArea);
             int obj2Diff = Math.abs(obj2Area - deviceArea);
-            VASTLog.v(TAG, "AreaComparator: obj1:" + obj1Diff +" obj2:" + obj2Diff);
+            VASTLog.v(TAG, "AreaComparator: obj1:" + obj1Diff + " obj2:" + obj2Diff);
 
             // choose the MediaFile which has the lower difference in area
-            if(obj1Diff < obj2Diff) {
+            if (obj1Diff < obj2Diff) {
                 return -1;
-            } else if(obj1Diff > obj2Diff) {
+            } else if (obj1Diff > obj2Diff) {
                 return 1;
             } else {
                 return 0;

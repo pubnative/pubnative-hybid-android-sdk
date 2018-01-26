@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
-import net.pubnative.tarantula.sdk.R;
+import net.pubnative.lite.sdk.R;
 import net.pubnative.lite.sdk.interstitial.presenter.InterstitialActivityPresenter;
 import net.pubnative.lite.sdk.interstitial.view.InterstitialActivityViewModule;
 import net.pubnative.lite.sdk.interstitial.view.InterstitialActivityViewModuleImpl;

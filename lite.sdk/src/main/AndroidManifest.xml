@@ -1,10 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="net.pubnative.lite.sdk" >
+    package="net.pubnative.lite.sdk">
+
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application>
-        <activity android:name="net.pubnative.lite.sdk.interstitial.activity.InterstitialActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"/>
+        <activity
+            android:name="net.pubnative.lite.sdk.interstitial.activity.InterstitialActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity android:name="net.pubnative.lite.sdk.interstitial.vast.activity.VASTActivity" />
     </application>
 </manifest>

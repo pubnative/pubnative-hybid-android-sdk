@@ -58,7 +58,7 @@ public class PNAdvertisingIdClient {
                 }
 
                 String advertisingId = null;
-                if(adInfo != null) {
+                if (adInfo != null) {
                     if (adInfo.isLimitAdTrackingEnabled()) {
                         Log.i(TAG, "Error: cannot get advertising id, limit ad tracking is enabled");
                     } else {
@@ -75,7 +75,7 @@ public class PNAdvertisingIdClient {
         mHadler.post(new Runnable() {
             @Override
             public void run() {
-                if(mListener != null) {
+                if (mListener != null) {
                     mListener.onPNAdvertisingIdFinish(advertisingId);
                 }
             }
@@ -127,11 +127,14 @@ public class PNAdvertisingIdClient {
             }
         }
 
-        public void onServiceDisconnected(ComponentName name) {}
+        public void onServiceDisconnected(ComponentName name) {
+        }
 
         public IBinder getBinder() throws InterruptedException {
 
-            if (this.retrieved) { throw new IllegalStateException(); }
+            if (this.retrieved) {
+                throw new IllegalStateException();
+            }
             this.retrieved = true;
             return this.queue.take();
         }

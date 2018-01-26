@@ -19,8 +19,8 @@ public class MRectPresenterDecorator implements MRectPresenter, MRectPresenter.L
     private boolean mIsDestroyed;
 
     public MRectPresenterDecorator(MRectPresenter mRectPresenter,
-                                    AdTracker adTrackingDelegate,
-                                    MRectPresenter.Listener listener) {
+                                   AdTracker adTrackingDelegate,
+                                   MRectPresenter.Listener listener) {
         mMRectPresenter = mRectPresenter;
         mAdTrackingDelegate = adTrackingDelegate;
         mListener = listener;

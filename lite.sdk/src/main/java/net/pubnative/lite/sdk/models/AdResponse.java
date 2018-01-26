@@ -21,7 +21,7 @@ public class AdResponse extends JsonModel {
     public interface Status {
 
         String ERROR = "error";
-        String OK    = "ok";
+        String OK = "ok";
     }
 
     public AdResponse() {

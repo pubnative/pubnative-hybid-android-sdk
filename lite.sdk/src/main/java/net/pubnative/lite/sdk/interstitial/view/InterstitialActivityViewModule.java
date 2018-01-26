@@ -7,10 +7,13 @@ package net.pubnative.lite.sdk.interstitial.view;
 public interface InterstitialActivityViewModule {
     interface Listener {
         void onInterstitialClicked();
+
         void onDismissClicked();
     }
 
     void setListener(Listener listener);
+
     void show(String html);
+
     void destroy();
 }

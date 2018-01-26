@@ -5,13 +5,13 @@ package net.pubnative.lite.sdk.models;
  */
 public interface APIAsset {
 
-    String TITLE           = "title";
-    String DESCRIPTION     = "description";
-    String CALL_TO_ACTION  = "cta";
-    String RATING          = "rating";
-    String ICON            = "icon";
-    String BANNER          = "banner";
+    String TITLE = "title";
+    String DESCRIPTION = "description";
+    String CALL_TO_ACTION = "cta";
+    String RATING = "rating";
+    String ICON = "icon";
+    String BANNER = "banner";
     String STANDARD_BANNER = "standardbanner";
-    String HTML_BANNER     = "htmlbanner";
-    String VAST            = "vast2";
+    String HTML_BANNER = "htmlbanner";
+    String VAST = "vast2";
 }

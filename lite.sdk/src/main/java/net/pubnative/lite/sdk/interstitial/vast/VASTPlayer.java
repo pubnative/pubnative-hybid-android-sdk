@@ -28,22 +28,26 @@ public class VASTPlayer {
 
     // errors that can be returned in the vastError callback method of the
     // VASTPlayerListener
-    public static final int ERROR_NONE                   = 0;
-    public static final int ERROR_NO_NETWORK             = 1;
-    public static final int ERROR_XML_OPEN_OR_READ       = 2;
-    public static final int ERROR_XML_PARSE              = 3;
-    public static final int ERROR_SCHEMA_VALIDATION      = 4; // not used in SDK, only in sourcekit
-    public static final int ERROR_POST_VALIDATION        = 5;
+    public static final int ERROR_NONE = 0;
+    public static final int ERROR_NO_NETWORK = 1;
+    public static final int ERROR_XML_OPEN_OR_READ = 2;
+    public static final int ERROR_XML_PARSE = 3;
+    public static final int ERROR_SCHEMA_VALIDATION = 4; // not used in SDK, only in sourcekit
+    public static final int ERROR_POST_VALIDATION = 5;
     public static final int ERROR_EXCEEDED_WRAPPER_LIMIT = 6;
-    public static final int ERROR_VIDEO_PLAYBACK		 = 7;
+    public static final int ERROR_VIDEO_PLAYBACK = 7;
 
     private Context context;
 
     public interface VASTPlayerListener {
         void vastReady();
+
         void vastError(int error);
+
         void vastClick();
+
         void vastComplete();
+
         void vastDismiss();
     }
 
@@ -111,8 +115,7 @@ public class VASTPlayer {
                     }
                 }
             })).start();
-        }
-        else {
+        } else {
             sendError(ERROR_NO_NETWORK);
         }
     }
@@ -135,7 +138,7 @@ public class VASTPlayer {
     private void sendReady() {
         VASTLog.d(TAG, "sendReady");
         if (listener != null) {
-            ((Activity)context).runOnUiThread(new Runnable() {
+            ((Activity) context).runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     listener.vastReady();
@@ -147,7 +150,7 @@ public class VASTPlayer {
     private void sendError(final int error) {
         VASTLog.d(TAG, "sendError");
         if (listener != null) {
-            ((Activity)context).runOnUiThread(new Runnable() {
+            ((Activity) context).runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     listener.vastError(error);

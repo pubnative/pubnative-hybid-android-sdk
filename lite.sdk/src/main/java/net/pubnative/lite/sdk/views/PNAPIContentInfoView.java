@@ -14,7 +14,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import net.pubnative.tarantula.sdk.R;
+import net.pubnative.lite.sdk.R;
 import net.pubnative.lite.sdk.utils.PNBitmapDownloader;
 
 public class PNAPIContentInfoView extends RelativeLayout implements View.OnClickListener {

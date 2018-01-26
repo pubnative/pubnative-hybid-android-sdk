@@ -422,7 +422,7 @@ public class VASTActivity extends Activity implements MediaPlayer.OnCompletionLi
 
     }
 
-    private void activateButtons (boolean active) {
+    private void activateButtons(boolean active) {
         VASTLog.d(TAG, "entered activateButtons:");
 
         if (active) {
@@ -433,10 +433,11 @@ public class VASTActivity extends Activity implements MediaPlayer.OnCompletionLi
 
 
     }
+
     private void processClickThroughEvent() {
         VASTLog.d(TAG, "entered processClickThroughEvent:");
 
-        if(VASTPlayer.listener!=null) {
+        if (VASTPlayer.listener != null) {
             VASTPlayer.listener.vastClick();
         }
 
@@ -453,9 +454,9 @@ public class VASTActivity extends Activity implements MediaPlayer.OnCompletionLi
             Uri uri = Uri.parse(clickThroughUrl);
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
             final List<ResolveInfo> resolveInfos = getPackageManager().queryIntentActivities(intent, 0);
-            if(resolveInfos.isEmpty()) {
+            if (resolveInfos.isEmpty()) {
                 VASTLog.e(TAG, "Clickthrough error occured, uri unresolvable");
-                if (mCurrentVideoPosition>=mMediaPlayer.getCurrentPosition()*0.99) {
+                if (mCurrentVideoPosition >= mMediaPlayer.getCurrentPosition() * 0.99) {
                     mMediaPlayer.start();
                 }
                 activateButtons(true);
@@ -484,7 +485,7 @@ public class VASTActivity extends Activity implements MediaPlayer.OnCompletionLi
 
     private void playPauseButtonClicked() {
         VASTLog.d(TAG, "entered playPauseClicked");
-        if(mMediaPlayer==null) {
+        if (mMediaPlayer == null) {
             VASTLog.e(TAG, "mMediaPlayer is null when playPauseButton was clicked");
             return;
         }
@@ -495,10 +496,10 @@ public class VASTActivity extends Activity implements MediaPlayer.OnCompletionLi
             //pause
             processPauseSteps();
 
-        } else if(mIsVideoPaused) {
+        } else if (mIsVideoPaused) {
             //play
             this.processPlaySteps();
-            if(!mIsCompleted) {
+            if (!mIsCompleted) {
                 this.processEvent(TRACKING_EVENTS_TYPE.resume);
             }
         } else {
@@ -515,7 +516,7 @@ public class VASTActivity extends Activity implements MediaPlayer.OnCompletionLi
         this.stopVideoProgressTimer();
         this.stopToolBarTimer();
         mPlayPauseButton.setImageDrawable(mPlayDrawable);
-        if(!mIsCompleted) {
+        if (!mIsCompleted) {
             this.processEvent(TRACKING_EVENTS_TYPE.pause);
         }
     }
@@ -540,7 +541,7 @@ public class VASTActivity extends Activity implements MediaPlayer.OnCompletionLi
     public void surfaceCreated(SurfaceHolder holder) {
         VASTLog.d(TAG, "surfaceCreated -- (SurfaceHolder callback)");
         try {
-            if(mMediaPlayer==null) {
+            if (mMediaPlayer == null) {
                 createMediaPlayer();
             }
             this.showProgressBar();
@@ -616,7 +617,7 @@ public class VASTActivity extends Activity implements MediaPlayer.OnCompletionLi
         startQuartileTimer();
         startToolBarTimer();
 
-        if(!mMediaPlayer.isPlaying() && !mIsVideoPaused) {
+        if (!mMediaPlayer.isPlaying() && !mIsVideoPaused) {
             mMediaPlayer.start();
         }
     }
@@ -625,7 +626,7 @@ public class VASTActivity extends Activity implements MediaPlayer.OnCompletionLi
     private void calculateAspectRatio() {
         VASTLog.d(TAG, "entered calculateAspectRatio");
 
-        if ( mVideoWidth == 0 || mVideoHeight == 0 ) {
+        if (mVideoWidth == 0 || mVideoHeight == 0) {
             VASTLog.w(TAG, "mVideoWidth or mVideoHeight is 0, skipping calculateAspectRatio");
             return;
         }
@@ -690,7 +691,7 @@ public class VASTActivity extends Activity implements MediaPlayer.OnCompletionLi
     public boolean onError(MediaPlayer mp, int what, int extra) {
         VASTLog.e(TAG, "entered onError -- (MediaPlayer callback)");
         mIsPlayBackError = true;
-        VASTLog.e(TAG, "Shutting down Activity due to Media Player errors: WHAT:" + what +": EXTRA:" + extra+":");
+        VASTLog.e(TAG, "Shutting down Activity due to Media Player errors: WHAT:" + what + ": EXTRA:" + extra + ":");
 
         processErrorEvent();
         this.closeClicked();
@@ -705,6 +706,7 @@ public class VASTActivity extends Activity implements MediaPlayer.OnCompletionLi
         fireUrls(errorUrls);
 
     }
+
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
         VASTLog
@@ -713,11 +715,11 @@ public class VASTActivity extends Activity implements MediaPlayer.OnCompletionLi
         stopToolBarTimer();
         mButtonPanel.setVisibility(View.VISIBLE);
         mPlayPauseButton.setImageDrawable(mPlayDrawable);
-        if ( !mIsPlayBackError && !mIsCompleted) {
+        if (!mIsPlayBackError && !mIsCompleted) {
             mIsCompleted = true;
             this.processEvent(TRACKING_EVENTS_TYPE.complete);
 
-            if(VASTPlayer.listener!=null) {
+            if (VASTPlayer.listener != null) {
                 VASTPlayer.listener.vastComplete();
             }
         }
@@ -747,10 +749,9 @@ public class VASTActivity extends Activity implements MediaPlayer.OnCompletionLi
                 HttpTools.httpGetURL(url);
             }
 
-        }else {
+        } else {
             VASTLog.d(TAG, "\turl list is null");
         }
-
 
 
     }
@@ -759,11 +760,11 @@ public class VASTActivity extends Activity implements MediaPlayer.OnCompletionLi
 
     private void startToolBarTimer() {
         VASTLog.d(TAG, "entered startToolBarTimer");
-        if(mQuartile==4) {
+        if (mQuartile == 4) {
             // we are at the end of the video, we dont want ot ever hide the toolbar now
             return;
         }
-        if (mMediaPlayer!= null && mMediaPlayer.isPlaying()) {
+        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
             stopToolBarTimer();
             mToolBarTimer = new Timer();
             mToolBarTimer.schedule(new TimerTask() {
@@ -798,7 +799,7 @@ public class VASTActivity extends Activity implements MediaPlayer.OnCompletionLi
         VASTLog.d(TAG, "entered startQuartileTimer");
         stopQuartileTimer();
 
-        if(mIsCompleted) {
+        if (mIsCompleted) {
             VASTLog.d(TAG, "ending quartileTimer becuase the video has been replayed");
             return;
         }
@@ -882,7 +883,7 @@ public class VASTActivity extends Activity implements MediaPlayer.OnCompletionLi
                     int lastPosition = mVideoProgressTracker.getLast();
 
                     if (lastPosition > firstPosition) {
-                        VASTLog.v(TAG, "video progressing (position:"+lastPosition+")");
+                        VASTLog.v(TAG, "video progressing (position:" + lastPosition + ")");
                         mVideoProgressTracker.removeFirst();
                     } else {
                         VASTLog.e(TAG, "detected video hang");

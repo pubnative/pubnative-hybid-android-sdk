@@ -14,10 +14,10 @@ import net.pubnative.lite.sdk.utils.PNLocalBroadcastManager;
 
 public class InterstitialBroadcastReceiver extends BroadcastReceiver {
     public static final String BROADCAST_ID = "broadcastId";
-    public static final String INTERSTITIAL_SHOW = "net.pubnative.tarantula.interstitial.show";
-    public static final String INTERSTITIAL_CLICK = "net.pubnative.tarantula.interstitial.click";
-    public static final String INTERSTITIAL_DISMISS = "net.pubnative.tarantula.interstitial.dismiss";
-    public static final String INTERSTITIAL_ERROR = "net.pubnative.tarantula.interstitial.error";
+    public static final String INTERSTITIAL_SHOW = "net.pubnative.lite.interstitial.show";
+    public static final String INTERSTITIAL_CLICK = "net.pubnative.lite.interstitial.click";
+    public static final String INTERSTITIAL_DISMISS = "net.pubnative.lite.interstitial.dismiss";
+    public static final String INTERSTITIAL_ERROR = "net.pubnative.lite.interstitial.error";
 
     private final Context mContext;
     private final InterstitialPresenter mInterstitialPresenter;

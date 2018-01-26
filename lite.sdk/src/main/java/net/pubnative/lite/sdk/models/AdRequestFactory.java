@@ -54,7 +54,7 @@ public class AdRequestFactory {
     }
 
     private String getDefaultMetaFields() {
-        String[] metaFields = new String[] {APIMeta.POINTS, APIMeta.REVENUE_MODEL, APIMeta.CONTENT_INFO};
+        String[] metaFields = new String[]{APIMeta.POINTS, APIMeta.REVENUE_MODEL, APIMeta.CONTENT_INFO};
         String result = TextUtils.join(",", metaFields);
         return result;
     }

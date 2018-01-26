@@ -102,8 +102,7 @@ public final class PNLocalBroadcastManager {
      * Register a receive for any local broadcasts that match the given IntentFilter.
      *
      * @param receiver The BroadcastReceiver to handle the broadcast.
-     * @param filter Selects the Intent broadcasts to be received.
-     *
+     * @param filter   Selects the Intent broadcasts to be received.
      * @see #unregisterReceiver
      */
     public void registerReceiver(BroadcastReceiver receiver,
@@ -116,7 +115,7 @@ public final class PNLocalBroadcastManager {
                 mReceivers.put(receiver, filters);
             }
             filters.add(entry);
-            for (int i=0; i<filter.countActions(); i++) {
+            for (int i = 0; i < filter.countActions(); i++) {
                 String action = filter.getAction(i);
                 ArrayList<ReceiverRecord> entries = mActions.get(action);
                 if (entries == null) {
@@ -134,7 +133,6 @@ public final class PNLocalBroadcastManager {
      * removed.
      *
      * @param receiver The BroadcastReceiver to unregister.
-     *
      * @see #registerReceiver
      */
     public void unregisterReceiver(BroadcastReceiver receiver) {
@@ -143,14 +141,14 @@ public final class PNLocalBroadcastManager {
             if (filters == null) {
                 return;
             }
-            for (int i=filters.size()-1; i>=0; i--) {
+            for (int i = filters.size() - 1; i >= 0; i--) {
                 final ReceiverRecord filter = filters.get(i);
                 filter.dead = true;
-                for (int j=0; j<filter.filter.countActions(); j++) {
+                for (int j = 0; j < filter.filter.countActions(); j++) {
                     final String action = filter.filter.getAction(j);
                     final ArrayList<ReceiverRecord> receivers = mActions.get(action);
                     if (receivers != null) {
-                        for (int k=receivers.size()-1; k>=0; k--) {
+                        for (int k = receivers.size() - 1; k >= 0; k--) {
                             final ReceiverRecord rec = receivers.get(k);
                             if (rec.receiver == receiver) {
                                 rec.dead = true;
@@ -172,13 +170,11 @@ public final class PNLocalBroadcastManager {
      * executing while the receivers are run.
      *
      * @param intent The Intent to broadcast; all receivers matching this
-     *     Intent will receive the broadcast.
-     *
-     * @see #registerReceiver
-     *
+     *               Intent will receive the broadcast.
      * @return Returns true if the intent has been scheduled for delivery to one or more
      * broadcast receivers.  (Note tha delivery may not ultimately take place if one of those
      * receivers is unregistered before it is dispatched.)
+     * @see #registerReceiver
      */
     public boolean sendBroadcast(Intent intent) {
         synchronized (mReceivers) {
@@ -200,7 +196,7 @@ public final class PNLocalBroadcastManager {
                 if (debug) Log.v(TAG, "Action list: " + entries);
 
                 ArrayList<ReceiverRecord> receivers = null;
-                for (int i=0; i<entries.size(); i++) {
+                for (int i = 0; i < entries.size(); i++) {
                     ReceiverRecord receiver = entries.get(i);
                     if (debug) Log.v(TAG, "Matching against filter " + receiver.filter);
 
@@ -225,11 +221,21 @@ public final class PNLocalBroadcastManager {
                         if (debug) {
                             String reason;
                             switch (match) {
-                                case IntentFilter.NO_MATCH_ACTION: reason = "action"; break;
-                                case IntentFilter.NO_MATCH_CATEGORY: reason = "category"; break;
-                                case IntentFilter.NO_MATCH_DATA: reason = "data"; break;
-                                case IntentFilter.NO_MATCH_TYPE: reason = "type"; break;
-                                default: reason = "unknown reason"; break;
+                                case IntentFilter.NO_MATCH_ACTION:
+                                    reason = "action";
+                                    break;
+                                case IntentFilter.NO_MATCH_CATEGORY:
+                                    reason = "category";
+                                    break;
+                                case IntentFilter.NO_MATCH_DATA:
+                                    reason = "data";
+                                    break;
+                                case IntentFilter.NO_MATCH_TYPE:
+                                    reason = "type";
+                                    break;
+                                default:
+                                    reason = "unknown reason";
+                                    break;
                             }
                             Log.v(TAG, "  Filter did not match: " + reason);
                         }
@@ -237,7 +243,7 @@ public final class PNLocalBroadcastManager {
                 }
 
                 if (receivers != null) {
-                    for (int i=0; i<receivers.size(); i++) {
+                    for (int i = 0; i < receivers.size(); i++) {
                         receivers.get(i).broadcasting = false;
                     }
                     mPendingBroadcasts.add(new BroadcastRecord(intent, receivers));
@@ -274,10 +280,10 @@ public final class PNLocalBroadcastManager {
                 mPendingBroadcasts.toArray(brs);
                 mPendingBroadcasts.clear();
             }
-            for (int i=0; i<brs.length; i++) {
+            for (int i = 0; i < brs.length; i++) {
                 final BroadcastRecord br = brs[i];
                 final int nbr = br.receivers.size();
-                for (int j=0; j<nbr; j++) {
+                for (int j = 0; j < nbr; j++) {
                     final ReceiverRecord rec = br.receivers.get(j);
                     if (!rec.dead) {
                         rec.receiver.onReceive(mAppContext, br.intent);

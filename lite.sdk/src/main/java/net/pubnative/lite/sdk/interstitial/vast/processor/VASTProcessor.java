@@ -26,7 +26,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 /**
  * This class is responsible for taking a VAST 2.0 XML file, parsing it,
  * validating it, and creating a valid VASTModel object corresponding to it.
- *
+ * <p>
  * It can handle "regular" VAST XML files as well as VAST wrapper files.
  */
 public class VASTProcessor {
@@ -88,16 +88,17 @@ public class VASTProcessor {
 
     private Document wrapMergedVastDocWithVasts() {
         VASTLog.d(TAG, "wrapmergedVastDocWithVasts");
-        mergedVastDocs.insert(0,"<VASTS>");
+        mergedVastDocs.insert(0, "<VASTS>");
         mergedVastDocs.append("</VASTS>");
 
         String merged = mergedVastDocs.toString();
-        VASTLog.v(TAG, "Merged VAST doc:\n"+merged);
+        VASTLog.v(TAG, "Merged VAST doc:\n" + merged);
 
         Document doc = XmlTools.stringToDocument(merged);
         return doc;
 
     }
+
     private int processUri(InputStream is, int depth) {
         VASTLog.d(TAG, "processUri");
 
@@ -144,7 +145,6 @@ public class VASTProcessor {
             return error;
         }
     }
-
 
 
     private Document createDoc(InputStream is) {

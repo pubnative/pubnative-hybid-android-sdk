@@ -25,7 +25,7 @@ public class TestUtil {
         request.al = "s";
         request.gid = "d98374d3-3b69-4a4b-a2c1-9dcb4c588849";
         request.zoneid = "2";
-        request.bundleid = "net.pubnative.tarantula.demo";
+        request.bundleid = "net.pubnative.lite.demo";
         request.testMode = "0";
         request.locale = "en";
         request.gidmd5 = "e74483c4b5e6dc78e088d9fb0243ae66";

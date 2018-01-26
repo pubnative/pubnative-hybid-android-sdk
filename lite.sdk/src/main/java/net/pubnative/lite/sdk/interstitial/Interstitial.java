@@ -17,9 +17,13 @@ import net.pubnative.lite.sdk.utils.PNInitializationHelper;
 public class Interstitial implements RequestManager.RequestListener, InterstitialPresenter.Listener {
     public interface Listener {
         void onInterstitialLoaded(Interstitial interstitial);
+
         void onInterstitialShown(Interstitial interstitial);
+
         void onInterstitialClicked(Interstitial interstitial);
+
         void onInterstitialDismissed(Interstitial interstitial);
+
         void onInterstitialError(Interstitial interstitial);
     }
 

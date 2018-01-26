@@ -102,7 +102,7 @@ public class PNWebView extends WebView {
 
     /**
      * Fixes issue: https://code.google.com/p/android/issues/detail?id=63754
-     *
+     * <p>
      * On KitKat, when a WebView with HTML5 video is is destroyed it can deadlock the WebView thread until another
      * hardware accelerated WebView is added to the view hierarchy.
      */

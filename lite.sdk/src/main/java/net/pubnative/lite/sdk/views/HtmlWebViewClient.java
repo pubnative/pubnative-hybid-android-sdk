@@ -10,7 +10,7 @@ import net.pubnative.lite.sdk.utils.UrlHandler;
  * Created by erosgarciaponte on 08.01.18.
  */
 
-public class HtmlWebViewClient extends WebViewClient{
+public class HtmlWebViewClient extends WebViewClient {
     private final UrlHandler mUrlHandler;
 
     public HtmlWebViewClient(Context context) {

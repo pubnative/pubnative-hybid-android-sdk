@@ -72,7 +72,8 @@ public class Ad extends JsonModel implements Serializable {
         String CLICK = "click";
     }
 
-    public Ad() {}
+    public Ad() {
+    }
 
     public Ad(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);

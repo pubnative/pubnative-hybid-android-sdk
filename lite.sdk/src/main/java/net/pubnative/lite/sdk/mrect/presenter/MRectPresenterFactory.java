@@ -20,7 +20,7 @@ public class MRectPresenterFactory {
     }
 
     public MRectPresenter createMRectPresenter(Ad ad,
-                                                 MRectPresenter.Listener mRectPresenterListener) {
+                                               MRectPresenter.Listener mRectPresenterListener) {
         final MRectPresenter mRectPresenter = fromCreativeType(ad.assetgroupid, ad);
         if (mRectPresenter == null) {
             return null;

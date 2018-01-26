@@ -16,7 +16,6 @@ public class VASTModelPostValidator {
     private static final String TAG = VASTModelPostValidator.class.getSimpleName();
 
 
-
     // This method tries to make sure that there is at least 1 Media file to
     // be used for VASTActivity. Also, if the boolean validateModel is true, it will
     // do additional validations which includes "at least 1 impression tracking url's is required'
@@ -50,12 +49,11 @@ public class VASTModelPostValidator {
                 }
             }
 
-        }
-        else {
+        } else {
             VASTLog.w(TAG, "mediaPicker: We don't have a compatible media file to play.");
         }
 
-        VASTLog.d(TAG, "Validator returns: " + (isValid?"valid":"not valid (no media file)"));
+        VASTLog.d(TAG, "Validator returns: " + (isValid ? "valid" : "not valid (no media file)"));
 
         return isValid;
     }
