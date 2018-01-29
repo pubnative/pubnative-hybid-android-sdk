@@ -55,7 +55,7 @@ publishing {
             groupId project.group
             artifactId project.name
             version version_name
-            if (System.getenv("CIRCLE_BRANCH") == "master") {
+            if (!System.getenv("IS_BETA")) {
                 artifact sourcesJar
             }
             android.libraryVariants.all { variant ->
@@ -76,6 +76,7 @@ publishing {
         }
     }
 }
+
 //----------------------------------------------------------------------------------------------
 // BINTRAY
 //----------------------------------------------------------------------------------------------
