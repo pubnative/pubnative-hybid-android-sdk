@@ -23,7 +23,7 @@ class SettingsManager private constructor(application: Application) {
         preferences.edit().putBoolean(SETTINGS_KEY_INITIALISED, initialised).apply()
     }
 
-    fun isInitialised() : Boolean {
+    fun isInitialised(): Boolean {
         return preferences.getBoolean(SETTINGS_KEY_INITIALISED, false)
     }
 
@@ -55,6 +55,18 @@ class SettingsManager private constructor(application: Application) {
         preferences.edit().putStringSet(SETTINGS_KEY_KEYWORDS, keywords.toSet()).apply()
     }
 
+    fun setMoPubBannerAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_MOPUB_BANNER_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setMoPubMediumAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_MOPUB_MEDIUM_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setMoPubInterstitialAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_MOPUB_INTERSTITIAL_AD_UNIT_ID, adUnitId).apply()
+    }
+
     fun setSettings(model: SettingsModel, asynchronously: Boolean) {
         val editor = preferences.edit()
         editor.putString(SETTINGS_KEY_APP_TOKEN, model.appToken)
@@ -64,6 +76,9 @@ class SettingsManager private constructor(application: Application) {
         editor.putString(SETTINGS_KEY_AGE, model.age)
         editor.putStringSet(SETTINGS_KEY_ZONE_ID_LIST, model.zoneIds.toSet())
         editor.putStringSet(SETTINGS_KEY_KEYWORDS, model.keywords.toSet())
+        editor.putString(SETTINGS_KEY_MOPUB_BANNER_AD_UNIT_ID, model.mopubBannerAdUnitId)
+        editor.putString(SETTINGS_KEY_MOPUB_MEDIUM_AD_UNIT_ID, model.mopubMediumAdUnitId)
+        editor.putString(SETTINGS_KEY_MOPUB_INTERSTITIAL_AD_UNIT_ID, model.mopubInterstitialAdUnitId)
 
         editor.putBoolean(SETTINGS_KEY_INITIALISED, true)
 
@@ -82,8 +97,12 @@ class SettingsManager private constructor(application: Application) {
         val keywords = preferences.getStringSet(SETTINGS_KEY_KEYWORDS, emptySet()).toList()
         val coppa = preferences.getBoolean(SETTINGS_KEY_COPPA, false)
         val testMode = preferences.getBoolean(SETTINGS_KEY_TEST_MODE, false)
+        val mopubBannerAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_BANNER_AD_UNIT_ID, "")
+        val mopubMediumAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_MEDIUM_AD_UNIT_ID, "")
+        val mopubInterstitialAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_INTERSTITIAL_AD_UNIT_ID, "")
 
-        val model = SettingsModel(appToken, zoneIds, gender, age, keywords, coppa, testMode)
+        val model = SettingsModel(appToken, zoneIds, gender, age, keywords, coppa, testMode,
+                mopubBannerAdUnitId, mopubMediumAdUnitId, mopubInterstitialAdUnitId)
         return model
     }
 }

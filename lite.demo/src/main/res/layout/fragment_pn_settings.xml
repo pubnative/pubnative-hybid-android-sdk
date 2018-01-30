@@ -1,10 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:layout_height="wrap_content"
     tools:context="net.pubnative.lite.demo.ui.fragments.PNSettingsFragment"
     tools:showIn="@layout/activity_pn_settings">
 
-</LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/input_pn_apptoken"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:hint="@string/hint_pn_apptoken" />
+        </android.support.design.widget.TextInputLayout>
+
+        <Switch
+            android:id="@+id/check_coppa"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/check_coppa"
+            android:layout_marginTop="6dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"/>
+
+        <Switch
+            android:id="@+id/check_test_mode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/check_test_mode"
+            android:layout_marginTop="6dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"/>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/input_pn_age"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:hint="@string/hint_pn_age" />
+        </android.support.design.widget.TextInputLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:text="@string/title_pn_gender"/>
+        <RadioGroup
+            android:id="@+id/groud_gender"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="2dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp">
+            <RadioButton
+                android:id="@+id/radio_gender_not_set"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/radio_gender_not_set"
+                android:layout_weight="1"/>
+            <RadioButton
+                android:id="@+id/radio_gender_male"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/radio_gender_male"
+                android:layout_weight="1"/>
+            <RadioButton
+                android:id="@+id/radio_gender_female"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/radio_gender_female"
+                android:layout_weight="1"/>
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/button_keywords"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:text="@string/title_pn_keywords"/>
+
+        <Button
+            android:id="@+id/button_zone_ids"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:text="@string/title_pn_zone_ids"/>
+
+        <Button
+            android:id="@+id/button_save_pn_settings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/save_pn_settings" />
+
+    </LinearLayout>
+
+</ScrollView>

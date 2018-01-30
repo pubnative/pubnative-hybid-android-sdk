@@ -75,7 +75,10 @@ public class PNLiteDemoApplication extends MultiDexApplication {
                     "",
                     new ArrayList<String>(),
                     false,
-                    true);
+                    true,
+                    Constants.MOPUB_MRAID_BANNER_AD_UNIT,
+                    Constants.MOPUB_MRAID_MEDIUM_AD_UNIT,
+                    Constants.MOPUB_MRAID_INTERSTITIAL_AD_UNIT);
             manager.setSettings(model, true);
         }
 

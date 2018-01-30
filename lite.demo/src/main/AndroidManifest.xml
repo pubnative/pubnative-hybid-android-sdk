@@ -27,25 +27,40 @@
 
         <activity
             android:name=".ui.activities.BannerActivity"
+            android:label="@string/banner"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.MRectActivity"
+            android:label="@string/medium"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.InterstitialActivity"
+            android:label="@string/interstitial"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.PNSettingsActivity"
-            android:screenOrientation="portrait"
             android:label="@string/pn_settings"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.activities.MoPubSettingsActivity"
-            android:screenOrientation="portrait"
             android:label="@string/mopub_settings"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".ui.activities.KeywordsActivity"
+            android:label="@string/title_pn_keywords"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.ZoneIdsActivity"
+            android:label="@string/title_pn_zone_ids"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
