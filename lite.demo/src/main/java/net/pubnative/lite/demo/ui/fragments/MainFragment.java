@@ -1,5 +1,6 @@
 package net.pubnative.lite.demo.ui.fragments;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -16,6 +17,7 @@ import com.mopub.mobileads.MoPubView;
 
 import net.pubnative.lite.demo.Constants;
 import net.pubnative.lite.demo.R;
+import net.pubnative.lite.demo.ui.activities.InterstitialActivity;
 import net.pubnative.lite.sdk.api.BannerRequestManager;
 import net.pubnative.lite.sdk.api.InterstitialRequestManager;
 import net.pubnative.lite.sdk.api.MRectRequestManager;
@@ -26,15 +28,13 @@ import net.pubnative.lite.sdk.utils.PrebidUtils;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainFragment extends Fragment implements MoPubInterstitial.InterstitialAdListener {
+public class MainFragment extends Fragment {
 
     private MoPubView mMopubBanner;
     private MoPubView mMopubMRect;
-    private MoPubInterstitial mMraidInterstitial;
 
     private RequestManager mBannerRequestManager;
     private RequestManager mMRectRequestManager;
-    private RequestManager mMraidInterstitialRequestManager;
 
     public MainFragment() {
     }
@@ -44,7 +44,6 @@ public class MainFragment extends Fragment implements MoPubInterstitial.Intersti
         super.onCreate(savedInstanceState);
         mBannerRequestManager = new BannerRequestManager();
         mMRectRequestManager = new MRectRequestManager();
-        mMraidInterstitialRequestManager = new InterstitialRequestManager();
     }
 
     @Override
@@ -65,9 +64,6 @@ public class MainFragment extends Fragment implements MoPubInterstitial.Intersti
         mMopubMRect.setBannerAdListener(mMRectListener);
         mMopubMRect.setAutorefreshEnabled(false);
 
-        mMraidInterstitial = new MoPubInterstitial(getActivity(), Constants.MOPUB_MRAID_INTERSTITIAL_AD_UNIT);
-        mMraidInterstitial.setInterstitialAdListener(this);
-
         view.findViewById(R.id.button_banner_mraid).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -87,8 +83,9 @@ public class MainFragment extends Fragment implements MoPubInterstitial.Intersti
         view.findViewById(R.id.button_interstitial_mraid).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loadMraidInterstitial();
-                Answers.getInstance().logCustom(new CustomEvent("request_mraid_interstitial"));
+                Intent intent = new Intent(getActivity(), InterstitialActivity.class);
+                intent.putExtra("zone_id", Constants.INTERSTITIAL_MRAID_ZONE_ID);
+                startActivity(intent);
             }
         });
     }
@@ -98,7 +95,6 @@ public class MainFragment extends Fragment implements MoPubInterstitial.Intersti
         super.onDestroy();
         mMopubBanner.destroy();
         mMopubMRect.destroy();
-        mMraidInterstitial.destroy();
     }
 
     private void loadMraidBanner() {
@@ -137,24 +133,6 @@ public class MainFragment extends Fragment implements MoPubInterstitial.Intersti
         });
 
         mMRectRequestManager.requestAd();
-    }
-
-    private void loadMraidInterstitial() {
-        mMraidInterstitialRequestManager.setZoneId(Constants.INTERSTITIAL_MRAID_ZONE_ID);
-        mMraidInterstitialRequestManager.setRequestListener(new RequestManager.RequestListener() {
-            @Override
-            public void onRequestSuccess(@NonNull Ad ad) {
-                mMraidInterstitial.setKeywords(PrebidUtils.getPrebidKeywords(ad, Constants.INTERSTITIAL_MRAID_ZONE_ID));
-                mMraidInterstitial.load();
-            }
-
-            @Override
-            public void onRequestFail(@NonNull Throwable throwable) {
-
-            }
-        });
-
-        mMraidInterstitialRequestManager.requestAd();
     }
 
     private final MoPubView.BannerAdListener mBannerListener = new MoPubView.BannerAdListener() {
@@ -210,30 +188,4 @@ public class MainFragment extends Fragment implements MoPubInterstitial.Intersti
 
         }
     };
-
-    // MoPubInterstitial.InterstitialAdListener
-    @Override
-    public void onInterstitialLoaded(MoPubInterstitial interstitial) {
-        mMraidInterstitial.show();
-    }
-
-    @Override
-    public void onInterstitialFailed(MoPubInterstitial interstitial, MoPubErrorCode errorCode) {
-
-    }
-
-    @Override
-    public void onInterstitialShown(MoPubInterstitial interstitial) {
-
-    }
-
-    @Override
-    public void onInterstitialClicked(MoPubInterstitial interstitial) {
-
-    }
-
-    @Override
-    public void onInterstitialDismissed(MoPubInterstitial interstitial) {
-
-    }
 }

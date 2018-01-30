@@ -7,4 +7,13 @@
     tools:context="net.pubnative.lite.demo.ui.fragments.MRectFragment"
     tools:showIn="@layout/activity_mrect">
 
+    <Button
+        android:id="@+id/button_load"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/load"/>
+
 </LinearLayout>

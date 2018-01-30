@@ -7,4 +7,6 @@
     <string name="video_interstitial">Video Interstitial</string>
     <string name="mraid_medium">MRAID Medium</string>
     <string name="video_medium">Video Medium</string>
+
+    <string name="load">Load</string>
 </resources>
