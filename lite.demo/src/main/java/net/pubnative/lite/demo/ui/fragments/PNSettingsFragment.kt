@@ -10,9 +10,9 @@ import net.pubnative.lite.demo.R
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class SettingsFragment : Fragment() {
+class PNSettingsFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
-            = inflater.inflate(R.layout.fragment_settings, container, false)
+            = inflater.inflate(R.layout.fragment_pn_settings, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

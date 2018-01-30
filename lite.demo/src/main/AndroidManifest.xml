@@ -38,8 +38,14 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.activities.SettingsActivity"
+            android:name=".ui.activities.PNSettingsActivity"
             android:screenOrientation="portrait"
+            android:label="@string/pn_settings"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.MoPubSettingsActivity"
+            android:screenOrientation="portrait"
+            android:label="@string/mopub_settings"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity

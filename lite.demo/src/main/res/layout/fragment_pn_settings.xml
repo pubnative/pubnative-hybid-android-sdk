@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="net.pubnative.lite.demo.ui.fragments.SettingsFragment"
-    tools:showIn="@layout/activity_settings">
+    tools:context="net.pubnative.lite.demo.ui.fragments.PNSettingsFragment"
+    tools:showIn="@layout/activity_pn_settings">
 
 </LinearLayout>

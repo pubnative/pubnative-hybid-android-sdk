@@ -5,7 +5,14 @@
     <string name="banner">Banner</string>
     <string name="interstitial">Interstitial</string>
     <string name="medium">Medium</string>
-    <string name="video_medium">Video Medium</string>
+
+    <string name="pn_settings">PN Lite Settings</string>
+    <string name="mopub_settings">MoPub Settings</string>
 
     <string name="load">Load</string>
+
+    <string name="hint_mopub_banner_ad_unit_id">Banner Ad Unit ID</string>
+    <string name="hint_mopub_medium_ad_unit_id">Medium Ad Unit ID</string>
+    <string name="hint_mopub_interstitial_ad_unit_id">Interstitial Ad Unit ID</string>
+    <string name="save_mopub_settings">Save MoPub settings</string>
 </resources>
