@@ -2,10 +2,9 @@
     <string name="app_name">PNLite demo</string>
     <string name="action_settings">Settings</string>
 
-    <string name="mraid_banner">MRAID Banner</string>
-    <string name="mraid_interstitial">MRAID Interstitial</string>
-    <string name="video_interstitial">Video Interstitial</string>
-    <string name="mraid_medium">MRAID Medium</string>
+    <string name="banner">Banner</string>
+    <string name="interstitial">Interstitial</string>
+    <string name="medium">Medium</string>
     <string name="video_medium">Video Medium</string>
 
     <string name="load">Load</string>

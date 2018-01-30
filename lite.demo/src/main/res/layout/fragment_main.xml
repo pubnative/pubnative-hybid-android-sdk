@@ -12,41 +12,31 @@
         android:orientation="vertical">
 
         <Button
-            android:id="@+id/button_banner_mraid"
+            android:id="@+id/button_banner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
-            android:text="@string/mraid_banner" />
-
-        <com.mopub.mobileads.MoPubView
-            android:id="@+id/mopub_banner"
-            android:layout_width="match_parent"
-            android:layout_height="50dp" />
+            android:text="@string/banner" />
 
         <Button
-            android:id="@+id/button_medium_mraid"
+            android:id="@+id/button_medium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:text="@string/mraid_medium" />
-
-        <com.mopub.mobileads.MoPubView
-            android:id="@+id/mopub_mrect"
-            android:layout_width="match_parent"
-            android:layout_height="250dp" />
+            android:text="@string/medium" />
 
         <Button
-            android:id="@+id/button_interstitial_mraid"
+            android:id="@+id/button_interstitial"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:text="@string/mraid_interstitial" />
+            android:text="@string/interstitial" />
     </LinearLayout>
 
 </ScrollView>

@@ -7,8 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import com.crashlytics.android.answers.Answers
-import com.crashlytics.android.answers.CustomEvent
 import com.mopub.mobileads.MoPubErrorCode
 import com.mopub.mobileads.MoPubInterstitial
 import net.pubnative.lite.demo.Constants
@@ -41,11 +39,10 @@ class InterstitialFragment : Fragment(), RequestManager.RequestListener, MoPubIn
         requestManager = InterstitialRequestManager()
         mopubInterstitial = MoPubInterstitial(activity!!, Constants.MOPUB_MRAID_INTERSTITIAL_AD_UNIT)
         mopubInterstitial.interstitialAdListener = this
-        zoneId = activity?.intent?.getStringExtra("zone_id")
+        zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
         loadButton.setOnClickListener {
             loadPNAd()
-            Answers.getInstance().logCustom(CustomEvent("request_mraid_interstitial"))
         }
     }
 
@@ -57,6 +54,7 @@ class InterstitialFragment : Fragment(), RequestManager.RequestListener, MoPubIn
     fun loadPNAd() {
         requestManager.setZoneId(zoneId)
         requestManager.setRequestListener(this)
+        requestManager.requestAd()
     }
 
     // --------------- PNLite Request Listener --------------------

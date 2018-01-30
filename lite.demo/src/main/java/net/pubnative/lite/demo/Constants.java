@@ -18,4 +18,8 @@ public class Constants {
 
     public static final String APP_TOKEN = "dde3c298b47648459f8ada4a982fa92d";
     public static final List<String> ZONE_ID_LIST = Arrays.asList(BANNER_MRAID_ZONE_ID, MEDIUM_MRAID_ZONE_ID, INTERSTITIAL_MRAID_ZONE_ID);
+
+    public final class IntentParams {
+        public static final String ZONE_ID = "zone_id";
+    }
 }
