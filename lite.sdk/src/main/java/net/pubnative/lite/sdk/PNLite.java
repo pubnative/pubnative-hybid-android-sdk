@@ -43,6 +43,10 @@ public class PNLite {
         return sAppToken;
     }
 
+    public static void setAppToken(String appToken) {
+        sAppToken = appToken;
+    }
+
     public static String getBundleId() {
         return sBundleId;
     }

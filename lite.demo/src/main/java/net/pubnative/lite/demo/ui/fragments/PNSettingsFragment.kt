@@ -11,6 +11,7 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.KeywordsActivity
 import net.pubnative.lite.demo.ui.activities.ZoneIdsActivity
+import net.pubnative.lite.sdk.PNLite
 
 /**
  * Created by erosgarciaponte on 30.01.18.
@@ -92,5 +93,11 @@ class PNSettingsFragment : Fragment() {
         settingManager.setCoppa(coppa)
         settingManager.setTestMode(testMode)
         settingManager.setGender(gender)
+
+        PNLite.setAppToken(appToken)
+        PNLite.setAge(age)
+        PNLite.setCoppaEnabled(coppa)
+        PNLite.setTestMode(testMode)
+        PNLite.setGender(gender)
     }
 }

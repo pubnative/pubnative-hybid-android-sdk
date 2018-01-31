@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +17,7 @@ import android.widget.Toast
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.adapters.KeywordAdapter
+import net.pubnative.lite.sdk.PNLite
 
 /**
  * Created by erosgarciaponte on 30.01.18.
@@ -54,7 +56,22 @@ class KeywordsFragment: Fragment() {
         }
 
         view.findViewById<Button>(R.id.button_save_pn_keywords).setOnClickListener {
-            settingManager.setKeywords(adapter.getKeywords())
+            val keywords = adapter.getKeywords()
+            settingManager.setKeywords(keywords)
+
+            val keywordsBuilder = StringBuilder()
+            val separator = ","
+            for (keyword in keywords) {
+                keywordsBuilder.append(keyword)
+                keywordsBuilder.append(separator)
+            }
+            var keywordString = keywordsBuilder.toString()
+
+            if (!TextUtils.isEmpty(keywordString)) {
+                keywordString = keywordString.substring(0, keywordString.length - separator.length)
+            }
+
+            PNLite.setKeywords(keywordString)
 
             val inputMethodManager = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             inputMethodManager.hideSoftInputFromWindow(keywordInput.windowToken, 0)
