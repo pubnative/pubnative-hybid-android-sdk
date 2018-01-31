@@ -5,19 +5,42 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 
 import net.pubnative.lite.demo.Constants;
 import net.pubnative.lite.demo.R;
+import net.pubnative.lite.demo.managers.SettingsManager;
+import net.pubnative.lite.demo.models.SettingsModel;
 import net.pubnative.lite.demo.ui.activities.BannerActivity;
 import net.pubnative.lite.demo.ui.activities.InterstitialActivity;
 import net.pubnative.lite.demo.ui.activities.MRectActivity;
 import net.pubnative.lite.demo.ui.activities.MoPubSettingsActivity;
 import net.pubnative.lite.demo.ui.activities.PNSettingsActivity;
+import net.pubnative.lite.demo.ui.adapters.ZoneIdAdapter;
+import net.pubnative.lite.demo.ui.listeners.ZoneIdClickListener;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class MainFragment extends Fragment {
+
+    private Button mBannerButton;
+    private Button mMediumButton;
+    private Button mInterstitialButton;
+    private RecyclerView mZoneIdList;
+    private TextView mChosenZoneIdView;
+    private ZoneIdAdapter mAdapter;
+    private SettingsManager mSettingsManager;
+
+    private String mChosenZoneId;
 
     public MainFragment() {
     }
@@ -25,6 +48,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mSettingsManager = SettingsManager.Companion.getInstance(getActivity());
     }
 
     @Override
@@ -36,6 +60,20 @@ public class MainFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        mChosenZoneIdView = view.findViewById(R.id.view_chosen_zone_id);
+        mZoneIdList = view.findViewById(R.id.list_zone_ids);
+        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getActivity(), 5, LinearLayoutManager.VERTICAL, false);
+        mZoneIdList.setLayoutManager(layoutManager);
+        mAdapter = new ZoneIdAdapter(new ZoneIdClickListener() {
+            @Override
+            public void onZoneIdClicked(@NotNull String zoneId) {
+                mChosenZoneId = zoneId;
+                mChosenZoneIdView.setText(zoneId);
+                enableZones();
+            }
+        });
+        mZoneIdList.setAdapter(mAdapter);
 
         view.findViewById(R.id.button_pn_settings).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -53,32 +91,65 @@ public class MainFragment extends Fragment {
             }
         });
 
-        view.findViewById(R.id.button_banner).setOnClickListener(new View.OnClickListener() {
+        mBannerButton = view.findViewById(R.id.button_banner);
+        mBannerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), BannerActivity.class);
-                intent.putExtra(Constants.IntentParams.ZONE_ID, Constants.BANNER_MRAID_ZONE_ID);
+                intent.putExtra(Constants.IntentParams.ZONE_ID, mChosenZoneId);
                 startActivity(intent);
             }
         });
 
-        view.findViewById(R.id.button_medium).setOnClickListener(new View.OnClickListener() {
+        mMediumButton = view.findViewById(R.id.button_medium);
+        mMediumButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), MRectActivity.class);
-                intent.putExtra(Constants.IntentParams.ZONE_ID, Constants.MEDIUM_MRAID_ZONE_ID);
+                intent.putExtra(Constants.IntentParams.ZONE_ID, mChosenZoneId);
                 startActivity(intent);
 
             }
         });
 
-        view.findViewById(R.id.button_interstitial).setOnClickListener(new View.OnClickListener() {
+        mInterstitialButton = view.findViewById(R.id.button_interstitial);
+        mInterstitialButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), InterstitialActivity.class);
-                intent.putExtra(Constants.IntentParams.ZONE_ID, Constants.INTERSTITIAL_MRAID_ZONE_ID);
+                intent.putExtra(Constants.IntentParams.ZONE_ID, mChosenZoneId);
                 startActivity(intent);
             }
         });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        fillSavedZoneIds();
+    }
+
+    private void fillSavedZoneIds() {
+        SettingsModel settings = mSettingsManager.getSettings();
+        mAdapter.clear();
+        List<String> zoneIds = settings.getZoneIds();
+        mAdapter.addZoneIds(zoneIds);
+        if (!settings.getZoneIds().contains(mChosenZoneId)) {
+            disableZones();
+        }
+    }
+
+    private void disableZones() {
+        mChosenZoneIdView.setText("");
+        mChosenZoneId = "";
+        mBannerButton.setEnabled(false);
+        mMediumButton.setEnabled(false);
+        mInterstitialButton.setEnabled(false);
+    }
+
+    private void enableZones() {
+        mBannerButton.setEnabled(true);
+        mMediumButton.setEnabled(true);
+        mInterstitialButton.setEnabled(true);
     }
 }

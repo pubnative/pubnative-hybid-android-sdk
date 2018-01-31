@@ -38,7 +38,7 @@ class ZoneIdsFragment : Fragment() {
         zoneIdList = view.findViewById(R.id.list_zone_ids)
         settingManager = SettingsManager.getInstance(context!!)
 
-        adapter = ZoneIdAdapter()
+        adapter = ZoneIdAdapter(null)
         val layoutManager = GridLayoutManager(activity, 6, GridLayoutManager.VERTICAL, false)
         zoneIdList.layoutManager = layoutManager
         zoneIdList.adapter = adapter

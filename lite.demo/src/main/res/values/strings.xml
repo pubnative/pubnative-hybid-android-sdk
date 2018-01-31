@@ -6,6 +6,9 @@
     <string name="interstitial">Interstitial</string>
     <string name="medium">Medium</string>
 
+    <string name="zone_id">Zone ID:</string>
+    <string name="chosen">Chosen:</string>
+
     <string name="pn_settings">PN Lite Settings</string>
     <string name="mopub_settings">MoPub Settings</string>
 

@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.Toast
 import com.mopub.mobileads.MoPubErrorCode
 import com.mopub.mobileads.MoPubView
 import net.pubnative.lite.demo.Constants
@@ -69,6 +70,7 @@ class BannerFragment : Fragment(), RequestManager.RequestListener, MoPubView.Ban
 
     override fun onRequestFail(throwable: Throwable?) {
         Log.d(TAG, "onRequestFail: ", throwable)
+        Toast.makeText(activity, throwable?.message, Toast.LENGTH_SHORT).show()
     }
 
     // ---------------- MoPub Banner Listener ---------------------
