@@ -12,6 +12,7 @@ import com.mopub.mobileads.MoPubErrorCode
 import com.mopub.mobileads.MoPubInterstitial
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.sdk.api.InterstitialRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
@@ -26,6 +27,7 @@ class InterstitialFragment : Fragment(), RequestManager.RequestListener, MoPubIn
     private lateinit var requestManager: RequestManager
     private lateinit var mopubInterstitial: MoPubInterstitial
     private var zoneId: String? = null
+    private var adUnitId: String? = null
 
     private lateinit var loadButton: Button
 
@@ -37,9 +39,12 @@ class InterstitialFragment : Fragment(), RequestManager.RequestListener, MoPubIn
 
         loadButton = view.findViewById(R.id.button_load)
 
+        adUnitId = SettingsManager.getInstance(activity!!).getSettings().mopubInterstitialAdUnitId
+
         requestManager = InterstitialRequestManager()
-        mopubInterstitial = MoPubInterstitial(activity!!, Constants.MOPUB_MRAID_INTERSTITIAL_AD_UNIT)
+        mopubInterstitial = MoPubInterstitial(activity!!, adUnitId!!)
         mopubInterstitial.interstitialAdListener = this
+
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
         loadButton.setOnClickListener {

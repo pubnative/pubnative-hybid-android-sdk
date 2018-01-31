@@ -12,6 +12,7 @@ import com.mopub.mobileads.MoPubErrorCode
 import com.mopub.mobileads.MoPubView
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.sdk.api.MRectRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
@@ -25,6 +26,7 @@ class MRectFragment : Fragment(), RequestManager.RequestListener, MoPubView.Bann
 
     private lateinit var requestManager: RequestManager
     private var zoneId: String? = null
+    private var adUnitId: String? = null
 
     private lateinit var mopubMRect: MoPubView
     private lateinit var loadButton: Button
@@ -43,6 +45,7 @@ class MRectFragment : Fragment(), RequestManager.RequestListener, MoPubView.Bann
         requestManager = MRectRequestManager()
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
+        adUnitId = SettingsManager.getInstance(activity!!).getSettings().mopubMediumAdUnitId
 
         loadButton.setOnClickListener {
             loadPNAd()
@@ -62,7 +65,7 @@ class MRectFragment : Fragment(), RequestManager.RequestListener, MoPubView.Bann
 
     // --------------- PNLite Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
-        mopubMRect.adUnitId = Constants.MOPUB_MRAID_MEDIUM_AD_UNIT
+        mopubMRect.adUnitId = adUnitId
         mopubMRect.keywords = PrebidUtils.getPrebidKeywords(ad, zoneId)
         mopubMRect.loadAd()
         Log.d(TAG, "onRequestSuccess")
