@@ -52,7 +52,7 @@ class PNSettingsFragment : Fragment() {
 
         view.findViewById<Button>(R.id.button_save_pn_settings).setOnClickListener {
             saveData()
-            Toast.makeText(activity, "PubNative settings saved successfully.", Toast.LENGTH_LONG).show()
+            Toast.makeText(activity, "PubNative settings saved successfully.", Toast.LENGTH_SHORT).show()
             activity?.finish()
         }
 

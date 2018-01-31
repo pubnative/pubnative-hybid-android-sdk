@@ -42,7 +42,7 @@ class MoPubSettingsFragment : Fragment() {
             settingManager.setMoPubMediumAdUnitId(mediumAdUnitId)
             settingManager.setMoPubInterstitialAdUnitId(interstitialAdUnitId)
 
-            Toast.makeText(activity, "MoPub settings saved successfully.", Toast.LENGTH_LONG).show()
+            Toast.makeText(activity, "MoPub settings saved successfully.", Toast.LENGTH_SHORT).show()
             activity?.finish()
         }
 

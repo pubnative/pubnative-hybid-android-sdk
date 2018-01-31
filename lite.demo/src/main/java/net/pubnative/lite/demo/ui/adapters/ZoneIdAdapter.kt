@@ -10,7 +10,7 @@ import net.pubnative.lite.demo.ui.viewholders.ZoneIdViewHolder
  * Created by erosgarciaponte on 30.01.18.
  */
 class ZoneIdAdapter : RecyclerView.Adapter<ZoneIdViewHolder>() {
-    private val list: List<String> = emptyList()
+    private val list: MutableList<String> = mutableListOf()
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ZoneIdViewHolder
             = ZoneIdViewHolder(LayoutInflater.from(parent?.context).inflate(R.layout.item_zone_id, parent, false))
@@ -20,4 +20,22 @@ class ZoneIdAdapter : RecyclerView.Adapter<ZoneIdViewHolder>() {
     }
 
     override fun getItemCount(): Int = list.size
+
+    fun addZoneIds(zoneIds: List<String>) {
+        zoneIds.forEach {
+            addZoneId(it)
+        }
+    }
+
+    fun addZoneId(zoneId: String) {
+        list.add(zoneId)
+        notifyItemInserted(list.size - 1)
+    }
+
+    fun clear() {
+        list.clear()
+        notifyDataSetChanged()
+    }
+
+    fun getZoneIds(): List<String> = list.toList()
 }
