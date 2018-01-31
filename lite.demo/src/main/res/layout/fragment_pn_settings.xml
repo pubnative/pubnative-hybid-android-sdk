@@ -54,6 +54,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
                 android:layout_marginStart="16dp"
+                android:inputType="number"
                 android:hint="@string/hint_pn_age" />
         </android.support.design.widget.TextInputLayout>
 
@@ -67,7 +68,7 @@
             android:textColor="@android:color/black"
             android:text="@string/title_pn_gender"/>
         <RadioGroup
-            android:id="@+id/groud_gender"
+            android:id="@+id/group_gender"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"

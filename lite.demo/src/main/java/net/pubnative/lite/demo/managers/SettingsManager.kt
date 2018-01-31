@@ -1,6 +1,7 @@
 package net.pubnative.lite.demo.managers
 
 import android.app.Application
+import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import net.pubnative.lite.demo.*
@@ -10,14 +11,14 @@ import net.pubnative.lite.demo.util.SingletonHolder
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class SettingsManager private constructor(application: Application) {
+class SettingsManager private constructor(context: Context) {
     private val preferences: SharedPreferences
 
     init {
-        preferences = PreferenceManager.getDefaultSharedPreferences(application)
+        preferences = PreferenceManager.getDefaultSharedPreferences(context)
     }
 
-    companion object : SingletonHolder<SettingsManager, Application>(::SettingsManager)
+    companion object : SingletonHolder<SettingsManager, Context>(::SettingsManager)
 
     fun setInitialised(initialised: Boolean) {
         preferences.edit().putBoolean(SETTINGS_KEY_INITIALISED, initialised).apply()

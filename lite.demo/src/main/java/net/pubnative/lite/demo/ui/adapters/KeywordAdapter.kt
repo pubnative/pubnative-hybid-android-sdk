@@ -1,6 +1,5 @@
 package net.pubnative.lite.demo.ui.adapters
 
-import android.content.Context
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -10,7 +9,7 @@ import net.pubnative.lite.demo.ui.viewholders.KeywordViewHolder
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class KeywordAdapter() : RecyclerView.Adapter<KeywordViewHolder>() {
+class KeywordAdapter : RecyclerView.Adapter<KeywordViewHolder>() {
     private val list: List<String> = emptyList()
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): KeywordViewHolder
