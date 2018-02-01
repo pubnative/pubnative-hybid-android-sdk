@@ -1,2 +1,3 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="net.pubnative.lite.adapters.mopub" />
+    package="net.pubnative.lite.adapters.mopub" >
+</manifest>
