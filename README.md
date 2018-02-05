@@ -1,29 +1,7 @@
-# README #
+![PNLogo](https://github.com/pubnative/pubnative-android-mediation-sdk-private/blob/master/PNLogo.png)
 
-This README would normally document whatever steps are necessary to get your application up and running.
+# PN Lite #
 
-### What is this repository for? ###
+For instructions on how to use the PN Lite SDK please refer to the wiki pages:
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
-
-### How do I get set up? ###
-
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
-
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+[PN Lite Wiki](https://github.com/pubnative/pubnative-lite-android-sdk/wiki)
