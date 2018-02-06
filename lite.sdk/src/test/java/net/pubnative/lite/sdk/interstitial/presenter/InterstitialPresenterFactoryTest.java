@@ -40,13 +40,6 @@ public class InterstitialPresenterFactoryTest {
     }
 
     @Test
-    public void createInterstitialPresenter_withVAST() {
-        mTestAd = TestUtil.createTestVideoInterstitialAd();
-
-        assertThat(mSubject.createInterstitialPresenter(mTestAd, mMockListener)).isNotNull();
-    }
-
-    @Test
     public void fromCreativeType_withHTML() {
         assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_INTERSTITIAL, mTestAd))
                 .isInstanceOf(MraidInterstitialPresenter.class);
