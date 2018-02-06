@@ -7,6 +7,5 @@
         <activity
             android:name="net.pubnative.lite.sdk.interstitial.activity.InterstitialActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity android:name="net.pubnative.lite.sdk.interstitial.vast.activity.VASTActivity" />
     </application>
 </manifest>
