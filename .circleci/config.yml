@@ -30,6 +30,4 @@ jobs:
       - deploy:
           name: Deploy to Bintray
           command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ] || [ "${CIRCLE_BRANCH}" == "beta" ] || [ "${CIRCLE_BRANCH}" == "development" ] ; then
-              ./gradlew bintrayUpload
-            fi
+            ./gradlew bintrayUpload
