@@ -11,9 +11,6 @@ import java.util.Observer;
  */
 
 public class NativeInterface {
-    /**
-     * Static reference used if not using Bugsnag.init()
-     */
     @SuppressLint("StaticFieldLeak")
     private static Client client;
 
@@ -30,10 +27,6 @@ public class NativeInterface {
         configureClientObservers(client);
     }
 
-    /**
-     * Sets up observers for the NDK client
-     * @param client the client
-     */
     public static void configureClientObservers(Client client) {
 
         // Ensure that the bugsnag observer is registered
@@ -172,21 +165,10 @@ public class NativeInterface {
         return getClient().config.getFilters();
     }
 
-    /**
-     * Retrieves the release stages
-     * @return the release stages
-     */
     public static String[] getReleaseStages() {
         return getClient().config.getNotifyReleaseStages();
     }
 
-    /**
-     * Sets the user
-     *
-     * @param id id
-     * @param email email
-     * @param name name
-     */
     public static void setUser(final String id,
                                final String email,
                                final String name) {
@@ -209,15 +191,6 @@ public class NativeInterface {
         getClient().config.getMetaData().addToTab(tab, key, value, false);
     }
 
-    /**
-     * Notifies using the Android SDK
-     *
-     * @param name the error name
-     * @param message the error message
-     * @param severity the error severity
-     * @param stacktrace a stacktrace
-     * @param metaData any metadata
-     */
     public static void notify(final String name,
                               final String message,
                               final Severity severity,

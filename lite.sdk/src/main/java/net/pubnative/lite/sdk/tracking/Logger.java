@@ -8,7 +8,7 @@ import android.util.Log;
 
 final class Logger {
 
-    private static final String LOG_TAG = "Bugsnag";
+    private static final String LOG_TAG = "PNLiteCrashTracker";
     private static volatile boolean enabled = true;
 
     private Logger() {

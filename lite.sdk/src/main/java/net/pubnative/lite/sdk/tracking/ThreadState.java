@@ -24,12 +24,6 @@ class ThreadState implements JsonStream.Streamable {
         threads = sanitiseThreads(Thread.currentThread().getId(), stackTraces);
     }
 
-    /**
-     * Returns an array of threads excluding the current thread, sorted by thread id
-     *
-     * @param currentThreadId the current thread id
-     * @param liveThreads     all live threads
-     */
     private Thread[] sanitiseThreads(long currentThreadId,
                                      Map<Thread, StackTraceElement[]> liveThreads) {
         Set<Thread> threadSet = liveThreads.keySet();

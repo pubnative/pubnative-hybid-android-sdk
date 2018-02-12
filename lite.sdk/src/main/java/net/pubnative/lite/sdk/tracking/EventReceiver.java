@@ -71,12 +71,6 @@ public class EventReceiver extends BroadcastReceiver {
         }
     }
 
-    /**
-     * Builds a map of intent actions and their breadcrumb type.
-     *
-     * Noisy breadcrumbs are commented out, along with anything that involves a state change.
-     * @return the action map
-     */
     private static Map<String, BreadcrumbType> buildActions() {
         HashMap<String, BreadcrumbType> actions = new HashMap<>();
 
@@ -388,11 +382,6 @@ public class EventReceiver extends BroadcastReceiver {
         return categories;
     }
 
-    /**
-     * Creates a new Intent filter with all the intents to record breadcrumbs for
-     *
-     * @return The intent filter
-     */
     public static IntentFilter getIntentFilter() {
         IntentFilter filter = new IntentFilter();
 

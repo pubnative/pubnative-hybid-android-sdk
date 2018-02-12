@@ -43,9 +43,6 @@ class DeviceDataSummary implements JsonStream.Streamable {
             "/su/bin"
     };
 
-    /**
-     * Check if the current Android device is rooted
-     */
     static Boolean isRooted() {
         if (android.os.Build.TAGS != null && android.os.Build.TAGS.contains("test-keys")) {
             return true;
