@@ -7,7 +7,6 @@ package net.pubnative.lite.sdk.api;
 public class BannerRequestManager extends RequestManager {
     @Override
     protected String getAdSize() {
-        //throw new RuntimeException("BreakingStuff");
         return "s";
     }
 }
