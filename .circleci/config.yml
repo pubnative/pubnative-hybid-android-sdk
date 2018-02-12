@@ -17,6 +17,9 @@ jobs:
       - run:
           name: Run Tests
           command: ./gradlew clean testDebug
+      - run:
+          name: Send reports to coveralls.io
+          command: ./gradlew cobertura coveralls
       - save_cache:
           key: sdk-{{ .Branch }}
           paths:
