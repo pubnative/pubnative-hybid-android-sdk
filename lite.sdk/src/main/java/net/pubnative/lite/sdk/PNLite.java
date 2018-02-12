@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 
 import net.pubnative.lite.sdk.api.PNApiClient;
-import net.pubnative.lite.sdk.tracking.ExceptionHandler;
 
 /**
  * Created by erosgarciaponte on 05.01.18.
@@ -32,7 +31,6 @@ public class PNLite {
      */
     public static void initialize(String appToken,
                                   Application application) {
-        ExceptionHandler.register(application, "https://crash-collector.herokuapp.com/crashes");
         sAppToken = appToken;
         sBundleId = application.getPackageName();
         sApiClient = new PNApiClient(application);
