@@ -3,9 +3,8 @@ package net.pubnative.lite.sdk;
 import android.annotation.SuppressLint;
 import android.app.Application;
 
-import com.nullwire.trace.ExceptionHandler;
-
 import net.pubnative.lite.sdk.api.PNApiClient;
+import net.pubnative.lite.sdk.tracking.ExceptionHandler;
 
 /**
  * Created by erosgarciaponte on 05.01.18.
