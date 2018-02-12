@@ -55,10 +55,6 @@ class AppData extends AppDataSummary {
         writer.endObject();
     }
 
-    /**
-     * The name of the running Android app, from android:label in
-     * AndroidManifest.xml
-     */
     private static String getAppName(Context appContext) {
         try {
             PackageManager packageManager = appContext.getPackageManager();
@@ -87,17 +83,10 @@ class AppData extends AppDataSummary {
         return null;
     }
 
-    /**
-     * Get the actual memory used by the VM (which may not be the total used
-     * by the app in the case of NDK usage).
-     */
     private static Long getMemoryUsage() {
         return Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
     }
 
-    /**
-     * Check if the device is currently running low on memory.
-     */
     private static Boolean isLowMemory(Context appContext) {
         try {
             ActivityManager activityManager =
@@ -112,18 +101,10 @@ class AppData extends AppDataSummary {
         return null;
     }
 
-    /**
-     * Get the time in milliseconds since PNLiteCrashTracker was initialized, which is a
-     * good approximation for how long the app has been running.
-     */
     static long getDurationMs() {
         return SystemClock.elapsedRealtime() - startTimeMs;
     }
 
-
-    /**
-     * The package name of the running Android app, eg: com.example.myapp
-     */
     private static String getPackageName(Context appContext) {
         return appContext.getPackageName();
     }

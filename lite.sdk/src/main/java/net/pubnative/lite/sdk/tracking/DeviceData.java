@@ -63,9 +63,6 @@ class DeviceData extends DeviceDataSummary {
                 .name("freeDisk").value(getFreeDisk())
                 .name("orientation").value(getOrientation(appContext));
 
-
-        // TODO migrate metadata values
-
         writer
                 .name("batteryLevel").value(getBatteryLevel(appContext))
                 .name("charging").value(isCharging(appContext))
@@ -96,9 +93,6 @@ class DeviceData extends DeviceDataSummary {
         this.id = id;
     }
 
-    /**
-     * The screen density scaling factor of the current Android device
-     */
     private static Float getScreenDensity(Context appContext) {
         Resources resources = appContext.getResources();
         if (resources == null) {
@@ -107,9 +101,6 @@ class DeviceData extends DeviceDataSummary {
         return resources.getDisplayMetrics().density;
     }
 
-    /**
-     * The screen density of the current Android device in dpi, eg. 320
-     */
     private static Integer getScreenDensityDpi(Context appContext) {
         Resources resources = appContext.getResources();
         if (resources == null) {
@@ -118,9 +109,6 @@ class DeviceData extends DeviceDataSummary {
         return resources.getDisplayMetrics().densityDpi;
     }
 
-    /**
-     * The screen resolution of the current Android device in px, eg. 1920x1080
-     */
     private static String getScreenResolution(Context appContext) {
         Resources resources = appContext.getResources();
         if (resources == null) {
@@ -132,9 +120,6 @@ class DeviceData extends DeviceDataSummary {
         return String.format(Locale.US, "%dx%d", max, min);
     }
 
-    /**
-     * Get the total memory available on the current Android device, in bytes
-     */
     static Long getTotalMemory() {
         if (Runtime.getRuntime().maxMemory() != Long.MAX_VALUE) {
             return Runtime.getRuntime().maxMemory();
@@ -143,16 +128,10 @@ class DeviceData extends DeviceDataSummary {
         }
     }
 
-    /**
-     * Get the locale of the current Android device, eg en_US
-     */
     private static String getLocale() {
         return Locale.getDefault().toString();
     }
 
-    /**
-     * Get the unique id for the current app installation, creating a unique UUID if needed
-     */
     private String retrieveUniqueInstallId(SharedPreferences sharedPref) {
         String installId = sharedPref.getString(INSTALL_ID_KEY, null);
 
@@ -163,9 +142,6 @@ class DeviceData extends DeviceDataSummary {
         return installId;
     }
 
-    /**
-     * Gets information about the CPU / API
-     */
     private static String[] getCpuAbi() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             return SupportedAbiWrapper.getSupportedAbis();
@@ -173,32 +149,22 @@ class DeviceData extends DeviceDataSummary {
         return Abi2Wrapper.getAbi1andAbi2();
     }
 
-    /**
-     * Wrapper class to allow the test framework to use the correct version of the CPU / ABI
-     */
     private static class SupportedAbiWrapper {
         public static String[] getSupportedAbis() {
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 return Build.SUPPORTED_ABIS;
             } else {
-                return new String[] {};
+                return new String[]{};
             }
         }
     }
 
-    /**
-     * Wrapper class to allow the test framework to use the correct version of the CPU / ABI
-     */
     private static class Abi2Wrapper {
         public static String[] getAbi1andAbi2() {
             return new String[]{Build.CPU_ABI, Build.CPU_ABI2};
         }
     }
 
-
-    /**
-     * Get the free disk space on the smallest disk
-     */
     private static Long getFreeDisk() {
         try {
             StatFs externalStat = new StatFs(Environment.getExternalStorageDirectory().getPath());
@@ -216,9 +182,6 @@ class DeviceData extends DeviceDataSummary {
         return null;
     }
 
-    /**
-     * Get the amount of memory remaining that the VM can allocate
-     */
     private static Long getFreeMemory() {
         Runtime runtime = Runtime.getRuntime();
         if (runtime.maxMemory() != Long.MAX_VALUE) {
@@ -228,9 +191,6 @@ class DeviceData extends DeviceDataSummary {
         }
     }
 
-    /**
-     * Get the device orientation, eg. "landscape"
-     */
     private static String getOrientation(Context appContext) {
         String orientation;
         switch (appContext.getResources().getConfiguration().orientation) {
@@ -247,9 +207,6 @@ class DeviceData extends DeviceDataSummary {
         return orientation;
     }
 
-    /**
-     * Get the current battery charge level, eg 0.3
-     */
     private static Float getBatteryLevel(Context appContext) {
         try {
             IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
@@ -263,9 +220,6 @@ class DeviceData extends DeviceDataSummary {
         return null;
     }
 
-    /**
-     * Is the device currently charging/full battery?
-     */
     private static Boolean isCharging(Context appContext) {
         try {
             IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
@@ -280,9 +234,6 @@ class DeviceData extends DeviceDataSummary {
         return null;
     }
 
-    /**
-     * Get the current status of location services
-     */
     private static String getLocationStatus(Context appContext) {
         try {
             ContentResolver cr = appContext.getContentResolver();
@@ -299,9 +250,6 @@ class DeviceData extends DeviceDataSummary {
         return null;
     }
 
-    /**
-     * Get the current status of network access, eg "cellular"
-     */
     private static String getNetworkAccess(Context appContext) {
         try {
             ConnectivityManager cm =
@@ -327,9 +275,6 @@ class DeviceData extends DeviceDataSummary {
         return null;
     }
 
-    /**
-     * Get the current time on the device, in ISO8601 format.
-     */
     private String getTime() {
         return DateUtils.toIso8601(new Date());
     }

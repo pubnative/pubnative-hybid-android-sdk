@@ -16,11 +16,6 @@ public class JsonStream extends JsonWriter {
 
     private final Writer out;
 
-    /**
-     * Constructs a JSONStream
-     *
-     * @param out the writer
-     */
     public JsonStream(Writer out) {
         super(out);
         setSerializeNulls(false);
@@ -33,10 +28,6 @@ public class JsonStream extends JsonWriter {
         return this;
     }
 
-    /**
-     * This gives the Streamable the JsonStream instance and
-     * allows lets it write itself into the stream.
-     */
     public void value(Streamable streamable) throws IOException {
         if (streamable == null) {
             nullValue();
@@ -45,9 +36,6 @@ public class JsonStream extends JsonWriter {
         streamable.toStream(this);
     }
 
-    /**
-     * Writes a File (its content) into the stream
-     */
     public void value(File file) throws IOException {
         super.flush();
         beforeValue(false); // add comma if in array

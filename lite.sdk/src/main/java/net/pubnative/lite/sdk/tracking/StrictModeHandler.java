@@ -47,12 +47,6 @@ class StrictModeHandler {
         POLICY_CODE_MAP.put(DETECT_VM_CLEARTEXT_NETWORK, "CleartextNetwork");
     }
 
-    /**
-     * Checks whether a throwable was originally thrown from the StrictMode class
-     *
-     * @param throwable the throwable
-     * @return true if the throwable's root cause is a StrictMode policy violation
-     */
     boolean isStrictModeThrowable(Throwable throwable) {
         Throwable cause = getRootCause(throwable);
         Class<? extends Throwable> causeClass = cause.getClass();
@@ -78,12 +72,6 @@ class StrictModeHandler {
         return null;
     }
 
-    /**
-     * Recurse the stack to get the original cause of the throwable
-     *
-     * @param throwable the throwable
-     * @return the root cause of the throwable
-     */
     private Throwable getRootCause(Throwable throwable) {
         Throwable cause = throwable.getCause();
 

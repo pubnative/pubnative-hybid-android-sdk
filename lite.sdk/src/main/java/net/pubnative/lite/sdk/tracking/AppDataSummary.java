@@ -73,10 +73,6 @@ class AppDataSummary implements JsonStream.Streamable {
         }
     }
 
-    /**
-     * The version code of the running Android app, from android:versionCode
-     * in AndroidManifest.xml
-     */
     private static Integer getVersionCode(Context appContext) {
         try {
             String packageName = appContext.getPackageName();
@@ -87,10 +83,6 @@ class AppDataSummary implements JsonStream.Streamable {
         return null;
     }
 
-    /**
-     * The version code of the running Android app, from android:versionName
-     * in AndroidManifest.xml
-     */
     private static String getVersionName(Context appContext) {
         try {
             String packageName = appContext.getPackageName();
@@ -100,11 +92,7 @@ class AppDataSummary implements JsonStream.Streamable {
         }
         return null;
     }
-
-    /**
-     * Guess the release stage of the running Android app by checking the
-     * android:debuggable flag from AndroidManifest.xml
-     */
+    
     static String guessReleaseStage(Context appContext) {
         try {
             String packageName = appContext.getPackageName();

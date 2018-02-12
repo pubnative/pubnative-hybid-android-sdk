@@ -56,27 +56,12 @@ public class SessionTracker implements Application.ActivityLifecycleCallbacks {
         this.apiClient = apiClient;
     }
 
-    /**
-     * Starts a new session with the given date and user.
-     * <p>
-     * A session will only be created if {@link Configuration#shouldAutoCaptureSessions()} returns
-     * true.
-     *
-     * @param date the session start date
-     * @param user the session user (if any)
-     */
     void startNewSession(Date date, User user, boolean autoCaptured) {
         Session session = new Session(UUID.randomUUID().toString(), date, user, autoCaptured);
         currentSession.set(session);
         trackSessionIfNeeded(session);
     }
 
-    /**
-     * Determines whether or not a session should be tracked. If this is true, the session will be
-     * stored and sent to the Bugsnag API, otherwise no action will occur in this method.
-     *
-     * @param session      the session
-     */
     private void trackSessionIfNeeded(final Session session) {
         boolean notifyForRelease = configuration.shouldNotifyForReleaseStage(getReleaseStage());
 
@@ -112,9 +97,6 @@ public class SessionTracker implements Application.ActivityLifecycleCallbacks {
         }
     }
 
-    /**
-     * Track a new session when auto capture is enabled via config after initialisation.
-     */
     void onAutoCaptureEnabled() {
         Session session = currentSession.get();
         if (session != null && !foregroundActivities.isEmpty()) {
@@ -145,9 +127,6 @@ public class SessionTracker implements Application.ActivityLifecycleCallbacks {
         }
     }
 
-    /**
-     * Attempts to flush session payloads stored on disk
-     */
     void flushStoredSessions() {
         if (flushingRequest.tryAcquire(1)) {
             try {
@@ -239,12 +218,6 @@ public class SessionTracker implements Application.ActivityLifecycleCallbacks {
         }
     }
 
-    /**
-     * Tracks a session if a session has not yet been captured,
-     * recording the session as auto-captured. Requires the current activity.
-     *
-     * @param activity the current activity
-     */
     void startFirstSession(Activity activity) {
         Session session = currentSession.get();
         if (session == null) {
@@ -255,19 +228,6 @@ public class SessionTracker implements Application.ActivityLifecycleCallbacks {
         }
     }
 
-    /**
-     * Tracks whether an activity is in the foreground or not.
-     * <p>
-     * If an activity leaves the foreground, a timeout should be recorded (e.g. 30s), during which
-     * no new sessions should be automatically started.
-     * <p>
-     * If an activity comes to the foreground and is the only foreground activity, a new session
-     * should be started, unless the app is within a timeout period.
-     *
-     * @param activityName the activity name
-     * @param activityStarting whether the activity is being started or not
-     * @param nowMs The current time in ms
-     */
     void updateForegroundTracker(String activityName, boolean activityStarting, long nowMs) {
         if (activityStarting) {
             long noActivityRunningForMs = nowMs - activityLastStoppedAtMs.get();
@@ -291,7 +251,6 @@ public class SessionTracker implements Application.ActivityLifecycleCallbacks {
         return !foregroundActivities.isEmpty();
     }
 
-    //FUTURE:SM This shouldnt be here
     long getDurationInForegroundMs(long nowMs) {
         long durationMs = 0;
         long sessionStartTimeMs = activityFirstStartedAtMs.get();

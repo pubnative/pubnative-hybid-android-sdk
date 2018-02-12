@@ -23,16 +23,10 @@ public class MetaData extends Observable implements JsonStream.Streamable {
     private String[] filters;
     final Map<String, Object> store;
 
-    /**
-     * Create an empty MetaData object.
-     */
     public MetaData() {
         store = new ConcurrentHashMap<>();
     }
 
-    /**
-     * Create a MetaData with values copied from an existing Map
-     */
     public MetaData(Map<String, Object> map) {
         store = new ConcurrentHashMap<>(map);
     }
@@ -42,35 +36,10 @@ public class MetaData extends Observable implements JsonStream.Streamable {
         objectToStream(store, writer);
     }
 
-    /**
-     * Add diagnostic information to a tab of this MetaData.
-     * <p>
-     * For example:
-     * <p>
-     * metaData.addToTab("account", "name", "Acme Co.");
-     * metaData.addToTab("account", "payingCustomer", true);
-     *
-     * @param tabName the dashboard tab to add diagnostic data to
-     * @param key     the name of the diagnostic information
-     * @param value   the contents of the diagnostic information
-     */
     public void addToTab(String tabName, String key, Object value) {
         addToTab(tabName, key, value, true);
     }
 
-    /**
-     * Add diagnostic information to a tab of this MetaData.
-     * <p>
-     * For example:
-     * <p>
-     * metaData.addToTab("account", "name", "Acme Co.");
-     * metaData.addToTab("account", "payingCustomer", true);
-     *
-     * @param tabName the dashboard tab to add diagnostic data to
-     * @param key     the name of the diagnostic information
-     * @param value   the contents of the diagnostic information
-     * @param notify  whether or not to notify any NDK observers about this change
-     */
     void addToTab(String tabName, String key, Object value, boolean notify) {
         Map<String, Object> tab = getTab(tabName);
 
@@ -83,11 +52,6 @@ public class MetaData extends Observable implements JsonStream.Streamable {
         notifyPNLiteObservers(NotifyType.META);
     }
 
-    /**
-     * Remove a tab of diagnostic information from this MetaData.
-     *
-     * @param tabName the dashboard tab to remove diagnostic data from
-     */
     public void clearTab(String tabName) {
         store.remove(tabName);
 

@@ -87,21 +87,10 @@ public class Error implements JsonStream.Streamable {
         writer.endObject();
     }
 
-    /**
-     * Override the context sent to Bugsnag with this Error. By default we'll
-     * attempt to detect the name of the top-most Activity when this error
-     * occurred, and use this as the context, but sometimes this is not
-     * possible.
-     *
-     * @param context what was happening at the time of a crash
-     */
     public void setContext(String context) {
         this.context = context;
     }
 
-    /**
-     * Get the context associated with this Error.
-     */
     public String getContext() {
         if (!TextUtils.isEmpty(context)) {
             return context;
@@ -114,27 +103,10 @@ public class Error implements JsonStream.Streamable {
         }
     }
 
-    /**
-     * Set a custom grouping hash to use when grouping this Error on the
-     * Bugsnag dashboard. By default, we use a combination of error class
-     * and top-most stacktrace line to calculate this, and we do not recommend
-     * you override this.
-     *
-     * @param groupingHash a string to use when grouping errors
-     */
     public void setGroupingHash(String groupingHash) {
         this.groupingHash = groupingHash;
     }
 
-    /**
-     * Set the Severity of this Error.
-     * <p>
-     * By default, unhandled exceptions will be Severity.ERROR and handled
-     * exceptions sent with bugsnag.notify will be Severity.WARNING.
-     *
-     * @param severity the severity of this error
-     * @see Severity
-     */
     public void setSeverity(Severity severity) {
         if (severity != null) {
             this.severity = severity;
@@ -142,22 +114,10 @@ public class Error implements JsonStream.Streamable {
         }
     }
 
-    /**
-     * Get the Severity of this Error.
-     *
-     * @see Severity
-     */
     public Severity getSeverity() {
         return severity;
     }
 
-    /**
-     * Set user information associated with this Error
-     *
-     * @param id    the id of the user
-     * @param email the email address of the user
-     * @param name  the name of the user
-     */
     public void setUser(String id, String email, String name) {
         this.user = new User(id, email, name);
     }
@@ -166,92 +126,37 @@ public class Error implements JsonStream.Streamable {
         this.user = user;
     }
 
-    /**
-     * @return user information associated with this Error
-     */
     public User getUser() {
         return user;
     }
 
-    /**
-     * Set user id associated with this Error
-     *
-     * @param id the id of the user
-     */
     public void setUserId(String id) {
         this.user = new User(this.user);
         this.user.setId(id);
     }
 
-    /**
-     * Set user email address associated with this Error
-     *
-     * @param email the email address of the user
-     */
     public void setUserEmail(String email) {
         this.user = new User(this.user);
         this.user.setEmail(email);
     }
 
-    /**
-     * Set user name associated with this Error
-     *
-     * @param name the name of the user
-     */
     public void setUserName(String name) {
         this.user = new User(this.user);
         this.user.setName(name);
     }
 
-    /**
-     * Add additional diagnostic information to send with this Error.
-     * Diagnostic information is collected in "tabs" on your dashboard.
-     * <p>
-     * For example:
-     * <p>
-     * error.addToTab("account", "name", "Acme Co.");
-     * error.addToTab("account", "payingCustomer", true);
-     *
-     * @param tabName the dashboard tab to add diagnostic data to
-     * @param key     the name of the diagnostic information
-     * @param value   the contents of the diagnostic information
-     */
     public void addToTab(String tabName, String key, Object value) {
         metaData.addToTab(tabName, key, value);
     }
 
-    /**
-     * Remove a tab of app-wide diagnostic information from this Error
-     *
-     * @param tabName the dashboard tab to remove diagnostic data from
-     */
     public void clearTab(String tabName) {
         metaData.clearTab(tabName);
     }
 
-    /**
-     * Get any additional diagnostic MetaData currently attached to this Error.
-     * <p>
-     * This will contain any MetaData set by setMetaData or addToTab.
-     *
-     * @see Error#setMetaData
-     * @see Error#addToTab
-     */
     public MetaData getMetaData() {
         return metaData;
     }
 
-    /**
-     * Set additional diagnostic MetaData to send with this Error. This will
-     * be merged with any global MetaData you set on the Client.
-     * <p>
-     * Note: This will overwrite any MetaData you provided using
-     * Bugsnag.notify, so it is recommended to use addToTab instead.
-     *
-     * @param metaData additional diagnostic data to send with this Error
-     * @see Error#addToTab
-     * @see Error#getMetaData
-     */
     public void setMetaData(MetaData metaData) {
         //noinspection ConstantConditions
         if (metaData == null) {
@@ -261,9 +166,6 @@ public class Error implements JsonStream.Streamable {
         }
     }
 
-    /**
-     * Get the class name from the exception contained in this Error report.
-     */
     public String getExceptionName() {
         if (exception instanceof PNLiteCrashTrackerException) {
             return ((PNLiteCrashTrackerException) exception).getName();
@@ -272,25 +174,14 @@ public class Error implements JsonStream.Streamable {
         }
     }
 
-    /**
-     * Get the message from the exception contained in this Error report.
-     */
     public String getExceptionMessage() {
         return exception.getLocalizedMessage();
     }
 
-    /**
-     * The {@linkplain Throwable exception} which triggered this Error report.
-     */
     public Throwable getException() {
         return exception;
     }
 
-    /**
-     * Sets the device ID. This can be set to null for privacy concerns.
-     *
-     * @param id the device id
-     */
     public void setDeviceId(String id) {
         deviceData.id = id;
     }

@@ -36,9 +36,6 @@ class Exceptions implements JsonStream.Streamable {
         writer.endArray();
     }
 
-    /**
-     * Get the class name from the exception contained in this Error report.
-     */
     private String getExceptionName(Throwable throwable) {
         if (throwable instanceof PNLiteCrashTrackerException) {
             return ((PNLiteCrashTrackerException) throwable).getName();

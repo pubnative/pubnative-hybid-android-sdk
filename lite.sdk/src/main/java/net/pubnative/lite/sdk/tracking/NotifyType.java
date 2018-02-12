@@ -4,9 +4,6 @@ package net.pubnative.lite.sdk.tracking;
  * Created by erosgarciaponte on 12.02.18.
  */
 
-/**
- * Used to inform the NDK library which type of data needs to be updated
- */
 public enum NotifyType {
     ALL(1),
     USER(2),
@@ -28,12 +25,6 @@ public enum NotifyType {
         return intValue;
     }
 
-    /**
-     * Maps the notifyType from an int
-     *
-     * @param intValue the int
-     * @return the notifytype
-     */
     public static NotifyType fromInt(Integer intValue) {
         if (intValue != null) {
             for (NotifyType type : NotifyType.values()) {
