@@ -118,7 +118,7 @@ public class PNHttpRequest {
             // 3. Do request
             connection.connect();
             int responseCode = connection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
+            if (isHttpSuccess(responseCode)) {
                 try {
                     InputStream inputStream = connection.getInputStream();
                     String result = stringFromInputStream(inputStream);
@@ -148,7 +148,14 @@ public class PNHttpRequest {
         }
     }
 
+    protected boolean isHttpSuccess(int responseCode) {
+        return responseCode / 100 == 2;
+    }
+
     protected String stringFromInputStream(InputStream inputStream) throws PNException {
+        if (inputStream == null) {
+            return "";
+        }
         String result = null;
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         int length;
