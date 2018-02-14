@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 
 import net.pubnative.lite.sdk.api.PNApiClient;
+import net.pubnative.lite.sdk.tracking.PNLiteCrashTracker;
 
 /**
  * Created by erosgarciaponte on 05.01.18.
@@ -31,6 +32,7 @@ public class PNLite {
      */
     public static void initialize(String appToken,
                                   Application application) {
+        PNLiteCrashTracker.init(application, "9ef9d95d69bd0ec31bfa7806af72dddd");
         sAppToken = appToken;
         sBundleId = application.getPackageName();
         sApiClient = new PNApiClient(application);
