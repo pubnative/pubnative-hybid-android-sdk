@@ -27,6 +27,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.RelativeLayout;
 
 import net.pubnative.lite.sdk.utils.json.BindField;
 import net.pubnative.lite.sdk.utils.json.JsonModel;
@@ -154,7 +155,7 @@ public class Ad extends JsonModel implements Serializable {
         return result;
     }
 
-    public View getContentInfo(Context context) {
+    private View getContentInfo(Context context) {
         PNAPIContentInfoView result = null;
         AdData data = getMeta(APIMeta.CONTENT_INFO);
         if (data == null) {
@@ -178,6 +179,25 @@ public class Ad extends JsonModel implements Serializable {
             });
         }
         return result;
+    }
+
+    public RelativeLayout getContentInfoContainer(Context context) {
+        View contentInfo = getContentInfo(context);
+        if (contentInfo != null) {
+            RelativeLayout contentInfoContainer = new RelativeLayout(context);
+
+            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.WRAP_CONTENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT);
+            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+
+            contentInfoContainer.setLayoutParams(layoutParams);
+            contentInfoContainer.addView(contentInfo);
+            return contentInfoContainer;
+        } else {
+            return null;
+        }
     }
 
     /**

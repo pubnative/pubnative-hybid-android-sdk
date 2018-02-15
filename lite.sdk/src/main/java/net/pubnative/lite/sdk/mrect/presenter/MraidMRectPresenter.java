@@ -1,6 +1,8 @@
 package net.pubnative.lite.sdk.mrect.presenter;
 
 import android.content.Context;
+import android.view.View;
+import android.widget.RelativeLayout;
 
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
@@ -50,10 +52,10 @@ public class MraidMRectPresenter implements MRectPresenter, MRAIDViewListener, M
 
         if (mAd.getAssetUrl(APIAsset.HTML_BANNER) != null) {
             mMRAIDBanner = new MRAIDBanner(mContext, mAd.getAssetUrl(APIAsset.HTML_BANNER), "", mSupportedNativeFeatures,
-                    this, this);
+                    this, this, mAd.getContentInfoContainer(mContext));
         } else if (mAd.getAssetHtml(APIAsset.HTML_BANNER) != null) {
             mMRAIDBanner = new MRAIDBanner(mContext, "", mAd.getAssetHtml(APIAsset.HTML_BANNER), mSupportedNativeFeatures,
-                    this, this);
+                    this, this, mAd.getContentInfoContainer(mContext));
         }
 
     }
@@ -136,5 +138,4 @@ public class MraidMRectPresenter implements MRectPresenter, MRAIDViewListener, M
     public void mraidNativeFeatureSendSms(String url) {
 
     }
-
 }
