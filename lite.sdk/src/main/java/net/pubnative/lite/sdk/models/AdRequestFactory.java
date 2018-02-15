@@ -6,6 +6,7 @@ import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.PNLite;
+import net.pubnative.lite.sdk.location.PNLiteLocationManager;
 import net.pubnative.lite.sdk.utils.PNCrypto;
 
 import java.util.Locale;
@@ -16,13 +17,15 @@ import java.util.Locale;
 
 public class AdRequestFactory {
     private final DeviceInfo mDeviceInfo;
+    private final PNLiteLocationManager mLocationManager;
 
     public AdRequestFactory() {
-        this(PNLite.getDeviceInfo());
+        this(PNLite.getDeviceInfo(), PNLite.getLocationManager());
     }
 
-    AdRequestFactory(DeviceInfo deviceInfo) {
+    AdRequestFactory(DeviceInfo deviceInfo, PNLiteLocationManager locationManager) {
         mDeviceInfo = deviceInfo;
+        mLocationManager = locationManager;
     }
 
     public AdRequest createAdRequest(final String zoneid, final String adSize) {
@@ -32,8 +35,8 @@ public class AdRequestFactory {
         adRequest.zoneid = zoneid;
         adRequest.apptoken = PNLite.getAppToken();
         adRequest.os = "android";
-        adRequest.osver = PNLite.getDeviceInfo().getOSVersion();
-        adRequest.devicemodel = PNLite.getDeviceInfo().getModel();
+        adRequest.osver = mDeviceInfo.getOSVersion();
+        adRequest.devicemodel = mDeviceInfo.getModel();
         adRequest.coppa = PNLite.isCoppaEnabled() ? "1" : "0";
 
         if (PNLite.isCoppaEnabled() || TextUtils.isEmpty(advertisingId)) {
@@ -53,10 +56,10 @@ public class AdRequestFactory {
         adRequest.al = adSize;
         adRequest.mf = getDefaultMetaFields();
 
-        Location location = PNLite.getLocationManager().getUserLocation();
+        Location location = mLocationManager.getUserLocation();
         if (location != null) {
-            adRequest.latitude = String.format(Locale.ENGLISH, "%f", location.getLatitude());
-            adRequest.longitude = String.format(Locale.ENGLISH, "%f", location.getLongitude());
+            adRequest.latitude = String.format(Locale.ENGLISH, "%.6f", location.getLatitude());
+            adRequest.longitude = String.format(Locale.ENGLISH, "%.6f", location.getLongitude());
         }
 
         return adRequest;
