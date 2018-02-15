@@ -1,11 +1,14 @@
 package net.pubnative.lite.sdk.models;
 
+import android.location.Location;
 import android.os.Build;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.PNLite;
 import net.pubnative.lite.sdk.utils.PNCrypto;
+
+import java.util.Locale;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
@@ -29,8 +32,8 @@ public class AdRequestFactory {
         adRequest.zoneid = zoneid;
         adRequest.apptoken = PNLite.getAppToken();
         adRequest.os = "android";
-        adRequest.osver = Build.VERSION.RELEASE;
-        adRequest.devicemodel = Build.MODEL;
+        adRequest.osver = PNLite.getDeviceInfo().getOSVersion();
+        adRequest.devicemodel = PNLite.getDeviceInfo().getModel();
         adRequest.coppa = PNLite.isCoppaEnabled() ? "1" : "0";
 
         if (PNLite.isCoppaEnabled() || TextUtils.isEmpty(advertisingId)) {
@@ -49,6 +52,12 @@ public class AdRequestFactory {
         adRequest.testMode = PNLite.isTestMode() ? "1" : "0";
         adRequest.al = adSize;
         adRequest.mf = getDefaultMetaFields();
+
+        Location location = PNLite.getLocationManager().getUserLocation();
+        if (location != null) {
+            adRequest.latitude = String.format(Locale.ENGLISH, "%f", location.getLatitude());
+            adRequest.longitude = String.format(Locale.ENGLISH, "%f", location.getLongitude());
+        }
 
         return adRequest;
     }

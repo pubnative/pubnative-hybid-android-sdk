@@ -162,6 +162,10 @@ public class DeviceInfo {
         return Build.MODEL;
     }
 
+    public String getOSVersion() {
+        return Build.VERSION.RELEASE;
+    }
+
     private boolean checkPermission(String permission) {
         if (permission == null) {
             throw new IllegalArgumentException("permission is null");

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 
 import net.pubnative.lite.sdk.api.PNApiClient;
+import net.pubnative.lite.sdk.location.PNLiteLocationManager;
 import net.pubnative.lite.sdk.tracking.PNLiteCrashTracker;
 
 /**
@@ -18,6 +19,7 @@ public class PNLite {
     private static PNApiClient sApiClient;
     @SuppressLint("StaticFieldLeak")
     private static DeviceInfo sDeviceInfo;
+    private static PNLiteLocationManager sLocationManager;
     private static AdCache sAdCache;
     private static boolean sInitialized;
     private static boolean sCoppaEnabled = false;
@@ -33,9 +35,12 @@ public class PNLite {
     public static void initialize(String appToken,
                                   Application application) {
         PNLiteCrashTracker.init(application, "9ef9d95d69bd0ec31bfa7806af72dddd");
+
         sAppToken = appToken;
         sBundleId = application.getPackageName();
         sApiClient = new PNApiClient(application);
+        sLocationManager = new PNLiteLocationManager(application);
+        sLocationManager.startLocationUpdates();
         sDeviceInfo = new DeviceInfo(application.getApplicationContext());
         sAdCache = new AdCache();
         sInitialized = true;
@@ -59,6 +64,10 @@ public class PNLite {
 
     public static DeviceInfo getDeviceInfo() {
         return sDeviceInfo;
+    }
+
+    public static PNLiteLocationManager getLocationManager() {
+        return sLocationManager;
     }
 
     public static AdCache getAdCache() {
