@@ -19,6 +19,7 @@
 
     <com.mopub.mobileads.MoPubView
         android:id="@+id/mopub_mrect"
-        android:layout_width="match_parent"
-        android:layout_height="250dp" />
+        android:layout_width="300dp"
+        android:layout_height="250dp"
+        android:layout_gravity="center_horizontal"/>
 </LinearLayout>

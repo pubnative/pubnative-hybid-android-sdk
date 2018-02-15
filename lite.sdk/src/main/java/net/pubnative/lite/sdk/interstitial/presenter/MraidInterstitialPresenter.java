@@ -1,6 +1,8 @@
 package net.pubnative.lite.sdk.interstitial.presenter;
 
 import android.app.Activity;
+import android.view.View;
+import android.widget.RelativeLayout;
 
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
@@ -50,10 +52,10 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, MRAIDV
 
         if (mAd.getAssetUrl(APIAsset.HTML_BANNER) != null) {
             mMRAIDInterstitial = new MRAIDInterstitial(mActivity, mAd.getAssetUrl(APIAsset.HTML_BANNER), "",
-                    mSupportedNativeFeatures, this, this);
+                    mSupportedNativeFeatures, this, this, mAd.getContentInfoContainer(mActivity));
         } else if (mAd.getAssetHtml(APIAsset.HTML_BANNER) != null) {
             mMRAIDInterstitial = new MRAIDInterstitial(mActivity, "", mAd.getAssetHtml(APIAsset.HTML_BANNER),
-                    mSupportedNativeFeatures, this, this);
+                    mSupportedNativeFeatures, this, this, mAd.getContentInfoContainer(mActivity));
         }
     }
 
