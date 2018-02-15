@@ -258,8 +258,8 @@ public final class PNLiteCrashTracker {
 
     public static Client getClient() {
         if (client == null) {
-            throw new IllegalStateException("You must call Bugsnag.init before any"
-                    + " other Bugsnag methods");
+            throw new IllegalStateException("You must call PNLiteCrashTracker.init before any"
+                    + " other PNLiteCrashTracker methods");
         }
 
         return client;
