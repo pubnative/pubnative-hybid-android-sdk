@@ -1,10 +1,13 @@
 package net.pubnative.lite.demo.ui.fragments;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import net.pubnative.lite.demo.Constants;
 import net.pubnative.lite.demo.R;
@@ -31,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class MainFragment extends Fragment {
+    private static final int PERMISSION_REQUEST = 1000;
 
     private Button mBannerButton;
     private Button mMediumButton;
@@ -49,6 +54,8 @@ public class MainFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mSettingsManager = SettingsManager.Companion.getInstance(getActivity());
+
+        checkPermissions();
     }
 
     @Override
@@ -151,5 +158,25 @@ public class MainFragment extends Fragment {
         mBannerButton.setEnabled(true);
         mMediumButton.setEnabled(true);
         mInterstitialButton.setEnabled(true);
+    }
+
+    private void checkPermissions() {
+        if (ContextCompat.checkSelfPermission(getContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST :
+                if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(getActivity(), "Location permission denied. You can change this on the app settings.", Toast.LENGTH_SHORT).show();
+                }
+                break;
+                default:
+                    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
     }
 }
