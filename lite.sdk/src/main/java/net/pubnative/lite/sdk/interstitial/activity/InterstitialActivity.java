@@ -28,8 +28,6 @@ public class InterstitialActivity extends Activity {
 
         setContentView(R.layout.activity_interstitial);
 
-        // TODO do we care about locking the orientation of the device? How do we know?
-
         if (savedInstanceState != null) {
             mHtml = savedInstanceState.getString(HTML_KEY);
             mBroadcastId = savedInstanceState.getLong(BROADCAST_ID_KEY, -1);
