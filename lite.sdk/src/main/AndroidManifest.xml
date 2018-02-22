@@ -3,9 +3,4 @@
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <application>
-        <activity
-            android:name="net.pubnative.lite.sdk.interstitial.activity.InterstitialActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-    </application>
 </manifest>
