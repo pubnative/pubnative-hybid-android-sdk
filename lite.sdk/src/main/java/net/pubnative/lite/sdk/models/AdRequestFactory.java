@@ -48,16 +48,20 @@ public class AdRequestFactory {
         }
 
         adRequest.locale = mDeviceInfo.getLocale().getLanguage();
-        adRequest.age = PNLite.getAge();
-        adRequest.gender = PNLite.getGender();
-        adRequest.keywords = PNLite.getKeywords();
+
+        if (!PNLite.isCoppaEnabled()) {
+            adRequest.age = PNLite.getAge();
+            adRequest.gender = PNLite.getGender();
+            adRequest.keywords = PNLite.getKeywords();
+        }
+
         adRequest.bundleid = PNLite.getBundleId();
         adRequest.testMode = PNLite.isTestMode() ? "1" : "0";
         adRequest.al = adSize;
         adRequest.mf = getDefaultMetaFields();
 
         Location location = mLocationManager.getUserLocation();
-        if (location != null) {
+        if (location != null && !PNLite.isCoppaEnabled()) {
             adRequest.latitude = String.format(Locale.ENGLISH, "%.6f", location.getLatitude());
             adRequest.longitude = String.format(Locale.ENGLISH, "%.6f", location.getLongitude());
         }
