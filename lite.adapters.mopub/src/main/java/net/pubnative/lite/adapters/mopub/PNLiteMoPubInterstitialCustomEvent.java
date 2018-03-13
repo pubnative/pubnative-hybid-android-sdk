@@ -2,8 +2,6 @@ package net.pubnative.lite.adapters.mopub;
 
 import android.app.Activity;
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.mopub.mobileads.CustomEventInterstitial;
 import com.mopub.mobileads.MoPubErrorCode;
@@ -21,14 +19,10 @@ import java.util.Map;
  */
 
 public class PNLiteMoPubInterstitialCustomEvent extends CustomEventInterstitial implements InterstitialPresenter.Listener {
-    @NonNull
     private static final String TAG = PNLiteMoPubInterstitialCustomEvent.class.getSimpleName();
 
-    @NonNull
     private static final String ZONE_ID_KEY = "pn_zone_id";
-    @Nullable
     private CustomEventInterstitialListener mInterstitialListener;
-    @Nullable
     private InterstitialPresenter mInterstitialPresenter;
 
     @Override
@@ -94,35 +88,35 @@ public class PNLiteMoPubInterstitialCustomEvent extends CustomEventInterstitial 
     }
 
     @Override
-    public void onInterstitialLoaded(@NonNull InterstitialPresenter interstitialPresenter) {
+    public void onInterstitialLoaded(InterstitialPresenter interstitialPresenter) {
         if (mInterstitialListener != null) {
             mInterstitialListener.onInterstitialLoaded();
         }
     }
 
     @Override
-    public void onInterstitialShown(@NonNull InterstitialPresenter interstitialPresenter) {
+    public void onInterstitialShown(InterstitialPresenter interstitialPresenter) {
         if (mInterstitialListener != null) {
             mInterstitialListener.onInterstitialShown();
         }
     }
 
     @Override
-    public void onInterstitialClicked(@NonNull InterstitialPresenter interstitialPresenter) {
+    public void onInterstitialClicked(InterstitialPresenter interstitialPresenter) {
         if (mInterstitialListener != null) {
             mInterstitialListener.onInterstitialClicked();
         }
     }
 
     @Override
-    public void onInterstitialDismissed(@NonNull InterstitialPresenter interstitialPresenter) {
+    public void onInterstitialDismissed(InterstitialPresenter interstitialPresenter) {
         if (mInterstitialListener != null) {
             mInterstitialListener.onInterstitialDismissed();
         }
     }
 
     @Override
-    public void onInterstitialError(@NonNull InterstitialPresenter interstitialPresenter) {
+    public void onInterstitialError(InterstitialPresenter interstitialPresenter) {
         if (mInterstitialListener != null) {
             mInterstitialListener.onInterstitialFailed(MoPubErrorCode.INTERNAL_ERROR);
         }
