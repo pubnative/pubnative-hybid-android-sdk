@@ -1,8 +1,6 @@
 package net.pubnative.lite.adapters.mopub;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.view.View;
 
 import com.mopub.mobileads.CustomEventBanner;
@@ -21,14 +19,10 @@ import java.util.Map;
  */
 
 public class PNLiteMoPubBannerCustomEvent extends CustomEventBanner implements BannerPresenter.Listener {
-    @NonNull
     private static final String TAG = PNLiteMoPubBannerCustomEvent.class.getSimpleName();
 
-    @NonNull
     private static final String ZONE_ID_KEY = "pn_zone_id";
-    @Nullable
     private CustomEventBannerListener mBannerListener;
-    @Nullable
     private BannerPresenter mBannerPresenter;
 
     @Override
@@ -80,21 +74,21 @@ public class PNLiteMoPubBannerCustomEvent extends CustomEventBanner implements B
     }
 
     @Override
-    public void onBannerLoaded(@NonNull BannerPresenter bannerPresenter, @NonNull View banner) {
+    public void onBannerLoaded(BannerPresenter bannerPresenter, View banner) {
         if (mBannerListener != null) {
             mBannerListener.onBannerLoaded(banner);
         }
     }
 
     @Override
-    public void onBannerClicked(@NonNull BannerPresenter bannerPresenter) {
+    public void onBannerClicked(BannerPresenter bannerPresenter) {
         if (mBannerListener != null) {
             mBannerListener.onBannerClicked();
         }
     }
 
     @Override
-    public void onBannerError(@NonNull BannerPresenter bannerPresenter) {
+    public void onBannerError(BannerPresenter bannerPresenter) {
         if (mBannerListener != null) {
             mBannerListener.onBannerFailed(MoPubErrorCode.INTERNAL_ERROR);
         }

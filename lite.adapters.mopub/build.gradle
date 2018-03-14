@@ -30,7 +30,6 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support:appcompat-v7:27.0.2'
     implementation project(':lite.sdk')
     compileOnly('com.mopub:mopub-sdk:4.20.0@aar') {
         transitive = true
