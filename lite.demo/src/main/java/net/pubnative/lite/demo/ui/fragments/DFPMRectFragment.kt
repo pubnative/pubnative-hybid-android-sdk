@@ -7,28 +7,31 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.Toast
-import com.mopub.mobileads.MoPubErrorCode
-import com.mopub.mobileads.MoPubView
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.doubleclick.PublisherAdRequest
+import com.google.android.gms.ads.doubleclick.PublisherAdView
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.sdk.api.MRectRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
-import net.pubnative.lite.sdk.utils.PrebidUtils
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class DFPMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView.BannerAdListener {
+class DFPMRectFragment : Fragment(), RequestManager.RequestListener {
     val TAG = DFPMRectFragment::class.java.simpleName
 
     private lateinit var requestManager: RequestManager
     private var zoneId: String? = null
     private var adUnitId: String? = null
 
-    private lateinit var mopubMRect: MoPubView
+    private lateinit var dfpMRect: PublisherAdView
+    private lateinit var dfpMRectContainer: FrameLayout
     private lateinit var loadButton: Button
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
@@ -38,14 +41,18 @@ class DFPMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView.B
         super.onViewCreated(view, savedInstanceState)
 
         loadButton = view.findViewById(R.id.button_load)
-        mopubMRect = view.findViewById(R.id.mopub_mrect)
-        mopubMRect.bannerAdListener = this
-        mopubMRect.autorefreshEnabled = false
+        dfpMRectContainer = view.findViewById(R.id.dfp_mrect_container)
 
         requestManager = MRectRequestManager()
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
-        adUnitId = SettingsManager.getInstance(activity!!).getSettings().mopubMediumAdUnitId
+        adUnitId = SettingsManager.getInstance(activity!!).getSettings().dfpMediumAdUnitId
+
+        dfpMRect = PublisherAdView(activity)
+        dfpMRect.adUnitId = adUnitId
+        dfpMRect.setAdSizes(AdSize.MEDIUM_RECTANGLE)
+
+        dfpMRectContainer.addView(dfpMRect)
 
         loadButton.setOnClickListener {
             loadPNAd()
@@ -54,7 +61,7 @@ class DFPMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView.B
 
     override fun onDestroy() {
         super.onDestroy()
-        mopubMRect.destroy()
+        dfpMRect.destroy()
     }
 
     fun loadPNAd() {
@@ -65,9 +72,8 @@ class DFPMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView.B
 
     // --------------- PNLite Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
-        mopubMRect.adUnitId = adUnitId
-        mopubMRect.keywords = PrebidUtils.getPrebidKeywords(ad, zoneId)
-        mopubMRect.loadAd()
+        val adRequest = PublisherAdRequest.Builder().build()
+        dfpMRect.loadAd(adRequest)
         Log.d(TAG, "onRequestSuccess")
     }
 
@@ -76,24 +82,41 @@ class DFPMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView.B
         Toast.makeText(activity, throwable?.message, Toast.LENGTH_SHORT).show()
     }
 
-    // ---------------- MoPub Banner Listener ---------------------
-    override fun onBannerLoaded(banner: MoPubView?) {
-        Log.d(TAG, "onBannerLoaded")
-    }
+    // ---------------- DFP Ad Listener ---------------------
+    private val adListener = object : AdListener() {
+        override fun onAdLoaded() {
+            super.onAdLoaded()
+            Log.d(TAG, "onAdLoaded")
+        }
 
-    override fun onBannerFailed(banner: MoPubView?, errorCode: MoPubErrorCode?) {
-        Log.d(TAG, "onBannerFailed")
-    }
+        override fun onAdFailedToLoad(errorCode: Int) {
+            super.onAdFailedToLoad(errorCode)
+            Log.d(TAG, "onAdFailedToLoad")
+        }
 
-    override fun onBannerExpanded(banner: MoPubView?) {
-        Log.d(TAG, "onBannerExpanded")
-    }
+        override fun onAdImpression() {
+            super.onAdImpression()
+            Log.d(TAG, "onAdImpression")
+        }
 
-    override fun onBannerCollapsed(banner: MoPubView?) {
-        Log.d(TAG, "onBannerCollapsed")
-    }
+        override fun onAdClicked() {
+            super.onAdClicked()
+            Log.d(TAG, "onAdClicked")
+        }
 
-    override fun onBannerClicked(banner: MoPubView?) {
-        Log.d(TAG, "onBannerClicked")
+        override fun onAdOpened() {
+            super.onAdOpened()
+            Log.d(TAG, "onAdOpened")
+        }
+
+        override fun onAdLeftApplication() {
+            super.onAdLeftApplication()
+            Log.d(TAG, "onAdLeftApplication")
+        }
+
+        override fun onAdClosed() {
+            super.onAdClosed()
+            Log.d(TAG, "onAdClosed")
+        }
     }
 }

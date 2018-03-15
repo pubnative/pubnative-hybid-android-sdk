@@ -17,8 +17,8 @@
         android:layout_marginTop="20dp"
         android:text="@string/load" />
 
-    <com.mopub.mobileads.MoPubView
-        android:id="@+id/mopub_banner"
+    <FrameLayout
+        android:id="@+id/dfp_banner_container"
         android:layout_width="320dp"
         android:layout_height="50dp"
         android:layout_gravity="center_horizontal"/>
