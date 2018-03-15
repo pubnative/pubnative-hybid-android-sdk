@@ -11,21 +11,21 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <Button
+            android:id="@+id/button_pn_settings"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="20dp"
+            android:layout_weight="1"
+            android:text="@string/pn_settings" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="20dp">
-
-            <Button
-                android:id="@+id/button_pn_settings"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_marginRight="8dp"
-                android:layout_weight="1"
-                android:text="@string/pn_settings" />
+            android:layout_marginStart="16dp">
 
             <Button
                 android:id="@+id/button_mopub_settings"
@@ -35,6 +35,15 @@
                 android:layout_marginStart="8dp"
                 android:layout_weight="1"
                 android:text="@string/mopub_settings" />
+
+            <Button
+                android:id="@+id/button_dfp_settings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_weight="1"
+                android:text="@string/dfp_settings" />
         </LinearLayout>
 
         <TextView

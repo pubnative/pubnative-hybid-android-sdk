@@ -8,10 +8,10 @@ import net.pubnative.lite.demo.R
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class InterstitialActivity : AppCompatActivity() {
+class DFPMRectActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_interstitial)
+        setContentView(R.layout.activity_dfp_mrect)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

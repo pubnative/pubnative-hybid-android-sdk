@@ -9,11 +9,11 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
 import com.mopub.mobileads.MoPubErrorCode
-import com.mopub.mobileads.MoPubInterstitial
+import com.mopub.mobileads.MoPubView
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
-import net.pubnative.lite.sdk.api.InterstitialRequestManager
+import net.pubnative.lite.sdk.api.BannerRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
 import net.pubnative.lite.sdk.utils.PrebidUtils
@@ -21,31 +21,31 @@ import net.pubnative.lite.sdk.utils.PrebidUtils
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class InterstitialFragment : Fragment(), RequestManager.RequestListener, MoPubInterstitial.InterstitialAdListener {
-    val TAG = InterstitialFragment::class.java.simpleName
+class MoPubBannerFragment : Fragment(), RequestManager.RequestListener, MoPubView.BannerAdListener {
+    val TAG = MoPubBannerFragment::class.java.simpleName
 
     private lateinit var requestManager: RequestManager
-    private lateinit var mopubInterstitial: MoPubInterstitial
     private var zoneId: String? = null
     private var adUnitId: String? = null
 
+    private lateinit var mopubBanner: MoPubView
     private lateinit var loadButton: Button
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
-            = inflater.inflate(R.layout.fragment_interstitial, container, false)
+            = inflater.inflate(R.layout.fragment_mopub_banner, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         loadButton = view.findViewById(R.id.button_load)
+        mopubBanner = view.findViewById(R.id.mopub_banner)
+        mopubBanner.bannerAdListener = this
+        mopubBanner.autorefreshEnabled = false
 
-        adUnitId = SettingsManager.getInstance(activity!!).getSettings().mopubInterstitialAdUnitId
-
-        requestManager = InterstitialRequestManager()
-        mopubInterstitial = MoPubInterstitial(activity!!, adUnitId!!)
-        mopubInterstitial.interstitialAdListener = this
+        requestManager = BannerRequestManager()
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
+        adUnitId = SettingsManager.getInstance(activity!!).getSettings().mopubBannerAdUnitId
 
         loadButton.setOnClickListener {
             loadPNAd()
@@ -54,7 +54,7 @@ class InterstitialFragment : Fragment(), RequestManager.RequestListener, MoPubIn
 
     override fun onDestroy() {
         super.onDestroy()
-        mopubInterstitial.destroy()
+        mopubBanner.destroy()
     }
 
     fun loadPNAd() {
@@ -65,8 +65,9 @@ class InterstitialFragment : Fragment(), RequestManager.RequestListener, MoPubIn
 
     // --------------- PNLite Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
-        mopubInterstitial.keywords = PrebidUtils.getPrebidKeywords(ad, zoneId)
-        mopubInterstitial.load()
+        mopubBanner.adUnitId = adUnitId
+        mopubBanner.keywords = PrebidUtils.getPrebidKeywords(ad, zoneId)
+        mopubBanner.loadAd()
         Log.d(TAG, "onRequestSuccess")
     }
 
@@ -75,25 +76,24 @@ class InterstitialFragment : Fragment(), RequestManager.RequestListener, MoPubIn
         Toast.makeText(activity, throwable?.message, Toast.LENGTH_SHORT).show()
     }
 
-    // ------------- MoPub Interstitial Listener ------------------
-    override fun onInterstitialLoaded(interstitial: MoPubInterstitial?) {
-        mopubInterstitial.show()
-        Log.d(TAG, "onInterstitialLoaded")
+    // ---------------- MoPub Banner Listener ---------------------
+    override fun onBannerLoaded(banner: MoPubView?) {
+        Log.d(TAG, "onBannerLoaded")
     }
 
-    override fun onInterstitialFailed(interstitial: MoPubInterstitial?, errorCode: MoPubErrorCode?) {
-        Log.d(TAG, "onInterstitialFailed")
+    override fun onBannerFailed(banner: MoPubView?, errorCode: MoPubErrorCode?) {
+        Log.d(TAG, "onBannerFailed")
     }
 
-    override fun onInterstitialShown(interstitial: MoPubInterstitial?) {
-        Log.d(TAG, "onInterstitialShown")
+    override fun onBannerExpanded(banner: MoPubView?) {
+        Log.d(TAG, "onBannerExpanded")
     }
 
-    override fun onInterstitialDismissed(interstitial: MoPubInterstitial?) {
-        Log.d(TAG, "onInterstitialDismissed")
+    override fun onBannerCollapsed(banner: MoPubView?) {
+        Log.d(TAG, "onBannerCollapsed")
     }
 
-    override fun onInterstitialClicked(interstitial: MoPubInterstitial?) {
-        Log.d(TAG, "onInterstitialClicked")
+    override fun onBannerClicked(banner: MoPubView?) {
+        Log.d(TAG, "onBannerClicked")
     }
 }

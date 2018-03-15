@@ -22,9 +22,10 @@ import net.pubnative.lite.demo.Constants;
 import net.pubnative.lite.demo.R;
 import net.pubnative.lite.demo.managers.SettingsManager;
 import net.pubnative.lite.demo.models.SettingsModel;
-import net.pubnative.lite.demo.ui.activities.BannerActivity;
-import net.pubnative.lite.demo.ui.activities.InterstitialActivity;
-import net.pubnative.lite.demo.ui.activities.MRectActivity;
+import net.pubnative.lite.demo.ui.activities.DFPSettingsActivity;
+import net.pubnative.lite.demo.ui.activities.MoPubBannerActivity;
+import net.pubnative.lite.demo.ui.activities.MoPubInterstitialActivity;
+import net.pubnative.lite.demo.ui.activities.MoPubMRectActivity;
 import net.pubnative.lite.demo.ui.activities.MoPubSettingsActivity;
 import net.pubnative.lite.demo.ui.activities.PNSettingsActivity;
 import net.pubnative.lite.demo.ui.adapters.ZoneIdAdapter;
@@ -90,6 +91,14 @@ public class MainFragment extends Fragment {
             }
         });
 
+        view.findViewById(R.id.button_dfp_settings).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), DFPSettingsActivity.class);
+                startActivity(intent);
+            }
+        });
+
         view.findViewById(R.id.button_mopub_settings).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -102,7 +111,7 @@ public class MainFragment extends Fragment {
         mBannerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), BannerActivity.class);
+                Intent intent = new Intent(getActivity(), MoPubBannerActivity.class);
                 intent.putExtra(Constants.IntentParams.ZONE_ID, mChosenZoneId);
                 startActivity(intent);
             }
@@ -112,7 +121,7 @@ public class MainFragment extends Fragment {
         mMediumButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), MRectActivity.class);
+                Intent intent = new Intent(getActivity(), MoPubMRectActivity.class);
                 intent.putExtra(Constants.IntentParams.ZONE_ID, mChosenZoneId);
                 startActivity(intent);
 
@@ -123,7 +132,7 @@ public class MainFragment extends Fragment {
         mInterstitialButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), InterstitialActivity.class);
+                Intent intent = new Intent(getActivity(), MoPubInterstitialActivity.class);
                 intent.putExtra(Constants.IntentParams.ZONE_ID, mChosenZoneId);
                 startActivity(intent);
             }
