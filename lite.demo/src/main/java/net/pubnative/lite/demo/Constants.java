@@ -17,8 +17,8 @@ public class Constants {
     public static final String MOPUB_MRAID_MEDIUM_AD_UNIT = "1fafef6b872a4e10ba9fc573ca347e55";
 
     public static final String DFP_MRAID_BANNER_AD_UNIT = "/6499/example/banner";
-    public static final String DFP_MRAID_INTERSTITIAL_AD_UNIT = "/6499/example/banner";
-    public static final String DFP_MRAID_MEDIUM_AD_UNIT = "/6499/example/interstitial";
+    public static final String DFP_MRAID_INTERSTITIAL_AD_UNIT = "/6499/example/interstitial";
+    public static final String DFP_MRAID_MEDIUM_AD_UNIT = "/6499/example/banner";
 
     public static final String APP_TOKEN = "dde3c298b47648459f8ada4a982fa92d";
     public static final List<String> ZONE_ID_LIST = Arrays.asList(BANNER_MRAID_ZONE_ID, MEDIUM_MRAID_ZONE_ID, INTERSTITIAL_MRAID_ZONE_ID);

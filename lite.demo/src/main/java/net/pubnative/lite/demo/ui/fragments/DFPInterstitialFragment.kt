@@ -8,24 +8,24 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
-import com.mopub.mobileads.MoPubErrorCode
-import com.mopub.mobileads.MoPubInterstitial
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.doubleclick.PublisherAdRequest
+import com.google.android.gms.ads.doubleclick.PublisherInterstitialAd
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.sdk.api.InterstitialRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
-import net.pubnative.lite.sdk.utils.PrebidUtils
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener, MoPubInterstitial.InterstitialAdListener {
+class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
     val TAG = DFPInterstitialFragment::class.java.simpleName
 
     private lateinit var requestManager: RequestManager
-    private lateinit var mopubInterstitial: MoPubInterstitial
+    private lateinit var dfpInterstitial: PublisherInterstitialAd
     private var zoneId: String? = null
     private var adUnitId: String? = null
 
@@ -39,22 +39,19 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener, MoPu
 
         loadButton = view.findViewById(R.id.button_load)
 
-        adUnitId = SettingsManager.getInstance(activity!!).getSettings().mopubInterstitialAdUnitId
+        adUnitId = SettingsManager.getInstance(activity!!).getSettings().dfpInterstitialAdUnitId
 
         requestManager = InterstitialRequestManager()
-        mopubInterstitial = MoPubInterstitial(activity!!, adUnitId!!)
-        mopubInterstitial.interstitialAdListener = this
+
+        dfpInterstitial = PublisherInterstitialAd(activity)
+        dfpInterstitial.adUnitId = adUnitId
+        dfpInterstitial.adListener = adListener
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
         loadButton.setOnClickListener {
             loadPNAd()
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mopubInterstitial.destroy()
     }
 
     fun loadPNAd() {
@@ -65,8 +62,8 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener, MoPu
 
     // --------------- PNLite Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
-        mopubInterstitial.keywords = PrebidUtils.getPrebidKeywords(ad, zoneId)
-        mopubInterstitial.load()
+        val adRequest = PublisherAdRequest.Builder().build()
+        dfpInterstitial.loadAd(adRequest)
         Log.d(TAG, "onRequestSuccess")
     }
 
@@ -75,25 +72,42 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener, MoPu
         Toast.makeText(activity, throwable?.message, Toast.LENGTH_SHORT).show()
     }
 
-    // ------------- MoPub Interstitial Listener ------------------
-    override fun onInterstitialLoaded(interstitial: MoPubInterstitial?) {
-        mopubInterstitial.show()
-        Log.d(TAG, "onInterstitialLoaded")
-    }
+    // ---------------- DFP Ad Listener ---------------------
+    private val adListener = object : AdListener() {
+        override fun onAdLoaded() {
+            super.onAdLoaded()
+            Log.d(TAG, "onAdLoaded")
+            dfpInterstitial.show()
+        }
 
-    override fun onInterstitialFailed(interstitial: MoPubInterstitial?, errorCode: MoPubErrorCode?) {
-        Log.d(TAG, "onInterstitialFailed")
-    }
+        override fun onAdFailedToLoad(errorCode: Int) {
+            super.onAdFailedToLoad(errorCode)
+            Log.d(TAG, "onAdFailedToLoad")
+        }
 
-    override fun onInterstitialShown(interstitial: MoPubInterstitial?) {
-        Log.d(TAG, "onInterstitialShown")
-    }
+        override fun onAdImpression() {
+            super.onAdImpression()
+            Log.d(TAG, "onAdImpression")
+        }
 
-    override fun onInterstitialDismissed(interstitial: MoPubInterstitial?) {
-        Log.d(TAG, "onInterstitialDismissed")
-    }
+        override fun onAdClicked() {
+            super.onAdClicked()
+            Log.d(TAG, "onAdClicked")
+        }
 
-    override fun onInterstitialClicked(interstitial: MoPubInterstitial?) {
-        Log.d(TAG, "onInterstitialClicked")
+        override fun onAdOpened() {
+            super.onAdOpened()
+            Log.d(TAG, "onAdOpened")
+        }
+
+        override fun onAdLeftApplication() {
+            super.onAdLeftApplication()
+            Log.d(TAG, "onAdLeftApplication")
+        }
+
+        override fun onAdClosed() {
+            super.onAdClosed()
+            Log.d(TAG, "onAdClosed")
+        }
     }
 }
