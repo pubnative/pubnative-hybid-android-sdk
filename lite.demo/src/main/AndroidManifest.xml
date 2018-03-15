@@ -37,32 +37,32 @@
 
         <activity
             android:name=".ui.activities.MoPubBannerActivity"
-            android:label="@string/banner"
+            android:label="@string/mopub_banner"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.MoPubMRectActivity"
-            android:label="@string/medium"
+            android:label="@string/mopub_medium"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.MoPubInterstitialActivity"
-            android:label="@string/interstitial"
+            android:label="@string/mopub_interstitial"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.DFPBannerActivity"
-            android:label="@string/banner"
+            android:label="@string/dfp_banner"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.DFPMRectActivity"
-            android:label="@string/medium"
+            android:label="@string/dfp_medium"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.DFPInterstitialActivity"
-            android:label="@string/interstitial"
+            android:label="@string/dfp_interstitial"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

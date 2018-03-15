@@ -22,6 +22,9 @@ import net.pubnative.lite.demo.Constants;
 import net.pubnative.lite.demo.R;
 import net.pubnative.lite.demo.managers.SettingsManager;
 import net.pubnative.lite.demo.models.SettingsModel;
+import net.pubnative.lite.demo.ui.activities.DFPBannerActivity;
+import net.pubnative.lite.demo.ui.activities.DFPInterstitialActivity;
+import net.pubnative.lite.demo.ui.activities.DFPMRectActivity;
 import net.pubnative.lite.demo.ui.activities.DFPSettingsActivity;
 import net.pubnative.lite.demo.ui.activities.MoPubBannerActivity;
 import net.pubnative.lite.demo.ui.activities.MoPubInterstitialActivity;
@@ -38,9 +41,12 @@ import java.util.List;
 public class MainFragment extends Fragment {
     private static final int PERMISSION_REQUEST = 1000;
 
-    private Button mBannerButton;
-    private Button mMediumButton;
-    private Button mInterstitialButton;
+    private Button mMoPubBannerButton;
+    private Button mMoPubMediumButton;
+    private Button mMoPubInterstitialButton;
+    private Button mDFPBannerButton;
+    private Button mDFPMediumButton;
+    private Button mDFPInterstitialButton;
     private RecyclerView mZoneIdList;
     private TextView mChosenZoneIdView;
     private ZoneIdAdapter mAdapter;
@@ -107,8 +113,8 @@ public class MainFragment extends Fragment {
             }
         });
 
-        mBannerButton = view.findViewById(R.id.button_banner);
-        mBannerButton.setOnClickListener(new View.OnClickListener() {
+        mMoPubBannerButton = view.findViewById(R.id.button_mopub_banner);
+        mMoPubBannerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), MoPubBannerActivity.class);
@@ -117,8 +123,8 @@ public class MainFragment extends Fragment {
             }
         });
 
-        mMediumButton = view.findViewById(R.id.button_medium);
-        mMediumButton.setOnClickListener(new View.OnClickListener() {
+        mMoPubMediumButton = view.findViewById(R.id.button_mopub_medium);
+        mMoPubMediumButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), MoPubMRectActivity.class);
@@ -128,11 +134,42 @@ public class MainFragment extends Fragment {
             }
         });
 
-        mInterstitialButton = view.findViewById(R.id.button_interstitial);
-        mInterstitialButton.setOnClickListener(new View.OnClickListener() {
+        mMoPubInterstitialButton = view.findViewById(R.id.button_mopub_interstitial);
+        mMoPubInterstitialButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), MoPubInterstitialActivity.class);
+                intent.putExtra(Constants.IntentParams.ZONE_ID, mChosenZoneId);
+                startActivity(intent);
+            }
+        });
+
+        mDFPBannerButton = view.findViewById(R.id.button_dfp_banner);
+        mDFPBannerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), DFPBannerActivity.class);
+                intent.putExtra(Constants.IntentParams.ZONE_ID, mChosenZoneId);
+                startActivity(intent);
+            }
+        });
+
+        mDFPMediumButton = view.findViewById(R.id.button_dfp_medium);
+        mDFPMediumButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), DFPMRectActivity.class);
+                intent.putExtra(Constants.IntentParams.ZONE_ID, mChosenZoneId);
+                startActivity(intent);
+
+            }
+        });
+
+        mDFPInterstitialButton = view.findViewById(R.id.button_dfp_interstitial);
+        mDFPInterstitialButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), DFPInterstitialActivity.class);
                 intent.putExtra(Constants.IntentParams.ZONE_ID, mChosenZoneId);
                 startActivity(intent);
             }
@@ -158,34 +195,40 @@ public class MainFragment extends Fragment {
     private void disableZones() {
         mChosenZoneIdView.setText("");
         mChosenZoneId = "";
-        mBannerButton.setEnabled(false);
-        mMediumButton.setEnabled(false);
-        mInterstitialButton.setEnabled(false);
+        mMoPubBannerButton.setEnabled(false);
+        mMoPubMediumButton.setEnabled(false);
+        mMoPubInterstitialButton.setEnabled(false);
+        mDFPBannerButton.setEnabled(false);
+        mDFPMediumButton.setEnabled(false);
+        mDFPInterstitialButton.setEnabled(false);
     }
 
     private void enableZones() {
-        mBannerButton.setEnabled(true);
-        mMediumButton.setEnabled(true);
-        mInterstitialButton.setEnabled(true);
+        mMoPubBannerButton.setEnabled(true);
+        mMoPubMediumButton.setEnabled(true);
+        mMoPubInterstitialButton.setEnabled(true);
+        mDFPBannerButton.setEnabled(true);
+        mDFPMediumButton.setEnabled(true);
+        mDFPInterstitialButton.setEnabled(true);
     }
 
     private void checkPermissions() {
         if (ContextCompat.checkSelfPermission(getContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST);
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST);
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
-            case PERMISSION_REQUEST :
+            case PERMISSION_REQUEST:
                 if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(getActivity(), "Location permission denied. You can change this on the app settings.", Toast.LENGTH_SHORT).show();
                 }
                 break;
-                default:
-                    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 }
