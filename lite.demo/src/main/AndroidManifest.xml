@@ -8,8 +8,12 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
-    <uses-feature android:name="android.hardware.location.gps" android:required="false" />
-    <uses-feature android:name="android.hardware.location.network" android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location.network"
+        android:required="false" />
 
     <application
         android:name="net.pubnative.lite.demo.PNLiteDemoApplication"
@@ -32,18 +36,33 @@
         </activity>
 
         <activity
-            android:name=".ui.activities.BannerActivity"
-            android:label="@string/banner"
+            android:name=".ui.activities.MoPubBannerActivity"
+            android:label="@string/mopub_banner"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.activities.MRectActivity"
-            android:label="@string/medium"
+            android:name=".ui.activities.MoPubMRectActivity"
+            android:label="@string/mopub_medium"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.activities.InterstitialActivity"
-            android:label="@string/interstitial"
+            android:name=".ui.activities.MoPubInterstitialActivity"
+            android:label="@string/mopub_interstitial"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.DFPBannerActivity"
+            android:label="@string/dfp_banner"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.DFPMRectActivity"
+            android:label="@string/dfp_medium"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.DFPInterstitialActivity"
+            android:label="@string/dfp_interstitial"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
@@ -55,6 +74,12 @@
         <activity
             android:name=".ui.activities.MoPubSettingsActivity"
             android:label="@string/mopub_settings"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".ui.activities.DFPSettingsActivity"
+            android:label="@string/dfp_settings"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden" />

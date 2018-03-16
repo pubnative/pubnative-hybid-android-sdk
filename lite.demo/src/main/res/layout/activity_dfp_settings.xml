@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="net.pubnative.lite.demo.ui.activities.BannerActivity">
+    tools:context="net.pubnative.lite.demo.ui.activities.DFPSettingsActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -22,10 +22,10 @@
 
     <fragment
         android:id="@+id/fragment"
-        android:name="net.pubnative.lite.demo.ui.fragments.BannerFragment"
+        android:name="net.pubnative.lite.demo.ui.fragments.DFPSettingsFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:layout="@layout/fragment_banner" />
+        tools:layout="@layout/fragment_dfp_settings" />
 
 </android.support.design.widget.CoordinatorLayout>

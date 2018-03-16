@@ -21,8 +21,8 @@ import net.pubnative.lite.sdk.utils.PrebidUtils
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class BannerFragment : Fragment(), RequestManager.RequestListener, MoPubView.BannerAdListener {
-    val TAG = BannerFragment::class.java.simpleName
+class MoPubBannerFragment : Fragment(), RequestManager.RequestListener, MoPubView.BannerAdListener {
+    val TAG = MoPubBannerFragment::class.java.simpleName
 
     private lateinit var requestManager: RequestManager
     private var zoneId: String? = null
@@ -32,7 +32,7 @@ class BannerFragment : Fragment(), RequestManager.RequestListener, MoPubView.Ban
     private lateinit var loadButton: Button
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
-            = inflater.inflate(R.layout.fragment_banner, container, false)
+            = inflater.inflate(R.layout.fragment_mopub_banner, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

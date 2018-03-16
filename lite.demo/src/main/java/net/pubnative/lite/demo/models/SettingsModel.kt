@@ -16,7 +16,10 @@ data class SettingsModel(var appToken: String,
                          var testMode: Boolean,
                          var mopubBannerAdUnitId: String,
                          var mopubMediumAdUnitId: String,
-                         var mopubInterstitialAdUnitId: String) : Parcelable {
+                         var mopubInterstitialAdUnitId: String,
+                         var dfpBannerAdUnitId: String,
+                         var dfpMediumAdUnitId: String,
+                         var dfpInterstitialAdUnitId: String) : Parcelable {
     companion object {
         @JvmField
         @Suppress("unused")
@@ -35,6 +38,9 @@ data class SettingsModel(var appToken: String,
             },
             parcel.readInt() != 0,
             parcel.readInt() != 0,
+            parcel.readString(),
+            parcel.readString(),
+            parcel.readString(),
             parcel.readString(),
             parcel.readString(),
             parcel.readString())
@@ -68,6 +74,10 @@ data class SettingsModel(var appToken: String,
         dest?.writeString(mopubBannerAdUnitId)
         dest?.writeString(mopubMediumAdUnitId)
         dest?.writeString(mopubInterstitialAdUnitId)
+
+        dest?.writeString(dfpBannerAdUnitId)
+        dest?.writeString(dfpMediumAdUnitId)
+        dest?.writeString(dfpInterstitialAdUnitId)
     }
 
     override fun describeContents(): Int = 0

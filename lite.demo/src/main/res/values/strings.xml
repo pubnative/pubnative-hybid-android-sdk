@@ -11,15 +11,24 @@
 
     <string name="pn_settings">PN Lite Settings</string>
     <string name="mopub_settings">MoPub Settings</string>
+    <string name="dfp_settings">DFP Settings</string>
 
     <string name="load">Load</string>
     <string name="clear">Clear</string>
     <string name="add">Add</string>
 
+    <string name="mopub">MoPub</string>
+    <string name="dfp">DFP</string>
+
     <string name="hint_mopub_banner_ad_unit_id">Banner Ad Unit ID</string>
     <string name="hint_mopub_medium_ad_unit_id">Medium Ad Unit ID</string>
     <string name="hint_mopub_interstitial_ad_unit_id">Interstitial Ad Unit ID</string>
     <string name="save_mopub_settings">Save MoPub settings</string>
+
+    <string name="hint_dfp_banner_ad_unit_id">Banner Ad Unit ID</string>
+    <string name="hint_dfp_medium_ad_unit_id">Medium Ad Unit ID</string>
+    <string name="hint_dfp_interstitial_ad_unit_id">Interstitial Ad Unit ID</string>
+    <string name="save_dfp_settings">Save DFP settings</string>
 
     <string name="hint_pn_apptoken">App token</string>
     <string name="hint_pn_age">Age</string>
@@ -36,4 +45,15 @@
     <string name="save_pn_settings">Save PN Lite settings</string>
     <string name="save_pn_zone_ids">Save Zone Ids</string>
     <string name="save_pn_keywords">Save Keywords</string>
+
+    <string name="load_with_mopub">Load with MoPub</string>
+    <string name="load_with_dfp">Load with DFP</string>
+
+    <string name="mopub_banner">MoPub Banner</string>
+    <string name="mopub_interstitial">MoPub Interstitial</string>
+    <string name="mopub_medium">MoPub Medium</string>
+
+    <string name="dfp_banner">DFP Banner</string>
+    <string name="dfp_interstitial">DFP Interstitial</string>
+    <string name="dfp_medium">DFP Medium</string>
 </resources>

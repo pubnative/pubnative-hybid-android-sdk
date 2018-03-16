@@ -16,3 +16,7 @@ const val SETTINGS_KEY_TEST_MODE = "test_mode"
 const val SETTINGS_KEY_MOPUB_BANNER_AD_UNIT_ID = "mopub_banner_ad_unit_id"
 const val SETTINGS_KEY_MOPUB_MEDIUM_AD_UNIT_ID = "mopub_medium_ad_unit_id"
 const val SETTINGS_KEY_MOPUB_INTERSTITIAL_AD_UNIT_ID = "mopub_interstitial_ad_unit_id"
+
+const val SETTINGS_KEY_DFP_BANNER_AD_UNIT_ID = "dfp_banner_ad_unit_id"
+const val SETTINGS_KEY_DFP_MEDIUM_AD_UNIT_ID = "dfp_medium_ad_unit_id"
+const val SETTINGS_KEY_DFP_INTERSTITIAL_AD_UNIT_ID = "dfp_interstitial_ad_unit_id"

@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="net.pubnative.lite.demo.ui.fragments.BannerFragment"
-    tools:showIn="@layout/activity_banner">
+    tools:context="net.pubnative.lite.demo.ui.fragments.MoPubMRectFragment"
+    tools:showIn="@layout/activity_mopub_mrect">
 
     <Button
         android:id="@+id/button_load"
@@ -18,9 +18,8 @@
         android:text="@string/load" />
 
     <com.mopub.mobileads.MoPubView
-        android:id="@+id/mopub_banner"
-        android:layout_width="320dp"
-        android:layout_height="50dp"
+        android:id="@+id/mopub_mrect"
+        android:layout_width="300dp"
+        android:layout_height="250dp"
         android:layout_gravity="center_horizontal"/>
-
 </LinearLayout>

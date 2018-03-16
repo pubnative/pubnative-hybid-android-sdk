@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="net.pubnative.lite.demo.ui.fragments.MRectFragment"
-    tools:showIn="@layout/activity_mrect">
+    tools:context="net.pubnative.lite.demo.ui.fragments.DFPMRectFragment"
+    tools:showIn="@layout/activity_dfp_mrect">
 
     <Button
         android:id="@+id/button_load"
@@ -17,8 +17,8 @@
         android:layout_marginTop="20dp"
         android:text="@string/load" />
 
-    <com.mopub.mobileads.MoPubView
-        android:id="@+id/mopub_mrect"
+    <FrameLayout
+        android:id="@+id/dfp_mrect_container"
         android:layout_width="300dp"
         android:layout_height="250dp"
         android:layout_gravity="center_horizontal"/>
