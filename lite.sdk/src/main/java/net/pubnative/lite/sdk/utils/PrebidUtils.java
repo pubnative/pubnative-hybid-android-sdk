@@ -4,7 +4,9 @@ import android.os.Bundle;
 
 import net.pubnative.lite.sdk.models.Ad;
 
+import java.util.LinkedHashSet;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * Created by erosgarciaponte on 11.01.18.
@@ -37,6 +39,16 @@ public final class PrebidUtils {
         bundle.putString(KEYS.PN_BID, getBidECPM(ad));
 
         return bundle;
+    }
+
+    public static Set<String> getPrebidKeywordsSet(Ad ad, String zoneid) {
+        Set<String> set = new LinkedHashSet<>(3);
+
+        set.add(KEYS.PN.concat(":true"));
+        set.add(KEYS.PN_ZONE_ID.concat(":").concat(zoneid));
+        set.add(KEYS.PN_BID.concat(":").concat(getBidECPM(ad)));
+
+        return set;
     }
 
     private static String getBidECPM(Ad ad) {
