@@ -19,6 +19,7 @@ import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.sdk.api.MRectRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
+import net.pubnative.lite.sdk.utils.PrebidUtils
 
 /**
  * Created by erosgarciaponte on 30.01.18.
@@ -72,7 +73,19 @@ class DFPMRectFragment : Fragment(), RequestManager.RequestListener {
 
     // --------------- PNLite Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
-        val adRequest = PublisherAdRequest.Builder().build()
+        val builder = PublisherAdRequest.Builder()
+
+        val keywordSet = PrebidUtils.getPrebidKeywordsSet(ad, zoneId)
+        for (key in keywordSet) {
+            builder.addKeyword(key)
+        }
+
+        val keywordBundle = PrebidUtils.getPrebidKeywordsBundle(ad, zoneId)
+        for (key in keywordBundle.keySet()) {
+            builder.addCustomTargeting(key, keywordBundle.getString(key))
+        }
+
+        val adRequest = builder.build()
         dfpMRect.loadAd(adRequest)
         Log.d(TAG, "onRequestSuccess")
     }
