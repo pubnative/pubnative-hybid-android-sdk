@@ -34,7 +34,7 @@ public final class PrebidUtils {
     public static Bundle getPrebidKeywordsBundle(Ad ad, String zoneid) {
         Bundle bundle = new Bundle();
 
-        bundle.putBoolean(KEYS.PN, true);
+        bundle.putString(KEYS.PN, "true");
         bundle.putString(KEYS.PN_ZONE_ID, zoneid);
         bundle.putString(KEYS.PN_BID, getBidECPM(ad));
 
