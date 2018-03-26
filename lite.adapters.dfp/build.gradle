@@ -1,15 +1,24 @@
+def project_name = project.name
+def version_name = project.version
+if (System.getenv("IS_BETA")) {
+    version_name = "${version_name}-${branchName}.${buildNumber}"
+    project_name = "${project_name}.beta"
+}
+//==================================================================================================
+// ANDROID
+//==================================================================================================
+version = version_name
+
 apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 27
 
-
-
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 1
-        versionName "1.0"
+        versionCode System.getenv("CIRCLE_BUILD_NUM") ? System.getenv("CIRCLE_BUILD_NUM").toInteger() : 1
+        versionName version_name
     }
 
     buildTypes {
@@ -17,12 +26,67 @@ android {
             minifyEnabled false
         }
     }
-
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':lite.sdk')
-
     compileOnly 'com.google.android.gms:play-services-ads:11.8.0'
+}
+
+//--------------------------------------------------------------------------------------------------
+// MAVEN
+// -------------------------------------------------------------------------------------------------
+apply plugin: 'maven-publish'
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+publishing {
+    publications {
+
+        aar(MavenPublication) {
+            groupId project.group
+            artifactId project.name
+            version version_name
+            if (!System.getenv("IS_BETA")) {
+                artifact sourcesJar
+            }
+            android.libraryVariants.all { variant ->
+                if (variant.buildType.name == "debug") return
+                artifact variant.outputs[0].packageLibrary // This is the aar library
+            }
+        }
+    }
+}
+
+//----------------------------------------------------------------------------------------------
+// BINTRAY
+//----------------------------------------------------------------------------------------------
+apply plugin: 'com.jfrog.bintray'
+
+bintray {
+    user = System.getenv("BINTRAY_USER")
+    key = System.getenv("BINTRAY_API_KEY")
+    publish = System.getenv("IS_BETA") ? true : false
+    override = true
+    publications = ['aar']
+    pkg {
+        configurations = ['archives']
+        userOrg = 'pubnative'
+        repo = 'maven'
+        desc = 'PubNative Lite SDK DFP Adapter'
+        websiteUrl = "https://pubnative.net"
+        name = project_name
+        licenses = ['MIT']
+        labels = ['android', 'advertising', 'sdk', 'pubnative', 'ads', 'development', 'dfp', 'adapter']
+        version {
+            name = version_name
+            vcsTag = version_name
+            released = new Date()
+            vcsUrl = System.getenv("CIRCLE_REPOSITORY_URL")
+        }
+    }
 }
