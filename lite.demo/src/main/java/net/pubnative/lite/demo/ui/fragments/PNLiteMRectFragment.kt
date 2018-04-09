@@ -80,6 +80,7 @@ class PNLiteMRectFragment : Fragment(), RequestManager.RequestListener, MRectPre
 
     // --------------- PNLite MRect Presenter Listener --------------------
     override fun onMRectLoaded(mRectPresenter: MRectPresenter?, mRect: View?) {
+        pnliteMRectContainer.removeAllViews()
         pnliteMRectContainer.addView(mRect)
         Log.d(TAG, "onMRectLoaded")
     }

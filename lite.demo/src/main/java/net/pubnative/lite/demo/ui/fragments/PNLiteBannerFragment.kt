@@ -74,8 +74,8 @@ class PNLiteBannerFragment : Fragment(), RequestManager.RequestListener, BannerP
 
     // --------------- PNLite Banner Presenter Listener --------------------
     override fun onBannerLoaded(bannerPresenter: BannerPresenter?, banner: View?) {
-        pnliteBannerContainer.addView(banner)
         pnliteBannerContainer.removeAllViews()
+        pnliteBannerContainer.addView(banner)
         Log.d(TAG, "onBannerLoaded")
     }
 
