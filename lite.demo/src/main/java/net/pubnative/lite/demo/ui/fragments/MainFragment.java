@@ -41,6 +41,9 @@ import java.util.List;
 public class MainFragment extends Fragment {
     private static final int PERMISSION_REQUEST = 1000;
 
+    private Button mPNLiteBannerButton;
+    private Button mPNLiteMediumButton;
+    private Button mPNLiteInterstitialButton;
     private Button mMoPubBannerButton;
     private Button mMoPubMediumButton;
     private Button mMoPubInterstitialButton;

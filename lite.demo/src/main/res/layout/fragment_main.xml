@@ -120,6 +120,16 @@
             android:orientation="horizontal">
 
             <Button
+                android:id="@+id/button_pnlite_banner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="@string/pnlite" />
+
+            <Button
                 android:id="@+id/button_mopub_banner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -160,6 +170,16 @@
             android:orientation="horizontal">
 
             <Button
+                android:id="@+id/button_pnlite_medium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="@string/pnlite" />
+
+            <Button
                 android:id="@+id/button_mopub_medium"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -198,6 +218,16 @@
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button_pnlite_interstitial"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="@string/pnlite" />
 
             <Button
                 android:id="@+id/button_mopub_interstitial"
