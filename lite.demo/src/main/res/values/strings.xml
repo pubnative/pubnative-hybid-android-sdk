@@ -17,6 +17,7 @@
     <string name="clear">Clear</string>
     <string name="add">Add</string>
 
+    <string name="pnlite">PN Lite</string>
     <string name="mopub">MoPub</string>
     <string name="dfp">DFP</string>
 
@@ -48,6 +49,10 @@
 
     <string name="load_with_mopub">Load with MoPub</string>
     <string name="load_with_dfp">Load with DFP</string>
+
+    <string name="pnlite_banner">PNLite Banner</string>
+    <string name="pnlite_interstitial">PNLite Interstitial</string>
+    <string name="pnlite_medium">PNLite Medium</string>
 
     <string name="mopub_banner">MoPub Banner</string>
     <string name="mopub_interstitial">MoPub Interstitial</string>

@@ -36,6 +36,22 @@
         </activity>
 
         <activity
+            android:name=".ui.activities.PNLiteBannerActivity"
+            android:label="@string/pnlite_banner"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.PNLiteMRectActivity"
+            android:label="@string/pnlite_medium"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.PNLiteInterstitialActivity"
+            android:label="@string/pnlite_interstitial"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
             android:name=".ui.activities.MoPubBannerActivity"
             android:label="@string/mopub_banner"
             android:screenOrientation="portrait"
