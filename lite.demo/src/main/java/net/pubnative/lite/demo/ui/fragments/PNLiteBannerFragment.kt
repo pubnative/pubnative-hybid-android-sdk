@@ -13,17 +13,20 @@ import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.sdk.api.BannerRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
+import net.pubnative.lite.sdk.banner.presenter.BannerPresenter
+import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory
 import net.pubnative.lite.sdk.models.Ad
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class PNLiteBannerFragment : Fragment(), RequestManager.RequestListener {
+class PNLiteBannerFragment : Fragment(), RequestManager.RequestListener, BannerPresenter.Listener {
     val TAG = PNLiteBannerFragment::class.java.simpleName
 
     private lateinit var requestManager: RequestManager
     private var zoneId: String? = null
 
+    private var presenter: BannerPresenter? = null
     private lateinit var pnliteBannerContainer: FrameLayout
     private lateinit var loadButton: Button
 
@@ -46,6 +49,7 @@ class PNLiteBannerFragment : Fragment(), RequestManager.RequestListener {
     }
 
     override fun onDestroy() {
+        presenter?.destroy()
         super.onDestroy()
     }
 
@@ -57,12 +61,27 @@ class PNLiteBannerFragment : Fragment(), RequestManager.RequestListener {
 
     // --------------- PNLite Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
-
+        presenter = BannerPresenterFactory(context).createBannerPresenter(ad, this)
+        presenter?.load()
         Log.d(TAG, "onRequestSuccess")
     }
 
     override fun onRequestFail(throwable: Throwable?) {
         Log.d(TAG, "onRequestFail: ", throwable)
         Toast.makeText(activity, throwable?.message, Toast.LENGTH_SHORT).show()
+    }
+
+    // --------------- PNLite Banner Presenter Listener --------------------
+    override fun onBannerLoaded(bannerPresenter: BannerPresenter?, banner: View?) {
+        pnliteBannerContainer.addView(banner)
+        Log.d(TAG, "onBannerLoaded")
+    }
+
+    override fun onBannerError(bannerPresenter: BannerPresenter?) {
+        Log.d(TAG, "onBannerError")
+    }
+
+    override fun onBannerClicked(bannerPresenter: BannerPresenter?) {
+        Log.d(TAG, "onBannerClicked")
     }
 }

@@ -19,18 +19,21 @@ import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.sdk.api.MRectRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
+import net.pubnative.lite.sdk.mrect.presenter.MRectPresenter
+import net.pubnative.lite.sdk.mrect.presenter.MRectPresenterFactory
 import net.pubnative.lite.sdk.utils.PrebidUtils
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class PNLiteMRectFragment : Fragment(), RequestManager.RequestListener {
+class PNLiteMRectFragment : Fragment(), RequestManager.RequestListener, MRectPresenter.Listener {
     val TAG = PNLiteMRectFragment::class.java.simpleName
 
     private lateinit var requestManager: RequestManager
     private var zoneId: String? = null
 
     private lateinit var pnliteMRectContainer: FrameLayout
+    private var presenter: MRectPresenter? = null
     private lateinit var loadButton: Button
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
@@ -52,6 +55,7 @@ class PNLiteMRectFragment : Fragment(), RequestManager.RequestListener {
     }
 
     override fun onDestroy() {
+        presenter?.destroy()
         super.onDestroy()
     }
 
@@ -63,11 +67,27 @@ class PNLiteMRectFragment : Fragment(), RequestManager.RequestListener {
 
     // --------------- PNLite Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
+        presenter = MRectPresenterFactory(context).createMRectPresenter(ad, this)
+        presenter?.load()
         Log.d(TAG, "onRequestSuccess")
     }
 
     override fun onRequestFail(throwable: Throwable?) {
         Log.d(TAG, "onRequestFail: ", throwable)
         Toast.makeText(activity, throwable?.message, Toast.LENGTH_SHORT).show()
+    }
+
+    // --------------- PNLite MRect Presenter Listener --------------------
+    override fun onMRectLoaded(mRectPresenter: MRectPresenter?, mRect: View?) {
+        pnliteMRectContainer.addView(mRect)
+        Log.d(TAG, "onMRectLoaded")
+    }
+
+    override fun onMRectError(mRectPresenter: MRectPresenter?) {
+        Log.d(TAG, "onMRectError")
+    }
+
+    override fun onMRectClicked(mRectPresenter: MRectPresenter?) {
+        Log.d(TAG, "onMRectClicked")
     }
 }
