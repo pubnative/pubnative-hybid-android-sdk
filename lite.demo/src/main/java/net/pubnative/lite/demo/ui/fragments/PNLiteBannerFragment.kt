@@ -61,6 +61,7 @@ class PNLiteBannerFragment : Fragment(), RequestManager.RequestListener, BannerP
 
     // --------------- PNLite Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
+        presenter?.destroy()
         presenter = BannerPresenterFactory(context).createBannerPresenter(ad, this)
         presenter?.load()
         Log.d(TAG, "onRequestSuccess")
@@ -74,6 +75,7 @@ class PNLiteBannerFragment : Fragment(), RequestManager.RequestListener, BannerP
     // --------------- PNLite Banner Presenter Listener --------------------
     override fun onBannerLoaded(bannerPresenter: BannerPresenter?, banner: View?) {
         pnliteBannerContainer.addView(banner)
+        pnliteBannerContainer.removeAllViews()
         Log.d(TAG, "onBannerLoaded")
     }
 

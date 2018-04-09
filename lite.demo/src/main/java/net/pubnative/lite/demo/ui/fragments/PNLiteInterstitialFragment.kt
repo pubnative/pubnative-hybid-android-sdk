@@ -57,6 +57,7 @@ class PNLiteInterstitialFragment : Fragment(), RequestManager.RequestListener, I
 
     // --------------- PNLite Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
+        presenter?.destroy()
         presenter = InterstitialPresenterFactory(activity).createInterstitialPresenter(ad, this)
         presenter?.load()
         Log.d(TAG, "onRequestSuccess")

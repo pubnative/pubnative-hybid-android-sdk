@@ -67,6 +67,7 @@ class PNLiteMRectFragment : Fragment(), RequestManager.RequestListener, MRectPre
 
     // --------------- PNLite Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
+        presenter?.destroy()
         presenter = MRectPresenterFactory(context).createMRectPresenter(ad, this)
         presenter?.load()
         Log.d(TAG, "onRequestSuccess")
