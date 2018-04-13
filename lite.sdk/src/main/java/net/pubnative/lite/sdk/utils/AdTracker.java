@@ -85,9 +85,11 @@ public class AdTracker {
     }
 
     private void trackUrls(List<AdData> urls, Type type) {
-        for (final AdData url : urls) {
-            Logger.d(TAG, "Tracking " + type.toString() + " url: " + url);
-            mApiClient.trackUrl(url.getURL(), mTrackUrlListener);
+        if (urls != null) {
+            for (final AdData url : urls) {
+                Logger.d(TAG, "Tracking " + type.toString() + " url: " + url);
+                mApiClient.trackUrl(url.getURL(), mTrackUrlListener);
+            }
         }
     }
 }
