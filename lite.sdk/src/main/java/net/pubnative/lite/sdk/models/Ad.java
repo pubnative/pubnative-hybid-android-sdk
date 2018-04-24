@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 
+import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.json.BindField;
 import net.pubnative.lite.sdk.utils.json.JsonModel;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
@@ -36,6 +37,8 @@ import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -133,6 +136,13 @@ public class Ad extends JsonModel implements Serializable {
         AdData data = getAsset(asset);
         if (data != null) {
             result = data.getURL();
+            if (result != null) {
+                try {
+                    result = URLDecoder.decode(result, "UTF-8");
+                } catch (UnsupportedEncodingException exception) {
+                    Logger.e(TAG, "Error decoding URL: ", exception);
+                }
+            }
         }
         return result;
     }
@@ -142,6 +152,13 @@ public class Ad extends JsonModel implements Serializable {
         AdData data = getAsset(asset);
         if (data != null) {
             result = data.getHtml();
+            if (result != null) {
+                try {
+                    result = URLDecoder.decode(result, "UTF-8");
+                } catch (UnsupportedEncodingException exception) {
+                    Logger.e(TAG, "Error decoding HTML: ", exception);
+                }
+            }
         }
         return result;
     }
