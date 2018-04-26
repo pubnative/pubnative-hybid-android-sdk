@@ -65,22 +65,12 @@ public class DeviceInfo {
     private static final String TAG = DeviceInfo.class.getSimpleName();
     private static final String UNKNOWN_APP_VERSION_IDENTIFIER = "UNKNOWN";
     private final Context mContext;
-    private final String mUserAgent;
     private String mAdvertisingId;
     private final ConnectivityManager mConnectivityManager;
     private final TelephonyManager mTelephonyManager;
 
     public DeviceInfo(Context context) {
         mContext = context.getApplicationContext();
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            mUserAgent = WebSettings.getDefaultUserAgent(context);
-        } else if (Looper.myLooper() == Looper.getMainLooper()) {
-            // Can only create WebViews on the main thread
-            mUserAgent = new WebView(mContext).getSettings().getUserAgentString();
-        } else {
-            mUserAgent = System.getProperty("http.agent");
-        }
 
         mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         mTelephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
@@ -115,21 +105,8 @@ public class DeviceInfo {
         return mAdvertisingId;
     }
 
-    public String getAppVersion() {
-        try {
-            return mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0).versionName;
-        } catch (PackageManager.NameNotFoundException e) {
-            Logger.d(TAG, "Could not determine app version", e);
-            return UNKNOWN_APP_VERSION_IDENTIFIER;
-        }
-    }
-
     public Locale getLocale() {
         return mContext.getResources().getConfiguration().locale;
-    }
-
-    public String getTimeZoneShortDisplayName() {
-        return TimeZone.getDefault().getDisplayName(false, TimeZone.SHORT);
     }
 
     public Orientation getOrientation() {
@@ -144,18 +121,6 @@ public class DeviceInfo {
                 return Orientation.NONE;
             }
         }
-    }
-
-    public int getScreenWidthPx() {
-        return mContext.getResources().getDisplayMetrics().widthPixels;
-    }
-
-    public int getScreenHeightPx() {
-        return mContext.getResources().getDisplayMetrics().heightPixels;
-    }
-
-    public String getBrowserAgent() {
-        return mUserAgent;
     }
 
     public String getModel() {
@@ -199,18 +164,5 @@ public class DeviceInfo {
             default:
                 return Connectivity.NONE;
         }
-    }
-
-    public String getCarrierName() {
-        if (mTelephonyManager == null) {
-            return "";
-        }
-
-        try {
-            return mTelephonyManager.getNetworkOperatorName();
-        } catch (Exception ignored) {
-        }
-
-        return "";
     }
 }
