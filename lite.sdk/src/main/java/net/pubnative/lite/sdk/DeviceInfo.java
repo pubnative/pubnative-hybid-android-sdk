@@ -66,6 +66,7 @@ public class DeviceInfo {
     private static final String UNKNOWN_APP_VERSION_IDENTIFIER = "UNKNOWN";
     private final Context mContext;
     private String mAdvertisingId;
+    private boolean mLimitTracking = false;
     private final ConnectivityManager mConnectivityManager;
     private final TelephonyManager mTelephonyManager;
 
@@ -82,7 +83,8 @@ public class DeviceInfo {
         PNAdvertisingIdClient client = new PNAdvertisingIdClient();
         client.request(mContext, new PNAdvertisingIdClient.Listener() {
             @Override
-            public void onPNAdvertisingIdFinish(String advertisingId) {
+            public void onPNAdvertisingIdFinish(String advertisingId, boolean limitTracking) {
+                mLimitTracking = limitTracking;
                 if (TextUtils.isEmpty(advertisingId)) {
                     mAdvertisingId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
                 } else {
@@ -103,6 +105,10 @@ public class DeviceInfo {
     @SuppressLint("HardwareIds")
     public String getAdvertisingId() {
         return mAdvertisingId;
+    }
+
+    public boolean limitTracking() {
+        return mLimitTracking;
     }
 
     public Locale getLocale() {

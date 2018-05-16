@@ -20,7 +20,7 @@ public class PNAdvertisingIdClient {
     private static final String TAG = PNAdvertisingIdClient.class.getSimpleName();
 
     public interface Listener {
-        void onPNAdvertisingIdFinish(String advertisingId);
+        void onPNAdvertisingIdFinish(String advertisingId, boolean limitTracking);
     }
 
     protected Listener mListener;
@@ -58,25 +58,27 @@ public class PNAdvertisingIdClient {
                 }
 
                 String advertisingId = null;
+                boolean limitTracking = false;
                 if (adInfo != null) {
-                    if (adInfo.isLimitAdTrackingEnabled()) {
+                    limitTracking = adInfo.isLimitAdTrackingEnabled();
+                    if (limitTracking) {
                         Log.i(TAG, "Error: cannot get advertising id, limit ad tracking is enabled");
                     } else {
                         advertisingId = adInfo.getId();
                     }
                 }
 
-                PNAdvertisingIdClient.this.invokeOnFinish(advertisingId);
+                PNAdvertisingIdClient.this.invokeOnFinish(advertisingId, limitTracking);
             }
         }).start();
     }
 
-    protected void invokeOnFinish(final String advertisingId) {
+    protected void invokeOnFinish(final String advertisingId, final boolean limitTracking) {
         mHadler.post(new Runnable() {
             @Override
             public void run() {
                 if (mListener != null) {
-                    mListener.onPNAdvertisingIdFinish(advertisingId);
+                    mListener.onPNAdvertisingIdFinish(advertisingId, limitTracking);
                 }
             }
         });

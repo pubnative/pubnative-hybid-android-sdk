@@ -39,7 +39,7 @@ public class AdRequestFactory {
         adRequest.devicemodel = mDeviceInfo.getModel();
         adRequest.coppa = PNLite.isCoppaEnabled() ? "1" : "0";
 
-        if (PNLite.isCoppaEnabled() || TextUtils.isEmpty(advertisingId)) {
+        if (PNLite.isCoppaEnabled() || mDeviceInfo.limitTracking() || TextUtils.isEmpty(advertisingId)) {
             adRequest.dnt = "1";
         } else {
             adRequest.gid = advertisingId;
@@ -49,7 +49,7 @@ public class AdRequestFactory {
 
         adRequest.locale = mDeviceInfo.getLocale().getLanguage();
 
-        if (!PNLite.isCoppaEnabled()) {
+        if (!PNLite.isCoppaEnabled() && !mDeviceInfo.limitTracking()) {
             adRequest.age = PNLite.getAge();
             adRequest.gender = PNLite.getGender();
             adRequest.keywords = PNLite.getKeywords();
@@ -61,7 +61,7 @@ public class AdRequestFactory {
         adRequest.mf = getDefaultMetaFields();
 
         Location location = mLocationManager.getUserLocation();
-        if (location != null && !PNLite.isCoppaEnabled()) {
+        if (location != null && !PNLite.isCoppaEnabled() && !mDeviceInfo.limitTracking()) {
             adRequest.latitude = String.format(Locale.ENGLISH, "%.6f", location.getLatitude());
             adRequest.longitude = String.format(Locale.ENGLISH, "%.6f", location.getLongitude());
         }
@@ -71,7 +71,6 @@ public class AdRequestFactory {
 
     private String getDefaultMetaFields() {
         String[] metaFields = new String[]{APIMeta.POINTS, APIMeta.REVENUE_MODEL, APIMeta.CONTENT_INFO};
-        String result = TextUtils.join(",", metaFields);
-        return result;
+        return TextUtils.join(",", metaFields);
     }
 }

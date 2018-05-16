@@ -6,6 +6,7 @@ import android.support.multidex.MultiDexApplication;
 import android.text.TextUtils;
 
 import com.crashlytics.android.Crashlytics;
+import com.mopub.common.MoPub;
 
 import io.fabric.sdk.android.Fabric;
 

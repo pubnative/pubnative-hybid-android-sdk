@@ -6,6 +6,7 @@ import android.app.Application;
 import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.location.PNLiteLocationManager;
 import net.pubnative.lite.sdk.tracking.PNLiteCrashTracker;
+import net.pubnative.lite.sdk.userdata.UserDataManager;
 
 /**
  * Created by erosgarciaponte on 05.01.18.
@@ -19,6 +20,7 @@ public class PNLite {
     private static PNApiClient sApiClient;
     @SuppressLint("StaticFieldLeak")
     private static DeviceInfo sDeviceInfo;
+    private static UserDataManager sUserDataManager;
     private static PNLiteLocationManager sLocationManager;
     private static AdCache sAdCache;
     private static boolean sInitialized;
@@ -42,6 +44,7 @@ public class PNLite {
         sLocationManager = new PNLiteLocationManager(application);
         sLocationManager.startLocationUpdates();
         sDeviceInfo = new DeviceInfo(application.getApplicationContext());
+        sUserDataManager = new UserDataManager(application.getApplicationContext(), appToken);
         sAdCache = new AdCache();
         sInitialized = true;
     }
