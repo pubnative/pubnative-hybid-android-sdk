@@ -8,15 +8,13 @@ import android.text.TextUtils;
 import com.crashlytics.android.Crashlytics;
 
 import io.fabric.sdk.android.Fabric;
-import kotlin.io.ConstantsKt;
 
+import net.pubnative.lite.demo.managers.MoPubManager;
 import net.pubnative.lite.demo.managers.SettingsManager;
 import net.pubnative.lite.demo.models.SettingsModel;
 import net.pubnative.lite.sdk.PNLite;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
@@ -59,6 +57,8 @@ public class PNLiteDemoApplication extends MultiDexApplication {
         }
 
         PNLite.setKeywords(keywordString);
+
+        MoPubManager.initMoPubSdk(this, settings.getMopubBannerAdUnitId());
     }
 
     private SettingsModel fetchSettings() {
