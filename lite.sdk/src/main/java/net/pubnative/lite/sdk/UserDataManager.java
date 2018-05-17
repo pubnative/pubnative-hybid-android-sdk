@@ -3,8 +3,16 @@ package net.pubnative.lite.sdk;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
+import android.util.Log;
+
+import net.pubnative.lite.sdk.location.GeoIpRequest;
+import net.pubnative.lite.sdk.models.GeoIpResponse;
+import net.pubnative.lite.sdk.utils.CountryUtils;
+import net.pubnative.lite.sdk.utils.Logger;
 
 public class UserDataManager {
+    private static final String TAG = UserDataManager.class.getSimpleName();
+
     private static final String PREFERENCES_CONSENT = "net.pubnative.lite.dataconsent";
     private static final String KEY_GDPR_CONSENT_UUID = "gdpr_consent_uuid";
     private static final String KEY_GDPR_CONSENT_STATE = "gdpr_consent_state";
@@ -21,7 +29,7 @@ public class UserDataManager {
 
     public UserDataManager(Context context, String appToken, UserDataInitialisationListener initialisationListener) {
         mPreferences = context.getSharedPreferences(PREFERENCES_CONSENT, Context.MODE_PRIVATE);
-        determineUserZone(appToken, initialisationListener);
+        determineUserZone(context, initialisationListener);
     }
 
     public String getPrivacyPolicyLink() {
@@ -48,11 +56,37 @@ public class UserDataManager {
         //TODO sync with API
     }
 
-    private void determineUserZone(String appToken, UserDataInitialisationListener listener) {
-        // TODO get country from API
-        if (listener != null) {
-            listener.onDataInitialised(true);
-        }
+    public void revokeConsent() {
+        setConsentState(CONSENT_STATE_DENIED);
+
+        //TODO sync with API
+    }
+
+    private void determineUserZone(Context context, final UserDataInitialisationListener listener) {
+        GeoIpRequest request = new GeoIpRequest();
+        request.fetchGeoIp(context, new GeoIpRequest.GeoIpRequestListener() {
+            @Override
+            public void onSuccess(GeoIpResponse geoIpResponse) {
+                String countryCode = geoIpResponse.countryCode;
+                boolean initialisedSuccessfully = false;
+
+                if (TextUtils.isEmpty(countryCode)) {
+                    Logger.w(TAG, "No country code was obtained. The default value will be used, therefore no user data consent will be required.");
+                } else {
+                    inGDPRZone = CountryUtils.isGDPRCountry(countryCode);
+                    initialisedSuccessfully = true;
+                }
+
+                if (listener != null) {
+                    listener.onDataInitialised(initialisedSuccessfully);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+                Logger.e(TAG, exception.getMessage());
+            }
+        });
     }
 
     private boolean gdprApplies() {
