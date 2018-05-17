@@ -39,7 +39,12 @@ public class PNLiteDemoApplication extends MultiDexApplication {
     private void initSettings() {
         SettingsModel settings = fetchSettings();
 
-        PNLite.initialize(settings.getAppToken(), this);
+        PNLite.initialize(settings.getAppToken(), this, new PNLite.InitialisationListener() {
+            @Override
+            public void onInitialisationFinished() {
+                // PNLite SDK has been initialised
+            }
+        });
         PNLite.setTestMode(settings.getTestMode());
         PNLite.setCoppaEnabled(settings.getCoppa());
         PNLite.setAge(settings.getAge());

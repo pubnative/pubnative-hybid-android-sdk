@@ -1,4 +1,4 @@
-package net.pubnative.lite.sdk.userdata;
+package net.pubnative.lite.sdk;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -13,9 +13,15 @@ public class UserDataManager {
     private static final int CONSENT_STATE_DENIED = 0;
 
     private SharedPreferences mPreferences;
+    private boolean inGDPRZone = false;
 
     public UserDataManager(Context context, String appToken) {
+        this(context, appToken, null);
+    }
+
+    public UserDataManager(Context context, String appToken, UserDataInitialisationListener initialisationListener) {
         mPreferences = context.getSharedPreferences(PREFERENCES_CONSENT, Context.MODE_PRIVATE);
+        determineUserZone(appToken, initialisationListener);
     }
 
     public String getPrivacyPolicyLink() {
@@ -42,13 +48,23 @@ public class UserDataManager {
         //TODO sync with API
     }
 
+    private void determineUserZone(String appToken, UserDataInitialisationListener listener) {
+        // TODO get country from API
+        if (listener != null) {
+            listener.onDataInitialised();
+        }
+    }
+
     private boolean gdprApplies() {
-        // TODO determine is GDPR applies according to country
-        return true;
+        return inGDPRZone;
     }
 
     private boolean askedForGDPRConsent() {
         return mPreferences.contains(KEY_GDPR_CONSENT_STATE);
+    }
+
+    void setGDPRZone(boolean gdprZone) {
+        this.inGDPRZone = gdprZone;
     }
 
     private void setConsentState(int consentState) {
@@ -69,5 +85,9 @@ public class UserDataManager {
             editor.putString(KEY_GDPR_CONSENT_UUID, uuid);
             editor.apply();
         }
+    }
+
+    interface UserDataInitialisationListener {
+        void onDataInitialised();
     }
 }
