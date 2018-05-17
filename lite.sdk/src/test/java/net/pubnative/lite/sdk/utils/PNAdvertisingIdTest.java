@@ -8,6 +8,7 @@ import org.robolectric.RobolectricTestRunner;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -33,6 +34,6 @@ public class PNAdvertisingIdTest {
         Robolectric.flushForegroundThreadScheduler();
         Robolectric.flushBackgroundThreadScheduler();
 
-        verify(listener).onPNAdvertisingIdFinish((String) isNull());
+        verify(listener).onPNAdvertisingIdFinish((String) isNull(), (Boolean) isNotNull());
     }
 }

@@ -83,7 +83,7 @@ public class DeviceInfo {
         PNAdvertisingIdClient client = new PNAdvertisingIdClient();
         client.request(mContext, new PNAdvertisingIdClient.Listener() {
             @Override
-            public void onPNAdvertisingIdFinish(String advertisingId, boolean limitTracking) {
+            public void onPNAdvertisingIdFinish(String advertisingId, Boolean limitTracking) {
                 mLimitTracking = limitTracking;
                 if (TextUtils.isEmpty(advertisingId)) {
                     mAdvertisingId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
