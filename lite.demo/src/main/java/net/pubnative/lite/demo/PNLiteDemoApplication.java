@@ -6,6 +6,7 @@ import android.support.multidex.MultiDexApplication;
 import android.text.TextUtils;
 
 import com.crashlytics.android.Crashlytics;
+import com.mopub.common.MoPub;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -38,7 +39,12 @@ public class PNLiteDemoApplication extends MultiDexApplication {
     private void initSettings() {
         SettingsModel settings = fetchSettings();
 
-        PNLite.initialize(settings.getAppToken(), this);
+        PNLite.initialize(settings.getAppToken(), this, new PNLite.InitialisationListener() {
+            @Override
+            public void onInitialisationFinished(boolean success) {
+                // PNLite SDK has been initialised
+            }
+        });
         PNLite.setTestMode(settings.getTestMode());
         PNLite.setCoppaEnabled(settings.getCoppa());
         PNLite.setAge(settings.getAge());

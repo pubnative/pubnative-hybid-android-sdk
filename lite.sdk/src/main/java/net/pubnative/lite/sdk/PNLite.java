@@ -12,13 +12,13 @@ import net.pubnative.lite.sdk.tracking.PNLiteCrashTracker;
  */
 
 public class PNLite {
-    public static final String HOST = "api.pubnative.net/api/v3/";
     public static final String BASE_URL = "https://api.pubnative.net/api/v3/native";
 
     private static String sAppToken;
     private static PNApiClient sApiClient;
     @SuppressLint("StaticFieldLeak")
     private static DeviceInfo sDeviceInfo;
+    private static UserDataManager sUserDataManager;
     private static PNLiteLocationManager sLocationManager;
     private static AdCache sAdCache;
     private static boolean sInitialized;
@@ -29,11 +29,16 @@ public class PNLite {
     private static String sKeywords;
     private static String sBundleId;
 
+    public static void initialize(String appToken,
+                                  Application application) {
+        initialize(appToken, application, null);
+    }
+
     /**
      * This method must be called to initialize the SDK before request ads.
      */
     public static void initialize(String appToken,
-                                  Application application) {
+                                  Application application, final InitialisationListener initialisationListener) {
         PNLiteCrashTracker.init(application, "9ef9d95d69bd0ec31bfa7806af72dddd");
 
         sAppToken = appToken;
@@ -42,6 +47,14 @@ public class PNLite {
         sLocationManager = new PNLiteLocationManager(application);
         sLocationManager.startLocationUpdates();
         sDeviceInfo = new DeviceInfo(application.getApplicationContext());
+        sUserDataManager = new UserDataManager(application.getApplicationContext(), appToken, new UserDataManager.UserDataInitialisationListener() {
+            @Override
+            public void onDataInitialised(boolean success) {
+                if (initialisationListener != null) {
+                    initialisationListener.onInitialisationFinished(success);
+                }
+            }
+        });
         sAdCache = new AdCache();
         sInitialized = true;
     }
@@ -116,5 +129,9 @@ public class PNLite {
 
     public static String getKeywords() {
         return sKeywords;
+    }
+
+    public interface InitialisationListener {
+        void onInitialisationFinished(boolean success);
     }
 }
