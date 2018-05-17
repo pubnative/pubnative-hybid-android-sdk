@@ -49,9 +49,9 @@ public class PNLite {
         sDeviceInfo = new DeviceInfo(application.getApplicationContext());
         sUserDataManager = new UserDataManager(application.getApplicationContext(), appToken, new UserDataManager.UserDataInitialisationListener() {
             @Override
-            public void onDataInitialised() {
+            public void onDataInitialised(boolean success) {
                 if (initialisationListener != null) {
-                    initialisationListener.onInitialisationFinished();
+                    initialisationListener.onInitialisationFinished(success);
                 }
             }
         });
@@ -132,6 +132,6 @@ public class PNLite {
     }
 
     public interface InitialisationListener {
-        void onInitialisationFinished();
+        void onInitialisationFinished(boolean success);
     }
 }

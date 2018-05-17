@@ -51,7 +51,7 @@ public class UserDataManager {
     private void determineUserZone(String appToken, UserDataInitialisationListener listener) {
         // TODO get country from API
         if (listener != null) {
-            listener.onDataInitialised();
+            listener.onDataInitialised(true);
         }
     }
 
@@ -88,6 +88,6 @@ public class UserDataManager {
     }
 
     interface UserDataInitialisationListener {
-        void onDataInitialised();
+        void onDataInitialised(boolean success);
     }
 }

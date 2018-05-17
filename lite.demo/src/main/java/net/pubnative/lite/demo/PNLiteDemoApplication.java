@@ -41,7 +41,7 @@ public class PNLiteDemoApplication extends MultiDexApplication {
 
         PNLite.initialize(settings.getAppToken(), this, new PNLite.InitialisationListener() {
             @Override
-            public void onInitialisationFinished() {
+            public void onInitialisationFinished(boolean success) {
                 // PNLite SDK has been initialised
             }
         });
