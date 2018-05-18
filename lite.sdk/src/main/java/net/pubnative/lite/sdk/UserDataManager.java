@@ -104,7 +104,7 @@ public class UserDataManager {
     }
 
     public void showConsentRequestScreen(Context context) {
-        Intent intent = new Intent(context, UserConsentActivity.class);
+        Intent intent = getConsentScreenIntent(context);
         context.startActivity(intent);
     }
 
