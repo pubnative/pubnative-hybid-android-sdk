@@ -79,6 +79,10 @@ public class PNLite {
         return sDeviceInfo;
     }
 
+    public static UserDataManager getUserDataManager() {
+        return sUserDataManager;
+    }
+
     public static PNLiteLocationManager getLocationManager() {
         return sLocationManager;
     }

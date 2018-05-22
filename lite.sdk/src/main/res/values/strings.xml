@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">PNLiteSDK</string>
+
+    <string name="pn_consent_accept">Accept</string>
+    <string name="pn_consent_reject">Reject</string>
+    <string name="pn_consent_close">Close</string>
 </resources>

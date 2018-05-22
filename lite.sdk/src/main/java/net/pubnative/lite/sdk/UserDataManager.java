@@ -1,10 +1,12 @@
 package net.pubnative.lite.sdk;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.util.Log;
 
+import net.pubnative.lite.sdk.consent.UserConsentActivity;
 import net.pubnative.lite.sdk.location.GeoIpRequest;
 import net.pubnative.lite.sdk.models.GeoIpResponse;
 import net.pubnative.lite.sdk.utils.CountryUtils;
@@ -30,6 +32,10 @@ public class UserDataManager {
     public UserDataManager(Context context, String appToken, UserDataInitialisationListener initialisationListener) {
         mPreferences = context.getSharedPreferences(PREFERENCES_CONSENT, Context.MODE_PRIVATE);
         determineUserZone(context, initialisationListener);
+    }
+
+    public String getConsentPageLink() {
+        return "consent_page";
     }
 
     public String getPrivacyPolicyLink() {
@@ -97,8 +103,13 @@ public class UserDataManager {
         return mPreferences.contains(KEY_GDPR_CONSENT_STATE);
     }
 
-    void setGDPRZone(boolean gdprZone) {
-        this.inGDPRZone = gdprZone;
+    public void showConsentRequestScreen(Context context) {
+        Intent intent = getConsentScreenIntent(context);
+        context.startActivity(intent);
+    }
+
+    public Intent getConsentScreenIntent(Context context) {
+        return new Intent(context, UserConsentActivity.class);
     }
 
     private void setConsentState(int consentState) {
