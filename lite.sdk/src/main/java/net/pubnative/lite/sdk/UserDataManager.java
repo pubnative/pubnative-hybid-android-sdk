@@ -35,7 +35,7 @@ public class UserDataManager {
     }
 
     public String getConsentPageLink() {
-        return "consent_page";
+        return "https://pubnative.net/personalize-your-experience/";
     }
 
     public String getPrivacyPolicyLink() {
@@ -121,6 +121,8 @@ public class UserDataManager {
             editor.apply();
         }
     }
+
+
 
     private void setGDPRConsentUUID(String uuid) {
         if (TextUtils.isEmpty(uuid)) {

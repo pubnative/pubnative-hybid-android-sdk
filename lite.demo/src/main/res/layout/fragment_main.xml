@@ -11,21 +11,32 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/button_pn_settings"
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginEnd="24dp"
-            android:layout_marginStart="24dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
-            android:layout_weight="1"
-            android:text="@string/pn_settings" />
+            android:maxLines="1"
+            android:text="@string/action_settings"
+            android:textColor="@android:color/black"
+            android:textSize="16sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp">
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp">
+
+            <Button
+                android:id="@+id/button_pn_settings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_weight="1"
+                android:text="@string/pnlite" />
 
             <Button
                 android:id="@+id/button_mopub_settings"
@@ -33,18 +44,30 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="8dp"
                 android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
                 android:layout_weight="1"
-                android:text="@string/mopub_settings" />
+                android:text="@string/mopub" />
 
             <Button
                 android:id="@+id/button_dfp_settings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_marginRight="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
                 android:layout_weight="1"
-                android:text="@string/dfp_settings" />
+                android:text="@string/dfp" />
         </LinearLayout>
+
+        <Button
+            android:id="@+id/button_pn_consent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/pn_consent"
+            />
 
         <TextView
             android:layout_width="match_parent"
@@ -123,8 +146,8 @@
                 android:id="@+id/button_pnlite_banner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginStart="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginEnd="8dp"
                 android:layout_weight="1"
                 android:enabled="false"
                 android:text="@string/pnlite" />
@@ -135,6 +158,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="8dp"
                 android:layout_marginStart="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginEnd="8dp"
                 android:layout_weight="1"
                 android:enabled="false"
                 android:text="@string/mopub" />
@@ -173,8 +198,8 @@
                 android:id="@+id/button_pnlite_medium"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginStart="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginEnd="8dp"
                 android:layout_weight="1"
                 android:enabled="false"
                 android:text="@string/pnlite" />
@@ -185,6 +210,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="8dp"
                 android:layout_marginStart="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginEnd="8dp"
                 android:layout_weight="1"
                 android:enabled="false"
                 android:text="@string/mopub" />
@@ -223,8 +250,8 @@
                 android:id="@+id/button_pnlite_interstitial"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginStart="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginEnd="8dp"
                 android:layout_weight="1"
                 android:enabled="false"
                 android:text="@string/pnlite" />
@@ -235,6 +262,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="8dp"
                 android:layout_marginStart="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginEnd="8dp"
                 android:layout_weight="1"
                 android:enabled="false"
                 android:text="@string/mopub" />
