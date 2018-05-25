@@ -1,4 +1,4 @@
-package net.pubnative.lite.sdk.vast.model;
+package net.pubnative.lite.sdk.vast2.model;
 
 public enum VAST_DOC_ELEMENTS {
     vastVersion("2.0"),

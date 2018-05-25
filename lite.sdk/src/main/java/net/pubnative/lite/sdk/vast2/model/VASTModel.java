@@ -1,7 +1,7 @@
-package net.pubnative.lite.sdk.vast.model;
+package net.pubnative.lite.sdk.vast2.model;
 
-import net.pubnative.lite.sdk.vast.util.VASTLog;
-import net.pubnative.lite.sdk.vast.util.XmlTools;
+import net.pubnative.lite.sdk.vast2.util.VASTLog;
+import net.pubnative.lite.sdk.vast2.util.XmlTools;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;

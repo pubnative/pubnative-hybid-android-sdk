@@ -1,4 +1,4 @@
-package net.pubnative.lite.sdk.vast.model;
+package net.pubnative.lite.sdk.vast2.model;
 
 import java.util.ArrayList;
 import java.util.List;

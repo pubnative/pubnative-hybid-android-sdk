@@ -1,10 +1,10 @@
-package net.pubnative.lite.sdk.vast.processor;
+package net.pubnative.lite.sdk.vast2.processor;
 
-import net.pubnative.lite.sdk.vast.VASTPlayer;
-import net.pubnative.lite.sdk.vast.model.VASTModel;
-import net.pubnative.lite.sdk.vast.model.VAST_DOC_ELEMENTS;
-import net.pubnative.lite.sdk.vast.util.VASTLog;
-import net.pubnative.lite.sdk.vast.util.XmlTools;
+import net.pubnative.lite.sdk.vast2.VASTPlayer;
+import net.pubnative.lite.sdk.vast2.model.VASTModel;
+import net.pubnative.lite.sdk.vast2.model.VAST_DOC_ELEMENTS;
+import net.pubnative.lite.sdk.vast2.util.VASTLog;
+import net.pubnative.lite.sdk.vast2.util.XmlTools;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;

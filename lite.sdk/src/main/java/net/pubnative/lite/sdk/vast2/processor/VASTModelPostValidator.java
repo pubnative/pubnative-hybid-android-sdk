@@ -1,10 +1,10 @@
-package net.pubnative.lite.sdk.vast.processor;
+package net.pubnative.lite.sdk.vast2.processor;
 
 import android.text.TextUtils;
 
-import net.pubnative.lite.sdk.vast.model.VASTMediaFile;
-import net.pubnative.lite.sdk.vast.model.VASTModel;
-import net.pubnative.lite.sdk.vast.util.VASTLog;
+import net.pubnative.lite.sdk.vast2.model.VASTMediaFile;
+import net.pubnative.lite.sdk.vast2.model.VASTModel;
+import net.pubnative.lite.sdk.vast2.util.VASTLog;
 
 import java.util.List;
 

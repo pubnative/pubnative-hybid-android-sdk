@@ -1,11 +1,11 @@
-package net.pubnative.lite.sdk.vast.util;
+package net.pubnative.lite.sdk.vast2.util;
 
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 
-import net.pubnative.lite.sdk.vast.model.VASTMediaFile;
-import net.pubnative.lite.sdk.vast.processor.VASTMediaPicker;
+import net.pubnative.lite.sdk.vast2.model.VASTMediaFile;
+import net.pubnative.lite.sdk.vast2.processor.VASTMediaPicker;
 
 import java.math.BigInteger;
 import java.util.Collections;

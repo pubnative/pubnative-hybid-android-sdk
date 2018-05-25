@@ -1,4 +1,4 @@
-package net.pubnative.lite.sdk.vast.util;
+package net.pubnative.lite.sdk.vast2.util;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

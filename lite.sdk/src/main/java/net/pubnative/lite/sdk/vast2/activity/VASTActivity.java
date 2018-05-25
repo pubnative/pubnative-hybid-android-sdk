@@ -1,4 +1,4 @@
-package net.pubnative.lite.sdk.vast.activity;
+package net.pubnative.lite.sdk.vast2.activity;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -24,12 +24,12 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
-import net.pubnative.lite.sdk.vast.VASTPlayer;
-import net.pubnative.lite.sdk.vast.model.TRACKING_EVENTS_TYPE;
-import net.pubnative.lite.sdk.vast.model.VASTModel;
-import net.pubnative.lite.sdk.vast.util.Assets;
-import net.pubnative.lite.sdk.vast.util.HttpTools;
-import net.pubnative.lite.sdk.vast.util.VASTLog;
+import net.pubnative.lite.sdk.vast2.VASTPlayer;
+import net.pubnative.lite.sdk.vast2.model.TRACKING_EVENTS_TYPE;
+import net.pubnative.lite.sdk.vast2.model.VASTModel;
+import net.pubnative.lite.sdk.vast2.util.Assets;
+import net.pubnative.lite.sdk.vast2.util.HttpTools;
+import net.pubnative.lite.sdk.vast2.util.VASTLog;
 
 import java.util.HashMap;
 import java.util.LinkedList;

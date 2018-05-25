@@ -1,6 +1,6 @@
-package net.pubnative.lite.sdk.vast.processor;
+package net.pubnative.lite.sdk.vast2.processor;
 
-import net.pubnative.lite.sdk.vast.model.VASTMediaFile;
+import net.pubnative.lite.sdk.vast2.model.VASTMediaFile;
 
 import java.util.List;
 

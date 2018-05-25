@@ -1,16 +1,16 @@
-package net.pubnative.lite.sdk.vast;
+package net.pubnative.lite.sdk.vast2;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
-import net.pubnative.lite.sdk.vast.activity.VASTActivity;
-import net.pubnative.lite.sdk.vast.model.VASTModel;
-import net.pubnative.lite.sdk.vast.processor.VASTMediaPicker;
-import net.pubnative.lite.sdk.vast.processor.VASTProcessor;
-import net.pubnative.lite.sdk.vast.util.DefaultMediaPicker;
-import net.pubnative.lite.sdk.vast.util.NetworkTools;
-import net.pubnative.lite.sdk.vast.util.VASTLog;
+import net.pubnative.lite.sdk.vast2.activity.VASTActivity;
+import net.pubnative.lite.sdk.vast2.model.VASTModel;
+import net.pubnative.lite.sdk.vast2.processor.VASTMediaPicker;
+import net.pubnative.lite.sdk.vast2.processor.VASTProcessor;
+import net.pubnative.lite.sdk.vast2.util.DefaultMediaPicker;
+import net.pubnative.lite.sdk.vast2.util.NetworkTools;
+import net.pubnative.lite.sdk.vast2.util.VASTLog;
 
 import java.io.BufferedReader;
 import java.io.IOException;

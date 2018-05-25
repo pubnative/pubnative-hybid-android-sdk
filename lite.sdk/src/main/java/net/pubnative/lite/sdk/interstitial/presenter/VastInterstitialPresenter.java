@@ -4,7 +4,7 @@ import android.app.Activity;
 
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.CheckUtils;
-import net.pubnative.lite.sdk.vast.VASTPlayer;
+import net.pubnative.lite.sdk.vast2.VASTPlayer;
 
 public class VastInterstitialPresenter implements InterstitialPresenter, VASTPlayer.VASTPlayerListener {
     private final Activity mActivity;
