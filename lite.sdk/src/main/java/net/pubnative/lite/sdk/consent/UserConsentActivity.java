@@ -16,9 +16,9 @@ import net.pubnative.lite.sdk.utils.Logger;
 public class UserConsentActivity extends Activity {
     private static final String TAG = UserConsentActivity.class.getSimpleName();
 
-    private static final String REDIRECT_ACCEPT = "accept";
-    private static final String REDIRECT_REJECT = "reject";
-    private static final String REDIRECT_CLOSE = "close";
+    private static final String REDIRECT_ACCEPT = "https://pubnative.net/personalize-experience-yes/";
+    private static final String REDIRECT_REJECT = "https://pubnative.net/personalize-experience-no/";
+    private static final String REDIRECT_CLOSE = "https://pubnative.net/";
 
     public static final int RESULT_CONSENT_ACCEPTED = 200;
     public static final int RESULT_CONSENT_REJECTED = 201;

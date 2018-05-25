@@ -61,4 +61,10 @@
     <string name="dfp_banner">DFP Banner</string>
     <string name="dfp_interstitial">DFP Interstitial</string>
     <string name="dfp_medium">DFP Medium</string>
+
+    <string name="title_pn_consent">PubNative Consent</string>
+    <string name="pn_consent">PN Consent</string>
+    <string name="pn_owned_consent">PN Owned</string>
+    <string name="publisher_owned_consent">Publisher Owned</string>
+    <string name="publisher_owned_consent_links">Links:</string>
 </resources>

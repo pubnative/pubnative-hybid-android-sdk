@@ -111,6 +111,15 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".ui.activities.PNConsentActivity"
+            android:label="@string/title_pn_consent"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden" />
+
+        <activity android:name="net.pubnative.lite.sdk.consent.UserConsentActivity"
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name="com.mopub.mobileads.MoPubActivity"

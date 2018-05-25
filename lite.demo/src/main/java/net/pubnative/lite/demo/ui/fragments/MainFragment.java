@@ -30,6 +30,7 @@ import net.pubnative.lite.demo.ui.activities.MoPubBannerActivity;
 import net.pubnative.lite.demo.ui.activities.MoPubInterstitialActivity;
 import net.pubnative.lite.demo.ui.activities.MoPubMRectActivity;
 import net.pubnative.lite.demo.ui.activities.MoPubSettingsActivity;
+import net.pubnative.lite.demo.ui.activities.PNConsentActivity;
 import net.pubnative.lite.demo.ui.activities.PNLiteBannerActivity;
 import net.pubnative.lite.demo.ui.activities.PNLiteInterstitialActivity;
 import net.pubnative.lite.demo.ui.activities.PNLiteMRectActivity;
@@ -115,6 +116,14 @@ public class MainFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), MoPubSettingsActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        view.findViewById(R.id.button_pn_consent).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), PNConsentActivity.class);
                 startActivity(intent);
             }
         });
