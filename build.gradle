@@ -26,7 +26,7 @@ subprojects {
         branchName = "${System.getenv("CIRCLE_BRANCH")}"
         buildNumber = "${System.getenv("CIRCLE_BUILD_NUM")}"
     }
-    version = "0.1.7"
+    version = "0.1.8"
     group = "net.pubnative"
 }
 
