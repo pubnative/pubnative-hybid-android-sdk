@@ -82,15 +82,6 @@ public class DefaultMediaPicker implements VASTMediaPicker {
                         .d(TAG, "Validator error: mediaFile height null");
                 iter.remove();
                 continue;
-            } else {
-                int videoHeight = height.intValue();
-                if (!(0 < videoHeight && videoHeight < maxPixels)) {
-                    VASTLog.d(TAG,
-                            "Validator error: mediaFile height invalid: "
-                                    + videoHeight);
-                    iter.remove();
-                    continue;
-                }
             }
 
             // width attribute
@@ -99,15 +90,6 @@ public class DefaultMediaPicker implements VASTMediaPicker {
                 VASTLog.d(TAG, "Validator error: mediaFile width null");
                 iter.remove();
                 continue;
-            } else {
-                int videoWidth = width.intValue();
-                if (!(0 < videoWidth && videoWidth < maxPixels)) {
-                    VASTLog.d(TAG,
-                            "Validator error: mediaFile width invalid: "
-                                    + videoWidth);
-                    iter.remove();
-                    continue;
-                }
             }
 
             // mediaFile url
