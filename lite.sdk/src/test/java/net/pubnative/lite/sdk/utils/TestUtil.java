@@ -54,6 +54,10 @@ public class TestUtil {
         return createTestAd(ApiAssetGroupType.MRAID_INTERSTITIAL);
     }
 
+    public static Ad createTestVideoInterstitialAd() {
+        return createTestAd(ApiAssetGroupType.VAST_INTERSTITIAL_1);
+    }
+
     public static Ad createTestAd(int assetGroupId) {
         Ad ad = new Ad();
         ad.assetgroupid = assetGroupId;
