@@ -41,6 +41,12 @@ public class InterstitialPresenterFactory {
             case ApiAssetGroupType.MRAID_INTERSTITIAL: {
                 return new MraidInterstitialPresenter(mActivity, ad);
             }
+            case ApiAssetGroupType.VAST_INTERSTITIAL_1:
+            case ApiAssetGroupType.VAST_INTERSTITIAL_2:
+            case ApiAssetGroupType.VAST_INTERSTITIAL_3:
+            case ApiAssetGroupType.VAST_INTERSTITIAL_4: {
+                return new VastInterstitialPresenter(mActivity, ad);
+            }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for interstitial ad format.");
                 return null;
