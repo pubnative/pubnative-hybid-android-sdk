@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center">
+
+    <RelativeLayout
+        android:id="@+id/player"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true">
+
+        <!--PLAYER VIEW-->
+        <SurfaceView
+            android:id="@+id/surface"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"/>
+
+        <!--PLAYER COUNTDOWN-->
+        <net.pubnative.player.widget.CountDownView
+            android:id="@+id/count_down"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/surface"
+            android:layout_alignParentLeft="true"
+            android:layout_margin="5dp"/>
+
+        <!--MUTE-->
+        <ImageView
+            android:id="@+id/mute"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_margin="5dp"
+            android:src="@drawable/pn_btn_mute"/>
+
+        <!--SKIP-->
+        <TextView
+            android:id="@+id/skip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/surface"
+            android:layout_alignParentRight="true"
+            android:layout_margin="5dp"
+            android:padding="10dp"
+            android:text="Skip"
+            android:textColor="@android:color/white"/>
+    </RelativeLayout>
+
+    <!-- OPEN BANNER BUTTON -->
+    <ImageView
+        android:id="@+id/open"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@id/player"
+        android:layout_margin="5dp"
+        android:src="@drawable/pn_btn_learn_more"
+        android:visibility="gone"/>
+
+    <!-- LOADER -->
+    <RelativeLayout
+        android:id="@+id/loader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@drawable/pn_rounded_shape_gray"
+        android:padding="10dp">
+
+        <ProgressBar
+            android:id="@+id/loader_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"/>
+
+        <TextView
+            android:id="@+id/loader_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/loader_progress"
+            android:layout_marginTop="5dp"
+            android:text="lorem ipsum"
+            android:textColor="@android:color/white"
+            android:textSize="20dp"/>
+
+    </RelativeLayout>
+
+</RelativeLayout>
