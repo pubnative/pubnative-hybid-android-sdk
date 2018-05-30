@@ -30,6 +30,7 @@ public class PNHttpRequest {
 
     protected int mTimeoutInMillis = 4000; // 4 seconds
     protected String mPOSTString = null;
+    private Map<String, String> mHeaders = null;
     // Inner
     protected Listener mListener = null;
     protected Handler mHandler = null;
@@ -66,6 +67,10 @@ public class PNHttpRequest {
         mPOSTString = postString;
     }
 
+    public void setHeaders(Map<String, String> headers) {
+        mHeaders = headers;
+    }
+
     public void start(Context context, final String urlString, Listener listener) {
         mListener = listener;
         mHandler = new Handler(Looper.getMainLooper());
@@ -94,6 +99,7 @@ public class PNHttpRequest {
         // For avoid changing the POST string
         // during the sending - make a local variable
         String postJson = mPOSTString;
+        Map<String, String> headers = mHeaders;
         try {
             // 1. Create connection
             URL url = new URL(urlString);
@@ -101,6 +107,13 @@ public class PNHttpRequest {
             // 2. Set connection properties
             connection.setDoInput(true);
             connection.setConnectTimeout(mTimeoutInMillis);
+
+            if (headers != null && !headers.isEmpty()) {
+                for (String header : headers.keySet()) {
+                    connection.setRequestProperty(header, headers.get(header));
+                }
+            }
+
             if (TextUtils.isEmpty(postJson)) {
                 connection.setRequestMethod("GET");
             } else {
