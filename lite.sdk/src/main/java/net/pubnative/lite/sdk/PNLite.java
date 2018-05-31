@@ -15,10 +15,13 @@ public class PNLite {
     public static final String BASE_URL = "https://api.pubnative.net/api/v3/native";
 
     private static String sAppToken;
+    @SuppressLint("StaticFieldLeak")
     private static PNApiClient sApiClient;
     @SuppressLint("StaticFieldLeak")
     private static DeviceInfo sDeviceInfo;
+    @SuppressLint("StaticFieldLeak")
     private static UserDataManager sUserDataManager;
+    @SuppressLint("StaticFieldLeak")
     private static PNLiteLocationManager sLocationManager;
     private static AdCache sAdCache;
     private static boolean sInitialized;

@@ -65,6 +65,8 @@
     <string name="title_pn_consent">PubNative Consent</string>
     <string name="pn_consent">PN Consent</string>
     <string name="pn_owned_consent">PN Owned</string>
+    <string name="pn_accept_consent">Accept consent</string>
+    <string name="pn_deny_consent">Reject consent</string>
     <string name="publisher_owned_consent">Publisher Owned</string>
     <string name="publisher_owned_consent_links">Links:</string>
 </resources>

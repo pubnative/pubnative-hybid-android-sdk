@@ -6,9 +6,14 @@ import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.util.Log;
 
+import net.pubnative.lite.sdk.consent.CheckConsentRequest;
 import net.pubnative.lite.sdk.consent.UserConsentActivity;
+import net.pubnative.lite.sdk.consent.UserConsentRequest;
 import net.pubnative.lite.sdk.location.GeoIpRequest;
 import net.pubnative.lite.sdk.models.GeoIpResponse;
+import net.pubnative.lite.sdk.models.UserConsentRequestModel;
+import net.pubnative.lite.sdk.models.UserConsentResponseModel;
+import net.pubnative.lite.sdk.models.UserConsentResponseStatus;
 import net.pubnative.lite.sdk.utils.CountryUtils;
 import net.pubnative.lite.sdk.utils.Logger;
 
@@ -16,12 +21,13 @@ public class UserDataManager {
     private static final String TAG = UserDataManager.class.getSimpleName();
 
     private static final String PREFERENCES_CONSENT = "net.pubnative.lite.dataconsent";
-    private static final String KEY_GDPR_CONSENT_UUID = "gdpr_consent_uuid";
     private static final String KEY_GDPR_CONSENT_STATE = "gdpr_consent_state";
+    private static final String DEVICE_ID_TYPE = "gaid";
 
     private static final int CONSENT_STATE_ACCEPTED = 1;
     private static final int CONSENT_STATE_DENIED = 0;
 
+    private Context mContext;
     private SharedPreferences mPreferences;
     private boolean inGDPRZone = false;
 
@@ -30,8 +36,9 @@ public class UserDataManager {
     }
 
     public UserDataManager(Context context, String appToken, UserDataInitialisationListener initialisationListener) {
-        mPreferences = context.getSharedPreferences(PREFERENCES_CONSENT, Context.MODE_PRIVATE);
-        determineUserZone(context, initialisationListener);
+        mContext = context.getApplicationContext();
+        mPreferences = mContext.getSharedPreferences(PREFERENCES_CONSENT, Context.MODE_PRIVATE);
+        determineUserZone(initialisationListener);
     }
 
     public String getConsentPageLink() {
@@ -51,49 +58,107 @@ public class UserDataManager {
     }
 
     public void grantConsent() {
-        setConsentState(CONSENT_STATE_ACCEPTED);
 
-        //TODO sync with API
+        notifyConsentResponse(true);
     }
 
     public void denyConsent() {
         setConsentState(CONSENT_STATE_DENIED);
 
-        //TODO sync with API
+        notifyConsentResponse(false);
     }
 
     public void revokeConsent() {
         setConsentState(CONSENT_STATE_DENIED);
 
-        //TODO sync with API
+        notifyConsentResponse(false);
     }
 
-    private void determineUserZone(Context context, final UserDataInitialisationListener listener) {
+    private void notifyConsentResponse(final boolean consentGiven) {
+        UserConsentRequestModel requestModel = new UserConsentRequestModel(
+                PNLite.getAppToken(),
+                PNLite.getDeviceInfo().getAdvertisingId(),
+                DEVICE_ID_TYPE,
+                consentGiven);
+
+        UserConsentRequest request = new UserConsentRequest();
+        request.doRequest(mContext, requestModel, new UserConsentRequest.UserConsentListener() {
+            @Override
+            public void onSuccess(UserConsentResponseModel model) {
+                if (consentGiven && model.getStatus().equals(UserConsentResponseStatus.OK)) {
+                    setConsentState(CONSENT_STATE_ACCEPTED);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Logger.e(TAG, error.getMessage());
+            }
+        });
+    }
+
+    private void determineUserZone(final UserDataInitialisationListener listener) {
         GeoIpRequest request = new GeoIpRequest();
-        request.fetchGeoIp(context, new GeoIpRequest.GeoIpRequestListener() {
+        request.fetchGeoIp(mContext, new GeoIpRequest.GeoIpRequestListener() {
             @Override
             public void onSuccess(GeoIpResponse geoIpResponse) {
                 String countryCode = geoIpResponse.countryCode;
-                boolean initialisedSuccessfully = false;
 
                 if (TextUtils.isEmpty(countryCode)) {
                     Logger.w(TAG, "No country code was obtained. The default value will be used, therefore no user data consent will be required.");
+                    if (listener != null) {
+                        listener.onDataInitialised(false);
+                    }
                 } else {
                     inGDPRZone = CountryUtils.isGDPRCountry(countryCode);
-                    initialisedSuccessfully = true;
-                }
 
-                if (listener != null) {
-                    listener.onDataInitialised(initialisedSuccessfully);
+                    if (inGDPRZone && !askedForGDPRConsent()) {
+                        checkConsentGiven(listener);
+                    } else {
+                        if (listener != null) {
+                            listener.onDataInitialised(true);
+                        }
+                    }
                 }
             }
 
             @Override
             public void onFailure(Throwable exception) {
                 Logger.e(TAG, exception.getMessage());
+                if (listener != null) {
+                    listener.onDataInitialised(false);
+                }
             }
         });
     }
+
+    private void checkConsentGiven(final UserDataInitialisationListener listener) {
+        CheckConsentRequest checkRequest = new CheckConsentRequest();
+        checkRequest.checkConsent(mContext, PNLite.getAppToken(), PNLite.getDeviceInfo().getAdvertisingId(), DEVICE_ID_TYPE, new CheckConsentRequest.CheckConsentListener() {
+            @Override
+            public void onSuccess(UserConsentResponseModel model) {
+                if (model.getStatus().equals(UserConsentResponseStatus.OK)) {
+                    if (model.getConsent().isFound()) {
+                        setConsentState(model.getConsent().isConsented() ? CONSENT_STATE_ACCEPTED : CONSENT_STATE_DENIED);
+                    }
+
+                    if (listener != null) {
+                        listener.onDataInitialised(true);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Logger.e(TAG, error.getMessage());
+                if (listener != null) {
+                    listener.onDataInitialised(false);
+                }
+            }
+        });
+    }
+
+
 
     private boolean gdprApplies() {
         return inGDPRZone;
@@ -118,18 +183,6 @@ public class UserDataManager {
         } else {
             SharedPreferences.Editor editor = mPreferences.edit();
             editor.putInt(KEY_GDPR_CONSENT_STATE, consentState);
-            editor.apply();
-        }
-    }
-
-
-
-    private void setGDPRConsentUUID(String uuid) {
-        if (TextUtils.isEmpty(uuid)) {
-            throw new RuntimeException("Illegal UUID provided");
-        } else {
-            SharedPreferences.Editor editor = mPreferences.edit();
-            editor.putString(KEY_GDPR_CONSENT_UUID, uuid);
             editor.apply();
         }
     }
