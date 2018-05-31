@@ -29,17 +29,32 @@ class PNConsentFragment : Fragment() {
         privacyPolicyView = view.findViewById(R.id.view_privacy_policy)
 
         view.findViewById<Button>(R.id.button_pn_owned).setOnClickListener {
+            /*
+            This would be the normal implementation for a regular publisher.
+            We remove this condition here for testing purposes
+
             if (PNLite.getUserDataManager().shouldAskConsent()) {
+
                 val intent = PNLite.getUserDataManager().getConsentScreenIntent(activity)
                 startActivityForResult(intent, REQUEST_CONSENT)
             } else {
                 Toast.makeText(activity, "Consent has already been answered. If you want to try again please clear your app cache", Toast.LENGTH_LONG).show()
-            }
+            } */
+            val intent = PNLite.getUserDataManager().getConsentScreenIntent(activity)
+            startActivityForResult(intent, REQUEST_CONSENT)
         }
 
         view.findViewById<Button>(R.id.button_publisher_owned).setOnClickListener {
             vendorListView.text = PNLite.getUserDataManager().vendorListLink
             privacyPolicyView.text = PNLite.getUserDataManager().privacyPolicyLink
+        }
+
+        view.findViewById<Button>(R.id.button_accept_consent).setOnClickListener {
+            PNLite.getUserDataManager().grantConsent()
+        }
+
+        view.findViewById<Button>(R.id.button_deny_consent).setOnClickListener {
+            PNLite.getUserDataManager().denyConsent()
         }
     }
 
