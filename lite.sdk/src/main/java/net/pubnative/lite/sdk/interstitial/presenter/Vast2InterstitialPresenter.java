@@ -6,7 +6,7 @@ import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.vast2.VASTPlayer;
 
-public class VastInterstitialPresenter implements InterstitialPresenter, VASTPlayer.VASTPlayerListener {
+public class Vast2InterstitialPresenter implements InterstitialPresenter, VASTPlayer.VASTPlayerListener {
     private final Activity mActivity;
     private final Ad mAd;
 
@@ -14,7 +14,7 @@ public class VastInterstitialPresenter implements InterstitialPresenter, VASTPla
     private InterstitialPresenter.Listener mListener;
     private boolean mIsDestroyed;
 
-    public VastInterstitialPresenter(Activity activity, Ad ad) {
+    public Vast2InterstitialPresenter(Activity activity, Ad ad) {
         mActivity = activity;
         mAd = ad;
     }
@@ -31,7 +31,7 @@ public class VastInterstitialPresenter implements InterstitialPresenter, VASTPla
 
     @Override
     public void load() {
-        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "VastInterstitialPresenter is destroyed")) {
+        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "Vast2InterstitialPresenter is destroyed")) {
             return;
         }
 
@@ -41,7 +41,7 @@ public class VastInterstitialPresenter implements InterstitialPresenter, VASTPla
 
     @Override
     public void show() {
-        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "VastInterstitialPresenter is destroyed")) {
+        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "Vast2InterstitialPresenter is destroyed")) {
             return;
         }
 
