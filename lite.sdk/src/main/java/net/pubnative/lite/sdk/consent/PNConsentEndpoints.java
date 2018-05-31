@@ -10,8 +10,9 @@ public class PNConsentEndpoints {
 
     private static final String PARAM_APP_TOKEN = "app_token";
     private static final String PARAM_DEVICE_ID = "did";
+    private static final String PARAM_DEVICE_ID_TYPE = "did_type";
 
-    public static String getCheckConsentUrl(String appToken, String deviceId) {
+    public static String getCheckConsentUrl(String appToken, String deviceId, String deviceIdType) {
         return new Uri.Builder()
                 .scheme(SCHEME)
                 .authority(AUTHORITY)
@@ -19,6 +20,7 @@ public class PNConsentEndpoints {
                 .appendPath(API_VERSION)
                 .appendQueryParameter(PARAM_APP_TOKEN, appToken)
                 .appendQueryParameter(PARAM_DEVICE_ID, deviceId)
+                .appendQueryParameter(PARAM_DEVICE_ID_TYPE, deviceIdType)
                 .build()
                 .toString();
     }

@@ -22,6 +22,7 @@ public class UserDataManager {
 
     private static final String PREFERENCES_CONSENT = "net.pubnative.lite.dataconsent";
     private static final String KEY_GDPR_CONSENT_STATE = "gdpr_consent_state";
+    private static final String DEVICE_ID_TYPE = "gaid";
 
     private static final int CONSENT_STATE_ACCEPTED = 1;
     private static final int CONSENT_STATE_DENIED = 0;
@@ -77,7 +78,7 @@ public class UserDataManager {
         UserConsentRequestModel requestModel = new UserConsentRequestModel(
                 PNLite.getAppToken(),
                 PNLite.getDeviceInfo().getAdvertisingId(),
-                "gaid",
+                DEVICE_ID_TYPE,
                 consentGiven);
 
         UserConsentRequest request = new UserConsentRequest();
@@ -133,7 +134,7 @@ public class UserDataManager {
 
     private void checkConsentGiven(final UserDataInitialisationListener listener) {
         CheckConsentRequest checkRequest = new CheckConsentRequest();
-        checkRequest.checkConsent(mContext, PNLite.getAppToken(), PNLite.getDeviceInfo().getAdvertisingId(), new CheckConsentRequest.CheckConsentListener() {
+        checkRequest.checkConsent(mContext, PNLite.getAppToken(), PNLite.getDeviceInfo().getAdvertisingId(), DEVICE_ID_TYPE, new CheckConsentRequest.CheckConsentListener() {
             @Override
             public void onSuccess(UserConsentResponseModel model) {
                 if (model.getStatus().equals(UserConsentResponseStatus.OK)) {

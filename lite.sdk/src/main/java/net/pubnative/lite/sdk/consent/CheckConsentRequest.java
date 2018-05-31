@@ -18,11 +18,11 @@ public class CheckConsentRequest {
         void onFailure(Throwable error);
     }
 
-    public void checkConsent(Context context, String appToken, String deviceId, final CheckConsentListener listener) {
-        if (TextUtils.isEmpty(appToken) || TextUtils.isEmpty(deviceId)) {
+    public void checkConsent(Context context, String appToken, String deviceId, String deviceIdType, final CheckConsentListener listener) {
+        if (TextUtils.isEmpty(appToken) || TextUtils.isEmpty(deviceId) || TextUtils.isEmpty(deviceIdType)) {
             listener.onFailure(new Exception("Invalid parameters for check user consent request."));
         } else {
-            String url = PNConsentEndpoints.getCheckConsentUrl(appToken, deviceId);
+            String url = PNConsentEndpoints.getCheckConsentUrl(appToken, deviceId, deviceIdType);
             PNHttpRequest httpRequest = new PNHttpRequest();
             httpRequest.start(context, url, new PNHttpRequest.Listener() {
                 @Override
