@@ -19,7 +19,7 @@
             android:background="@android:color/transparent"/>
 
         <!--PLAYER COUNTDOWN-->
-        <net.pubnative.player.widget.CountDownView
+        <net.pubnative.lite.sdk.vast.widget.CountDownView
             android:id="@+id/count_down"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

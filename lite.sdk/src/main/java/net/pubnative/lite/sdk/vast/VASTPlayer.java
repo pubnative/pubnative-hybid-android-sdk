@@ -41,11 +41,13 @@ import android.net.Uri;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -136,7 +138,7 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
     private MediaPlayer mMediaPlayer;
 
     // VIEWS
-    private View mRoot;
+    private RelativeLayout mRoot;
     private View mOpen;
     // Load
     private View mLoader;
@@ -147,6 +149,8 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
     private TextView mSkip;
     private ImageView mMute;
     private CountDownView mCountDown;
+    // Ad Choices
+    private ViewGroup mContentInfo;
 
     // OTHERS
     private Handler mMainHandler      = null;
@@ -165,9 +169,37 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
         super(context);
     }
 
+    /**
+     * Constructor, generally used automatically by a layout inflater
+     *
+     * @param context
+     * @param attrs
+     */
+    public VASTPlayer(Context context, AttributeSet attrs) {
+
+        super(context, attrs);
+        init();
+    }
+
+    public VASTPlayer(Context context, ViewGroup contentInfo) {
+        super(context);
+        this.mContentInfo = contentInfo;
+
+        init();
+    }
+
     public VASTPlayer(Context context, AttributeSet attrs, int defStyleAttr) {
 
         super(context, attrs, defStyleAttr);
+
+        init();
+    }
+
+    private void init() {
+        mMainHandler = new Handler(getContext().getMainLooper());
+
+        createLayout();
+        setEmptyState();
     }
 
     /**
@@ -388,22 +420,6 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
     //=======================================================
     // PUBLIC
     //=======================================================
-
-    /**
-     * Constructor, generally used automatically by a layout inflater
-     *
-     * @param context
-     * @param attrs
-     */
-    public VASTPlayer(Context context, AttributeSet attrs) {
-
-        super(context, attrs);
-
-        mMainHandler = new Handler(getContext().getMainLooper());
-
-        createLayout();
-        setEmptyState();
-    }
 
     /**
      * Sets listener for callbacks related to status of player
@@ -630,7 +646,7 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
 
         if (mRoot == null) {
 
-            mRoot = LayoutInflater.from(getContext()).inflate(R.layout.pn_vast_player, null);
+            mRoot = (RelativeLayout) LayoutInflater.from(getContext()).inflate(R.layout.pn_vast_player, null);
 
             mPlayer = mRoot.findViewById(R.id.player);
 
@@ -686,6 +702,10 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
             mOpen = mRoot.findViewById(R.id.open);
             mOpen.setVisibility(INVISIBLE);
             mOpen.setOnClickListener(this);
+
+            if (mContentInfo != null) {
+                mRoot.addView(mContentInfo);
+            }
 
             addView(mRoot);
         }

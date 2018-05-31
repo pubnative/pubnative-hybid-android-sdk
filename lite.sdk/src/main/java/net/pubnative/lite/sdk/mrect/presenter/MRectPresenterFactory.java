@@ -37,6 +37,9 @@ public class MRectPresenterFactory {
             case ApiAssetGroupType.MRAID_MRECT: {
                 return new MraidMRectPresenter(mContext, ad);
             }
+            case ApiAssetGroupType.VAST_MRECT: {
+                return new VastMRectPresenter(mContext, ad);
+            }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for MRect ad format.");
                 return null;
