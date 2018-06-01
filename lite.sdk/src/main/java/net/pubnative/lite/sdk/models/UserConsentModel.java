@@ -7,9 +7,7 @@ import org.json.JSONObject;
 
 public class UserConsentModel extends JsonModel {
     @BindField
-    private boolean found;
-    @BindField
-    private boolean consented;
+    private boolean consent;
 
     public UserConsentModel() {
     }
@@ -18,11 +16,7 @@ public class UserConsentModel extends JsonModel {
         fromJson(jsonObject);
     }
 
-    public boolean isFound() {
-        return found;
-    }
-
     public boolean isConsented() {
-        return consented;
+        return consent;
     }
 }

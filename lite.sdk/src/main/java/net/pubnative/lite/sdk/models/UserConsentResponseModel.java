@@ -11,7 +11,7 @@ public class UserConsentResponseModel extends JsonModel {
     @BindField
     private String error;
     @BindField
-    private UserConsentModel consent;
+    private UserConsentModel data;
 
     public UserConsentResponseModel() {
     }
@@ -29,6 +29,6 @@ public class UserConsentResponseModel extends JsonModel {
     }
 
     public UserConsentModel getConsent() {
-        return consent;
+        return data;
     }
 }

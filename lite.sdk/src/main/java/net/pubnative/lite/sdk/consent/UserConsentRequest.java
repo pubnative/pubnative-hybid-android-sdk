@@ -12,6 +12,7 @@ import net.pubnative.lite.sdk.utils.UrlUtils;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class UserConsentRequest {
@@ -23,16 +24,16 @@ public class UserConsentRequest {
         void onFailure(Throwable error);
     }
 
-    public void doRequest(Context context, UserConsentRequestModel request, final UserConsentListener listener) {
+    public void doRequest(Context context, String appToken, UserConsentRequestModel request, final UserConsentListener listener) {
         String url = PNConsentEndpoints.getConsentUrl();
 
         try {
-            //String body = UrlUtils.createQueryStringForParameters(request.toJson());
             PNHttpRequest httpRequest = new PNHttpRequest();
             httpRequest.setPOSTString(request.toJson().toString());
 
             Map<String, String> headers = new HashMap<>();
             headers.put("Content-Type", "application/json");
+            headers.put("Authorization", String.format(Locale.ENGLISH, "Bearer %s", appToken));
 
             httpRequest.setHeaders(headers);
 
