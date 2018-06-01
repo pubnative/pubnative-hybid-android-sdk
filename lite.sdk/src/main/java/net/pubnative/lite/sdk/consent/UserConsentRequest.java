@@ -37,7 +37,7 @@ public class UserConsentRequest {
 
             httpRequest.setHeaders(headers);
 
-            httpRequest.start(context, url, new PNHttpRequest.Listener() {
+            httpRequest.start(context, PNHttpRequest.Method.POST, url, new PNHttpRequest.Listener() {
                 @Override
                 public void onPNHttpRequestFinish(PNHttpRequest request, String result) {
                     if (listener != null) {

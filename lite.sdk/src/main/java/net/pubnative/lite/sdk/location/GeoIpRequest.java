@@ -20,7 +20,7 @@ public class GeoIpRequest {
 
     public void fetchGeoIp(Context context, final GeoIpRequestListener listener) {
         PNHttpRequest request = new PNHttpRequest();
-        request.start(context, URL, new PNHttpRequest.Listener() {
+        request.start(context, PNHttpRequest.Method.GET, URL, new PNHttpRequest.Listener() {
             @Override
             public void onPNHttpRequestFinish(PNHttpRequest request, String result) {
                 processStream(result, listener);

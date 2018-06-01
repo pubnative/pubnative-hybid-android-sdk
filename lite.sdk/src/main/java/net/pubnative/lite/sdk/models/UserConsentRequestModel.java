@@ -10,13 +10,10 @@ public class UserConsentRequestModel extends JsonModel {
     private String did;
     @BindField
     private String did_type;
-    @BindField
-    private boolean consented;
 
-    public UserConsentRequestModel(String deviceId, String deviceIdType, boolean consented) {
+    public UserConsentRequestModel(String deviceId, String deviceIdType) {
         this.did = deviceId;
         this.did_type = deviceIdType;
-        this.consented = consented;
     }
 
     public UserConsentRequestModel(JSONObject jsonObject) throws Exception {
@@ -29,9 +26,5 @@ public class UserConsentRequestModel extends JsonModel {
 
     public String getDeviceIdType() {
         return did_type;
-    }
-
-    public boolean isConsented() {
-        return consented;
     }
 }
