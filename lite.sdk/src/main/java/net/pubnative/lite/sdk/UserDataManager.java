@@ -76,13 +76,12 @@ public class UserDataManager {
 
     private void notifyConsentResponse(final boolean consentGiven) {
         UserConsentRequestModel requestModel = new UserConsentRequestModel(
-                PNLite.getAppToken(),
                 PNLite.getDeviceInfo().getAdvertisingId(),
                 DEVICE_ID_TYPE,
                 consentGiven);
 
         UserConsentRequest request = new UserConsentRequest();
-        request.doRequest(mContext, requestModel, new UserConsentRequest.UserConsentListener() {
+        request.doRequest(mContext, PNLite.getAppToken(), requestModel, new UserConsentRequest.UserConsentListener() {
             @Override
             public void onSuccess(UserConsentResponseModel model) {
                 if (consentGiven && model.getStatus().equals(UserConsentResponseStatus.OK)) {
@@ -138,8 +137,8 @@ public class UserDataManager {
             @Override
             public void onSuccess(UserConsentResponseModel model) {
                 if (model.getStatus().equals(UserConsentResponseStatus.OK)) {
-                    if (model.getConsent().isFound()) {
-                        setConsentState(model.getConsent().isConsented() ? CONSENT_STATE_ACCEPTED : CONSENT_STATE_DENIED);
+                    if (model.getConsent() != null && model.getConsent().isConsented()) {
+                        setConsentState(CONSENT_STATE_ACCEPTED);
                     }
 
                     if (listener != null) {

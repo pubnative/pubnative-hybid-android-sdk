@@ -9,6 +9,10 @@ import net.pubnative.lite.sdk.utils.Logger;
 
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
 public class CheckConsentRequest {
     private static final String TAG = CheckConsentRequest.class.getSimpleName();
 
@@ -22,8 +26,14 @@ public class CheckConsentRequest {
         if (TextUtils.isEmpty(appToken) || TextUtils.isEmpty(deviceId) || TextUtils.isEmpty(deviceIdType)) {
             listener.onFailure(new Exception("Invalid parameters for check user consent request."));
         } else {
-            String url = PNConsentEndpoints.getCheckConsentUrl(appToken, deviceId, deviceIdType);
+            String url = PNConsentEndpoints.getCheckConsentUrl(deviceId, deviceIdType);
             PNHttpRequest httpRequest = new PNHttpRequest();
+
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Authorization", String.format(Locale.ENGLISH, "Bearer %s", appToken));
+
+            httpRequest.setHeaders(headers);
+
             httpRequest.start(context, url, new PNHttpRequest.Listener() {
                 @Override
                 public void onPNHttpRequestFinish(PNHttpRequest request, String result) {
