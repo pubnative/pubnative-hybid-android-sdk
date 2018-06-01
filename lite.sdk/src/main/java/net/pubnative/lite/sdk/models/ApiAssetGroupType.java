@@ -10,6 +10,7 @@ public interface ApiAssetGroupType {
     int MRAID_MRECT = 8;
     int MRAID_INTERSTITIAL = 21;
 
+    int VAST_MRECT = 4;
     int VAST_INTERSTITIAL_1 = 15;
     int VAST_INTERSTITIAL_2 = 18;
     int VAST_INTERSTITIAL_3 = 19;

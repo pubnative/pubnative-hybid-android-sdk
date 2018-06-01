@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.RelativeLayout
 import android.widget.Toast
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
@@ -27,7 +28,7 @@ class PNLiteBannerFragment : Fragment(), RequestManager.RequestListener, BannerP
     private var zoneId: String? = null
 
     private var presenter: BannerPresenter? = null
-    private lateinit var pnliteBannerContainer: FrameLayout
+    private lateinit var pnliteBannerContainer: RelativeLayout
     private lateinit var loadButton: Button
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?

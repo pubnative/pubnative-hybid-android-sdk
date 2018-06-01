@@ -1,16 +1,17 @@
 package net.pubnative.lite.sdk.interstitial.presenter;
 
 import android.app.Activity;
+import android.content.Intent;
 
 import net.pubnative.lite.sdk.models.Ad;
-import net.pubnative.lite.sdk.utils.CheckUtils;
-import net.pubnative.lite.sdk.vast2.VASTPlayer;
+import net.pubnative.lite.sdk.vast.VASTParser;
+import net.pubnative.lite.sdk.vast.model.VASTModel;
+import net.pubnative.lite.sdk.vast2.activity.VASTActivity;
 
-public class VastInterstitialPresenter implements InterstitialPresenter, VASTPlayer.VASTPlayerListener {
+public class VastInterstitialPresenter implements InterstitialPresenter {
     private final Activity mActivity;
     private final Ad mAd;
 
-    private VASTPlayer mVastPlayer;
     private InterstitialPresenter.Listener mListener;
     private boolean mIsDestroyed;
 
@@ -31,28 +32,24 @@ public class VastInterstitialPresenter implements InterstitialPresenter, VASTPla
 
     @Override
     public void load() {
-        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "VastInterstitialPresenter is destroyed")) {
-            return;
-        }
+        new VASTParser(mActivity).setListener(new VASTParser.Listener() {
+            @Override
+            public void onVASTParserError(int error) {
+                mListener.onInterstitialError(VastInterstitialPresenter.this);
+            }
 
-        mVastPlayer = new VASTPlayer(mActivity, this);
-        mVastPlayer.loadVideoWithData(mAd.getVast());
+            @Override
+            public void onVASTParserFinished(VASTModel model) {
+                Intent vastPlayerIntent = new Intent(mActivity, VASTActivity.class);
+                vastPlayerIntent.putExtra(VASTActivity.EXTRA_VAST_MODEL, model);
+                mActivity.startActivity(vastPlayerIntent);
+            }
+        }).execute(mAd.getVast());
     }
 
     @Override
     public void show() {
-        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "VastInterstitialPresenter is destroyed")) {
-            return;
-        }
 
-        if (mVastPlayer != null) {
-            mVastPlayer.play();
-
-            // TODO: ideally we fire the impression url after we confirm the video successfully plays
-            if (mListener != null) {
-                mListener.onInterstitialShown(this);
-            }
-        }
     }
 
     @Override
@@ -61,53 +58,5 @@ public class VastInterstitialPresenter implements InterstitialPresenter, VASTPla
         mIsDestroyed = true;
     }
 
-    // VASTPlayerListener
 
-    @Override
-    public void vastReady() {
-        if (mIsDestroyed) {
-            return;
-        }
-
-        if (mListener != null) {
-            mListener.onInterstitialLoaded(this);
-        }
-    }
-
-    @Override
-    public void vastError(int error) {
-        if (mIsDestroyed) {
-            return;
-        }
-
-        if (mListener != null) {
-            mListener.onInterstitialError(this);
-        }
-    }
-
-    @Override
-    public void vastClick() {
-        if (mIsDestroyed) {
-            return;
-        }
-
-        if (mListener != null) {
-            mListener.onInterstitialClicked(this);
-        }
-    }
-
-    @Override
-    public void vastComplete() {
-    }
-
-    @Override
-    public void vastDismiss() {
-        if (mIsDestroyed) {
-            return;
-        }
-
-        if (mListener != null) {
-            mListener.onInterstitialDismissed(this);
-        }
-    }
 }

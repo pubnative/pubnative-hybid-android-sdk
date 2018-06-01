@@ -23,7 +23,9 @@ public class Constants {
     public static final String DFP_MRAID_MEDIUM_AD_UNIT = "/219576711/pnlite_dfp_mrect";
 
     public static final String APP_TOKEN = "dde3c298b47648459f8ada4a982fa92d";
-    public static final List<String> ZONE_ID_LIST = Arrays.asList(BANNER_MRAID_ZONE_ID, MEDIUM_MRAID_ZONE_ID, INTERSTITIAL_MRAID_ZONE_ID, INTERSTITIAL_VIDEO_ZONE_ID);
+    public static final List<String> ZONE_ID_LIST = Arrays.asList(BANNER_MRAID_ZONE_ID,
+            MEDIUM_MRAID_ZONE_ID, INTERSTITIAL_MRAID_ZONE_ID, MEDIUM_VIDEO_ZONE_ID,
+            INTERSTITIAL_VIDEO_ZONE_ID);
 
     public final class IntentParams {
         public static final String ZONE_ID = "zone_id";
