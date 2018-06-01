@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.managers.MoPubManager
 import net.pubnative.lite.demo.managers.SettingsManager
 
 /**
@@ -42,8 +43,10 @@ class MoPubSettingsFragment : Fragment() {
             settingManager.setMoPubMediumAdUnitId(mediumAdUnitId)
             settingManager.setMoPubInterstitialAdUnitId(interstitialAdUnitId)
 
-            Toast.makeText(activity, "MoPub settings saved successfully.", Toast.LENGTH_SHORT).show()
-            activity?.finish()
+            MoPubManager.initMoPubSdk(activity, bannerAdUnitId, {
+                Toast.makeText(activity, "MoPub settings saved successfully.", Toast.LENGTH_SHORT).show()
+                activity?.finish()
+            })
         }
 
         fillSavedValues()
