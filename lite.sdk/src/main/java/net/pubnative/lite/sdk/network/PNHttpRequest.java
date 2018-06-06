@@ -19,6 +19,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -34,6 +35,12 @@ public class PNHttpRequest {
     // Inner
     protected Listener mListener = null;
     protected Handler mHandler = null;
+
+    public interface Method {
+        String GET = "GET";
+        String POST = "POST";
+        String DELETE = "DELETE";
+    }
 
     public interface Listener {
 
@@ -71,7 +78,7 @@ public class PNHttpRequest {
         mHeaders = headers;
     }
 
-    public void start(Context context, final String urlString, Listener listener) {
+    public void start(Context context, final String method, final String urlString, Listener listener) {
         mListener = listener;
         mHandler = new Handler(Looper.getMainLooper());
         if (mListener == null) {
@@ -81,12 +88,14 @@ public class PNHttpRequest {
             invokeFail(new IllegalArgumentException("PNAPIHttpRequest - Error: null context provided, dropping call"));
         } else if (TextUtils.isEmpty(urlString)) {
             invokeFail(new IllegalArgumentException("PNAPIHttpRequest - Error: null or empty url, dropping call"));
+        } else if (!validateMethod(method)) {
+            invokeFail(new IllegalArgumentException("HttpRequest - Error: Unsupported HTTP method, dropping call"));
         } else if (PNLite.getDeviceInfo().getConnectivity() != DeviceInfo.Connectivity.NONE) {
             new Thread(new Runnable() {
 
                 @Override
                 public void run() {
-                    doRequest(urlString);
+                    doRequest(method, urlString);
                 }
             }).start();
         } else {
@@ -94,7 +103,21 @@ public class PNHttpRequest {
         }
     }
 
-    protected void doRequest(String urlString) {
+    private boolean validateMethod(String method) {
+        if (TextUtils.isEmpty(method)) {
+            return false;
+        }
+        switch (method.toUpperCase(Locale.ENGLISH)) {
+            case Method.GET:
+            case Method.POST:
+            case Method.DELETE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    protected void doRequest(String method, String urlString) {
         HttpURLConnection connection = null;
         // For avoid changing the POST string
         // during the sending - make a local variable
@@ -107,6 +130,7 @@ public class PNHttpRequest {
             // 2. Set connection properties
             connection.setDoInput(true);
             connection.setConnectTimeout(mTimeoutInMillis);
+            connection.setRequestMethod(method);
 
             if (headers != null && !headers.isEmpty()) {
                 for (String header : headers.keySet()) {
@@ -114,10 +138,7 @@ public class PNHttpRequest {
                 }
             }
 
-            if (TextUtils.isEmpty(postJson)) {
-                connection.setRequestMethod("GET");
-            } else {
-                connection.setRequestMethod("POST");
+            if (!TextUtils.isEmpty(postJson)) {
                 connection.setUseCaches(false);
                 connection.setDoOutput(true);
                 connection.setRequestProperty("Content-Length", Integer.toString(postJson.getBytes().length));

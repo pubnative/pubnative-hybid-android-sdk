@@ -44,7 +44,7 @@ public class PNApiClient {
             }
         } else {
             PNHttpRequest httpRequest = new PNHttpRequest();
-            httpRequest.start(mContext, url, new PNHttpRequest.Listener() {
+            httpRequest.start(mContext, PNHttpRequest.Method.GET, url, new PNHttpRequest.Listener() {
                 @Override
                 public void onPNHttpRequestFinish(PNHttpRequest request, String result) {
                     processStream(result, listener);
@@ -62,7 +62,7 @@ public class PNApiClient {
 
     public void trackUrl(String url, final TrackUrlListener listener) {
         PNHttpRequest httpRequest = new PNHttpRequest();
-        httpRequest.start(mContext, url, new PNHttpRequest.Listener() {
+        httpRequest.start(mContext, PNHttpRequest.Method.GET, url, new PNHttpRequest.Listener() {
             @Override
             public void onPNHttpRequestFinish(PNHttpRequest request, String result) {
                 if (listener != null) {

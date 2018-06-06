@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import net.pubnative.lite.sdk.consent.CheckConsentRequest;
+import net.pubnative.lite.sdk.consent.RevokeConsentRequest;
 import net.pubnative.lite.sdk.consent.UserConsentActivity;
 import net.pubnative.lite.sdk.consent.UserConsentRequest;
 import net.pubnative.lite.sdk.location.GeoIpRequest;
@@ -59,33 +60,47 @@ public class UserDataManager {
 
     public void grantConsent() {
 
-        notifyConsentResponse(true);
+        notifyConsentGiven();
     }
 
     public void denyConsent() {
         setConsentState(CONSENT_STATE_DENIED);
-
-        notifyConsentResponse(false);
     }
 
     public void revokeConsent() {
-        setConsentState(CONSENT_STATE_DENIED);
-
-        notifyConsentResponse(false);
+        notifyConsentRevoked();
     }
 
-    private void notifyConsentResponse(final boolean consentGiven) {
+    private void notifyConsentGiven() {
         UserConsentRequestModel requestModel = new UserConsentRequestModel(
                 PNLite.getDeviceInfo().getAdvertisingId(),
-                DEVICE_ID_TYPE,
-                consentGiven);
+                DEVICE_ID_TYPE);
 
         UserConsentRequest request = new UserConsentRequest();
         request.doRequest(mContext, PNLite.getAppToken(), requestModel, new UserConsentRequest.UserConsentListener() {
             @Override
             public void onSuccess(UserConsentResponseModel model) {
-                if (consentGiven && model.getStatus().equals(UserConsentResponseStatus.OK)) {
+                if (model.getStatus().equals(UserConsentResponseStatus.OK)) {
                     setConsentState(CONSENT_STATE_ACCEPTED);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Logger.e(TAG, error.getMessage());
+            }
+        });
+    }
+
+    private void notifyConsentRevoked() {
+        RevokeConsentRequest checkRequest = new RevokeConsentRequest();
+        checkRequest.revokeConsent(mContext, PNLite.getAppToken(), PNLite.getDeviceInfo().getAdvertisingId(), DEVICE_ID_TYPE, new RevokeConsentRequest.RevokeConsentListener() {
+            @Override
+            public void onSuccess(UserConsentResponseModel model) {
+                if (model.getStatus().equals(UserConsentResponseStatus.OK)) {
+                    if (model.getStatus().equals(UserConsentResponseStatus.OK)) {
+                        setConsentState(CONSENT_STATE_DENIED);
+                    }
                 }
             }
 

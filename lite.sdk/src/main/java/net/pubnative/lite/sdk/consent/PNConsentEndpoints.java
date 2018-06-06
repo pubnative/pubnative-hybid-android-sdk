@@ -23,6 +23,18 @@ public class PNConsentEndpoints {
                 .toString();
     }
 
+    public static String getRevokeConsentUrl(String deviceId, String deviceIdType) {
+        return new Uri.Builder()
+                .scheme(SCHEME)
+                .authority(AUTHORITY)
+                .appendPath(CONSENT_PATH)
+                .appendPath(API_VERSION)
+                .appendQueryParameter(PARAM_DEVICE_ID, deviceId)
+                .appendQueryParameter(PARAM_DEVICE_ID_TYPE, deviceIdType)
+                .build()
+                .toString();
+    }
+
     public static String getConsentUrl() {
         return new Uri.Builder()
                 .scheme(SCHEME)

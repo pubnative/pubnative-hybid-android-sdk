@@ -25,7 +25,7 @@ public class PNHttpRequestTest {
         PNHttpRequest request = spy(PNHttpRequest.class);
         PNHttpRequest.Listener listener = mock(PNHttpRequest.Listener.class);
         request.mHandler = new Handler();
-        request.start(null, "url", listener);
+        request.start(null, PNHttpRequest.Method.GET, "url", listener);
         verify(listener).onPNHttpRequestFail(eq(request), any(Exception.class));
     }
 
@@ -35,7 +35,7 @@ public class PNHttpRequestTest {
         PNHttpRequest request = spy(PNHttpRequest.class);
         PNHttpRequest.Listener listener = mock(PNHttpRequest.Listener.class);
         request.mHandler = new Handler();
-        request.start(RuntimeEnvironment.application.getApplicationContext(), null, listener);
+        request.start(RuntimeEnvironment.application.getApplicationContext(), PNHttpRequest.Method.GET, null, listener);
         verify(listener).onPNHttpRequestFail(eq(request), any(Exception.class));
     }
 
@@ -45,7 +45,7 @@ public class PNHttpRequestTest {
         PNHttpRequest request = spy(PNHttpRequest.class);
         PNHttpRequest.Listener listener = mock(PNHttpRequest.Listener.class);
         request.mHandler = new Handler();
-        request.start(RuntimeEnvironment.application.getApplicationContext(), "", listener);
+        request.start(RuntimeEnvironment.application.getApplicationContext(), PNHttpRequest.Method.GET,"", listener);
         verify(listener).onPNHttpRequestFail(eq(request), any(Exception.class));
     }
 
