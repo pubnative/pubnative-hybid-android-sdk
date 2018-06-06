@@ -21,7 +21,7 @@ public class GeoIpRequest {
 
     public void fetchGeoIp(Context context, final GeoIpRequestListener listener) {
         PNHttpRequest request = new PNHttpRequest();
-        request.start(context, PNHttpRequest.Method.GET, getEndpointUrl(context), new PNHttpRequest.Listener() {
+        request.start(context, PNHttpRequest.Method.GET, getEndpointUrl(), new PNHttpRequest.Listener() {
             @Override
             public void onPNHttpRequestFinish(PNHttpRequest request, String result) {
                 processStream(result, listener);
@@ -36,12 +36,12 @@ public class GeoIpRequest {
         });
     }
 
-    private String getEndpointUrl(Context context) {
+    private String getEndpointUrl() {
         return new Uri.Builder()
                 .scheme("https")
                 .authority("pro.ip-api.com")
                 .appendPath("json")
-                .appendQueryParameter("key", context.getResources().getString(R.string.ip_api_key))
+                .appendQueryParameter("key", "4ykqS3YU062TII3")
                 .build()
                 .toString();
     }
