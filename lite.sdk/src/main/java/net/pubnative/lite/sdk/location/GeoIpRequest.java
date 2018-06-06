@@ -1,14 +1,15 @@
 package net.pubnative.lite.sdk.location;
 
 import android.content.Context;
+import android.net.Uri;
 
+import net.pubnative.lite.sdk.R;
 import net.pubnative.lite.sdk.models.GeoIpResponse;
 import net.pubnative.lite.sdk.network.PNHttpRequest;
 
 import org.json.JSONObject;
 
 public class GeoIpRequest {
-    private static final String URL = "http://ip-api.com/json";
     private static final String STATUS_SUCCESS = "success";
     private static final String STATUS_FAILED = "fail";
 
@@ -20,7 +21,7 @@ public class GeoIpRequest {
 
     public void fetchGeoIp(Context context, final GeoIpRequestListener listener) {
         PNHttpRequest request = new PNHttpRequest();
-        request.start(context, PNHttpRequest.Method.GET, URL, new PNHttpRequest.Listener() {
+        request.start(context, PNHttpRequest.Method.GET, getEndpointUrl(context), new PNHttpRequest.Listener() {
             @Override
             public void onPNHttpRequestFinish(PNHttpRequest request, String result) {
                 processStream(result, listener);
@@ -33,6 +34,16 @@ public class GeoIpRequest {
                 }
             }
         });
+    }
+
+    private String getEndpointUrl(Context context) {
+        return new Uri.Builder()
+                .scheme("https")
+                .authority("pro.ip-api.com")
+                .appendPath("json")
+                .appendQueryParameter("key", context.getResources().getString(R.string.ip_api_key))
+                .build()
+                .toString();
     }
 
     private void processStream(String result, GeoIpRequestListener listener) {
