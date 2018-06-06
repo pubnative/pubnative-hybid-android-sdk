@@ -68,8 +68,6 @@ public class UserDataManager {
     }
 
     public void revokeConsent() {
-        setConsentState(CONSENT_STATE_DENIED);
-
         notifyConsentRevoked();
     }
 
