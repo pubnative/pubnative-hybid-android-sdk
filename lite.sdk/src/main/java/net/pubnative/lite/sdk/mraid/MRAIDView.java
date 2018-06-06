@@ -134,9 +134,6 @@ public class MRAIDView extends RelativeLayout {
     // reference to the webview currently being presented to the user
     private WebView currentWebView;
 
-    private ViewGroup contentInfo;
-
-
     private final MRAIDWebChromeClient mraidWebChromeClient;
     private final MRAIDWebViewClient mraidWebViewClient;
 
@@ -233,7 +230,6 @@ public class MRAIDView extends RelativeLayout {
             String[] supportedNativeFeatures,
             MRAIDViewListener listener,
             MRAIDNativeFeatureListener nativeFeatureListener,
-            ViewGroup contentInfo,
             boolean isInterstitial) {
         super(context);
 
@@ -241,8 +237,6 @@ public class MRAIDView extends RelativeLayout {
         this.showActivity = (Activity) context;
         this.baseUrl = baseUrl == null ? "http://example.com/" : baseUrl;
         this.isInterstitial = isInterstitial;
-
-        this.contentInfo = contentInfo;
 
         state = STATE_LOADING;
         isViewable = false;
@@ -836,9 +830,6 @@ public class MRAIDView extends RelativeLayout {
         expandedView = new RelativeLayout(context);
         expandedView.addView(webView, new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
-        if(isInterstitial) {
-            addContentInfo(expandedView);
-        }
         addCloseRegion(expandedView);
         setCloseRegionPosition(expandedView);
 
@@ -1034,12 +1025,6 @@ public class MRAIDView extends RelativeLayout {
                 return "VISIBLE";
             default:
                 return "UNKNOWN";
-        }
-    }
-
-    private void addContentInfo(View view) {
-        if (contentInfo != null) {
-            ((ViewGroup) view).addView(contentInfo);
         }
     }
 
@@ -1369,10 +1354,6 @@ public class MRAIDView extends RelativeLayout {
                             fireViewableChangeEvent();
                         }
                     }
-                }
-
-                if (!isInterstitial) {
-                    addContentInfo(MRAIDView.this);
                 }
 
                 if (listener != null) {

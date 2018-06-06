@@ -24,4 +24,8 @@ public interface BannerPresenter {
     void load();
 
     void destroy();
+
+    void startTracking();
+
+    void stopTracking();
 }

@@ -54,6 +54,16 @@ public class MRectPresenterDecorator implements MRectPresenter, MRectPresenter.L
     }
 
     @Override
+    public void startTracking() {
+        mMRectPresenter.startTracking();
+    }
+
+    @Override
+    public void stopTracking() {
+        mMRectPresenter.stopTracking();
+    }
+
+    @Override
     public void onMRectLoaded(MRectPresenter mRectPresenter, View mRect) {
         if (mIsDestroyed) {
             return;

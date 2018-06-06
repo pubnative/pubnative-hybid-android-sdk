@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
-import android.view.ViewGroup;
 import android.webkit.WebView;
 
 /**
@@ -20,10 +19,9 @@ public class MRAIDInterstitial extends MRAIDView {
             String data,
             String[] supportedNativeFeatures,
             MRAIDViewListener viewListener,
-            MRAIDNativeFeatureListener nativeFeatureListener,
-            ViewGroup contentInfo
+            MRAIDNativeFeatureListener nativeFeatureListener
     ) {
-        super(context, baseUrl, data, supportedNativeFeatures, viewListener, nativeFeatureListener, contentInfo, true);
+        super(context, baseUrl, data, supportedNativeFeatures, viewListener, nativeFeatureListener, true);
         webView.setBackgroundColor(Color.BLACK);
         addView(webView);
     }

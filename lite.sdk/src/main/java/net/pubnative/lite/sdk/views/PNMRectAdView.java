@@ -7,10 +7,8 @@ import android.view.View;
 
 import net.pubnative.lite.sdk.api.MRectRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
-import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.mrect.presenter.MRectPresenter;
 import net.pubnative.lite.sdk.mrect.presenter.MRectPresenterFactory;
-import net.pubnative.lite.sdk.utils.Logger;
 
 public class PNMRectAdView extends PNAdView implements MRectPresenter.Listener {
 
@@ -56,6 +54,21 @@ public class PNMRectAdView extends PNAdView implements MRectPresenter.Listener {
     protected void renderAd() {
         mPresenter = new MRectPresenterFactory(getContext())
                 .createMRectPresenter(mAd, this);
+        mPresenter.load();
+    }
+
+    @Override
+    protected void startTracking() {
+        if (mPresenter != null) {
+            mPresenter.startTracking();
+        }
+    }
+
+    @Override
+    protected void stopTracking() {
+        if (mPresenter != null) {
+            mPresenter.stopTracking();
+        }
     }
 
     //------------------------------ MRectPresenter Callbacks --------------------------------------

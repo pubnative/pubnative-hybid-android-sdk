@@ -64,15 +64,16 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
 
     public void destroy() {
         cleanup();
-    }
-
-    protected void cleanup() {
-        removeAllViews();
-        mAd = null;
         if (mRequestManager != null) {
             mRequestManager.destroy();
             mRequestManager = null;
         }
+    }
+
+    protected void cleanup() {
+        stopTracking();
+        removeAllViews();
+        mAd = null;
     }
 
     protected abstract String getLogTag();
@@ -80,6 +81,10 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
     protected abstract RequestManager getRequestManager();
 
     protected abstract void renderAd();
+
+    protected abstract void startTracking();
+
+    protected abstract void stopTracking();
 
     @Override
     public void onRequestSuccess(Ad ad) {
@@ -136,6 +141,7 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
         }
 
         invokeOnLoadFinished();
+        startTracking();
         invokeOnImpression();
     }
 }

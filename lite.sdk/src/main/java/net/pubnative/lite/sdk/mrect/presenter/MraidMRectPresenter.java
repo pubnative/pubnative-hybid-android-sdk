@@ -52,10 +52,10 @@ public class MraidMRectPresenter implements MRectPresenter, MRAIDViewListener, M
 
         if (mAd.getAssetUrl(APIAsset.HTML_BANNER) != null) {
             mMRAIDBanner = new MRAIDBanner(mContext, mAd.getAssetUrl(APIAsset.HTML_BANNER), "", mSupportedNativeFeatures,
-                    this, this, mAd.getContentInfoContainer(mContext));
+                    this, this);
         } else if (mAd.getAssetHtml(APIAsset.HTML_BANNER) != null) {
             mMRAIDBanner = new MRAIDBanner(mContext, "", mAd.getAssetHtml(APIAsset.HTML_BANNER), mSupportedNativeFeatures,
-                    this, this, mAd.getContentInfoContainer(mContext));
+                    this, this);
         }
 
     }
@@ -67,6 +67,16 @@ public class MraidMRectPresenter implements MRectPresenter, MRAIDViewListener, M
         }
         mListener = null;
         mIsDestroyed = true;
+    }
+
+    @Override
+    public void startTracking() {
+
+    }
+
+    @Override
+    public void stopTracking() {
+
     }
 
     @Override

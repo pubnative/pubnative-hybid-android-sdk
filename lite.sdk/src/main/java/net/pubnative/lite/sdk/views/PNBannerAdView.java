@@ -9,8 +9,6 @@ import net.pubnative.lite.sdk.api.BannerRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenter;
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
-import net.pubnative.lite.sdk.models.Ad;
-import net.pubnative.lite.sdk.utils.Logger;
 
 public class PNBannerAdView extends PNAdView implements BannerPresenter.Listener {
 
@@ -57,6 +55,20 @@ public class PNBannerAdView extends PNAdView implements BannerPresenter.Listener
         mPresenter = new BannerPresenterFactory(getContext())
                 .createBannerPresenter(mAd, this);
         mPresenter.load();
+    }
+
+    @Override
+    protected void startTracking() {
+        if (mPresenter != null) {
+            mPresenter.startTracking();
+        }
+    }
+
+    @Override
+    protected void stopTracking() {
+        if (mPresenter != null) {
+            mPresenter.stopTracking();
+        }
     }
 
     //----------------------------- BannerPresenter Callbacks --------------------------------------

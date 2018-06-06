@@ -64,7 +64,21 @@ public class VastMRectPresenter implements MRectPresenter, VASTPlayer.Listener {
 
     @Override
     public void destroy() {
+        if (mPlayer != null) {
+            mPlayer.destroy();
+        }
+        mListener = null;
+        mIsDestroyed = true;
+    }
 
+    @Override
+    public void startTracking() {
+        mPlayer.play();
+    }
+
+    @Override
+    public void stopTracking() {
+        mPlayer.stop();
     }
 
     private View buildView() {
@@ -82,9 +96,6 @@ public class VastMRectPresenter implements MRectPresenter, VASTPlayer.Listener {
         if (mIsDestroyed) {
             return;
         }
-
-        //TODO handle play action when using PNLiteAdView
-        //mPlayer.play();
 
         if (mListener != null) {
             mListener.onMRectLoaded(this, buildView());
