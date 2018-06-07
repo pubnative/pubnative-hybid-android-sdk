@@ -7,28 +7,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.FrameLayout
-import android.widget.RelativeLayout
-import android.widget.Toast
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
-import net.pubnative.lite.sdk.api.BannerRequestManager
-import net.pubnative.lite.sdk.api.RequestManager
-import net.pubnative.lite.sdk.banner.presenter.BannerPresenter
-import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory
-import net.pubnative.lite.sdk.models.Ad
+import net.pubnative.lite.sdk.views.PNAdView
+import net.pubnative.lite.sdk.views.PNBannerAdView
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class PNLiteBannerFragment : Fragment(), RequestManager.RequestListener, BannerPresenter.Listener {
+class PNLiteBannerFragment : Fragment(), PNAdView.Listener {
     val TAG = PNLiteBannerFragment::class.java.simpleName
 
-    private lateinit var requestManager: RequestManager
     private var zoneId: String? = null
 
-    private var presenter: BannerPresenter? = null
-    private lateinit var pnliteBannerContainer: RelativeLayout
+    private lateinit var pnliteBanner: PNBannerAdView
     private lateinit var loadButton: Button
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
@@ -38,9 +30,7 @@ class PNLiteBannerFragment : Fragment(), RequestManager.RequestListener, BannerP
         super.onViewCreated(view, savedInstanceState)
 
         loadButton = view.findViewById(R.id.button_load)
-        pnliteBannerContainer = view.findViewById(R.id.pnlite_banner_container)
-
-        requestManager = BannerRequestManager()
+        pnliteBanner = view.findViewById(R.id.pnlite_banner)
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
@@ -50,41 +40,28 @@ class PNLiteBannerFragment : Fragment(), RequestManager.RequestListener, BannerP
     }
 
     override fun onDestroy() {
-        presenter?.destroy()
+        pnliteBanner.destroy()
         super.onDestroy()
     }
 
     fun loadPNAd() {
-        requestManager.setZoneId(zoneId)
-        requestManager.setRequestListener(this)
-        requestManager.requestAd()
+        pnliteBanner.load(zoneId, this)
     }
 
-    // --------------- PNLite Request Listener --------------------
-    override fun onRequestSuccess(ad: Ad?) {
-        presenter?.destroy()
-        presenter = BannerPresenterFactory(context).createBannerPresenter(ad, this)
-        presenter?.load()
-        Log.d(TAG, "onRequestSuccess")
+    // --------------- PNAdView Listener --------------------
+    override fun onAdLoaded() {
+        Log.d(TAG, "onAdLoaded")
     }
 
-    override fun onRequestFail(throwable: Throwable?) {
-        Log.d(TAG, "onRequestFail: ", throwable)
-        Toast.makeText(activity, throwable?.message, Toast.LENGTH_SHORT).show()
+    override fun onAdLoadFailed(error: Throwable?) {
+        Log.e(TAG, "onAdLoadFailed", error)
     }
 
-    // --------------- PNLite Banner Presenter Listener --------------------
-    override fun onBannerLoaded(bannerPresenter: BannerPresenter?, banner: View?) {
-        pnliteBannerContainer.removeAllViews()
-        pnliteBannerContainer.addView(banner)
-        Log.d(TAG, "onBannerLoaded")
+    override fun onAdImpression() {
+        Log.d(TAG, "onAdImpression")
     }
 
-    override fun onBannerError(bannerPresenter: BannerPresenter?) {
-        Log.d(TAG, "onBannerError")
-    }
-
-    override fun onBannerClicked(bannerPresenter: BannerPresenter?) {
-        Log.d(TAG, "onBannerClicked")
+    override fun onAdClick() {
+        Log.d(TAG, "onAdClick")
     }
 }

@@ -9,31 +9,25 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.Toast
-import com.google.android.gms.ads.AdListener
-import com.google.android.gms.ads.AdSize
-import com.google.android.gms.ads.doubleclick.PublisherAdRequest
-import com.google.android.gms.ads.doubleclick.PublisherAdView
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
-import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.sdk.api.MRectRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
 import net.pubnative.lite.sdk.mrect.presenter.MRectPresenter
 import net.pubnative.lite.sdk.mrect.presenter.MRectPresenterFactory
-import net.pubnative.lite.sdk.utils.PrebidUtils
+import net.pubnative.lite.sdk.views.PNAdView
+import net.pubnative.lite.sdk.views.PNMRectAdView
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class PNLiteMRectFragment : Fragment(), RequestManager.RequestListener, MRectPresenter.Listener {
+class PNLiteMRectFragment : Fragment(), PNAdView.Listener {
     val TAG = PNLiteMRectFragment::class.java.simpleName
 
-    private lateinit var requestManager: RequestManager
     private var zoneId: String? = null
 
-    private lateinit var pnliteMRectContainer: FrameLayout
-    private var presenter: MRectPresenter? = null
+    private lateinit var pnliteMRect: PNMRectAdView
     private lateinit var loadButton: Button
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
@@ -43,9 +37,7 @@ class PNLiteMRectFragment : Fragment(), RequestManager.RequestListener, MRectPre
         super.onViewCreated(view, savedInstanceState)
 
         loadButton = view.findViewById(R.id.button_load)
-        pnliteMRectContainer = view.findViewById(R.id.pnlite_mrect_container)
-
-        requestManager = MRectRequestManager()
+        pnliteMRect = view.findViewById(R.id.pnlite_mrect)
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
@@ -55,41 +47,28 @@ class PNLiteMRectFragment : Fragment(), RequestManager.RequestListener, MRectPre
     }
 
     override fun onDestroy() {
-        presenter?.destroy()
+        pnliteMRect.destroy()
         super.onDestroy()
     }
 
     fun loadPNAd() {
-        requestManager.setZoneId(zoneId)
-        requestManager.setRequestListener(this)
-        requestManager.requestAd()
+        pnliteMRect.load(zoneId, this)
     }
 
-    // --------------- PNLite Request Listener --------------------
-    override fun onRequestSuccess(ad: Ad?) {
-        presenter?.destroy()
-        presenter = MRectPresenterFactory(context).createMRectPresenter(ad, this)
-        presenter?.load()
-        Log.d(TAG, "onRequestSuccess")
+    // --------------- PNAdView Listener --------------------
+    override fun onAdLoaded() {
+        Log.d(TAG, "onAdLoaded")
     }
 
-    override fun onRequestFail(throwable: Throwable?) {
-        Log.d(TAG, "onRequestFail: ", throwable)
-        Toast.makeText(activity, throwable?.message, Toast.LENGTH_SHORT).show()
+    override fun onAdLoadFailed(error: Throwable?) {
+        Log.e(TAG, "onAdLoadFailed", error)
     }
 
-    // --------------- PNLite MRect Presenter Listener --------------------
-    override fun onMRectLoaded(mRectPresenter: MRectPresenter?, mRect: View?) {
-        pnliteMRectContainer.removeAllViews()
-        pnliteMRectContainer.addView(mRect)
-        Log.d(TAG, "onMRectLoaded")
+    override fun onAdImpression() {
+        Log.d(TAG, "onAdImpression")
     }
 
-    override fun onMRectError(mRectPresenter: MRectPresenter?) {
-        Log.d(TAG, "onMRectError")
-    }
-
-    override fun onMRectClicked(mRectPresenter: MRectPresenter?) {
-        Log.d(TAG, "onMRectClicked")
+    override fun onAdClick() {
+        Log.d(TAG, "onAdClick")
     }
 }

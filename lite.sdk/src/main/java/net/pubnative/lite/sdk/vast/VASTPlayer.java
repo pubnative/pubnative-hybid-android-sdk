@@ -54,6 +54,7 @@ import android.widget.TextView;
 
 import net.pubnative.lite.sdk.R;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.vast.model.TRACKING_EVENTS_TYPE;
 import net.pubnative.lite.sdk.vast.model.VASTModel;
 import net.pubnative.lite.sdk.vast.util.HttpTools;
@@ -149,8 +150,6 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
     private TextView mSkip;
     private ImageView mMute;
     private CountDownView mCountDown;
-    // Ad Choices
-    private ViewGroup mContentInfo;
 
     // OTHERS
     private Handler mMainHandler      = null;
@@ -167,6 +166,8 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
 
     public VASTPlayer(Context context) {
         super(context);
+
+        init();
     }
 
     /**
@@ -178,13 +179,6 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
     public VASTPlayer(Context context, AttributeSet attrs) {
 
         super(context, attrs);
-        init();
-    }
-
-    public VASTPlayer(Context context, ViewGroup contentInfo) {
-        super(context);
-        this.mContentInfo = contentInfo;
-
         init();
     }
 
@@ -615,27 +609,9 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
         fireUrls(urls);
 
         // Navigate to the click through url
-        try {
-
-            Uri uri = Uri.parse(clickThroughUrl);
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            ResolveInfo resolvable = getContext().getPackageManager().resolveActivity(intent, PackageManager.GET_INTENT_FILTERS);
-
-            if (resolvable == null) {
-
-                Logger.e(TAG, "openOffer -clickthrough error occured, uri unresolvable");
-                return;
-
-            } else {
-
-                invokeOnPlayerOpenOffer();
-                getContext().startActivity(intent);
-            }
-
-        } catch (NullPointerException e) {
-
-            Logger.e(TAG, e.getMessage(), e);
-        }
+        UrlHandler urlHandler = new UrlHandler(getContext());
+        urlHandler.handleUrl(clickThroughUrl);
+        invokeOnPlayerOpenOffer();
     }
 
     // Layout
@@ -702,10 +678,6 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
             mOpen = mRoot.findViewById(R.id.open);
             mOpen.setVisibility(INVISIBLE);
             mOpen.setOnClickListener(this);
-
-            if (mContentInfo != null) {
-                mRoot.addView(mContentInfo);
-            }
 
             addView(mRoot);
         }

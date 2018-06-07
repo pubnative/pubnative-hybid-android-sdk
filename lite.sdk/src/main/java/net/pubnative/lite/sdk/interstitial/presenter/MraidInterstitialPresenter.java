@@ -52,10 +52,10 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, MRAIDV
 
         if (mAd.getAssetUrl(APIAsset.HTML_BANNER) != null) {
             mMRAIDInterstitial = new MRAIDInterstitial(mActivity, mAd.getAssetUrl(APIAsset.HTML_BANNER), "",
-                    mSupportedNativeFeatures, this, this, mAd.getContentInfoContainer(mActivity));
+                    mSupportedNativeFeatures, this, this);
         } else if (mAd.getAssetHtml(APIAsset.HTML_BANNER) != null) {
             mMRAIDInterstitial = new MRAIDInterstitial(mActivity, "", mAd.getAssetHtml(APIAsset.HTML_BANNER),
-                    mSupportedNativeFeatures, this, this, mAd.getContentInfoContainer(mActivity));
+                    mSupportedNativeFeatures, this, this);
         }
     }
 

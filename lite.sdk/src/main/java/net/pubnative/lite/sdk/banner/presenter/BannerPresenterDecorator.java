@@ -54,6 +54,16 @@ public class BannerPresenterDecorator implements BannerPresenter, BannerPresente
     }
 
     @Override
+    public void startTracking() {
+        mBannerPresenter.startTracking();
+    }
+
+    @Override
+    public void stopTracking() {
+        mBannerPresenter.stopTracking();
+    }
+
+    @Override
     public void onBannerLoaded(BannerPresenter bannerPresenter, View banner) {
         if (mIsDestroyed) {
             return;
