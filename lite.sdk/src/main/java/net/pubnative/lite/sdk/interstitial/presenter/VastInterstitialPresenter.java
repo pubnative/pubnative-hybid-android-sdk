@@ -58,5 +58,8 @@ public class VastInterstitialPresenter implements InterstitialPresenter {
         mIsDestroyed = true;
     }
 
+    @Override
+    public void hide() {
 
+    }
 }

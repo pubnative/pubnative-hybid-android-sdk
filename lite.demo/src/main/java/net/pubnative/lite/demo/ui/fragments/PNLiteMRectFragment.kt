@@ -62,6 +62,7 @@ class PNLiteMRectFragment : Fragment(), PNAdView.Listener {
 
     override fun onAdLoadFailed(error: Throwable?) {
         Log.e(TAG, "onAdLoadFailed", error)
+        Toast.makeText(activity, error?.message, Toast.LENGTH_SHORT).show()
     }
 
     override fun onAdImpression() {

@@ -1,0 +1,164 @@
+package net.pubnative.lite.sdk.interstitial;
+
+import android.app.Activity;
+import android.text.TextUtils;
+
+import net.pubnative.lite.sdk.api.InterstitialRequestManager;
+import net.pubnative.lite.sdk.api.RequestManager;
+import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenter;
+import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenterFactory;
+import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.utils.Logger;
+
+public class PNInterstitialAd implements RequestManager.RequestListener, InterstitialPresenter.Listener {
+    private static final String TAG = PNInterstitialAd.class.getSimpleName();
+
+    public interface Listener {
+        void onInterstitialLoaded();
+
+        void onInterstitialLoadFailed(Throwable error);
+
+        void onInterstitialImpression();
+
+        void onInterstitialDismissed();
+
+        void onInterstitialClick();
+    }
+
+    private RequestManager mRequestManager;
+    private InterstitialPresenter mPresenter;
+    private Listener mListener;
+    private Activity mActivity;
+    private String mZoneId;
+    private boolean mReady = false;
+
+    public PNInterstitialAd(Activity activity, String zoneId, Listener listener) {
+        mRequestManager = new InterstitialRequestManager();
+        mActivity = activity;
+        mZoneId = zoneId;
+        mListener = listener;
+    }
+
+    public void load() {
+        if (TextUtils.isEmpty(mZoneId)) {
+            invokeOnLoadFailed(new Exception("Invalid zone id provided"));
+        } else {
+            cleanup();
+            mRequestManager.setZoneId(mZoneId);
+            mRequestManager.setRequestListener(this);
+            mRequestManager.requestAd();
+        }
+    }
+
+    public void show() {
+        if (mPresenter != null && mReady) {
+            mPresenter.show();
+        } else {
+            Logger.e(TAG, "Can't display ad. Interstitial not ready.");
+        }
+    }
+
+    public void hide() {
+        if (mPresenter != null) {
+            mPresenter.hide();
+        }
+    }
+
+    public boolean isReady() {
+        return mReady;
+    }
+
+    public void destroy() {
+        cleanup();
+        if (mRequestManager != null) {
+            mRequestManager.destroy();
+            mRequestManager = null;
+        }
+    }
+
+    private void cleanup() {
+        mReady = false;
+        if (mPresenter != null) {
+            mPresenter.destroy();
+            mPresenter = null;
+        }
+    }
+
+    private void renderAd(Ad ad) {
+        mPresenter = new InterstitialPresenterFactory(mActivity).createInterstitialPresenter(ad, this);
+        mPresenter.load();
+    }
+
+    protected void invokeOnLoadFinished() {
+        if (mListener != null) {
+            mListener.onInterstitialLoaded();
+        }
+    }
+
+    protected void invokeOnLoadFailed(Exception exception) {
+        Logger.e(TAG, exception.getMessage());
+        if (mListener != null) {
+            mListener.onInterstitialLoadFailed(exception);
+        }
+    }
+
+    protected void invokeOnClick() {
+        if (mListener != null) {
+            mListener.onInterstitialClick();
+        }
+    }
+
+    protected void invokeOnImpression() {
+        if (mListener != null) {
+            mListener.onInterstitialImpression();
+        }
+    }
+
+    protected void invokeOnDismissed() {
+        if (mListener != null) {
+            mListener.onInterstitialDismissed();
+        }
+    }
+
+    //------------------------------ RequestManager Callbacks --------------------------------------
+    @Override
+    public void onRequestSuccess(Ad ad) {
+        if (ad == null) {
+            invokeOnLoadFailed(new Exception("Server returned null ad"));
+        } else {
+            renderAd(ad);
+        }
+    }
+
+    @Override
+    public void onRequestFail(Throwable throwable) {
+        invokeOnLoadFailed(new Exception(throwable));
+    }
+
+    //------------------------- IntersititialPresenter Callbacks -----------------------------------
+    @Override
+    public void onInterstitialLoaded(InterstitialPresenter interstitialPresenter) {
+        mReady = true;
+        invokeOnLoadFinished();
+    }
+
+    @Override
+    public void onInterstitialError(InterstitialPresenter interstitialPresenter) {
+        invokeOnLoadFailed(new Exception("An error has occurred while rendering the interstitial"));
+    }
+
+    @Override
+    public void onInterstitialShown(InterstitialPresenter interstitialPresenter) {
+        invokeOnImpression();
+    }
+
+    @Override
+    public void onInterstitialClicked(InterstitialPresenter interstitialPresenter) {
+        invokeOnClick();
+    }
+
+    @Override
+    public void onInterstitialDismissed(InterstitialPresenter interstitialPresenter) {
+        invokeOnDismissed();
+    }
+}

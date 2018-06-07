@@ -40,7 +40,6 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             return;
         }
 
-        //Logger.d(TAG, "Loading interstitial presenter for ad unit id: " + getAd().getAdUnitId());
         mInterstitialPresenter.load();
     }
 
@@ -50,8 +49,16 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             return;
         }
 
-        //Logger.d(TAG, "Showing interstitial presenter for ad unit id: " + getAd().getAdUnitId());
         mInterstitialPresenter.show();
+    }
+
+    @Override
+    public void hide() {
+        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "InterstitialPresenterDecorator is destroyed")) {
+            return;
+        }
+
+        mInterstitialPresenter.hide();
     }
 
     @Override

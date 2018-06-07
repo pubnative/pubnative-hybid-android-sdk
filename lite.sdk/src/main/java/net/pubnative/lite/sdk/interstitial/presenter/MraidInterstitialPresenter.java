@@ -71,6 +71,17 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, MRAIDV
     }
 
     @Override
+    public void hide() {
+        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "MraidInterstitialPresenter is destroyed")) {
+            return;
+        }
+
+        if (mMRAIDInterstitial != null) {
+            mMRAIDInterstitial.hide();
+        }
+    }
+
+    @Override
     public void destroy() {
         if (mMRAIDInterstitial != null) {
             mMRAIDInterstitial.destroy();
@@ -139,7 +150,6 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, MRAIDV
         }
 
         mUrlHandlerDelegate.handleUrl(url);
-        // TODO will this always count as a click? Are there other cases that should be considered a click?
         if (mListener != null) {
             mListener.onInterstitialClicked(this);
         }

@@ -98,10 +98,7 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
 
     @Override
     public void onRequestFail(Throwable throwable) {
-        Logger.e(getLogTag(), throwable.getMessage());
-        if (mListener != null) {
-            mListener.onAdLoadFailed(throwable);
-        }
+        invokeOnLoadFailed(new Exception(throwable));
     }
 
     protected void invokeOnLoadFinished() {
@@ -111,7 +108,7 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
     }
 
     protected void invokeOnLoadFailed(Exception exception) {
-        Logger.e(getLogTag(), "PN Ad load failed:", exception);
+        Logger.e(getLogTag(), exception.getMessage());
         if (mListener != null) {
             mListener.onAdLoadFailed(exception);
         }
