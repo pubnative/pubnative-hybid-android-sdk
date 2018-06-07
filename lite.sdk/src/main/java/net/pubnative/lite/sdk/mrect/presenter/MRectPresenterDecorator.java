@@ -65,7 +65,7 @@ public class MRectPresenterDecorator implements MRectPresenter, MRectPresenter.L
         if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "MRectPresenterDecorator is destroyed")) {
             return;
         }
-        
+
         mMRectPresenter.stopTracking();
     }
 

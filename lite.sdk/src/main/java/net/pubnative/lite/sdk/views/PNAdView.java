@@ -2,6 +2,7 @@ package net.pubnative.lite.sdk.views;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Color;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -72,6 +73,7 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
 
     protected void cleanup() {
         stopTracking();
+        setBackgroundColor(Color.TRANSPARENT);
         removeAllViews();
         mAd = null;
     }
@@ -131,6 +133,8 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
         adLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
 
         addView(view, adLayoutParams);
+
+        setBackgroundColor(Color.BLACK);
 
         View contentInfo = mAd.getContentInfoContainer(getContext());
         if (contentInfo != null) {
