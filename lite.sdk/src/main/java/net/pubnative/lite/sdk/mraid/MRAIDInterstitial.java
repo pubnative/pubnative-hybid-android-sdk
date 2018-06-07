@@ -26,6 +26,10 @@ public class MRAIDInterstitial extends MRAIDView {
         addView(webView);
     }
 
+    public void hide() {
+        close();
+    }
+
     @Override
     protected void close() {
         super.close();

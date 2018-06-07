@@ -27,5 +27,7 @@ public interface InterstitialPresenter {
 
     void show();
 
+    void hide();
+
     void destroy();
 }

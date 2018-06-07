@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.Toast
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.sdk.views.PNAdView
@@ -55,6 +56,7 @@ class PNLiteBannerFragment : Fragment(), PNAdView.Listener {
 
     override fun onAdLoadFailed(error: Throwable?) {
         Log.e(TAG, "onAdLoadFailed", error)
+        Toast.makeText(activity, error?.message, Toast.LENGTH_SHORT).show()
     }
 
     override fun onAdImpression() {
