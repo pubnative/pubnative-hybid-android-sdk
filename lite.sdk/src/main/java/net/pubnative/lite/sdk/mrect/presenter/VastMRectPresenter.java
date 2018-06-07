@@ -20,6 +20,7 @@ public class VastMRectPresenter implements MRectPresenter, VASTPlayer.Listener {
     private MRectPresenter.Listener mListener;
     private VASTPlayer mPlayer;
     private boolean mIsDestroyed;
+    private boolean mLoaded = false;
 
     public VastMRectPresenter(Context context, Ad ad) {
         mContext = context;
@@ -43,7 +44,7 @@ public class VastMRectPresenter implements MRectPresenter, VASTPlayer.Listener {
             return;
         }
 
-        mPlayer = new VASTPlayer(mContext, mAd.getContentInfoContainer(mContext));
+        mPlayer = new VASTPlayer(mContext);
         mPlayer.setListener(this);
         mPlayer.onMuteClick();
 
@@ -97,8 +98,11 @@ public class VastMRectPresenter implements MRectPresenter, VASTPlayer.Listener {
             return;
         }
 
-        if (mListener != null) {
-            mListener.onMRectLoaded(this, buildView());
+        if (!mLoaded) {
+            mLoaded = true;
+            if (mListener != null) {
+                mListener.onMRectLoaded(this, buildView());
+            }
         }
     }
 
@@ -115,7 +119,6 @@ public class VastMRectPresenter implements MRectPresenter, VASTPlayer.Listener {
             return;
         }
 
-        //mUrlHandlerDelegate.handleUrl(url);
         if (mListener != null) {
             mListener.onMRectClicked(this);
         }
