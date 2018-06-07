@@ -43,4 +43,17 @@ public class MRectPresenterFactoryTest {
         assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_MRECT, mTestAd))
                 .isInstanceOf(MraidMRectPresenter.class);
     }
+
+    @Test
+    public void createMRectPresenter_withVast() {
+        mTestAd = TestUtil.createTestVideoMRectAd();
+
+        assertThat(mSubject.createMRectPresenter(mTestAd, mMockListener)).isNotNull();
+    }
+
+    @Test
+    public void fromCreativeType_withVast() {
+        assertThat(mSubject.fromCreativeType(ApiAssetGroupType.VAST_MRECT, mTestAd))
+                .isInstanceOf(VastMRectPresenter.class);
+    }
 }

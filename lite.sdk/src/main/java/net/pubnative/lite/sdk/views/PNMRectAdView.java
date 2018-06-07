@@ -18,6 +18,10 @@ public class PNMRectAdView extends PNAdView implements MRectPresenter.Listener {
         super(context);
     }
 
+    public PNMRectAdView(Context context, RequestManager requestManager) {
+        super(context, requestManager);
+    }
+
     public PNMRectAdView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -46,7 +50,7 @@ public class PNMRectAdView extends PNAdView implements MRectPresenter.Listener {
     }
 
     @Override
-    protected RequestManager getRequestManager() {
+    RequestManager getRequestManager() {
         return new MRectRequestManager();
     }
 

@@ -27,27 +27,32 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
 
     public PNAdView(Context context) {
         super(context);
-        init();
+        init(getRequestManager());
+    }
+
+    public PNAdView(Context context, RequestManager requestManager) {
+        super(context);
+        init(requestManager);
     }
 
     public PNAdView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init();
+        init(getRequestManager());
     }
 
     public PNAdView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+        init(getRequestManager());
     }
 
     @TargetApi(21)
     public PNAdView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init();
+        init(getRequestManager());
     }
 
-    private void init() {
-        mRequestManager = getRequestManager();
+    private void init(RequestManager requestManager) {
+        mRequestManager = requestManager;
     }
 
     public void load(String zoneId, Listener listener) {
@@ -78,7 +83,7 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
 
     protected abstract String getLogTag();
 
-    protected abstract RequestManager getRequestManager();
+    abstract RequestManager getRequestManager();
 
     protected abstract void renderAd();
 

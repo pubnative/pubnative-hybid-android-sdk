@@ -18,6 +18,10 @@ public class PNBannerAdView extends PNAdView implements BannerPresenter.Listener
         super(context);
     }
 
+    public PNBannerAdView(Context context, RequestManager requestManager) {
+        super(context, requestManager);
+    }
+
     public PNBannerAdView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -46,7 +50,7 @@ public class PNBannerAdView extends PNAdView implements BannerPresenter.Listener
     }
 
     @Override
-    protected RequestManager getRequestManager() {
+    RequestManager getRequestManager() {
         return new BannerRequestManager();
     }
 
