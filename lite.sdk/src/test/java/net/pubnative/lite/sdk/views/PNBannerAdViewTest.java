@@ -28,19 +28,13 @@ public class PNBannerAdViewTest {
     @Mock
     private PNAdView.Listener listener;
 
-    @Mock
-    private BannerRequestManager requestManager;
-    @Mock
-    private RequestManager.RequestListener requestListener;
-
     @Before
     public void setUp() throws Exception {
         initMocks(this);
 
         ActivityController<Activity> activityController = Robolectric.buildActivity(Activity.class);
         activity = activityController.get();
-        requestManager.setRequestListener(requestListener);
-        adView = new PNBannerAdView(activity, requestManager);
+        adView = new PNBannerAdView(activity);
     }
 
     @Test

@@ -30,11 +30,6 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
         init(getRequestManager());
     }
 
-    public PNAdView(Context context, RequestManager requestManager) {
-        super(context);
-        init(requestManager);
-    }
-
     public PNAdView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(getRequestManager());

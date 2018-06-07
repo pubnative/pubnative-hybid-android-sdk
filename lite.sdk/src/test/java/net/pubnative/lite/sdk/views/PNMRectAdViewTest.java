@@ -26,19 +26,13 @@ public class PNMRectAdViewTest {
     @Mock
     private PNAdView.Listener listener;
 
-    @Mock
-    private MRectRequestManager requestManager;
-    @Mock
-    private RequestManager.RequestListener requestListener;
-
     @Before
     public void setUp() throws Exception {
         initMocks(this);
 
         ActivityController<Activity> activityController = Robolectric.buildActivity(Activity.class);
         activity = activityController.get();
-        requestManager.setRequestListener(requestListener);
-        adView = new PNMRectAdView(activity, requestManager);
+        adView = new PNMRectAdView(activity);
     }
 
     @Test
