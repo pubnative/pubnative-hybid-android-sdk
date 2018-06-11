@@ -46,7 +46,7 @@ public class PNMRectAdView extends PNAdView implements MRectPresenter.Listener {
     }
 
     @Override
-    protected RequestManager getRequestManager() {
+    RequestManager getRequestManager() {
         return new MRectRequestManager();
     }
 

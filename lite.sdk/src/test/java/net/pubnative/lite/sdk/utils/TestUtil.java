@@ -50,6 +50,10 @@ public class TestUtil {
         return createTestAd(ApiAssetGroupType.MRAID_MRECT);
     }
 
+    public static Ad createTestVideoMRectAd() {
+        return createTestAd(ApiAssetGroupType.VAST_MRECT);
+    }
+
     public static Ad createTestInterstitialAd() {
         return createTestAd(ApiAssetGroupType.MRAID_INTERSTITIAL);
     }

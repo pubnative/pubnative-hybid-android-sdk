@@ -61,6 +61,38 @@ public class MRectPresenterDecoratorTest {
     }
 
     @Test
+    public void startTracking() {
+        mSubject.startTracking();
+
+        verify(mMockPresenter).startTracking();
+    }
+
+    @Test
+    public void startTracking_whenDestroyed() {
+        mSubject.destroy();
+
+        mSubject.startTracking();
+
+        verify(mMockPresenter, never()).startTracking();
+    }
+
+    @Test
+    public void stopTracking() {
+        mSubject.stopTracking();
+
+        verify(mMockPresenter).stopTracking();
+    }
+
+    @Test
+    public void stopTracking_whenDestroyed() {
+        mSubject.destroy();
+
+        mSubject.stopTracking();
+
+        verify(mMockPresenter, never()).stopTracking();
+    }
+
+    @Test
     public void destroy() {
         mSubject.destroy();
 

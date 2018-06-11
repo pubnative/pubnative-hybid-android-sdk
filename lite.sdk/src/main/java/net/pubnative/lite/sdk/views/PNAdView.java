@@ -2,6 +2,7 @@ package net.pubnative.lite.sdk.views;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Color;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -27,27 +28,27 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
 
     public PNAdView(Context context) {
         super(context);
-        init();
+        init(getRequestManager());
     }
 
     public PNAdView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init();
+        init(getRequestManager());
     }
 
     public PNAdView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+        init(getRequestManager());
     }
 
     @TargetApi(21)
     public PNAdView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init();
+        init(getRequestManager());
     }
 
-    private void init() {
-        mRequestManager = getRequestManager();
+    private void init(RequestManager requestManager) {
+        mRequestManager = requestManager;
     }
 
     public void load(String zoneId, Listener listener) {
@@ -72,13 +73,14 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
 
     protected void cleanup() {
         stopTracking();
+        setBackgroundColor(Color.TRANSPARENT);
         removeAllViews();
         mAd = null;
     }
 
     protected abstract String getLogTag();
 
-    protected abstract RequestManager getRequestManager();
+    abstract RequestManager getRequestManager();
 
     protected abstract void renderAd();
 
@@ -131,6 +133,8 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
         adLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
 
         addView(view, adLayoutParams);
+
+        setBackgroundColor(Color.BLACK);
 
         View contentInfo = mAd.getContentInfoContainer(getContext());
         if (contentInfo != null) {

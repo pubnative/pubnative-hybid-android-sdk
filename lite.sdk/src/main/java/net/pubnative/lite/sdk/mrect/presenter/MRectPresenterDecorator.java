@@ -42,24 +42,30 @@ public class MRectPresenterDecorator implements MRectPresenter, MRectPresenter.L
             return;
         }
 
-        //Logger.d(TAG, "Loading MRect presenter for zone id: " + getAd().getAdUnitId());
         mMRectPresenter.load();
     }
 
     @Override
     public void destroy() {
-        //Logger.d(TAG, "Destroying MRect presenter for ad unit id: " + getAd().getAdUnitId());
         mMRectPresenter.destroy();
         mIsDestroyed = true;
     }
 
     @Override
     public void startTracking() {
+        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "MRectPresenterDecorator is destroyed")) {
+            return;
+        }
+
         mMRectPresenter.startTracking();
     }
 
     @Override
     public void stopTracking() {
+        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "MRectPresenterDecorator is destroyed")) {
+            return;
+        }
+
         mMRectPresenter.stopTracking();
     }
 

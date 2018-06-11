@@ -46,7 +46,7 @@ public class PNBannerAdView extends PNAdView implements BannerPresenter.Listener
     }
 
     @Override
-    protected RequestManager getRequestManager() {
+    RequestManager getRequestManager() {
         return new BannerRequestManager();
     }
 

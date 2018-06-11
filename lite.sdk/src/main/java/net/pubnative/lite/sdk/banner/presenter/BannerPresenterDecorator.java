@@ -42,24 +42,30 @@ public class BannerPresenterDecorator implements BannerPresenter, BannerPresente
             return;
         }
 
-        //Logger.d(TAG, "Loading banner presenter for zone id: " + getAd().getAdUnitId());
         mBannerPresenter.load();
     }
 
     @Override
     public void destroy() {
-        //Logger.d(TAG, "Destroying banner presenter for ad unit id: " + getAd().getAdUnitId());
         mBannerPresenter.destroy();
         mIsDestroyed = true;
     }
 
     @Override
     public void startTracking() {
+        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "BannerPresenterDecorator is destroyed")) {
+            return;
+        }
+
         mBannerPresenter.startTracking();
     }
 
     @Override
     public void stopTracking() {
+        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "BannerPresenterDecorator is destroyed")) {
+            return;
+        }
+
         mBannerPresenter.stopTracking();
     }
 
