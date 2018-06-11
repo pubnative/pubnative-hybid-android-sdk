@@ -26,6 +26,7 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, MRAIDV
     private InterstitialPresenter.Listener mListener;
     private MRAIDInterstitial mMRAIDInterstitial;
     private boolean mIsDestroyed;
+    private boolean mReady = false;
 
     public MraidInterstitialPresenter(Activity activity, Ad ad) {
         mActivity = activity;
@@ -50,13 +51,19 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, MRAIDV
             return;
         }
 
+        mReady = false;
         if (mAd.getAssetUrl(APIAsset.HTML_BANNER) != null) {
             mMRAIDInterstitial = new MRAIDInterstitial(mActivity, mAd.getAssetUrl(APIAsset.HTML_BANNER), "",
-                    mSupportedNativeFeatures, this, this);
+                    mSupportedNativeFeatures, this, this, mAd.getContentInfoContainer(mActivity));
         } else if (mAd.getAssetHtml(APIAsset.HTML_BANNER) != null) {
             mMRAIDInterstitial = new MRAIDInterstitial(mActivity, "", mAd.getAssetHtml(APIAsset.HTML_BANNER),
-                    mSupportedNativeFeatures, this, this);
+                    mSupportedNativeFeatures, this, this, mAd.getContentInfoContainer(mActivity));
         }
+    }
+
+    @Override
+    public boolean isReady() {
+        return mReady;
     }
 
     @Override
@@ -96,6 +103,7 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, MRAIDV
             return;
         }
 
+        mReady = true;
         if (mListener != null) {
             mListener.onInterstitialLoaded(this);
         }

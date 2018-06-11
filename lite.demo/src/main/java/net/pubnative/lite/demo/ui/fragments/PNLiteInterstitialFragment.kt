@@ -27,7 +27,7 @@ class PNLiteInterstitialFragment : Fragment(), PNInterstitialAd.Listener {
     private var zoneId: String? = null
 
     private lateinit var loadButton: Button
-    private lateinit var interstitial: PNInterstitialAd
+    private var interstitial: PNInterstitialAd? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_pnlite_interstitial, container, false)
 
@@ -45,18 +45,18 @@ class PNLiteInterstitialFragment : Fragment(), PNInterstitialAd.Listener {
     }
 
     override fun onDestroy() {
-        interstitial.destroy()
+        interstitial?.destroy()
         super.onDestroy()
     }
 
     fun loadPNAd() {
         interstitial = PNInterstitialAd(activity, zoneId, this)
-        interstitial.load()
+        interstitial?.load()
     }
 
     override fun onInterstitialLoaded() {
         Log.d(TAG, "onInterstitialLoaded")
-        interstitial.show()
+        interstitial?.show()
     }
 
     override fun onInterstitialLoadFailed(error: Throwable?) {
