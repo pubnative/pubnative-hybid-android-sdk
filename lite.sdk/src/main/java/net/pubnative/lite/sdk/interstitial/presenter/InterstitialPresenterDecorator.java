@@ -44,6 +44,11 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
     }
 
     @Override
+    public boolean isReady() {
+        return mInterstitialPresenter.isReady();
+    }
+
+    @Override
     public void show() {
         if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "InterstitialPresenterDecorator is destroyed")) {
             return;

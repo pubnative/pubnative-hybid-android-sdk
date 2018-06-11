@@ -44,7 +44,7 @@ public class VASTModelPostValidator {
     private static final String TAG = VASTModelPostValidator.class.getName();
 
     // This method tries to make sure that there is at least 1 Media file to
-    // be used for VASTActivity. Also, if the boolean validateModel is true, it will
+    // be used. Also, if the boolean validateModel is true, it will
     // do additional validations which includes "at least 1 impression tracking url's is required'
     // If any of the above fails, it returns false. The false indicates that you can stop proceeding
     // further to display this on the MediaPlayer.
