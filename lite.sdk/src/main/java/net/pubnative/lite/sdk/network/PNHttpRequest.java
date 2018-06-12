@@ -4,11 +4,11 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
-import android.util.Log;
 
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.PNLite;
 import net.pubnative.lite.sdk.exception.PNException;
+import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNCrypto;
 
 import java.io.ByteArrayOutputStream;
@@ -29,12 +29,15 @@ import java.util.Map;
 public class PNHttpRequest {
     private static final String TAG = PNHttpRequest.class.getSimpleName();
 
+    protected final int MAX_RETRIES = 1;
     protected int mTimeoutInMillis = 4000; // 4 seconds
     protected String mPOSTString = null;
-    private Map<String, String> mHeaders = null;
+    protected Map<String, String> mHeaders = null;
     // Inner
     protected Listener mListener = null;
     protected Handler mHandler = null;
+    protected boolean mShouldRetry;
+    protected int mRetryCount;
 
     public interface Method {
         String GET = "GET";
@@ -61,6 +64,11 @@ public class PNHttpRequest {
         void onPNHttpRequestFail(PNHttpRequest request, Exception exception);
     }
 
+    public PNHttpRequest() {
+        mShouldRetry = false;
+        mRetryCount = 0;
+    }
+
     /**
      * Sets timeout for connection and reading, if not specified default is 0 ms
      *
@@ -68,6 +76,10 @@ public class PNHttpRequest {
      */
     public void setTimeout(int timeoutInMillis) {
         mTimeoutInMillis = timeoutInMillis;
+    }
+
+    public void shouldRetry(boolean shouldRetry) {
+        mShouldRetry = shouldRetry;
     }
 
     public void setPOSTString(String postString) {
@@ -82,7 +94,7 @@ public class PNHttpRequest {
         mListener = listener;
         mHandler = new Handler(Looper.getMainLooper());
         if (mListener == null) {
-            Log.w(TAG, "Warning: null listener specified, performing request without callbacks");
+            Logger.w(TAG, "Warning: null listener specified, performing request without callbacks");
         }
         if (context == null) {
             invokeFail(new IllegalArgumentException("PNAPIHttpRequest - Error: null context provided, dropping call"));
@@ -91,16 +103,20 @@ public class PNHttpRequest {
         } else if (!validateMethod(method)) {
             invokeFail(new IllegalArgumentException("HttpRequest - Error: Unsupported HTTP method, dropping call"));
         } else if (PNLite.getDeviceInfo().getConnectivity() != DeviceInfo.Connectivity.NONE) {
-            new Thread(new Runnable() {
-
-                @Override
-                public void run() {
-                    doRequest(method, urlString);
-                }
-            }).start();
+            executeAsync(method, urlString);
         } else {
             invokeFail(PNException.REQUEST_NO_INTERNET);
         }
+    }
+
+    private void executeAsync(final String method, final String url) {
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                doRequest(method, url);
+            }
+        }).start();
     }
 
     private boolean validateMethod(String method) {
@@ -202,7 +218,7 @@ public class PNHttpRequest {
             result = byteArrayOutputStream.toString();
             byteArrayOutputStream.close();
         } catch (IOException e) {
-            Log.e(TAG, "stringFromInputStream - Error:" + e);
+            Logger.e(TAG, "stringFromInputStream - Error:" + e);
 
             Map<String, String> errorData = new HashMap<>();
             if (result == null) {
