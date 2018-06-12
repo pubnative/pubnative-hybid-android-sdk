@@ -10,6 +10,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import net.pubnative.lite.sdk.utils.Logger;
+
 public class NetworkTools {
 
     private static final String TAG = NetworkTools.class.getName();
@@ -17,7 +19,7 @@ public class NetworkTools {
     // This method return true if it's connected to Internet
     public static boolean isConnectedToInternet(Context context) {
 
-        VASTLog.d(TAG, "Testing connectivity:");
+        Logger.d(TAG, "Testing connectivity:");
 
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -25,7 +27,7 @@ public class NetworkTools {
 
         if (wifiNetwork != null && wifiNetwork.isConnected()) {
 
-            VASTLog.d(TAG, "Connected to Internet");
+            Logger.d(TAG, "Connected to Internet");
             return true;
         }
 
@@ -33,7 +35,7 @@ public class NetworkTools {
 
         if (mobileNetwork != null && mobileNetwork.isConnected()) {
 
-            VASTLog.d(TAG, "Connected to Internet");
+            Logger.d(TAG, "Connected to Internet");
             return true;
         }
 
@@ -41,11 +43,11 @@ public class NetworkTools {
 
         if (activeNetwork != null && activeNetwork.isConnected()) {
 
-            VASTLog.d(TAG, "Connected to Internet");
+            Logger.d(TAG, "Connected to Internet");
             return true;
         }
 
-        VASTLog.d(TAG, "No Internet connection");
+        Logger.d(TAG, "No Internet connection");
         return false;
     }
 }

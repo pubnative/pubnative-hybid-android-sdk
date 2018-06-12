@@ -33,6 +33,8 @@ package net.pubnative.lite.sdk.vast.util;
 
 import android.text.TextUtils;
 
+import net.pubnative.lite.sdk.utils.Logger;
+
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -51,7 +53,7 @@ public class HttpTools {
                     HttpURLConnection conn = null;
 
                     try {
-                        VASTLog.v(TAG, "connection to URL:" + url);
+                        Logger.d(TAG, "connection to URL:" + url);
                         URL httpUrl = new URL(url);
 
                         HttpURLConnection.setFollowRedirects(true);
@@ -62,14 +64,14 @@ public class HttpTools {
                         conn.connect();
 
                         int code = conn.getResponseCode();
-                        VASTLog.v(TAG, "response code:" + code + ", for URL:" + url);
+                        Logger.d(TAG, "response code:" + code + ", for URL:" + url);
 
                         conn.getInputStream().close();
                         conn.getOutputStream().close();
 
                     } catch (Exception e) {
 
-                        VASTLog.w(TAG, url + ": " + e.getMessage() + ":" + e.toString());
+                        Logger.w(TAG, url + ": " + e.getMessage() + ":" + e.toString());
 
                     } finally {
                         if (conn != null) {
@@ -82,7 +84,7 @@ public class HttpTools {
 
         } else {
 
-            VASTLog.w(TAG, "url is null or empty");
+            Logger.w(TAG, "url is null or empty");
         }
     }
 }
