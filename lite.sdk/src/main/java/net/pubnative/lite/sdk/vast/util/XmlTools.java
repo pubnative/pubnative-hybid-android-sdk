@@ -31,6 +31,8 @@
 
 package net.pubnative.lite.sdk.vast.util;
 
+import net.pubnative.lite.sdk.utils.Logger;
+
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -56,11 +58,9 @@ public class XmlTools {
     private static String TAG = XmlTools.class.getName();
 
     public static void logXmlDocument(Document doc) {
-
-        VASTLog.d(TAG, "logXmlDocument");
+        Logger.d(TAG, "logXmlDocument");
 
         try {
-
             TransformerFactory tf = TransformerFactory.newInstance();
             Transformer transformer = tf.newTransformer();
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
@@ -72,22 +72,18 @@ public class XmlTools {
             StringWriter sw = new StringWriter();
             transformer.transform(new DOMSource(doc), new StreamResult(sw));
 
-            VASTLog.d(TAG, sw.toString());
+            Logger.d(TAG, sw.toString());
 
         } catch (Exception e) {
-
-            VASTLog.e(TAG, e.getMessage(), e);
-            ;
+            Logger.e(TAG, e.getMessage(), e);
         }
     }
 
     public static String xmlDocumentToString(Document doc) {
-
         String xml = null;
-        VASTLog.d(TAG, "xmlDocumentToString");
+        Logger.d(TAG, "xmlDocumentToString");
 
         try {
-
             TransformerFactory tf = TransformerFactory.newInstance();
             Transformer transformer = tf.newTransformer();
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
@@ -102,20 +98,17 @@ public class XmlTools {
             xml = sw.toString();
 
         } catch (Exception e) {
-
-            VASTLog.e(TAG, e.getMessage(), e);
+            Logger.e(TAG, e.getMessage(), e);
         }
 
         return xml;
     }
 
     public static String xmlDocumentToString(Node node) {
-
         String xml = null;
-        VASTLog.d(TAG, "xmlDocumentToString");
+        Logger.d(TAG, "xmlDocumentToString");
 
         try {
-
             TransformerFactory tf = TransformerFactory.newInstance();
             Transformer transformer = tf.newTransformer();
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
@@ -130,22 +123,19 @@ public class XmlTools {
             xml = sw.toString();
 
         } catch (Exception e) {
-
-            VASTLog.e(TAG, e.getMessage(), e);
+            Logger.e(TAG, e.getMessage(), e);
         }
 
         return xml;
     }
 
     public static Document stringToDocument(String doc) {
-
-        VASTLog.d(TAG, "stringToDocument");
+        Logger.d(TAG, "stringToDocument");
 
         DocumentBuilder db;
         Document document = null;
 
         try {
-
             db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 
             InputSource is = new InputSource();
@@ -154,20 +144,18 @@ public class XmlTools {
             document = db.parse(is);
 
         } catch (Exception e) {
-
-            VASTLog.e(TAG, e.getMessage(), e);
+            Logger.e(TAG, e.getMessage(), e);
         }
         return document;
 
     }
 
     public static String stringFromStream(InputStream inputStream) throws IOException {
+        Logger.d(TAG, "stringFromStream");
 
-        VASTLog.d(TAG, "stringFromStream");
-
-        ByteArrayOutputStream baos   = new ByteArrayOutputStream();
-        byte[]                buffer = new byte[1024];
-        int                   length = 0;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int length = 0;
 
         while ((length = inputStream.read(buffer)) != -1) {
 
@@ -180,10 +168,9 @@ public class XmlTools {
     }
 
     public static String getElementValue(Node node) {
-
         NodeList childNodes = node.getChildNodes();
         Node child;
-        String value      = null;
+        String value = null;
         CharacterData cd;
 
         for (int childIndex = 0; childIndex < childNodes.getLength(); childIndex++) {
@@ -198,7 +185,7 @@ public class XmlTools {
                 continue;
             }
 
-            VASTLog.v(TAG, "getElementValue: " + value);
+            Logger.d(TAG, "getElementValue: " + value);
             return value;
         }
 

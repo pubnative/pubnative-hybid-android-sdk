@@ -35,6 +35,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 
+import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vast.model.VASTMediaFile;
 import net.pubnative.lite.sdk.vast.processor.VASTMediaPicker;
 
@@ -45,15 +46,15 @@ import java.util.List;
 
 public class DefaultMediaPicker implements VASTMediaPicker {
 
-    private static final String TAG       = DefaultMediaPicker.class.getName();
-    private static final int    maxPixels = 5000;
+    private static final String TAG = DefaultMediaPicker.class.getName();
+    private static final int maxPixels = 5000;
 
     // These are the Android supported MIME types, see http://developer.android.com/guide/appendix/media-formats.html#core (as of API 18)
     String SUPPORTED_VIDEO_TYPE_REGEX = "video/.*(?i)(mp4|3gpp|mp2t|webm|matroska)";
 
-    private int     deviceWidth;
-    private int     deviceHeight;
-    private int     deviceArea;
+    private int deviceWidth;
+    private int deviceHeight;
+    private int deviceArea;
     private Context context;
 
     public DefaultMediaPicker(Context context) {
@@ -82,16 +83,16 @@ public class DefaultMediaPicker implements VASTMediaPicker {
         return mediaFile;
     }
 
-	/*
-	 * This method filters the list of mediafiles and return the count.
-	 * Validate that the media file objects contain the required attributes for the Default Media Picker processing.
-	 * 
-	 * 		Required attributes:
-	 * 			1. type
-	 * 			2. height
-	 * 			3. width 
-	 * 			4. url
-	 */
+    /*
+     * This method filters the list of mediafiles and return the count.
+     * Validate that the media file objects contain the required attributes for the Default Media Picker processing.
+     *
+     * 		Required attributes:
+     * 			1. type
+     * 			2. height
+     * 			3. width
+     * 			4. url
+     */
 
     private int prefilterMediaFiles(List<VASTMediaFile> mediaFiles) {
 
@@ -102,7 +103,7 @@ public class DefaultMediaPicker implements VASTMediaPicker {
             VASTMediaFile mediaFile = iter.next();
             // type attribute
             if (TextUtils.isEmpty(mediaFile.getType())) {
-                VASTLog.d(TAG, "Validator error: mediaFile type empty");
+                Logger.d(TAG, "Validator error: mediaFile type empty");
                 iter.remove();
                 continue;
             }
@@ -110,7 +111,7 @@ public class DefaultMediaPicker implements VASTMediaPicker {
             // mediaFile url
             if (TextUtils.isEmpty(mediaFile.getValue())) {
 
-                VASTLog.d(TAG, "Validator error: mediaFile url empty");
+                Logger.d(TAG, "Validator error: mediaFile url empty");
                 iter.remove();
             }
         }
@@ -146,7 +147,7 @@ public class DefaultMediaPicker implements VASTMediaPicker {
             // get the difference between the area of the MediaFile and the area of the screen
             int obj1Diff = Math.abs(obj1Area - deviceArea);
             int obj2Diff = Math.abs(obj2Area - deviceArea);
-            VASTLog.v(TAG, "AreaComparator: obj1:" + obj1Diff + " obj2:" + obj2Diff);
+            Logger.d(TAG, "AreaComparator: obj1:" + obj1Diff + " obj2:" + obj2Diff);
 
             // choose the MediaFile which has the lower difference in area
             if (obj1Diff < obj2Diff) {
@@ -173,7 +174,7 @@ public class DefaultMediaPicker implements VASTMediaPicker {
 
     private VASTMediaFile getBestMatch(List<VASTMediaFile> list) {
 
-        VASTLog.d(TAG, "getBestMatch");
+        Logger.d(TAG, "getBestMatch");
 
         // Iterate through the sorted list and return the first compatible media.
         // If none of the media file is compatible, return null
