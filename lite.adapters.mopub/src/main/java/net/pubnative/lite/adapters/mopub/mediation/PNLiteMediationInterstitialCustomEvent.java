@@ -7,23 +7,18 @@ import com.mopub.mobileads.CustomEventInterstitial;
 import com.mopub.mobileads.MoPubErrorCode;
 
 import net.pubnative.lite.sdk.PNLite;
-import net.pubnative.lite.sdk.api.InterstitialRequestManager;
-import net.pubnative.lite.sdk.api.RequestManager;
-import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenter;
-import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenterFactory;
-import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.interstitial.PNInterstitialAd;
 import net.pubnative.lite.sdk.utils.Logger;
 
 import java.util.Map;
 
-public class PNLiteMediationInterstitialCustomEvent extends CustomEventInterstitial implements RequestManager.RequestListener, InterstitialPresenter.Listener {
+public class PNLiteMediationInterstitialCustomEvent extends CustomEventInterstitial implements PNInterstitialAd.Listener {
     private static final String TAG = PNLiteMediationMRectCustomEvent.class.getSimpleName();
 
     private static final String APP_TOKEN_KEY = "pn_app_token";
     private static final String ZONE_ID_KEY = "pn_zone_id";
     private CustomEventInterstitialListener mInterstitialListener;
-    private InterstitialPresenter mInterstitialPresenter;
-    private Activity mActivity;
+    private PNInterstitialAd mInterstitialAd;
 
     @Override
     protected void loadInterstitial(Context context, CustomEventInterstitialListener customEventInterstitialListener, Map<String, Object> localExtras, Map<String, String> serverExtras) {
@@ -39,7 +34,7 @@ public class PNLiteMediationInterstitialCustomEvent extends CustomEventInterstit
             return;
         }
 
-        mActivity = (Activity) context;
+        Activity activity = (Activity) context;
 
         String zoneId;
         String appToken;
@@ -58,86 +53,57 @@ public class PNLiteMediationInterstitialCustomEvent extends CustomEventInterstit
             return;
         }
 
-        RequestManager requestManager = new InterstitialRequestManager();
-        requestManager.setZoneId(zoneId);
-        requestManager.setRequestListener(this);
-        requestManager.requestAd();
+        mInterstitialAd = new PNInterstitialAd(activity, zoneId, this);
+        mInterstitialAd.load();
     }
 
     @Override
     protected void onInvalidate() {
-        if (mInterstitialPresenter != null) {
-            mInterstitialPresenter.destroy();
-            mInterstitialPresenter = null;
+        if (mInterstitialAd != null) {
+            mInterstitialAd.destroy();
+            mInterstitialAd = null;
         }
     }
 
     @Override
     protected void showInterstitial() {
-        if (mInterstitialPresenter != null) {
-            mInterstitialPresenter.show();
+        if (mInterstitialAd != null) {
+            mInterstitialAd.show();
         }
     }
 
-    //------------------------------- RequestManager Callbacks -------------------------------------
-
+    //--------------------------------- PNInterstitialAd Callbacks ---------------------------------
     @Override
-    public void onRequestSuccess(Ad ad) {
-        if (mActivity == null) {
-            Logger.e(TAG, "Invalid activity. Dropping call.");
-            mInterstitialListener.onInterstitialFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
-        } else {
-            mInterstitialPresenter = new InterstitialPresenterFactory(mActivity).createInterstitialPresenter(ad, this);
-            if (mInterstitialPresenter == null) {
-                Logger.e(TAG, "Could not create valid interstitial presenter");
-                mInterstitialListener.onInterstitialFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
-                return;
-            }
-
-            mInterstitialPresenter.load();
-        }
-    }
-
-    @Override
-    public void onRequestFail(Throwable throwable) {
-        Logger.e(TAG, throwable.getMessage());
-        mInterstitialListener.onInterstitialFailed(MoPubErrorCode.NETWORK_NO_FILL);
-    }
-
-    //----------------------------- InterstitialPresenter Callbacks --------------------------------
-
-    @Override
-    public void onInterstitialLoaded(InterstitialPresenter interstitialPresenter) {
+    public void onInterstitialLoaded() {
         if (mInterstitialListener != null) {
             mInterstitialListener.onInterstitialLoaded();
         }
     }
 
     @Override
-    public void onInterstitialError(InterstitialPresenter interstitialPresenter) {
-        if (mInterstitialListener != null) {
-            mInterstitialListener.onInterstitialFailed(MoPubErrorCode.INTERNAL_ERROR);
-        }
+    public void onInterstitialLoadFailed(Throwable error) {
+        Logger.e(TAG, error.getMessage());
+        mInterstitialListener.onInterstitialFailed(MoPubErrorCode.NETWORK_NO_FILL);
     }
 
     @Override
-    public void onInterstitialShown(InterstitialPresenter interstitialPresenter) {
+    public void onInterstitialImpression() {
         if (mInterstitialListener != null) {
             mInterstitialListener.onInterstitialShown();
         }
     }
 
     @Override
-    public void onInterstitialClicked(InterstitialPresenter interstitialPresenter) {
+    public void onInterstitialDismissed() {
         if (mInterstitialListener != null) {
-            mInterstitialListener.onInterstitialClicked();
+            mInterstitialListener.onInterstitialDismissed();
         }
     }
 
     @Override
-    public void onInterstitialDismissed(InterstitialPresenter interstitialPresenter) {
+    public void onInterstitialClick() {
         if (mInterstitialListener != null) {
-            mInterstitialListener.onInterstitialDismissed();
+            mInterstitialListener.onInterstitialClicked();
         }
     }
 }

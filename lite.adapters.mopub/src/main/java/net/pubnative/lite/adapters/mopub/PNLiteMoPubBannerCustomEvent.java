@@ -68,6 +68,7 @@ public class PNLiteMoPubBannerCustomEvent extends CustomEventBanner implements B
     @Override
     protected void onInvalidate() {
         if (mBannerPresenter != null) {
+            mBannerPresenter.stopTracking();
             mBannerPresenter.destroy();
             mBannerPresenter = null;
         }
@@ -77,6 +78,7 @@ public class PNLiteMoPubBannerCustomEvent extends CustomEventBanner implements B
     public void onBannerLoaded(BannerPresenter bannerPresenter, View banner) {
         if (mBannerListener != null) {
             mBannerListener.onBannerLoaded(banner);
+            mBannerPresenter.startTracking();
         }
     }
 

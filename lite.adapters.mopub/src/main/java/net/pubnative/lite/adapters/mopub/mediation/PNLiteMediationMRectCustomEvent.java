@@ -1,29 +1,24 @@
 package net.pubnative.lite.adapters.mopub.mediation;
 
 import android.content.Context;
-import android.view.View;
 
 import com.mopub.mobileads.CustomEventBanner;
 import com.mopub.mobileads.MoPubErrorCode;
 
 import net.pubnative.lite.sdk.PNLite;
-import net.pubnative.lite.sdk.api.BannerRequestManager;
-import net.pubnative.lite.sdk.api.RequestManager;
-import net.pubnative.lite.sdk.models.Ad;
-import net.pubnative.lite.sdk.mrect.presenter.MRectPresenter;
-import net.pubnative.lite.sdk.mrect.presenter.MRectPresenterFactory;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.views.PNAdView;
+import net.pubnative.lite.sdk.views.PNMRectAdView;
 
 import java.util.Map;
 
-public class PNLiteMediationMRectCustomEvent extends CustomEventBanner implements RequestManager.RequestListener, MRectPresenter.Listener {
+public class PNLiteMediationMRectCustomEvent extends CustomEventBanner implements PNAdView.Listener {
     private static final String TAG = PNLiteMediationMRectCustomEvent.class.getSimpleName();
 
     private static final String APP_TOKEN_KEY = "pn_app_token";
     private static final String ZONE_ID_KEY = "pn_zone_id";
     private CustomEventBannerListener mBannerListener;
-    private MRectPresenter mMRectPresenter;
-    private Context mContext;
+    private PNMRectAdView mMRectView;
 
     @Override
     protected void loadBanner(Context context,
@@ -34,8 +29,6 @@ public class PNLiteMediationMRectCustomEvent extends CustomEventBanner implement
             Logger.e(TAG, "customEventBannerListener is null");
             return;
         }
-
-        mContext = context.getApplicationContext();
 
         mBannerListener = customEventBannerListener;
 
@@ -56,61 +49,40 @@ public class PNLiteMediationMRectCustomEvent extends CustomEventBanner implement
             return;
         }
 
-        RequestManager requestManager = new BannerRequestManager();
-        requestManager.setZoneId(zoneId);
-        requestManager.setRequestListener(this);
-        requestManager.requestAd();
+        mMRectView = new PNMRectAdView(context);
+        mMRectView.load(zoneId, this);
     }
 
     @Override
     protected void onInvalidate() {
-        if (mMRectPresenter != null) {
-            mMRectPresenter.destroy();
-            mMRectPresenter = null;
+        if (mMRectView != null) {
+            mMRectView.destroy();
+            mMRectView = null;
         }
     }
 
-    //------------------------------ RequestManager Callbacks --------------------------------------
+    //------------------------------------ PNAdView Callbacks --------------------------------------
     @Override
-    public void onRequestSuccess(Ad ad) {
-        if (mContext == null) {
-            Logger.e(TAG, "Invalid context. Dropping call.");
-            mBannerListener.onBannerFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
-        } else {
-            mMRectPresenter = new MRectPresenterFactory(mContext).createMRectPresenter(ad, this);
-            if (mMRectPresenter == null) {
-                Logger.e(TAG, "Could not create valid mrect presenter");
-                mBannerListener.onBannerFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
-                return;
-            }
-
-            mMRectPresenter.load();
-        }
-    }
-
-    @Override
-    public void onRequestFail(Throwable throwable) {
-        Logger.e(TAG, throwable.getMessage());
-        mBannerListener.onBannerFailed(MoPubErrorCode.NETWORK_NO_FILL);
-    }
-
-    //----------------------------- MRectPresenter Callbacks ---------------------------------------
-    @Override
-    public void onMRectLoaded(MRectPresenter mRectPresenter, View mRect) {
+    public void onAdLoaded() {
         if (mBannerListener != null) {
-            mBannerListener.onBannerLoaded(mRect);
+            mBannerListener.onBannerLoaded(mMRectView);
         }
     }
 
     @Override
-    public void onMRectError(MRectPresenter mRectPresenter) {
+    public void onAdLoadFailed(Throwable error) {
         if (mBannerListener != null) {
-            mBannerListener.onBannerFailed(MoPubErrorCode.INTERNAL_ERROR);
+            mBannerListener.onBannerFailed(MoPubErrorCode.NETWORK_NO_FILL);
         }
     }
 
     @Override
-    public void onMRectClicked(MRectPresenter mRectPresenter) {
+    public void onAdImpression() {
+
+    }
+
+    @Override
+    public void onAdClick() {
         if (mBannerListener != null) {
             mBannerListener.onBannerClicked();
         }

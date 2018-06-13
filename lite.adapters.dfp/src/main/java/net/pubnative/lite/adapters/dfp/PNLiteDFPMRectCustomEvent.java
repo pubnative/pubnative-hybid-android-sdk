@@ -74,6 +74,7 @@ public class PNLiteDFPMRectCustomEvent implements CustomEventBanner, MRectPresen
     @Override
     public void onDestroy() {
         if (mPresenter != null) {
+            mPresenter.stopTracking();
             mPresenter.destroy();
             mPresenter = null;
         }
@@ -92,6 +93,7 @@ public class PNLiteDFPMRectCustomEvent implements CustomEventBanner, MRectPresen
     public void onMRectLoaded(MRectPresenter mRectPresenter, View mRect) {
         if (mMRectListener != null) {
             mMRectListener.onAdLoaded(mRect);
+            mPresenter.startTracking();
         }
     }
 

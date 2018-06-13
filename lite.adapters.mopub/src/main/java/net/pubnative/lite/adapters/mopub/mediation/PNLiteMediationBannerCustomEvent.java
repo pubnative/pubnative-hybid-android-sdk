@@ -1,28 +1,24 @@
 package net.pubnative.lite.adapters.mopub.mediation;
 
 import android.content.Context;
-import android.view.View;
 
 import com.mopub.mobileads.CustomEventBanner;
 import com.mopub.mobileads.MoPubErrorCode;
 
 import net.pubnative.lite.sdk.PNLite;
-import net.pubnative.lite.sdk.api.BannerRequestManager;
-import net.pubnative.lite.sdk.api.RequestManager;
-import net.pubnative.lite.sdk.banner.presenter.BannerPresenter;
-import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
-import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.views.PNAdView;
+import net.pubnative.lite.sdk.views.PNBannerAdView;
 
 import java.util.Map;
 
-public class PNLiteMediationBannerCustomEvent extends CustomEventBanner implements RequestManager.RequestListener, BannerPresenter.Listener {
+public class PNLiteMediationBannerCustomEvent extends CustomEventBanner implements PNAdView.Listener {
     private static final String TAG = PNLiteMediationBannerCustomEvent.class.getSimpleName();
 
     private static final String APP_TOKEN_KEY = "pn_app_token";
     private static final String ZONE_ID_KEY = "pn_zone_id";
     private CustomEventBannerListener mBannerListener;
-    private BannerPresenter mBannerPresenter;
+    private PNBannerAdView mBannerView;
     private Context mContext;
 
     @Override
@@ -56,62 +52,41 @@ public class PNLiteMediationBannerCustomEvent extends CustomEventBanner implemen
             return;
         }
 
-        RequestManager requestManager = new BannerRequestManager();
-        requestManager.setZoneId(zoneId);
-        requestManager.setRequestListener(this);
-        requestManager.requestAd();
+        mBannerView = new PNBannerAdView(context);
+        mBannerView.load(zoneId, this);
     }
 
     @Override
     protected void onInvalidate() {
-        if (mBannerPresenter != null) {
-            mBannerPresenter.destroy();
-            mBannerPresenter = null;
+        if (mBannerView != null) {
+            mBannerView.destroy();
+            mBannerView = null;
         }
     }
 
-    //------------------------------- RequestManager Callbacks -------------------------------------
+    //------------------------------------ PNAdView Callbacks --------------------------------------
     @Override
-    public void onRequestSuccess(Ad ad) {
-        if (mContext == null) {
-            Logger.e(TAG, "Invalid context. Dropping call.");
-            mBannerListener.onBannerFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
-        } else {
-            mBannerPresenter = new BannerPresenterFactory(mContext).createBannerPresenter(ad, this);
-            if (mBannerPresenter == null) {
-                Logger.e(TAG, "Could not create valid banner presenter");
-                mBannerListener.onBannerFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
-                return;
-            }
-
-            mBannerPresenter.load();
-        }
-    }
-
-    @Override
-    public void onRequestFail(Throwable throwable) {
-        Logger.e(TAG, throwable.getMessage());
-        mBannerListener.onBannerFailed(MoPubErrorCode.NETWORK_NO_FILL);
-    }
-
-    //------------------------------ BannerPresenter Callbacks -------------------------------------
-
-    @Override
-    public void onBannerLoaded(BannerPresenter bannerPresenter, View banner) {
+    public void onAdLoaded() {
         if (mBannerListener != null) {
-            mBannerListener.onBannerLoaded(banner);
+            mBannerListener.onBannerLoaded(mBannerView);
+
         }
     }
 
     @Override
-    public void onBannerError(BannerPresenter bannerPresenter) {
+    public void onAdLoadFailed(Throwable error) {
         if (mBannerListener != null) {
-            mBannerListener.onBannerFailed(MoPubErrorCode.INTERNAL_ERROR);
+            mBannerListener.onBannerFailed(MoPubErrorCode.NETWORK_NO_FILL);
         }
     }
 
     @Override
-    public void onBannerClicked(BannerPresenter bannerPresenter) {
+    public void onAdImpression() {
+
+    }
+
+    @Override
+    public void onAdClick() {
         if (mBannerListener != null) {
             mBannerListener.onBannerClicked();
         }
