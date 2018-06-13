@@ -72,6 +72,7 @@ public class PNLiteDFPBannerCustomEvent implements CustomEventBanner, BannerPres
     @Override
     public void onDestroy() {
         if (mPresenter != null) {
+            mPresenter.stopTracking();
             mPresenter.destroy();
             mPresenter = null;
         }
@@ -90,6 +91,7 @@ public class PNLiteDFPBannerCustomEvent implements CustomEventBanner, BannerPres
     public void onBannerLoaded(BannerPresenter bannerPresenter, View banner) {
         if (mBannerListener != null) {
             mBannerListener.onAdLoaded(banner);
+            mPresenter.startTracking();
         }
     }
 

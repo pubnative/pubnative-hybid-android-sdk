@@ -70,6 +70,7 @@ public class PNLiteMoPubMRectCustomEvent extends CustomEventBanner implements MR
     @Override
     protected void onInvalidate() {
         if (mMRectPresenter != null) {
+            mMRectPresenter.stopTracking();
             mMRectPresenter.destroy();
             mMRectPresenter = null;
         }
@@ -79,6 +80,7 @@ public class PNLiteMoPubMRectCustomEvent extends CustomEventBanner implements MR
     public void onMRectLoaded(MRectPresenter mRectPresenter, View mRect) {
         if (mBannerListener != null) {
             mBannerListener.onBannerLoaded(mRect);
+            mMRectPresenter.startTracking();
         }
     }
 
