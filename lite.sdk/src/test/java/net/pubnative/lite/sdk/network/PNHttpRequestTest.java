@@ -64,7 +64,7 @@ public class PNHttpRequestTest {
         PNHttpRequest request = spy(PNHttpRequest.class);
         request.mListener = null;
         request.mHandler = new Handler();
-        request.invokeFail(mock(Exception.class));
+        request.invokeFail(mock(Exception.class), false);
     }
 
     @Test
@@ -86,7 +86,7 @@ public class PNHttpRequestTest {
         PNHttpRequest.Listener listener = mock(PNHttpRequest.Listener.class);
         request.mListener = listener;
         request.mHandler = new Handler();
-        request.invokeFail(mock(Exception.class));
+        request.invokeFail(mock(Exception.class), false);
         verify(listener).onPNHttpRequestFail(eq(request), any(Exception.class));
         assertThat(request.mListener).isNull();
     }
