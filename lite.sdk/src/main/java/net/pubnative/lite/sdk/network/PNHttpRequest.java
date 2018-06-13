@@ -39,6 +39,9 @@ public class PNHttpRequest {
     protected boolean mShouldRetry;
     protected int mRetryCount;
 
+    protected String mMethod;
+    protected String mUrl;
+
     public interface Method {
         String GET = "GET";
         String POST = "POST";
@@ -92,29 +95,31 @@ public class PNHttpRequest {
 
     public void start(Context context, final String method, final String urlString, Listener listener) {
         mListener = listener;
+        mMethod = method;
+        mUrl = urlString;
         mHandler = new Handler(Looper.getMainLooper());
         if (mListener == null) {
             Logger.w(TAG, "Warning: null listener specified, performing request without callbacks");
         }
         if (context == null) {
-            invokeFail(new IllegalArgumentException("PNAPIHttpRequest - Error: null context provided, dropping call"));
+            invokeFail(new IllegalArgumentException("PNAPIHttpRequest - Error: null context provided, dropping call"), false);
         } else if (TextUtils.isEmpty(urlString)) {
-            invokeFail(new IllegalArgumentException("PNAPIHttpRequest - Error: null or empty url, dropping call"));
+            invokeFail(new IllegalArgumentException("PNAPIHttpRequest - Error: null or empty url, dropping call"), false);
         } else if (!validateMethod(method)) {
-            invokeFail(new IllegalArgumentException("HttpRequest - Error: Unsupported HTTP method, dropping call"));
+            invokeFail(new IllegalArgumentException("HttpRequest - Error: Unsupported HTTP method, dropping call"), false);
         } else if (PNLite.getDeviceInfo().getConnectivity() != DeviceInfo.Connectivity.NONE) {
-            executeAsync(method, urlString);
+            executeAsync();
         } else {
-            invokeFail(PNException.REQUEST_NO_INTERNET);
+            invokeFail(PNException.REQUEST_NO_INTERNET, true);
         }
     }
 
-    private void executeAsync(final String method, final String url) {
+    private void executeAsync() {
         new Thread(new Runnable() {
 
             @Override
             public void run() {
-                doRequest(method, url);
+                doRequest(mMethod, mUrl);
             }
         }).start();
     }
@@ -175,7 +180,7 @@ public class PNHttpRequest {
                     inputStream.close();
                     invokeFinish(result);
                 } catch (PNException ex) {
-                    invokeFail(ex);
+                    invokeFail(ex, false);
                 }
             } else {
                 Map<String, String> errorData = new HashMap<String, String>();
@@ -185,12 +190,12 @@ public class PNHttpRequest {
                 } catch (PNException ex) {
                     errorData.put("parsingException", ex.toString());
                 }
-                invokeFail(PNException.extraException(errorData));
+                invokeFail(PNException.extraException(errorData), false);
             }
         } catch (OutOfMemoryError outOfMemoryError) {
-            invokeFail(new Exception("Not enough memory for making request!", outOfMemoryError));
+            invokeFail(new Exception("Not enough memory for making request!", outOfMemoryError), true);
         } catch (Exception exception) {
-            invokeFail(exception);
+            invokeFail(exception, false);
         } finally {
             if (connection != null) {
                 connection.disconnect();
@@ -245,16 +250,20 @@ public class PNHttpRequest {
         });
     }
 
-    protected void invokeFail(final Exception exception) {
+    protected void invokeFail(final Exception exception, final boolean attemptRetry) {
         mHandler.post(new Runnable() {
 
             @Override
             public void run() {
-
-                if (mListener != null) {
-                    mListener.onPNHttpRequestFail(PNHttpRequest.this, exception);
+                if (attemptRetry && mShouldRetry && mRetryCount < MAX_RETRIES) {
+                    executeAsync();
+                    mRetryCount++;
+                } else {
+                    if (mListener != null) {
+                        mListener.onPNHttpRequestFail(PNHttpRequest.this, exception);
+                    }
+                    mListener = null;
                 }
-                mListener = null;
             }
         });
     }
