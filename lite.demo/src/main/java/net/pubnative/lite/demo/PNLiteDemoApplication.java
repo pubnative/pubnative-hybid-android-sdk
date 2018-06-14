@@ -85,6 +85,9 @@ public class PNLiteDemoApplication extends MultiDexApplication {
                     Constants.MOPUB_MRAID_BANNER_AD_UNIT,
                     Constants.MOPUB_MRAID_MEDIUM_AD_UNIT,
                     Constants.MOPUB_MRAID_INTERSTITIAL_AD_UNIT,
+                    Constants.MOPUB_MEDIATION_BANNER_AD_UNIT,
+                    Constants.MOPUB_MEDIATION_MEDIUM_AD_UNIT,
+                    Constants.MOPUB_MEDIATION_INTERSTITIAL_AD_UNIT,
                     Constants.DFP_MRAID_BANNER_AD_UNIT,
                     Constants.DFP_MRAID_MEDIUM_AD_UNIT,
                     Constants.DFP_MRAID_INTERSTITIAL_AD_UNIT);
