@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="net.pubnative.lite.demo.ui.fragments.MoPubMRectFragment"
+    tools:context="net.pubnative.lite.demo.ui.fragments.mopub.MoPubMRectFragment"
     tools:showIn="@layout/activity_mopub_mrect">
 
     <Button

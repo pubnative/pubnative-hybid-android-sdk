@@ -36,77 +36,77 @@
         </activity>
 
         <activity
-            android:name=".ui.activities.PNLiteBannerActivity"
+            android:name=".ui.activities.pnlite.PNLiteBannerActivity"
             android:label="@string/pnlite_banner"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.activities.PNLiteMRectActivity"
+            android:name=".ui.activities.pnlite.PNLiteMRectActivity"
             android:label="@string/pnlite_medium"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.activities.PNLiteInterstitialActivity"
+            android:name=".ui.activities.pnlite.PNLiteInterstitialActivity"
             android:label="@string/pnlite_interstitial"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
-            android:name=".ui.activities.MoPubBannerActivity"
+            android:name=".ui.activities.mopub.MoPubBannerActivity"
             android:label="@string/mopub_banner"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.activities.MoPubMRectActivity"
+            android:name=".ui.activities.mopub.MoPubMRectActivity"
             android:label="@string/mopub_medium"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.activities.MoPubInterstitialActivity"
+            android:name=".ui.activities.mopub.MoPubInterstitialActivity"
             android:label="@string/mopub_interstitial"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.activities.DFPBannerActivity"
+            android:name=".ui.activities.dfp.DFPBannerActivity"
             android:label="@string/dfp_banner"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.activities.DFPMRectActivity"
+            android:name=".ui.activities.dfp.DFPMRectActivity"
             android:label="@string/dfp_medium"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.activities.DFPInterstitialActivity"
+            android:name=".ui.activities.dfp.DFPInterstitialActivity"
             android:label="@string/dfp_interstitial"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.activities.PNSettingsActivity"
+            android:name=".ui.activities.config.PNSettingsActivity"
             android:label="@string/pn_settings"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name=".ui.activities.MoPubSettingsActivity"
+            android:name=".ui.activities.config.MoPubSettingsActivity"
             android:label="@string/mopub_settings"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name=".ui.activities.DFPSettingsActivity"
+            android:name=".ui.activities.config.DFPSettingsActivity"
             android:label="@string/dfp_settings"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name=".ui.activities.KeywordsActivity"
+            android:name=".ui.activities.config.KeywordsActivity"
             android:label="@string/title_pn_keywords"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name=".ui.activities.ZoneIdsActivity"
+            android:name=".ui.activities.config.ZoneIdsActivity"
             android:label="@string/title_pn_zone_ids"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
