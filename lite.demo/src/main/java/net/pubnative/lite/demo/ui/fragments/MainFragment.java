@@ -22,19 +22,13 @@ import net.pubnative.lite.demo.Constants;
 import net.pubnative.lite.demo.R;
 import net.pubnative.lite.demo.managers.SettingsManager;
 import net.pubnative.lite.demo.models.SettingsModel;
-import net.pubnative.lite.demo.ui.activities.DFPBannerActivity;
-import net.pubnative.lite.demo.ui.activities.DFPInterstitialActivity;
-import net.pubnative.lite.demo.ui.activities.DFPMRectActivity;
-import net.pubnative.lite.demo.ui.activities.DFPSettingsActivity;
-import net.pubnative.lite.demo.ui.activities.MoPubBannerActivity;
-import net.pubnative.lite.demo.ui.activities.MoPubInterstitialActivity;
-import net.pubnative.lite.demo.ui.activities.MoPubMRectActivity;
-import net.pubnative.lite.demo.ui.activities.MoPubSettingsActivity;
+import net.pubnative.lite.demo.ui.activities.dfp.DFPActivity;
+import net.pubnative.lite.demo.ui.activities.config.DFPSettingsActivity;
+import net.pubnative.lite.demo.ui.activities.mopub.MoPubActivity;
+import net.pubnative.lite.demo.ui.activities.config.MoPubSettingsActivity;
 import net.pubnative.lite.demo.ui.activities.PNConsentActivity;
-import net.pubnative.lite.demo.ui.activities.PNLiteBannerActivity;
-import net.pubnative.lite.demo.ui.activities.PNLiteInterstitialActivity;
-import net.pubnative.lite.demo.ui.activities.PNLiteMRectActivity;
-import net.pubnative.lite.demo.ui.activities.PNSettingsActivity;
+import net.pubnative.lite.demo.ui.activities.pnlite.PNLiteActivity;
+import net.pubnative.lite.demo.ui.activities.config.PNSettingsActivity;
 import net.pubnative.lite.demo.ui.adapters.ZoneIdAdapter;
 import net.pubnative.lite.demo.ui.listeners.ZoneIdClickListener;
 
@@ -45,15 +39,9 @@ import java.util.List;
 public class MainFragment extends Fragment {
     private static final int PERMISSION_REQUEST = 1000;
 
-    private Button mPNLiteBannerButton;
-    private Button mPNLiteMediumButton;
-    private Button mPNLiteInterstitialButton;
-    private Button mMoPubBannerButton;
-    private Button mMoPubMediumButton;
-    private Button mMoPubInterstitialButton;
-    private Button mDFPBannerButton;
-    private Button mDFPMediumButton;
-    private Button mDFPInterstitialButton;
+    private Button mPNLiteButton;
+    private Button mMoPubButton;
+    private Button mDFPButton;
     private RecyclerView mZoneIdList;
     private TextView mChosenZoneIdView;
     private ZoneIdAdapter mAdapter;
@@ -128,94 +116,31 @@ public class MainFragment extends Fragment {
             }
         });
 
-        mPNLiteBannerButton = view.findViewById(R.id.button_pnlite_banner);
-        mPNLiteBannerButton.setOnClickListener(new View.OnClickListener() {
+        mPNLiteButton = view.findViewById(R.id.button_pnlite);
+        mPNLiteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), PNLiteBannerActivity.class);
+                Intent intent = new Intent(getActivity(), PNLiteActivity.class);
                 intent.putExtra(Constants.IntentParams.ZONE_ID, mChosenZoneId);
                 startActivity(intent);
             }
         });
 
-        mPNLiteMediumButton = view.findViewById(R.id.button_pnlite_medium);
-        mPNLiteMediumButton.setOnClickListener(new View.OnClickListener() {
+        mMoPubButton = view.findViewById(R.id.button_mopub);
+        mMoPubButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), PNLiteMRectActivity.class);
-                intent.putExtra(Constants.IntentParams.ZONE_ID, mChosenZoneId);
-                startActivity(intent);
-
-            }
-        });
-
-        mPNLiteInterstitialButton = view.findViewById(R.id.button_pnlite_interstitial);
-        mPNLiteInterstitialButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), PNLiteInterstitialActivity.class);
+                Intent intent = new Intent(getActivity(), MoPubActivity.class);
                 intent.putExtra(Constants.IntentParams.ZONE_ID, mChosenZoneId);
                 startActivity(intent);
             }
         });
 
-        mMoPubBannerButton = view.findViewById(R.id.button_mopub_banner);
-        mMoPubBannerButton.setOnClickListener(new View.OnClickListener() {
+        mDFPButton = view.findViewById(R.id.button_dfp);
+        mDFPButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), MoPubBannerActivity.class);
-                intent.putExtra(Constants.IntentParams.ZONE_ID, mChosenZoneId);
-                startActivity(intent);
-            }
-        });
-
-        mMoPubMediumButton = view.findViewById(R.id.button_mopub_medium);
-        mMoPubMediumButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), MoPubMRectActivity.class);
-                intent.putExtra(Constants.IntentParams.ZONE_ID, mChosenZoneId);
-                startActivity(intent);
-
-            }
-        });
-
-        mMoPubInterstitialButton = view.findViewById(R.id.button_mopub_interstitial);
-        mMoPubInterstitialButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), MoPubInterstitialActivity.class);
-                intent.putExtra(Constants.IntentParams.ZONE_ID, mChosenZoneId);
-                startActivity(intent);
-            }
-        });
-
-        mDFPBannerButton = view.findViewById(R.id.button_dfp_banner);
-        mDFPBannerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), DFPBannerActivity.class);
-                intent.putExtra(Constants.IntentParams.ZONE_ID, mChosenZoneId);
-                startActivity(intent);
-            }
-        });
-
-        mDFPMediumButton = view.findViewById(R.id.button_dfp_medium);
-        mDFPMediumButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), DFPMRectActivity.class);
-                intent.putExtra(Constants.IntentParams.ZONE_ID, mChosenZoneId);
-                startActivity(intent);
-
-            }
-        });
-
-        mDFPInterstitialButton = view.findViewById(R.id.button_dfp_interstitial);
-        mDFPInterstitialButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), DFPInterstitialActivity.class);
+                Intent intent = new Intent(getActivity(), DFPActivity.class);
                 intent.putExtra(Constants.IntentParams.ZONE_ID, mChosenZoneId);
                 startActivity(intent);
             }
@@ -241,27 +166,15 @@ public class MainFragment extends Fragment {
     private void disableZones() {
         mChosenZoneIdView.setText("");
         mChosenZoneId = "";
-        mPNLiteBannerButton.setEnabled(false);
-        mPNLiteMediumButton.setEnabled(false);
-        mPNLiteInterstitialButton.setEnabled(false);
-        mMoPubBannerButton.setEnabled(false);
-        mMoPubMediumButton.setEnabled(false);
-        mMoPubInterstitialButton.setEnabled(false);
-        mDFPBannerButton.setEnabled(false);
-        mDFPMediumButton.setEnabled(false);
-        mDFPInterstitialButton.setEnabled(false);
+        mPNLiteButton.setEnabled(false);
+        mMoPubButton.setEnabled(false);
+        mDFPButton.setEnabled(false);
     }
 
     private void enableZones() {
-        mPNLiteBannerButton.setEnabled(true);
-        mPNLiteMediumButton.setEnabled(true);
-        mPNLiteInterstitialButton.setEnabled(true);
-        mMoPubBannerButton.setEnabled(true);
-        mMoPubMediumButton.setEnabled(true);
-        mMoPubInterstitialButton.setEnabled(true);
-        mDFPBannerButton.setEnabled(true);
-        mDFPMediumButton.setEnabled(true);
-        mDFPInterstitialButton.setEnabled(true);
+        mPNLiteButton.setEnabled(true);
+        mMoPubButton.setEnabled(true);
+        mDFPButton.setEnabled(true);
     }
 
     private void checkPermissions() {

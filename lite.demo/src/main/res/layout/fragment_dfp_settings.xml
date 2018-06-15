@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:context="net.pubnative.lite.demo.ui.fragments.DFPSettingsFragment"
+    tools:context="net.pubnative.lite.demo.ui.fragments.config.DFPSettingsFragment"
     tools:showIn="@layout/activity_dfp_settings">
 
     <LinearLayout

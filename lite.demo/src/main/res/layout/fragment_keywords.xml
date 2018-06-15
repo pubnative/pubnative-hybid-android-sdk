@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="net.pubnative.lite.demo.ui.fragments.KeywordsFragment"
+    tools:context="net.pubnative.lite.demo.ui.fragments.config.KeywordsFragment"
     tools:showIn="@layout/activity_keywords">
 
     <RelativeLayout

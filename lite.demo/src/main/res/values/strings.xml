@@ -14,6 +14,9 @@
     <string name="dfp_settings">DFP Settings</string>
 
     <string name="load">Load</string>
+    <string name="load_banner">Load banner</string>
+    <string name="load_medium">Load medium</string>
+    <string name="load_fullscreen">Load fullscreen</string>
     <string name="clear">Clear</string>
     <string name="add">Add</string>
 
@@ -57,6 +60,8 @@
     <string name="mopub_banner">MoPub Banner</string>
     <string name="mopub_interstitial">MoPub Interstitial</string>
     <string name="mopub_medium">MoPub Medium</string>
+    <string name="mopub_network_mediation">MoPub Mediation</string>
+    <string name="mopub_mediation">MoPub Mediation</string>
 
     <string name="dfp_banner">DFP Banner</string>
     <string name="dfp_interstitial">DFP Interstitial</string>
@@ -69,4 +74,6 @@
     <string name="pn_deny_consent">Reject consent</string>
     <string name="publisher_owned_consent">Publisher Owned</string>
     <string name="publisher_owned_consent_links">Links:</string>
+
+    <string name="selected_zone_id">Selected Zone Id:</string>
 </resources>

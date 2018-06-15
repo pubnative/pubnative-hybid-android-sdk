@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:context="net.pubnative.lite.demo.ui.fragments.MoPubSettingsFragment"
+    tools:context="net.pubnative.lite.demo.ui.fragments.config.MoPubSettingsFragment"
     tools:showIn="@layout/activity_mopub_settings">
 
     <LinearLayout
