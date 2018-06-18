@@ -15,7 +15,6 @@ import net.pubnative.lite.sdk.vast.model.VASTModel;
 public class VastMRectPresenter implements MRectPresenter, VASTPlayer.Listener {
     private final Context mContext;
     private final Ad mAd;
-    private final UrlHandler mUrlHandlerDelegate;
 
     private MRectPresenter.Listener mListener;
     private VASTPlayer mPlayer;
@@ -25,7 +24,6 @@ public class VastMRectPresenter implements MRectPresenter, VASTPlayer.Listener {
     public VastMRectPresenter(Context context, Ad ad) {
         mContext = context;
         mAd = ad;
-        mUrlHandlerDelegate = new UrlHandler(context);
     }
 
     @Override
@@ -88,6 +86,12 @@ public class VastMRectPresenter implements MRectPresenter, VASTPlayer.Listener {
         layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
 
         container.addView(mPlayer, layoutParams);
+
+        View contentInfo = getAd().getContentInfoContainer(mContext);
+        if (contentInfo != null) {
+
+            container.addView(contentInfo);
+        }
 
         return container;
     }

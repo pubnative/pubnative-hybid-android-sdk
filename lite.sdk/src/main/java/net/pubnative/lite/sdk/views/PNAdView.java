@@ -136,11 +136,6 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
 
         setBackgroundColor(Color.BLACK);
 
-        View contentInfo = mAd.getContentInfoContainer(getContext());
-        if (contentInfo != null) {
-            addView(contentInfo);
-        }
-
         invokeOnLoadFinished();
         startTracking();
         invokeOnImpression();

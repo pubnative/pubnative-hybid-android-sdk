@@ -1,6 +1,7 @@
 package net.pubnative.lite.sdk.banner.presenter;
 
 import android.view.View;
+import android.view.ViewGroup;
 
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.AdTracker;
@@ -75,7 +76,6 @@ public class BannerPresenterDecorator implements BannerPresenter, BannerPresente
             return;
         }
 
-        //Logger.d(TAG, "Banner loaded for ad unit id: " + getAd().getAdUnitId());
         mAdTrackingDelegate.trackImpression();
         mListener.onBannerLoaded(bannerPresenter, banner);
     }
@@ -86,7 +86,6 @@ public class BannerPresenterDecorator implements BannerPresenter, BannerPresente
             return;
         }
 
-        //Logger.d(TAG, "Banner clicked for ad unit id: " + getAd().getAdUnitId());
         mAdTrackingDelegate.trackClick();
         mListener.onBannerClicked(bannerPresenter);
     }
@@ -97,10 +96,8 @@ public class BannerPresenterDecorator implements BannerPresenter, BannerPresente
             return;
         }
 
-        //String errorMessage = "Banner error for zone id: " + getAd().getAdUnitId();
         String errorMessage = "Banner error for zone id: ";
         Logger.d(TAG, errorMessage);
-        //mAdTrackingDelegate.trackError(errorMessage);
         mListener.onBannerError(bannerPresenter);
     }
 }

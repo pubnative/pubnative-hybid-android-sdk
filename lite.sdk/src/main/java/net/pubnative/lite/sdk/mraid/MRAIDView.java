@@ -1371,6 +1371,10 @@ public class MRAIDView extends RelativeLayout {
                     }
                 }
 
+                if (!isInterstitial) {
+                    addContentInfo(MRAIDView.this);
+                }
+
                 if (listener != null) {
                     listener.mraidViewLoaded(MRAIDView.this);
                 }

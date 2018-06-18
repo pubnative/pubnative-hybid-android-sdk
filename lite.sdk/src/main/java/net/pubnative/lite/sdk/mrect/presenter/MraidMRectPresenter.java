@@ -52,10 +52,10 @@ public class MraidMRectPresenter implements MRectPresenter, MRAIDViewListener, M
 
         if (mAd.getAssetUrl(APIAsset.HTML_BANNER) != null) {
             mMRAIDBanner = new MRAIDBanner(mContext, mAd.getAssetUrl(APIAsset.HTML_BANNER), "", mSupportedNativeFeatures,
-                    this, this);
+                    this, this, mAd.getContentInfoContainer(mContext));
         } else if (mAd.getAssetHtml(APIAsset.HTML_BANNER) != null) {
             mMRAIDBanner = new MRAIDBanner(mContext, "", mAd.getAssetHtml(APIAsset.HTML_BANNER), mSupportedNativeFeatures,
-                    this, this);
+                    this, this, mAd.getContentInfoContainer(mContext));
         }
 
     }
