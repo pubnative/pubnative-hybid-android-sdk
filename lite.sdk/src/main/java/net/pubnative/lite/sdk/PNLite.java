@@ -49,15 +49,20 @@ public class PNLite {
         sApiClient = new PNApiClient(application);
         sLocationManager = new PNLiteLocationManager(application);
         sLocationManager.startLocationUpdates();
-        sDeviceInfo = new DeviceInfo(application.getApplicationContext());
-        sUserDataManager = new UserDataManager(application.getApplicationContext(), appToken, new UserDataManager.UserDataInitialisationListener() {
+        sDeviceInfo = new DeviceInfo(application.getApplicationContext(), new DeviceInfo.Listener() {
             @Override
-            public void onDataInitialised(boolean success) {
-                if (initialisationListener != null) {
-                    initialisationListener.onInitialisationFinished(success);
-                }
+            public void onInfoLoaded() {
+                sUserDataManager.initialize(new UserDataManager.UserDataInitialisationListener() {
+                    @Override
+                    public void onDataInitialised(boolean success) {
+                        if (initialisationListener != null) {
+                            initialisationListener.onInitialisationFinished(success);
+                        }
+                    }
+                });
             }
         });
+        sUserDataManager = new UserDataManager(application.getApplicationContext());
         sAdCache = new AdCache();
         sInitialized = true;
     }

@@ -32,13 +32,12 @@ public class UserDataManager {
     private SharedPreferences mPreferences;
     private boolean inGDPRZone = false;
 
-    public UserDataManager(Context context, String appToken) {
-        this(context, appToken, null);
-    }
-
-    public UserDataManager(Context context, String appToken, UserDataInitialisationListener initialisationListener) {
+    public UserDataManager(Context context) {
         mContext = context.getApplicationContext();
         mPreferences = mContext.getSharedPreferences(PREFERENCES_CONSENT, Context.MODE_PRIVATE);
+    }
+
+    public void initialize(UserDataInitialisationListener initialisationListener) {
         determineUserZone(initialisationListener);
     }
 
