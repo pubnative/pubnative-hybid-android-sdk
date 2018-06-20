@@ -1,1 +1,1 @@
-include ':lite.sdk', ':lite.demo', ':lite.adapters.mopub', ':lite.adapters.dfp'
+include ':hybid.sdk', ':hybid.demo', ':hybid.adapters.mopub', ':hybid.adapters.dfp'

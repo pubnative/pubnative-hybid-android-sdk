@@ -119,11 +119,11 @@ bintray {
         configurations = ['archives']
         userOrg = 'pubnative'
         repo = 'maven'
-        desc = 'PubNative Lite SDK'
+        desc = 'HyBid SDK'
         websiteUrl = "https://pubnative.net"
         name = project_name
         licenses = ['MIT']
-        labels = ['android', 'advertising', 'sdk', 'pubnative', 'ads', 'development']
+        labels = ['android', 'advertising', 'sdk', 'pubnative', 'hybid', 'ads', 'development']
         version {
             name = version_name
             vcsTag = version_name
