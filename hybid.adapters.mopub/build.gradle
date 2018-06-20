@@ -4,11 +4,11 @@ if (branchName != "master") {
     version_name = "${version_name}-${branchName}.${buildNumber}"
     project_name = "${project_name}.beta"
 }
+
+version = version_name
 //==================================================================================================
 // ANDROID
 //==================================================================================================
-version = version_name
-
 apply plugin: 'com.android.library'
 
 android {
@@ -29,9 +29,13 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(':lite.sdk')
-    compileOnly 'com.google.android.gms:play-services-ads:11.8.0'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation project(':hybid.sdk')
+    compileOnly('com.mopub:mopub-sdk:5.0.0@aar') {
+        transitive = true
+        exclude module: 'libAvid-mopub' // To exclude AVID
+        exclude module: 'moat-mobile-app-kit' // To exclude Moat
+    }
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -77,11 +81,11 @@ bintray {
         configurations = ['archives']
         userOrg = 'pubnative'
         repo = 'maven'
-        desc = 'PubNative Lite SDK DFP Adapter'
+        desc = 'HyBid SDK MoPub Adapter'
         websiteUrl = "https://pubnative.net"
         name = project_name
         licenses = ['MIT']
-        labels = ['android', 'advertising', 'sdk', 'pubnative', 'ads', 'development', 'dfp', 'adapter']
+        labels = ['android', 'advertising', 'sdk', 'pubnative', 'hybid', 'ads', 'development', 'mopub', 'adapter']
         version {
             name = version_name
             vcsTag = version_name
