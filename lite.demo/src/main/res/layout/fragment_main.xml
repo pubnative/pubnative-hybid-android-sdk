@@ -66,7 +66,8 @@
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="10dp"
-            android:text="@string/pn_consent" />
+            android:text="@string/pn_consent"
+            android:visibility="gone"/>
 
         <TextView
             android:layout_width="match_parent"
