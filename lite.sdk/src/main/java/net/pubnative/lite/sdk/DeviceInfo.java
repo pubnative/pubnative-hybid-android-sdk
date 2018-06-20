@@ -27,6 +27,10 @@ import java.util.TimeZone;
  */
 
 public class DeviceInfo {
+    public interface Listener {
+        void onInfoLoaded();
+    }
+
     public enum Orientation {
         PORTRAIT("portrait"),
         LANDSCAPE("landscape"),
@@ -68,13 +72,13 @@ public class DeviceInfo {
     private String mAdvertisingId;
     private boolean mLimitTracking = false;
     private final ConnectivityManager mConnectivityManager;
-    private final TelephonyManager mTelephonyManager;
+    private Listener mListener;
 
-    public DeviceInfo(Context context) {
+    public DeviceInfo(Context context, Listener listener) {
         mContext = context.getApplicationContext();
+        mListener = listener;
 
         mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        mTelephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
 
         fetchAdvertisingId();
     }
@@ -89,6 +93,10 @@ public class DeviceInfo {
                     mAdvertisingId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
                 } else {
                     mAdvertisingId = advertisingId;
+                }
+
+                if (mListener != null) {
+                    mListener.onInfoLoaded();
                 }
             }
         });
