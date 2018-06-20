@@ -1,6 +1,6 @@
 def project_name = project.name
 def version_name = project.version
-if (System.getenv("IS_BETA")) {
+if (branchName != "master") {
     version_name = "${version_name}-${branchName}.${buildNumber}"
     project_name = "${project_name}.beta"
 }
