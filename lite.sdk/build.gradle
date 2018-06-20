@@ -84,7 +84,7 @@ publishing {
             artifactId project.name
             version version_name
             artifact javadocJar
-            if (!System.getenv("IS_BETA")) {
+            if (branchName == "master") {
                 artifact sourcesJar
             }
             android.libraryVariants.all { variant ->
@@ -112,7 +112,7 @@ apply plugin: 'com.jfrog.bintray'
 bintray {
     user = System.getenv("BINTRAY_USER")
     key = System.getenv("BINTRAY_API_KEY")
-    publish = System.getenv("IS_BETA") ? true : false
+    publish = branchName != "master"
     override = true
     publications = ['aar']
     pkg {
