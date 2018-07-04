@@ -49,11 +49,11 @@ public class UserDataManager {
     }
 
     public String getPrivacyPolicyLink() {
-        return "https://pubnative.net/privacy-policy/";
+        return "https://pubnative.net/privacy-notice/";
     }
 
     public String getVendorListLink() {
-        return "https://pubnative.net/vendor-list/";
+        return "https://pubnative.net/monetization-partners/";
     }
 
     public boolean shouldAskConsent() {
