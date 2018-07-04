@@ -52,7 +52,6 @@ public class VastInterstitialPresenter implements InterstitialPresenter, VASTPla
         mReady = false;
         mPlayer = new VASTPlayer(mActivity);
         mPlayer.setListener(this);
-        mPlayer.onMuteClick();
 
         new VASTParser(mActivity).setListener(new VASTParser.Listener() {
             @Override
@@ -109,6 +108,7 @@ public class VastInterstitialPresenter implements InterstitialPresenter, VASTPla
 
         mListener.onInterstitialShown(this);
         mStopped = false;
+        mPlayer.onMuteClick();
         mPlayer.play();
     }
 
