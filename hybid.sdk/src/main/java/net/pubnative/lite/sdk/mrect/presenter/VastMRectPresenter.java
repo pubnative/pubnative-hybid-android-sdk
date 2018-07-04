@@ -66,7 +66,6 @@ public class VastMRectPresenter implements MRectPresenter, VASTPlayer.Listener {
 
         mPlayer = new VASTPlayer(mContext);
         mPlayer.setListener(this);
-        mPlayer.onMuteClick();
 
         new VASTParser(mContext).setListener(new VASTParser.Listener() {
             @Override
@@ -94,6 +93,7 @@ public class VastMRectPresenter implements MRectPresenter, VASTPlayer.Listener {
 
     @Override
     public void startTracking() {
+        mPlayer.onMuteClick();
         mPlayer.play();
     }
 
