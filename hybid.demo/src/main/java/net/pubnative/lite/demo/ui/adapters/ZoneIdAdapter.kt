@@ -36,11 +36,11 @@ class ZoneIdAdapter(listener: ZoneIdClickListener?) : RecyclerView.Adapter<ZoneI
     private val list: MutableList<String> = mutableListOf()
     private var listener: ZoneIdClickListener? = listener
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ZoneIdViewHolder
-            = ZoneIdViewHolder(LayoutInflater.from(parent?.context).inflate(R.layout.item_zone_id, parent, false), listener)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ZoneIdViewHolder
+            = ZoneIdViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_zone_id, parent, false), listener)
 
-    override fun onBindViewHolder(holder: ZoneIdViewHolder?, position: Int) {
-        holder?.bind(list[position])
+    override fun onBindViewHolder(holder: ZoneIdViewHolder, position: Int) {
+        holder.bind(list[position])
     }
 
     override fun getItemCount(): Int = list.size
