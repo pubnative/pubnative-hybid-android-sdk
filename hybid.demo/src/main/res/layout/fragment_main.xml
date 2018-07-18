@@ -36,7 +36,7 @@
                 android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
                 android:layout_weight="1"
-                android:text="@string/pnlite" />
+                android:text="@string/hybid" />
 
             <Button
                 android:id="@+id/button_mopub_settings"
@@ -124,13 +124,13 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/button_pnlite"
+            android:id="@+id/button_hybid"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="10dp"
-            android:text="@string/pnlite" />
+            android:text="@string/hybid" />
 
         <Button
             android:id="@+id/button_mopub"

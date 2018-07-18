@@ -46,7 +46,7 @@ public class NativeInterface {
         }
 
         // Should make NDK components configure
-        client.notifyPNLiteObservers(NotifyType.ALL);
+        client.notifyHyBidObservers(NotifyType.ALL);
     }
 
     public static String getContext() {

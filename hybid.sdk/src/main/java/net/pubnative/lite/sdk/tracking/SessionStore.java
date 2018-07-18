@@ -32,7 +32,7 @@ class SessionStore extends FileStore<Session> {
     };
 
     SessionStore(Configuration config, Context appContext) {
-        super(config, appContext, "/pnlite-sessions/",
+        super(config, appContext, "/hybid-sessions/",
                 128, SESSION_COMPARATOR);
     }
 

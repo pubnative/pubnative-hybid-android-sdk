@@ -38,7 +38,7 @@ public class AppDataTest {
 
         assertEquals("net.pubnative.lite.sdk.test", appDataJson.get("id"));
         assertEquals("net.pubnative.lite.sdk.test", appDataJson.get("packageName"));
-        assertEquals("PNLite Android Tests", appDataJson.get("name"));
+        assertEquals("HyBid Android Tests", appDataJson.get("name"));
         assertEquals(1, appDataJson.get("versionCode"));
         assertEquals("1.0", appDataJson.get("versionName"));
         assertEquals("1.0", appDataJson.get("version"));

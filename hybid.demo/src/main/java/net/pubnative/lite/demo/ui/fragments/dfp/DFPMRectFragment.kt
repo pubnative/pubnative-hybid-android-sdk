@@ -93,7 +93,7 @@ class DFPMRectFragment : Fragment(), RequestManager.RequestListener {
         requestManager.requestAd()
     }
 
-    // --------------- PNLite Request Listener --------------------
+    // --------------- HyBid Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
         val builder = PublisherAdRequest.Builder()
 

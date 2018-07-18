@@ -61,7 +61,7 @@ import java.util.List;
 public class MainFragment extends Fragment {
     private static final int PERMISSION_REQUEST = 1000;
 
-    private Button mPNLiteButton;
+    private Button mHyBidButton;
     private Button mMoPubButton;
     private Button mDFPButton;
     private RecyclerView mZoneIdList;
@@ -138,8 +138,8 @@ public class MainFragment extends Fragment {
             }
         });
 
-        mPNLiteButton = view.findViewById(R.id.button_pnlite);
-        mPNLiteButton.setOnClickListener(new View.OnClickListener() {
+        mHyBidButton = view.findViewById(R.id.button_hybid);
+        mHyBidButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), HyBidActivity.class);
@@ -188,13 +188,13 @@ public class MainFragment extends Fragment {
     private void disableZones() {
         mChosenZoneIdView.setText("");
         mChosenZoneId = "";
-        mPNLiteButton.setEnabled(false);
+        mHyBidButton.setEnabled(false);
         mMoPubButton.setEnabled(false);
         mDFPButton.setEnabled(false);
     }
 
     private void enableZones() {
-        mPNLiteButton.setEnabled(true);
+        mHyBidButton.setEnabled(true);
         mMoPubButton.setEnabled(true);
         mDFPButton.setEnabled(true);
     }

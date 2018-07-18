@@ -37,22 +37,22 @@
 
         <activity
             android:name=".ui.activities.hybid.HyBidActivity"
-            android:label="@string/pnlite"
+            android:label="@string/hybid"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.hybid.HyBidBannerActivity"
-            android:label="@string/pnlite_banner"
+            android:label="@string/hybid_banner"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.hybid.HyBidMRectActivity"
-            android:label="@string/pnlite_medium"
+            android:label="@string/hybid_medium"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.hybid.HyBidInterstitialActivity"
-            android:label="@string/pnlite_interstitial"
+            android:label="@string/hybid_interstitial"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
 

@@ -188,7 +188,7 @@ public class Client extends Observable implements Observer {
         }
     }
 
-    public void notifyPNLiteObservers(NotifyType type) {
+    public void notifyHyBidObservers(NotifyType type) {
         setChanged();
         super.notifyObservers(type.getValue());
     }
@@ -199,7 +199,7 @@ public class Client extends Observable implements Observer {
             NotifyType type = NotifyType.fromInt((Integer) arg);
 
             if (type != null) {
-                notifyPNLiteObservers(type);
+                notifyHyBidObservers(type);
             }
         }
     }
@@ -353,7 +353,7 @@ public class Client extends Observable implements Observer {
                 .remove(USER_EMAIL_KEY)
                 .remove(USER_NAME_KEY)
                 .apply();
-        notifyPNLiteObservers(NotifyType.USER);
+        notifyHyBidObservers(NotifyType.USER);
     }
 
     public void setUserId(String id) {
@@ -368,7 +368,7 @@ public class Client extends Observable implements Observer {
         }
 
         if (notify) {
-            notifyPNLiteObservers(NotifyType.USER);
+            notifyHyBidObservers(NotifyType.USER);
         }
     }
 
@@ -384,7 +384,7 @@ public class Client extends Observable implements Observer {
         }
 
         if (notify) {
-            notifyPNLiteObservers(NotifyType.USER);
+            notifyHyBidObservers(NotifyType.USER);
         }
     }
 
@@ -400,7 +400,7 @@ public class Client extends Observable implements Observer {
         }
 
         if (notify) {
-            notifyPNLiteObservers(NotifyType.USER);
+            notifyHyBidObservers(NotifyType.USER);
         }
     }
 
@@ -730,7 +730,7 @@ public class Client extends Observable implements Observer {
 
         if (runBeforeBreadcrumbTasks(crumb)) {
             breadcrumbs.add(crumb);
-            notifyPNLiteObservers(NotifyType.BREADCRUMB);
+            notifyHyBidObservers(NotifyType.BREADCRUMB);
         }
     }
 
@@ -750,7 +750,7 @@ public class Client extends Observable implements Observer {
             breadcrumbs.add(crumb);
 
             if (notify) {
-                notifyPNLiteObservers(NotifyType.BREADCRUMB);
+                notifyHyBidObservers(NotifyType.BREADCRUMB);
             }
         }
     }
@@ -761,7 +761,7 @@ public class Client extends Observable implements Observer {
 
     public void clearBreadcrumbs() {
         breadcrumbs.clear();
-        notifyPNLiteObservers(NotifyType.BREADCRUMB);
+        notifyHyBidObservers(NotifyType.BREADCRUMB);
     }
 
     public void enableExceptionHandler() {
