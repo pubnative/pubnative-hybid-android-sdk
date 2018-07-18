@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package net.pubnative.lite.demo.ui.fragments.pnlite
+package net.pubnative.lite.demo.ui.fragments.hybid
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -38,22 +38,22 @@ import net.pubnative.lite.sdk.views.PNMRectAdView
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class PNLiteMRectFragment : Fragment(), PNAdView.Listener {
-    val TAG = PNLiteMRectFragment::class.java.simpleName
+class HyBidMRectFragment : Fragment(), PNAdView.Listener {
+    val TAG = HyBidMRectFragment::class.java.simpleName
 
     private var zoneId: String? = null
 
-    private lateinit var pnliteMRect: PNMRectAdView
+    private lateinit var hybidMRect: PNMRectAdView
     private lateinit var loadButton: Button
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
-            = inflater.inflate(R.layout.fragment_pnlite_mrect, container, false)
+            = inflater.inflate(R.layout.fragment_hybid_mrect, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         loadButton = view.findViewById(R.id.button_load)
-        pnliteMRect = view.findViewById(R.id.pnlite_mrect)
+        hybidMRect = view.findViewById(R.id.hybid_mrect)
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
@@ -63,12 +63,12 @@ class PNLiteMRectFragment : Fragment(), PNAdView.Listener {
     }
 
     override fun onDestroy() {
-        pnliteMRect.destroy()
+        hybidMRect.destroy()
         super.onDestroy()
     }
 
     fun loadPNAd() {
-        pnliteMRect.load(zoneId, this)
+        hybidMRect.load(zoneId, this)
     }
 
     // --------------- PNAdView Listener --------------------

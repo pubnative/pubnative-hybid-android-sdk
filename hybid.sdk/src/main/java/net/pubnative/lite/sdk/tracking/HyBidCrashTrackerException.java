@@ -4,11 +4,11 @@ package net.pubnative.lite.sdk.tracking;
  * Created by erosgarciaponte on 12.02.18.
  */
 
-public class PNLiteCrashTrackerException extends Throwable {
+public class HyBidCrashTrackerException extends Throwable {
 
     private final String name;
 
-    public PNLiteCrashTrackerException(String name, String message, StackTraceElement[] frames) {
+    public HyBidCrashTrackerException(String name, String message, StackTraceElement[] frames) {
         super(message);
 
         super.setStackTrace(frames);

@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package net.pubnative.lite.demo.ui.fragments.pnlite
+package net.pubnative.lite.demo.ui.fragments.hybid
 
 import android.content.Intent
 import android.os.Bundle
@@ -32,14 +32,14 @@ import android.widget.Button
 import android.widget.TextView
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
-import net.pubnative.lite.demo.ui.activities.pnlite.PNLiteBannerActivity
-import net.pubnative.lite.demo.ui.activities.pnlite.PNLiteInterstitialActivity
-import net.pubnative.lite.demo.ui.activities.pnlite.PNLiteMRectActivity
+import net.pubnative.lite.demo.ui.activities.hybid.HyBidBannerActivity
+import net.pubnative.lite.demo.ui.activities.hybid.HyBidInterstitialActivity
+import net.pubnative.lite.demo.ui.activities.hybid.HyBidMRectActivity
 
-class PNLiteFragment : Fragment() {
+class HyBidFragment : Fragment() {
     private var zoneId: String? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_pnlite, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_hybid, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -49,19 +49,19 @@ class PNLiteFragment : Fragment() {
         view.findViewById<TextView>(R.id.view_chosen_zone_id).text = zoneId
 
         view.findViewById<Button>(R.id.button_banner).setOnClickListener {
-            val intent = Intent(activity, PNLiteBannerActivity::class.java)
+            val intent = Intent(activity, HyBidBannerActivity::class.java)
             intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }
 
         view.findViewById<Button>(R.id.button_medium).setOnClickListener {
-            val intent = Intent(activity, PNLiteMRectActivity::class.java)
+            val intent = Intent(activity, HyBidMRectActivity::class.java)
             intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }
 
         view.findViewById<Button>(R.id.button_interstitial).setOnClickListener {
-            val intent = Intent(activity, PNLiteInterstitialActivity::class.java)
+            val intent = Intent(activity, HyBidInterstitialActivity::class.java)
             intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }

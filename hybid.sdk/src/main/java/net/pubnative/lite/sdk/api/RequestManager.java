@@ -23,7 +23,7 @@
 package net.pubnative.lite.sdk.api;
 
 import net.pubnative.lite.sdk.AdCache;
-import net.pubnative.lite.sdk.PNLite;
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.AdRequestFactory;
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.Ad;
@@ -52,7 +52,7 @@ public abstract class RequestManager {
     private boolean mIsDestroyed;
 
     public RequestManager() {
-        this(PNLite.getApiClient(), PNLite.getAdCache(), new AdRequestFactory(), new PNInitializationHelper());
+        this(HyBid.getApiClient(), HyBid.getAdCache(), new AdRequestFactory(), new PNInitializationHelper());
     }
 
     RequestManager(PNApiClient apiClient,
@@ -74,8 +74,8 @@ public abstract class RequestManager {
     }
 
     public void requestAd() {
-        if (!CheckUtils.NoThrow.checkArgument(mInitializationHelper.isInitialized(), "PNLite SDK has not been initialized. " +
-                "Please call PNLite#initialize in your application's onCreate method.")) {
+        if (!CheckUtils.NoThrow.checkArgument(mInitializationHelper.isInitialized(), "HyBid SDK has not been initialized. " +
+                "Please call HyBid#initialize in your application's onCreate method.")) {
             return;
         }
 

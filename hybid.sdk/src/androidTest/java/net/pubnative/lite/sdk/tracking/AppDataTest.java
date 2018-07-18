@@ -12,8 +12,8 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 
-import static net.pubnative.lite.sdk.tracking.PNLiteCrashTrackerTestUtils.generateSessionTracker;
-import static net.pubnative.lite.sdk.tracking.PNLiteCrashTrackerTestUtils.streamableToJson;
+import static net.pubnative.lite.sdk.tracking.HyBidCrashTrackerTestUtils.generateSessionTracker;
+import static net.pubnative.lite.sdk.tracking.HyBidCrashTrackerTestUtils.streamableToJson;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;

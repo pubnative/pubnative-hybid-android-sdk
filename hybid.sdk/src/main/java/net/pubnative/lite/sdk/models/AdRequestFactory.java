@@ -23,12 +23,11 @@
 package net.pubnative.lite.sdk.models;
 
 import android.location.Location;
-import android.os.Build;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.DeviceInfo;
-import net.pubnative.lite.sdk.PNLite;
-import net.pubnative.lite.sdk.location.PNLiteLocationManager;
+import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.utils.PNCrypto;
 
 import java.util.Locale;
@@ -39,13 +38,13 @@ import java.util.Locale;
 
 public class AdRequestFactory {
     private final DeviceInfo mDeviceInfo;
-    private final PNLiteLocationManager mLocationManager;
+    private final HyBidLocationManager mLocationManager;
 
     public AdRequestFactory() {
-        this(PNLite.getDeviceInfo(), PNLite.getLocationManager());
+        this(HyBid.getDeviceInfo(), HyBid.getLocationManager());
     }
 
-    AdRequestFactory(DeviceInfo deviceInfo, PNLiteLocationManager locationManager) {
+    AdRequestFactory(DeviceInfo deviceInfo, HyBidLocationManager locationManager) {
         mDeviceInfo = deviceInfo;
         mLocationManager = locationManager;
     }
@@ -55,13 +54,13 @@ public class AdRequestFactory {
 
         AdRequest adRequest = new AdRequest();
         adRequest.zoneid = zoneid;
-        adRequest.apptoken = PNLite.getAppToken();
+        adRequest.apptoken = HyBid.getAppToken();
         adRequest.os = "android";
         adRequest.osver = mDeviceInfo.getOSVersion();
         adRequest.devicemodel = mDeviceInfo.getModel();
-        adRequest.coppa = PNLite.isCoppaEnabled() ? "1" : "0";
+        adRequest.coppa = HyBid.isCoppaEnabled() ? "1" : "0";
 
-        if (PNLite.isCoppaEnabled() || mDeviceInfo.limitTracking() || TextUtils.isEmpty(advertisingId)) {
+        if (HyBid.isCoppaEnabled() || mDeviceInfo.limitTracking() || TextUtils.isEmpty(advertisingId)) {
             adRequest.dnt = "1";
         } else {
             adRequest.gid = advertisingId;
@@ -71,19 +70,19 @@ public class AdRequestFactory {
 
         adRequest.locale = mDeviceInfo.getLocale().getLanguage();
 
-        if (!PNLite.isCoppaEnabled() && !mDeviceInfo.limitTracking()) {
-            adRequest.age = PNLite.getAge();
-            adRequest.gender = PNLite.getGender();
-            adRequest.keywords = PNLite.getKeywords();
+        if (!HyBid.isCoppaEnabled() && !mDeviceInfo.limitTracking()) {
+            adRequest.age = HyBid.getAge();
+            adRequest.gender = HyBid.getGender();
+            adRequest.keywords = HyBid.getKeywords();
         }
 
-        adRequest.bundleid = PNLite.getBundleId();
-        adRequest.testMode = PNLite.isTestMode() ? "1" : "0";
+        adRequest.bundleid = HyBid.getBundleId();
+        adRequest.testMode = HyBid.isTestMode() ? "1" : "0";
         adRequest.al = adSize;
         adRequest.mf = getDefaultMetaFields();
 
         Location location = mLocationManager.getUserLocation();
-        if (location != null && !PNLite.isCoppaEnabled() && !mDeviceInfo.limitTracking()) {
+        if (location != null && !HyBid.isCoppaEnabled() && !mDeviceInfo.limitTracking()) {
             adRequest.latitude = String.format(Locale.ENGLISH, "%.6f", location.getLatitude());
             adRequest.longitude = String.format(Locale.ENGLISH, "%.6f", location.getLongitude());
         }

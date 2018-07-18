@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="net.pubnative.lite.demo.ui.activities.pnlite.PNLiteInterstitialActivity">
+    tools:context="net.pubnative.lite.demo.ui.activities.hybid.HyBidBannerActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -22,10 +22,10 @@
 
     <fragment
         android:id="@+id/fragment"
-        android:name="net.pubnative.lite.demo.ui.fragments.pnlite.PNLiteInterstitialFragment"
+        android:name="net.pubnative.lite.demo.ui.fragments.hybid.HyBidBannerFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:layout="@layout/fragment_pnlite_interstitial" />
+        tools:layout="@layout/fragment_hybid_banner" />
 
 </android.support.design.widget.CoordinatorLayout>

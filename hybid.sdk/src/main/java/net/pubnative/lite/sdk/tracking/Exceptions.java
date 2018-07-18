@@ -37,8 +37,8 @@ class Exceptions implements JsonStream.Streamable {
     }
 
     private String getExceptionName(Throwable throwable) {
-        if (throwable instanceof PNLiteCrashTrackerException) {
-            return ((PNLiteCrashTrackerException) throwable).getName();
+        if (throwable instanceof HyBidCrashTrackerException) {
+            return ((HyBidCrashTrackerException) throwable).getName();
         } else {
             return throwable.getClass().getName();
         }

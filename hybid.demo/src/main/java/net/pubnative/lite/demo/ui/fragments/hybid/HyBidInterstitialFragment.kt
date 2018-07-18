@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package net.pubnative.lite.demo.ui.fragments.pnlite
+package net.pubnative.lite.demo.ui.fragments.hybid
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -37,15 +37,15 @@ import net.pubnative.lite.sdk.interstitial.PNInterstitialAd
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class PNLiteInterstitialFragment : Fragment(), PNInterstitialAd.Listener {
-    val TAG = PNLiteInterstitialFragment::class.java.simpleName
+class HyBidInterstitialFragment : Fragment(), PNInterstitialAd.Listener {
+    val TAG = HyBidInterstitialFragment::class.java.simpleName
 
     private var zoneId: String? = null
 
     private lateinit var loadButton: Button
     private var interstitial: PNInterstitialAd? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_pnlite_interstitial, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_hybid_interstitial, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

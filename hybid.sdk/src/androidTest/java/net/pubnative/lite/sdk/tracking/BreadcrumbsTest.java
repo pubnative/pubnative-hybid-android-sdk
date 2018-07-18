@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 
-import static net.pubnative.lite.sdk.tracking.PNLiteCrashTrackerTestUtils.streamableToJsonArray;
+import static net.pubnative.lite.sdk.tracking.HyBidCrashTrackerTestUtils.streamableToJsonArray;
 import static org.junit.Assert.assertEquals;
 
 /**

@@ -28,14 +28,13 @@ import android.support.multidex.MultiDexApplication;
 import android.text.TextUtils;
 
 import com.crashlytics.android.Crashlytics;
-import com.mopub.common.MoPub;
 
 import io.fabric.sdk.android.Fabric;
 
 import net.pubnative.lite.demo.managers.MoPubManager;
 import net.pubnative.lite.demo.managers.SettingsManager;
 import net.pubnative.lite.demo.models.SettingsModel;
-import net.pubnative.lite.sdk.PNLite;
+import net.pubnative.lite.sdk.HyBid;
 
 import java.util.ArrayList;
 
@@ -43,7 +42,7 @@ import java.util.ArrayList;
  * Created by erosgarciaponte on 08.01.18.
  */
 
-public class PNLiteDemoApplication extends MultiDexApplication {
+public class HyBidDemoApplication extends MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
@@ -61,16 +60,16 @@ public class PNLiteDemoApplication extends MultiDexApplication {
     private void initSettings() {
         SettingsModel settings = fetchSettings();
 
-        PNLite.initialize(settings.getAppToken(), this, new PNLite.InitialisationListener() {
+        HyBid.initialize(settings.getAppToken(), this, new HyBid.InitialisationListener() {
             @Override
             public void onInitialisationFinished(boolean success) {
-                // PNLite SDK has been initialised
+                // HyBid SDK has been initialised
             }
         });
-        PNLite.setTestMode(settings.getTestMode());
-        PNLite.setCoppaEnabled(settings.getCoppa());
-        PNLite.setAge(settings.getAge());
-        PNLite.setGender(settings.getGender());
+        HyBid.setTestMode(settings.getTestMode());
+        HyBid.setCoppaEnabled(settings.getCoppa());
+        HyBid.setAge(settings.getAge());
+        HyBid.setGender(settings.getGender());
 
         StringBuilder keywordsBuilder = new StringBuilder();
         String separator = ",";
@@ -84,7 +83,7 @@ public class PNLiteDemoApplication extends MultiDexApplication {
             keywordString = keywordString.substring(0, keywordString.length() - separator.length());
         }
 
-        PNLite.setKeywords(keywordString);
+        HyBid.setKeywords(keywordString);
 
         MoPubManager.initMoPubSdk(this, settings.getMopubBannerAdUnitId());
     }

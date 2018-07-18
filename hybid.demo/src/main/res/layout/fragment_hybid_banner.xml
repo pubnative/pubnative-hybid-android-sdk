@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="net.pubnative.lite.demo.ui.fragments.pnlite.PNLiteBannerFragment"
-    tools:showIn="@layout/activity_pnlite_banner">
+    tools:context="net.pubnative.lite.demo.ui.fragments.hybid.HyBidBannerFragment"
+    tools:showIn="@layout/activity_hybid_banner">
 
     <Button
         android:id="@+id/button_load"
@@ -18,7 +18,7 @@
         android:text="@string/load" />
 
     <net.pubnative.lite.sdk.views.PNBannerAdView
-        android:id="@+id/pnlite_banner"
+        android:id="@+id/hybid_banner"
         android:layout_width="320dp"
         android:layout_height="50dp"
         android:layout_gravity="center_horizontal"/>

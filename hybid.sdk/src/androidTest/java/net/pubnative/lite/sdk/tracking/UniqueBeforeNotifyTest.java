@@ -36,7 +36,7 @@ public class UniqueBeforeNotifyTest {
     @Before
     public void setUp() throws Exception {
         callbackCount = 0;
-        client = PNLiteCrashTrackerTestUtils.generateClient();
+        client = HyBidCrashTrackerTestUtils.generateClient();
     }
 
     @After

@@ -33,12 +33,12 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.config.KeywordsActivity
 import net.pubnative.lite.demo.ui.activities.config.ZoneIdsActivity
-import net.pubnative.lite.sdk.PNLite
+import net.pubnative.lite.sdk.HyBid
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class PNSettingsFragment : Fragment() {
+class HyBidSettingsFragment : Fragment() {
     private val REQUEST_KEYWORDS = 1
     private val REQUEST_ZONE_IDS = 2
 
@@ -50,7 +50,7 @@ class PNSettingsFragment : Fragment() {
     private lateinit var settingManager: SettingsManager
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
-            = inflater.inflate(R.layout.fragment_pn_settings, container, false)
+            = inflater.inflate(R.layout.fragment_hybid_settings, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -116,10 +116,10 @@ class PNSettingsFragment : Fragment() {
         settingManager.setTestMode(testMode)
         settingManager.setGender(gender)
 
-        PNLite.setAppToken(appToken)
-        PNLite.setAge(age)
-        PNLite.setCoppaEnabled(coppa)
-        PNLite.setTestMode(testMode)
-        PNLite.setGender(gender)
+        HyBid.setAppToken(appToken)
+        HyBid.setAge(age)
+        HyBid.setCoppaEnabled(coppa)
+        HyBid.setTestMode(testMode)
+        HyBid.setGender(gender)
     }
 }

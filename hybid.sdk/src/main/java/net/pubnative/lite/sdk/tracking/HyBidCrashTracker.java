@@ -9,11 +9,11 @@ import java.util.Map;
  * Created by erosgarciaponte on 12.02.18.
  */
 
-public final class PNLiteCrashTracker {
+public final class HyBidCrashTracker {
     @SuppressLint("StaticFieldLeak")
     static Client client;
 
-    private PNLiteCrashTracker() {}
+    private HyBidCrashTracker() {}
 
     public static Client init(Context androidContext) {
         client = new Client(androidContext);
@@ -258,8 +258,8 @@ public final class PNLiteCrashTracker {
 
     public static Client getClient() {
         if (client == null) {
-            throw new IllegalStateException("You must call PNLiteCrashTracker.init before any"
-                    + " other PNLiteCrashTracker methods");
+            throw new IllegalStateException("You must call HyBidCrashTracker.init before any"
+                    + " other HyBidCrashTracker methods");
         }
 
         return client;

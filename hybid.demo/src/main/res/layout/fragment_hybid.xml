@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="net.pubnative.lite.demo.ui.fragments.pnlite.PNLiteFragment"
-    tools:showIn="@layout/activity_pnlite">
+    tools:context="net.pubnative.lite.demo.ui.fragments.hybid.HyBidFragment"
+    tools:showIn="@layout/activity_hybid">
 
     <TextView
         android:layout_width="match_parent"

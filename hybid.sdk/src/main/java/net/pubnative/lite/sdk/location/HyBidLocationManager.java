@@ -39,8 +39,8 @@ import net.pubnative.lite.sdk.utils.PNPermissionUtil;
  */
 
 @SuppressLint("MissingPermission")
-public class PNLiteLocationManager implements LocationListener {
-    private static final String TAG = PNLiteLocationManager.class.getSimpleName();
+public class HyBidLocationManager implements LocationListener {
+    private static final String TAG = HyBidLocationManager.class.getSimpleName();
 
     private static final int TWO_MINUTES = 1000 * 60 * 2;
     private static final int LOCATION_UPDATE_TIMEOUT = 10000;
@@ -50,7 +50,7 @@ public class PNLiteLocationManager implements LocationListener {
 
     private Location mCurrentBestLocation;
 
-    public PNLiteLocationManager(Context context) {
+    public HyBidLocationManager(Context context) {
         mManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         mContext = context;
     }

@@ -12,7 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static net.pubnative.lite.sdk.tracking.PNLiteCrashTrackerTestUtils.getSharedPrefs;
+import static net.pubnative.lite.sdk.tracking.HyBidCrashTrackerTestUtils.getSharedPrefs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -59,7 +59,7 @@ public class ClientTest {
     @Test
     public void testNotify() {
         // Notify should not crash
-        Client client = PNLiteCrashTrackerTestUtils.generateClient();
+        Client client = HyBidCrashTrackerTestUtils.generateClient();
         client.notify(new RuntimeException("Testing"));
     }
 
@@ -68,8 +68,8 @@ public class ClientTest {
         config.setEndpoint("new-endpoint");
 
         Client client = new Client(context, config);
-        client.setErrorReportApiClient(PNLiteCrashTrackerTestUtils.generateErrorReportApiClient());
-        client.setSessionTrackingApiClient(PNLiteCrashTrackerTestUtils.generateSessionTrackingApiClient());
+        client.setErrorReportApiClient(HyBidCrashTrackerTestUtils.generateErrorReportApiClient());
+        client.setSessionTrackingApiClient(HyBidCrashTrackerTestUtils.generateSessionTrackingApiClient());
 
         // Notify should not crash
         client.notify(new RuntimeException("Testing"));

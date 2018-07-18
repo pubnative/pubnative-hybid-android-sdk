@@ -23,8 +23,8 @@ public class NullMetaDataTest {
     @Before
     public void setUp() throws Exception {
         config = new Configuration("api-key");
-        PNLiteCrashTracker.init(InstrumentationRegistry.getContext(), config);
-        PNLiteCrashTracker.setErrorReportApiClient(new ErrorReportApiClient() {
+        HyBidCrashTracker.init(InstrumentationRegistry.getContext(), config);
+        HyBidCrashTracker.setErrorReportApiClient(new ErrorReportApiClient() {
             @Override
             public void postReport(String urlString, Report report, Map<String, String> headers) throws NetworkException, BadResponseException {
 
@@ -83,7 +83,7 @@ public class NullMetaDataTest {
 
     @Test
     public void testNotify() throws Exception {
-        PNLiteCrashTracker.beforeNotify(new BeforeNotify() {
+        HyBidCrashTracker.beforeNotify(new BeforeNotify() {
             @Override
             public boolean run(Error error) {
                 validateDefaultMetadata(error.getMetaData());
@@ -91,7 +91,7 @@ public class NullMetaDataTest {
             }
         });
         Error error = new Error.Builder(config, new Throwable(), null).build();
-        Client client = PNLiteCrashTracker.getClient();
+        Client client = HyBidCrashTracker.getClient();
         client.notify(error, DeliveryStyle.SAME_THREAD, null);
     }
 

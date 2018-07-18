@@ -1,10 +1,9 @@
 package net.pubnative.lite.sdk.models;
 
 import android.location.Location;
-import android.os.Build;
 
 import net.pubnative.lite.sdk.DeviceInfo;
-import net.pubnative.lite.sdk.location.PNLiteLocationManager;
+import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.utils.PNCrypto;
 
 import org.junit.Assert;
@@ -28,7 +27,7 @@ public class AdRequestFactoryTest {
     @Mock
     private DeviceInfo mMockDeviceInfo;
     @Mock
-    private PNLiteLocationManager mLocationManager;
+    private HyBidLocationManager mLocationManager;
 
     @InjectMocks
     private AdRequestFactory mSubject;

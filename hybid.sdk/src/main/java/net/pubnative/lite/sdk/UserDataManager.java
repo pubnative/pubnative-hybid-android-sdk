@@ -26,7 +26,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
-import android.util.Log;
 
 import net.pubnative.lite.sdk.consent.CheckConsentRequest;
 import net.pubnative.lite.sdk.consent.RevokeConsentRequest;
@@ -97,11 +96,11 @@ public class UserDataManager {
 
     private void notifyConsentGiven() {
         UserConsentRequestModel requestModel = new UserConsentRequestModel(
-                PNLite.getDeviceInfo().getAdvertisingId(),
+                HyBid.getDeviceInfo().getAdvertisingId(),
                 DEVICE_ID_TYPE);
 
         UserConsentRequest request = new UserConsentRequest();
-        request.doRequest(mContext, PNLite.getAppToken(), requestModel, new UserConsentRequest.UserConsentListener() {
+        request.doRequest(mContext, HyBid.getAppToken(), requestModel, new UserConsentRequest.UserConsentListener() {
             @Override
             public void onSuccess(UserConsentResponseModel model) {
                 if (model.getStatus().equals(UserConsentResponseStatus.OK)) {
@@ -118,7 +117,7 @@ public class UserDataManager {
 
     private void notifyConsentRevoked() {
         RevokeConsentRequest checkRequest = new RevokeConsentRequest();
-        checkRequest.revokeConsent(mContext, PNLite.getAppToken(), PNLite.getDeviceInfo().getAdvertisingId(), DEVICE_ID_TYPE, new RevokeConsentRequest.RevokeConsentListener() {
+        checkRequest.revokeConsent(mContext, HyBid.getAppToken(), HyBid.getDeviceInfo().getAdvertisingId(), DEVICE_ID_TYPE, new RevokeConsentRequest.RevokeConsentListener() {
             @Override
             public void onSuccess(UserConsentResponseModel model) {
                 if (model.getStatus().equals(UserConsentResponseStatus.OK)) {
@@ -172,7 +171,7 @@ public class UserDataManager {
 
     private void checkConsentGiven(final UserDataInitialisationListener listener) {
         CheckConsentRequest checkRequest = new CheckConsentRequest();
-        checkRequest.checkConsent(mContext, PNLite.getAppToken(), PNLite.getDeviceInfo().getAdvertisingId(), DEVICE_ID_TYPE, new CheckConsentRequest.CheckConsentListener() {
+        checkRequest.checkConsent(mContext, HyBid.getAppToken(), HyBid.getDeviceInfo().getAdvertisingId(), DEVICE_ID_TYPE, new CheckConsentRequest.CheckConsentListener() {
             @Override
             public void onSuccess(UserConsentResponseModel model) {
                 if (model.getStatus().equals(UserConsentResponseStatus.OK)) {

@@ -17,9 +17,9 @@ import java.util.Map;
  * Created by erosgarciaponte on 13.02.18.
  */
 
-final class PNLiteCrashTrackerTestUtils {
+final class HyBidCrashTrackerTestUtils {
 
-    private PNLiteCrashTrackerTestUtils() {
+    private HyBidCrashTrackerTestUtils() {
     }
 
     private static String streamableToString(JsonStream.Streamable streamable) throws IOException {
@@ -57,7 +57,7 @@ final class PNLiteCrashTrackerTestUtils {
     }
 
     static SessionTracker generateSessionTracker() {
-        return new SessionTracker(generateConfiguration(), PNLiteCrashTrackerTestUtils.generateClient(),
+        return new SessionTracker(generateConfiguration(), HyBidCrashTrackerTestUtils.generateClient(),
                 generateSessionStore(), generateSessionTrackingApiClient());
     }
 

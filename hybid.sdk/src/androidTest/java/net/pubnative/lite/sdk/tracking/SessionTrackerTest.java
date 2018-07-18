@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import java.util.Date;
 
-import static net.pubnative.lite.sdk.tracking.PNLiteCrashTrackerTestUtils.*;
+import static net.pubnative.lite.sdk.tracking.HyBidCrashTrackerTestUtils.*;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;

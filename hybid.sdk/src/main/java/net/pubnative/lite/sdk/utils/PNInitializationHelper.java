@@ -22,7 +22,7 @@
 //
 package net.pubnative.lite.sdk.utils;
 
-import net.pubnative.lite.sdk.PNLite;
+import net.pubnative.lite.sdk.HyBid;
 
 /**
  * Created by erosgarciaponte on 24.01.18.
@@ -30,6 +30,6 @@ import net.pubnative.lite.sdk.PNLite;
 
 public class PNInitializationHelper {
     public boolean isInitialized() {
-        return PNLite.isInitialized();
+        return HyBid.isInitialized();
     }
 }

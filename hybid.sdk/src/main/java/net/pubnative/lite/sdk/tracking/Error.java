@@ -167,8 +167,8 @@ public class Error implements JsonStream.Streamable {
     }
 
     public String getExceptionName() {
-        if (exception instanceof PNLiteCrashTrackerException) {
-            return ((PNLiteCrashTrackerException) exception).getName();
+        if (exception instanceof HyBidCrashTrackerException) {
+            return ((HyBidCrashTrackerException) exception).getName();
         } else {
             return exception.getClass().getName();
         }
@@ -234,7 +234,7 @@ public class Error implements JsonStream.Streamable {
 
         Builder(Configuration config, String name,
                 String message, StackTraceElement[] frames, Session session) {
-            this(config, new PNLiteCrashTrackerException(name, message, frames), session);
+            this(config, new HyBidCrashTrackerException(name, message, frames), session);
         }
 
         Builder severityReasonType(@HandledState.SeverityReason String severityReasonType) {

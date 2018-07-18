@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package net.pubnative.lite.demo.ui.activities.pnlite
+package net.pubnative.lite.demo.ui.activities.hybid
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -30,10 +30,10 @@ import net.pubnative.lite.demo.R
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class PNLiteBannerActivity : AppCompatActivity() {
+class HyBidBannerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_pnlite_banner)
+        setContentView(R.layout.activity_hybid_banner)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

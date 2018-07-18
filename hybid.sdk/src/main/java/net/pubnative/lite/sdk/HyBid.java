@@ -26,8 +26,8 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 
 import net.pubnative.lite.sdk.api.PNApiClient;
-import net.pubnative.lite.sdk.location.PNLiteLocationManager;
-import net.pubnative.lite.sdk.tracking.PNLiteCrashTracker;
+import net.pubnative.lite.sdk.location.HyBidLocationManager;
+import net.pubnative.lite.sdk.tracking.HyBidCrashTracker;
 
 public class HyBid {
     public static final String BASE_URL = "https://api.pubnative.net/api/v3/native";
@@ -40,7 +40,7 @@ public class HyBid {
     @SuppressLint("StaticFieldLeak")
     private static UserDataManager sUserDataManager;
     @SuppressLint("StaticFieldLeak")
-    private static PNLiteLocationManager sLocationManager;
+    private static HyBidLocationManager sLocationManager;
     private static AdCache sAdCache;
     private static boolean sInitialized;
     private static boolean sCoppaEnabled = false;
@@ -60,12 +60,12 @@ public class HyBid {
      */
     public static void initialize(String appToken,
                                   Application application, final InitialisationListener initialisationListener) {
-        PNLiteCrashTracker.init(application, "9ef9d95d69bd0ec31bfa7806af72dddd");
+        HyBidCrashTracker.init(application, "9ef9d95d69bd0ec31bfa7806af72dddd");
 
         sAppToken = appToken;
         sBundleId = application.getPackageName();
         sApiClient = new PNApiClient(application);
-        sLocationManager = new PNLiteLocationManager(application);
+        sLocationManager = new HyBidLocationManager(application);
         sLocationManager.startLocationUpdates();
         sDeviceInfo = new DeviceInfo(application.getApplicationContext(), new DeviceInfo.Listener() {
             @Override
@@ -109,7 +109,7 @@ public class HyBid {
         return sUserDataManager;
     }
 
-    public static PNLiteLocationManager getLocationManager() {
+    public static HyBidLocationManager getLocationManager() {
         return sLocationManager;
     }
 
