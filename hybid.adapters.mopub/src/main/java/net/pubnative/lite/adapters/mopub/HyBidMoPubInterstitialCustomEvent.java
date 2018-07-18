@@ -28,17 +28,13 @@ import android.content.Context;
 import com.mopub.mobileads.CustomEventInterstitial;
 import com.mopub.mobileads.MoPubErrorCode;
 
-import net.pubnative.lite.sdk.PNLite;
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenter;
 import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenterFactory;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.Logger;
 
 import java.util.Map;
-
-/**
- * Created by erosgarciaponte on 12.01.18.
- */
 
 public class HyBidMoPubInterstitialCustomEvent extends CustomEventInterstitial implements InterstitialPresenter.Listener {
     private static final String TAG = HyBidMoPubInterstitialCustomEvent.class.getSimpleName();
@@ -60,7 +56,7 @@ public class HyBidMoPubInterstitialCustomEvent extends CustomEventInterstitial i
         mInterstitialListener = customEventInterstitialListener;
 
         if (!(context instanceof Activity)) {
-            Logger.e(TAG, "PNLite interstitial ad can only be rendered with an Activity context");
+            Logger.e(TAG, "HyBid interstitial ad can only be rendered with an Activity context");
             mInterstitialListener.onInterstitialFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
@@ -77,7 +73,7 @@ public class HyBidMoPubInterstitialCustomEvent extends CustomEventInterstitial i
             return;
         }
 
-        final Ad ad = PNLite.getAdCache().remove(zoneIdKey);
+        final Ad ad = HyBid.getAdCache().remove(zoneIdKey);
         if (ad == null) {
             Logger.e(TAG, "Could not find an ad in the cache for zone id with key " + zoneIdKey);
             mInterstitialListener.onInterstitialFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);

@@ -28,17 +28,13 @@ import android.view.View;
 import com.mopub.mobileads.CustomEventBanner;
 import com.mopub.mobileads.MoPubErrorCode;
 
-import net.pubnative.lite.sdk.PNLite;
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.mrect.presenter.MRectPresenter;
 import net.pubnative.lite.sdk.mrect.presenter.MRectPresenterFactory;
 import net.pubnative.lite.sdk.utils.Logger;
 
 import java.util.Map;
-
-/**
- * Created by erosgarciaponte on 12.01.18.
- */
 
 public class HyBidMoPubMRectCustomEvent extends CustomEventBanner implements MRectPresenter.Listener {
     private static final String TAG = HyBidMoPubMRectCustomEvent.class.getSimpleName();
@@ -72,7 +68,7 @@ public class HyBidMoPubMRectCustomEvent extends CustomEventBanner implements MRe
             return;
         }
 
-        final Ad ad = PNLite.getAdCache().remove(zoneIdKey);
+        final Ad ad = HyBid.getAdCache().remove(zoneIdKey);
         if (ad == null) {
             Logger.e(TAG, "Could not find an ad in the cache for zone id with key: " + zoneIdKey);
             mBannerListener.onBannerFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
