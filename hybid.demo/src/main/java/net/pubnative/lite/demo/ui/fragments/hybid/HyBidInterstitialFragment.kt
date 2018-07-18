@@ -32,12 +32,13 @@ import android.widget.Button
 import android.widget.Toast
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd
 import net.pubnative.lite.sdk.interstitial.PNInterstitialAd
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class HyBidInterstitialFragment : Fragment(), PNInterstitialAd.Listener {
+class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
     val TAG = HyBidInterstitialFragment::class.java.simpleName
 
     private var zoneId: String? = null
