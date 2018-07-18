@@ -28,7 +28,7 @@ jobs:
           name: Deploy to Fabric
           command:
             if [ "${CIRCLE_BRANCH}" == "master" ] || [ "${CIRCLE_BRANCH}" == "beta" ] || [ "${CIRCLE_BRANCH}" == "development" ] ; then
-              ./gradlew assembleDebug crashlyticsUploadDistributionDebug ; fi
+              ./gradlew assembleDebug crashlyticsUploadDistributionDebug
             fi
       - deploy:
           name: Deploy to Bintray
