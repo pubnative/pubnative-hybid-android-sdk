@@ -34,11 +34,11 @@ import net.pubnative.lite.demo.ui.viewholders.KeywordViewHolder
 class KeywordAdapter : RecyclerView.Adapter<KeywordViewHolder>() {
     private val list: MutableList<String> = mutableListOf()
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): KeywordViewHolder
-            = KeywordViewHolder(LayoutInflater.from(parent?.context).inflate(R.layout.item_keyword, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): KeywordViewHolder
+            = KeywordViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_keyword, parent, false))
 
-    override fun onBindViewHolder(holder: KeywordViewHolder?, position: Int) {
-        holder?.bind(list[position])
+    override fun onBindViewHolder(holder: KeywordViewHolder, position: Int) {
+        holder.bind(list[position])
     }
 
     override fun getItemCount(): Int = list.size
