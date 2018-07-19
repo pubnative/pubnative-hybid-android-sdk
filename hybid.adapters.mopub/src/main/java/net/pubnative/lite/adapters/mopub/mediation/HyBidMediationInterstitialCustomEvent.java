@@ -29,18 +29,18 @@ import com.mopub.mobileads.CustomEventInterstitial;
 import com.mopub.mobileads.MoPubErrorCode;
 
 import net.pubnative.lite.sdk.HyBid;
-import net.pubnative.lite.sdk.interstitial.PNInterstitialAd;
+import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd;
 import net.pubnative.lite.sdk.utils.Logger;
 
 import java.util.Map;
 
-public class HyBidMediationInterstitialCustomEvent extends CustomEventInterstitial implements PNInterstitialAd.Listener {
+public class HyBidMediationInterstitialCustomEvent extends CustomEventInterstitial implements HyBidInterstitialAd.Listener {
     private static final String TAG = HyBidMediationInterstitialCustomEvent.class.getSimpleName();
 
     private static final String APP_TOKEN_KEY = "pn_app_token";
     private static final String ZONE_ID_KEY = "pn_zone_id";
     private CustomEventInterstitialListener mInterstitialListener;
-    private PNInterstitialAd mInterstitialAd;
+    private HyBidInterstitialAd mInterstitialAd;
 
     @Override
     protected void loadInterstitial(Context context, CustomEventInterstitialListener customEventInterstitialListener, Map<String, Object> localExtras, Map<String, String> serverExtras) {
@@ -75,7 +75,7 @@ public class HyBidMediationInterstitialCustomEvent extends CustomEventInterstiti
             return;
         }
 
-        mInterstitialAd = new PNInterstitialAd(activity, zoneId, this);
+        mInterstitialAd = new HyBidInterstitialAd(activity, zoneId, this);
         mInterstitialAd.load();
     }
 

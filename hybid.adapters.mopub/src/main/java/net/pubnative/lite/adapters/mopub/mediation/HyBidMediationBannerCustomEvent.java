@@ -29,8 +29,8 @@ import com.mopub.mobileads.MoPubErrorCode;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.views.HyBidBannerAdView;
 import net.pubnative.lite.sdk.views.PNAdView;
-import net.pubnative.lite.sdk.views.PNBannerAdView;
 
 import java.util.Map;
 
@@ -40,7 +40,7 @@ public class HyBidMediationBannerCustomEvent extends CustomEventBanner implement
     private static final String APP_TOKEN_KEY = "pn_app_token";
     private static final String ZONE_ID_KEY = "pn_zone_id";
     private CustomEventBannerListener mBannerListener;
-    private PNBannerAdView mBannerView;
+    private HyBidBannerAdView mBannerView;
     private Context mContext;
 
     @Override
@@ -74,7 +74,7 @@ public class HyBidMediationBannerCustomEvent extends CustomEventBanner implement
             return;
         }
 
-        mBannerView = new PNBannerAdView(context);
+        mBannerView = new HyBidBannerAdView(context);
         mBannerView.load(zoneId, this);
     }
 
