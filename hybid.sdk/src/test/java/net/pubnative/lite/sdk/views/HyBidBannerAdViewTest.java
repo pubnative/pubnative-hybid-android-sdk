@@ -1,9 +1,10 @@
-package net.pubnative.lite.sdk.interstitial;
+package net.pubnative.lite.sdk.views;
 
 import android.app.Activity;
 
-import net.pubnative.lite.sdk.api.InterstitialRequestManager;
+import net.pubnative.lite.sdk.api.BannerRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
+import net.pubnative.lite.sdk.models.Ad;
 
 import org.junit.After;
 import org.junit.Before;
@@ -16,15 +17,16 @@ import org.robolectric.android.controller.ActivityController;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(RobolectricTestRunner.class)
-public class PNInterstitialAdTest {
+public class HyBidBannerAdViewTest {
+    private PNAdView adView;
     private Activity activity;
-    private PNInterstitialAd interstitial;
 
     @Mock
-    private PNInterstitialAd.Listener listener;
+    private PNAdView.Listener listener;
 
     @Before
     public void setUp() throws Exception {
@@ -32,19 +34,19 @@ public class PNInterstitialAdTest {
 
         ActivityController<Activity> activityController = Robolectric.buildActivity(Activity.class);
         activity = activityController.get();
+        adView = new HyBidBannerAdView(activity);
     }
 
     @Test
     public void testLoad_emptyZoneId() {
-        interstitial = new PNInterstitialAd(activity, "", listener);
-        interstitial.load();
+        adView.load("", listener);
 
-        verify(listener).onInterstitialLoadFailed(any(Throwable.class));
+        verify(listener).onAdLoadFailed(any(Throwable.class));
     }
 
     @After
     public void tearDown() {
         activity = null;
-        interstitial = null;
+        adView = null;
     }
 }

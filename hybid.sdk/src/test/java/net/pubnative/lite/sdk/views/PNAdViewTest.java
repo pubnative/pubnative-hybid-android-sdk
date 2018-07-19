@@ -6,7 +6,6 @@ import net.pubnative.lite.sdk.api.BannerRequestManager;
 import net.pubnative.lite.sdk.api.MRectRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
 
-import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Assert;
@@ -31,13 +30,13 @@ public class PNAdViewTest {
 
     @Test
     public void testCreateBannerView() throws Exception {
-        adView = new PNBannerAdView(activity);
+        adView = new HyBidBannerAdView(activity);
         Assert.assertThat(adView.getRequestManager(), Matchers.<RequestManager>instanceOf(BannerRequestManager.class));
     }
 
     @Test
     public void testCreateMRectView() throws Exception {
-        adView = new PNMRectAdView(activity);
+        adView = new HyBidMRectAdView(activity);
         Assert.assertThat(adView.getRequestManager(), Matchers.<RequestManager>instanceOf(MRectRequestManager.class));
     }
 

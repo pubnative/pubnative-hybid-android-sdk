@@ -33,7 +33,6 @@ import android.widget.Toast
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd
-import net.pubnative.lite.sdk.interstitial.PNInterstitialAd
 
 /**
  * Created by erosgarciaponte on 30.01.18.
@@ -44,7 +43,7 @@ class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
     private var zoneId: String? = null
 
     private lateinit var loadButton: Button
-    private var interstitial: PNInterstitialAd? = null
+    private var interstitial: HyBidInterstitialAd? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_hybid_interstitial, container, false)
 
@@ -67,7 +66,7 @@ class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
     }
 
     fun loadPNAd() {
-        interstitial = PNInterstitialAd(activity, zoneId, this)
+        interstitial = HyBidInterstitialAd(activity, zoneId, this)
         interstitial?.load()
     }
 

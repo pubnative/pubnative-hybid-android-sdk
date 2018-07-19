@@ -17,7 +17,7 @@
         android:layout_marginTop="20dp"
         android:text="@string/load" />
 
-    <net.pubnative.lite.sdk.views.PNBannerAdView
+    <net.pubnative.lite.sdk.views.HyBidBannerAdView
         android:id="@+id/hybid_banner"
         android:layout_width="320dp"
         android:layout_height="50dp"

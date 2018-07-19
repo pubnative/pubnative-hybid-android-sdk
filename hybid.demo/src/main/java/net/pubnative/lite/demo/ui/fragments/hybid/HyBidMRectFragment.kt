@@ -32,8 +32,8 @@ import android.widget.Button
 import android.widget.Toast
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.sdk.views.HyBidMRectAdView
 import net.pubnative.lite.sdk.views.PNAdView
-import net.pubnative.lite.sdk.views.PNMRectAdView
 
 /**
  * Created by erosgarciaponte on 30.01.18.
@@ -43,7 +43,7 @@ class HyBidMRectFragment : Fragment(), PNAdView.Listener {
 
     private var zoneId: String? = null
 
-    private lateinit var hybidMRect: PNMRectAdView
+    private lateinit var hybidMRect: HyBidMRectAdView
     private lateinit var loadButton: Button
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?

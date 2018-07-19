@@ -19,7 +19,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(RobolectricTestRunner.class)
-public class PNMRectAdViewTest {
+public class HyBidMRectAdViewTest {
     private PNAdView adView;
     private Activity activity;
 
@@ -32,7 +32,7 @@ public class PNMRectAdViewTest {
 
         ActivityController<Activity> activityController = Robolectric.buildActivity(Activity.class);
         activity = activityController.get();
-        adView = new PNMRectAdView(activity);
+        adView = new HyBidMRectAdView(activity);
     }
 
     @Test
