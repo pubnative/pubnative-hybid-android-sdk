@@ -85,7 +85,7 @@ class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView
         requestManager.requestAd()
     }
 
-    // --------------- PNLite Request Listener --------------------
+    // --------------- HyBid Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
         mopubMRect.adUnitId = adUnitId
         mopubMRect.keywords = PrebidUtils.getPrebidKeywords(ad, zoneId)

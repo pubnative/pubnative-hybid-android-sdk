@@ -121,7 +121,7 @@ public class Client extends Observable implements Observer {
             Application application = (Application) appContext;
             application.registerActivityLifecycleCallbacks(sessionTracker);
         } else {
-            Logger.warn("PNLiteCrashTracker is unable to setup automatic activity lifecycle "
+            Logger.warn("HyBidCrashTracker is unable to setup automatic activity lifecycle "
                     + "breadcrumbs on API Levels below 14.");
         }
 
@@ -138,7 +138,7 @@ public class Client extends Observable implements Observer {
                         packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
                 buildUuid = ai.metaData.getString(MF_BUILD_UUID);
             } catch (Exception ignore) {
-                Logger.warn("PNLiteCrashTracker is unable to read build UUID from manifest.");
+                Logger.warn("HyBidCrashTracker is unable to read build UUID from manifest.");
             }
             if (buildUuid != null) {
                 config.setBuildUUID(buildUuid);
@@ -188,7 +188,7 @@ public class Client extends Observable implements Observer {
         }
     }
 
-    public void notifyPNLiteObservers(NotifyType type) {
+    public void notifyHyBidObservers(NotifyType type) {
         setChanged();
         super.notifyObservers(type.getValue());
     }
@@ -199,7 +199,7 @@ public class Client extends Observable implements Observer {
             NotifyType type = NotifyType.fromInt((Integer) arg);
 
             if (type != null) {
-                notifyPNLiteObservers(type);
+                notifyHyBidObservers(type);
             }
         }
     }
@@ -221,12 +221,12 @@ public class Client extends Observable implements Observer {
                 Bundle data = ai.metaData;
                 apiKey = data.getString(MF_API_KEY);
             } catch (Exception ignore) {
-                Logger.warn("PNLiteCrashTracker is unable to read api key from manifest.");
+                Logger.warn("HyBidCrashTracker is unable to read api key from manifest.");
             }
         }
 
         if (apiKey == null) {
-            throw new NullPointerException("You must provide a PNLiteCrashTracker API key");
+            throw new NullPointerException("You must provide a HyBidCrashTracker API key");
         }
 
         // Build a configuration object
@@ -242,7 +242,7 @@ public class Client extends Observable implements Observer {
                 Bundle data = ai.metaData;
                 populateConfigFromManifest(newConfig, data);
             } catch (Exception ignore) {
-                Logger.warn("PNLiteCrashTracker is unable to read config from manifest.");
+                Logger.warn("HyBidCrashTracker is unable to read config from manifest.");
             }
         }
         return newConfig;
@@ -353,7 +353,7 @@ public class Client extends Observable implements Observer {
                 .remove(USER_EMAIL_KEY)
                 .remove(USER_NAME_KEY)
                 .apply();
-        notifyPNLiteObservers(NotifyType.USER);
+        notifyHyBidObservers(NotifyType.USER);
     }
 
     public void setUserId(String id) {
@@ -368,7 +368,7 @@ public class Client extends Observable implements Observer {
         }
 
         if (notify) {
-            notifyPNLiteObservers(NotifyType.USER);
+            notifyHyBidObservers(NotifyType.USER);
         }
     }
 
@@ -384,7 +384,7 @@ public class Client extends Observable implements Observer {
         }
 
         if (notify) {
-            notifyPNLiteObservers(NotifyType.USER);
+            notifyHyBidObservers(NotifyType.USER);
         }
     }
 
@@ -400,7 +400,7 @@ public class Client extends Observable implements Observer {
         }
 
         if (notify) {
-            notifyPNLiteObservers(NotifyType.USER);
+            notifyHyBidObservers(NotifyType.USER);
         }
     }
 
@@ -730,7 +730,7 @@ public class Client extends Observable implements Observer {
 
         if (runBeforeBreadcrumbTasks(crumb)) {
             breadcrumbs.add(crumb);
-            notifyPNLiteObservers(NotifyType.BREADCRUMB);
+            notifyHyBidObservers(NotifyType.BREADCRUMB);
         }
     }
 
@@ -750,7 +750,7 @@ public class Client extends Observable implements Observer {
             breadcrumbs.add(crumb);
 
             if (notify) {
-                notifyPNLiteObservers(NotifyType.BREADCRUMB);
+                notifyHyBidObservers(NotifyType.BREADCRUMB);
             }
         }
     }
@@ -761,7 +761,7 @@ public class Client extends Observable implements Observer {
 
     public void clearBreadcrumbs() {
         breadcrumbs.clear();
-        notifyPNLiteObservers(NotifyType.BREADCRUMB);
+        notifyHyBidObservers(NotifyType.BREADCRUMB);
     }
 
     public void enableExceptionHandler() {
@@ -776,16 +776,16 @@ public class Client extends Observable implements Observer {
         try {
             errorReportApiClient.postReport(config.getEndpoint(), report,
                     config.getErrorApiHeaders());
-            Logger.info("Sent 1 new error to PNLiteCrashTracker");
+            Logger.info("Sent 1 new error to HyBidCrashTracker");
         } catch (NetworkException exception) {
-            Logger.info("Could not send error(s) to PNLiteCrashTracker, saving to disk to send later");
+            Logger.info("Could not send error(s) to HyBidCrashTracker, saving to disk to send later");
 
             // Save error to disk for later sending
             errorStore.write(error);
         } catch (BadResponseException exception) {
-            Logger.info("Bad response when sending data to PNLiteCrashTracker");
+            Logger.info("Bad response when sending data to HyBidCrashTracker");
         } catch (Exception exception) {
-            Logger.warn("Problem sending error to PNLiteCrashTracker", exception);
+            Logger.warn("Problem sending error to HyBidCrashTracker", exception);
         }
     }
 
@@ -852,7 +852,7 @@ public class Client extends Observable implements Observer {
     private static void warnIfNotAppContext(Context androidContext) {
         if (!(androidContext instanceof Application)) {
             Logger.warn("Warning - Non-Application context detected! Please ensure that you are "
-                    + "initializing PNLiteCrashTracker from a custom Application class.");
+                    + "initializing HyBidCrashTracker from a custom Application class.");
         }
     }
 

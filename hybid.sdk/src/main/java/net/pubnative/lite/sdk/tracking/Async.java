@@ -27,7 +27,7 @@ class Async {
         private final AtomicInteger count = new AtomicInteger(1);
 
         public Thread newThread(Runnable runnable) {
-            return new Thread(runnable, "PNLiteCrashTracking Thread #" + count.getAndIncrement());
+            return new Thread(runnable, "HyBidCrashTracking Thread #" + count.getAndIncrement());
         }
     };
     private static final Executor EXECUTOR = new ThreadPoolExecutor(

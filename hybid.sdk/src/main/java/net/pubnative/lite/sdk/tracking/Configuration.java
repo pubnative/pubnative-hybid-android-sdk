@@ -64,7 +64,7 @@ public class Configuration extends Observable implements Observer {
 
     public void setAppVersion(String appVersion) {
         this.appVersion = appVersion;
-        notifyPNLiteObservers(NotifyType.APP);
+        notifyHyBidObservers(NotifyType.APP);
     }
 
     public String getContext() {
@@ -73,7 +73,7 @@ public class Configuration extends Observable implements Observer {
 
     public void setContext(String context) {
         this.context = context;
-        notifyPNLiteObservers(NotifyType.CONTEXT);
+        notifyHyBidObservers(NotifyType.CONTEXT);
     }
 
     public String getEndpoint() {
@@ -100,7 +100,7 @@ public class Configuration extends Observable implements Observer {
     @SuppressWarnings("checkstyle:AbbreviationAsWordInName")
     public void setBuildUUID(String buildUuid) {
         this.buildUuid = buildUuid;
-        notifyPNLiteObservers(NotifyType.APP);
+        notifyHyBidObservers(NotifyType.APP);
     }
 
     public String[] getFilters() {
@@ -126,7 +126,7 @@ public class Configuration extends Observable implements Observer {
 
     public void setNotifyReleaseStages(String[] notifyReleaseStages) {
         this.notifyReleaseStages = notifyReleaseStages;
-        notifyPNLiteObservers(NotifyType.RELEASE_STAGES);
+        notifyHyBidObservers(NotifyType.RELEASE_STAGES);
     }
 
 
@@ -144,7 +144,7 @@ public class Configuration extends Observable implements Observer {
 
     public void setReleaseStage(String releaseStage) {
         this.releaseStage = releaseStage;
-        notifyPNLiteObservers(NotifyType.APP);
+        notifyHyBidObservers(NotifyType.APP);
     }
 
     public boolean getSendThreads() {
@@ -186,7 +186,7 @@ public class Configuration extends Observable implements Observer {
         }
 
         this.metaData.addObserver(this);
-        notifyPNLiteObservers(NotifyType.META);
+        notifyHyBidObservers(NotifyType.META);
     }
 
     protected Collection<BeforeNotify> getBeforeNotifyTasks() {
@@ -291,7 +291,7 @@ public class Configuration extends Observable implements Observer {
         return false;
     }
 
-    private void notifyPNLiteObservers(NotifyType type) {
+    private void notifyHyBidObservers(NotifyType type) {
         setChanged();
         super.notifyObservers(type.getValue());
     }
@@ -302,7 +302,7 @@ public class Configuration extends Observable implements Observer {
             NotifyType type = NotifyType.fromInt((Integer) arg);
 
             if (type != null) {
-                notifyPNLiteObservers(type);
+                notifyHyBidObservers(type);
             }
         }
     }

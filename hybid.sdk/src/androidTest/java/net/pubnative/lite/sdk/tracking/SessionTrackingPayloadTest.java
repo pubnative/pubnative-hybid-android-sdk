@@ -13,9 +13,9 @@ import org.junit.Test;
 import java.io.File;
 import java.util.List;
 
-import static net.pubnative.lite.sdk.tracking.PNLiteCrashTrackerTestUtils.generateSession;
-import static net.pubnative.lite.sdk.tracking.PNLiteCrashTrackerTestUtils.generateSessionTracker;
-import static net.pubnative.lite.sdk.tracking.PNLiteCrashTrackerTestUtils.streamableToJson;
+import static net.pubnative.lite.sdk.tracking.HyBidCrashTrackerTestUtils.generateSession;
+import static net.pubnative.lite.sdk.tracking.HyBidCrashTrackerTestUtils.generateSessionTracker;
+import static net.pubnative.lite.sdk.tracking.HyBidCrashTrackerTestUtils.streamableToJson;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 

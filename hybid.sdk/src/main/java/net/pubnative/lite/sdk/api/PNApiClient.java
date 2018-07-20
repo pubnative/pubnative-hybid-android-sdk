@@ -24,7 +24,7 @@ package net.pubnative.lite.sdk.api;
 
 import android.content.Context;
 
-import net.pubnative.lite.sdk.PNLite;
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdResponse;
@@ -102,7 +102,7 @@ public class PNApiClient {
     }
 
     protected String getAdRequestURL(AdRequest adRequest) {
-        return PNApiUrlComposer.buildUrl(PNLite.BASE_URL, adRequest);
+        return PNApiUrlComposer.buildUrl(HyBid.BASE_URL, adRequest);
     }
 
     protected void processStream(String result, AdRequestListener listener) {
@@ -124,11 +124,11 @@ public class PNApiClient {
             if (apiResponseModel.ads != null && !apiResponseModel.ads.isEmpty()) {
                 listener.onSuccess(apiResponseModel.ads.get(0));
             } else {
-                listener.onFailure(new Exception("PNLite - No fill"));
+                listener.onFailure(new Exception("HyBid - No fill"));
             }
         } else {
             // STATUS 'ERROR'
-            listener.onFailure(new Exception("PNLite - Server error: " + apiResponseModel.error_message));
+            listener.onFailure(new Exception("HyBid - Server error: " + apiResponseModel.error_message));
         }
     }
 }

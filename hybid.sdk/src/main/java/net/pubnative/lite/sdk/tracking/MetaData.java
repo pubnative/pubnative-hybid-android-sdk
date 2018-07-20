@@ -49,13 +49,13 @@ public class MetaData extends Observable implements JsonStream.Streamable {
             tab.remove(key);
         }
 
-        notifyPNLiteObservers(NotifyType.META);
+        notifyHyBidObservers(NotifyType.META);
     }
 
     public void clearTab(String tabName) {
         store.remove(tabName);
 
-        notifyPNLiteObservers(NotifyType.META);
+        notifyHyBidObservers(NotifyType.META);
     }
 
     Map<String, Object> getTab(String tabName) {
@@ -72,7 +72,7 @@ public class MetaData extends Observable implements JsonStream.Streamable {
     void setFilters(String... filters) {
         this.filters = filters;
 
-        notifyPNLiteObservers(NotifyType.FILTERS);
+        notifyHyBidObservers(NotifyType.FILTERS);
     }
 
     static MetaData merge(MetaData... metaDataList) {
@@ -193,7 +193,7 @@ public class MetaData extends Observable implements JsonStream.Streamable {
         return false;
     }
 
-    private void notifyPNLiteObservers(NotifyType type) {
+    private void notifyHyBidObservers(NotifyType type) {
         setChanged();
         super.notifyObservers(type.getValue());
     }

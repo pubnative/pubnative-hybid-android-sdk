@@ -29,7 +29,7 @@ import android.util.Log;
  */
 
 public class MRAIDLog {
-    private static final String TAG = "PNLite-MRAID";
+    private static final String TAG = "HyBid-MRAID";
 
     public enum LOG_LEVEL {
 

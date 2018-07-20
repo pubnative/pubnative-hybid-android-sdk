@@ -48,9 +48,9 @@ import net.pubnative.lite.demo.ui.activities.dfp.DFPActivity;
 import net.pubnative.lite.demo.ui.activities.config.DFPSettingsActivity;
 import net.pubnative.lite.demo.ui.activities.mopub.MoPubActivity;
 import net.pubnative.lite.demo.ui.activities.config.MoPubSettingsActivity;
-import net.pubnative.lite.demo.ui.activities.PNConsentActivity;
-import net.pubnative.lite.demo.ui.activities.pnlite.PNLiteActivity;
-import net.pubnative.lite.demo.ui.activities.config.PNSettingsActivity;
+import net.pubnative.lite.demo.ui.activities.HyBidConsentActivity;
+import net.pubnative.lite.demo.ui.activities.hybid.HyBidActivity;
+import net.pubnative.lite.demo.ui.activities.config.HyBidSettingsActivity;
 import net.pubnative.lite.demo.ui.adapters.ZoneIdAdapter;
 import net.pubnative.lite.demo.ui.listeners.ZoneIdClickListener;
 
@@ -61,7 +61,7 @@ import java.util.List;
 public class MainFragment extends Fragment {
     private static final int PERMISSION_REQUEST = 1000;
 
-    private Button mPNLiteButton;
+    private Button mHyBidButton;
     private Button mMoPubButton;
     private Button mDFPButton;
     private RecyclerView mZoneIdList;
@@ -109,7 +109,7 @@ public class MainFragment extends Fragment {
         view.findViewById(R.id.button_pn_settings).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), PNSettingsActivity.class);
+                Intent intent = new Intent(getActivity(), HyBidSettingsActivity.class);
                 startActivity(intent);
             }
         });
@@ -133,16 +133,16 @@ public class MainFragment extends Fragment {
         view.findViewById(R.id.button_pn_consent).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), PNConsentActivity.class);
+                Intent intent = new Intent(getActivity(), HyBidConsentActivity.class);
                 startActivity(intent);
             }
         });
 
-        mPNLiteButton = view.findViewById(R.id.button_pnlite);
-        mPNLiteButton.setOnClickListener(new View.OnClickListener() {
+        mHyBidButton = view.findViewById(R.id.button_hybid);
+        mHyBidButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), PNLiteActivity.class);
+                Intent intent = new Intent(getActivity(), HyBidActivity.class);
                 intent.putExtra(Constants.IntentParams.ZONE_ID, mChosenZoneId);
                 startActivity(intent);
             }
@@ -188,13 +188,13 @@ public class MainFragment extends Fragment {
     private void disableZones() {
         mChosenZoneIdView.setText("");
         mChosenZoneId = "";
-        mPNLiteButton.setEnabled(false);
+        mHyBidButton.setEnabled(false);
         mMoPubButton.setEnabled(false);
         mDFPButton.setEnabled(false);
     }
 
     private void enableZones() {
-        mPNLiteButton.setEnabled(true);
+        mHyBidButton.setEnabled(true);
         mMoPubButton.setEnabled(true);
         mDFPButton.setEnabled(true);
     }

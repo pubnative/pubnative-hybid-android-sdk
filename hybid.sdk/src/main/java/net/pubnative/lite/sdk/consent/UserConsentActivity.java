@@ -32,7 +32,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
-import net.pubnative.lite.sdk.PNLite;
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.utils.Logger;
 
 public class UserConsentActivity extends Activity {
@@ -101,11 +101,11 @@ public class UserConsentActivity extends Activity {
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             switch (url) {
                 case REDIRECT_ACCEPT:
-                    PNLite.getUserDataManager().grantConsent();
+                    HyBid.getUserDataManager().grantConsent();
                     setResult(RESULT_CONSENT_ACCEPTED);
                     return false;
                 case REDIRECT_REJECT:
-                    PNLite.getUserDataManager().denyConsent();
+                    HyBid.getUserDataManager().denyConsent();
                     setResult(RESULT_CONSENT_REJECTED);
                     return false;
                 case REDIRECT_CLOSE:
@@ -118,7 +118,7 @@ public class UserConsentActivity extends Activity {
     };
 
     private void loadConsentPage(WebView webView) {
-        String url = PNLite.getUserDataManager().getConsentPageLink();
+        String url = HyBid.getUserDataManager().getConsentPageLink();
 
         if (TextUtils.isEmpty(url)) {
             Logger.e(TAG, "Invalid consent page URL");

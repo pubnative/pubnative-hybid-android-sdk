@@ -43,7 +43,7 @@ class ErrorStore extends FileStore<Error> {
 
     ErrorStore(Configuration config, Context appContext) {
         super(config, appContext,
-                "/pnlite-errors/", 128, ERROR_REPORT_COMPARATOR);
+                "/hybid-errors/", 128, ERROR_REPORT_COMPARATOR);
     }
 
     void flushOnLaunch(final ErrorReportApiClient errorReportApiClient) {

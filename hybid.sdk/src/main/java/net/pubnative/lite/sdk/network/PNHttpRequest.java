@@ -28,7 +28,7 @@ import android.os.Looper;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.DeviceInfo;
-import net.pubnative.lite.sdk.PNLite;
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.exception.PNException;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNCrypto;
@@ -129,7 +129,7 @@ public class PNHttpRequest {
             invokeFail(new IllegalArgumentException("PNAPIHttpRequest - Error: null or empty url, dropping call"), false);
         } else if (!validateMethod(method)) {
             invokeFail(new IllegalArgumentException("HttpRequest - Error: Unsupported HTTP method, dropping call"), false);
-        } else if (PNLite.getDeviceInfo().getConnectivity() != DeviceInfo.Connectivity.NONE) {
+        } else if (HyBid.getDeviceInfo().getConnectivity() != DeviceInfo.Connectivity.NONE) {
             executeAsync();
         } else {
             invokeFail(PNException.REQUEST_NO_INTERNET, true);

@@ -12,8 +12,8 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 
-import static net.pubnative.lite.sdk.tracking.PNLiteCrashTrackerTestUtils.generateSessionTracker;
-import static net.pubnative.lite.sdk.tracking.PNLiteCrashTrackerTestUtils.streamableToJson;
+import static net.pubnative.lite.sdk.tracking.HyBidCrashTrackerTestUtils.generateSessionTracker;
+import static net.pubnative.lite.sdk.tracking.HyBidCrashTrackerTestUtils.streamableToJson;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -38,7 +38,7 @@ public class AppDataTest {
 
         assertEquals("net.pubnative.lite.sdk.test", appDataJson.get("id"));
         assertEquals("net.pubnative.lite.sdk.test", appDataJson.get("packageName"));
-        assertEquals("PNLite Android Tests", appDataJson.get("name"));
+        assertEquals("HyBid Android Tests", appDataJson.get("name"));
         assertEquals(1, appDataJson.get("versionCode"));
         assertEquals("1.0", appDataJson.get("versionName"));
         assertEquals("1.0", appDataJson.get("version"));

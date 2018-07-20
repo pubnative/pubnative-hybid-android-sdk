@@ -85,7 +85,7 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
         requestManager.requestAd()
     }
 
-    // --------------- PNLite Request Listener --------------------
+    // --------------- HyBid Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
         mopubInterstitial.keywords = PrebidUtils.getPrebidKeywords(ad, zoneId)
         mopubInterstitial.load()

@@ -22,7 +22,7 @@
 //
 package net.pubnative.lite.sdk.utils;
 
-import net.pubnative.lite.sdk.PNLite;
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.models.AdData;
 
@@ -61,7 +61,7 @@ public class AdTracker {
 
     public AdTracker(List<AdData> impressionUrls,
                      List<AdData> clickUrls) {
-        this(PNLite.getApiClient(), impressionUrls, clickUrls);
+        this(HyBid.getApiClient(), impressionUrls, clickUrls);
     }
 
     AdTracker(PNApiClient apiClient,

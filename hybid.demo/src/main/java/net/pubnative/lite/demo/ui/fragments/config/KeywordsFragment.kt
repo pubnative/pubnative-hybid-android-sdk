@@ -39,7 +39,7 @@ import android.widget.Toast
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.adapters.KeywordAdapter
-import net.pubnative.lite.sdk.PNLite
+import net.pubnative.lite.sdk.HyBid
 
 /**
  * Created by erosgarciaponte on 30.01.18.
@@ -93,7 +93,7 @@ class KeywordsFragment: Fragment() {
                 keywordString = keywordString.substring(0, keywordString.length - separator.length)
             }
 
-            PNLite.setKeywords(keywordString)
+            HyBid.setKeywords(keywordString)
 
             val inputMethodManager = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             inputMethodManager.hideSoftInputFromWindow(keywordInput.windowToken, 0)
