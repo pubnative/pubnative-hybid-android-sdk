@@ -128,6 +128,12 @@ public class Ad extends JsonModel implements Serializable {
         return result;
     }
 
+    /**
+     * Gets url of the assets (html banner page, standard banner etc.)
+     *
+     * @param asset asset name for which url requested.
+     * @return valid String with the url value, null if not present.
+     */
     public String getAssetUrl(String asset) {
         String result = null;
         AdData data = getAsset(asset);
@@ -230,4 +236,6 @@ public class Ad extends JsonModel implements Serializable {
         AdData adData = getMeta(APIMeta.POINTS);
         return adData.getIntField(DATA_POINTS_NUMBER_KEY);
     }
+
+
 }
