@@ -42,10 +42,10 @@ public class NativeAd implements ImpressionTracker.Listener {
         void onAdOpenOffer(NativeAd PNAPIAdModel);
     }
 
-    private Ad mAd;
+    protected Ad mAd;
     // Used externally to inject data for tracking
     private Map<String, String> mTrackingExtras;
-    private transient Listener mListener;
+    protected transient Listener mListener;
     private transient boolean mIsImpressionConfirmed;
     private transient View mClickableView;
     private List<String> mUsedAssets;
@@ -247,7 +247,7 @@ public class NativeAd implements ImpressionTracker.Listener {
         }
     }
 
-    private void openURL(String urlString) {
+    protected void openURL(String urlString) {
         if (TextUtils.isEmpty(urlString)) {
             Log.w(TAG, "Error: ending URL cannot be opened - " + urlString);
         } else if (mClickableView == null) {
