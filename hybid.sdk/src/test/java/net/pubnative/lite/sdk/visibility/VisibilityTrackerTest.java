@@ -3,21 +3,16 @@ package net.pubnative.lite.sdk.visibility;
 import android.os.Handler;
 import android.view.View;
 
-import net.pubnative.lite.sdk.BuildConfig;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class,
-        sdk = 21)
 public class VisibilityTrackerTest {
     @Test
     public void addView_withValidListener_shouldScheduleVisibilityCheck() {
