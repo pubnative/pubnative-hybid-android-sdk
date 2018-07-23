@@ -16,6 +16,14 @@
  */
 package net.pubnative.lite.sdk.utils.text;
 
+import android.util.Log;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
+
 public class StringUtils {
 
     public static final String SPACE = " ";
