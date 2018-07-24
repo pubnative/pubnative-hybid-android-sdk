@@ -35,6 +35,7 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.hybid.HyBidBannerActivity
 import net.pubnative.lite.demo.ui.activities.hybid.HyBidInterstitialActivity
 import net.pubnative.lite.demo.ui.activities.hybid.HyBidMRectActivity
+import net.pubnative.lite.demo.ui.activities.hybid.HyBidNativeActivity
 
 class HyBidFragment : Fragment() {
     private var zoneId: String? = null
@@ -62,6 +63,12 @@ class HyBidFragment : Fragment() {
 
         view.findViewById<Button>(R.id.button_interstitial).setOnClickListener {
             val intent = Intent(activity, HyBidInterstitialActivity::class.java)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_native).setOnClickListener {
+            val intent = Intent(activity, HyBidNativeActivity::class.java)
             intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }

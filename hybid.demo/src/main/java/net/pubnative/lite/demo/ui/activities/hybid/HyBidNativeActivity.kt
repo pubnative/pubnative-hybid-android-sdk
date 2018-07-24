@@ -20,34 +20,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package net.pubnative.lite.sdk.views;
+package net.pubnative.lite.demo.ui.activities.hybid
 
-import android.content.Context;
-import android.util.AttributeSet;
-import android.webkit.WebView;
+import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.Toolbar
+import net.pubnative.lite.demo.R
 
-public class PNBeaconWebView extends WebView {
-    public PNBeaconWebView(Context context) {
-        super(context);
-        init();
+class HyBidNativeActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_hybid_native)
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
     }
 
-    public PNBeaconWebView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init();
-    }
-
-    public PNBeaconWebView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        init();
-    }
-
-
-    private void init() {
-        getSettings().setJavaScriptEnabled(true);
-    }
-
-    public void loadBeacon(final String jsBeacon) {
-        loadUrl("javascript:" + jsBeacon);
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
     }
 }

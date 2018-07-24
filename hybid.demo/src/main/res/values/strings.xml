@@ -2,6 +2,7 @@
     <string name="app_name">HyBid demo</string>
     <string name="action_settings">Settings</string>
 
+    <string name="native_ad">"Native"</string>
     <string name="banner">Banner</string>
     <string name="interstitial">Interstitial</string>
     <string name="medium">Medium</string>
@@ -53,6 +54,7 @@
     <string name="load_with_mopub">Load with MoPub</string>
     <string name="load_with_dfp">Load with DFP</string>
 
+    <string name="hybid_native">HyBid Native</string>
     <string name="hybid_banner">HyBid Banner</string>
     <string name="hybid_interstitial">HyBid Interstitial</string>
     <string name="hybid_medium">HyBid Medium</string>

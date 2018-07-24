@@ -30,6 +30,7 @@ import java.util.List;
  */
 
 public class Constants {
+    public static final String NATIVE_ZONE_ID = "1";
     public static final String BANNER_MRAID_ZONE_ID = "2";
     public static final String INTERSTITIAL_MRAID_ZONE_ID = "3";
     public static final String MEDIUM_MRAID_ZONE_ID = "5";
@@ -49,7 +50,7 @@ public class Constants {
     public static final String DFP_MRAID_MEDIUM_AD_UNIT = "/219576711/pnlite_dfp_mrect";
 
     public static final String APP_TOKEN = "dde3c298b47648459f8ada4a982fa92d";
-    public static final List<String> ZONE_ID_LIST = Arrays.asList(BANNER_MRAID_ZONE_ID,
+    public static final List<String> ZONE_ID_LIST = Arrays.asList(NATIVE_ZONE_ID, BANNER_MRAID_ZONE_ID,
             MEDIUM_MRAID_ZONE_ID, INTERSTITIAL_MRAID_ZONE_ID, MEDIUM_VIDEO_ZONE_ID,
             INTERSTITIAL_VIDEO_ZONE_ID);
 
