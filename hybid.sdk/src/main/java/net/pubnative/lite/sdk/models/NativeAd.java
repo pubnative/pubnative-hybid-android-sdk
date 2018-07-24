@@ -70,6 +70,10 @@ public class NativeAd implements ImpressionTracker.Listener {
     private List<String> mUsedAssets;
     private transient View mAdView;
 
+    public NativeAd() {
+        this.mAd = null;
+    }
+
     public NativeAd(Ad ad) {
         this.mAd = ad;
     }
