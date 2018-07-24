@@ -48,6 +48,10 @@ public class NativeAd implements ImpressionTracker.Listener {
     private List<String> mUsedAssets;
     private transient View mAdView;
 
+    public NativeAd(Ad ad) {
+        this.mAd = ad;
+    }
+
     /**
      * Gets the title string of the ad
      *
@@ -142,6 +146,10 @@ public class NativeAd implements ImpressionTracker.Listener {
             }
         }
         return result;
+    }
+
+    public View getContentInfo(Context context) {
+        return mAd.getContentInfo(context);
     }
 
     // Used to inject extra data in urls

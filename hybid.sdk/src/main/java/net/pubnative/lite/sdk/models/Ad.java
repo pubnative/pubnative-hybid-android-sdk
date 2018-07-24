@@ -167,7 +167,7 @@ public class Ad extends JsonModel implements Serializable {
         return result;
     }
 
-    private View getContentInfo(Context context) {
+    public View getContentInfo(Context context) {
         PNAPIContentInfoView result = null;
         AdData data = getMeta(APIMeta.CONTENT_INFO);
         if (data == null) {
