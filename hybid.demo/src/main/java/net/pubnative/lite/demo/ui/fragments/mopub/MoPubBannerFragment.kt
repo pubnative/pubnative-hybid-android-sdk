@@ -29,6 +29,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import com.mopub.mobileads.MoPubErrorCode
 import com.mopub.mobileads.MoPubView
@@ -52,6 +53,7 @@ class MoPubBannerFragment : Fragment(), RequestManager.RequestListener, MoPubVie
 
     private lateinit var mopubBanner: MoPubView
     private lateinit var loadButton: Button
+    private lateinit var errorView: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
             = inflater.inflate(R.layout.fragment_mopub_banner, container, false)
@@ -59,6 +61,7 @@ class MoPubBannerFragment : Fragment(), RequestManager.RequestListener, MoPubVie
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
         mopubBanner = view.findViewById(R.id.mopub_banner)
         mopubBanner.bannerAdListener = this
@@ -70,6 +73,7 @@ class MoPubBannerFragment : Fragment(), RequestManager.RequestListener, MoPubVie
         adUnitId = SettingsManager.getInstance(activity!!).getSettings().mopubBannerAdUnitId
 
         loadButton.setOnClickListener {
+            errorView.text = ""
             loadPNAd()
         }
     }
@@ -95,7 +99,7 @@ class MoPubBannerFragment : Fragment(), RequestManager.RequestListener, MoPubVie
 
     override fun onRequestFail(throwable: Throwable?) {
         Log.d(TAG, "onRequestFail: ", throwable)
-        Toast.makeText(activity, throwable?.message, Toast.LENGTH_SHORT).show()
+        errorView.text = throwable?.message
     }
 
     // ---------------- MoPub Banner Listener ---------------------

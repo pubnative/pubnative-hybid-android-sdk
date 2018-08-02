@@ -29,6 +29,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.doubleclick.PublisherAdRequest
@@ -53,6 +54,7 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
     private var adUnitId: String? = null
 
     private lateinit var loadButton: Button
+    private lateinit var errorView: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
             = inflater.inflate(R.layout.fragment_dfp_interstitial, container, false)
@@ -60,6 +62,7 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
 
         adUnitId = SettingsManager.getInstance(activity!!).getSettings().dfpInterstitialAdUnitId
@@ -73,6 +76,7 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
         loadButton.setOnClickListener {
+            errorView.text = ""
             loadPNAd()
         }
     }
@@ -104,7 +108,7 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
 
     override fun onRequestFail(throwable: Throwable?) {
         Log.d(TAG, "onRequestFail: ", throwable)
-        Toast.makeText(activity, throwable?.message, Toast.LENGTH_SHORT).show()
+        errorView.text = throwable?.message
     }
 
     // ---------------- DFP Ad Listener ---------------------

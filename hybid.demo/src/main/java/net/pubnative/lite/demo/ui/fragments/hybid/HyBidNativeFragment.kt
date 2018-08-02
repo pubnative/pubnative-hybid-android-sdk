@@ -48,7 +48,9 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
     private lateinit var adDescription: TextView
     private lateinit var adChoices: FrameLayout
     private lateinit var adCallToAction: Button
+
     private lateinit var loadButton: Button
+    private lateinit var errorView: TextView
 
     private var nativeAd: NativeAd? = null
     private var nativeAdRequest: HyBidNativeAdRequest? = null
@@ -59,7 +61,9 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
+
         adContainer = view.findViewById(R.id.ad_container)
         adIcon = view.findViewById(R.id.ad_icon)
         adBanner = view.findViewById(R.id.ad_banner)
@@ -73,6 +77,7 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
         nativeAdRequest = HyBidNativeAdRequest()
 
         loadButton.setOnClickListener {
+            errorView.text = ""
             loadPNAd()
         }
     }
@@ -105,7 +110,7 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
 
     override fun onRequestFail(throwable: Throwable?) {
         Log.e(TAG, "onAdLoadFailed", throwable)
-        Toast.makeText(activity, throwable?.message, Toast.LENGTH_SHORT).show()
+        errorView.text = throwable?.message
     }
 
     override fun onAdImpression(PNAPIAdModel: NativeAd?, view: View?) {
