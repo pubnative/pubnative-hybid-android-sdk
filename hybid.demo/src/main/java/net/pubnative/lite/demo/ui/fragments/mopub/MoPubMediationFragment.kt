@@ -29,6 +29,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import com.mopub.mobileads.MoPubErrorCode
 import com.mopub.mobileads.MoPubInterstitial
 import com.mopub.mobileads.MoPubView
@@ -45,6 +46,9 @@ class MoPubMediationFragment : Fragment() {
     private lateinit var mopubBanner: MoPubView
     private lateinit var mopubMedium: MoPubView
     private lateinit var mopubInterstitial: MoPubInterstitial
+    private lateinit var errorBannerView: TextView
+    private lateinit var errorMRectView: TextView
+    private lateinit var errorInterstitialView: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_mopub_mediation, container, false)
 
@@ -53,6 +57,10 @@ class MoPubMediationFragment : Fragment() {
 
         mopubBanner = view.findViewById(R.id.mopub_banner)
         mopubMedium = view.findViewById(R.id.mopub_medium)
+
+        errorBannerView = view.findViewById(R.id.view_banner_error);
+        errorMRectView = view.findViewById(R.id.view_mrect_error);
+        errorInterstitialView = view.findViewById(R.id.view_interstitial_error);
 
         val settings = SettingsManager.getInstance(activity!!).getSettings()
         bannerAdUnitId = settings.mopubMediationBannerAdUnitId
@@ -71,14 +79,17 @@ class MoPubMediationFragment : Fragment() {
         mopubInterstitial.interstitialAdListener = interstitialListener
 
         view.findViewById<Button>(R.id.button_load_banner).setOnClickListener {
+            errorBannerView.text = ""
             mopubBanner.loadAd()
         }
 
         view.findViewById<Button>(R.id.button_load_medium).setOnClickListener {
+            errorMRectView.text = ""
             mopubMedium.loadAd()
         }
 
         view.findViewById<Button>(R.id.button_load_fullscreen).setOnClickListener {
+            errorInterstitialView.text = ""
             mopubInterstitial.load()
         }
     }
@@ -90,6 +101,7 @@ class MoPubMediationFragment : Fragment() {
 
         override fun onBannerFailed(banner: MoPubView?, errorCode: MoPubErrorCode?) {
             Log.d(TAG, "onBannerFailed")
+            errorBannerView.text = errorCode.toString()
         }
 
         override fun onBannerClicked(banner: MoPubView?) {
@@ -112,6 +124,7 @@ class MoPubMediationFragment : Fragment() {
 
         override fun onBannerFailed(banner: MoPubView?, errorCode: MoPubErrorCode?) {
             Log.d(TAG, "onMediumFailed")
+            errorMRectView.text = errorCode.toString()
         }
 
         override fun onBannerClicked(banner: MoPubView?) {
@@ -135,6 +148,7 @@ class MoPubMediationFragment : Fragment() {
 
         override fun onInterstitialFailed(interstitial: MoPubInterstitial?, errorCode: MoPubErrorCode?) {
             Log.d(TAG, "onInterstitialFailed")
+            errorInterstitialView.text = errorCode.toString()
         }
 
         override fun onInterstitialShown(interstitial: MoPubInterstitial?) {
