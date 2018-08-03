@@ -22,6 +22,10 @@
 //
 package net.pubnative.lite.sdk.mraid.internal;
 
+import android.util.Base64;
+
+import net.pubnative.lite.sdk.mraid.Assets;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -77,6 +81,11 @@ public class MRAIDHtmlProcessor {
             }
         }
 
+        String str = Assets.mraidJS;
+        byte[] mraidjsBytes = Base64.decode(str, Base64.DEFAULT);
+        String mraidJs = new String(mraidjsBytes);
+        String mraidTag = "<script>" + ls + mraidJs + ls + "</script>";
+
         // Add meta and style tags to head tag.
         regex = "<head[^>]*>";
         pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
@@ -89,7 +98,7 @@ public class MRAIDHtmlProcessor {
                             "body { margin:0; padding:0;}" + ls +
                             "*:not(input) { -webkit-touch-callout:none; -webkit-user-select:none; -webkit-text-size-adjust:none; }" + ls +
                             "</style>";
-            processedHtml.insert(matcher.end(), ls + metaTag + ls + styleTag);
+            processedHtml.insert(matcher.end(), ls + metaTag + ls + styleTag + ls + mraidTag);
         }
 
         return processedHtml.toString();

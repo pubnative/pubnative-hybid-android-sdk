@@ -29,6 +29,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import com.mopub.mobileads.MoPubErrorCode
 import com.mopub.mobileads.MoPubInterstitial
@@ -52,6 +53,7 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
     private var adUnitId: String? = null
 
     private lateinit var loadButton: Button
+    private lateinit var errorView: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
             = inflater.inflate(R.layout.fragment_mopub_interstitial, container, false)
@@ -59,6 +61,7 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
 
         adUnitId = SettingsManager.getInstance(activity!!).getSettings().mopubInterstitialAdUnitId
@@ -70,6 +73,7 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
         loadButton.setOnClickListener {
+            errorView.text = ""
             loadPNAd()
         }
     }
@@ -94,7 +98,7 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
 
     override fun onRequestFail(throwable: Throwable?) {
         Log.d(TAG, "onRequestFail: ", throwable)
-        Toast.makeText(activity, throwable?.message, Toast.LENGTH_SHORT).show()
+        errorView.text = throwable?.message
     }
 
     // ------------- MoPub Interstitial Listener ------------------

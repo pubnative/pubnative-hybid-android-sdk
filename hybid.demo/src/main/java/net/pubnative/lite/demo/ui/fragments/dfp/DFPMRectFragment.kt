@@ -30,6 +30,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.TextView
 import android.widget.Toast
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdSize
@@ -56,6 +57,7 @@ class DFPMRectFragment : Fragment(), RequestManager.RequestListener {
     private lateinit var dfpMRect: PublisherAdView
     private lateinit var dfpMRectContainer: FrameLayout
     private lateinit var loadButton: Button
+    private lateinit var errorView: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
             = inflater.inflate(R.layout.fragment_dfp_mrect, container, false)
@@ -63,6 +65,7 @@ class DFPMRectFragment : Fragment(), RequestManager.RequestListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
         dfpMRectContainer = view.findViewById(R.id.dfp_mrect_container)
 
@@ -78,6 +81,7 @@ class DFPMRectFragment : Fragment(), RequestManager.RequestListener {
         dfpMRectContainer.addView(dfpMRect)
 
         loadButton.setOnClickListener {
+            errorView.text = ""
             loadPNAd()
         }
     }
@@ -114,7 +118,7 @@ class DFPMRectFragment : Fragment(), RequestManager.RequestListener {
 
     override fun onRequestFail(throwable: Throwable?) {
         Log.d(TAG, "onRequestFail: ", throwable)
-        Toast.makeText(activity, throwable?.message, Toast.LENGTH_SHORT).show()
+        errorView.text = throwable?.message
     }
 
     // ---------------- DFP Ad Listener ---------------------

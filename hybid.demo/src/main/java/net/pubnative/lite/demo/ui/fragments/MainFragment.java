@@ -51,6 +51,7 @@ import net.pubnative.lite.demo.ui.activities.config.MoPubSettingsActivity;
 import net.pubnative.lite.demo.ui.activities.HyBidConsentActivity;
 import net.pubnative.lite.demo.ui.activities.hybid.HyBidActivity;
 import net.pubnative.lite.demo.ui.activities.config.HyBidSettingsActivity;
+import net.pubnative.lite.demo.ui.activities.mopub.MoPubMediationActivity;
 import net.pubnative.lite.demo.ui.adapters.ZoneIdAdapter;
 import net.pubnative.lite.demo.ui.listeners.ZoneIdClickListener;
 
@@ -64,6 +65,7 @@ public class MainFragment extends Fragment {
     private Button mHyBidButton;
     private Button mMoPubButton;
     private Button mDFPButton;
+    private Button mMoPubMediationButton;
     private RecyclerView mZoneIdList;
     private TextView mChosenZoneIdView;
     private ZoneIdAdapter mAdapter;
@@ -164,6 +166,15 @@ public class MainFragment extends Fragment {
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), DFPActivity.class);
                 intent.putExtra(Constants.IntentParams.ZONE_ID, mChosenZoneId);
+                startActivity(intent);
+            }
+        });
+
+        mMoPubMediationButton = view.findViewById(R.id.button_mopub_mediation);
+        mMoPubMediationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), MoPubMediationActivity.class);
                 startActivity(intent);
             }
         });

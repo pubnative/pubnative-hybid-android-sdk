@@ -29,6 +29,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
@@ -45,6 +46,7 @@ class HyBidMRectFragment : Fragment(), PNAdView.Listener {
 
     private lateinit var hybidMRect: HyBidMRectAdView
     private lateinit var loadButton: Button
+    private lateinit var errorView: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
             = inflater.inflate(R.layout.fragment_hybid_mrect, container, false)
@@ -52,12 +54,14 @@ class HyBidMRectFragment : Fragment(), PNAdView.Listener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
         hybidMRect = view.findViewById(R.id.hybid_mrect)
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
         loadButton.setOnClickListener {
+            errorView.text = ""
             loadPNAd()
         }
     }
@@ -78,7 +82,7 @@ class HyBidMRectFragment : Fragment(), PNAdView.Listener {
 
     override fun onAdLoadFailed(error: Throwable?) {
         Log.e(TAG, "onAdLoadFailed", error)
-        Toast.makeText(activity, error?.message, Toast.LENGTH_SHORT).show()
+        errorView.text = error?.message
     }
 
     override fun onAdImpression() {

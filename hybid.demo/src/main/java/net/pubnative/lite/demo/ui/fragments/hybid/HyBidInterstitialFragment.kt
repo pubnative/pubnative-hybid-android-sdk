@@ -29,6 +29,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
@@ -43,6 +44,7 @@ class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
     private var zoneId: String? = null
 
     private lateinit var loadButton: Button
+    private lateinit var errorView: TextView
     private var interstitial: HyBidInterstitialAd? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_hybid_interstitial, container, false)
@@ -50,12 +52,14 @@ class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
 
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
         loadButton.setOnClickListener {
+            errorView.text = ""
             loadPNAd()
         }
     }
@@ -77,7 +81,7 @@ class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
 
     override fun onInterstitialLoadFailed(error: Throwable?) {
         Log.e(TAG, "onInterstitialLoadFailed", error)
-        Toast.makeText(activity, error?.message, Toast.LENGTH_SHORT).show()
+        errorView.text = error?.message
     }
 
     override fun onInterstitialImpression() {
