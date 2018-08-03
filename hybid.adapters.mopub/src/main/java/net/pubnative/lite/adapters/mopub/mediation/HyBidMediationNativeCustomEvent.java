@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.view.View;
 
 import com.mopub.nativeads.CustomEventNative;
+import com.mopub.nativeads.ImpressionTracker;
 import com.mopub.nativeads.NativeErrorCode;
 import com.mopub.nativeads.StaticNativeAd;
 
@@ -22,6 +23,7 @@ public class HyBidMediationNativeCustomEvent extends CustomEventNative implement
     private static final String ZONE_ID_KEY = "pn_zone_id";
 
     private CustomEventNativeListener mListener;
+    private Context mContext;
     private HyBidNativeAdRequest mAdRequest;
 
     @Override
@@ -29,11 +31,7 @@ public class HyBidMediationNativeCustomEvent extends CustomEventNative implement
                                 @NonNull CustomEventNativeListener customEventNativeListener,
                                 @NonNull Map<String, Object> localExtras,
                                 @NonNull Map<String, String> serverExtras) {
-        if (customEventNativeListener == null) {
-            Logger.e(TAG, "customEventBannerListener is null");
-            return;
-        }
-
+        mContext = context;
         mListener = customEventNativeListener;
 
         String zoneId;
@@ -59,9 +57,7 @@ public class HyBidMediationNativeCustomEvent extends CustomEventNative implement
 
     @Override
     public void onRequestSuccess(NativeAd ad) {
-        if (mListener != null) {
-            mListener.onNativeAdLoaded(null);
-        }
+        new HyBidStaticNativeAd(ad, new ImpressionTracker(mContext), mListener);
     }
 
     @Override
@@ -71,46 +67,54 @@ public class HyBidMediationNativeCustomEvent extends CustomEventNative implement
         }
     }
 
-    public class HyBidStaticNativeAd extends StaticNativeAd {
-        private final Context mContext;
+    private class HyBidStaticNativeAd extends StaticNativeAd implements NativeAd.Listener {
         private final CustomEventNativeListener mListener;
         private final NativeAd mNativeAd;
-        private final NativeAd.Listener mNativeAdListener = new NativeAd.Listener() {
-            @Override
-            public void onAdImpression(NativeAd PNAPIAdModel, View view) {
-                notifyAdImpressed();
+        private final ImpressionTracker mImpressionTracker;
+
+        public HyBidStaticNativeAd(NativeAd nativeAd,
+                                   ImpressionTracker impressionTracker,
+                                   CustomEventNativeListener listener) {
+            this.mNativeAd = nativeAd;
+            this.mImpressionTracker = impressionTracker;
+            this.mListener = listener;
+            fillData();
+            if (mListener != null) {
+                mListener.onNativeAdLoaded(this);
             }
+        }
 
-            @Override
-            public void onAdClick(NativeAd PNAPIAdModel, View view) {
-                notifyAdClicked();
-            }
-
-            @Override
-            public void onAdOpenOffer(NativeAd PNAPIAdModel) {
-
-            }
-        };
-
-        HyBidStaticNativeAd(Context context, NativeAd nativeAd, CustomEventNativeListener listener) {
-            mContext = context;
-            mNativeAd = nativeAd;
-            mListener = listener;
+        private void fillData() {
+            setTitle(mNativeAd.getTitle());
+            setText(mNativeAd.getDescription());
+            setIconImageUrl(mNativeAd.getIconUrl());
+            setMainImageUrl(mNativeAd.getBannerUrl());
+            setCallToAction(mNativeAd.getCallToActionText());
+            setStarRating((double) mNativeAd.getRating());
+            setPrivacyInformationIconImageUrl(mNativeAd.getContentInfoIconUrl());
+            setPrivacyInformationIconClickThroughUrl(mNativeAd.getContentInfoClickUrl());
         }
 
         @Override
         public void prepare(@NonNull View view) {
-            mNativeAd.startTracking(view, mNativeAdListener);
+            mImpressionTracker.addView(view, this);
+            mNativeAd.startTracking(view, this);
         }
 
         @Override
         public void clear(@NonNull View view) {
+            mImpressionTracker.removeView(view);
             mNativeAd.stopTracking();
         }
 
         @Override
-        public void destroy() {
+        public void onAdImpression(NativeAd ad, View view) {
+            notifyAdImpressed();
+        }
 
+        @Override
+        public void onAdClick(NativeAd ad, View view) {
+            notifyAdClicked();
         }
     }
 }

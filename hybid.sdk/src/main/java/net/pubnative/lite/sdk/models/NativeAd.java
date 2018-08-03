@@ -48,17 +48,12 @@ public class NativeAd implements ImpressionTracker.Listener {
         /**
          * Called when impression is confirmed
          */
-        void onAdImpression(NativeAd PNAPIAdModel, View view);
+        void onAdImpression(NativeAd ad, View view);
 
         /**
          * Called when click is confirmed
          */
-        void onAdClick(NativeAd PNAPIAdModel, View view);
-
-        /**
-         * Called before the model opens the offer
-         */
-        void onAdOpenOffer(NativeAd PNAPIAdModel);
+        void onAdClick(NativeAd ad, View view);
     }
 
     protected Ad mAd;
@@ -172,6 +167,14 @@ public class NativeAd implements ImpressionTracker.Listener {
             }
         }
         return result;
+    }
+
+    public String getContentInfoIconUrl() {
+        return mAd.getContentInfoIconUrl();
+    }
+
+    public String getContentInfoClickUrl() {
+        return mAd.getContentInfoClickUrl();
     }
 
     public View getContentInfo(Context context) {
@@ -289,7 +292,6 @@ public class NativeAd implements ImpressionTracker.Listener {
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 mClickableView.getContext().startActivity(intent);
-                invokeOnOpenOffer();
             } catch (Exception ex) {
                 Log.w(TAG, "openURL: Error - " + ex.getMessage());
             }
@@ -352,12 +354,6 @@ public class NativeAd implements ImpressionTracker.Listener {
     protected void invokeOnClick(View view) {
         if (mListener != null) {
             mListener.onAdClick(NativeAd.this, view);
-        }
-    }
-
-    protected void invokeOnOpenOffer() {
-        if (mListener != null) {
-            mListener.onAdOpenOffer(this);
         }
     }
 

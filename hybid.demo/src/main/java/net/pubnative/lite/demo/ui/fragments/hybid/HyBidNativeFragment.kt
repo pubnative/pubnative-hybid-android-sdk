@@ -120,8 +120,4 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
     override fun onAdClick(PNAPIAdModel: NativeAd?, view: View?) {
         Log.d(TAG, "onAdClick")
     }
-
-    override fun onAdOpenOffer(PNAPIAdModel: NativeAd?) {
-        Log.d(TAG, "onAdOpenOffer")
-    }
 }
