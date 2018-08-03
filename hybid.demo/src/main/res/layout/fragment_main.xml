@@ -67,7 +67,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="10dp"
             android:text="@string/pn_consent"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <TextView
             android:layout_width="match_parent"
@@ -149,6 +149,26 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="4dp"
             android:text="@string/dfp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="32dp"
+            android:text="@string/mediation"
+            android:textColor="@android:color/black"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/button_mopub_mediation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:text="@string/mopub" />
 
     </LinearLayout>
 
