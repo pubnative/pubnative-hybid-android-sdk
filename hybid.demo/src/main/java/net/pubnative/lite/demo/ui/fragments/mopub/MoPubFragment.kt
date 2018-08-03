@@ -66,11 +66,5 @@ class MoPubFragment : Fragment() {
             intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }
-
-        view.findViewById<Button>(R.id.button_mopub_mediation).setOnClickListener {
-            val intent = Intent(activity, MoPubMediationActivity::class.java)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
-            startActivity(intent)
-        }
     }
 }

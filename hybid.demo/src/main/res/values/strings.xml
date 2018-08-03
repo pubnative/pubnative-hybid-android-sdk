@@ -78,4 +78,5 @@
     <string name="publisher_owned_consent_links">Links:</string>
 
     <string name="selected_zone_id">Selected Zone Id:</string>
+    <string name="mediation">Mediation</string>
 </resources>
