@@ -78,7 +78,14 @@ public class AdRequestFactory {
 
         adRequest.bundleid = HyBid.getBundleId();
         adRequest.testMode = HyBid.isTestMode() ? "1" : "0";
-        adRequest.al = adSize;
+
+        // If the ad size is empty it means it's a native ad
+        if (TextUtils.isEmpty(adSize)) {
+            adRequest.af = getDefaultNativeAssetFields();
+        } else {
+            adRequest.al = adSize;
+        }
+
         adRequest.mf = getDefaultMetaFields();
 
         Location location = mLocationManager.getUserLocation();
@@ -93,5 +100,12 @@ public class AdRequestFactory {
     private String getDefaultMetaFields() {
         String[] metaFields = new String[]{APIMeta.POINTS, APIMeta.REVENUE_MODEL, APIMeta.CONTENT_INFO};
         return TextUtils.join(",", metaFields);
+    }
+
+    private String getDefaultNativeAssetFields() {
+        String[] assetFields = new String[]{APIAsset.ICON,
+                APIAsset.TITLE, APIAsset.BANNER, APIAsset.CALL_TO_ACTION,
+                APIAsset.RATING, APIAsset.DESCRIPTION};
+        return TextUtils.join(",", assetFields);
     }
 }
