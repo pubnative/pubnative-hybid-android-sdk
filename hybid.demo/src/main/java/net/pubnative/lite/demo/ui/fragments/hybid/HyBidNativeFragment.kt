@@ -48,6 +48,7 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
     private lateinit var adDescription: TextView
     private lateinit var adChoices: FrameLayout
     private lateinit var adCallToAction: Button
+    private lateinit var adRating: RatingBar
 
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
@@ -71,6 +72,7 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
         adDescription = view.findViewById(R.id.ad_description)
         adChoices = view.findViewById(R.id.ad_choices)
         adCallToAction = view.findViewById(R.id.ad_call_to_action)
+        adRating = view.findViewById(R.id.ad_rating)
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
@@ -98,10 +100,13 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
         adCallToAction.text = ad?.callToActionText
         adChoices.addView(ad?.getContentInfo(context))
 
-        Picasso.get().load(ad?.bannerUrl).into(adBanner)
-        Picasso.get().load(ad?.iconUrl).into(adIcon)
+        val rating = ad?.rating?.toFloat()
+        adRating.rating = rating!!
 
-        ad?.startTracking(adContainer, this)
+        Picasso.get().load(ad.bannerUrl).into(adBanner)
+        Picasso.get().load(ad.iconUrl).into(adIcon)
+
+        ad.startTracking(adContainer, this)
     }
 
     override fun onRequestSuccess(ad: NativeAd?) {
