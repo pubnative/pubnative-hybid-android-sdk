@@ -71,8 +71,12 @@ public class AdData extends JsonModel implements Serializable {
     }
 
     public Double getDoubleField(String field) {
+        Object value = getDataField(field);
+        if (value instanceof Number) {
+            return ((Number) getDataField(field)).doubleValue();
+        }
 
-        return (Double) getDataField(field);
+        return null;
     }
 
     public Integer getIntField(String field) {
