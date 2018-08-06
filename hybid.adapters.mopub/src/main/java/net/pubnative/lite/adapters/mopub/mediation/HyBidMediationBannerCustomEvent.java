@@ -41,7 +41,6 @@ public class HyBidMediationBannerCustomEvent extends CustomEventBanner implement
     private static final String ZONE_ID_KEY = "pn_zone_id";
     private CustomEventBannerListener mBannerListener;
     private HyBidBannerAdView mBannerView;
-    private Context mContext;
 
     @Override
     protected void loadBanner(Context context,
@@ -52,8 +51,6 @@ public class HyBidMediationBannerCustomEvent extends CustomEventBanner implement
             Logger.e(TAG, "customEventBannerListener is null");
             return;
         }
-
-        mContext = context.getApplicationContext();
 
         mBannerListener = customEventBannerListener;
 

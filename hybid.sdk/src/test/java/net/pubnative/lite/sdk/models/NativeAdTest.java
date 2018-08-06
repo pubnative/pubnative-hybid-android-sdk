@@ -61,21 +61,10 @@ public class NativeAdTest {
     }
 
     @Test
-    public void testOpenOfferCallbackWithValidListener() {
-
-        NativeAd model = spy(NativeAd.class);
-        NativeAd.Listener listener = mock(NativeAd.Listener.class);
-        model.mListener = listener;
-        model.invokeOnOpenOffer();
-        verify(listener, times(1)).onAdOpenOffer(eq(model));
-    }
-
-    @Test
     public void testCallbacksWithNullListener() {
 
         NativeAd model = spy(NativeAd.class);
         model.mListener = null;
-        model.invokeOnOpenOffer();
         model.invokeOnClick(null);
         model.invokeOnImpression(null);
     }
@@ -121,22 +110,6 @@ public class NativeAdTest {
     }
 
     @Test
-    public void openUrl_withValidData_onPubnativeAdModelOpenOfferCalled() {
-        Ad adDataModel = spy(AdTestModel.class);
-        String url = "http://www.google.com";
-        adDataModel.link = url;
-        NativeAd model = spy(NativeAd.class);
-        model.mAd = adDataModel;
-        View adView = spy(new View(activity));
-        View clickableView = spy(new View(activity));
-        NativeAd.Listener listener = mock(NativeAd.Listener.class);
-        model.startTracking(adView, clickableView, listener);
-        model.openURL(url);
-
-        verify(listener).onAdOpenOffer(eq(model));
-    }
-
-    @Test
     public void getAsset_withRightData_returnDataModel() {
         String assetName = "text";
         String assetValue = "value";
@@ -144,10 +117,10 @@ public class NativeAdTest {
         Ad adModel = spy(AdTestModel.class);
         AdData adDataModel = spy(AdData.class);
         NativeAd model = spy(NativeAd.class);
-        adDataModel.data = new HashMap<String, Object>();
-        adModel.assets = new ArrayList<AdData>();
-        adModel.meta = new ArrayList<AdData>();
-        adModel.beacons = new ArrayList<AdData>();
+        adDataModel.data = new HashMap<>();
+        adModel.assets = new ArrayList<>();
+        adModel.meta = new ArrayList<>();
+        adModel.beacons = new ArrayList<>();
         adDataModel.data.put(assetName, assetValue);
         adDataModel.type = assetName;
         adModel.assets.add(adDataModel);

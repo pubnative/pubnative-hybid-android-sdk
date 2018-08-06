@@ -30,7 +30,7 @@ import java.util.List;
  */
 
 public class Constants {
-    public static final String NATIVE_ZONE_ID = "1";
+    public static final String NATIVE_ZONE_ID = "7";
     public static final String BANNER_MRAID_ZONE_ID = "2";
     public static final String INTERSTITIAL_MRAID_ZONE_ID = "3";
     public static final String MEDIUM_MRAID_ZONE_ID = "5";
