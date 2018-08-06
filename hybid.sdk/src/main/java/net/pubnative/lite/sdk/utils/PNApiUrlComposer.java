@@ -64,6 +64,10 @@ public final class PNApiUrlComposer {
             uriBuilder.appendQueryParameter("mf", adRequest.mf);
         }
 
+        if (!TextUtils.isEmpty(adRequest.af)) {
+            uriBuilder.appendQueryParameter("af", adRequest.af);
+        }
+
         if (!TextUtils.isEmpty(adRequest.zoneid)) {
             uriBuilder.appendQueryParameter("zoneid", adRequest.zoneid);
         }

@@ -34,6 +34,7 @@ public class AdRequest {
     public String dnt;
     public String al;
     public String mf;
+    public String af;
     public String zoneid;
     public String locale;
     public String latitude;
