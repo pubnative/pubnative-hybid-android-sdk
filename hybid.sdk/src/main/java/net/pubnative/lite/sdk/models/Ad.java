@@ -23,6 +23,7 @@
 package net.pubnative.lite.sdk.models;
 
 import android.content.Context;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -45,6 +46,9 @@ public class Ad extends JsonModel implements Serializable {
     private static final String DATA_CONTENTINFO_LINK_KEY = "link";
     private static final String DATA_CONTENTINFO_ICON_KEY = "icon";
     private static final String DATA_POINTS_NUMBER_KEY = "number";
+
+    private static final String PN_IMPRESSION_URL = "got.pubnative.net";
+    private static final String PN_IMPRESSION_QUERY_PARAM = "t";
 
     //==============================================================================================
     // Fields
@@ -237,5 +241,31 @@ public class Ad extends JsonModel implements Serializable {
         return adData.getIntField(DATA_POINTS_NUMBER_KEY);
     }
 
+    public String getImpressionId() {
+        List<AdData> impressionBeacons = getBeacons(Beacon.IMPRESSION);
 
+        boolean found = false;
+        int index = 0;
+
+        String impressionId = "";
+
+        while (index < impressionBeacons.size() && !found) {
+            AdData data = impressionBeacons.get(index);
+
+            if (!TextUtils.isEmpty(data.getURL())) {
+                Uri uri = Uri.parse(data.getURL());
+                if (uri.getAuthority().equals(PN_IMPRESSION_URL)) {
+                    String idParam = uri.getQueryParameter(PN_IMPRESSION_QUERY_PARAM);
+                    if (!TextUtils.isEmpty(idParam)) {
+                        impressionId = idParam;
+                        found = true;
+                    }
+                }
+            }
+
+            index++;
+        }
+
+        return impressionId;
+    }
 }

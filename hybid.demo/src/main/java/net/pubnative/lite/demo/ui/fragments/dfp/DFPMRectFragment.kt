@@ -24,6 +24,7 @@ package net.pubnative.lite.demo.ui.fragments.dfp
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -57,16 +58,17 @@ class DFPMRectFragment : Fragment(), RequestManager.RequestListener {
     private lateinit var dfpMRect: PublisherAdView
     private lateinit var dfpMRectContainer: FrameLayout
     private lateinit var loadButton: Button
+    private lateinit var impressionIdView: TextView
     private lateinit var errorView: TextView
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
-            = inflater.inflate(R.layout.fragment_dfp_mrect, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_dfp_mrect, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
+        impressionIdView = view.findViewById(R.id.view_impression_id)
         dfpMRectContainer = view.findViewById(R.id.dfp_mrect_container)
 
         requestManager = MRectRequestManager()
@@ -113,6 +115,10 @@ class DFPMRectFragment : Fragment(), RequestManager.RequestListener {
 
         val adRequest = builder.build()
         dfpMRect.loadAd(adRequest)
+
+        if (!TextUtils.isEmpty(ad?.impressionId)) {
+            impressionIdView.text = ad?.impressionId
+        }
         Log.d(TAG, "onRequestSuccess")
     }
 

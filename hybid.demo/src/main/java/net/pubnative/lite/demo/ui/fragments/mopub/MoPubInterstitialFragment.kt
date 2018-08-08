@@ -24,6 +24,7 @@ package net.pubnative.lite.demo.ui.fragments.mopub
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -53,16 +54,17 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
     private var adUnitId: String? = null
 
     private lateinit var loadButton: Button
+    private lateinit var impressionIdView: TextView
     private lateinit var errorView: TextView
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
-            = inflater.inflate(R.layout.fragment_mopub_interstitial, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_mopub_interstitial, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
+        impressionIdView = view.findViewById(R.id.view_impression_id)
 
         adUnitId = SettingsManager.getInstance(activity!!).getSettings().mopubInterstitialAdUnitId
 
@@ -93,6 +95,10 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
     override fun onRequestSuccess(ad: Ad?) {
         mopubInterstitial.keywords = PrebidUtils.getPrebidKeywords(ad, zoneId)
         mopubInterstitial.load()
+
+        if (!TextUtils.isEmpty(ad?.impressionId)) {
+            impressionIdView.text = ad?.impressionId
+        }
         Log.d(TAG, "onRequestSuccess")
     }
 

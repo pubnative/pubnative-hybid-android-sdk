@@ -48,6 +48,7 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
 
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
             = inflater.inflate(R.layout.fragment_hybid_banner, container, false)
 

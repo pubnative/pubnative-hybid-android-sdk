@@ -24,6 +24,7 @@ package net.pubnative.lite.demo.ui.fragments.dfp
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -54,16 +55,17 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
     private var adUnitId: String? = null
 
     private lateinit var loadButton: Button
+    private lateinit var impressionIdView: TextView
     private lateinit var errorView: TextView
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
-            = inflater.inflate(R.layout.fragment_dfp_interstitial, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_dfp_interstitial, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
+        impressionIdView = view.findViewById(R.id.view_impression_id)
 
         adUnitId = SettingsManager.getInstance(activity!!).getSettings().dfpInterstitialAdUnitId
 
@@ -103,6 +105,10 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
 
         val adRequest = builder.build()
         dfpInterstitial.loadAd(adRequest)
+
+        if (!TextUtils.isEmpty(ad?.impressionId)) {
+            impressionIdView.text = ad?.impressionId
+        }
         Log.d(TAG, "onRequestSuccess")
     }
 

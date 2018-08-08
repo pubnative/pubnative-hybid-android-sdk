@@ -79,4 +79,5 @@
 
     <string name="selected_zone_id">Selected Zone Id:</string>
     <string name="mediation">Mediation</string>
+    <string name="impression_id">Impression Id:</string>
 </resources>
