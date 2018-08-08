@@ -192,6 +192,8 @@ public class PNHttpRequest {
                 wr.flush();
                 wr.close();
             }
+
+            Logger.d(TAG, urlString);
             // 3. Do request
             connection.connect();
             int responseCode = connection.getResponseCode();
@@ -200,6 +202,7 @@ public class PNHttpRequest {
                     InputStream inputStream = connection.getInputStream();
                     String result = stringFromInputStream(inputStream);
                     inputStream.close();
+                    Logger.d(TAG, result);
                     invokeFinish(result);
                 } catch (PNException ex) {
                     invokeFail(ex, false);

@@ -28,6 +28,7 @@ import android.app.Application;
 import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.tracking.HyBidCrashTracker;
+import net.pubnative.lite.sdk.utils.Logger;
 
 public class HyBid {
     public static final String BASE_URL = "https://api.pubnative.net/api/v3/native";
@@ -159,6 +160,10 @@ public class HyBid {
 
     public static String getKeywords() {
         return sKeywords;
+    }
+
+    public static void setLogLevel(Logger.Level level) {
+        Logger.setLogLevel(level);
     }
 
     public interface InitialisationListener {
