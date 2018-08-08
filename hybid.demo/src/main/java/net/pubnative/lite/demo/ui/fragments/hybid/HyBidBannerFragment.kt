@@ -29,6 +29,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
@@ -45,6 +46,7 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
 
     private lateinit var hybidBanner: HyBidBannerAdView
     private lateinit var loadButton: Button
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
             = inflater.inflate(R.layout.fragment_hybid_banner, container, false)

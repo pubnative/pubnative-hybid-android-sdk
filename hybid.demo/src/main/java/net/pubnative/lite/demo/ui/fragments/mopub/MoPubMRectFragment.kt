@@ -24,11 +24,13 @@ package net.pubnative.lite.demo.ui.fragments.mopub
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import com.mopub.mobileads.MoPubErrorCode
 import com.mopub.mobileads.MoPubView
@@ -52,14 +54,15 @@ class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView
 
     private lateinit var mopubMRect: MoPubView
     private lateinit var loadButton: Button
+    private lateinit var impressionIdView: TextView
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
-            = inflater.inflate(R.layout.fragment_mopub_mrect, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_mopub_mrect, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         loadButton = view.findViewById(R.id.button_load)
+        impressionIdView = view.findViewById(R.id.view_impression_id)
         mopubMRect = view.findViewById(R.id.mopub_mrect)
         mopubMRect.bannerAdListener = this
         mopubMRect.autorefreshEnabled = false
@@ -90,6 +93,10 @@ class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView
         mopubMRect.adUnitId = adUnitId
         mopubMRect.keywords = PrebidUtils.getPrebidKeywords(ad, zoneId)
         mopubMRect.loadAd()
+
+        if (!TextUtils.isEmpty(ad?.impressionId)) {
+            impressionIdView.text = ad?.impressionId
+        }
         Log.d(TAG, "onRequestSuccess")
     }
 
