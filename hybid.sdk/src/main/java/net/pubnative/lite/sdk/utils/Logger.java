@@ -49,7 +49,7 @@ public class Logger {
     }
 
     private static final String TAG = "HyBid";
-    private static Level sLogLevel = Level.debug;
+    private static Level sLogLevel = Level.info;
 
     public static void setLogLevel(Level logLevel) {
         sLogLevel = logLevel;

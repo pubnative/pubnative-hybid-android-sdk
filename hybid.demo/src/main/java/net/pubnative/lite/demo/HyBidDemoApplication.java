@@ -35,6 +35,7 @@ import net.pubnative.lite.demo.managers.MoPubManager;
 import net.pubnative.lite.demo.managers.SettingsManager;
 import net.pubnative.lite.demo.models.SettingsModel;
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.utils.Logger;
 
 import java.util.ArrayList;
 
@@ -66,6 +67,9 @@ public class HyBidDemoApplication extends MultiDexApplication {
                 // HyBid SDK has been initialised
             }
         });
+
+        HyBid.setLogLevel(Logger.Level.debug);
+
         HyBid.setTestMode(settings.getTestMode());
         HyBid.setCoppaEnabled(settings.getCoppa());
         HyBid.setAge(settings.getAge());
