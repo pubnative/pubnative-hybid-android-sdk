@@ -15,6 +15,7 @@
     <string name="dfp_settings">DFP Settings</string>
 
     <string name="load">Load</string>
+    <string name="load_native">Load native</string>
     <string name="load_banner">Load banner</string>
     <string name="load_medium">Load medium</string>
     <string name="load_fullscreen">Load fullscreen</string>

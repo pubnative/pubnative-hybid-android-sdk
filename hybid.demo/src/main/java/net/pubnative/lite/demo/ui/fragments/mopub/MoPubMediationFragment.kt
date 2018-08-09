@@ -49,6 +49,7 @@ class MoPubMediationFragment : Fragment() {
     private lateinit var errorBannerView: TextView
     private lateinit var errorMRectView: TextView
     private lateinit var errorInterstitialView: TextView
+    private lateinit var errorNativeView: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_mopub_mediation, container, false)
 
@@ -58,9 +59,10 @@ class MoPubMediationFragment : Fragment() {
         mopubBanner = view.findViewById(R.id.mopub_banner)
         mopubMedium = view.findViewById(R.id.mopub_medium)
 
-        errorBannerView = view.findViewById(R.id.view_banner_error);
-        errorMRectView = view.findViewById(R.id.view_mrect_error);
-        errorInterstitialView = view.findViewById(R.id.view_interstitial_error);
+        errorBannerView = view.findViewById(R.id.view_banner_error)
+        errorMRectView = view.findViewById(R.id.view_mrect_error)
+        errorInterstitialView = view.findViewById(R.id.view_interstitial_error)
+        errorNativeView = view.findViewById(R.id.view_native_error)
 
         val settings = SettingsManager.getInstance(activity!!).getSettings()
         bannerAdUnitId = settings.mopubMediationBannerAdUnitId
@@ -91,6 +93,10 @@ class MoPubMediationFragment : Fragment() {
         view.findViewById<Button>(R.id.button_load_fullscreen).setOnClickListener {
             errorInterstitialView.text = ""
             mopubInterstitial.load()
+        }
+
+        view.findViewById<Button>(R.id.button_load_native).setOnClickListener {
+            errorNativeView.text = ""
         }
     }
 
