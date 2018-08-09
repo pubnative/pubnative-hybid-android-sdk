@@ -33,6 +33,7 @@ import android.widget.TextView
 import com.mopub.mobileads.MoPubErrorCode
 import com.mopub.mobileads.MoPubInterstitial
 import com.mopub.mobileads.MoPubView
+import com.mopub.nativeads.*
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 
@@ -42,6 +43,7 @@ class MoPubMediationFragment : Fragment() {
     private var bannerAdUnitId: String? = null
     private var mediumAdUnitId: String? = null
     private var fullscreenAdUnitId: String? = null
+    private var nativeAdUnitId: String? = null
 
     private lateinit var mopubBanner: MoPubView
     private lateinit var mopubMedium: MoPubView
@@ -50,6 +52,8 @@ class MoPubMediationFragment : Fragment() {
     private lateinit var errorMRectView: TextView
     private lateinit var errorInterstitialView: TextView
     private lateinit var errorNativeView: TextView
+
+    private var mopubNative: MoPubNative? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_mopub_mediation, container, false)
 
@@ -68,6 +72,7 @@ class MoPubMediationFragment : Fragment() {
         bannerAdUnitId = settings.mopubMediationBannerAdUnitId
         mediumAdUnitId = settings.mopubMediationMediumAdUnitId
         fullscreenAdUnitId = settings.mopubMediationInterstitialAdUnitId
+        nativeAdUnitId = settings.mopubMediationNativeAdUnitId
 
         mopubBanner.bannerAdListener = bannerListener
         mopubBanner.adUnitId = bannerAdUnitId
@@ -79,6 +84,20 @@ class MoPubMediationFragment : Fragment() {
 
         mopubInterstitial = MoPubInterstitial(activity!!, fullscreenAdUnitId!!)
         mopubInterstitial.interstitialAdListener = interstitialListener
+
+        mopubNative = MoPubNative(activity!!, nativeAdUnitId!!, nativeListener)
+
+        val viewBinder = ViewBinder.Builder(R.layout.fragment_mopub_mediation)
+                .mainImageId(R.id.ad_banner)
+                .iconImageId(R.id.ad_icon)
+                .titleId(R.id.ad_title)
+                .textId(R.id.ad_description)
+                .privacyInformationIconImageId(R.id.ad_choices)
+                .build()
+
+        val adRenderer = MoPubStaticNativeAdRenderer(viewBinder)
+
+        mopubNative?.registerAdRenderer(adRenderer)
 
         view.findViewById<Button>(R.id.button_load_banner).setOnClickListener {
             errorBannerView.text = ""
@@ -97,6 +116,7 @@ class MoPubMediationFragment : Fragment() {
 
         view.findViewById<Button>(R.id.button_load_native).setOnClickListener {
             errorNativeView.text = ""
+            mopubNative?.makeRequest()
         }
     }
 
@@ -167,6 +187,28 @@ class MoPubMediationFragment : Fragment() {
 
         override fun onInterstitialClicked(interstitial: MoPubInterstitial?) {
             Log.d(TAG, "onInterstitialClicked")
+        }
+    }
+
+    private val nativeListener = object : MoPubNative.MoPubNativeNetworkListener {
+        override fun onNativeLoad(nativeAd: NativeAd?) {
+            nativeAd?.setMoPubNativeEventListener(nativeEventListener)
+            Log.d(TAG, "onNativeLoad")
+        }
+
+        override fun onNativeFail(errorCode: NativeErrorCode?) {
+            Log.d(TAG, "onNativeFail")
+            errorNativeView.text = errorCode.toString()
+        }
+    }
+
+    private val nativeEventListener = object : NativeAd.MoPubNativeEventListener {
+        override fun onImpression(view: View?) {
+            Log.d(TAG, "Native: onImpression")
+        }
+
+        override fun onClick(view: View?) {
+            Log.d(TAG, "Native: onClick")
         }
     }
 }

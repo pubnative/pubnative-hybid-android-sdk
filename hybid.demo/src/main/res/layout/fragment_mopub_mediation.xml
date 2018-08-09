@@ -92,7 +92,7 @@
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="10dp"
-            android:text="@string/load_fullscreen" />
+            android:text="@string/load_native" />
 
         <RelativeLayout
             android:id="@+id/ad_container"
@@ -144,19 +144,6 @@
                 android:layout_marginTop="8dp"
                 android:textColor="@android:color/black"
                 android:textSize="14sp" />
-
-            <RatingBar
-                android:id="@+id/ad_rating"
-                style="@style/customRatingBar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/ad_description"
-                android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:numStars="5"
-                android:rating="2"
-                android:isIndicator="true"
-                android:layout_marginTop="8dp"/>
 
             <Button
                 android:id="@+id/ad_call_to_action"

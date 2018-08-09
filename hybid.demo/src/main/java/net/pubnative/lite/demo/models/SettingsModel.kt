@@ -42,6 +42,7 @@ data class SettingsModel(var appToken: String,
                          var mopubMediationBannerAdUnitId: String,
                          var mopubMediationMediumAdUnitId: String,
                          var mopubMediationInterstitialAdUnitId: String,
+                         var mopubMediationNativeAdUnitId: String,
                          var dfpBannerAdUnitId: String,
                          var dfpMediumAdUnitId: String,
                          var dfpInterstitialAdUnitId: String) : Parcelable {
@@ -63,6 +64,7 @@ data class SettingsModel(var appToken: String,
             },
             parcel.readInt() != 0,
             parcel.readInt() != 0,
+            parcel.readString(),
             parcel.readString(),
             parcel.readString(),
             parcel.readString(),
@@ -106,6 +108,7 @@ data class SettingsModel(var appToken: String,
         dest?.writeString(mopubMediationBannerAdUnitId)
         dest?.writeString(mopubMediationMediumAdUnitId)
         dest?.writeString(mopubMediationInterstitialAdUnitId)
+        dest?.writeString(mopubMediationNativeAdUnitId)
 
         dest?.writeString(dfpBannerAdUnitId)
         dest?.writeString(dfpMediumAdUnitId)
