@@ -87,7 +87,7 @@ class MoPubMediationFragment : Fragment() {
 
         mopubNative = MoPubNative(activity!!, nativeAdUnitId!!, nativeListener)
 
-        val viewBinder = ViewBinder.Builder(R.layout.fragment_mopub_mediation)
+        val viewBinder = ViewBinder.Builder(R.id.ad_container)
                 .mainImageId(R.id.ad_banner)
                 .iconImageId(R.id.ad_icon)
                 .titleId(R.id.ad_title)
