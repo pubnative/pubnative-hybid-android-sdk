@@ -42,6 +42,7 @@ const val SETTINGS_KEY_MOPUB_INTERSTITIAL_AD_UNIT_ID = "mopub_interstitial_ad_un
 const val SETTINGS_KEY_MOPUB_MEDIATION_BANNER_AD_UNIT_ID = "mopub_mediation_banner_ad_unit_id"
 const val SETTINGS_KEY_MOPUB_MEDIATION_MEDIUM_AD_UNIT_ID = "mopub_mediation_medium_ad_unit_id"
 const val SETTINGS_KEY_MOPUB_MEDIATION_INTERSTITIAL_AD_UNIT_ID = "mopub_mediation_interstitial_ad_unit_id"
+const val SETTINGS_KEY_MOPUB_MEDIATION_NATIVE_AD_UNIT_ID = "mopub_mediation_native_ad_unit_id"
 
 const val SETTINGS_KEY_DFP_BANNER_AD_UNIT_ID = "dfp_banner_ad_unit_id"
 const val SETTINGS_KEY_DFP_MEDIUM_AD_UNIT_ID = "dfp_medium_ad_unit_id"

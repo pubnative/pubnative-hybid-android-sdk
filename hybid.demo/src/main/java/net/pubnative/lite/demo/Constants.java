@@ -40,6 +40,7 @@ public class Constants {
     public static final String MOPUB_MEDIATION_BANNER_AD_UNIT = "38864d35877d4684af11319530993074";
     public static final String MOPUB_MEDIATION_INTERSTITIAL_AD_UNIT = "2bb6db4d69fa407a87b0c96c55d7c2b4";
     public static final String MOPUB_MEDIATION_MEDIUM_AD_UNIT = "0af490cac3d34256b0010fac17f26759";
+    public static final String MOPUB_MEDIATION_NATIVE_AD_UNIT = "2dfcd13fb5dc4e9d9bc6ab3e382ffeb7";
 
     public static final String MOPUB_MRAID_BANNER_AD_UNIT = "b8b82260e1b84a9ba361e03c21ce4caf";
     public static final String MOPUB_MRAID_INTERSTITIAL_AD_UNIT = "0bd7ea20185547f2bd29a9574bfce917";
