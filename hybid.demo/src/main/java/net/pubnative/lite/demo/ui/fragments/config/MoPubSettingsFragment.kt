@@ -42,6 +42,10 @@ class MoPubSettingsFragment : Fragment() {
     private lateinit var bannerInput: EditText
     private lateinit var mediumInput: EditText
     private lateinit var interstitialInput: EditText
+    private lateinit var mediationBannerInput: EditText
+    private lateinit var mediationMediumInput: EditText
+    private lateinit var mediationInterstitialInput: EditText
+    private lateinit var mediationNativeInput: EditText
     private lateinit var settingManager: SettingsManager
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
@@ -53,6 +57,10 @@ class MoPubSettingsFragment : Fragment() {
         bannerInput = view.findViewById(R.id.input_mopub_banner)
         mediumInput = view.findViewById(R.id.input_mopub_medium)
         interstitialInput = view.findViewById(R.id.input_mopub_interstitial)
+        mediationBannerInput = view.findViewById(R.id.input_mopub_mediation_banner)
+        mediationMediumInput = view.findViewById(R.id.input_mopub_mediation_medium)
+        mediationInterstitialInput = view.findViewById(R.id.input_mopub_mediation_interstitial)
+        mediationNativeInput = view.findViewById(R.id.input_mopub_mediation_native)
 
         settingManager = SettingsManager.getInstance(context!!)
 
@@ -60,15 +68,23 @@ class MoPubSettingsFragment : Fragment() {
             val bannerAdUnitId = bannerInput.text.toString()
             val mediumAdUnitId = mediumInput.text.toString()
             val interstitialAdUnitId = interstitialInput.text.toString()
+            val mediationBannerAdUnitId = mediationBannerInput.text.toString()
+            val mediationMediumAdUnitId = mediationMediumInput.text.toString()
+            val mediationInterstitialAdUnitId = mediationInterstitialInput.text.toString()
+            val mediationNativeAdUnitId = mediationNativeInput.text.toString()
 
             settingManager.setMoPubBannerAdUnitId(bannerAdUnitId)
             settingManager.setMoPubMediumAdUnitId(mediumAdUnitId)
             settingManager.setMoPubInterstitialAdUnitId(interstitialAdUnitId)
+            settingManager.setMoPubMediationBannerAdUnitId(mediationBannerAdUnitId)
+            settingManager.setMoPubMediationMediumAdUnitId(mediationMediumAdUnitId)
+            settingManager.setMoPubMediationInterstitialAdUnitId(mediationInterstitialAdUnitId)
+            settingManager.setMoPubMediationNativeAdUnitId(mediationNativeAdUnitId)
 
-            MoPubManager.initMoPubSdk(activity, bannerAdUnitId, {
+            MoPubManager.initMoPubSdk(activity, bannerAdUnitId) {
                 Toast.makeText(activity, "MoPub settings saved successfully.", Toast.LENGTH_SHORT).show()
                 activity?.finish()
-            })
+            }
         }
 
         fillSavedValues()
@@ -79,5 +95,9 @@ class MoPubSettingsFragment : Fragment() {
         bannerInput.setText(settings.mopubBannerAdUnitId)
         mediumInput.setText(settings.mopubMediumAdUnitId)
         interstitialInput.setText(settings.mopubInterstitialAdUnitId)
+        mediationBannerInput.setText(settings.mopubMediationBannerAdUnitId)
+        mediationMediumInput.setText(settings.mopubMediationMediumAdUnitId)
+        mediationInterstitialInput.setText(settings.mopubMediationInterstitialAdUnitId)
+        mediationNativeInput.setText(settings.mopubMediationNativeAdUnitId)
     }
 }
