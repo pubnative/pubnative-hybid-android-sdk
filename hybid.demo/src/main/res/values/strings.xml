@@ -29,6 +29,7 @@
     <string name="hint_mopub_banner_ad_unit_id">Banner Ad Unit ID</string>
     <string name="hint_mopub_medium_ad_unit_id">Medium Ad Unit ID</string>
     <string name="hint_mopub_interstitial_ad_unit_id">Interstitial Ad Unit ID</string>
+    <string name="hint_mopub_native_ad_unit_id">Native Ad Unit ID</string>
     <string name="save_mopub_settings">Save MoPub settings</string>
 
     <string name="hint_dfp_banner_ad_unit_id">Banner Ad Unit ID</string>
