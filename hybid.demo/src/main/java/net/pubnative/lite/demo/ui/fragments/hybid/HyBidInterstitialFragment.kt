@@ -24,6 +24,7 @@ package net.pubnative.lite.demo.ui.fragments.hybid
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -33,6 +34,7 @@ import android.widget.TextView
 import android.widget.Toast
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.util.JsonUtils
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd
 import net.pubnative.lite.sdk.utils.AdRequestRegistry
 
@@ -87,11 +89,13 @@ class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
     override fun onInterstitialLoaded() {
         Log.d(TAG, "onInterstitialLoaded")
         interstitial?.show()
+        displayLogs()
     }
 
     override fun onInterstitialLoadFailed(error: Throwable?) {
         Log.e(TAG, "onInterstitialLoadFailed", error)
         errorView.text = error?.message
+        displayLogs()
     }
 
     override fun onInterstitialImpression() {
@@ -111,7 +115,9 @@ class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
         if (registryItem != null) {
             requestView.text = registryItem.url
             latencyView.text = registryItem.latency.toString()
-            responseView.text = registryItem.response
+            if (!TextUtils.isEmpty(registryItem.response)) {
+                responseView.text = JsonUtils.toFormattedJson(registryItem.response)
+            }
         }
     }
 }

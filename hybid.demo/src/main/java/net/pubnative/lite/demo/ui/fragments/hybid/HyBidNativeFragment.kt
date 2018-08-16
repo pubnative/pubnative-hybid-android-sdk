@@ -33,6 +33,7 @@ import android.widget.*
 import com.squareup.picasso.Picasso
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.util.JsonUtils
 import net.pubnative.lite.sdk.models.NativeAd
 import net.pubnative.lite.sdk.nativead.HyBidNativeAdRequest
 import net.pubnative.lite.sdk.utils.AdRequestRegistry
@@ -122,11 +123,13 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
 
     override fun onRequestSuccess(ad: NativeAd?) {
         renderAd(ad)
+        displayLogs()
     }
 
     override fun onRequestFail(throwable: Throwable?) {
         Log.e(TAG, "onAdLoadFailed", throwable)
         errorView.text = throwable?.message
+        displayLogs()
     }
 
     override fun onAdImpression(PNAPIAdModel: NativeAd?, view: View?) {
@@ -142,7 +145,9 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
         if (registryItem != null) {
             requestView.text = registryItem.url
             latencyView.text = registryItem.latency.toString()
-            responseView.text = registryItem.response
+            if (!TextUtils.isEmpty(registryItem.response)) {
+                responseView.text = JsonUtils.toFormattedJson(registryItem.response)
+            }
         }
     }
 }

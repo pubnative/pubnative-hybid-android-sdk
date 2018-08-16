@@ -24,6 +24,7 @@ package net.pubnative.lite.demo.ui.fragments.hybid
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -33,6 +34,7 @@ import android.widget.TextView
 import android.widget.Toast
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.util.JsonUtils
 import net.pubnative.lite.sdk.utils.AdRequestRegistry
 import net.pubnative.lite.sdk.views.HyBidMRectAdView
 import net.pubnative.lite.sdk.views.PNAdView
@@ -88,11 +90,13 @@ class HyBidMRectFragment : Fragment(), PNAdView.Listener {
     // --------------- PNAdView Listener --------------------
     override fun onAdLoaded() {
         Log.d(TAG, "onAdLoaded")
+        displayLogs()
     }
 
     override fun onAdLoadFailed(error: Throwable?) {
         Log.e(TAG, "onAdLoadFailed", error)
         errorView.text = error?.message
+        displayLogs()
     }
 
     override fun onAdImpression() {
@@ -108,7 +112,9 @@ class HyBidMRectFragment : Fragment(), PNAdView.Listener {
         if (registryItem != null) {
             requestView.text = registryItem.url
             latencyView.text = registryItem.latency.toString()
-            responseView.text = registryItem.response
+            if (!TextUtils.isEmpty(registryItem.response)) {
+                responseView.text = JsonUtils.toFormattedJson(registryItem.response)
+            }
         }
     }
 }

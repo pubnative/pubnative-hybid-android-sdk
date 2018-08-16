@@ -40,6 +40,7 @@ import com.google.android.gms.ads.doubleclick.PublisherAdView
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
+import net.pubnative.lite.demo.util.JsonUtils
 import net.pubnative.lite.sdk.api.MRectRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
@@ -122,11 +123,13 @@ class DFPMRectFragment : Fragment(), RequestManager.RequestListener {
         dfpMRect.loadAd(adRequest)
 
         Log.d(TAG, "onRequestSuccess")
+        displayLogs()
     }
 
     override fun onRequestFail(throwable: Throwable?) {
         Log.d(TAG, "onRequestFail: ", throwable)
         errorView.text = throwable?.message
+        displayLogs()
     }
 
     // ---------------- DFP Ad Listener ---------------------
@@ -172,7 +175,9 @@ class DFPMRectFragment : Fragment(), RequestManager.RequestListener {
         if (registryItem != null) {
             requestView.text = registryItem.url
             latencyView.text = registryItem.latency.toString()
-            responseView.text = registryItem.response
+            if (!TextUtils.isEmpty(registryItem.response)) {
+                responseView.text = JsonUtils.toFormattedJson(registryItem.response)
+            }
         }
     }
 }

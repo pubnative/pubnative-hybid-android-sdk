@@ -38,6 +38,7 @@ import com.google.android.gms.ads.doubleclick.PublisherInterstitialAd
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
+import net.pubnative.lite.demo.util.JsonUtils
 import net.pubnative.lite.sdk.api.InterstitialRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
@@ -112,11 +113,13 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
         dfpInterstitial.loadAd(adRequest)
 
         Log.d(TAG, "onRequestSuccess")
+        displayLogs()
     }
 
     override fun onRequestFail(throwable: Throwable?) {
         Log.d(TAG, "onRequestFail: ", throwable)
         errorView.text = throwable?.message
+        displayLogs()
     }
 
     // ---------------- DFP Ad Listener ---------------------
@@ -163,7 +166,9 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
         if (registryItem != null) {
             requestView.text = registryItem.url
             latencyView.text = registryItem.latency.toString()
-            responseView.text = registryItem.response
+            if (!TextUtils.isEmpty(registryItem.response)) {
+                responseView.text = JsonUtils.toFormattedJson(registryItem.response)
+            }
         }
     }
 }
