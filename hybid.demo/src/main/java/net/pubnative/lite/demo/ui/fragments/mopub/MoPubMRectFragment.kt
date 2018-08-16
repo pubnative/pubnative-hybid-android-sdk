@@ -40,6 +40,7 @@ import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.sdk.api.MRectRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
+import net.pubnative.lite.sdk.utils.AdRequestRegistry
 import net.pubnative.lite.sdk.utils.PrebidUtils
 
 /**
@@ -54,8 +55,10 @@ class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView
 
     private lateinit var mopubMRect: MoPubView
     private lateinit var loadButton: Button
-    private lateinit var impressionIdView: TextView
     private lateinit var errorView: TextView
+    private lateinit var requestView: TextView
+    private lateinit var latencyView: TextView
+    private lateinit var responseView: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_mopub_mrect, container, false)
 
@@ -63,8 +66,10 @@ class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView
         super.onViewCreated(view, savedInstanceState)
 
         errorView = view.findViewById(R.id.view_error)
+        requestView = view.findViewById(R.id.view_request_url)
+        latencyView = view.findViewById(R.id.view_latency)
+        responseView = view.findViewById(R.id.view_response)
         loadButton = view.findViewById(R.id.button_load)
-        impressionIdView = view.findViewById(R.id.view_impression_id)
         mopubMRect = view.findViewById(R.id.mopub_mrect)
         mopubMRect.bannerAdListener = this
         mopubMRect.autorefreshEnabled = false
@@ -76,6 +81,9 @@ class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView
 
         loadButton.setOnClickListener {
             errorView.text = ""
+            requestView.text = ""
+            latencyView.text = ""
+            responseView.text = ""
             loadPNAd()
         }
     }
@@ -97,9 +105,6 @@ class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView
         mopubMRect.keywords = PrebidUtils.getPrebidKeywords(ad, zoneId)
         mopubMRect.loadAd()
 
-        if (!TextUtils.isEmpty(ad?.impressionId)) {
-            impressionIdView.text = ad?.impressionId
-        }
         Log.d(TAG, "onRequestSuccess")
     }
 
@@ -127,5 +132,14 @@ class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView
 
     override fun onBannerClicked(banner: MoPubView?) {
         Log.d(TAG, "onBannerClicked")
+    }
+
+    private fun displayLogs() {
+        val registryItem = AdRequestRegistry.getInstance().lastAdRequest
+        if (registryItem != null) {
+            requestView.text = registryItem.url
+            latencyView.text = registryItem.latency.toString()
+            responseView.text = registryItem.response
+        }
     }
 }

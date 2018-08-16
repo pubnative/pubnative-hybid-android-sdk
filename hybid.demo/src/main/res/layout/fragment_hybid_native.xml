@@ -1,117 +1,232 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context="net.pubnative.lite.demo.ui.fragments.hybid.HyBidNativeFragment"
     tools:showIn="@layout/activity_hybid_native">
 
-    <Button
-        android:id="@+id/button_load"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="20dp"
-        android:text="@string/load" />
+        android:orientation="vertical">
 
-    <RelativeLayout
-        android:id="@+id/ad_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="20dp"
-        android:background="@android:color/white">
-
-        <ImageView
-            android:id="@+id/ad_icon"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginLeft="16dp"
+        <Button
+            android:id="@+id/button_load"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="20dp"
+            android:text="@string/load" />
+
+        <RelativeLayout
+            android:id="@+id/ad_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:background="@android:color/white">
+
+            <ImageView
+                android:id="@+id/ad_icon"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:id="@+id/ad_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_toEndOf="@id/ad_icon"
+                android:layout_toRightOf="@id/ad_icon"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="@android:color/black"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:id="@+id/ad_banner"
+                android:layout_width="match_parent"
+                android:layout_height="140dp"
+                android:layout_below="@id/ad_icon"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:id="@+id/ad_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/ad_banner"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:textColor="@android:color/black"
+                android:textSize="14sp" />
+
+            <RatingBar
+                android:id="@+id/ad_rating"
+                style="@style/customRatingBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/ad_description"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:isIndicator="true"
+                android:numStars="5"
+                android:rating="2" />
+
+            <Button
+                android:id="@+id/ad_call_to_action"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_below="@id/ad_description"
+                android:layout_marginBottom="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:clickable="false" />
+
+            <FrameLayout
+                android:id="@+id/ad_choices"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true" />
+        </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:background="@android:color/black" />
 
         <TextView
-            android:id="@+id/ad_title"
+            android:id="@+id/label_error"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
-            android:layout_toEndOf="@id/ad_icon"
-            android:layout_toRightOf="@id/ad_icon"
-            android:ellipsize="end"
-            android:maxLines="2"
+            android:text="@string/error"
+            android:textColor="@android:color/black"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/view_error"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:textSize="16sp" />
 
-        <ImageView
-            android:id="@+id/ad_banner"
+        <View
             android:layout_width="match_parent"
-            android:layout_height="140dp"
-            android:layout_below="@id/ad_icon"
+            android:layout_height="1dp"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="10dp"
+            android:background="@android:color/black" />
 
         <TextView
-            android:id="@+id/ad_description"
+            android:id="@+id/label_request_url"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/ad_banner"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:text="@string/request_url"
             android:textColor="@android:color/black"
-            android:textSize="14sp" />
+            android:textSize="18sp" />
 
-        <RatingBar
-            android:id="@+id/ad_rating"
-            style="@style/customRatingBar"
-            android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/view_request_url"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/ad_description"
-            android:layout_marginStart="16dp"
-            android:layout_marginLeft="16dp"
-            android:numStars="5"
-            android:rating="2"
-            android:isIndicator="true"
-            android:layout_marginTop="8dp"/>
-
-        <Button
-            android:id="@+id/ad_call_to_action"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_below="@id/ad_description"
-            android:layout_marginBottom="8dp"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
-            android:clickable="false" />
+            android:gravity="center"
+            android:textColor="@android:color/black"
+            android:textSize="16sp" />
 
-        <FrameLayout
-            android:id="@+id/ad_choices"
-            android:layout_width="wrap_content"
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:background="@android:color/black" />
+
+        <TextView
+            android:id="@+id/label_latency"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true" />
-    </RelativeLayout>
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/latency"
+            android:textColor="@android:color/black"
+            android:textSize="18sp" />
 
-    <TextView
-        android:id="@+id/view_error"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="20dp"
-        android:gravity="center"
-        android:textColor="@android:color/black"
-        android:textSize="16sp" />
+        <TextView
+            android:id="@+id/view_latency"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:textColor="@android:color/black"
+            android:textSize="16sp" />
 
-</LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:background="@android:color/black" />
+
+        <TextView
+            android:id="@+id/label_response"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/response"
+            android:textColor="@android:color/black"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/view_response"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:textColor="@android:color/black"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+</ScrollView>

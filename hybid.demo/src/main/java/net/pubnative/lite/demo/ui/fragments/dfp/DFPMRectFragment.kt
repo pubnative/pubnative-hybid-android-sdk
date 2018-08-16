@@ -43,6 +43,7 @@ import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.sdk.api.MRectRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
+import net.pubnative.lite.sdk.utils.AdRequestRegistry
 import net.pubnative.lite.sdk.utils.PrebidUtils
 
 /**
@@ -58,8 +59,10 @@ class DFPMRectFragment : Fragment(), RequestManager.RequestListener {
     private lateinit var dfpMRect: PublisherAdView
     private lateinit var dfpMRectContainer: FrameLayout
     private lateinit var loadButton: Button
-    private lateinit var impressionIdView: TextView
     private lateinit var errorView: TextView
+    private lateinit var requestView: TextView
+    private lateinit var latencyView: TextView
+    private lateinit var responseView: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_dfp_mrect, container, false)
 
@@ -68,7 +71,6 @@ class DFPMRectFragment : Fragment(), RequestManager.RequestListener {
 
         errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
-        impressionIdView = view.findViewById(R.id.view_impression_id)
         dfpMRectContainer = view.findViewById(R.id.dfp_mrect_container)
 
         requestManager = MRectRequestManager()
@@ -84,6 +86,9 @@ class DFPMRectFragment : Fragment(), RequestManager.RequestListener {
 
         loadButton.setOnClickListener {
             errorView.text = ""
+            requestView.text = ""
+            latencyView.text = ""
+            responseView.text = ""
             loadPNAd()
         }
     }
@@ -116,9 +121,6 @@ class DFPMRectFragment : Fragment(), RequestManager.RequestListener {
         val adRequest = builder.build()
         dfpMRect.loadAd(adRequest)
 
-        if (!TextUtils.isEmpty(ad?.impressionId)) {
-            impressionIdView.text = ad?.impressionId
-        }
         Log.d(TAG, "onRequestSuccess")
     }
 
@@ -162,6 +164,15 @@ class DFPMRectFragment : Fragment(), RequestManager.RequestListener {
         override fun onAdClosed() {
             super.onAdClosed()
             Log.d(TAG, "onAdClosed")
+        }
+    }
+
+    private fun displayLogs() {
+        val registryItem = AdRequestRegistry.getInstance().lastAdRequest
+        if (registryItem != null) {
+            requestView.text = registryItem.url
+            latencyView.text = registryItem.latency.toString()
+            responseView.text = registryItem.response
         }
     }
 }

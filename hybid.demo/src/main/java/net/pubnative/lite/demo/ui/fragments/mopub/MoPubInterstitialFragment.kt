@@ -40,6 +40,7 @@ import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.sdk.api.InterstitialRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
+import net.pubnative.lite.sdk.utils.AdRequestRegistry
 import net.pubnative.lite.sdk.utils.PrebidUtils
 
 /**
@@ -54,8 +55,10 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
     private var adUnitId: String? = null
 
     private lateinit var loadButton: Button
-    private lateinit var impressionIdView: TextView
     private lateinit var errorView: TextView
+    private lateinit var requestView: TextView
+    private lateinit var latencyView: TextView
+    private lateinit var responseView: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_mopub_interstitial, container, false)
 
@@ -63,8 +66,10 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
         super.onViewCreated(view, savedInstanceState)
 
         errorView = view.findViewById(R.id.view_error)
+        requestView = view.findViewById(R.id.view_request_url)
+        latencyView = view.findViewById(R.id.view_latency)
+        responseView = view.findViewById(R.id.view_response)
         loadButton = view.findViewById(R.id.button_load)
-        impressionIdView = view.findViewById(R.id.view_impression_id)
 
         adUnitId = SettingsManager.getInstance(activity!!).getSettings().mopubInterstitialAdUnitId
 
@@ -76,6 +81,9 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
 
         loadButton.setOnClickListener {
             errorView.text = ""
+            requestView.text = ""
+            latencyView.text = ""
+            responseView.text = ""
             loadPNAd()
         }
     }
@@ -96,9 +104,6 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
         mopubInterstitial.keywords = PrebidUtils.getPrebidKeywords(ad, zoneId)
         mopubInterstitial.load()
 
-        if (!TextUtils.isEmpty(ad?.impressionId)) {
-            impressionIdView.text = ad?.impressionId
-        }
         Log.d(TAG, "onRequestSuccess")
     }
 
@@ -127,5 +132,14 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
 
     override fun onInterstitialClicked(interstitial: MoPubInterstitial?) {
         Log.d(TAG, "onInterstitialClicked")
+    }
+
+    private fun displayLogs() {
+        val registryItem = AdRequestRegistry.getInstance().lastAdRequest
+        if (registryItem != null) {
+            requestView.text = registryItem.url
+            latencyView.text = registryItem.latency.toString()
+            responseView.text = registryItem.response
+        }
     }
 }

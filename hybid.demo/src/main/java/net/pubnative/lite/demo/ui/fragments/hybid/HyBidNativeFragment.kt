@@ -35,6 +35,7 @@ import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.sdk.models.NativeAd
 import net.pubnative.lite.sdk.nativead.HyBidNativeAdRequest
+import net.pubnative.lite.sdk.utils.AdRequestRegistry
 
 class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, NativeAd.Listener {
     val TAG = HyBidNativeFragment::class.java.simpleName
@@ -52,6 +53,9 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
 
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
+    private lateinit var requestView: TextView
+    private lateinit var latencyView: TextView
+    private lateinit var responseView: TextView
 
     private var nativeAd: NativeAd? = null
     private var nativeAdRequest: HyBidNativeAdRequest? = null
@@ -63,6 +67,10 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
         super.onViewCreated(view, savedInstanceState)
 
         errorView = view.findViewById(R.id.view_error)
+        requestView = view.findViewById(R.id.view_request_url)
+        latencyView = view.findViewById(R.id.view_latency)
+        responseView = view.findViewById(R.id.view_response)
+
         loadButton = view.findViewById(R.id.button_load)
 
         adContainer = view.findViewById(R.id.ad_container)
@@ -80,6 +88,9 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
 
         loadButton.setOnClickListener {
             errorView.text = ""
+            requestView.text = ""
+            latencyView.text = ""
+            responseView.text = ""
             loadPNAd()
         }
     }
@@ -124,5 +135,14 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
 
     override fun onAdClick(PNAPIAdModel: NativeAd?, view: View?) {
         Log.d(TAG, "onAdClick")
+    }
+
+    private fun displayLogs() {
+        val registryItem = AdRequestRegistry.getInstance().lastAdRequest
+        if (registryItem != null) {
+            requestView.text = registryItem.url
+            latencyView.text = registryItem.latency.toString()
+            responseView.text = registryItem.response
+        }
     }
 }

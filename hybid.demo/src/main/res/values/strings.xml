@@ -86,5 +86,5 @@
     <string name="error">Error:</string>
     <string name="request_url">PubNative request url:</string>
     <string name="response">PubNative response:</string>
-    <string name="latency">PubNative latency:</string>
+    <string name="latency">PubNative latency (milliseconds):</string>
 </resources>
