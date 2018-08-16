@@ -40,6 +40,7 @@ import com.google.android.gms.ads.doubleclick.PublisherAdView
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
+import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.demo.util.JsonUtils
 import net.pubnative.lite.sdk.api.BannerRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
@@ -93,6 +94,11 @@ class DFPBannerFragment : Fragment(), RequestManager.RequestListener {
             responseView.text = ""
             loadPNAd()
         }
+
+        requestView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, requestView.text.toString()) }
+        latencyView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, latencyView.text.toString()) }
+        responseView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, responseView.text.toString()) }
+        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
     }
 
     override fun onDestroy() {
