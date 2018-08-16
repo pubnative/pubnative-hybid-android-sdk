@@ -38,9 +38,11 @@ import com.google.android.gms.ads.doubleclick.PublisherInterstitialAd
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
+import net.pubnative.lite.demo.util.JsonUtils
 import net.pubnative.lite.sdk.api.InterstitialRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
+import net.pubnative.lite.sdk.utils.AdRequestRegistry
 import net.pubnative.lite.sdk.utils.PrebidUtils
 
 /**
@@ -55,8 +57,10 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
     private var adUnitId: String? = null
 
     private lateinit var loadButton: Button
-    private lateinit var impressionIdView: TextView
     private lateinit var errorView: TextView
+    private lateinit var requestView: TextView
+    private lateinit var latencyView: TextView
+    private lateinit var responseView: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_dfp_interstitial, container, false)
 
@@ -65,7 +69,6 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
 
         errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
-        impressionIdView = view.findViewById(R.id.view_impression_id)
 
         adUnitId = SettingsManager.getInstance(activity!!).getSettings().dfpInterstitialAdUnitId
 
@@ -79,6 +82,9 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
 
         loadButton.setOnClickListener {
             errorView.text = ""
+            requestView.text = ""
+            latencyView.text = ""
+            responseView.text = ""
             loadPNAd()
         }
     }
@@ -106,15 +112,14 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
         val adRequest = builder.build()
         dfpInterstitial.loadAd(adRequest)
 
-        if (!TextUtils.isEmpty(ad?.impressionId)) {
-            impressionIdView.text = ad?.impressionId
-        }
         Log.d(TAG, "onRequestSuccess")
+        displayLogs()
     }
 
     override fun onRequestFail(throwable: Throwable?) {
         Log.d(TAG, "onRequestFail: ", throwable)
         errorView.text = throwable?.message
+        displayLogs()
     }
 
     // ---------------- DFP Ad Listener ---------------------
@@ -153,6 +158,17 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
         override fun onAdClosed() {
             super.onAdClosed()
             Log.d(TAG, "onAdClosed")
+        }
+    }
+
+    private fun displayLogs() {
+        val registryItem = AdRequestRegistry.getInstance().lastAdRequest
+        if (registryItem != null) {
+            requestView.text = registryItem.url
+            latencyView.text = registryItem.latency.toString()
+            if (!TextUtils.isEmpty(registryItem.response)) {
+                responseView.text = JsonUtils.toFormattedJson(registryItem.response)
+            }
         }
     }
 }

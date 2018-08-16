@@ -24,6 +24,7 @@ package net.pubnative.lite.demo.ui.fragments.hybid
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -33,7 +34,9 @@ import android.widget.TextView
 import android.widget.Toast
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.util.JsonUtils
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd
+import net.pubnative.lite.sdk.utils.AdRequestRegistry
 
 /**
  * Created by erosgarciaponte on 30.01.18.
@@ -45,6 +48,9 @@ class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
 
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
+    private lateinit var requestView: TextView
+    private lateinit var latencyView: TextView
+    private lateinit var responseView: TextView
     private var interstitial: HyBidInterstitialAd? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_hybid_interstitial, container, false)
@@ -53,6 +59,9 @@ class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
         super.onViewCreated(view, savedInstanceState)
 
         errorView = view.findViewById(R.id.view_error)
+        requestView = view.findViewById(R.id.view_request_url)
+        latencyView = view.findViewById(R.id.view_latency)
+        responseView = view.findViewById(R.id.view_response)
         loadButton = view.findViewById(R.id.button_load)
 
 
@@ -60,6 +69,9 @@ class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
 
         loadButton.setOnClickListener {
             errorView.text = ""
+            requestView.text = ""
+            latencyView.text = ""
+            responseView.text = ""
             loadPNAd()
         }
     }
@@ -77,11 +89,13 @@ class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
     override fun onInterstitialLoaded() {
         Log.d(TAG, "onInterstitialLoaded")
         interstitial?.show()
+        displayLogs()
     }
 
     override fun onInterstitialLoadFailed(error: Throwable?) {
         Log.e(TAG, "onInterstitialLoadFailed", error)
         errorView.text = error?.message
+        displayLogs()
     }
 
     override fun onInterstitialImpression() {
@@ -94,5 +108,16 @@ class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
 
     override fun onInterstitialClick() {
         Log.d(TAG, "onInterstitialClick")
+    }
+
+    private fun displayLogs() {
+        val registryItem = AdRequestRegistry.getInstance().lastAdRequest
+        if (registryItem != null) {
+            requestView.text = registryItem.url
+            latencyView.text = registryItem.latency.toString()
+            if (!TextUtils.isEmpty(registryItem.response)) {
+                responseView.text = JsonUtils.toFormattedJson(registryItem.response)
+            }
+        }
     }
 }

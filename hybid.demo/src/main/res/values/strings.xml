@@ -82,4 +82,9 @@
     <string name="selected_zone_id">Selected Zone Id:</string>
     <string name="mediation">Mediation</string>
     <string name="impression_id">Impression Id:</string>
+
+    <string name="error">Error:</string>
+    <string name="request_url">PubNative request url:</string>
+    <string name="response">PubNative response:</string>
+    <string name="latency">PubNative latency (milliseconds):</string>
 </resources>
