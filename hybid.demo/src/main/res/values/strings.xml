@@ -87,4 +87,10 @@
     <string name="request_url">PubNative request url:</string>
     <string name="response">PubNative response:</string>
     <string name="latency">PubNative latency (milliseconds):</string>
+
+    <string name="nav_standalone">Standalone</string>
+    <string name="nav_pre_bid">Pre-Bid</string>
+    <string name="nav_mediation">Mediation</string>
+    <string name="nav_consent">Consent</string>
+    <string name="nav_settings">Settings</string>
 </resources>
