@@ -23,12 +23,14 @@
 package net.pubnative.lite.sdk.api;
 
 import android.content.Context;
+import android.os.SystemClock;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdResponse;
 import net.pubnative.lite.sdk.network.PNHttpRequest;
+import net.pubnative.lite.sdk.utils.AdRequestRegistry;
 import net.pubnative.lite.sdk.utils.PNApiUrlComposer;
 
 import org.json.JSONObject;
@@ -59,21 +61,27 @@ public class PNApiClient {
     }
 
     public void getAd(AdRequest request, final AdRequestListener listener) {
-        String url = getAdRequestURL(request);
+        final String url = getAdRequestURL(request);
         if (url == null) {
             if (listener != null) {
                 listener.onFailure(new Exception("PNApiClient - Error: invalid request URL"));
             }
         } else {
+            final long initTime = System.currentTimeMillis();
+
             PNHttpRequest httpRequest = new PNHttpRequest();
             httpRequest.start(mContext, PNHttpRequest.Method.GET, url, new PNHttpRequest.Listener() {
                 @Override
                 public void onPNHttpRequestFinish(PNHttpRequest request, String result) {
+                    registerAdRequest(url, result, initTime);
+
                     processStream(result, listener);
                 }
 
                 @Override
                 public void onPNHttpRequestFail(PNHttpRequest request, Exception exception) {
+                    registerAdRequest(url, exception.getMessage(), initTime);
+
                     if (listener != null) {
                         listener.onFailure(exception);
                     }
@@ -130,5 +138,9 @@ public class PNApiClient {
             // STATUS 'ERROR'
             listener.onFailure(new Exception("HyBid - Server error: " + apiResponseModel.error_message));
         }
+    }
+
+    private void registerAdRequest(String url, String response, long initTime) {
+        AdRequestRegistry.getInstance().setLastAdRequest(url, response, System.currentTimeMillis() - initTime);
     }
 }

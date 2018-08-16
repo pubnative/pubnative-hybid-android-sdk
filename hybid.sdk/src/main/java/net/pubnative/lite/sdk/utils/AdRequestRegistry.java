@@ -20,15 +20,15 @@ public class AdRequestRegistry {
         return sInstance;
     }
 
-    public void setLastAdRequest(RequestItem item) {
-        this.mLastAdRequest = item;
+    public void setLastAdRequest(String url, String response, long latency) {
+        this.mLastAdRequest = new RequestItem(url, response, latency);;
     }
 
     public RequestItem getLastAdRequest() {
         return mLastAdRequest;
     }
 
-    public class RequestItem {
+    public final class RequestItem {
         private String mUrl;
         private String mPostParams;
         private String mResponse;
