@@ -24,6 +24,11 @@ import net.pubnative.lite.demo.ui.listeners.ZoneIdClickListener
 
 class StandaloneNavFragment : Fragment() {
 
+    private lateinit var bannerButton: Button
+    private lateinit var mediumButton: Button
+    private lateinit var interstitialButton: Button
+    private lateinit var nativeButton: Button
+
     private lateinit var zoneIdList: RecyclerView
     private lateinit var chosenZoneIdView: TextView
     private lateinit var adapter: ZoneIdAdapter
@@ -54,25 +59,29 @@ class StandaloneNavFragment : Fragment() {
         })
         zoneIdList.adapter = adapter
 
-        view.findViewById<Button>(R.id.button_banner).setOnClickListener {
-            val intent = Intent(activity, TabActivity::class.java)
+        bannerButton = view.findViewById(R.id.button_banner)
+        bannerButton.setOnClickListener {
+            val intent = Intent(activity, HyBidBannerActivity::class.java)
             intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
             startActivity(intent)
         }
 
-        view.findViewById<Button>(R.id.button_medium).setOnClickListener {
+        mediumButton = view.findViewById(R.id.button_medium)
+        mediumButton.setOnClickListener {
             val intent = Intent(activity, HyBidMRectActivity::class.java)
             intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
             startActivity(intent)
         }
 
-        view.findViewById<Button>(R.id.button_interstitial).setOnClickListener {
+        interstitialButton = view.findViewById(R.id.button_interstitial)
+        interstitialButton.setOnClickListener {
             val intent = Intent(activity, HyBidInterstitialActivity::class.java)
             intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
             startActivity(intent)
         }
 
-        view.findViewById<Button>(R.id.button_native).setOnClickListener {
+        nativeButton = view.findViewById(R.id.button_native)
+        nativeButton.setOnClickListener {
             val intent = Intent(activity, HyBidNativeActivity::class.java)
             intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
             startActivity(intent)
@@ -95,10 +104,18 @@ class StandaloneNavFragment : Fragment() {
     }
 
     private fun enableZones() {
-
+        bannerButton.isEnabled = true
+        mediumButton.isEnabled = true
+        interstitialButton.isEnabled = true
+        nativeButton.isEnabled = true
     }
 
     private fun disableZones() {
-
+        chosenZoneIdView.text = ""
+        chosenZoneId = ""
+        bannerButton.isEnabled = false
+        mediumButton.isEnabled = false
+        interstitialButton.isEnabled = false
+        nativeButton.isEnabled = false
     }
 }

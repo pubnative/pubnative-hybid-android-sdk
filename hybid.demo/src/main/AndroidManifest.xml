@@ -172,14 +172,14 @@
             android:name="com.mopub.common.privacy.ConsentDialogActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
 
+        <activity
+            android:name=".ui.activities.TabActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="f61a9f30a8156746aae4b1cc84856189a3bf8575" />
 
-        <activity
-            android:name=".ui.activities.TabActivity"
-            android:label="@string/title_activity_tab"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

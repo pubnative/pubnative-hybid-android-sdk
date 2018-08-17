@@ -38,6 +38,7 @@ import com.google.android.gms.ads.doubleclick.PublisherInterstitialAd
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
+import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.demo.util.JsonUtils
 import net.pubnative.lite.sdk.api.InterstitialRequestManager
@@ -59,9 +60,6 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
 
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
-    private lateinit var requestView: TextView
-    private lateinit var latencyView: TextView
-    private lateinit var responseView: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_dfp_interstitial, container, false)
 
@@ -83,15 +81,11 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
 
         loadButton.setOnClickListener {
             errorView.text = ""
-            requestView.text = ""
-            latencyView.text = ""
-            responseView.text = ""
+            val activity = activity as TabActivity
+            activity.notifyAdCleaned()
             loadPNAd()
         }
 
-        requestView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, requestView.text.toString()) }
-        latencyView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, latencyView.text.toString()) }
-        responseView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, responseView.text.toString()) }
         errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
     }
 
@@ -168,13 +162,7 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
     }
 
     private fun displayLogs() {
-        val registryItem = AdRequestRegistry.getInstance().lastAdRequest
-        if (registryItem != null) {
-            requestView.text = registryItem.url
-            latencyView.text = registryItem.latency.toString()
-            if (!TextUtils.isEmpty(registryItem.response)) {
-                responseView.text = JsonUtils.toFormattedJson(registryItem.response)
-            }
-        }
+        val activity = activity as TabActivity
+        activity.notifyAdUpdated()
     }
 }
