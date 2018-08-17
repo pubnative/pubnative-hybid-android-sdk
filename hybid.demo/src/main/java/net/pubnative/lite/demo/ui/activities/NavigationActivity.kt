@@ -1,12 +1,19 @@
-package net.pubnative.lite.demo
+package net.pubnative.lite.demo.ui.activities
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
+import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
+import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_navigation.*
+import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.fragments.*
 
 class NavigationActivity : AppCompatActivity() {
+
+    private val PERMISSION_REQUEST = 1000
 
     private var currentSelectedNav = -1
 
@@ -39,6 +46,8 @@ class NavigationActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_navigation)
+
+        checkPermissions()
 
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
 
@@ -82,6 +91,24 @@ class NavigationActivity : AppCompatActivity() {
             currentSelectedNav = R.id.nav_settings
             setTitle(R.string.nav_settings)
             supportFragmentManager.beginTransaction().replace(R.id.fragment_container, SettingsNavFragment()).commit()
+        }
+    }
+
+    fun checkPermissions() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            val permissionList = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+            ActivityCompat.requestPermissions(this, permissionList, PERMISSION_REQUEST)
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        when (requestCode) {
+            PERMISSION_REQUEST -> {
+                if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Location permission denied. You can change this on the app settings.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
     }
 }
