@@ -33,25 +33,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ui.activities.MainActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
 
-            <!--
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            -->
-        </activity>
-        <activity
-            android:name=".ui.activities.hybid.HyBidActivity"
-            android:label="@string/hybid"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.hybid.HyBidNativeActivity"
             android:label="@string/hybid_native"
@@ -73,11 +55,6 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.activities.mopub.MoPubActivity"
-            android:label="@string/mopub"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
             android:name=".ui.activities.mopub.MoPubBannerActivity"
             android:label="@string/mopub_banner"
             android:screenOrientation="portrait"
@@ -90,11 +67,6 @@
         <activity
             android:name=".ui.activities.mopub.MoPubInterstitialActivity"
             android:label="@string/mopub_interstitial"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.activities.mopub.MoPubMediationActivity"
-            android:label="@string/mopub_mediation"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
@@ -115,11 +87,6 @@
         <activity
             android:name=".ui.activities.mopub.MoPubMediationNativeActivity"
             android:label="@string/mopub_native"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.activities.dfp.DFPActivity"
-            android:label="@string/dfp"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
@@ -164,12 +131,6 @@
         <activity
             android:name=".ui.activities.config.ZoneIdsActivity"
             android:label="@string/title_pn_zone_ids"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
-        <activity
-            android:name=".ui.activities.HyBidConsentActivity"
-            android:label="@string/title_pn_consent"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
