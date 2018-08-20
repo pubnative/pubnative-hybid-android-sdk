@@ -7,8 +7,8 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
 
-        <item name="colorButtonNormal">@color/colorPrimary</item>
-        <item name="colorControlHighlight">@color/colorAccent</item>
+        <item name="colorButtonNormal">@color/button_background</item>
+        <item name="colorControlHighlight">@color/button_background</item>
     </style>
 
     <style name="AppTheme.NoActionBar">

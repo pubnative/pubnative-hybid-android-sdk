@@ -18,8 +18,9 @@
             android:layout_marginTop="20dp"
             android:maxLines="1"
             android:text="@string/mopub"
-            android:textColor="@android:color/black"
-            android:textSize="16sp" />
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/button_mopub_banner"
@@ -55,9 +56,9 @@
             android:id="@+id/button_mopub_native"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
-            android:layout_marginBottom="20dp"
             android:layout_marginTop="8dp"
             android:text="@string/native_ad"
             android:textColor="@android:color/white" />

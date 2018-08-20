@@ -108,7 +108,8 @@
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="6dp"
-            android:text="@string/title_pn_keywords" />
+            android:text="@string/title_pn_keywords"
+            android:textColor="@android:color/white" />
 
         <Button
             android:id="@+id/button_zone_ids"
@@ -117,7 +118,8 @@
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="6dp"
-            android:text="@string/title_pn_zone_ids" />
+            android:text="@string/title_pn_zone_ids"
+            android:textColor="@android:color/white" />
 
         <Button
             android:id="@+id/button_save_pn_settings"
@@ -126,7 +128,8 @@
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:text="@string/save_pn_settings" />
+            android:text="@string/save_pn_settings"
+            android:textColor="@android:color/white" />
 
     </LinearLayout>
 
