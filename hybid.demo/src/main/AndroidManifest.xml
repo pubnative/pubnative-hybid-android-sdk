@@ -98,6 +98,26 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".ui.activities.mopub.MoPubMediationBannerActivity"
+            android:label="@string/mopub_banner"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.mopub.MoPubMediationMRectActivity"
+            android:label="@string/mopub_medium"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.mopub.MoPubMediationInterstitialActivity"
+            android:label="@string/mopub_interstitial"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.mopub.MoPubMediationNativeActivity"
+            android:label="@string/mopub_native"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".ui.activities.dfp.DFPActivity"
             android:label="@string/dfp"
             android:screenOrientation="portrait"
@@ -153,6 +173,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
+
         <activity
             android:name="com.mopub.mobileads.MoPubActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
@@ -171,10 +192,6 @@
         <activity
             android:name="com.mopub.common.privacy.ConsentDialogActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
-
-        <activity
-            android:name=".ui.activities.TabActivity"
-            android:theme="@style/AppTheme.NoActionBar"/>
 
         <meta-data
             android:name="io.fabric.ApiKey"

@@ -1,4 +1,4 @@
-package net.pubnative.lite.demo.ui.fragments
+package net.pubnative.lite.demo.ui.fragments.navigation
 
 import android.content.Intent
 import android.os.Bundle

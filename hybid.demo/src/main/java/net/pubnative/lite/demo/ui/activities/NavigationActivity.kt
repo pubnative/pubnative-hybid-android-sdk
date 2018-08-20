@@ -9,7 +9,7 @@ import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_navigation.*
 import net.pubnative.lite.demo.R
-import net.pubnative.lite.demo.ui.fragments.*
+import net.pubnative.lite.demo.ui.fragments.navigation.*
 
 class NavigationActivity : AppCompatActivity() {
 

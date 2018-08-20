@@ -1,4 +1,4 @@
-package net.pubnative.lite.demo.ui.fragments
+package net.pubnative.lite.demo.ui.fragments.navigation
 
 import android.content.Intent
 import android.os.Bundle
@@ -14,15 +14,19 @@ import android.widget.TextView
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
-import net.pubnative.lite.demo.ui.activities.dfp.DFPActivity
-import net.pubnative.lite.demo.ui.activities.mopub.MoPubActivity
+import net.pubnative.lite.demo.ui.activities.hybid.HyBidBannerActivity
+import net.pubnative.lite.demo.ui.activities.hybid.HyBidInterstitialActivity
+import net.pubnative.lite.demo.ui.activities.hybid.HyBidMRectActivity
+import net.pubnative.lite.demo.ui.activities.hybid.HyBidNativeActivity
 import net.pubnative.lite.demo.ui.adapters.ZoneIdAdapter
 import net.pubnative.lite.demo.ui.listeners.ZoneIdClickListener
 
-class PrebidNavFragment : Fragment() {
+class StandaloneNavFragment : Fragment() {
 
-    private lateinit var mopubButton: Button
-    private lateinit var dfpButton: Button
+    private lateinit var bannerButton: Button
+    private lateinit var mediumButton: Button
+    private lateinit var interstitialButton: Button
+    private lateinit var nativeButton: Button
 
     private lateinit var zoneIdList: RecyclerView
     private lateinit var chosenZoneIdView: TextView
@@ -36,7 +40,7 @@ class PrebidNavFragment : Fragment() {
         settingsManager = SettingsManager.getInstance(activity!!)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_nav_prebid, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_nav_standalone, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -54,16 +58,30 @@ class PrebidNavFragment : Fragment() {
         })
         zoneIdList.adapter = adapter
 
-        mopubButton = view.findViewById(R.id.button_mopub)
-        mopubButton.setOnClickListener {
-            val intent = Intent(activity, MoPubActivity::class.java)
+        bannerButton = view.findViewById(R.id.button_banner)
+        bannerButton.setOnClickListener {
+            val intent = Intent(activity, HyBidBannerActivity::class.java)
             intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
             startActivity(intent)
         }
 
-        dfpButton = view.findViewById(R.id.button_dfp)
-        dfpButton.setOnClickListener {
-            val intent = Intent(activity, DFPActivity::class.java)
+        mediumButton = view.findViewById(R.id.button_medium)
+        mediumButton.setOnClickListener {
+            val intent = Intent(activity, HyBidMRectActivity::class.java)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            startActivity(intent)
+        }
+
+        interstitialButton = view.findViewById(R.id.button_interstitial)
+        interstitialButton.setOnClickListener {
+            val intent = Intent(activity, HyBidInterstitialActivity::class.java)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            startActivity(intent)
+        }
+
+        nativeButton = view.findViewById(R.id.button_native)
+        nativeButton.setOnClickListener {
+            val intent = Intent(activity, HyBidNativeActivity::class.java)
             intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
             startActivity(intent)
         }
@@ -85,14 +103,18 @@ class PrebidNavFragment : Fragment() {
     }
 
     private fun enableZones() {
-        mopubButton.isEnabled = true
-        dfpButton.isEnabled = true
+        bannerButton.isEnabled = true
+        mediumButton.isEnabled = true
+        interstitialButton.isEnabled = true
+        nativeButton.isEnabled = true
     }
 
     private fun disableZones() {
         chosenZoneIdView.text = ""
         chosenZoneId = ""
-        mopubButton.isEnabled = false
-        dfpButton.isEnabled = false
+        bannerButton.isEnabled = false
+        mediumButton.isEnabled = false
+        interstitialButton.isEnabled = false
+        nativeButton.isEnabled = false
     }
 }

@@ -48,5 +48,6 @@ class DebugFragment: Fragment() {
                 responseView.text = JsonUtils.toFormattedJson(registryItem.response)
             }
         }
+        AdRequestRegistry.getInstance().setLastAdRequest("", "", 0)
     }
 }
