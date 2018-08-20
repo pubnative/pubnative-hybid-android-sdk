@@ -96,5 +96,10 @@
 
     <string name="ad">Ad</string>
     <string name="debug">Debug</string>
+    <string name="privacy_policy">Privacy policy:</string>
+    <string name="vendor_list">Vendor list:</string>
+    <string name="consent_result">Consent result:</string>
+    <string name="consent_given">Accepted</string>
+    <string name="consent_refused">Refused</string>
 
 </resources>

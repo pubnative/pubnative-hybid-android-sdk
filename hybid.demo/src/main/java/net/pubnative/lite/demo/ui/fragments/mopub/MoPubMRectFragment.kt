@@ -82,7 +82,7 @@ class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView
             activity.notifyAdCleaned()
             loadPNAd()
         }
-        
+
         errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
     }
 
