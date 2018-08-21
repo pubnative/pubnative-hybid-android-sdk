@@ -22,26 +22,15 @@
 //
 package net.pubnative.lite.demo.ui.activities.hybid
 
-import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.ui.activities.TabActivity
+import net.pubnative.lite.demo.ui.fragments.hybid.HyBidMRectFragment
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class HyBidMRectActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_hybid_mrect)
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setDisplayShowHomeEnabled(true)
-    }
+class HyBidMRectActivity : TabActivity() {
+    override fun getAdFragment() = HyBidMRectFragment()
 
-    override fun onSupportNavigateUp(): Boolean {
-        onBackPressed()
-        return true
-    }
+    override fun getActivityTitle() = getString(R.string.hybid_medium)
 }

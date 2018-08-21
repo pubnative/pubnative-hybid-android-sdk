@@ -60,10 +60,12 @@
             android:id="@+id/button_save_dfp_settings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:text="@string/save_dfp_settings" />
+            android:text="@string/save_dfp_settings"
+            android:textColor="@android:color/white" />
 
     </LinearLayout>
 

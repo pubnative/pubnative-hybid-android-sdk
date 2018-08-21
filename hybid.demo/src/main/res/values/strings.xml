@@ -61,6 +61,7 @@
     <string name="hybid_interstitial">HyBid Interstitial</string>
     <string name="hybid_medium">HyBid Medium</string>
 
+    <string name="mopub_native">MoPub Native</string>
     <string name="mopub_banner">MoPub Banner</string>
     <string name="mopub_interstitial">MoPub Interstitial</string>
     <string name="mopub_medium">MoPub Medium</string>
@@ -87,4 +88,19 @@
     <string name="request_url">PubNative request url:</string>
     <string name="response">PubNative response:</string>
     <string name="latency">PubNative latency (milliseconds):</string>
+
+    <string name="nav_standalone">Standalone</string>
+    <string name="nav_pre_bid">Pre-Bid</string>
+    <string name="nav_mediation">Mediation</string>
+    <string name="nav_consent">Consent</string>
+    <string name="nav_settings">Settings</string>
+
+    <string name="ad">Ad</string>
+    <string name="debug">Debug</string>
+    <string name="privacy_policy">Privacy policy:</string>
+    <string name="vendor_list">Vendor list:</string>
+    <string name="consent_result">Consent result:</string>
+    <string name="consent_given">Accepted</string>
+    <string name="consent_refused">Refused</string>
+
 </resources>

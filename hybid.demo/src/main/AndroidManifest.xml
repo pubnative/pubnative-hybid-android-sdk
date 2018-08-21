@@ -4,7 +4,6 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
@@ -16,7 +15,7 @@
         android:required="false" />
 
     <application
-        android:name="net.pubnative.lite.demo.HyBidDemoApplication"
+        android:name=".HyBidDemoApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -25,10 +24,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="net.pubnative.lite.demo.ui.activities.MainActivity"
+            android:name=".ui.activities.NavigationActivity"
             android:label="@string/app_name"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -36,11 +34,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".ui.activities.hybid.HyBidActivity"
-            android:label="@string/hybid"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.hybid.HyBidNativeActivity"
             android:label="@string/hybid_native"
@@ -61,12 +54,6 @@
             android:label="@string/hybid_interstitial"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
-
-        <activity
-            android:name=".ui.activities.mopub.MoPubActivity"
-            android:label="@string/mopub"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.mopub.MoPubBannerActivity"
             android:label="@string/mopub_banner"
@@ -83,14 +70,23 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.activities.mopub.MoPubMediationActivity"
-            android:label="@string/mopub_mediation"
+            android:name=".ui.activities.mopub.MoPubMediationBannerActivity"
+            android:label="@string/mopub_banner"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
-
         <activity
-            android:name=".ui.activities.dfp.DFPActivity"
-            android:label="@string/dfp"
+            android:name=".ui.activities.mopub.MoPubMediationMRectActivity"
+            android:label="@string/mopub_medium"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.mopub.MoPubMediationInterstitialActivity"
+            android:label="@string/mopub_interstitial"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.mopub.MoPubMediationNativeActivity"
+            android:label="@string/mopub_native"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
@@ -138,12 +134,6 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
-        <activity
-            android:name=".ui.activities.HyBidConsentActivity"
-            android:label="@string/title_pn_consent"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
 
         <activity
             android:name="com.mopub.mobileads.MoPubActivity"
@@ -167,6 +157,7 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="f61a9f30a8156746aae4b1cc84856189a3bf8575" />
+
     </application>
 
 </manifest>

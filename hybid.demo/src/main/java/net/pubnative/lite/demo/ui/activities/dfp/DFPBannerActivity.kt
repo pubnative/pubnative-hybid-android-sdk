@@ -22,26 +22,15 @@
 //
 package net.pubnative.lite.demo.ui.activities.dfp
 
-import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.ui.activities.TabActivity
+import net.pubnative.lite.demo.ui.fragments.dfp.DFPBannerFragment
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class DFPBannerActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_dfp_banner)
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setDisplayShowHomeEnabled(true)
-    }
+class DFPBannerActivity : TabActivity() {
+    override fun getAdFragment() = DFPBannerFragment()
 
-    override fun onSupportNavigateUp(): Boolean {
-        onBackPressed()
-        return true
-    }
+    override fun getActivityTitle() = getString(R.string.dfp_banner)
 }
