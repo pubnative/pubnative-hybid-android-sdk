@@ -76,7 +76,11 @@ public class HyBidMRectAdView extends PNAdView implements MRectPresenter.Listene
     protected void renderAd() {
         mPresenter = new MRectPresenterFactory(getContext())
                 .createMRectPresenter(mAd, this);
-        mPresenter.load();
+        if (mPresenter != null) {
+            mPresenter.load();
+        } else {
+            invokeOnLoadFailed(new Exception("The server has returned an unsupported ad asset"));
+        }
     }
 
     @Override
