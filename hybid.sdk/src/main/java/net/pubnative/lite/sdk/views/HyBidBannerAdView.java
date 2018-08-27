@@ -76,7 +76,11 @@ public class HyBidBannerAdView extends PNAdView implements BannerPresenter.Liste
     protected void renderAd() {
         mPresenter = new BannerPresenterFactory(getContext())
                 .createBannerPresenter(mAd, this);
-        mPresenter.load();
+        if (mPresenter != null) {
+            mPresenter.load();
+        } else {
+            invokeOnLoadFailed(new Exception("The server has returned an unsupported ad asset"));
+        }
     }
 
     @Override
