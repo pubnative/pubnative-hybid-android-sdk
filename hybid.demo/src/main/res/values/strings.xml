@@ -93,6 +93,7 @@
     <string name="nav_pre_bid">Pre-Bid</string>
     <string name="nav_mediation">Mediation</string>
     <string name="nav_consent">Consent</string>
+    <string name="nav_markup">Markup</string>
     <string name="nav_settings">Settings</string>
 
     <string name="ad">Ad</string>
@@ -102,5 +103,7 @@
     <string name="consent_result">Consent result:</string>
     <string name="consent_given">Accepted</string>
     <string name="consent_refused">Refused</string>
+
+    <string name="title_markup">Custom markup</string>
 
 </resources>
