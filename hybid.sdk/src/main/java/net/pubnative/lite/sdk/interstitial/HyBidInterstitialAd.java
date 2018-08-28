@@ -108,7 +108,11 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
 
     private void renderAd(Ad ad) {
         mPresenter = new InterstitialPresenterFactory(mActivity).createInterstitialPresenter(ad, this);
-        mPresenter.load();
+        if (mPresenter != null) {
+            mPresenter.load();
+        } else {
+            invokeOnLoadFailed(new Exception("The server has returned an unsupported ad asset"));
+        }
     }
 
     protected void invokeOnLoadFinished() {
