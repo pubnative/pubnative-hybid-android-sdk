@@ -105,5 +105,5 @@
     <string name="consent_refused">Refused</string>
 
     <string name="title_markup">Custom markup</string>
-
+    <string name="ad_size">Ad size:</string>
 </resources>

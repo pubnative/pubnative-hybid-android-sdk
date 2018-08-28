@@ -11,6 +11,7 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.config.DFPSettingsActivity
 import net.pubnative.lite.demo.ui.activities.config.HyBidSettingsActivity
 import net.pubnative.lite.demo.ui.activities.config.MoPubSettingsActivity
+import net.pubnative.lite.demo.ui.activities.markup.MarkupActivity
 
 class SettingsNavFragment : Fragment() {
 
@@ -31,6 +32,11 @@ class SettingsNavFragment : Fragment() {
 
         view.findViewById<TextView>(R.id.button_dfp_settings).setOnClickListener {
             val intent = Intent(activity, DFPSettingsActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<TextView>(R.id.button_markup).setOnClickListener {
+            val intent = Intent(activity, MarkupActivity::class.java)
             startActivity(intent)
         }
     }
