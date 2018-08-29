@@ -29,6 +29,7 @@ import android.widget.RelativeLayout;
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.mraid.MRAIDBanner;
+import net.pubnative.lite.sdk.mraid.MRAIDNativeFeature;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
@@ -53,7 +54,13 @@ public class MraidBannerPresenter implements BannerPresenter, MRAIDViewListener,
         mContext = context;
         mAd = ad;
         mUrlHandlerDelegate = new UrlHandler(context);
-        mSupportedNativeFeatures = new String[]{};
+        mSupportedNativeFeatures = new String[]{
+                MRAIDNativeFeature.CALENDAR,
+                MRAIDNativeFeature.INLINE_VIDEO,
+                MRAIDNativeFeature.SMS,
+                MRAIDNativeFeature.STORE_PICTURE,
+                MRAIDNativeFeature.TEL
+        };
     }
 
     @Override
