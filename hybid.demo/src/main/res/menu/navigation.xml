@@ -5,12 +5,10 @@
         android:id="@+id/nav_standalone"
         android:icon="@drawable/baseline_view_stream_black_24"
         android:title="@string/nav_standalone" />
-
     <item
         android:id="@+id/nav_pre_bid"
         android:icon="@drawable/baseline_line_style_black_24"
         android:title="@string/nav_pre_bid" />
-
     <item
         android:id="@+id/nav_mediation"
         android:icon="@drawable/baseline_list_black_24"
@@ -19,7 +17,6 @@
         android:id="@+id/nav_consent"
         android:icon="@drawable/baseline_account_circle_black_24"
         android:title="@string/nav_consent" />
-
     <item
         android:id="@+id/nav_settings"
         android:icon="@drawable/baseline_settings_black_24"
