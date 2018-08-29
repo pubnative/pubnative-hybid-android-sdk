@@ -55,8 +55,6 @@ class MarkupFragment : Fragment() {
         markupList.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
         markupList.itemAnimator = DefaultItemAnimator()
         markupList.adapter = adapter
-
-        markupInput.setText("<html><head></head><body><h4 style=\"color: white\">Hola</h4></body></html>")
     }
 
     override fun onDestroy() {
