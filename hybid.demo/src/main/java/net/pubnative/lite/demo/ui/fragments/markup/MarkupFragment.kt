@@ -16,6 +16,7 @@ import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.mraid.*
 import net.pubnative.lite.sdk.utils.Logger
 import net.pubnative.lite.sdk.utils.UrlHandler
+import net.pubnative.lite.sdk.utils.text.StringEscapeUtils
 
 class MarkupFragment : Fragment() {
     private val TAG = MarkupFragment::class.java.simpleName
@@ -83,9 +84,9 @@ class MarkupFragment : Fragment() {
             Toast.makeText(activity, "Please input some markup", Toast.LENGTH_SHORT).show()
         } else {
             if (selectedSize == R.id.radio_size_interstitial) {
-                loadInterstitial(markup)
+                loadInterstitial(StringEscapeUtils.unescapeJava(markup))
             } else {
-                adapter.refreshWithMarkup(markup, selectedSize)
+                adapter.refreshWithMarkup(StringEscapeUtils.unescapeJava(markup), selectedSize)
             }
         }
     }
