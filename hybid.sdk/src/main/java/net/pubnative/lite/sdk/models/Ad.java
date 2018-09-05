@@ -49,6 +49,7 @@ public class Ad extends JsonModel implements Serializable {
 
     private static final String PN_IMPRESSION_URL = "got.pubnative.net";
     private static final String PN_IMPRESSION_QUERY_PARAM = "t";
+    private static final int MIN_POINTS = 10;
 
     //==============================================================================================
     // Fields
@@ -238,7 +239,14 @@ public class Ad extends JsonModel implements Serializable {
 
     public Integer getECPM() {
         AdData adData = getMeta(APIMeta.POINTS);
-        return adData.getIntField(DATA_POINTS_NUMBER_KEY);
+
+        if (adData == null) {
+            return MIN_POINTS;
+        }
+
+        Integer points = adData.getIntField(DATA_POINTS_NUMBER_KEY);
+
+        return points == null ? MIN_POINTS : points;
     }
 
     public String getImpressionId() {
