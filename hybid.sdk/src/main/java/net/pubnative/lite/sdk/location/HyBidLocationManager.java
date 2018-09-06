@@ -56,11 +56,11 @@ public class HyBidLocationManager implements LocationListener {
     }
 
     private Location getLastKnownNetworkLocation() {
-        return mManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        return hasNetworkProvider() ? mManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) : null;
     }
 
     private Location getLastKnownGPSLocation() {
-        return mManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        return hasGPSProvider() ? mManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) : null;
     }
 
     private boolean hasFinePermission() {
@@ -75,13 +75,25 @@ public class HyBidLocationManager implements LocationListener {
         return hasCoarsePermission() || hasFinePermission();
     }
 
+    private boolean hasGPSProvider() {
+        return mManager.getProvider(LocationManager.GPS_PROVIDER) != null;
+    }
+
+    private boolean hasNetworkProvider() {
+        return mManager.getProvider(LocationManager.NETWORK_PROVIDER) != null;
+    }
+
     /**
      * Triggers a location update request and sets a timeout of 10 seconds to obtain the location
      */
     public void startLocationUpdates() {
         if (hasFinePermission()) {
-            mManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-            mManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+            if (hasGPSProvider()) {
+                mManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+            }
+            if (hasNetworkProvider()) {
+                mManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+            }
         } else if (hasCoarsePermission()) {
             mManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
         }
