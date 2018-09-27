@@ -12,6 +12,8 @@ class ExceptionHandler implements Thread.UncaughtExceptionHandler {
     private static final String STRICT_MODE_TAB = "StrictMode";
     private static final String STRICT_MODE_KEY = "Violation";
 
+    private static final String PREFIX_HYBID_CLASS = "net.pubnative.lite";
+
     private final Thread.UncaughtExceptionHandler originalHandler;
     private final StrictModeHandler strictModeHandler = new StrictModeHandler();
     final Map<Client, Boolean> clientMap = new WeakHashMap<>();
@@ -55,21 +57,23 @@ class ExceptionHandler implements Thread.UncaughtExceptionHandler {
     public void uncaughtException(Thread thread, Throwable throwable) {
         boolean strictModeThrowable = strictModeHandler.isStrictModeThrowable(throwable);
 
-        // Notify any subscribed clients of the uncaught exception
-        for (Client client : clientMap.keySet()) {
-            MetaData metaData = new MetaData();
-            String violationDesc = null;
+        if (isHyBidException(throwable)) {
+            // Notify any subscribed clients of the uncaught exception
+            for (Client client : clientMap.keySet()) {
+                MetaData metaData = new MetaData();
+                String violationDesc = null;
 
-            if (strictModeThrowable) { // add strictmode policy violation to metadata
-                violationDesc = strictModeHandler.getViolationDescription(throwable.getMessage());
-                metaData = new MetaData();
-                metaData.addToTab(STRICT_MODE_TAB, STRICT_MODE_KEY, violationDesc);
+                if (strictModeThrowable) { // add strictmode policy violation to metadata
+                    violationDesc = strictModeHandler.getViolationDescription(throwable.getMessage());
+                    metaData = new MetaData();
+                    metaData.addToTab(STRICT_MODE_TAB, STRICT_MODE_KEY, violationDesc);
+                }
+
+                String severityReason = strictModeThrowable
+                        ? HandledState.REASON_STRICT_MODE : HandledState.REASON_UNHANDLED_EXCEPTION;
+                client.cacheAndNotify(throwable, Severity.ERROR,
+                        metaData, severityReason, violationDesc);
             }
-
-            String severityReason = strictModeThrowable
-                    ? HandledState.REASON_STRICT_MODE : HandledState.REASON_UNHANDLED_EXCEPTION;
-            client.cacheAndNotify(throwable, Severity.ERROR,
-                    metaData, severityReason, violationDesc);
         }
 
         // Pass exception on to original exception handler
@@ -79,5 +83,20 @@ class ExceptionHandler implements Thread.UncaughtExceptionHandler {
             System.err.printf("Exception in thread \"%s\" ", thread.getName());
             throwable.printStackTrace(System.err);
         }
+    }
+
+    private boolean isHyBidException(Throwable throwable) {
+        boolean isHyBid = false;
+        if (throwable != null && throwable.getStackTrace() != null) {
+            StackTraceElement[] elements = throwable.getStackTrace();
+
+            for (int i = 0; i < elements.length && !isHyBid; i++) {
+                if (elements[i].getClassName().contains(PREFIX_HYBID_CLASS)) {
+                    isHyBid = true;
+                }
+            }
+        }
+
+        return isHyBid;
     }
 }
