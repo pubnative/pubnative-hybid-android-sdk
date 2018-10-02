@@ -44,11 +44,11 @@ public class CheckConsentRequest {
         void onFailure(Throwable error);
     }
 
-    public void checkConsent(Context context, String appToken, String deviceId, String deviceIdType, final CheckConsentListener listener) {
-        if (TextUtils.isEmpty(appToken) || TextUtils.isEmpty(deviceId) || TextUtils.isEmpty(deviceIdType)) {
+    public void checkConsent(Context context, String appToken, String deviceId, final CheckConsentListener listener) {
+        if (TextUtils.isEmpty(appToken) || TextUtils.isEmpty(deviceId)) {
             listener.onFailure(new Exception("Invalid parameters for check user consent request."));
         } else {
-            String url = PNConsentEndpoints.getCheckConsentUrl(deviceId, deviceIdType);
+            String url = PNConsentEndpoints.getCheckConsentUrl(deviceId);
             PNHttpRequest httpRequest = new PNHttpRequest();
 
             Map<String, String> headers = new HashMap<>();

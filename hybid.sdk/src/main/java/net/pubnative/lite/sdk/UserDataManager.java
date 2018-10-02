@@ -28,7 +28,6 @@ import android.content.SharedPreferences;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.consent.CheckConsentRequest;
-import net.pubnative.lite.sdk.consent.RevokeConsentRequest;
 import net.pubnative.lite.sdk.consent.UserConsentActivity;
 import net.pubnative.lite.sdk.consent.UserConsentRequest;
 import net.pubnative.lite.sdk.location.GeoIpRequest;
@@ -59,7 +58,7 @@ public class UserDataManager {
     }
 
     public void initialize(UserDataInitialisationListener initialisationListener) {
-        //determineUserZone(initialisationListener);
+        determineUserZone(initialisationListener);
         if (initialisationListener != null) {
             initialisationListener.onDataInitialised(true);
         }
@@ -97,7 +96,7 @@ public class UserDataManager {
     private void notifyConsentGiven() {
         UserConsentRequestModel requestModel = new UserConsentRequestModel(
                 HyBid.getDeviceInfo().getAdvertisingId(),
-                DEVICE_ID_TYPE);
+                DEVICE_ID_TYPE, true);
 
         UserConsentRequest request = new UserConsentRequest();
         request.doRequest(mContext, HyBid.getAppToken(), requestModel, new UserConsentRequest.UserConsentListener() {
@@ -116,14 +115,16 @@ public class UserDataManager {
     }
 
     private void notifyConsentRevoked() {
-        RevokeConsentRequest checkRequest = new RevokeConsentRequest();
-        checkRequest.revokeConsent(mContext, HyBid.getAppToken(), HyBid.getDeviceInfo().getAdvertisingId(), DEVICE_ID_TYPE, new RevokeConsentRequest.RevokeConsentListener() {
+        UserConsentRequestModel requestModel = new UserConsentRequestModel(
+                HyBid.getDeviceInfo().getAdvertisingId(),
+                DEVICE_ID_TYPE, false);
+
+        UserConsentRequest request = new UserConsentRequest();
+        request.doRequest(mContext, HyBid.getAppToken(), requestModel, new UserConsentRequest.UserConsentListener() {
             @Override
             public void onSuccess(UserConsentResponseModel model) {
                 if (model.getStatus().equals(UserConsentResponseStatus.OK)) {
-                    if (model.getStatus().equals(UserConsentResponseStatus.OK)) {
-                        setConsentState(CONSENT_STATE_DENIED);
-                    }
+                    setConsentState(CONSENT_STATE_DENIED);
                 }
             }
 
@@ -171,12 +172,16 @@ public class UserDataManager {
 
     private void checkConsentGiven(final UserDataInitialisationListener listener) {
         CheckConsentRequest checkRequest = new CheckConsentRequest();
-        checkRequest.checkConsent(mContext, HyBid.getAppToken(), HyBid.getDeviceInfo().getAdvertisingId(), DEVICE_ID_TYPE, new CheckConsentRequest.CheckConsentListener() {
+        checkRequest.checkConsent(mContext, HyBid.getAppToken(), HyBid.getDeviceInfo().getAdvertisingId(), new CheckConsentRequest.CheckConsentListener() {
             @Override
             public void onSuccess(UserConsentResponseModel model) {
                 if (model.getStatus().equals(UserConsentResponseStatus.OK)) {
-                    if (model.getConsent() != null && model.getConsent().isConsented()) {
-                        setConsentState(CONSENT_STATE_ACCEPTED);
+                    if (model.getConsent() != null) {
+                        if (model.getConsent().isConsented()) {
+                            setConsentState(CONSENT_STATE_ACCEPTED);
+                        } else {
+                            setConsentState(CONSENT_STATE_DENIED);
+                        }
                     }
 
                     if (listener != null) {
