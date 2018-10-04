@@ -86,11 +86,11 @@ public class UserDataManager {
     }
 
     public void denyConsent() {
-        setConsentState(CONSENT_STATE_DENIED);
+        notifyConsentDenied();
     }
 
     public void revokeConsent() {
-        notifyConsentRevoked();
+        notifyConsentDenied();
     }
 
     private void notifyConsentGiven() {
@@ -114,7 +114,7 @@ public class UserDataManager {
         });
     }
 
-    private void notifyConsentRevoked() {
+    private void notifyConsentDenied() {
         UserConsentRequestModel requestModel = new UserConsentRequestModel(
                 HyBid.getDeviceInfo().getAdvertisingId(),
                 DEVICE_ID_TYPE, false);
