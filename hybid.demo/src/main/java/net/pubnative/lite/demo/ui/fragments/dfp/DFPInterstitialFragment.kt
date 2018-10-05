@@ -99,12 +99,12 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
     override fun onRequestSuccess(ad: Ad?) {
         val builder = PublisherAdRequest.Builder()
 
-        val keywordSet = PrebidUtils.getPrebidKeywordsSet(ad, zoneId)
+        val keywordSet = PrebidUtils.getPrebidKeywordsSet(ad)
         for (key in keywordSet) {
             builder.addKeyword(key)
         }
 
-        val keywordBundle = PrebidUtils.getPrebidKeywordsBundle(ad, zoneId)
+        val keywordBundle = PrebidUtils.getPrebidKeywordsBundle(ad)
         for (key in keywordBundle.keySet()) {
             builder.addCustomTargeting(key, keywordBundle.getString(key))
         }
