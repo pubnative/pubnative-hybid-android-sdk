@@ -100,7 +100,7 @@ class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView
     // --------------- HyBid Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
         mopubMRect.adUnitId = adUnitId
-        mopubMRect.keywords = PrebidUtils.getPrebidKeywords(ad, zoneId)
+        mopubMRect.keywords = PrebidUtils.getPrebidKeywords(ad)
         mopubMRect.loadAd()
 
         Log.d(TAG, "onRequestSuccess")
