@@ -43,6 +43,7 @@ public class UserDataManager {
 
     private static final String PREFERENCES_CONSENT = "net.pubnative.lite.dataconsent";
     private static final String KEY_GDPR_CONSENT_STATE = "gdpr_consent_state";
+    private static final String KEY_GDPR_ADVERTISING_ID = "gdpr_advertising_id";
     private static final String DEVICE_ID_TYPE = "gaid";
 
     private static final int CONSENT_STATE_ACCEPTED = 1;
@@ -207,7 +208,17 @@ public class UserDataManager {
     }
 
     private boolean askedForGDPRConsent() {
-        return mPreferences.contains(KEY_GDPR_CONSENT_STATE);
+        boolean askedForConsent = mPreferences.contains(KEY_GDPR_CONSENT_STATE);
+
+        if (askedForConsent) {
+            String gaid = mPreferences.getString(KEY_GDPR_ADVERTISING_ID, "");
+
+            if (!TextUtils.isEmpty(gaid) && !gaid.equals(HyBid.getDeviceInfo().getAdvertisingId())) {
+                askedForConsent = false;
+            }
+        }
+
+        return askedForConsent;
     }
 
     public void showConsentRequestScreen(Context context) {
@@ -224,6 +235,7 @@ public class UserDataManager {
             throw new RuntimeException("Illegal consent state provided");
         } else {
             SharedPreferences.Editor editor = mPreferences.edit();
+            editor.putString(KEY_GDPR_ADVERTISING_ID, HyBid.getDeviceInfo().getAdvertisingId());
             editor.putInt(KEY_GDPR_CONSENT_STATE, consentState);
             editor.apply();
         }
