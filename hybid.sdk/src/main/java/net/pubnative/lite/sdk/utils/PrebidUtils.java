@@ -35,50 +35,87 @@ import java.util.Set;
  */
 
 public final class PrebidUtils {
+    public enum KeywordMode {
+        TWO_DECIMALS, THREE_DECIMALS
+    }
+
     private static final double ECPM_POINTS_DIVIDER = 1000.0;
 
     public interface KEYS {
         String PN_BID = "pn_bid";
     }
 
+    private static String getBidECPM(Ad ad, KeywordMode mode) {
+        Double eCPM = ad.getECPM().doubleValue() / ECPM_POINTS_DIVIDER;
+        String formatString = "%.3f";
+
+        if (mode == KeywordMode.TWO_DECIMALS) {
+            formatString = "%.2f";
+        }
+
+        return String.format(Locale.ENGLISH, formatString, eCPM);
+    }
+
+    //---------------------------------- String keywords -------------------------------------------
     public static String getPrebidKeywords(Ad ad) {
         return getPrebidKeywords(ad, "");
     }
 
+    public static String getPrebidKeywords(Ad ad, KeywordMode mode) {
+        return getPrebidKeywords(ad, "", mode);
+    }
+
     public static String getPrebidKeywords(Ad ad, String zoneId) {
+        return getPrebidKeywords(ad, zoneId, KeywordMode.THREE_DECIMALS);
+    }
+
+    public static String getPrebidKeywords(Ad ad, String zoneId, KeywordMode mode) {
         StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append(KEYS.PN_BID).append(':').append(getBidECPM(ad));
+        stringBuilder.append(KEYS.PN_BID).append(':').append(getBidECPM(ad, mode));
 
         return stringBuilder.toString();
     }
 
+    //---------------------------------- Bundle keywords -------------------------------------------
     public static Bundle getPrebidKeywordsBundle(Ad ad) {
         return getPrebidKeywordsBundle(ad, "");
     }
 
+    public static Bundle getPrebidKeywordsBundle(Ad ad, KeywordMode mode) {
+        return getPrebidKeywordsBundle(ad, "", mode);
+    }
+
     public static Bundle getPrebidKeywordsBundle(Ad ad, String zoneid) {
+        return getPrebidKeywordsBundle(ad, zoneid, KeywordMode.THREE_DECIMALS);
+    }
+
+    public static Bundle getPrebidKeywordsBundle(Ad ad, String zoneid, KeywordMode mode) {
         Bundle bundle = new Bundle();
 
-        bundle.putString(KEYS.PN_BID, getBidECPM(ad));
+        bundle.putString(KEYS.PN_BID, getBidECPM(ad, mode));
 
         return bundle;
     }
 
+    //------------------------------------ Set keywords --------------------------------------------
     public static Set<String> getPrebidKeywordsSet(Ad ad) {
         return getPrebidKeywordsSet(ad, "");
     }
 
-    public static Set<String> getPrebidKeywordsSet(Ad ad, String zoneid) {
-        Set<String> set = new LinkedHashSet<>(3);
-
-        set.add(KEYS.PN_BID.concat(":").concat(getBidECPM(ad)));
-
-        return set;
+    public static Set<String> getPrebidKeywordsSet(Ad ad, KeywordMode mode) {
+        return getPrebidKeywordsSet(ad, "", mode);
     }
 
-    private static String getBidECPM(Ad ad) {
-        Double eCPM = ad.getECPM().doubleValue() / ECPM_POINTS_DIVIDER;
-        return String.format(Locale.ENGLISH, "%.3f", eCPM);
+    public static Set<String> getPrebidKeywordsSet(Ad ad, String zoneid) {
+        return getPrebidKeywordsSet(ad, zoneid, KeywordMode.THREE_DECIMALS);
+    }
+
+    public static Set<String> getPrebidKeywordsSet(Ad ad, String zoneid, KeywordMode mode) {
+        Set<String> set = new LinkedHashSet<>(3);
+
+        set.add(KEYS.PN_BID.concat(":").concat(getBidECPM(ad, mode)));
+
+        return set;
     }
 }
