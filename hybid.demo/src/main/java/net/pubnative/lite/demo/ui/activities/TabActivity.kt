@@ -23,14 +23,11 @@
 
 package net.pubnative.lite.demo.ui.activities
 
-import android.support.design.widget.TabLayout
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentPagerAdapter
-import android.support.v4.view.ViewPager
+import androidx.fragment.app.FragmentPagerAdapter
 import android.os.Bundle
+import com.google.android.material.tabs.TabLayout
 
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.fragments.DebugFragment
@@ -47,11 +44,11 @@ abstract class TabActivity : AppCompatActivity() {
      */
     private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
 
-    private lateinit var container: ViewPager
+    private lateinit var container: androidx.viewpager.widget.ViewPager
     private lateinit var tabs: TabLayout
 
     private lateinit var debugFragment: DebugFragment
-    private lateinit var adFragment: Fragment
+    private lateinit var adFragment: androidx.fragment.app.Fragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,9 +82,9 @@ abstract class TabActivity : AppCompatActivity() {
         return true
     }
 
-    inner class SectionsPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
+    inner class SectionsPagerAdapter(fm: androidx.fragment.app.FragmentManager) : FragmentPagerAdapter(fm) {
 
-        override fun getItem(position: Int): Fragment {
+        override fun getItem(position: Int): androidx.fragment.app.Fragment {
             val fragment = when (position) {
                 0 -> adFragment
                 else -> debugFragment
@@ -108,7 +105,7 @@ abstract class TabActivity : AppCompatActivity() {
         debugFragment.updateLogs()
     }
 
-    abstract fun getAdFragment(): Fragment
+    abstract fun getAdFragment(): androidx.fragment.app.Fragment
 
     abstract fun getActivityTitle(): String
 }

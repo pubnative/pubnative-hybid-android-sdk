@@ -1,10 +1,10 @@
 package net.pubnative.lite.demo.ui.fragments.markup
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.widget.DefaultItemAnimator
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
@@ -23,7 +23,7 @@ class MarkupFragment : Fragment() {
 
     private lateinit var markupInput: EditText
     private lateinit var adSizeGroup: RadioGroup
-    private lateinit var markupList: RecyclerView
+    private lateinit var markupList: androidx.recyclerview.widget.RecyclerView
     private val adapter = MarkupAdapter()
     private val urlHandler = UrlHandler(activity)
 
@@ -53,7 +53,7 @@ class MarkupFragment : Fragment() {
             updateListVisibility()
         }
 
-        markupList.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
+        markupList.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
         markupList.itemAnimator = DefaultItemAnimator()
         markupList.adapter = adapter
     }

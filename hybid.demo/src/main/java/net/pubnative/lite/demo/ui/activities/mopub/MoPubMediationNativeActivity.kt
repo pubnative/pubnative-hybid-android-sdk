@@ -1,6 +1,5 @@
 package net.pubnative.lite.demo.ui.activities.mopub
 
-import android.support.v4.app.Fragment
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.ui.fragments.mopub.MoPubMediationNativeFragment

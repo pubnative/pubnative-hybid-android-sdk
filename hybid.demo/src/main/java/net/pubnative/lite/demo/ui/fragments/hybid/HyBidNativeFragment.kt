@@ -23,8 +23,7 @@
 package net.pubnative.lite.demo.ui.fragments.hybid
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.text.TextUtils
+import androidx.fragment.app.Fragment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -35,10 +34,8 @@ import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
-import net.pubnative.lite.demo.util.JsonUtils
 import net.pubnative.lite.sdk.models.NativeAd
 import net.pubnative.lite.sdk.nativead.HyBidNativeAdRequest
-import net.pubnative.lite.sdk.utils.AdRequestRegistry
 
 class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, NativeAd.Listener {
     val TAG = HyBidNativeFragment::class.java.simpleName

@@ -27,19 +27,19 @@
             android:layout_marginTop="4dp"
             android:src="@drawable/baseline_filter_none_white_24" />
 
-        <android.support.design.widget.TextInputLayout
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_toLeftOf="@id/button_paste_clipboard"
             android:layout_toStartOf="@id/button_paste_clipboard">
 
-            <android.support.design.widget.TextInputEditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_markup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/nav_markup"
                 android:maxLines="5" />
-        </android.support.design.widget.TextInputLayout>
+        </com.google.android.material.textfield.TextInputLayout>
     </RelativeLayout>
 
     <TextView
@@ -97,7 +97,7 @@
         android:text="@string/load"
         android:textColor="@android:color/white" />
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list_markup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
