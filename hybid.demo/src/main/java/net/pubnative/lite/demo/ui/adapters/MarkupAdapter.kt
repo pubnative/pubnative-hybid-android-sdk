@@ -1,6 +1,6 @@
 package net.pubnative.lite.demo.ui.adapters
 
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -34,7 +34,7 @@ class MarkupAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is MarkupBannerViewHolder -> holder.bind(markup)
             is MarkupMRectViewHolder -> holder.bind(markup)

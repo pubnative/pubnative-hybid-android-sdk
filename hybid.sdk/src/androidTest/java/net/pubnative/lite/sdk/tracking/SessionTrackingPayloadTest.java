@@ -1,6 +1,6 @@
 package net.pubnative.lite.sdk.tracking;
 
-import android.support.test.InstrumentationRegistry;
+import androidx.test.InstrumentationRegistry;
 
 import junit.framework.Assert;
 
