@@ -40,6 +40,7 @@ import android.webkit.WebView;
 
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNAdvertisingIdClient;
+import net.pubnative.lite.sdk.utils.PNCrypto;
 
 import java.util.Locale;
 import java.util.TimeZone;
@@ -92,6 +93,8 @@ public class DeviceInfo {
     private static final String UNKNOWN_APP_VERSION_IDENTIFIER = "UNKNOWN";
     private final Context mContext;
     private String mAdvertisingId;
+    private String mAdvertisingIdMd5;
+    private String mAdvertisingIdSha1;
     private boolean mLimitTracking = false;
     private final ConnectivityManager mConnectivityManager;
     private Listener mListener;
@@ -117,6 +120,9 @@ public class DeviceInfo {
                     mAdvertisingId = advertisingId;
                 }
 
+                mAdvertisingIdMd5 = PNCrypto.md5(mAdvertisingId);
+                mAdvertisingIdSha1 = PNCrypto.sha1(mAdvertisingId);
+
                 if (mListener != null) {
                     mListener.onInfoLoaded();
                 }
@@ -135,6 +141,14 @@ public class DeviceInfo {
     @SuppressLint("HardwareIds")
     public String getAdvertisingId() {
         return mAdvertisingId;
+    }
+
+    public String getAdvertisingIdMd5() {
+        return mAdvertisingIdMd5;
+    }
+
+    public String getAdvertisingIdSha1() {
+        return mAdvertisingIdSha1;
     }
 
     public boolean limitTracking() {
