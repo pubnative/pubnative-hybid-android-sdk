@@ -21,6 +21,7 @@ class ConsentNavFragment : Fragment() {
     private lateinit var privacyPolicyView: TextView
     private lateinit var consentResultLabel: TextView
     private lateinit var consentResultView: TextView
+    private lateinit var canCollectDataView: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_nav_consent, container, false)
 
@@ -32,6 +33,7 @@ class ConsentNavFragment : Fragment() {
         privacyPolicyView = view.findViewById(R.id.view_privacy_policy)
         consentResultLabel = view.findViewById(R.id.label_consent_result)
         consentResultView = view.findViewById(R.id.view_consent_result)
+        canCollectDataView = view.findViewById(R.id.view_can_collect_data)
 
         view.findViewById<Button>(R.id.button_pn_owned).setOnClickListener {
             /*
@@ -67,6 +69,10 @@ class ConsentNavFragment : Fragment() {
             HyBid.getUserDataManager().denyConsent()
             notifyConsentResult(false)
         }
+
+        view.findViewById<Button>(R.id.button_can_collect_data).setOnClickListener {
+            notifyCanCollectData(HyBid.getUserDataManager().canCollectData())
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -89,6 +95,15 @@ class ConsentNavFragment : Fragment() {
             consentResultView.text = getString(R.string.consent_given)
         } else {
             consentResultView.text = getString(R.string.consent_refused)
+        }
+    }
+
+    private fun notifyCanCollectData(canCollect: Boolean) {
+        canCollectDataView.visibility = View.VISIBLE
+        if (canCollect) {
+            canCollectDataView.text = getString(R.string.yes)
+        } else {
+            canCollectDataView.text = getString(R.string.no)
         }
     }
 
