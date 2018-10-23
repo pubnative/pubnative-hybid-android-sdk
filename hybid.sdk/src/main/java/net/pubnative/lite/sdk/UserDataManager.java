@@ -81,6 +81,25 @@ public class UserDataManager {
         return gdprApplies() && !askedForGDPRConsent();
     }
 
+    public boolean canCollectData() {
+        if (gdprApplies()) {
+            if (askedForGDPRConsent()) {
+                switch (mPreferences.getInt(KEY_GDPR_CONSENT_STATE, CONSENT_STATE_DENIED)) {
+                    case CONSENT_STATE_ACCEPTED:
+                        return true;
+                    case CONSENT_STATE_DENIED:
+                        return false;
+                    default:
+                        return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return true;
+        }
+    }
+
     public void grantConsent() {
 
         notifyConsentGiven();
@@ -200,7 +219,6 @@ public class UserDataManager {
             }
         });
     }
-
 
 
     private boolean gdprApplies() {
