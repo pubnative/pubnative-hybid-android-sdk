@@ -38,6 +38,8 @@ public class AdRequestFactoryTest {
         when(mMockDeviceInfo.getModel()).thenReturn("Nexus5X");
         when(mMockDeviceInfo.getOSVersion()).thenReturn("8.1.0");
         when(mMockDeviceInfo.getAdvertisingId()).thenReturn("aabbccdd");
+        when(mMockDeviceInfo.getAdvertisingIdMd5()).thenReturn(PNCrypto.md5("aabbccdd"));
+        when(mMockDeviceInfo.getAdvertisingIdSha1()).thenReturn(PNCrypto.sha1("aabbccdd"));
         when(mMockDeviceInfo.getLocale()).thenReturn(new Locale("EN", "US"));
 
         Location mockLocation = new Location("");
