@@ -64,8 +64,9 @@ public class AdRequestFactory {
             adRequest.dnt = "1";
         } else {
             adRequest.gid = advertisingId;
-            adRequest.gidmd5 = PNCrypto.md5(advertisingId);
-            adRequest.gidsha1 = PNCrypto.sha1(advertisingId);
+
+            adRequest.gidmd5 = mDeviceInfo.getAdvertisingIdMd5();
+            adRequest.gidsha1 = mDeviceInfo.getAdvertisingIdSha1();
         }
 
         adRequest.locale = mDeviceInfo.getLocale().getLanguage();
