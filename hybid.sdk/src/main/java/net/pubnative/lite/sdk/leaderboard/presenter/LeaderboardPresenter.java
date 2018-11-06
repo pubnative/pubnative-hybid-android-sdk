@@ -20,22 +20,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package net.pubnative.lite.sdk.models;
+package net.pubnative.lite.sdk.leaderboard.presenter;
 
-/**
- * Created by erosgarciaponte on 24.01.18.
- */
+import android.view.View;
 
-public interface ApiAssetGroupType {
-    int MRAID_BANNER_1 = 10;
-    int MRAID_BANNER_2 = 12;
-    int MRAID_MRECT = 8;
-    int MRAID_INTERSTITIAL = 21;
-    int MRAID_LEADERBOARD = 24;
+import net.pubnative.lite.sdk.models.Ad;
 
-    int VAST_MRECT = 4;
-    int VAST_INTERSTITIAL_1 = 15;
-    int VAST_INTERSTITIAL_2 = 18;
-    int VAST_INTERSTITIAL_3 = 19;
-    int VAST_INTERSTITIAL_4 = 20;
+public interface LeaderboardPresenter {
+    interface Listener {
+        void onLeaderboardLoaded(LeaderboardPresenter leaderboardPresenter, View leaderboard);
+
+        void onLeaderboardClicked(LeaderboardPresenter leaderboardPresenter);
+
+        void onLeaderboardError(LeaderboardPresenter leaderboardPresenter);
+    }
+
+    void setListener(Listener listener);
+
+    Ad getAd();
+
+    void load();
+
+    void destroy();
+
+    void startTracking();
+
+    void stopTracking();
 }
