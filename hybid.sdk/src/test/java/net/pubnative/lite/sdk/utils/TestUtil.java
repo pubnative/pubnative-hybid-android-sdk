@@ -54,6 +54,10 @@ public class TestUtil {
         return createTestAd(ApiAssetGroupType.VAST_MRECT);
     }
 
+    public static Ad createTestLeaderboardAd() {
+        return createTestAd(ApiAssetGroupType.MRAID_LEADERBOARD);
+    }
+
     public static Ad createTestInterstitialAd() {
         return createTestAd(ApiAssetGroupType.MRAID_INTERSTITIAL);
     }
