@@ -45,7 +45,7 @@ class MoPubLeaderboardFragment : Fragment(), RequestManager.RequestListener, MoP
         requestManager = LeaderboardRequestManager()
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
-        adUnitId = SettingsManager.getInstance(activity!!).getSettings().mopubBannerAdUnitId
+        adUnitId = SettingsManager.getInstance(activity!!).getSettings().mopubLeaderboardAdUnitId
 
         loadButton.setOnClickListener {
             errorView.text = ""
@@ -59,7 +59,7 @@ class MoPubLeaderboardFragment : Fragment(), RequestManager.RequestListener, MoP
 
     override fun onDestroy() {
         super.onDestroy()
-        mopubBanner.destroy()
+        mopubLeaderboard.destroy()
     }
 
     fun loadPNAd() {
@@ -70,9 +70,9 @@ class MoPubLeaderboardFragment : Fragment(), RequestManager.RequestListener, MoP
 
     // --------------- HyBid Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
-        mopubBanner.adUnitId = adUnitId
-        mopubBanner.keywords = PrebidUtils.getPrebidKeywords(ad, PrebidUtils.KeywordMode.TWO_DECIMALS)
-        mopubBanner.loadAd()
+        mopubLeaderboard.adUnitId = adUnitId
+        mopubLeaderboard.keywords = PrebidUtils.getPrebidKeywords(ad, PrebidUtils.KeywordMode.TWO_DECIMALS)
+        mopubLeaderboard.loadAd()
 
         Log.d(TAG, "onRequestSuccess")
         displayLogs()

@@ -78,6 +78,7 @@ data class SettingsModel(var appToken: String,
             parcel.readString(),
             parcel.readString(),
             parcel.readString(),
+            parcel.readString(),
             parcel.readString())
 
     override fun writeToParcel(dest: Parcel?, flags: Int) {

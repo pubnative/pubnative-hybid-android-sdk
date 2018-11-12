@@ -85,6 +85,10 @@ class SettingsManager private constructor(context: Context) {
         preferences.edit().putString(SETTINGS_KEY_MOPUB_MEDIUM_AD_UNIT_ID, adUnitId).apply()
     }
 
+    fun setMoPubLeaderboardAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_MOPUB_LEADERBOARD_AD_UNIT_ID, adUnitId).apply()
+    }
+
     fun setMoPubInterstitialAdUnitId(adUnitId: String) {
         preferences.edit().putString(SETTINGS_KEY_MOPUB_INTERSTITIAL_AD_UNIT_ID, adUnitId).apply()
     }
@@ -95,6 +99,10 @@ class SettingsManager private constructor(context: Context) {
 
     fun setMoPubMediationMediumAdUnitId(adUnitId: String) {
         preferences.edit().putString(SETTINGS_KEY_MOPUB_MEDIATION_MEDIUM_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setMoPubMediationLeaderboardAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_MOPUB_MEDIATION_LEADERBOARD_AD_UNIT_ID, adUnitId).apply()
     }
 
     fun setMoPubMediationInterstitialAdUnitId(adUnitId: String) {
@@ -111,6 +119,10 @@ class SettingsManager private constructor(context: Context) {
 
     fun setDFPMediumAdUnitId(adUnitId: String) {
         preferences.edit().putString(SETTINGS_KEY_DFP_MEDIUM_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setDFPLeaderboardAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_DFP_LEADERBOARD_AD_UNIT_ID, adUnitId).apply()
     }
 
     fun setDFPInterstitialAdUnitId(adUnitId: String) {
