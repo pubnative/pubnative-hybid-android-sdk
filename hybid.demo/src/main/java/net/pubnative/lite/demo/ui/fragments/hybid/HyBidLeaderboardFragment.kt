@@ -16,7 +16,7 @@ import net.pubnative.lite.sdk.views.HyBidLeaderboardAdView
 import net.pubnative.lite.sdk.views.PNAdView
 
 class HyBidLeaderboardFragment : Fragment(), PNAdView.Listener {
-    val TAG = HyBidBannerFragment::class.java.simpleName
+    val TAG = HyBidLeaderboardFragment::class.java.simpleName
 
     private var zoneId: String? = null
 
