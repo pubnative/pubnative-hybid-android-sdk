@@ -97,6 +97,16 @@
             android:textColor="@android:color/white" />
 
         <Button
+            android:id="@+id/button_mopub_leaderboard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/leaderboard"
+            android:textColor="@android:color/white" />
+
+        <Button
             android:id="@+id/button_mopub_interstitial"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -136,6 +146,16 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:text="@string/medium"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:id="@+id/button_dfp_leaderboard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/leaderboard"
             android:textColor="@android:color/white" />
 
         <Button

@@ -8,10 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import net.pubnative.lite.demo.R
-import net.pubnative.lite.demo.ui.activities.mopub.MoPubMediationBannerActivity
-import net.pubnative.lite.demo.ui.activities.mopub.MoPubMediationInterstitialActivity
-import net.pubnative.lite.demo.ui.activities.mopub.MoPubMediationMRectActivity
-import net.pubnative.lite.demo.ui.activities.mopub.MoPubMediationNativeActivity
+import net.pubnative.lite.demo.ui.activities.mopub.*
 
 class MediationNavFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_nav_mediation, container, false)
@@ -26,6 +23,11 @@ class MediationNavFragment : Fragment() {
 
         view.findViewById<Button>(R.id.button_mopub_medium).setOnClickListener {
             val intent = Intent(activity, MoPubMediationMRectActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_mopub_leaderboard).setOnClickListener {
+            val intent = Intent(activity, MoPubMediationLeaderboardActivity::class.java)
             startActivity(intent)
         }
 
