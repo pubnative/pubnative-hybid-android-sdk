@@ -13,10 +13,7 @@ import android.widget.TextView
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
-import net.pubnative.lite.demo.ui.activities.hybid.HyBidBannerActivity
-import net.pubnative.lite.demo.ui.activities.hybid.HyBidInterstitialActivity
-import net.pubnative.lite.demo.ui.activities.hybid.HyBidMRectActivity
-import net.pubnative.lite.demo.ui.activities.hybid.HyBidNativeActivity
+import net.pubnative.lite.demo.ui.activities.hybid.*
 import net.pubnative.lite.demo.ui.adapters.ZoneIdAdapter
 import net.pubnative.lite.demo.ui.listeners.ZoneIdClickListener
 
@@ -24,6 +21,7 @@ class StandaloneNavFragment : Fragment() {
 
     private lateinit var bannerButton: Button
     private lateinit var mediumButton: Button
+    private lateinit var leaderboardButton: Button
     private lateinit var interstitialButton: Button
     private lateinit var nativeButton: Button
 
@@ -71,6 +69,13 @@ class StandaloneNavFragment : Fragment() {
             startActivity(intent)
         }
 
+        leaderboardButton = view.findViewById(R.id.button_leaderboard)
+        leaderboardButton.setOnClickListener {
+            val intent = Intent(activity, HyBidLeaderboardActivity::class.java)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            startActivity(intent)
+        }
+
         interstitialButton = view.findViewById(R.id.button_interstitial)
         interstitialButton.setOnClickListener {
             val intent = Intent(activity, HyBidInterstitialActivity::class.java)
@@ -104,6 +109,7 @@ class StandaloneNavFragment : Fragment() {
     private fun enableZones() {
         bannerButton.isEnabled = true
         mediumButton.isEnabled = true
+        leaderboardButton.isEnabled = true
         interstitialButton.isEnabled = true
         nativeButton.isEnabled = true
     }
@@ -113,6 +119,7 @@ class StandaloneNavFragment : Fragment() {
         chosenZoneId = ""
         bannerButton.isEnabled = false
         mediumButton.isEnabled = false
+        leaderboardButton.isEnabled = false
         interstitialButton.isEnabled = false
         nativeButton.isEnabled = false
     }

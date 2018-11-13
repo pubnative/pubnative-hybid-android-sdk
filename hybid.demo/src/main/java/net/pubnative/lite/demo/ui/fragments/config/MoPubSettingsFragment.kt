@@ -41,24 +41,27 @@ class MoPubSettingsFragment : Fragment() {
 
     private lateinit var bannerInput: EditText
     private lateinit var mediumInput: EditText
+    private lateinit var leaderboardInput: EditText
     private lateinit var interstitialInput: EditText
     private lateinit var mediationBannerInput: EditText
     private lateinit var mediationMediumInput: EditText
+    private lateinit var mediationLeaderboardInput: EditText
     private lateinit var mediationInterstitialInput: EditText
     private lateinit var mediationNativeInput: EditText
     private lateinit var settingManager: SettingsManager
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
-            = inflater.inflate(R.layout.fragment_mopub_settings, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_mopub_settings, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         bannerInput = view.findViewById(R.id.input_mopub_banner)
         mediumInput = view.findViewById(R.id.input_mopub_medium)
+        leaderboardInput = view.findViewById(R.id.input_mopub_leaderboard)
         interstitialInput = view.findViewById(R.id.input_mopub_interstitial)
         mediationBannerInput = view.findViewById(R.id.input_mopub_mediation_banner)
         mediationMediumInput = view.findViewById(R.id.input_mopub_mediation_medium)
+        mediationLeaderboardInput = view.findViewById(R.id.input_mopub_mediation_leaderboard)
         mediationInterstitialInput = view.findViewById(R.id.input_mopub_mediation_interstitial)
         mediationNativeInput = view.findViewById(R.id.input_mopub_mediation_native)
 
@@ -67,17 +70,21 @@ class MoPubSettingsFragment : Fragment() {
         view.findViewById<Button>(R.id.button_save_mopub_settings).setOnClickListener {
             val bannerAdUnitId = bannerInput.text.toString()
             val mediumAdUnitId = mediumInput.text.toString()
+            val leaderboardAdUnitId = leaderboardInput.text.toString()
             val interstitialAdUnitId = interstitialInput.text.toString()
             val mediationBannerAdUnitId = mediationBannerInput.text.toString()
             val mediationMediumAdUnitId = mediationMediumInput.text.toString()
+            val mediationLeaderboardAdUnitId = mediationLeaderboardInput.text.toString()
             val mediationInterstitialAdUnitId = mediationInterstitialInput.text.toString()
             val mediationNativeAdUnitId = mediationNativeInput.text.toString()
 
             settingManager.setMoPubBannerAdUnitId(bannerAdUnitId)
             settingManager.setMoPubMediumAdUnitId(mediumAdUnitId)
+            settingManager.setMoPubLeaderboardAdUnitId(leaderboardAdUnitId)
             settingManager.setMoPubInterstitialAdUnitId(interstitialAdUnitId)
             settingManager.setMoPubMediationBannerAdUnitId(mediationBannerAdUnitId)
             settingManager.setMoPubMediationMediumAdUnitId(mediationMediumAdUnitId)
+            settingManager.setMoPubMediationLeaderboardAdUnitId(mediationLeaderboardAdUnitId)
             settingManager.setMoPubMediationInterstitialAdUnitId(mediationInterstitialAdUnitId)
             settingManager.setMoPubMediationNativeAdUnitId(mediationNativeAdUnitId)
 
@@ -94,9 +101,11 @@ class MoPubSettingsFragment : Fragment() {
         val settings = settingManager.getSettings()
         bannerInput.setText(settings.mopubBannerAdUnitId)
         mediumInput.setText(settings.mopubMediumAdUnitId)
+        leaderboardInput.setText(settings.mopubLeaderboardAdUnitId)
         interstitialInput.setText(settings.mopubInterstitialAdUnitId)
         mediationBannerInput.setText(settings.mopubMediationBannerAdUnitId)
         mediationMediumInput.setText(settings.mopubMediationMediumAdUnitId)
+        mediationLeaderboardInput.setText(settings.mopubMediationLeaderboardAdUnitId)
         mediationInterstitialInput.setText(settings.mopubMediationInterstitialAdUnitId)
         mediationNativeInput.setText(settings.mopubMediationNativeAdUnitId)
     }

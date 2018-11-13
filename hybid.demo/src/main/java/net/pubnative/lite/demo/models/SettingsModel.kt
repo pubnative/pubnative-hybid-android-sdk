@@ -38,13 +38,16 @@ data class SettingsModel(var appToken: String,
                          var testMode: Boolean,
                          var mopubBannerAdUnitId: String,
                          var mopubMediumAdUnitId: String,
+                         var mopubLeaderboardAdUnitId: String,
                          var mopubInterstitialAdUnitId: String,
                          var mopubMediationBannerAdUnitId: String,
                          var mopubMediationMediumAdUnitId: String,
+                         var mopubMediationLeaderboardAdUnitId: String,
                          var mopubMediationInterstitialAdUnitId: String,
                          var mopubMediationNativeAdUnitId: String,
                          var dfpBannerAdUnitId: String,
                          var dfpMediumAdUnitId: String,
+                         var dfpLeaderboardAdUnitId: String,
                          var dfpInterstitialAdUnitId: String) : Parcelable {
     companion object {
         @JvmField
@@ -64,6 +67,9 @@ data class SettingsModel(var appToken: String,
             },
             parcel.readInt() != 0,
             parcel.readInt() != 0,
+            parcel.readString(),
+            parcel.readString(),
+            parcel.readString(),
             parcel.readString(),
             parcel.readString(),
             parcel.readString(),
@@ -103,15 +109,18 @@ data class SettingsModel(var appToken: String,
 
         dest?.writeString(mopubBannerAdUnitId)
         dest?.writeString(mopubMediumAdUnitId)
+        dest?.writeString(mopubLeaderboardAdUnitId)
         dest?.writeString(mopubInterstitialAdUnitId)
 
         dest?.writeString(mopubMediationBannerAdUnitId)
         dest?.writeString(mopubMediationMediumAdUnitId)
+        dest?.writeString(mopubMediationLeaderboardAdUnitId)
         dest?.writeString(mopubMediationInterstitialAdUnitId)
         dest?.writeString(mopubMediationNativeAdUnitId)
 
         dest?.writeString(dfpBannerAdUnitId)
         dest?.writeString(dfpMediumAdUnitId)
+        dest?.writeString(dfpLeaderboardAdUnitId)
         dest?.writeString(dfpInterstitialAdUnitId)
     }
 

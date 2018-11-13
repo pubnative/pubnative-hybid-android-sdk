@@ -40,6 +40,7 @@ class DFPSettingsFragment : Fragment() {
 
     private lateinit var bannerInput: EditText
     private lateinit var mediumInput: EditText
+    private lateinit var leaderboardInput: EditText
     private lateinit var interstitialInput: EditText
     private lateinit var settingManager: SettingsManager
 
@@ -51,6 +52,7 @@ class DFPSettingsFragment : Fragment() {
 
         bannerInput = view.findViewById(R.id.input_dfp_banner)
         mediumInput = view.findViewById(R.id.input_dfp_medium)
+        leaderboardInput = view.findViewById(R.id.input_dfp_leaderboard)
         interstitialInput = view.findViewById(R.id.input_dfp_interstitial)
 
         settingManager = SettingsManager.getInstance(context!!)
@@ -58,10 +60,12 @@ class DFPSettingsFragment : Fragment() {
         view.findViewById<Button>(R.id.button_save_dfp_settings).setOnClickListener {
             val bannerAdUnitId = bannerInput.text.toString()
             val mediumAdUnitId = mediumInput.text.toString()
+            val leaderboardAdUnitId = leaderboardInput.text.toString()
             val interstitialAdUnitId = interstitialInput.text.toString()
 
             settingManager.setDFPBannerAdUnitId(bannerAdUnitId)
             settingManager.setDFPMediumAdUnitId(mediumAdUnitId)
+            settingManager.setDFPLeaderboardAdUnitId(leaderboardAdUnitId)
             settingManager.setDFPInterstitialAdUnitId(interstitialAdUnitId)
 
             Toast.makeText(activity, "DFP settings saved successfully.", Toast.LENGTH_SHORT).show()
@@ -75,6 +79,7 @@ class DFPSettingsFragment : Fragment() {
         val settings = settingManager.getSettings()
         bannerInput.setText(settings.dfpBannerAdUnitId)
         mediumInput.setText(settings.dfpMediumAdUnitId)
+        leaderboardInput.setText(settings.dfpLeaderboardAdUnitId)
         interstitialInput.setText(settings.dfpInterstitialAdUnitId)
     }
 }

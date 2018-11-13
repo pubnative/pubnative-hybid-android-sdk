@@ -6,6 +6,7 @@
     <string name="banner">Banner</string>
     <string name="interstitial">Interstitial</string>
     <string name="medium">Medium</string>
+    <string name="leaderboard">Leaderboard</string>
 
     <string name="zone_id">Zone ID:</string>
     <string name="chosen">Chosen:</string>
@@ -18,6 +19,7 @@
     <string name="load_native">Load native</string>
     <string name="load_banner">Load banner</string>
     <string name="load_medium">Load medium</string>
+    <string name="load_leaderboard">Load leaderboard</string>
     <string name="load_fullscreen">Load fullscreen</string>
     <string name="clear">Clear</string>
     <string name="add">Add</string>
@@ -28,12 +30,14 @@
 
     <string name="hint_mopub_banner_ad_unit_id">Banner Ad Unit ID</string>
     <string name="hint_mopub_medium_ad_unit_id">Medium Ad Unit ID</string>
+    <string name="hint_mopub_leaderboard_ad_unit_id">Leaderboard Ad Unit ID</string>
     <string name="hint_mopub_interstitial_ad_unit_id">Interstitial Ad Unit ID</string>
     <string name="hint_mopub_native_ad_unit_id">Native Ad Unit ID</string>
     <string name="save_mopub_settings">Save MoPub settings</string>
 
     <string name="hint_dfp_banner_ad_unit_id">Banner Ad Unit ID</string>
     <string name="hint_dfp_medium_ad_unit_id">Medium Ad Unit ID</string>
+    <string name="hint_dfp_leaderboard_ad_unit_id">Leaderboard Ad Unit ID</string>
     <string name="hint_dfp_interstitial_ad_unit_id">Interstitial Ad Unit ID</string>
     <string name="save_dfp_settings">Save DFP settings</string>
 
@@ -60,17 +64,20 @@
     <string name="hybid_banner">HyBid Banner</string>
     <string name="hybid_interstitial">HyBid Interstitial</string>
     <string name="hybid_medium">HyBid Medium</string>
+    <string name="hybid_leaderboard">HyBid Leaderboard</string>
 
     <string name="mopub_native">MoPub Native</string>
     <string name="mopub_banner">MoPub Banner</string>
     <string name="mopub_interstitial">MoPub Interstitial</string>
     <string name="mopub_medium">MoPub Medium</string>
+    <string name="mopub_leaderboard">MoPub Leaderboard</string>
     <string name="mopub_network_mediation">MoPub Mediation</string>
     <string name="mopub_mediation">MoPub Mediation</string>
 
     <string name="dfp_banner">DFP Banner</string>
     <string name="dfp_interstitial">DFP Interstitial</string>
     <string name="dfp_medium">DFP Medium</string>
+    <string name="dfp_leaderboard">DFP Leaderboard</string>
 
     <string name="title_pn_consent">PubNative Consent</string>
     <string name="pn_consent">PN Consent</string>

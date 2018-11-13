@@ -15,9 +15,11 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.dfp.DFPBannerActivity
 import net.pubnative.lite.demo.ui.activities.dfp.DFPInterstitialActivity
+import net.pubnative.lite.demo.ui.activities.dfp.DFPLeaderboardActivity
 import net.pubnative.lite.demo.ui.activities.dfp.DFPMRectActivity
 import net.pubnative.lite.demo.ui.activities.mopub.MoPubBannerActivity
 import net.pubnative.lite.demo.ui.activities.mopub.MoPubInterstitialActivity
+import net.pubnative.lite.demo.ui.activities.mopub.MoPubLeaderboardActivity
 import net.pubnative.lite.demo.ui.activities.mopub.MoPubMRectActivity
 import net.pubnative.lite.demo.ui.adapters.ZoneIdAdapter
 import net.pubnative.lite.demo.ui.listeners.ZoneIdClickListener
@@ -26,9 +28,11 @@ class PrebidNavFragment : Fragment() {
 
     private lateinit var mopubBannerButton: Button
     private lateinit var mopubMediumButton: Button
+    private lateinit var mopubLeaderboardButton: Button
     private lateinit var mopubInterstitialButton: Button
     private lateinit var dfpBannerButton: Button
     private lateinit var dfpMediumButton: Button
+    private lateinit var dfpLeaderboardButton: Button
     private lateinit var dfpInterstitialButton: Button
 
     private lateinit var zoneIdList: RecyclerView
@@ -75,6 +79,13 @@ class PrebidNavFragment : Fragment() {
             startActivity(intent)
         }
 
+        mopubLeaderboardButton = view.findViewById(R.id.button_mopub_leaderboard)
+        mopubLeaderboardButton.setOnClickListener {
+            val intent = Intent(activity, MoPubLeaderboardActivity::class.java)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            startActivity(intent)
+        }
+
         mopubInterstitialButton = view.findViewById(R.id.button_mopub_interstitial)
         mopubInterstitialButton.setOnClickListener {
             val intent = Intent(activity, MoPubInterstitialActivity::class.java)
@@ -92,6 +103,13 @@ class PrebidNavFragment : Fragment() {
         dfpMediumButton = view.findViewById(R.id.button_dfp_medium)
         dfpMediumButton.setOnClickListener {
             val intent = Intent(activity, DFPMRectActivity::class.java)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            startActivity(intent)
+        }
+
+        dfpLeaderboardButton = view.findViewById(R.id.button_dfp_leaderboard)
+        dfpLeaderboardButton.setOnClickListener {
+            val intent = Intent(activity, DFPLeaderboardActivity::class.java)
             intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
             startActivity(intent)
         }
@@ -122,9 +140,11 @@ class PrebidNavFragment : Fragment() {
     private fun enableZones() {
         mopubBannerButton.isEnabled = true
         mopubMediumButton.isEnabled = true
+        mopubLeaderboardButton.isEnabled = true
         mopubInterstitialButton.isEnabled = true
         dfpBannerButton.isEnabled = true
         dfpMediumButton.isEnabled = true
+        dfpLeaderboardButton.isEnabled = true
         dfpInterstitialButton.isEnabled = true
     }
 
@@ -133,9 +153,11 @@ class PrebidNavFragment : Fragment() {
         chosenZoneId = ""
         mopubBannerButton.isEnabled = false
         mopubMediumButton.isEnabled = false
+        mopubLeaderboardButton.isEnabled = false
         mopubInterstitialButton.isEnabled = false
         dfpBannerButton.isEnabled = false
         dfpMediumButton.isEnabled = false
+        dfpLeaderboardButton.isEnabled = false
         dfpInterstitialButton.isEnabled = false
     }
 }
