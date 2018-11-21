@@ -22,6 +22,7 @@
 //
 package net.pubnative.lite.sdk.banner.presenter;
 
+import android.app.Activity;
 import android.content.Context;
 
 import net.pubnative.lite.sdk.models.Ad;
@@ -58,7 +59,11 @@ public class BannerPresenterFactory {
         switch (assetGroupId) {
             case ApiAssetGroupType.MRAID_BANNER_1:
             case ApiAssetGroupType.MRAID_BANNER_2: {
-                return new MraidBannerPresenter(mContext, ad);
+                if (mContext instanceof Activity) {
+                    return new MraidBannerPresenter(mContext, ad);
+                } else {
+                    return new HtmlBannerPresenter(mContext, ad);
+                }
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for banner ad format.");
