@@ -74,7 +74,7 @@ public class HyBidBannerAdView extends PNAdView implements BannerPresenter.Liste
 
     @Override
     protected void renderAd() {
-        mPresenter = new BannerPresenterFactory(getContext().getApplicationContext())
+        mPresenter = new BannerPresenterFactory(getContext())
                 .createBannerPresenter(mAd, this);
         if (mPresenter != null) {
             mPresenter.load();

@@ -59,11 +59,7 @@ public class BannerPresenterFactory {
         switch (assetGroupId) {
             case ApiAssetGroupType.MRAID_BANNER_1:
             case ApiAssetGroupType.MRAID_BANNER_2: {
-                if (mContext instanceof Activity) {
-                    return new MraidBannerPresenter(mContext, ad);
-                } else {
-                    return new HtmlBannerPresenter(mContext, ad);
-                }
+                return new MraidBannerPresenter(mContext, ad);
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for banner ad format.");
