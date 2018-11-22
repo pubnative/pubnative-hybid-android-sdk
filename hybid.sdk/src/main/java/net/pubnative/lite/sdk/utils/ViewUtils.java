@@ -22,7 +22,10 @@
 //
 package net.pubnative.lite.sdk.utils;
 
+import android.content.Context;
 import android.os.Build;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -60,5 +63,14 @@ public class ViewUtils {
         } else {
             return View.generateViewId();
         }
+    }
+
+    public static float asFloatPixels(float dips, Context context) {
+        final DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dips, displayMetrics);
+    }
+
+    public static int asIntPixels(float dips, Context context) {
+        return (int) (asFloatPixels(dips, context) + 0.5f);
     }
 }

@@ -259,7 +259,9 @@ public class MRAIDView extends RelativeLayout {
         super(context);
 
         this.context = context;
-        this.showActivity = (Activity) context;
+        if (context instanceof Activity) {
+            this.showActivity = (Activity) context;
+        }
         this.baseUrl = baseUrl == null ? "http://example.com/" : baseUrl;
         this.isInterstitial = isInterstitial;
 
@@ -275,8 +277,13 @@ public class MRAIDView extends RelativeLayout {
         this.listener = listener;
         this.nativeFeatureListener = nativeFeatureListener;
 
-        displayMetrics = new DisplayMetrics();
-        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        if (windowManager != null) {
+            displayMetrics = new DisplayMetrics();
+            windowManager.getDefaultDisplay().getMetrics(displayMetrics);
+        } else {
+            displayMetrics = null;
+        }
 
         currentPosition = new Rect();
         defaultPosition = new Rect();
@@ -327,7 +334,10 @@ public class MRAIDView extends RelativeLayout {
                 super.onConfigurationChanged(newConfig);
                 MRAIDLog.d(TAG, "onConfigurationChanged " + (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT ? "portrait" : "landscape"));
                 if (isInterstitial) {
-                    ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                    WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+                    if (windowManager != null) {
+                        windowManager.getDefaultDisplay().getMetrics(displayMetrics);
+                    }
                 }
             }
 
@@ -604,7 +614,7 @@ public class MRAIDView extends RelativeLayout {
             public void run() {
                 MRAIDLog.d("hz-m MRAIDView - expand - url loading thread");
                 final String content = getStringFromUrl(finalUrl);
-                if (!TextUtils.isEmpty(content)) {
+                if (!TextUtils.isEmpty(content) && context instanceof Activity) {
                     // Get back onto the main thread to create and load a new WebView.
                     ((Activity) context).runOnUiThread(new Runnable() {
                         @Override
@@ -872,42 +882,46 @@ public class MRAIDView extends RelativeLayout {
     }
 
     private void setResizedViewSize() {
-        MRAIDLog.d(MRAID_LOG_TAG, "setResizedViewSize");
-        int widthInDip = resizeProperties.width;
-        int heightInDip = resizeProperties.height;
-        MRAIDLog.d(MRAID_LOG_TAG, "setResizedViewSize " + widthInDip + "x" + heightInDip);
-        int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, widthInDip, displayMetrics);
-        int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, heightInDip, displayMetrics);
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(width, height);
-        resizedView.setLayoutParams(params);
+        if (displayMetrics != null) {
+            MRAIDLog.d(MRAID_LOG_TAG, "setResizedViewSize");
+            int widthInDip = resizeProperties.width;
+            int heightInDip = resizeProperties.height;
+            MRAIDLog.d(MRAID_LOG_TAG, "setResizedViewSize " + widthInDip + "x" + heightInDip);
+            int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, widthInDip, displayMetrics);
+            int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, heightInDip, displayMetrics);
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(width, height);
+            resizedView.setLayoutParams(params);
+        }
     }
 
     private void setResizedViewPosition() {
-        MRAIDLog.d(MRAID_LOG_TAG, "setResizedViewPosition");
-        // resizedView could be null if it has been closed.
-        if (resizedView == null) {
-            return;
-        }
-        int widthInDip = resizeProperties.width;
-        int heightInDip = resizeProperties.height;
-        int offsetXInDip = resizeProperties.offsetX;
-        int offsetYInDip = resizeProperties.offsetY;
-        int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, widthInDip, displayMetrics);
-        int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, heightInDip, displayMetrics);
-        int offsetX = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, offsetXInDip, displayMetrics);
-        int offsetY = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, offsetYInDip, displayMetrics);
-        int x = defaultPosition.left + offsetX;
-        int y = defaultPosition.top + offsetY;
-        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) resizedView.getLayoutParams();
-        params.leftMargin = x;
-        params.topMargin = y;
-        resizedView.setLayoutParams(params);
-        if (x != currentPosition.left || y != currentPosition.top || width != currentPosition.width() || height != currentPosition.height()) {
-            currentPosition.left = x;
-            currentPosition.top = y;
-            currentPosition.right = x + width;
-            currentPosition.bottom = y + height;
-            setCurrentPosition();
+        if (displayMetrics != null) {
+            MRAIDLog.d(MRAID_LOG_TAG, "setResizedViewPosition");
+            // resizedView could be null if it has been closed.
+            if (resizedView == null) {
+                return;
+            }
+            int widthInDip = resizeProperties.width;
+            int heightInDip = resizeProperties.height;
+            int offsetXInDip = resizeProperties.offsetX;
+            int offsetYInDip = resizeProperties.offsetY;
+            int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, widthInDip, displayMetrics);
+            int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, heightInDip, displayMetrics);
+            int offsetX = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, offsetXInDip, displayMetrics);
+            int offsetY = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, offsetYInDip, displayMetrics);
+            int x = defaultPosition.left + offsetX;
+            int y = defaultPosition.top + offsetY;
+            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) resizedView.getLayoutParams();
+            params.leftMargin = x;
+            params.topMargin = y;
+            resizedView.setLayoutParams(params);
+            if (x != currentPosition.left || y != currentPosition.top || width != currentPosition.width() || height != currentPosition.height()) {
+                currentPosition.left = x;
+                currentPosition.top = y;
+                currentPosition.right = x + width;
+                currentPosition.bottom = y + height;
+                setCurrentPosition();
+            }
         }
     }
 
@@ -921,41 +935,43 @@ public class MRAIDView extends RelativeLayout {
 
         expandedView.removeAllViews();
 
-        // get the content view for the current context
-        FrameLayout rootView = ((Activity) context).findViewById(android.R.id.content);
-        rootView.removeView(expandedView);
-        expandedView = null;
-        closeRegion = null;
+        if (context instanceof Activity) {
+            // get the content view for the current context
+            FrameLayout rootView = ((Activity) context).findViewById(android.R.id.content);
+            rootView.removeView(expandedView);
+            expandedView = null;
+            closeRegion = null;
 
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                restoreOriginalOrientation();
-                restoreOriginalScreenState();
-            }
-        });
-        if (webViewPart2 == null) {
-            // close from 1-part expansion
-            addView(webView, new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        } else {
-            // close from 2-part expansion
-            webViewPart2.destroy();
-            webView.setWebChromeClient(mraidWebChromeClient);
-            webView.setWebViewClient(mraidWebViewClient);
-            MRAIDLog.d("hz-m MRAIDView - closeFromExpanded - setting currentwebview to " + webView);
-            currentWebView = webView;
-            currentWebView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        }
-
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                fireStateChangeEvent();
-                if (listener != null) {
-                    listener.mraidViewClose(MRAIDView.this);
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    restoreOriginalOrientation();
+                    restoreOriginalScreenState();
                 }
+            });
+            if (webViewPart2 == null) {
+                // close from 1-part expansion
+                addView(webView, new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            } else {
+                // close from 2-part expansion
+                webViewPart2.destroy();
+                webView.setWebChromeClient(mraidWebChromeClient);
+                webView.setWebViewClient(mraidWebViewClient);
+                MRAIDLog.d("hz-m MRAIDView - closeFromExpanded - setting currentwebview to " + webView);
+                currentWebView = webView;
+                currentWebView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             }
-        });
+
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    fireStateChangeEvent();
+                    if (listener != null) {
+                        listener.mraidViewClose(MRAIDView.this);
+                    }
+                }
+            });
+        }
     }
 
     protected void closeFromResized() {
@@ -976,73 +992,79 @@ public class MRAIDView extends RelativeLayout {
 
     private void removeResizeView() {
         resizedView.removeAllViews();
-        FrameLayout rootView = ((Activity) context).findViewById(android.R.id.content);
-        rootView.removeView(resizedView);
-        resizedView = null;
-        closeRegion = null;
+        if (context instanceof Activity) {
+            FrameLayout rootView = ((Activity) context).findViewById(android.R.id.content);
+            rootView.removeView(resizedView);
+            resizedView = null;
+            closeRegion = null;
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void forceFullScreen() {
-        MRAIDLog.d(MRAID_LOG_TAG, "forceFullScreen");
-        Activity activity = (Activity) context;
+        if (context instanceof Activity) {
+            MRAIDLog.d(MRAID_LOG_TAG, "forceFullScreen");
+            Activity activity = (Activity) context;
 
-        // store away the original state
-        int flags = activity.getWindow().getAttributes().flags;
-        isFullScreen = ((flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0);
-        isForceNotFullScreen = ((flags & WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN) != 0);
-        origTitleBarVisibility = -9;
+            // store away the original state
+            int flags = activity.getWindow().getAttributes().flags;
+            isFullScreen = ((flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0);
+            isForceNotFullScreen = ((flags & WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN) != 0);
+            origTitleBarVisibility = -9;
 
-        // First, see if the activity has an action bar.
-        boolean hasActionBar = false;
-        ActionBar actionBar = activity.getActionBar();
-        if (actionBar != null) {
-            hasActionBar = true;
-            isActionBarShowing = actionBar.isShowing();
-            actionBar.hide();
-        }
-
-        // If not, see if the app has a title bar
-        if (!hasActionBar) {
-            // http://stackoverflow.com/questions/6872376/how-to-hide-the-title-bar-through-code-in-android
-            titleBar = null;
-            try {
-                titleBar = (View) activity.findViewById(android.R.id.title).getParent();
-            } catch (NullPointerException npe) {
-                // do nothing
+            // First, see if the activity has an action bar.
+            boolean hasActionBar = false;
+            ActionBar actionBar = activity.getActionBar();
+            if (actionBar != null) {
+                hasActionBar = true;
+                isActionBarShowing = actionBar.isShowing();
+                actionBar.hide();
             }
-            if (titleBar != null) {
-                origTitleBarVisibility = titleBar.getVisibility();
-                titleBar.setVisibility(View.GONE);
+
+            // If not, see if the app has a title bar
+            if (!hasActionBar) {
+                // http://stackoverflow.com/questions/6872376/how-to-hide-the-title-bar-through-code-in-android
+                titleBar = null;
+                try {
+                    titleBar = (View) activity.findViewById(android.R.id.title).getParent();
+                } catch (NullPointerException npe) {
+                    // do nothing
+                }
+                if (titleBar != null) {
+                    origTitleBarVisibility = titleBar.getVisibility();
+                    titleBar.setVisibility(View.GONE);
+                }
             }
+
+            MRAIDLog.d(MRAID_LOG_TAG, "isFullScreen " + isFullScreen);
+            MRAIDLog.d(MRAID_LOG_TAG, "isForceNotFullScreen " + isForceNotFullScreen);
+            MRAIDLog.d(MRAID_LOG_TAG, "isActionBarShowing " + isActionBarShowing);
+            MRAIDLog.d(MRAID_LOG_TAG, "origTitleBarVisibility " + getVisibilityString(origTitleBarVisibility));
+
+            // force fullscreen mode
+            ((Activity) context).getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            ((Activity) context).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+
+            isForcingFullScreen = !isFullScreen;
         }
-
-        MRAIDLog.d(MRAID_LOG_TAG, "isFullScreen " + isFullScreen);
-        MRAIDLog.d(MRAID_LOG_TAG, "isForceNotFullScreen " + isForceNotFullScreen);
-        MRAIDLog.d(MRAID_LOG_TAG, "isActionBarShowing " + isActionBarShowing);
-        MRAIDLog.d(MRAID_LOG_TAG, "origTitleBarVisibility " + getVisibilityString(origTitleBarVisibility));
-
-        // force fullscreen mode
-        ((Activity) context).getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        ((Activity) context).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-
-        isForcingFullScreen = !isFullScreen;
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void restoreOriginalScreenState() {
-        Activity activity = (Activity) context;
-        if (!isFullScreen) {
-            activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        }
-        if (isForceNotFullScreen) {
-            activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-        }
-        if (isActionBarShowing) {
-            ActionBar actionBar = activity.getActionBar();
-            actionBar.show();
-        } else if (titleBar != null) {
-            titleBar.setVisibility(origTitleBarVisibility);
+        if (context instanceof Activity) {
+            Activity activity = (Activity) context;
+            if (!isFullScreen) {
+                activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            }
+            if (isForceNotFullScreen) {
+                activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+            }
+            if (isActionBarShowing) {
+                ActionBar actionBar = activity.getActionBar();
+                actionBar.show();
+            } else if (titleBar != null) {
+                titleBar.setVisibility(origTitleBarVisibility);
+            }
         }
     }
 
@@ -1107,53 +1129,55 @@ public class MRAIDView extends RelativeLayout {
     }
 
     private void setCloseRegionPosition(View view) {
-        // The input parameter should be either expandedView or resizedView.
+        if (displayMetrics != null) {
+            // The input parameter should be either expandedView or resizedView.
 
-        int size = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, CLOSE_REGION_SIZE, displayMetrics);
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(size, size);
+            int size = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, CLOSE_REGION_SIZE, displayMetrics);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(size, size);
 
-        // The close region on expanded banners and interstitials is always in the top right corner.
-        // Its position on resized banners is determined by the customClosePosition property of the
-        // resizeProperties.
-        if (view == expandedView) {
-            params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-        } else if (view == resizedView) {
+            // The close region on expanded banners and interstitials is always in the top right corner.
+            // Its position on resized banners is determined by the customClosePosition property of the
+            // resizeProperties.
+            if (view == expandedView) {
+                params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            } else if (view == resizedView) {
 
-            switch (resizeProperties.customClosePosition) {
-                case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_TOP_LEFT:
-                case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_BOTTOM_LEFT:
-                    params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-                    break;
-                case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_TOP_CENTER:
-                case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_CENTER:
-                case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_BOTTOM_CENTER:
-                    params.addRule(RelativeLayout.CENTER_HORIZONTAL);
-                    break;
-                case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_TOP_RIGHT:
-                case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_BOTTOM_RIGHT:
-                    params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-                    break;
+                switch (resizeProperties.customClosePosition) {
+                    case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_TOP_LEFT:
+                    case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_BOTTOM_LEFT:
+                        params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                        break;
+                    case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_TOP_CENTER:
+                    case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_CENTER:
+                    case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_BOTTOM_CENTER:
+                        params.addRule(RelativeLayout.CENTER_HORIZONTAL);
+                        break;
+                    case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_TOP_RIGHT:
+                    case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_BOTTOM_RIGHT:
+                        params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                        break;
+                }
+
+                switch (resizeProperties.customClosePosition) {
+                    case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_TOP_LEFT:
+                    case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_TOP_CENTER:
+                    case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_TOP_RIGHT:
+                        params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                        break;
+                    case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_CENTER:
+                        params.addRule(RelativeLayout.CENTER_VERTICAL);
+                        break;
+                    case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_BOTTOM_LEFT:
+                    case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_BOTTOM_CENTER:
+                    case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_BOTTOM_RIGHT:
+                        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                        break;
+                }
             }
 
-            switch (resizeProperties.customClosePosition) {
-                case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_TOP_LEFT:
-                case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_TOP_CENTER:
-                case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_TOP_RIGHT:
-                    params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-                    break;
-                case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_CENTER:
-                    params.addRule(RelativeLayout.CENTER_VERTICAL);
-                    break;
-                case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_BOTTOM_LEFT:
-                case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_BOTTOM_CENTER:
-                case MRAIDResizeProperties.CUSTOM_CLOSE_POSITION_BOTTOM_RIGHT:
-                    params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-                    break;
-            }
+            closeRegion.setLayoutParams(params);
         }
-
-        closeRegion.setLayoutParams(params);
     }
 
     /**************************************************************************
@@ -1226,7 +1250,11 @@ public class MRAIDView extends RelativeLayout {
     }
 
     private int px2dip(int pixels) {
-        return pixels * DisplayMetrics.DENSITY_DEFAULT / displayMetrics.densityDpi;
+        if (displayMetrics != null) {
+            return pixels * DisplayMetrics.DENSITY_DEFAULT / displayMetrics.densityDpi;
+        } else {
+            return pixels;
+        }
         // return pixels;
     }
 
@@ -1530,7 +1558,10 @@ public class MRAIDView extends RelativeLayout {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         MRAIDLog.d(MRAID_LOG_TAG, "onConfigurationChanged " + (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT ? "portrait" : "landscape"));
-        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        if (windowManager != null) {
+            windowManager.getDefaultDisplay().getMetrics(displayMetrics);
+        }
     }
 
     @Override
@@ -1659,40 +1690,44 @@ public class MRAIDView extends RelativeLayout {
         int orientation = getResources().getConfiguration().orientation;
         boolean isPortrait = (orientation == Configuration.ORIENTATION_PORTRAIT);
         MRAIDLog.d(MRAID_LOG_TAG, "calculateScreenSize orientation " + (isPortrait ? "portrait" : "landscape"));
-        int width = displayMetrics.widthPixels;
-        int height = displayMetrics.heightPixels;
-        MRAIDLog.d(MRAID_LOG_TAG, "calculateScreenSize screen size " + width + "x" + height);
-        if (width != screenSize.width || height != screenSize.height) {
-            screenSize.width = width;
-            screenSize.height = height;
-            if (isPageFinished) {
-                setScreenSize();
+        if (displayMetrics != null) {
+            int width = displayMetrics.widthPixels;
+            int height = displayMetrics.heightPixels;
+            MRAIDLog.d(MRAID_LOG_TAG, "calculateScreenSize screen size " + width + "x" + height);
+            if (width != screenSize.width || height != screenSize.height) {
+                screenSize.width = width;
+                screenSize.height = height;
+                if (isPageFinished) {
+                    setScreenSize();
+                }
             }
         }
     }
 
     private void calculateMaxSize() {
-        Rect frame = new Rect();
+        if (context instanceof Activity) {
+            Rect frame = new Rect();
 
-        Window window = ((Activity) context).getWindow();
-        window.getDecorView().getWindowVisibleDisplayFrame(frame);
+            Window window = ((Activity) context).getWindow();
+            window.getDecorView().getWindowVisibleDisplayFrame(frame);
 
-        MRAIDLog.d(MRAID_LOG_TAG, "calculateMaxSize frame [" + frame.left + "," + frame.top + "][" + frame.right + "," + frame.bottom + "] (" + frame.width() + "x" + frame.height() + ")");
+            MRAIDLog.d(MRAID_LOG_TAG, "calculateMaxSize frame [" + frame.left + "," + frame.top + "][" + frame.right + "," + frame.bottom + "] (" + frame.width() + "x" + frame.height() + ")");
 
-        contentViewTop = window.findViewById(Window.ID_ANDROID_CONTENT).getTop();
-        int statusHeight = frame.top;
-        int titleHeight = contentViewTop - statusHeight;
-        MRAIDLog.d(MRAID_LOG_TAG, "calculateMaxSize statusHeight " + statusHeight);
-        MRAIDLog.d(MRAID_LOG_TAG, "calculateMaxSize titleHeight " + titleHeight);
-        MRAIDLog.d(MRAID_LOG_TAG, "calculateMaxSize contentViewTop " + contentViewTop);
-        int width = frame.width();
-        int height = screenSize.height - contentViewTop;
-        MRAIDLog.d(MRAID_LOG_TAG, "calculateMaxSize max size " + width + "x" + height);
-        if (width != maxSize.width || height != maxSize.height) {
-            maxSize.width = width;
-            maxSize.height = height;
-            if (isPageFinished) {
-                setMaxSize();
+            contentViewTop = window.findViewById(Window.ID_ANDROID_CONTENT).getTop();
+            int statusHeight = frame.top;
+            int titleHeight = contentViewTop - statusHeight;
+            MRAIDLog.d(MRAID_LOG_TAG, "calculateMaxSize statusHeight " + statusHeight);
+            MRAIDLog.d(MRAID_LOG_TAG, "calculateMaxSize titleHeight " + titleHeight);
+            MRAIDLog.d(MRAID_LOG_TAG, "calculateMaxSize contentViewTop " + contentViewTop);
+            int width = frame.width();
+            int height = screenSize.height - contentViewTop;
+            MRAIDLog.d(MRAID_LOG_TAG, "calculateMaxSize max size " + width + "x" + height);
+            if (width != maxSize.width || height != maxSize.height) {
+                maxSize.width = width;
+                maxSize.height = height;
+                if (isPageFinished) {
+                    setMaxSize();
+                }
             }
         }
     }
@@ -1754,39 +1789,43 @@ public class MRAIDView extends RelativeLayout {
     }
 
     protected void applyOrientationProperties() {
-        MRAIDLog.d(MRAID_LOG_TAG, "applyOrientationProperties " +
-                orientationProperties.allowOrientationChange + " " + orientationProperties.forceOrientationString());
+        if (context instanceof Activity) {
+            MRAIDLog.d(MRAID_LOG_TAG, "applyOrientationProperties " +
+                    orientationProperties.allowOrientationChange + " " + orientationProperties.forceOrientationString());
 
-        Activity activity = (Activity) context;
+            Activity activity = (Activity) context;
 
-        int currentOrientation = getResources().getConfiguration().orientation;
-        boolean isCurrentPortrait = (currentOrientation == Configuration.ORIENTATION_PORTRAIT);
-        MRAIDLog.d(MRAID_LOG_TAG, "currentOrientation " + (isCurrentPortrait ? "portrait" : "landscape"));
+            int currentOrientation = getResources().getConfiguration().orientation;
+            boolean isCurrentPortrait = (currentOrientation == Configuration.ORIENTATION_PORTRAIT);
+            MRAIDLog.d(MRAID_LOG_TAG, "currentOrientation " + (isCurrentPortrait ? "portrait" : "landscape"));
 
-        int orientation = originalRequestedOrientation;
-        if (orientationProperties.forceOrientation == MRAIDOrientationProperties.FORCE_ORIENTATION_PORTRAIT) {
-            orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-        } else if (orientationProperties.forceOrientation == MRAIDOrientationProperties.FORCE_ORIENTATION_LANDSCAPE) {
-            orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-        } else {
-            // orientationProperties.forceOrientation == MRAIDOrientationProperties.FORCE_ORIENTATION_NONE
-            if (orientationProperties.allowOrientationChange) {
-                orientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+            int orientation = originalRequestedOrientation;
+            if (orientationProperties.forceOrientation == MRAIDOrientationProperties.FORCE_ORIENTATION_PORTRAIT) {
+                orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+            } else if (orientationProperties.forceOrientation == MRAIDOrientationProperties.FORCE_ORIENTATION_LANDSCAPE) {
+                orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
             } else {
-                // orientationProperties.allowOrientationChange == false
-                // lock the current orientation
-                orientation = (isCurrentPortrait ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                // orientationProperties.forceOrientation == MRAIDOrientationProperties.FORCE_ORIENTATION_NONE
+                if (orientationProperties.allowOrientationChange) {
+                    orientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+                } else {
+                    // orientationProperties.allowOrientationChange == false
+                    // lock the current orientation
+                    orientation = (isCurrentPortrait ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                }
             }
+            activity.setRequestedOrientation(orientation);
         }
-        activity.setRequestedOrientation(orientation);
     }
 
     private void restoreOriginalOrientation() {
-        MRAIDLog.d(MRAID_LOG_TAG, "restoreOriginalOrientation");
-        Activity activity = (Activity) context;
-        int currentRequestedOrientation = activity.getRequestedOrientation();
-        if (currentRequestedOrientation != originalRequestedOrientation) {
-            activity.setRequestedOrientation(originalRequestedOrientation);
+        if (context instanceof Activity) {
+            MRAIDLog.d(MRAID_LOG_TAG, "restoreOriginalOrientation");
+            Activity activity = (Activity) context;
+            int currentRequestedOrientation = activity.getRequestedOrientation();
+            if (currentRequestedOrientation != originalRequestedOrientation) {
+                activity.setRequestedOrientation(originalRequestedOrientation);
+            }
         }
     }
 }
