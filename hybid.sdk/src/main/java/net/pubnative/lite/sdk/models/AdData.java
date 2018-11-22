@@ -22,6 +22,8 @@
 //
 package net.pubnative.lite.sdk.models;
 
+import android.os.Parcelable;
+
 import net.pubnative.lite.sdk.utils.json.BindField;
 import net.pubnative.lite.sdk.utils.json.JsonModel;
 
