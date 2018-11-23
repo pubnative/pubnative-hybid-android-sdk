@@ -5,5 +5,6 @@
 
     <application>
         <activity android:name=".consent.UserConsentActivity" />
+        <activity android:name=".interstitial.MraidInterstitialActivity" />
     </application>
 </manifest>

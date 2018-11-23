@@ -36,9 +36,11 @@ import net.pubnative.lite.sdk.utils.Logger;
 public class InterstitialPresenterFactory {
     private static final String TAG = InterstitialPresenterFactory.class.getSimpleName();
     private final Activity mActivity;
+    private final String mZoneId;
 
-    public InterstitialPresenterFactory(Activity activity) {
+    public InterstitialPresenterFactory(Activity activity, String zoneId) {
         mActivity = activity;
+        mZoneId = zoneId;
     }
 
     public InterstitialPresenter createInterstitialPresenter(
@@ -61,7 +63,7 @@ public class InterstitialPresenterFactory {
     InterstitialPresenter fromCreativeType(int assetGroupId, Ad ad) {
         switch (assetGroupId) {
             case ApiAssetGroupType.MRAID_INTERSTITIAL: {
-                return new MraidInterstitialPresenter(mActivity, ad);
+                return new MraidInterstitialPresenter(mActivity, ad, mZoneId);
             }
             case ApiAssetGroupType.VAST_INTERSTITIAL_1:
             case ApiAssetGroupType.VAST_INTERSTITIAL_2:

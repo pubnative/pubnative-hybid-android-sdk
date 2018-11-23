@@ -82,7 +82,7 @@ public class HyBidDFPInterstitialCustomEvent implements CustomEventInterstitial,
             return;
         }
 
-        mPresenter = new InterstitialPresenterFactory(activity).createInterstitialPresenter(ad, this);
+        mPresenter = new InterstitialPresenterFactory(activity, zoneIdKey).createInterstitialPresenter(ad, this);
         if (mPresenter == null) {
             Logger.e(TAG, "Could not create valid interstitial presenter");
             mInterstitialListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NETWORK_ERROR);

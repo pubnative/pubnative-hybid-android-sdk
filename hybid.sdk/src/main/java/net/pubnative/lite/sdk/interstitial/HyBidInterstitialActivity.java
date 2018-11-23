@@ -9,7 +9,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
-import net.pubnative.lite.sdk.AdCache;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.UrlHandler;
@@ -18,10 +17,12 @@ import net.pubnative.lite.sdk.views.CloseableContainer;
 public abstract class HyBidInterstitialActivity extends Activity {
     private static final String TAG = HyBidInterstitialActivity.class.getSimpleName();
     public static final String EXTRA_ZONE_ID = "extra_pn_zone_id";
+    public static final String EXTRA_BROADCAST_ID = "extra_pn_broadcast_id";
 
     private CloseableContainer mCloseableContainer;
     private UrlHandler mUrlHandlerDelegate;
     private Ad mAd;
+    private HyBidInterstitialBroadcastSender mBroadcastSender;
 
     public abstract View getAdView();
 
@@ -36,9 +37,12 @@ public abstract class HyBidInterstitialActivity extends Activity {
 
         mUrlHandlerDelegate = new UrlHandler(this);
         String zoneId = intent.getStringExtra(EXTRA_ZONE_ID);
+        long broadcastId = intent.getLongExtra(EXTRA_BROADCAST_ID, -1);
 
-        if (!TextUtils.isEmpty(zoneId)) {
+        if (!TextUtils.isEmpty(zoneId) && broadcastId != -1) {
             mAd = HyBid.getAdCache().remove(zoneId);
+
+            mBroadcastSender = new HyBidInterstitialBroadcastSender(this, broadcastId);
 
             View adView = getAdView();
 
@@ -48,6 +52,7 @@ public abstract class HyBidInterstitialActivity extends Activity {
                 mCloseableContainer.setOnCloseListener(new CloseableContainer.OnCloseListener() {
                     @Override
                     public void onClose() {
+                        getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
                         finish();
                     }
                 });
@@ -92,5 +97,9 @@ public abstract class HyBidInterstitialActivity extends Activity {
 
     protected Ad getAd() {
         return mAd;
+    }
+
+    protected HyBidInterstitialBroadcastSender getBroadcastSender() {
+        return mBroadcastSender;
     }
 }

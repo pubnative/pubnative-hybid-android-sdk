@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.View;
 
 import net.pubnative.lite.sdk.models.APIAsset;
-import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.mraid.MRAIDBanner;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeature;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
@@ -41,7 +40,7 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
 
     @Override
     public void mraidViewLoaded(MRAIDView mraidView) {
-
+        getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.SHOW);
     }
 
     @Override
@@ -76,6 +75,7 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
 
     @Override
     public void mraidNativeFeatureOpenBrowser(String url) {
+        getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CLICK);
         getUrlHandler().handleUrl(url);
     }
 

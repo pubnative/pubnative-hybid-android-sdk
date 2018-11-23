@@ -49,9 +49,9 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
 
     private RequestManager mRequestManager;
     private InterstitialPresenter mPresenter;
-    private Listener mListener;
-    private Activity mActivity;
-    private String mZoneId;
+    private final Listener mListener;
+    private final Activity mActivity;
+    private final String mZoneId;
     private boolean mReady = false;
 
     public HyBidInterstitialAd(Activity activity, String zoneId, Listener listener) {
@@ -107,7 +107,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     }
 
     private void renderAd(Ad ad) {
-        mPresenter = new InterstitialPresenterFactory(mActivity).createInterstitialPresenter(ad, this);
+        mPresenter = new InterstitialPresenterFactory(mActivity, mZoneId).createInterstitialPresenter(ad, this);
         if (mPresenter != null) {
             mPresenter.load();
         } else {

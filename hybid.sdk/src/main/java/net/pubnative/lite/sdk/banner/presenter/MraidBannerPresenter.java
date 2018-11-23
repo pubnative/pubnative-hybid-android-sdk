@@ -86,7 +86,6 @@ public class MraidBannerPresenter implements BannerPresenter, MRAIDViewListener,
             mMRAIDBanner = new MRAIDBanner(mContext, "", mAd.getAssetHtml(APIAsset.HTML_BANNER), mSupportedNativeFeatures,
                     this, this, mAd.getContentInfoContainer(mContext));
         }
-
     }
 
     @Override
