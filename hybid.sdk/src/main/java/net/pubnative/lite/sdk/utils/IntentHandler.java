@@ -50,6 +50,7 @@ public class IntentHandler {
     public boolean handleDeepLink(Uri uri) {
         final Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(uri);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         if (canHandleIntent(intent)) {
             context.startActivity(intent);
             return true;
