@@ -161,7 +161,6 @@ public class MraidBannerPresenter implements BannerPresenter, MRAIDViewListener,
         }
 
         mUrlHandlerDelegate.handleUrl(url);
-        // TODO will this always count as a click? Are there other cases that should be considered a click?
         if (mListener != null) {
             mListener.onBannerClicked(this);
         }

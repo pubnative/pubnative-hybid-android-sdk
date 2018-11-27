@@ -22,6 +22,7 @@
 //
 package net.pubnative.lite.sdk.banner.presenter;
 
+import android.app.Activity;
 import android.content.Context;
 
 import net.pubnative.lite.sdk.models.Ad;
