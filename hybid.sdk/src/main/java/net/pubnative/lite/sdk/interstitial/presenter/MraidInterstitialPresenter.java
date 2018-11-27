@@ -112,11 +112,7 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, HyBidI
 
     @Override
     public void hide() {
-        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "MraidInterstitialPresenter is destroyed")) {
-            return;
-        }
-
-        //TODO Implement hide method
+        //This method will be removed once VAST Interstitial is converted to independent Activity
     }
 
     @Override
