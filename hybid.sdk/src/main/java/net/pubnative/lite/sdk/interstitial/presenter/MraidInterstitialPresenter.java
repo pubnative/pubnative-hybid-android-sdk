@@ -56,10 +56,14 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, HyBidI
 
     public MraidInterstitialPresenter(Activity activity, Ad ad, String zoneId) {
         mActivity = activity;
-        mBroadcastReceiver = new HyBidInterstitialBroadcastReceiver(mActivity);
-        mBroadcastReceiver.setListener(this);
         mAd = ad;
         mZoneId = zoneId;
+        if (activity != null && activity.getApplicationContext() != null) {
+            mBroadcastReceiver = new HyBidInterstitialBroadcastReceiver(mActivity);
+            mBroadcastReceiver.setListener(this);
+        } else {
+            mBroadcastReceiver = null;
+        }
     }
 
     @Override
@@ -95,13 +99,15 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, HyBidI
             return;
         }
 
-        mBroadcastReceiver.register();
+        if (mBroadcastReceiver != null) {
+            mBroadcastReceiver.register();
 
-        Intent intent = new Intent(mActivity, MraidInterstitialActivity.class);
-        intent.putExtra(HyBidInterstitialActivity.EXTRA_BROADCAST_ID, mBroadcastReceiver.getBroadcastId());
-        intent.putExtra(HyBidInterstitialActivity.EXTRA_ZONE_ID, mZoneId);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        mActivity.startActivity(intent);
+            Intent intent = new Intent(mActivity, MraidInterstitialActivity.class);
+            intent.putExtra(HyBidInterstitialActivity.EXTRA_BROADCAST_ID, mBroadcastReceiver.getBroadcastId());
+            intent.putExtra(HyBidInterstitialActivity.EXTRA_ZONE_ID, mZoneId);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mActivity.startActivity(intent);
+        }
     }
 
     @Override
@@ -115,7 +121,9 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, HyBidI
 
     @Override
     public void destroy() {
-        mBroadcastReceiver.destroy();
+        if (mBroadcastReceiver != null) {
+            mBroadcastReceiver.destroy();
+        }
         mListener = null;
         mIsDestroyed = true;
     }

@@ -1,9 +1,12 @@
 package net.pubnative.lite.sdk.interstitial.presenter;
 
+import android.app.Activity;
+
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.utils.TestUtil;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +33,11 @@ public class InterstitialPresenterFactoryTest {
     @Before
     public void setup() {
         initMocks(this);
+    }
+
+    @After
+    public void tearDown() {
+
     }
 
     @Test
