@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -56,8 +57,11 @@ public abstract class HyBidInterstitialActivity extends Activity {
                         finish();
                     }
                 });
-                mCloseableContainer.addView(adView,
-                        new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+
+                FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
+                params.gravity = Gravity.CENTER;
+
+                mCloseableContainer.addView(adView, params);
                 setContentView(mCloseableContainer);
             } else {
                 finish();

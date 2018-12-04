@@ -9,6 +9,7 @@ import net.pubnative.lite.sdk.vast.model.VASTModel;
 
 public class VastInterstitialActivity extends HyBidInterstitialActivity implements VASTPlayer.Listener {
     private VASTPlayer mPlayer;
+    private boolean mReady = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +38,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
     public View getAdView() {
         if (getAd() != null) {
             mPlayer = new VASTPlayer(this);
+            mPlayer.setListener(this);
             return mPlayer;
         }
 
@@ -45,12 +47,17 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
 
     @Override
     public void onVASTPlayerLoadFinish() {
+        mReady = true;
+        mPlayer.onMuteClick();
+        mPlayer.play();
         getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.SHOW);
     }
 
     @Override
     public void onVASTPlayerFail(Exception exception) {
-
+        getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.ERROR);
+        getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
+        finish();
     }
 
     @Override
@@ -65,6 +72,31 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
 
     @Override
     public void onVASTPlayerPlaybackFinish() {
+        mReady = false;
+    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mPlayer != null) {
+            mPlayer.destroy();
+            mReady = false;
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mReady) {
+            mPlayer.play();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mReady) {
+            mPlayer.pause();
+        }
     }
 }

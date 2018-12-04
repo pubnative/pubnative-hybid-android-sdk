@@ -122,6 +122,7 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, HyBidI
         }
         mListener = null;
         mIsDestroyed = true;
+        mReady = false;
     }
 
     //----------------------- Interstitial Broadcast Receiver Callbacks ----------------------------
