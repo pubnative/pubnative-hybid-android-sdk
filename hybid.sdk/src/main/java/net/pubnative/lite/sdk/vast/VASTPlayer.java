@@ -533,7 +533,7 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
                 mMediaPlayer.reset();
                 mIsDataSourceSet = false;
             }
-            setState(PlayerState.Loading);
+
         } else {
             Logger.e(TAG, "ERROR, player in wrong state: " + mPlayerState.name());
         }

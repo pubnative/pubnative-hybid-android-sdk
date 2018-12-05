@@ -47,10 +47,12 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
 
     @Override
     public void onVASTPlayerLoadFinish() {
-        mReady = true;
-        mPlayer.onMuteClick();
-        mPlayer.play();
-        getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.SHOW);
+        if (!mReady) {
+            mReady = true;
+            mPlayer.onMuteClick();
+            mPlayer.play();
+            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.SHOW);
+        }
     }
 
     @Override

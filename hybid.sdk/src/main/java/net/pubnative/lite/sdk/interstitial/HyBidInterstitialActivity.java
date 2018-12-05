@@ -2,6 +2,7 @@ package net.pubnative.lite.sdk.interstitial;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Gravity;
@@ -62,6 +63,7 @@ public abstract class HyBidInterstitialActivity extends Activity {
                 params.gravity = Gravity.CENTER;
 
                 mCloseableContainer.addView(adView, params);
+                mCloseableContainer.setBackgroundColor(Color.BLACK);
                 setContentView(mCloseableContainer);
             } else {
                 finish();
