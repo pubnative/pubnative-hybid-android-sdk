@@ -33,10 +33,6 @@ public class CheckUtils {
         checkArgumentImpl(expression, true, errorMessage);
     }
 
-    public static void checkNotNull(Object reference, String errorMessage) {
-        checkNotNullImpl(reference, true, errorMessage);
-    }
-
     public static class NoThrow {
         private static boolean sStrictMode = false;
 

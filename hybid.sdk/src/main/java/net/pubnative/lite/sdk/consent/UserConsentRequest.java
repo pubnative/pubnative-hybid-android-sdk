@@ -29,7 +29,6 @@ import net.pubnative.lite.sdk.models.UserConsentRequestModel;
 import net.pubnative.lite.sdk.models.UserConsentResponseModel;
 import net.pubnative.lite.sdk.network.PNHttpRequest;
 import net.pubnative.lite.sdk.utils.Logger;
-import net.pubnative.lite.sdk.utils.UrlUtils;
 
 import org.json.JSONObject;
 
