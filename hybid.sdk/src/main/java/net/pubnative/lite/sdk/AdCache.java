@@ -44,6 +44,10 @@ public class AdCache {
         return mAdMap.remove(zoneId);
     }
 
+    public Ad inspect(String zoneId) {
+        return mAdMap.get(zoneId);
+    }
+
     public void put(String zoneId, Ad ad) {
         Logger.d(TAG, "AdCache putting ad for zone id: " + zoneId);
         mAdMap.put(zoneId, ad);
