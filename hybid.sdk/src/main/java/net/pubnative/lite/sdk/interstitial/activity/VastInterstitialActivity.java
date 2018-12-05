@@ -1,8 +1,10 @@
-package net.pubnative.lite.sdk.interstitial;
+package net.pubnative.lite.sdk.interstitial.activity;
 
 import android.os.Bundle;
 import android.view.View;
 
+import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
+import net.pubnative.lite.sdk.interstitial.activity.HyBidInterstitialActivity;
 import net.pubnative.lite.sdk.vast.VASTParser;
 import net.pubnative.lite.sdk.vast.VASTPlayer;
 import net.pubnative.lite.sdk.vast.model.VASTModel;

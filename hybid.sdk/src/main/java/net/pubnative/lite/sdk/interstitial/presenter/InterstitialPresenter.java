@@ -49,8 +49,6 @@ public interface InterstitialPresenter {
 
     void show();
 
-    void hide();
-
     boolean isReady();
 
     void destroy();

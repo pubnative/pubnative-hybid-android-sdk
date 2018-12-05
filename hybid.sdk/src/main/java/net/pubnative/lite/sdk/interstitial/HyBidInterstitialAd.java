@@ -80,12 +80,6 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         }
     }
 
-    public void hide() {
-        if (mPresenter != null) {
-            mPresenter.hide();
-        }
-    }
-
     public boolean isReady() {
         return mReady;
     }

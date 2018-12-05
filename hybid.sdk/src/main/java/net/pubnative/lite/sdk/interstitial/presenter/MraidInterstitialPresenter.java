@@ -24,21 +24,12 @@ package net.pubnative.lite.sdk.interstitial.presenter;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.view.View;
-import android.widget.RelativeLayout;
 
-import net.pubnative.lite.sdk.interstitial.HyBidInterstitialActivity;
+import net.pubnative.lite.sdk.interstitial.activity.HyBidInterstitialActivity;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
-import net.pubnative.lite.sdk.interstitial.MraidInterstitialActivity;
-import net.pubnative.lite.sdk.models.APIAsset;
+import net.pubnative.lite.sdk.interstitial.activity.MraidInterstitialActivity;
 import net.pubnative.lite.sdk.models.Ad;
-import net.pubnative.lite.sdk.mraid.MRAIDInterstitial;
-import net.pubnative.lite.sdk.mraid.MRAIDNativeFeature;
-import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
-import net.pubnative.lite.sdk.mraid.MRAIDView;
-import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.utils.CheckUtils;
-import net.pubnative.lite.sdk.utils.UrlHandler;
 
 /**
  * Created by erosgarciaponte on 09.01.18.
@@ -108,11 +99,6 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, HyBidI
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mActivity.startActivity(intent);
         }
-    }
-
-    @Override
-    public void hide() {
-        //This method will be removed once VAST Interstitial is converted to independent Activity
     }
 
     @Override

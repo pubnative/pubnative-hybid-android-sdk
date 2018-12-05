@@ -1,8 +1,10 @@
-package net.pubnative.lite.sdk.interstitial;
+package net.pubnative.lite.sdk.interstitial.activity;
 
 import android.os.Bundle;
 import android.view.View;
 
+import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
+import net.pubnative.lite.sdk.interstitial.activity.HyBidInterstitialActivity;
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.mraid.MRAIDBanner;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeature;
