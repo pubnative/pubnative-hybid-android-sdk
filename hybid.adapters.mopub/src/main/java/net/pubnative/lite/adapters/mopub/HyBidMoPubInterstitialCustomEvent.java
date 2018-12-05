@@ -73,7 +73,7 @@ public class HyBidMoPubInterstitialCustomEvent extends CustomEventInterstitial i
             return;
         }
 
-        final Ad ad = HyBid.getAdCache().remove(zoneIdKey);
+        final Ad ad = HyBid.getAdCache().inspect(zoneIdKey);
         if (ad == null) {
             Logger.e(TAG, "Could not find an ad in the cache for zone id with key " + zoneIdKey);
             mInterstitialListener.onInterstitialFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
