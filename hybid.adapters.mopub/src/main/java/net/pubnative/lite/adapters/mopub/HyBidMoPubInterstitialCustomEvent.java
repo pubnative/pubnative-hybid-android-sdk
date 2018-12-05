@@ -80,7 +80,7 @@ public class HyBidMoPubInterstitialCustomEvent extends CustomEventInterstitial i
             return;
         }
 
-        mInterstitialPresenter = new InterstitialPresenterFactory(activity).createInterstitialPresenter(ad, this);
+        mInterstitialPresenter = new InterstitialPresenterFactory(activity, zoneIdKey).createInterstitialPresenter(ad, this);
         if (mInterstitialPresenter == null) {
             Logger.e(TAG, "Could not create valid interstitial presenter");
             mInterstitialListener.onInterstitialFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);

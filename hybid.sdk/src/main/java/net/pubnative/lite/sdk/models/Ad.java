@@ -24,6 +24,7 @@ package net.pubnative.lite.sdk.models;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -276,4 +277,6 @@ public class Ad extends JsonModel implements Serializable {
 
         return impressionId;
     }
+
+
 }

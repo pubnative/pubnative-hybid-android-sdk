@@ -24,35 +24,42 @@ package net.pubnative.lite.sdk.interstitial.presenter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.view.KeyEvent;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
 
+import net.pubnative.lite.sdk.interstitial.HyBidInterstitialActivity;
+import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
+import net.pubnative.lite.sdk.interstitial.VastInterstitialActivity;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.vast.VASTParser;
 import net.pubnative.lite.sdk.vast.VASTPlayer;
 import net.pubnative.lite.sdk.vast.model.VASTModel;
 
-public class VastInterstitialPresenter implements InterstitialPresenter, VASTPlayer.Listener {
+public class VastInterstitialPresenter implements InterstitialPresenter, HyBidInterstitialBroadcastReceiver.Listener {
     private final Activity mActivity;
     private final Ad mAd;
-    private VASTPlayer mPlayer;
-    private WindowManager mWindowManager;
-    private RelativeLayout mInterstitialView;
-
+    private final String mZoneId;
+    private final HyBidInterstitialBroadcastReceiver mBroadcastReceiver;
 
     private InterstitialPresenter.Listener mListener;
     private boolean mIsDestroyed;
-    private boolean mLoaded = false;
-    private boolean mStopped = false;
     private boolean mReady = false;
 
-    public VastInterstitialPresenter(Activity activity, Ad ad) {
+    public VastInterstitialPresenter(Activity activity, Ad ad, String zoneId) {
         mActivity = activity;
         mAd = ad;
+        mZoneId = zoneId;
+        if (activity != null && activity.getApplicationContext() != null) {
+            mBroadcastReceiver = new HyBidInterstitialBroadcastReceiver(mActivity);
+            mBroadcastReceiver.setListener(this);
+        } else {
+            mBroadcastReceiver = null;
+        }
     }
 
     @Override
@@ -71,23 +78,10 @@ public class VastInterstitialPresenter implements InterstitialPresenter, VASTPla
             return;
         }
 
-        mReady = false;
-        mPlayer = new VASTPlayer(mActivity);
-        mPlayer.setListener(this);
-
-        new VASTParser(mActivity).setListener(new VASTParser.Listener() {
-            @Override
-            public void onVASTParserError(int error) {
-                if (mListener != null) {
-                    mListener.onInterstitialError(VastInterstitialPresenter.this);
-                }
-            }
-
-            @Override
-            public void onVASTParserFinished(VASTModel model) {
-                mPlayer.load(model);
-            }
-        }).execute(mAd.getVast());
+        mReady = true;
+        if (mListener != null) {
+            mListener.onInterstitialLoaded(this);
+        }
     }
 
     @Override
@@ -101,41 +95,22 @@ public class VastInterstitialPresenter implements InterstitialPresenter, VASTPla
             return;
         }
 
-        mWindowManager = (WindowManager) mActivity.getSystemService(Context.WINDOW_SERVICE);
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams();
-        params.width = WindowManager.LayoutParams.MATCH_PARENT;
-        params.height = WindowManager.LayoutParams.MATCH_PARENT;
-        params.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN;
+        if (mBroadcastReceiver != null) {
+            mBroadcastReceiver.register();
 
-        mInterstitialView = new RelativeLayout(mActivity) {
-            @Override
-            public boolean dispatchKeyEvent(KeyEvent event) {
-
-                if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-                    hide();
-                    return true;
-                }
-                return super.dispatchKeyEvent(event);
-            }
-        };
-
-        mInterstitialView.setBackgroundColor(Color.BLACK);
-
-        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
-        mInterstitialView.addView(mPlayer, layoutParams);
-
-        mInterstitialView.addView(mAd.getContentInfoContainer(mActivity));
-        mWindowManager.addView(mInterstitialView, params);
-
-        mListener.onInterstitialShown(this);
-        mStopped = false;
-        mPlayer.onMuteClick();
-        mPlayer.play();
+            Intent intent = new Intent(mActivity, VastInterstitialActivity.class);
+            intent.putExtra(HyBidInterstitialActivity.EXTRA_BROADCAST_ID, mBroadcastReceiver.getBroadcastId());
+            intent.putExtra(HyBidInterstitialActivity.EXTRA_ZONE_ID, mZoneId);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mActivity.startActivity(intent);
+        }
     }
 
     @Override
     public void destroy() {
+        if (mBroadcastReceiver != null) {
+            mBroadcastReceiver.destroy();
+        }
         mListener = null;
         mIsDestroyed = true;
         mReady = false;
@@ -143,69 +118,12 @@ public class VastInterstitialPresenter implements InterstitialPresenter, VASTPla
 
     @Override
     public void hide() {
-        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "VastInterstitialPresenter is destroyed")) {
-            return;
-        }
-
-        if (!mStopped) {
-            mStopped = true;
-            if (mPlayer != null) {
-                mPlayer.stop();
-            }
-        }
-
-        if (mInterstitialView != null) {
-            mInterstitialView.removeAllViews();
-        }
-
-        if (mWindowManager != null) {
-            mWindowManager.removeView(mInterstitialView);
-            mWindowManager = null;
-        }
-
-        mListener.onInterstitialDismissed(this);
-    }
-
-    @Override
-    public void onVASTPlayerLoadFinish() {
-        if (mIsDestroyed) {
-            return;
-        }
-
-        if (!mLoaded) {
-            mLoaded = true;
-            mReady = true;
-            if (mListener != null) {
-                mListener.onInterstitialLoaded(this);
-            }
-        }
-    }
-
-    @Override
-    public void onVASTPlayerFail(Exception exception) {
-        if (mListener != null) {
-            mListener.onInterstitialError(this);
-        }
-    }
-
-    @Override
-    public void onVASTPlayerOpenOffer() {
-        if (mIsDestroyed) {
-            return;
-        }
-
-        if (mListener != null) {
-            mListener.onInterstitialClicked(this);
-        }
-    }
-
-    @Override
-    public void onVASTPlayerPlaybackStart() {
 
     }
 
+    //----------------------- Interstitial Broadcast Receiver Callbacks ----------------------------
     @Override
-    public void onVASTPlayerPlaybackFinish() {
-
+    public void onReceivedAction(HyBidInterstitialBroadcastReceiver.Action action) {
+        mBroadcastReceiver.handleAction(action, this, mListener);
     }
 }

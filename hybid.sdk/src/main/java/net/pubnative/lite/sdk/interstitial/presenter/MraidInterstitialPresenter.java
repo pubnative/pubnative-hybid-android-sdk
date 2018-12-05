@@ -23,9 +23,13 @@
 package net.pubnative.lite.sdk.interstitial.presenter;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.view.View;
 import android.widget.RelativeLayout;
 
+import net.pubnative.lite.sdk.interstitial.HyBidInterstitialActivity;
+import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
+import net.pubnative.lite.sdk.interstitial.MraidInterstitialActivity;
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.mraid.MRAIDInterstitial;
@@ -40,28 +44,26 @@ import net.pubnative.lite.sdk.utils.UrlHandler;
  * Created by erosgarciaponte on 09.01.18.
  */
 
-public class MraidInterstitialPresenter implements InterstitialPresenter, MRAIDViewListener, MRAIDNativeFeatureListener {
+public class MraidInterstitialPresenter implements InterstitialPresenter, HyBidInterstitialBroadcastReceiver.Listener {
     private final Activity mActivity;
     private final Ad mAd;
-    private final UrlHandler mUrlHandlerDelegate;
-    private final String[] mSupportedNativeFeatures;
+    private final String mZoneId;
+    private final HyBidInterstitialBroadcastReceiver mBroadcastReceiver;
 
     private InterstitialPresenter.Listener mListener;
-    private MRAIDInterstitial mMRAIDInterstitial;
     private boolean mIsDestroyed;
     private boolean mReady = false;
 
-    public MraidInterstitialPresenter(Activity activity, Ad ad) {
+    public MraidInterstitialPresenter(Activity activity, Ad ad, String zoneId) {
         mActivity = activity;
         mAd = ad;
-        mUrlHandlerDelegate = new UrlHandler(activity);
-        mSupportedNativeFeatures = new String[]{
-                MRAIDNativeFeature.CALENDAR,
-                MRAIDNativeFeature.INLINE_VIDEO,
-                MRAIDNativeFeature.SMS,
-                MRAIDNativeFeature.STORE_PICTURE,
-                MRAIDNativeFeature.TEL
-        };
+        mZoneId = zoneId;
+        if (activity != null && activity.getApplicationContext() != null) {
+            mBroadcastReceiver = new HyBidInterstitialBroadcastReceiver(mActivity);
+            mBroadcastReceiver.setListener(this);
+        } else {
+            mBroadcastReceiver = null;
+        }
     }
 
     @Override
@@ -80,13 +82,9 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, MRAIDV
             return;
         }
 
-        mReady = false;
-        if (mAd.getAssetUrl(APIAsset.HTML_BANNER) != null) {
-            mMRAIDInterstitial = new MRAIDInterstitial(mActivity, mAd.getAssetUrl(APIAsset.HTML_BANNER), "",
-                    mSupportedNativeFeatures, this, this, mAd.getContentInfoContainer(mActivity));
-        } else if (mAd.getAssetHtml(APIAsset.HTML_BANNER) != null) {
-            mMRAIDInterstitial = new MRAIDInterstitial(mActivity, "", mAd.getAssetHtml(APIAsset.HTML_BANNER),
-                    mSupportedNativeFeatures, this, this, mAd.getContentInfoContainer(mActivity));
+        mReady = true;
+        if (mListener != null) {
+            mListener.onInterstitialLoaded(this);
         }
     }
 
@@ -101,104 +99,35 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, MRAIDV
             return;
         }
 
-        if (mMRAIDInterstitial != null) {
-            mMRAIDInterstitial.show(mActivity);
+        if (mBroadcastReceiver != null) {
+            mBroadcastReceiver.register();
+
+            Intent intent = new Intent(mActivity, MraidInterstitialActivity.class);
+            intent.putExtra(HyBidInterstitialActivity.EXTRA_BROADCAST_ID, mBroadcastReceiver.getBroadcastId());
+            intent.putExtra(HyBidInterstitialActivity.EXTRA_ZONE_ID, mZoneId);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mActivity.startActivity(intent);
         }
     }
 
     @Override
     public void hide() {
-        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "MraidInterstitialPresenter is destroyed")) {
-            return;
-        }
-
-        if (mMRAIDInterstitial != null) {
-            mMRAIDInterstitial.hide();
-        }
+        //This method will be removed once VAST Interstitial is converted to independent Activity
     }
 
     @Override
     public void destroy() {
-        if (mMRAIDInterstitial != null) {
-            mMRAIDInterstitial.destroy();
+        if (mBroadcastReceiver != null) {
+            mBroadcastReceiver.destroy();
         }
         mListener = null;
         mIsDestroyed = true;
+        mReady = false;
     }
 
+    //----------------------- Interstitial Broadcast Receiver Callbacks ----------------------------
     @Override
-    public void mraidViewLoaded(MRAIDView mraidView) {
-        if (mIsDestroyed) {
-            return;
-        }
-
-        mReady = true;
-        if (mListener != null) {
-            mListener.onInterstitialLoaded(this);
-        }
-    }
-
-    @Override
-    public void mraidViewExpand(MRAIDView mraidView) {
-        if (mIsDestroyed) {
-            return;
-        }
-
-        if (mListener != null) {
-            mListener.onInterstitialShown(this);
-        }
-    }
-
-    @Override
-    public void mraidViewClose(MRAIDView mraidView) {
-        if (mIsDestroyed) {
-            return;
-        }
-
-        if (mListener != null) {
-            mListener.onInterstitialDismissed(this);
-        }
-    }
-
-    @Override
-    public boolean mraidViewResize(MRAIDView mraidView, int width, int height, int offsetX, int offsetY) {
-        return true;
-    }
-
-    @Override
-    public void mraidNativeFeatureCallTel(String url) {
-
-    }
-
-    @Override
-    public void mraidNativeFeatureCreateCalendarEvent(String eventJSON) {
-
-    }
-
-    @Override
-    public void mraidNativeFeaturePlayVideo(String url) {
-
-    }
-
-    @Override
-    public void mraidNativeFeatureOpenBrowser(String url) {
-        if (mIsDestroyed) {
-            return;
-        }
-
-        mUrlHandlerDelegate.handleUrl(url);
-        if (mListener != null) {
-            mListener.onInterstitialClicked(this);
-        }
-    }
-
-    @Override
-    public void mraidNativeFeatureStorePicture(String url) {
-
-    }
-
-    @Override
-    public void mraidNativeFeatureSendSms(String url) {
-
+    public void onReceivedAction(HyBidInterstitialBroadcastReceiver.Action action) {
+        mBroadcastReceiver.handleAction(action, this, mListener);
     }
 }
