@@ -52,16 +52,6 @@ public class UnicodeEscaper extends CodePointTranslator {
     }
 
     /**
-     * <p>Constructs a <code>UnicodeEscaper</code> below the specified value (exclusive). </p>
-     *
-     * @param codepoint below which to escape
-     * @return the newly created {@code UnicodeEscaper} instance
-     */
-    public static UnicodeEscaper below(final int codepoint) {
-        return outsideOf(codepoint, Integer.MAX_VALUE);
-    }
-
-    /**
      * <p>Constructs a <code>UnicodeEscaper</code> above the specified value (exclusive). </p>
      *
      * @param codepoint above which to escape
@@ -80,17 +70,6 @@ public class UnicodeEscaper extends CodePointTranslator {
      */
     public static UnicodeEscaper outsideOf(final int codepointLow, final int codepointHigh) {
         return new UnicodeEscaper(codepointLow, codepointHigh, false);
-    }
-
-    /**
-     * <p>Constructs a <code>UnicodeEscaper</code> between the specified values (inclusive). </p>
-     *
-     * @param codepointLow above which to escape
-     * @param codepointHigh below which to escape
-     * @return the newly created {@code UnicodeEscaper} instance
-     */
-    public static UnicodeEscaper between(final int codepointLow, final int codepointHigh) {
-        return new UnicodeEscaper(codepointLow, codepointHigh, true);
     }
 
     /**

@@ -45,24 +45,4 @@ public class Validate {
             throw new IllegalArgumentException(String.format(message, values));
         }
     }
-
-    /**
-     * <p>Validate that the specified argument is not {@code null};
-     * otherwise throwing an exception with the specified message.
-     * <p>
-     * <pre>Validate.notNull(myObject, "The object must not be null");</pre>
-     *
-     * @param <T>     the object type
-     * @param object  the object to check
-     * @param message the {@link String#format(String, Object...)} exception message if invalid, not null
-     * @param values  the optional values for the formatted exception message
-     * @return the validated object (never {@code null} for method chaining)
-     * @throws NullPointerException if the object is {@code null}
-     */
-    public static <T> T notNull(final T object, final String message, final Object... values) {
-        if (object == null) {
-            throw new NullPointerException(String.format(message, values));
-        }
-        return object;
-    }
 }

@@ -1,4 +1,4 @@
-package net.pubnative.lite.sdk.interstitial;
+package net.pubnative.lite.sdk.interstitial.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -12,6 +12,8 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
+import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastSender;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.views.CloseableContainer;
@@ -24,6 +26,7 @@ public abstract class HyBidInterstitialActivity extends Activity {
     private CloseableContainer mCloseableContainer;
     private UrlHandler mUrlHandlerDelegate;
     private Ad mAd;
+    private String mZoneId;
     private HyBidInterstitialBroadcastSender mBroadcastSender;
 
     public abstract View getAdView();
@@ -38,12 +41,10 @@ public abstract class HyBidInterstitialActivity extends Activity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         mUrlHandlerDelegate = new UrlHandler(this);
-        String zoneId = intent.getStringExtra(EXTRA_ZONE_ID);
+        mZoneId = intent.getStringExtra(EXTRA_ZONE_ID);
         long broadcastId = intent.getLongExtra(EXTRA_BROADCAST_ID, -1);
 
-        if (!TextUtils.isEmpty(zoneId) && broadcastId != -1) {
-            mAd = HyBid.getAdCache().remove(zoneId);
-
+        if (!TextUtils.isEmpty(mZoneId) && broadcastId != -1) {
             mBroadcastSender = new HyBidInterstitialBroadcastSender(this, broadcastId);
 
             View adView = getAdView();
@@ -102,6 +103,9 @@ public abstract class HyBidInterstitialActivity extends Activity {
     }
 
     protected Ad getAd() {
+        if (mAd == null) {
+            mAd = HyBid.getAdCache().remove(mZoneId);
+        }
         return mAd;
     }
 

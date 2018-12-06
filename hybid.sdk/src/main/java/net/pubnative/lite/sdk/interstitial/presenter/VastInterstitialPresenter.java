@@ -23,22 +23,13 @@
 package net.pubnative.lite.sdk.interstitial.presenter;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.view.KeyEvent;
-import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.RelativeLayout;
 
-import net.pubnative.lite.sdk.interstitial.HyBidInterstitialActivity;
+import net.pubnative.lite.sdk.interstitial.activity.HyBidInterstitialActivity;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
-import net.pubnative.lite.sdk.interstitial.VastInterstitialActivity;
+import net.pubnative.lite.sdk.interstitial.activity.VastInterstitialActivity;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.CheckUtils;
-import net.pubnative.lite.sdk.vast.VASTParser;
-import net.pubnative.lite.sdk.vast.VASTPlayer;
-import net.pubnative.lite.sdk.vast.model.VASTModel;
 
 public class VastInterstitialPresenter implements InterstitialPresenter, HyBidInterstitialBroadcastReceiver.Listener {
     private final Activity mActivity;
@@ -114,11 +105,6 @@ public class VastInterstitialPresenter implements InterstitialPresenter, HyBidIn
         mListener = null;
         mIsDestroyed = true;
         mReady = false;
-    }
-
-    @Override
-    public void hide() {
-
     }
 
     //----------------------- Interstitial Broadcast Receiver Callbacks ----------------------------

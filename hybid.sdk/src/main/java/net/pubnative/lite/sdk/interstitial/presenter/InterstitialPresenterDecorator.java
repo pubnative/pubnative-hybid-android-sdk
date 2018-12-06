@@ -80,17 +80,7 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
     }
 
     @Override
-    public void hide() {
-        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "InterstitialPresenterDecorator is destroyed")) {
-            return;
-        }
-
-        mInterstitialPresenter.hide();
-    }
-
-    @Override
     public void destroy() {
-        //Logger.d(TAG, "Destroying interstitial presenter for ad unit id: " + getAd().getAdUnitId());
         mInterstitialPresenter.destroy();
         mIsDestroyed = true;
     }
@@ -101,7 +91,6 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             return;
         }
 
-        //ogger.d(TAG, "Interstitial loaded for ad unit id: " + getAd().getAdUnitId());
         mListener.onInterstitialLoaded(interstitialPresenter);
     }
 
@@ -111,7 +100,6 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             return;
         }
 
-        //Logger.d(TAG, "Interstitial shown for ad unit id: " + getAd().getAdUnitId());
         mAdTrackingDelegate.trackImpression();
         mListener.onInterstitialShown(interstitialPresenter);
     }
@@ -122,7 +110,6 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             return;
         }
 
-        //Logger.d(TAG, "Interstitial clicked for ad unit id: " + getAd().getAdUnitId());
         mAdTrackingDelegate.trackClick();
         mListener.onInterstitialClicked(interstitialPresenter);
     }
@@ -133,7 +120,6 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             return;
         }
 
-        //Logger.d(TAG, "Interstitial dismissed for ad unit id: " + getAd().getAdUnitId());
         mListener.onInterstitialDismissed(interstitialPresenter);
     }
 
@@ -143,10 +129,8 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             return;
         }
 
-        //String errorMessage = "Interstitial error for ad unit id: " + getAd().getAdUnitId();
         String errorMessage = "Interstitial error for zone id: ";
         Logger.d(TAG, errorMessage);
-        //mAdTrackingDelegate.trackError(errorMessage);
         mListener.onInterstitialError(interstitialPresenter);
     }
 }
