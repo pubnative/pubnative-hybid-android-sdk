@@ -55,8 +55,7 @@ public abstract class HyBidInterstitialActivity extends Activity {
                 mCloseableContainer.setOnCloseListener(new CloseableContainer.OnCloseListener() {
                     @Override
                     public void onClose() {
-                        getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
-                        finish();
+                        dismiss();
                     }
                 });
 
@@ -72,6 +71,11 @@ public abstract class HyBidInterstitialActivity extends Activity {
         } else {
             finish();
         }
+    }
+
+    protected void dismiss() {
+        getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
+        finish();
     }
 
     @Override

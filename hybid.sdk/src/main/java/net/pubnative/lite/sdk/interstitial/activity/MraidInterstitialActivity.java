@@ -4,15 +4,15 @@ import android.os.Bundle;
 import android.view.View;
 
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
-import net.pubnative.lite.sdk.interstitial.activity.HyBidInterstitialActivity;
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.mraid.MRAIDBanner;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeature;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
+import net.pubnative.lite.sdk.mraid.MRAIDViewCloseLayoutListener;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 
-public class MraidInterstitialActivity extends HyBidInterstitialActivity implements MRAIDViewListener, MRAIDNativeFeatureListener {
+public class MraidInterstitialActivity extends HyBidInterstitialActivity implements MRAIDViewListener, MRAIDNativeFeatureListener, MRAIDViewCloseLayoutListener {
     private String[] mSupportedNativeFeatures = new String[]{
             MRAIDNativeFeature.CALENDAR,
             MRAIDNativeFeature.INLINE_VIDEO,
@@ -28,17 +28,24 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
 
     @Override
     public View getAdView() {
+        MRAIDBanner adView = null;
         if (getAd() != null) {
             if (getAd().getAssetUrl(APIAsset.HTML_BANNER) != null) {
-                return new MRAIDBanner(this, getAd().getAssetUrl(APIAsset.HTML_BANNER), "", mSupportedNativeFeatures,
+                adView = new MRAIDBanner(this, getAd().getAssetUrl(APIAsset.HTML_BANNER), "", mSupportedNativeFeatures,
                         this, this, getAd().getContentInfoContainer(this));
             } else if (getAd().getAssetHtml(APIAsset.HTML_BANNER) != null) {
-                return new MRAIDBanner(this, "", getAd().getAssetHtml(APIAsset.HTML_BANNER), mSupportedNativeFeatures,
+                adView = new MRAIDBanner(this, "", getAd().getAssetHtml(APIAsset.HTML_BANNER), mSupportedNativeFeatures,
                         this, this, getAd().getContentInfoContainer(this));
             }
+
+            if (adView != null) {
+                adView.setCloseLayoutListener(this);
+            }
         }
-        return null;
+        return adView;
     }
+
+    // ----------------------------------- MRAIDViewListener ---------------------------------------
 
     @Override
     public void mraidViewLoaded(MRAIDView mraidView) {
@@ -59,6 +66,8 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
     public boolean mraidViewResize(MRAIDView mraidView, int width, int height, int offsetX, int offsetY) {
         return true;
     }
+
+    // ------------------------------- MRAIDNativeFeatureListener ----------------------------------
 
     @Override
     public void mraidNativeFeatureCallTel(String url) {
@@ -89,5 +98,22 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
     @Override
     public void mraidNativeFeatureSendSms(String url) {
 
+    }
+
+    // ------------------------------ MRAIDViewCloseLayoutListener ---------------------------------
+
+    @Override
+    public void onShowCloseLayout() {
+        showInterstitialCloseButton();
+    }
+
+    @Override
+    public void onRemoveCloseLayout() {
+        hideInterstitialCloseButton();
+    }
+
+    @Override
+    public void onClose() {
+        dismiss();
     }
 }

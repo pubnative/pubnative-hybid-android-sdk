@@ -49,6 +49,8 @@ public class MRAIDBanner extends MRAIDView {
         addView(webView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
     }
 
+
+
     @Override
     public boolean onBackPressed() {
         return state != STATE_DEFAULT && super.onBackPressed();

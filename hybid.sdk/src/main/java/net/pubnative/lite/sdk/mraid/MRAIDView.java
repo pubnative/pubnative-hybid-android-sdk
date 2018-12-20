@@ -206,6 +206,7 @@ public class MRAIDView extends RelativeLayout {
     // listeners
     protected MRAIDViewListener listener;
     private final MRAIDNativeFeatureListener nativeFeatureListener;
+    private MRAIDViewCloseLayoutListener closeLayoutListener;
 
     // used for setting positions and sizes (all in pixels, not dpi)
     private final DisplayMetrics displayMetrics;
@@ -437,6 +438,10 @@ public class MRAIDView extends RelativeLayout {
         return super.onTouchEvent(event);
     }
 
+    public void setCloseLayoutListener(MRAIDViewCloseLayoutListener closeLayoutListener) {
+        this.closeLayoutListener = closeLayoutListener;
+    }
+
     public void clearView() {
         if (webView != null) {
             webView.setWebChromeClient(null);
@@ -549,7 +554,11 @@ public class MRAIDView extends RelativeLayout {
             @Override
             public void run() {
                 if (state == STATE_DEFAULT || state == STATE_EXPANDED) {
-                    closeFromExpanded();
+                    if (closeLayoutListener != null) {
+                        closeLayoutListener.onClose();
+                    } else {
+                        closeFromExpanded();
+                    }
                 } else if (state == STATE_RESIZED) {
                     closeFromResized();
                 }
@@ -770,9 +779,17 @@ public class MRAIDView extends RelativeLayout {
         if (this.useCustomClose != useCustomClose) {
             this.useCustomClose = useCustomClose;
             if (useCustomClose) {
-                removeDefaultCloseButton();
+                if (closeLayoutListener != null) {
+                    closeLayoutListener.onRemoveCloseLayout();
+                } else {
+                    removeDefaultCloseButton();
+                }
             } else {
-                showDefaultCloseButton();
+                if (closeLayoutListener != null) {
+                    closeLayoutListener.onShowCloseLayout();
+                } else {
+                    showDefaultCloseButton();
+                }
             }
         }
     }
