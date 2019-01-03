@@ -86,6 +86,11 @@ public abstract class HyBidInterstitialActivity extends Activity {
         super.onDestroy();
     }
 
+    @Override
+    public void onBackPressed() {
+        dismiss();
+    }
+
     protected CloseableContainer getCloseableContainer() {
         return mCloseableContainer;
     }
