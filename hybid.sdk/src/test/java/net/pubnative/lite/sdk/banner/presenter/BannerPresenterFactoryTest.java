@@ -35,7 +35,7 @@ public class BannerPresenterFactoryTest {
     public void createBannerPresenter_withHTML() {
         mTestAd = TestUtil.createTestBannerAd();
 
-        assertThat(mSubject.createBannerPresenter(mTestAd, mMockListener)).isNotNull();
+        assertThat(mSubject.createPresenter(mTestAd, mMockListener)).isNotNull();
     }
 
     @Test

@@ -1,5 +1,6 @@
 package net.pubnative.lite.sdk.leaderboard.presenter;
 
+import net.pubnative.lite.sdk.banner.presenter.BannerPresenter;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.utils.TestUtil;
@@ -17,7 +18,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 @RunWith(RobolectricTestRunner.class)
 public class LeaderboardPresenterFactoryTest {
     @Mock
-    private LeaderboardPresenter.Listener mMockListener;
+    private BannerPresenter.Listener mMockListener;
     private Ad mTestAd;
 
     @InjectMocks
@@ -32,7 +33,7 @@ public class LeaderboardPresenterFactoryTest {
     public void createLeaderboardPresenter_withHTML() {
         mTestAd = TestUtil.createTestLeaderboardAd();
 
-        assertThat(mSubject.createLeaderboardPresenter(mTestAd, mMockListener)).isNotNull();
+        assertThat(mSubject.createPresenter(mTestAd, mMockListener)).isNotNull();
     }
 
     @Test
