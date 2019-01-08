@@ -32,8 +32,7 @@ import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenter;
 import net.pubnative.lite.sdk.leaderboard.presenter.LeaderboardPresenterFactory;
 
-public class HyBidLeaderboardAdView extends PNAdView implements BannerPresenter.Listener {
-    private BannerPresenter mPresenter;
+public class HyBidLeaderboardAdView extends PNAdView {
 
     public HyBidLeaderboardAdView(Context context) {
         super(context);
@@ -53,15 +52,6 @@ public class HyBidLeaderboardAdView extends PNAdView implements BannerPresenter.
     }
 
     @Override
-    protected void cleanup() {
-        super.cleanup();
-        if (mPresenter != null) {
-            mPresenter.destroy();
-            mPresenter = null;
-        }
-    }
-
-    @Override
     protected String getLogTag() {
         return HyBidLeaderboardAdView.class.getSimpleName();
     }
@@ -72,48 +62,8 @@ public class HyBidLeaderboardAdView extends PNAdView implements BannerPresenter.
     }
 
     @Override
-    protected void renderAd() {
-        mPresenter = new LeaderboardPresenterFactory(getContext())
+    protected BannerPresenter createPresenter() {
+        return new LeaderboardPresenterFactory(getContext())
                 .createPresenter(mAd, this);
-        if (mPresenter != null) {
-            mPresenter.load();
-        } else {
-            invokeOnLoadFailed(new Exception("The server has returned an unsupported ad asset"));
-        }
-    }
-
-    @Override
-    protected void startTracking() {
-        if (mPresenter != null) {
-            mPresenter.startTracking();
-        }
-    }
-
-    @Override
-    protected void stopTracking() {
-        if (mPresenter != null) {
-            mPresenter.stopTracking();
-        }
-    }
-
-    //----------------------------- BannerPresenter Callbacks --------------------------------------
-
-    @Override
-    public void onBannerLoaded(BannerPresenter bannerPresenter, View banner) {
-        if (banner == null) {
-            invokeOnLoadFailed(new Exception("An error has occurred while rendering the ad"));
-        } else {
-            setupAdView(banner);
-        }
-    }
-
-    @Override
-    public void onBannerError(BannerPresenter bannerPresenter) {
-        invokeOnLoadFailed(new Exception("An error has occurred while rendering the ad"));
-    }
-
-    @Override
-    public void onBannerClicked(BannerPresenter bannerPresenter) {
-        invokeOnClick();
     }
 }
