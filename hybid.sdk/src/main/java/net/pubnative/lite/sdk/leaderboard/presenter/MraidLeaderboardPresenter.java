@@ -24,6 +24,7 @@ package net.pubnative.lite.sdk.leaderboard.presenter;
 
 import android.content.Context;
 
+import net.pubnative.lite.sdk.banner.presenter.BannerPresenter;
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.mraid.MRAIDBanner;
@@ -34,13 +35,13 @@ import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 
-public class MraidLeaderboardPresenter implements LeaderboardPresenter, MRAIDViewListener, MRAIDNativeFeatureListener {
+public class MraidLeaderboardPresenter implements BannerPresenter, MRAIDViewListener, MRAIDNativeFeatureListener {
     private final Context mContext;
     private final Ad mAd;
     private final UrlHandler mUrlHandlerDelegate;
     private final String[] mSupportedNativeFeatures;
 
-    private LeaderboardPresenter.Listener mListener;
+    private BannerPresenter.Listener mListener;
     private MRAIDBanner mMRAIDBanner;
     private boolean mIsDestroyed;
 
@@ -109,7 +110,7 @@ public class MraidLeaderboardPresenter implements LeaderboardPresenter, MRAIDVie
         }
 
         if (mListener != null) {
-            mListener.onLeaderboardLoaded(this, mraidView);
+            mListener.onBannerLoaded(this, mraidView);
         }
     }
 
@@ -120,7 +121,7 @@ public class MraidLeaderboardPresenter implements LeaderboardPresenter, MRAIDVie
         }
 
         if (mListener != null) {
-            mListener.onLeaderboardClicked(this);
+            mListener.onBannerClicked(this);
         }
     }
 
@@ -157,7 +158,7 @@ public class MraidLeaderboardPresenter implements LeaderboardPresenter, MRAIDVie
 
         mUrlHandlerDelegate.handleUrl(url);
         if (mListener != null) {
-            mListener.onLeaderboardClicked(this);
+            mListener.onBannerClicked(this);
         }
     }
 

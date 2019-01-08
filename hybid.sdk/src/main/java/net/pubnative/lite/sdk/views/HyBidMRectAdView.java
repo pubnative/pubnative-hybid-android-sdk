@@ -29,12 +29,12 @@ import android.view.View;
 
 import net.pubnative.lite.sdk.api.MRectRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
-import net.pubnative.lite.sdk.mrect.presenter.MRectPresenter;
+import net.pubnative.lite.sdk.banner.presenter.BannerPresenter;
 import net.pubnative.lite.sdk.mrect.presenter.MRectPresenterFactory;
 
-public class HyBidMRectAdView extends PNAdView implements MRectPresenter.Listener {
+public class HyBidMRectAdView extends PNAdView implements BannerPresenter.Listener {
 
-    private MRectPresenter mPresenter;
+    private BannerPresenter mPresenter;
 
     public HyBidMRectAdView(Context context) {
         super(context);
@@ -75,7 +75,7 @@ public class HyBidMRectAdView extends PNAdView implements MRectPresenter.Listene
     @Override
     protected void renderAd() {
         mPresenter = new MRectPresenterFactory(getContext())
-                .createMRectPresenter(mAd, this);
+                .createPresenter(mAd, this);
         if (mPresenter != null) {
             mPresenter.load();
         } else {
@@ -97,23 +97,24 @@ public class HyBidMRectAdView extends PNAdView implements MRectPresenter.Listene
         }
     }
 
-    //------------------------------ MRectPresenter Callbacks --------------------------------------
+    //------------------------------ BannerPresenter Callbacks -------------------------------------
+
     @Override
-    public void onMRectLoaded(MRectPresenter mRectPresenter, View mRect) {
-        if (mRect == null) {
+    public void onBannerLoaded(BannerPresenter bannerPresenter, View banner) {
+        if (banner == null) {
             invokeOnLoadFailed(new Exception("An error has occurred while rendering the ad"));
         } else {
-            setupAdView(mRect);
+            setupAdView(banner);
         }
     }
 
     @Override
-    public void onMRectError(MRectPresenter mRectPresenter) {
+    public void onBannerError(BannerPresenter bannerPresenter) {
         invokeOnLoadFailed(new Exception("An error has occurred while rendering the ad"));
     }
 
     @Override
-    public void onMRectClicked(MRectPresenter mRectPresenter) {
+    public void onBannerClicked(BannerPresenter bannerPresenter) {
         invokeOnClick();
     }
 }

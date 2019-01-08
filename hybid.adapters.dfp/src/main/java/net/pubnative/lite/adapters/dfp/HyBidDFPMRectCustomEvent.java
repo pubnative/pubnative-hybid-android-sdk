@@ -34,17 +34,17 @@ import com.google.android.gms.ads.mediation.customevent.CustomEventBanner;
 import com.google.android.gms.ads.mediation.customevent.CustomEventBannerListener;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.banner.presenter.BannerPresenter;
 import net.pubnative.lite.sdk.models.Ad;
-import net.pubnative.lite.sdk.mrect.presenter.MRectPresenter;
 import net.pubnative.lite.sdk.mrect.presenter.MRectPresenterFactory;
 import net.pubnative.lite.sdk.utils.Logger;
 
-public class HyBidDFPMRectCustomEvent implements CustomEventBanner, MRectPresenter.Listener {
+public class HyBidDFPMRectCustomEvent implements CustomEventBanner, BannerPresenter.Listener {
     private static final String TAG = HyBidDFPMRectCustomEvent.class.getSimpleName();
 
     private static final String ZONE_ID_KEY = "pn_zone_id";
     private CustomEventBannerListener mMRectListener;
-    private MRectPresenter mPresenter;
+    private BannerPresenter mPresenter;
 
     @Override
     public void requestBannerAd(Context context,
@@ -77,7 +77,7 @@ public class HyBidDFPMRectCustomEvent implements CustomEventBanner, MRectPresent
             return;
         }
 
-        mPresenter = new MRectPresenterFactory(context).createMRectPresenter(ad, this);
+        mPresenter = new MRectPresenterFactory(context).createPresenter(ad, this);
         if (mPresenter == null) {
             Logger.e(TAG, "Could not create valid mrect presenter");
             mMRectListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NETWORK_ERROR);
@@ -106,25 +106,25 @@ public class HyBidDFPMRectCustomEvent implements CustomEventBanner, MRectPresent
     }
 
     @Override
-    public void onMRectLoaded(MRectPresenter mRectPresenter, View mRect) {
+    public void onBannerLoaded(BannerPresenter bannerPresenter, View banner) {
         if (mMRectListener != null) {
-            mMRectListener.onAdLoaded(mRect);
+            mMRectListener.onAdLoaded(banner);
             mPresenter.startTracking();
         }
     }
 
     @Override
-    public void onMRectError(MRectPresenter mRectPresenter) {
+    public void onBannerClicked(BannerPresenter bannerPresenter) {
         if (mMRectListener != null) {
-            mMRectListener.onAdFailedToLoad(AdRequest.ERROR_CODE_INTERNAL_ERROR);
+            mMRectListener.onAdClicked();
+            mMRectListener.onAdLeftApplication();
         }
     }
 
     @Override
-    public void onMRectClicked(MRectPresenter mRectPresenter) {
+    public void onBannerError(BannerPresenter bannerPresenter) {
         if (mMRectListener != null) {
-            mMRectListener.onAdClicked();
-            mMRectListener.onAdLeftApplication();
+            mMRectListener.onAdFailedToLoad(AdRequest.ERROR_CODE_INTERNAL_ERROR);
         }
     }
 }

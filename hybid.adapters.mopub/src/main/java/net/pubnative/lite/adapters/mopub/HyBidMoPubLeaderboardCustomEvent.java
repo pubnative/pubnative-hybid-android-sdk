@@ -29,19 +29,19 @@ import com.mopub.mobileads.CustomEventBanner;
 import com.mopub.mobileads.MoPubErrorCode;
 
 import net.pubnative.lite.sdk.HyBid;
-import net.pubnative.lite.sdk.leaderboard.presenter.LeaderboardPresenter;
+import net.pubnative.lite.sdk.banner.presenter.BannerPresenter;
 import net.pubnative.lite.sdk.leaderboard.presenter.LeaderboardPresenterFactory;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.Logger;
 
 import java.util.Map;
 
-public class HyBidMoPubLeaderboardCustomEvent extends CustomEventBanner implements LeaderboardPresenter.Listener {
+public class HyBidMoPubLeaderboardCustomEvent extends CustomEventBanner implements BannerPresenter.Listener {
     private static final String TAG = HyBidMoPubBannerCustomEvent.class.getSimpleName();
 
     private static final String ZONE_ID_KEY = "pn_zone_id";
     private CustomEventBannerListener mBannerListener;
-    private LeaderboardPresenter mLeaderboardPresenter;
+    private BannerPresenter mLeaderboardPresenter;
 
     @Override
     protected void loadBanner(Context context,
@@ -73,7 +73,7 @@ public class HyBidMoPubLeaderboardCustomEvent extends CustomEventBanner implemen
             return;
         }
 
-        mLeaderboardPresenter = new LeaderboardPresenterFactory(context).createLeaderboardPresenter(ad, this);
+        mLeaderboardPresenter = new LeaderboardPresenterFactory(context).createPresenter(ad, this);
         if (mLeaderboardPresenter == null) {
             Logger.e(TAG, "Could not create valid leaderboard presenter");
             mBannerListener.onBannerFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
@@ -93,22 +93,22 @@ public class HyBidMoPubLeaderboardCustomEvent extends CustomEventBanner implemen
     }
 
     @Override
-    public void onLeaderboardLoaded(LeaderboardPresenter leaderboardPresenter, View leaderboard) {
+    public void onBannerLoaded(BannerPresenter bannerPresenter, View banner) {
         if (mBannerListener != null) {
-            mBannerListener.onBannerLoaded(leaderboard);
+            mBannerListener.onBannerLoaded(banner);
             mLeaderboardPresenter.startTracking();
         }
     }
 
     @Override
-    public void onLeaderboardError(LeaderboardPresenter leaderboardPresenter) {
+    public void onBannerError(BannerPresenter bannerPresenter) {
         if (mBannerListener != null) {
             mBannerListener.onBannerFailed(MoPubErrorCode.INTERNAL_ERROR);
         }
     }
 
     @Override
-    public void onLeaderboardClicked(LeaderboardPresenter leaderboardPresenter) {
+    public void onBannerClicked(BannerPresenter bannerPresenter) {
         if (mBannerListener != null) {
             mBannerListener.onBannerClicked();
         }

@@ -27,6 +27,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
+import net.pubnative.lite.sdk.banner.presenter.BannerPresenter;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.UrlHandler;
@@ -34,11 +35,11 @@ import net.pubnative.lite.sdk.vast.VASTParser;
 import net.pubnative.lite.sdk.vast.VASTPlayer;
 import net.pubnative.lite.sdk.vast.model.VASTModel;
 
-public class VastMRectPresenter implements MRectPresenter, VASTPlayer.Listener {
+public class VastMRectPresenter implements BannerPresenter, VASTPlayer.Listener {
     private final Context mContext;
     private final Ad mAd;
 
-    private MRectPresenter.Listener mListener;
+    private BannerPresenter.Listener mListener;
     private VASTPlayer mPlayer;
     private boolean mIsDestroyed;
     private boolean mLoaded = false;
@@ -71,7 +72,7 @@ public class VastMRectPresenter implements MRectPresenter, VASTPlayer.Listener {
             @Override
             public void onVASTParserError(int error) {
                 if (mListener != null) {
-                    mListener.onMRectError(VastMRectPresenter.this);
+                    mListener.onBannerError(VastMRectPresenter.this);
                 }
             }
 
@@ -127,7 +128,7 @@ public class VastMRectPresenter implements MRectPresenter, VASTPlayer.Listener {
         if (!mLoaded) {
             mLoaded = true;
             if (mListener != null) {
-                mListener.onMRectLoaded(this, buildView());
+                mListener.onBannerLoaded(this, buildView());
             }
         }
     }
@@ -135,7 +136,7 @@ public class VastMRectPresenter implements MRectPresenter, VASTPlayer.Listener {
     @Override
     public void onVASTPlayerFail(Exception exception) {
         if (mListener != null) {
-            mListener.onMRectError(this);
+            mListener.onBannerError(this);
         }
     }
 
@@ -146,7 +147,7 @@ public class VastMRectPresenter implements MRectPresenter, VASTPlayer.Listener {
         }
 
         if (mListener != null) {
-            mListener.onMRectClicked(this);
+            mListener.onBannerClicked(this);
         }
     }
 

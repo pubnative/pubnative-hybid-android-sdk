@@ -29,11 +29,11 @@ import android.view.View;
 
 import net.pubnative.lite.sdk.api.LeaderboardRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
-import net.pubnative.lite.sdk.leaderboard.presenter.LeaderboardPresenter;
+import net.pubnative.lite.sdk.banner.presenter.BannerPresenter;
 import net.pubnative.lite.sdk.leaderboard.presenter.LeaderboardPresenterFactory;
 
-public class HyBidLeaderboardAdView extends PNAdView implements LeaderboardPresenter.Listener {
-    private LeaderboardPresenter mPresenter;
+public class HyBidLeaderboardAdView extends PNAdView implements BannerPresenter.Listener {
+    private BannerPresenter mPresenter;
 
     public HyBidLeaderboardAdView(Context context) {
         super(context);
@@ -74,7 +74,7 @@ public class HyBidLeaderboardAdView extends PNAdView implements LeaderboardPrese
     @Override
     protected void renderAd() {
         mPresenter = new LeaderboardPresenterFactory(getContext())
-                .createLeaderboardPresenter(mAd, this);
+                .createPresenter(mAd, this);
         if (mPresenter != null) {
             mPresenter.load();
         } else {
@@ -96,23 +96,24 @@ public class HyBidLeaderboardAdView extends PNAdView implements LeaderboardPrese
         }
     }
 
-    //----------------------------- LeaderboardPresenter Callbacks --------------------------------------
+    //----------------------------- BannerPresenter Callbacks --------------------------------------
+
     @Override
-    public void onLeaderboardLoaded(LeaderboardPresenter leaderboardPresenter, View leaderboard) {
-        if (leaderboard == null) {
+    public void onBannerLoaded(BannerPresenter bannerPresenter, View banner) {
+        if (banner == null) {
             invokeOnLoadFailed(new Exception("An error has occurred while rendering the ad"));
         } else {
-            setupAdView(leaderboard);
+            setupAdView(banner);
         }
     }
 
     @Override
-    public void onLeaderboardError(LeaderboardPresenter leaderboardPresenter) {
+    public void onBannerError(BannerPresenter bannerPresenter) {
         invokeOnLoadFailed(new Exception("An error has occurred while rendering the ad"));
     }
 
     @Override
-    public void onLeaderboardClicked(LeaderboardPresenter leaderboardPresenter) {
+    public void onBannerClicked(BannerPresenter bannerPresenter) {
         invokeOnClick();
     }
 }

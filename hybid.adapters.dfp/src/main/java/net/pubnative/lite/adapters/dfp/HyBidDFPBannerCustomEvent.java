@@ -77,7 +77,7 @@ public class HyBidDFPBannerCustomEvent implements CustomEventBanner, BannerPrese
             return;
         }
 
-        mPresenter = new BannerPresenterFactory(context).createBannerPresenter(ad, this);
+        mPresenter = new BannerPresenterFactory(context).createPresenter(ad, this);
         if (mPresenter == null) {
             Logger.e(TAG, "Could not create valid banner presenter");
             mBannerListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NETWORK_ERROR);

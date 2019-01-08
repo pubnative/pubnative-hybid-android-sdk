@@ -24,36 +24,25 @@ package net.pubnative.lite.sdk.leaderboard.presenter;
 
 import android.content.Context;
 
+import net.pubnative.lite.sdk.banner.presenter.BannerPresenter;
+import net.pubnative.lite.sdk.banner.presenter.PresenterFactory;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.Logger;
 
-public class LeaderboardPresenterFactory {
+public class LeaderboardPresenterFactory extends PresenterFactory {
     private static final String TAG = LeaderboardPresenterFactory.class.getSimpleName();
-    private final Context mContext;
 
     public LeaderboardPresenterFactory(Context context) {
-        mContext = context;
+        super(context);
     }
 
-    public LeaderboardPresenter createLeaderboardPresenter(Ad ad,
-                                                           LeaderboardPresenter.Listener leaderboardPresenterListener) {
-        final LeaderboardPresenter leaderboardPresenter = fromCreativeType(ad.assetgroupid, ad);
-        if (leaderboardPresenter == null) {
-            return null;
-        }
-
-        final LeaderboardPresenterDecorator leaderboardPresenterDecorator = new LeaderboardPresenterDecorator(leaderboardPresenter,
-                new AdTracker(ad.getBeacons(Ad.Beacon.IMPRESSION), ad.getBeacons(Ad.Beacon.CLICK)), leaderboardPresenterListener);
-        leaderboardPresenter.setListener(leaderboardPresenterDecorator);
-        return leaderboardPresenterDecorator;
-    }
-
-    LeaderboardPresenter fromCreativeType(int assetGroupId, Ad ad) {
+    @Override
+    protected BannerPresenter fromCreativeType(int assetGroupId, Ad ad) {
         switch (assetGroupId) {
             case ApiAssetGroupType.MRAID_LEADERBOARD: {
-                return new MraidLeaderboardPresenter(mContext, ad);
+                return new MraidLeaderboardPresenter(getContext(), ad);
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for leaderboard ad format.");

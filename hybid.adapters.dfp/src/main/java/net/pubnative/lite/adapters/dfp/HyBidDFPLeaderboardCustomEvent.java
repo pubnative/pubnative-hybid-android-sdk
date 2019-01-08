@@ -34,17 +34,17 @@ import com.google.android.gms.ads.mediation.customevent.CustomEventBanner;
 import com.google.android.gms.ads.mediation.customevent.CustomEventBannerListener;
 
 import net.pubnative.lite.sdk.HyBid;
-import net.pubnative.lite.sdk.leaderboard.presenter.LeaderboardPresenter;
+import net.pubnative.lite.sdk.banner.presenter.BannerPresenter;
 import net.pubnative.lite.sdk.leaderboard.presenter.LeaderboardPresenterFactory;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.Logger;
 
-public class HyBidDFPLeaderboardCustomEvent implements CustomEventBanner, LeaderboardPresenter.Listener {
+public class HyBidDFPLeaderboardCustomEvent implements CustomEventBanner, BannerPresenter.Listener {
     private static final String TAG = HyBidDFPLeaderboardCustomEvent.class.getSimpleName();
 
     private static final String ZONE_ID_KEY = "pn_zone_id";
     private CustomEventBannerListener mBannerListener;
-    private LeaderboardPresenter mPresenter;
+    private BannerPresenter mPresenter;
 
     @Override
     public void requestBannerAd(Context context,
@@ -77,7 +77,7 @@ public class HyBidDFPLeaderboardCustomEvent implements CustomEventBanner, Leader
             return;
         }
 
-        mPresenter = new LeaderboardPresenterFactory(context).createLeaderboardPresenter(ad, this);
+        mPresenter = new LeaderboardPresenterFactory(context).createPresenter(ad, this);
         if (mPresenter == null) {
             Logger.e(TAG, "Could not create valid leaderboard presenter");
             mBannerListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NETWORK_ERROR);
@@ -106,25 +106,25 @@ public class HyBidDFPLeaderboardCustomEvent implements CustomEventBanner, Leader
     }
 
     @Override
-    public void onLeaderboardLoaded(LeaderboardPresenter leaderboardPresenter, View leaderboard) {
+    public void onBannerLoaded(BannerPresenter bannerPresenter, View banner) {
         if (mBannerListener != null) {
-            mBannerListener.onAdLoaded(leaderboard);
+            mBannerListener.onAdLoaded(banner);
             mPresenter.startTracking();
         }
     }
 
     @Override
-    public void onLeaderboardError(LeaderboardPresenter leaderboardPresenter) {
+    public void onBannerClicked(BannerPresenter bannerPresenter) {
         if (mBannerListener != null) {
-            mBannerListener.onAdFailedToLoad(AdRequest.ERROR_CODE_INTERNAL_ERROR);
+            mBannerListener.onAdClicked();
+            mBannerListener.onAdLeftApplication();
         }
     }
 
     @Override
-    public void onLeaderboardClicked(LeaderboardPresenter leaderboardPresenter) {
+    public void onBannerError(BannerPresenter bannerPresenter) {
         if (mBannerListener != null) {
-            mBannerListener.onAdClicked();
-            mBannerListener.onAdLeftApplication();
+            mBannerListener.onAdFailedToLoad(AdRequest.ERROR_CODE_INTERNAL_ERROR);
         }
     }
 }

@@ -73,7 +73,7 @@ public class HyBidMoPubBannerCustomEvent extends CustomEventBanner implements Ba
             return;
         }
 
-        mBannerPresenter = new BannerPresenterFactory(context).createBannerPresenter(ad, this);
+        mBannerPresenter = new BannerPresenterFactory(context).createPresenter(ad, this);
         if (mBannerPresenter == null) {
             Logger.e(TAG, "Could not create valid banner presenter");
             mBannerListener.onBannerFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);

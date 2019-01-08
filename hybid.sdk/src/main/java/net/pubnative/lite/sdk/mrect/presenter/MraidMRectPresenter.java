@@ -26,6 +26,7 @@ import android.content.Context;
 import android.view.View;
 import android.widget.RelativeLayout;
 
+import net.pubnative.lite.sdk.banner.presenter.BannerPresenter;
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.mraid.MRAIDBanner;
@@ -40,13 +41,13 @@ import net.pubnative.lite.sdk.utils.UrlHandler;
  * Created by erosgarciaponte on 12.01.18.
  */
 
-public class MraidMRectPresenter implements MRectPresenter, MRAIDViewListener, MRAIDNativeFeatureListener {
+public class MraidMRectPresenter implements BannerPresenter, MRAIDViewListener, MRAIDNativeFeatureListener {
     private final Context mContext;
     private final Ad mAd;
     private final UrlHandler mUrlHandlerDelegate;
     private final String[] mSupportedNativeFeatures;
 
-    private MRectPresenter.Listener mListener;
+    private BannerPresenter.Listener mListener;
     private MRAIDBanner mMRAIDBanner;
     private boolean mIsDestroyed;
 
@@ -115,7 +116,7 @@ public class MraidMRectPresenter implements MRectPresenter, MRAIDViewListener, M
         }
 
         if (mListener != null) {
-            mListener.onMRectLoaded(this, mraidView);
+            mListener.onBannerLoaded(this, mraidView);
         }
     }
 
@@ -126,7 +127,7 @@ public class MraidMRectPresenter implements MRectPresenter, MRAIDViewListener, M
         }
 
         if (mListener != null) {
-            mListener.onMRectClicked(this);
+            mListener.onBannerClicked(this);
         }
     }
 
@@ -164,7 +165,7 @@ public class MraidMRectPresenter implements MRectPresenter, MRAIDViewListener, M
         mUrlHandlerDelegate.handleUrl(url);
         // TODO will this always count as a click? Are there other cases that should be considered a click?
         if (mListener != null) {
-            mListener.onMRectClicked(this);
+            mListener.onBannerClicked(this);
         }
     }
 
