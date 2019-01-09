@@ -29,19 +29,19 @@ import com.mopub.mobileads.CustomEventBanner;
 import com.mopub.mobileads.MoPubErrorCode;
 
 import net.pubnative.lite.sdk.HyBid;
-import net.pubnative.lite.sdk.banner.presenter.BannerPresenter;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.Logger;
 
 import java.util.Map;
 
-public class HyBidMoPubBannerCustomEvent extends CustomEventBanner implements BannerPresenter.Listener {
+public class HyBidMoPubBannerCustomEvent extends CustomEventBanner implements AdPresenter.Listener {
     private static final String TAG = HyBidMoPubBannerCustomEvent.class.getSimpleName();
 
     private static final String ZONE_ID_KEY = "pn_zone_id";
     private CustomEventBannerListener mBannerListener;
-    private BannerPresenter mBannerPresenter;
+    private AdPresenter mAdPresenter;
 
     @Override
     protected void loadBanner(Context context,
@@ -73,42 +73,42 @@ public class HyBidMoPubBannerCustomEvent extends CustomEventBanner implements Ba
             return;
         }
 
-        mBannerPresenter = new BannerPresenterFactory(context).createBannerPresenter(ad, this);
-        if (mBannerPresenter == null) {
+        mAdPresenter = new BannerPresenterFactory(context).createPresenter(ad, this);
+        if (mAdPresenter == null) {
             Logger.e(TAG, "Could not create valid banner presenter");
             mBannerListener.onBannerFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
-        mBannerPresenter.load();
+        mAdPresenter.load();
     }
 
     @Override
     protected void onInvalidate() {
-        if (mBannerPresenter != null) {
-            mBannerPresenter.stopTracking();
-            mBannerPresenter.destroy();
-            mBannerPresenter = null;
+        if (mAdPresenter != null) {
+            mAdPresenter.stopTracking();
+            mAdPresenter.destroy();
+            mAdPresenter = null;
         }
     }
 
     @Override
-    public void onBannerLoaded(BannerPresenter bannerPresenter, View banner) {
+    public void onAdLoaded(AdPresenter adPresenter, View banner) {
         if (mBannerListener != null) {
             mBannerListener.onBannerLoaded(banner);
-            mBannerPresenter.startTracking();
+            mAdPresenter.startTracking();
         }
     }
 
     @Override
-    public void onBannerClicked(BannerPresenter bannerPresenter) {
+    public void onAdClicked(AdPresenter adPresenter) {
         if (mBannerListener != null) {
             mBannerListener.onBannerClicked();
         }
     }
 
     @Override
-    public void onBannerError(BannerPresenter bannerPresenter) {
+    public void onAdError(AdPresenter adPresenter) {
         if (mBannerListener != null) {
             mBannerListener.onBannerFailed(MoPubErrorCode.INTERNAL_ERROR);
         }

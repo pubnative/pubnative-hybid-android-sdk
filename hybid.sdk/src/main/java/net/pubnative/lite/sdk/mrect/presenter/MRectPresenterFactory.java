@@ -24,43 +24,31 @@ package net.pubnative.lite.sdk.mrect.presenter;
 
 import android.content.Context;
 
+import net.pubnative.lite.sdk.presenter.AdPresenter;
+import net.pubnative.lite.sdk.presenter.PresenterFactory;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
-import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.Logger;
 
 /**
  * Created by erosgarciaponte on 12.01.18.
  */
 
-public class MRectPresenterFactory {
+public class MRectPresenterFactory extends PresenterFactory {
     private static final String TAG = MRectPresenterFactory.class.getSimpleName();
-    private final Context mContext;
 
     public MRectPresenterFactory(Context context) {
-        mContext = context;
+        super(context);
     }
 
-    public MRectPresenter createMRectPresenter(Ad ad,
-                                               MRectPresenter.Listener mRectPresenterListener) {
-        final MRectPresenter mRectPresenter = fromCreativeType(ad.assetgroupid, ad);
-        if (mRectPresenter == null) {
-            return null;
-        }
-
-        final MRectPresenterDecorator mRectPresenterDecorator = new MRectPresenterDecorator(mRectPresenter,
-                new AdTracker(ad.getBeacons(Ad.Beacon.IMPRESSION), ad.getBeacons(Ad.Beacon.CLICK)), mRectPresenterListener);
-        mRectPresenter.setListener(mRectPresenterDecorator);
-        return mRectPresenterDecorator;
-    }
-
-    MRectPresenter fromCreativeType(int assetGroupId, Ad ad) {
+    @Override
+    protected AdPresenter fromCreativeType(int assetGroupId, Ad ad) {
         switch (assetGroupId) {
             case ApiAssetGroupType.MRAID_MRECT: {
-                return new MraidMRectPresenter(mContext, ad);
+                return new MraidMRectPresenter(getContext(), ad);
             }
             case ApiAssetGroupType.VAST_MRECT: {
-                return new VastMRectPresenter(mContext, ad);
+                return new VastMRectPresenter(getContext(), ad);
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for MRect ad format.");

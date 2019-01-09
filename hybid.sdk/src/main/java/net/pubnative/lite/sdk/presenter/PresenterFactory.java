@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 PubNative GmbH
+// Copyright (c) 2019 PubNative GmbH
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,30 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package net.pubnative.lite.sdk.leaderboard.presenter;
+package net.pubnative.lite.sdk.presenter;
 
-import android.view.View;
+import android.content.Context;
 
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.utils.AdTracker;
 
-public interface LeaderboardPresenter {
-    interface Listener {
-        void onLeaderboardLoaded(LeaderboardPresenter leaderboardPresenter, View leaderboard);
+public abstract class PresenterFactory {
+    private final Context mContext;
 
-        void onLeaderboardClicked(LeaderboardPresenter leaderboardPresenter);
-
-        void onLeaderboardError(LeaderboardPresenter leaderboardPresenter);
+    public PresenterFactory(Context context) {
+        mContext = context;
     }
 
-    void setListener(Listener listener);
+    public AdPresenter createPresenter(Ad ad,
+                                       AdPresenter.Listener bannerPresenterListener) {
+        final AdPresenter adPresenter = fromCreativeType(ad.assetgroupid, ad);
+        if (adPresenter == null) {
+            return null;
+        }
 
-    Ad getAd();
+        final AdPresenterDecorator bannerPresenterDecorator = new AdPresenterDecorator(adPresenter,
+                new AdTracker(ad.getBeacons(Ad.Beacon.IMPRESSION), ad.getBeacons(Ad.Beacon.CLICK)), bannerPresenterListener);
+        adPresenter.setListener(bannerPresenterDecorator);
+        return bannerPresenterDecorator;
+    }
 
-    void load();
+    protected Context getContext() {
+        return mContext;
+    }
 
-    void destroy();
-
-    void startTracking();
-
-    void stopTracking();
+    protected abstract AdPresenter fromCreativeType(int assetGroupId, Ad ad);
 }

@@ -25,16 +25,13 @@ package net.pubnative.lite.sdk.views;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.View;
 
 import net.pubnative.lite.sdk.api.MRectRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
-import net.pubnative.lite.sdk.mrect.presenter.MRectPresenter;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.mrect.presenter.MRectPresenterFactory;
 
-public class HyBidMRectAdView extends PNAdView implements MRectPresenter.Listener {
-
-    private MRectPresenter mPresenter;
+public class HyBidMRectAdView extends PNAdView {
 
     public HyBidMRectAdView(Context context) {
         super(context);
@@ -54,15 +51,6 @@ public class HyBidMRectAdView extends PNAdView implements MRectPresenter.Listene
     }
 
     @Override
-    protected void cleanup() {
-        super.cleanup();
-        if (mPresenter != null) {
-            mPresenter.destroy();
-            mPresenter = null;
-        }
-    }
-
-    @Override
     protected String getLogTag() {
         return HyBidMRectAdView.class.getSimpleName();
     }
@@ -73,47 +61,8 @@ public class HyBidMRectAdView extends PNAdView implements MRectPresenter.Listene
     }
 
     @Override
-    protected void renderAd() {
-        mPresenter = new MRectPresenterFactory(getContext())
-                .createMRectPresenter(mAd, this);
-        if (mPresenter != null) {
-            mPresenter.load();
-        } else {
-            invokeOnLoadFailed(new Exception("The server has returned an unsupported ad asset"));
-        }
-    }
-
-    @Override
-    protected void startTracking() {
-        if (mPresenter != null) {
-            mPresenter.startTracking();
-        }
-    }
-
-    @Override
-    protected void stopTracking() {
-        if (mPresenter != null) {
-            mPresenter.stopTracking();
-        }
-    }
-
-    //------------------------------ MRectPresenter Callbacks --------------------------------------
-    @Override
-    public void onMRectLoaded(MRectPresenter mRectPresenter, View mRect) {
-        if (mRect == null) {
-            invokeOnLoadFailed(new Exception("An error has occurred while rendering the ad"));
-        } else {
-            setupAdView(mRect);
-        }
-    }
-
-    @Override
-    public void onMRectError(MRectPresenter mRectPresenter) {
-        invokeOnLoadFailed(new Exception("An error has occurred while rendering the ad"));
-    }
-
-    @Override
-    public void onMRectClicked(MRectPresenter mRectPresenter) {
-        invokeOnClick();
+    protected AdPresenter createPresenter() {
+        return new MRectPresenterFactory(getContext())
+                .createPresenter(mAd, this);
     }
 }

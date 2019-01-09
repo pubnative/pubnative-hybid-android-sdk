@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package net.pubnative.lite.sdk.mrect.presenter;
+package net.pubnative.lite.sdk.presenter;
 
 import android.view.View;
 
@@ -30,20 +30,20 @@ import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.Logger;
 
 /**
- * Created by erosgarciaponte on 12.01.18.
+ * Created by erosgarciaponte on 08.01.18.
  */
 
-public class MRectPresenterDecorator implements MRectPresenter, MRectPresenter.Listener {
-    private static final String TAG = MRectPresenterDecorator.class.getSimpleName();
-    private final MRectPresenter mMRectPresenter;
+public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener {
+    private static final String TAG = AdPresenterDecorator.class.getSimpleName();
+    private final AdPresenter mAdPresenter;
     private final AdTracker mAdTrackingDelegate;
-    private final MRectPresenter.Listener mListener;
+    private final AdPresenter.Listener mListener;
     private boolean mIsDestroyed;
 
-    public MRectPresenterDecorator(MRectPresenter mRectPresenter,
-                                   AdTracker adTrackingDelegate,
-                                   MRectPresenter.Listener listener) {
-        mMRectPresenter = mRectPresenter;
+    public AdPresenterDecorator(AdPresenter adPresenter,
+                                AdTracker adTrackingDelegate,
+                                AdPresenter.Listener listener) {
+        mAdPresenter = adPresenter;
         mAdTrackingDelegate = adTrackingDelegate;
         mListener = listener;
     }
@@ -55,70 +55,70 @@ public class MRectPresenterDecorator implements MRectPresenter, MRectPresenter.L
 
     @Override
     public Ad getAd() {
-        return mMRectPresenter.getAd();
+        return mAdPresenter.getAd();
     }
 
     @Override
     public void load() {
-        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "MRectPresenterDecorator is destroyed")) {
+        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "AdPresenterDecorator is destroyed")) {
             return;
         }
 
-        mMRectPresenter.load();
+        mAdPresenter.load();
     }
 
     @Override
     public void destroy() {
-        mMRectPresenter.destroy();
+        mAdPresenter.destroy();
         mIsDestroyed = true;
     }
 
     @Override
     public void startTracking() {
-        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "MRectPresenterDecorator is destroyed")) {
+        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "AdPresenterDecorator is destroyed")) {
             return;
         }
 
-        mMRectPresenter.startTracking();
+        mAdPresenter.startTracking();
     }
 
     @Override
     public void stopTracking() {
-        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "MRectPresenterDecorator is destroyed")) {
+        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "AdPresenterDecorator is destroyed")) {
             return;
         }
 
-        mMRectPresenter.stopTracking();
+        mAdPresenter.stopTracking();
     }
 
     @Override
-    public void onMRectLoaded(MRectPresenter mRectPresenter, View mRect) {
+    public void onAdLoaded(AdPresenter adPresenter, View banner) {
         if (mIsDestroyed) {
             return;
         }
 
         mAdTrackingDelegate.trackImpression();
-        mListener.onMRectLoaded(mRectPresenter, mRect);
+        mListener.onAdLoaded(adPresenter, banner);
     }
 
     @Override
-    public void onMRectClicked(MRectPresenter mRectPresenter) {
+    public void onAdClicked(AdPresenter adPresenter) {
         if (mIsDestroyed) {
             return;
         }
 
         mAdTrackingDelegate.trackClick();
-        mListener.onMRectClicked(mRectPresenter);
+        mListener.onAdClicked(adPresenter);
     }
 
     @Override
-    public void onMRectError(MRectPresenter mRectPresenter) {
+    public void onAdError(AdPresenter adPresenter) {
         if (mIsDestroyed) {
             return;
         }
 
-        String errorMessage = "MRect error for zone id: ";
+        String errorMessage = "Banner error for zone id: ";
         Logger.d(TAG, errorMessage);
-        mListener.onMRectError(mRectPresenter);
+        mListener.onAdError(adPresenter);
     }
 }

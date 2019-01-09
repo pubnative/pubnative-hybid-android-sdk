@@ -2,6 +2,7 @@ package net.pubnative.lite.sdk.banner.presenter;
 
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.TestUtil;
 
 import org.junit.Before;
@@ -18,9 +19,9 @@ import static org.mockito.MockitoAnnotations.initMocks;
  * Created by erosgarciaponte on 24.01.18.
  */
 @RunWith(RobolectricTestRunner.class)
-public class BannerPresenterFactoryTest {
+public class AdPresenterFactoryTest {
     @Mock
-    private BannerPresenter.Listener mMockListener;
+    private AdPresenter.Listener mMockListener;
     private Ad mTestAd;
 
     @InjectMocks
@@ -35,12 +36,12 @@ public class BannerPresenterFactoryTest {
     public void createBannerPresenter_withHTML() {
         mTestAd = TestUtil.createTestBannerAd();
 
-        assertThat(mSubject.createBannerPresenter(mTestAd, mMockListener)).isNotNull();
+        assertThat(mSubject.createPresenter(mTestAd, mMockListener)).isNotNull();
     }
 
     @Test
     public void fromCreativeType_withHTML() {
         assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_BANNER_1, mTestAd))
-                .isInstanceOf(MraidBannerPresenter.class);
+                .isInstanceOf(MraidAdPresenter.class);
     }
 }

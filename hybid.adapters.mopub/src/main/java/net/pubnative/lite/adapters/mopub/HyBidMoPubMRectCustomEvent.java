@@ -29,21 +29,21 @@ import com.mopub.mobileads.CustomEventBanner;
 import com.mopub.mobileads.MoPubErrorCode;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.models.Ad;
-import net.pubnative.lite.sdk.mrect.presenter.MRectPresenter;
 import net.pubnative.lite.sdk.mrect.presenter.MRectPresenterFactory;
 import net.pubnative.lite.sdk.utils.Logger;
 
 import java.util.Map;
 
-public class HyBidMoPubMRectCustomEvent extends CustomEventBanner implements MRectPresenter.Listener {
+public class HyBidMoPubMRectCustomEvent extends CustomEventBanner implements AdPresenter.Listener {
     private static final String TAG = HyBidMoPubMRectCustomEvent.class.getSimpleName();
 
     private static final String ZONE_ID_KEY = "pn_zone_id";
 
     private CustomEventBannerListener mBannerListener;
 
-    private MRectPresenter mMRectPresenter;
+    private AdPresenter mMRectPresenter;
 
     @Override
     protected void loadBanner(Context context,
@@ -75,7 +75,7 @@ public class HyBidMoPubMRectCustomEvent extends CustomEventBanner implements MRe
             return;
         }
 
-        mMRectPresenter = new MRectPresenterFactory(context).createMRectPresenter(ad, this);
+        mMRectPresenter = new MRectPresenterFactory(context).createPresenter(ad, this);
         if (mMRectPresenter == null) {
             Logger.e(TAG, "Could not create valid MRect presenter");
             mBannerListener.onBannerFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
@@ -95,22 +95,22 @@ public class HyBidMoPubMRectCustomEvent extends CustomEventBanner implements MRe
     }
 
     @Override
-    public void onMRectLoaded(MRectPresenter mRectPresenter, View mRect) {
+    public void onAdLoaded(AdPresenter adPresenter, View banner) {
         if (mBannerListener != null) {
-            mBannerListener.onBannerLoaded(mRect);
+            mBannerListener.onBannerLoaded(banner);
             mMRectPresenter.startTracking();
         }
     }
 
     @Override
-    public void onMRectClicked(MRectPresenter mRectPresenter) {
+    public void onAdClicked(AdPresenter adPresenter) {
         if (mBannerListener != null) {
             mBannerListener.onBannerClicked();
         }
     }
 
     @Override
-    public void onMRectError(MRectPresenter mRectPresenter) {
+    public void onAdError(AdPresenter adPresenter) {
         if (mBannerListener != null) {
             mBannerListener.onBannerFailed(MoPubErrorCode.INTERNAL_ERROR);
         }

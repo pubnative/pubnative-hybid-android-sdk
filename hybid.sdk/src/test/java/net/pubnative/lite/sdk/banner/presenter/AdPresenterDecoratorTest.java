@@ -1,8 +1,10 @@
-package net.pubnative.lite.sdk.mrect.presenter;
+package net.pubnative.lite.sdk.banner.presenter;
 
 import android.view.View;
 
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
+import net.pubnative.lite.sdk.presenter.AdPresenterDecorator;
 import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.TestUtil;
 
@@ -23,24 +25,24 @@ import static org.mockito.MockitoAnnotations.initMocks;
  * Created by erosgarciaponte on 24.01.18.
  */
 @RunWith(RobolectricTestRunner.class)
-public class MRectPresenterDecoratorTest {
+public class AdPresenterDecoratorTest {
     @Mock
-    private MRectPresenter mMockPresenter;
+    private AdPresenter mMockPresenter;
     @Mock
     private AdTracker mMockAdTracker;
     @Mock
     private View mMockView;
     @Mock
-    private MRectPresenter.Listener mMockListener;
+    private AdPresenter.Listener mMockListener;
     private Ad mTestAd;
 
     @InjectMocks
-    private MRectPresenterDecorator mSubject;
+    private AdPresenterDecorator mSubject;
 
     @Before
     public void setup() {
         initMocks(this);
-        mTestAd = TestUtil.createTestMRectAd();
+        mTestAd = TestUtil.createTestBannerAd();
         when(mMockPresenter.getAd()).thenReturn(mTestAd);
     }
 
@@ -100,54 +102,54 @@ public class MRectPresenterDecoratorTest {
     }
 
     @Test
-    public void onMRectLoaded() {
-        mSubject.onMRectLoaded(mMockPresenter, mMockView);
+    public void onBannerLoaded() {
+        mSubject.onAdLoaded(mMockPresenter, mMockView);
 
         verify(mMockAdTracker).trackImpression();
-        verify(mMockListener).onMRectLoaded(mMockPresenter, mMockView);
+        verify(mMockListener).onAdLoaded(mMockPresenter, mMockView);
     }
 
     @Test
-    public void onMRectLoaded_whenDestroyed() {
+    public void onBannerLoaded_whenDestroyed() {
         mSubject.destroy();
 
-        mSubject.onMRectLoaded(mMockPresenter, mMockView);
+        mSubject.onAdLoaded(mMockPresenter, mMockView);
 
         verify(mMockAdTracker, never()).trackImpression();
-        verify(mMockListener, never()).onMRectLoaded(any(MRectPresenter.class), any(View.class));
+        verify(mMockListener, never()).onAdLoaded(any(AdPresenter.class), any(View.class));
     }
 
     @Test
-    public void onMRectClicked() {
-        mSubject.onMRectClicked(mMockPresenter);
+    public void onBannerClicked() {
+        mSubject.onAdClicked(mMockPresenter);
 
         verify(mMockAdTracker).trackClick();
-        verify(mMockListener).onMRectClicked(mMockPresenter);
+        verify(mMockListener).onAdClicked(mMockPresenter);
     }
 
     @Test
-    public void onMRectClicked_whenDestroyed() {
+    public void onBannerClicked_whenDestroyed() {
         mSubject.destroy();
 
-        mSubject.onMRectClicked(mMockPresenter);
+        mSubject.onAdClicked(mMockPresenter);
 
         verify(mMockAdTracker, never()).trackClick();
-        verify(mMockListener, never()).onMRectClicked(any(MRectPresenter.class));
+        verify(mMockListener, never()).onAdClicked(any(AdPresenter.class));
     }
 
     @Test
-    public void onMRectError() {
-        mSubject.onMRectError(mMockPresenter);
+    public void onBannerError() {
+        mSubject.onAdError(mMockPresenter);
 
-        verify(mMockListener).onMRectError(mMockPresenter);
+        verify(mMockListener).onAdError(mMockPresenter);
     }
 
     @Test
-    public void onMRectError_whenDestroyed() {
+    public void onBannerError_whenDestroyed() {
         mSubject.destroy();
 
-        mSubject.onMRectError(mMockPresenter);
+        mSubject.onAdError(mMockPresenter);
 
-        verify(mMockListener, never()).onMRectError(any(MRectPresenter.class));
+        verify(mMockListener, never()).onAdError(any(AdPresenter.class));
     }
 }
