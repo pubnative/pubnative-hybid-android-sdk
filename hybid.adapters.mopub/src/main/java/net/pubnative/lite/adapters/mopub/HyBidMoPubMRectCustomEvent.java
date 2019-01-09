@@ -29,21 +29,21 @@ import com.mopub.mobileads.CustomEventBanner;
 import com.mopub.mobileads.MoPubErrorCode;
 
 import net.pubnative.lite.sdk.HyBid;
-import net.pubnative.lite.sdk.banner.presenter.BannerPresenter;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.mrect.presenter.MRectPresenterFactory;
 import net.pubnative.lite.sdk.utils.Logger;
 
 import java.util.Map;
 
-public class HyBidMoPubMRectCustomEvent extends CustomEventBanner implements BannerPresenter.Listener {
+public class HyBidMoPubMRectCustomEvent extends CustomEventBanner implements AdPresenter.Listener {
     private static final String TAG = HyBidMoPubMRectCustomEvent.class.getSimpleName();
 
     private static final String ZONE_ID_KEY = "pn_zone_id";
 
     private CustomEventBannerListener mBannerListener;
 
-    private BannerPresenter mMRectPresenter;
+    private AdPresenter mMRectPresenter;
 
     @Override
     protected void loadBanner(Context context,
@@ -95,7 +95,7 @@ public class HyBidMoPubMRectCustomEvent extends CustomEventBanner implements Ban
     }
 
     @Override
-    public void onBannerLoaded(BannerPresenter bannerPresenter, View banner) {
+    public void onAdLoaded(AdPresenter adPresenter, View banner) {
         if (mBannerListener != null) {
             mBannerListener.onBannerLoaded(banner);
             mMRectPresenter.startTracking();
@@ -103,14 +103,14 @@ public class HyBidMoPubMRectCustomEvent extends CustomEventBanner implements Ban
     }
 
     @Override
-    public void onBannerClicked(BannerPresenter bannerPresenter) {
+    public void onAdClicked(AdPresenter adPresenter) {
         if (mBannerListener != null) {
             mBannerListener.onBannerClicked();
         }
     }
 
     @Override
-    public void onBannerError(BannerPresenter bannerPresenter) {
+    public void onAdError(AdPresenter adPresenter) {
         if (mBannerListener != null) {
             mBannerListener.onBannerFailed(MoPubErrorCode.INTERNAL_ERROR);
         }

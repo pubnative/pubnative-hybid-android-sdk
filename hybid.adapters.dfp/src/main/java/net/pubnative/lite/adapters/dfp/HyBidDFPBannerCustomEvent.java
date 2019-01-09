@@ -34,17 +34,17 @@ import com.google.android.gms.ads.mediation.customevent.CustomEventBanner;
 import com.google.android.gms.ads.mediation.customevent.CustomEventBannerListener;
 
 import net.pubnative.lite.sdk.HyBid;
-import net.pubnative.lite.sdk.banner.presenter.BannerPresenter;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.Logger;
 
-public class HyBidDFPBannerCustomEvent implements CustomEventBanner, BannerPresenter.Listener {
+public class HyBidDFPBannerCustomEvent implements CustomEventBanner, AdPresenter.Listener {
     private static final String TAG = HyBidDFPBannerCustomEvent.class.getSimpleName();
 
     private static final String ZONE_ID_KEY = "pn_zone_id";
     private CustomEventBannerListener mBannerListener;
-    private BannerPresenter mPresenter;
+    private AdPresenter mPresenter;
 
     @Override
     public void requestBannerAd(Context context,
@@ -106,7 +106,7 @@ public class HyBidDFPBannerCustomEvent implements CustomEventBanner, BannerPrese
     }
 
     @Override
-    public void onBannerLoaded(BannerPresenter bannerPresenter, View banner) {
+    public void onAdLoaded(AdPresenter adPresenter, View banner) {
         if (mBannerListener != null) {
             mBannerListener.onAdLoaded(banner);
             mPresenter.startTracking();
@@ -114,14 +114,14 @@ public class HyBidDFPBannerCustomEvent implements CustomEventBanner, BannerPrese
     }
 
     @Override
-    public void onBannerError(BannerPresenter bannerPresenter) {
+    public void onAdError(AdPresenter adPresenter) {
         if (mBannerListener != null) {
             mBannerListener.onAdFailedToLoad(AdRequest.ERROR_CODE_INTERNAL_ERROR);
         }
     }
 
     @Override
-    public void onBannerClicked(BannerPresenter bannerPresenter) {
+    public void onAdClicked(AdPresenter adPresenter) {
         if (mBannerListener != null) {
             mBannerListener.onAdClicked();
             mBannerListener.onAdLeftApplication();

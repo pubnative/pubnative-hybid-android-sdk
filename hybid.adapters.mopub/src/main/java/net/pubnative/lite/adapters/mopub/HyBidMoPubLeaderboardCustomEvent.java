@@ -29,19 +29,19 @@ import com.mopub.mobileads.CustomEventBanner;
 import com.mopub.mobileads.MoPubErrorCode;
 
 import net.pubnative.lite.sdk.HyBid;
-import net.pubnative.lite.sdk.banner.presenter.BannerPresenter;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.leaderboard.presenter.LeaderboardPresenterFactory;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.Logger;
 
 import java.util.Map;
 
-public class HyBidMoPubLeaderboardCustomEvent extends CustomEventBanner implements BannerPresenter.Listener {
+public class HyBidMoPubLeaderboardCustomEvent extends CustomEventBanner implements AdPresenter.Listener {
     private static final String TAG = HyBidMoPubBannerCustomEvent.class.getSimpleName();
 
     private static final String ZONE_ID_KEY = "pn_zone_id";
     private CustomEventBannerListener mBannerListener;
-    private BannerPresenter mLeaderboardPresenter;
+    private AdPresenter mLeaderboardPresenter;
 
     @Override
     protected void loadBanner(Context context,
@@ -93,7 +93,7 @@ public class HyBidMoPubLeaderboardCustomEvent extends CustomEventBanner implemen
     }
 
     @Override
-    public void onBannerLoaded(BannerPresenter bannerPresenter, View banner) {
+    public void onAdLoaded(AdPresenter adPresenter, View banner) {
         if (mBannerListener != null) {
             mBannerListener.onBannerLoaded(banner);
             mLeaderboardPresenter.startTracking();
@@ -101,14 +101,14 @@ public class HyBidMoPubLeaderboardCustomEvent extends CustomEventBanner implemen
     }
 
     @Override
-    public void onBannerError(BannerPresenter bannerPresenter) {
+    public void onAdError(AdPresenter adPresenter) {
         if (mBannerListener != null) {
             mBannerListener.onBannerFailed(MoPubErrorCode.INTERNAL_ERROR);
         }
     }
 
     @Override
-    public void onBannerClicked(BannerPresenter bannerPresenter) {
+    public void onAdClicked(AdPresenter adPresenter) {
         if (mBannerListener != null) {
             mBannerListener.onBannerClicked();
         }

@@ -25,11 +25,10 @@ package net.pubnative.lite.sdk.views;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.View;
 
 import net.pubnative.lite.sdk.api.BannerRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
-import net.pubnative.lite.sdk.banner.presenter.BannerPresenter;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
 
 public class HyBidBannerAdView extends PNAdView {
@@ -62,7 +61,7 @@ public class HyBidBannerAdView extends PNAdView {
     }
 
     @Override
-    protected BannerPresenter createPresenter() {
+    protected AdPresenter createPresenter() {
         return new BannerPresenterFactory(getContext())
                 .createPresenter(mAd, this);
     }

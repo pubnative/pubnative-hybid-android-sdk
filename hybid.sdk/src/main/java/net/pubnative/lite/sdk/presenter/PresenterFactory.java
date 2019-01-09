@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package net.pubnative.lite.sdk.banner.presenter;
+package net.pubnative.lite.sdk.presenter;
 
 import android.content.Context;
 
@@ -34,16 +34,16 @@ public abstract class PresenterFactory {
         mContext = context;
     }
 
-    public BannerPresenter createPresenter(Ad ad,
-                                                 BannerPresenter.Listener bannerPresenterListener) {
-        final BannerPresenter bannerPresenter = fromCreativeType(ad.assetgroupid, ad);
-        if (bannerPresenter == null) {
+    public AdPresenter createPresenter(Ad ad,
+                                       AdPresenter.Listener bannerPresenterListener) {
+        final AdPresenter adPresenter = fromCreativeType(ad.assetgroupid, ad);
+        if (adPresenter == null) {
             return null;
         }
 
-        final BannerPresenterDecorator bannerPresenterDecorator = new BannerPresenterDecorator(bannerPresenter,
+        final AdPresenterDecorator bannerPresenterDecorator = new AdPresenterDecorator(adPresenter,
                 new AdTracker(ad.getBeacons(Ad.Beacon.IMPRESSION), ad.getBeacons(Ad.Beacon.CLICK)), bannerPresenterListener);
-        bannerPresenter.setListener(bannerPresenterDecorator);
+        adPresenter.setListener(bannerPresenterDecorator);
         return bannerPresenterDecorator;
     }
 
@@ -51,5 +51,5 @@ public abstract class PresenterFactory {
         return mContext;
     }
 
-    protected abstract BannerPresenter fromCreativeType(int assetGroupId, Ad ad);
+    protected abstract AdPresenter fromCreativeType(int assetGroupId, Ad ad);
 }

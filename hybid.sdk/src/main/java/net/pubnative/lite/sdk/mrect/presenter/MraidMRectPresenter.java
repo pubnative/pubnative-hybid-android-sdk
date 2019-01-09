@@ -23,10 +23,8 @@
 package net.pubnative.lite.sdk.mrect.presenter;
 
 import android.content.Context;
-import android.view.View;
-import android.widget.RelativeLayout;
 
-import net.pubnative.lite.sdk.banner.presenter.BannerPresenter;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.mraid.MRAIDBanner;
@@ -41,13 +39,13 @@ import net.pubnative.lite.sdk.utils.UrlHandler;
  * Created by erosgarciaponte on 12.01.18.
  */
 
-public class MraidMRectPresenter implements BannerPresenter, MRAIDViewListener, MRAIDNativeFeatureListener {
+public class MraidMRectPresenter implements AdPresenter, MRAIDViewListener, MRAIDNativeFeatureListener {
     private final Context mContext;
     private final Ad mAd;
     private final UrlHandler mUrlHandlerDelegate;
     private final String[] mSupportedNativeFeatures;
 
-    private BannerPresenter.Listener mListener;
+    private AdPresenter.Listener mListener;
     private MRAIDBanner mMRAIDBanner;
     private boolean mIsDestroyed;
 
@@ -116,7 +114,7 @@ public class MraidMRectPresenter implements BannerPresenter, MRAIDViewListener, 
         }
 
         if (mListener != null) {
-            mListener.onBannerLoaded(this, mraidView);
+            mListener.onAdLoaded(this, mraidView);
         }
     }
 
@@ -127,7 +125,7 @@ public class MraidMRectPresenter implements BannerPresenter, MRAIDViewListener, 
         }
 
         if (mListener != null) {
-            mListener.onBannerClicked(this);
+            mListener.onAdClicked(this);
         }
     }
 
@@ -165,7 +163,7 @@ public class MraidMRectPresenter implements BannerPresenter, MRAIDViewListener, 
         mUrlHandlerDelegate.handleUrl(url);
         // TODO will this always count as a click? Are there other cases that should be considered a click?
         if (mListener != null) {
-            mListener.onBannerClicked(this);
+            mListener.onAdClicked(this);
         }
     }
 

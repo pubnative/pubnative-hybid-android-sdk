@@ -1,6 +1,6 @@
 package net.pubnative.lite.sdk.leaderboard.presenter;
 
-import net.pubnative.lite.sdk.banner.presenter.BannerPresenter;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.utils.TestUtil;
@@ -18,7 +18,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 @RunWith(RobolectricTestRunner.class)
 public class LeaderboardPresenterFactoryTest {
     @Mock
-    private BannerPresenter.Listener mMockListener;
+    private AdPresenter.Listener mMockListener;
     private Ad mTestAd;
 
     @InjectMocks

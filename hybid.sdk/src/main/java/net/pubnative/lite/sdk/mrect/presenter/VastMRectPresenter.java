@@ -27,19 +27,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
-import net.pubnative.lite.sdk.banner.presenter.BannerPresenter;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.CheckUtils;
-import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.vast.VASTParser;
 import net.pubnative.lite.sdk.vast.VASTPlayer;
 import net.pubnative.lite.sdk.vast.model.VASTModel;
 
-public class VastMRectPresenter implements BannerPresenter, VASTPlayer.Listener {
+public class VastMRectPresenter implements AdPresenter, VASTPlayer.Listener {
     private final Context mContext;
     private final Ad mAd;
 
-    private BannerPresenter.Listener mListener;
+    private AdPresenter.Listener mListener;
     private VASTPlayer mPlayer;
     private boolean mIsDestroyed;
     private boolean mLoaded = false;
@@ -72,7 +71,7 @@ public class VastMRectPresenter implements BannerPresenter, VASTPlayer.Listener 
             @Override
             public void onVASTParserError(int error) {
                 if (mListener != null) {
-                    mListener.onBannerError(VastMRectPresenter.this);
+                    mListener.onAdError(VastMRectPresenter.this);
                 }
             }
 
@@ -128,7 +127,7 @@ public class VastMRectPresenter implements BannerPresenter, VASTPlayer.Listener 
         if (!mLoaded) {
             mLoaded = true;
             if (mListener != null) {
-                mListener.onBannerLoaded(this, buildView());
+                mListener.onAdLoaded(this, buildView());
             }
         }
     }
@@ -136,7 +135,7 @@ public class VastMRectPresenter implements BannerPresenter, VASTPlayer.Listener 
     @Override
     public void onVASTPlayerFail(Exception exception) {
         if (mListener != null) {
-            mListener.onBannerError(this);
+            mListener.onAdError(this);
         }
     }
 
@@ -147,7 +146,7 @@ public class VastMRectPresenter implements BannerPresenter, VASTPlayer.Listener 
         }
 
         if (mListener != null) {
-            mListener.onBannerClicked(this);
+            mListener.onAdClicked(this);
         }
     }
 

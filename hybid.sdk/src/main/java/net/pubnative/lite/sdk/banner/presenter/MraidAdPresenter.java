@@ -23,8 +23,6 @@
 package net.pubnative.lite.sdk.banner.presenter;
 
 import android.content.Context;
-import android.view.View;
-import android.widget.RelativeLayout;
 
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
@@ -33,6 +31,7 @@ import net.pubnative.lite.sdk.mraid.MRAIDNativeFeature;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 
@@ -40,17 +39,17 @@ import net.pubnative.lite.sdk.utils.UrlHandler;
  * Created by erosgarciaponte on 08.01.18.
  */
 
-public class MraidBannerPresenter implements BannerPresenter, MRAIDViewListener, MRAIDNativeFeatureListener {
+public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNativeFeatureListener {
     private final Context mContext;
     private final Ad mAd;
     private final UrlHandler mUrlHandlerDelegate;
     private final String[] mSupportedNativeFeatures;
 
-    private BannerPresenter.Listener mListener;
+    private AdPresenter.Listener mListener;
     private MRAIDBanner mMRAIDBanner;
     private boolean mIsDestroyed;
 
-    public MraidBannerPresenter(Context context, Ad ad) {
+    public MraidAdPresenter(Context context, Ad ad) {
         mContext = context;
         mAd = ad;
         mUrlHandlerDelegate = new UrlHandler(context);
@@ -75,7 +74,7 @@ public class MraidBannerPresenter implements BannerPresenter, MRAIDViewListener,
 
     @Override
     public void load() {
-        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "MraidBannerPresenter is destroyed")) {
+        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "MraidAdPresenter is destroyed")) {
             return;
         }
 
@@ -114,7 +113,7 @@ public class MraidBannerPresenter implements BannerPresenter, MRAIDViewListener,
         }
 
         if (mListener != null) {
-            mListener.onBannerLoaded(this, mraidView);
+            mListener.onAdLoaded(this, mraidView);
         }
     }
 
@@ -125,7 +124,7 @@ public class MraidBannerPresenter implements BannerPresenter, MRAIDViewListener,
         }
 
         if (mListener != null) {
-            mListener.onBannerClicked(this);
+            mListener.onAdClicked(this);
         }
     }
 
@@ -162,7 +161,7 @@ public class MraidBannerPresenter implements BannerPresenter, MRAIDViewListener,
 
         mUrlHandlerDelegate.handleUrl(url);
         if (mListener != null) {
-            mListener.onBannerClicked(this);
+            mListener.onAdClicked(this);
         }
     }
 
