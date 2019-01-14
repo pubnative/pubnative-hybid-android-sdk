@@ -595,7 +595,6 @@ public class VASTPlayer extends RelativeLayout implements MediaPlayer.OnCompleti
     public void onOpenClick() {
 
         Logger.d(TAG, "onOpenClick");
-        load(mVastModel);
         openOffer();
     }
 
