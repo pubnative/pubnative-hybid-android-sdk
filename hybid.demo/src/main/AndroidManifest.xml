@@ -186,6 +186,10 @@
             android:name="io.fabric.ApiKey"
             android:value="f61a9f30a8156746aae4b1cc84856189a3bf8575" />
 
+        <meta-data
+            android:name="com.google.android.gms.ads.AD_MANAGER_APP"
+            android:value="true" />
+
     </application>
 
 </manifest>
