@@ -30,6 +30,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_toLeftOf="@id/button_paste_clipboard"
             android:layout_toStartOf="@id/button_paste_clipboard">
 
@@ -50,7 +51,8 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:text="@string/ad_size"
-        android:textColor="@color/colorPrimaryDark"
+        android:fontFamily="@font/roboto"
+        android:textColor="?colorPrimaryVariant"
         android:textSize="14sp"
         android:textStyle="bold" />
 

@@ -11,6 +11,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
+        android:fontFamily="@font/roboto"
         android:textColor="@android:color/black"
         android:textSize="16sp" />
     <TextView
@@ -22,6 +23,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="4dp"
         android:gravity="end"
+        android:fontFamily="@font/roboto"
         android:textStyle="bold"
         android:textColor="@android:color/black"
         android:textSize="14sp" />

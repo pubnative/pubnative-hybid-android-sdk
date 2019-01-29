@@ -35,6 +35,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:gravity="center"
+            android:fontFamily="@font/roboto"
             android:textColor="@android:color/black"
             android:textSize="16sp" />
 
@@ -62,6 +63,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:gravity="center"
+            android:fontFamily="@font/roboto"
             android:textColor="@android:color/black"
             android:textSize="16sp" />
 
@@ -82,6 +84,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:gravity="center"
+            android:fontFamily="@font/roboto"
             android:textColor="@android:color/black"
             android:textSize="16sp" />
 
@@ -112,6 +115,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginBottom="20dp"
             android:gravity="center"
+            android:fontFamily="@font/roboto"
             android:textColor="@android:color/black"
             android:textSize="16sp" />
     </LinearLayout>

@@ -37,8 +37,9 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
+            android:fontFamily="@font/roboto"
             android:text="@string/privacy_policy"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="?colorPrimaryVariant"
             android:textSize="14sp"
             android:textStyle="bold"
             android:visibility="gone" />
@@ -51,6 +52,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
             android:autoLink="web"
+            android:fontFamily="@font/roboto"
             android:textSize="16sp"
             android:visibility="gone" />
 
@@ -61,8 +63,9 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
+            android:fontFamily="@font/roboto"
             android:text="@string/vendor_list"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="?colorPrimaryVariant"
             android:textSize="14sp"
             android:textStyle="bold"
             android:visibility="gone" />
@@ -75,6 +78,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
             android:autoLink="web"
+            android:fontFamily="@font/roboto"
             android:textSize="16sp"
             android:visibility="gone" />
 
@@ -105,8 +109,9 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
+            android:fontFamily="@font/roboto"
             android:text="@string/consent_result"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="?colorPrimaryVariant"
             android:textSize="14sp"
             android:textStyle="bold"
             android:visibility="gone" />
@@ -120,6 +125,7 @@
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="20dp"
             android:autoLink="web"
+            android:fontFamily="@font/roboto"
             android:textColor="@android:color/black"
             android:textSize="16sp"
             android:visibility="gone" />
@@ -129,10 +135,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
             android:layout_marginTop="20dp"
+            android:layout_marginEnd="16dp"
+            android:fontFamily="@font/roboto"
             android:text="@string/pn_can_collect_data"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="?colorPrimaryVariant"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -155,6 +162,7 @@
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="20dp"
             android:autoLink="web"
+            android:fontFamily="@font/roboto"
             android:textColor="@android:color/black"
             android:textSize="16sp"
             android:visibility="gone" />

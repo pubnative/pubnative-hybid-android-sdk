@@ -29,10 +29,11 @@
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"
+            style="@style/Widget.MaterialComponents.TabLayout.Colored"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:tabIndicatorHeight="4dp"
-            app:tabIndicatorColor="@android:color/white">
+            app:tabIndicatorColor="@android:color/white"
+            app:tabIndicatorHeight="4dp">
 
             <com.google.android.material.tabs.TabItem
                 android:id="@+id/item_ad"

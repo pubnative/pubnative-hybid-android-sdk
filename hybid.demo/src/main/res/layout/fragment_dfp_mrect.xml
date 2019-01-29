@@ -36,7 +36,8 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:text="@string/error"
-            android:textColor="@color/colorPrimaryDark"
+            android:fontFamily="@font/roboto"
+            android:textColor="?colorPrimaryVariant"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -50,6 +51,7 @@
             android:clickable="true"
             android:focusable="true"
             android:gravity="center"
+            android:fontFamily="@font/roboto"
             android:textColor="@android:color/black"
             android:textSize="16sp" />
     </LinearLayout>

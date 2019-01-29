@@ -18,7 +18,8 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
             android:text="@string/request_url"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="?colorPrimaryVariant"
+            android:fontFamily="@font/roboto"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -33,6 +34,7 @@
             android:focusable="true"
             android:gravity="center"
             android:textColor="@android:color/black"
+            android:fontFamily="@font/roboto"
             android:textSize="16sp" />
 
         <TextView
@@ -43,7 +45,8 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:text="@string/latency"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="?colorPrimaryVariant"
+            android:fontFamily="@font/roboto"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -57,6 +60,7 @@
             android:clickable="true"
             android:focusable="true"
             android:gravity="center"
+            android:fontFamily="@font/roboto"
             android:textColor="@android:color/black"
             android:textSize="16sp" />
 
@@ -68,7 +72,8 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:text="@string/response"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="?colorPrimaryVariant"
+            android:fontFamily="@font/roboto"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -84,6 +89,7 @@
             android:focusable="true"
             android:gravity="center"
             android:textColor="@android:color/black"
+            android:fontFamily="@font/roboto"
             android:textSize="16sp" />
     </LinearLayout>
 </ScrollView>

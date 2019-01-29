@@ -13,21 +13,22 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
+            android:layout_marginEnd="16dp"
             android:maxLines="1"
             android:text="@string/zone_id"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="?colorPrimaryVariant"
             android:textSize="14sp"
+            android:fontFamily="@font/roboto"
             android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="4dp"
+            android:layout_marginEnd="16dp"
             android:orientation="horizontal"
             android:weightSum="3">
 
@@ -49,6 +50,7 @@
                     android:gravity="center"
                     android:maxLines="1"
                     android:text="@string/chosen"
+                    android:fontFamily="@font/roboto"
                     android:textColor="@android:color/black"
                     android:textSize="16sp" />
 
@@ -59,6 +61,7 @@
                     android:layout_marginTop="10dp"
                     android:gravity="center"
                     android:maxLines="1"
+                    android:fontFamily="@font/roboto"
                     android:textColor="@android:color/black"
                     android:textSize="48sp" />
             </LinearLayout>
@@ -67,12 +70,13 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
+            android:layout_marginEnd="16dp"
             android:maxLines="1"
             android:text="@string/mopub"
-            android:textColor="@color/colorPrimaryDark"
+            android:fontFamily="@font/roboto"
+            android:textColor="?colorPrimaryVariant"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -80,9 +84,9 @@
             android:id="@+id/button_mopub_banner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:text="@string/banner"
             android:textColor="@android:color/white" />
 
@@ -90,9 +94,9 @@
             android:id="@+id/button_mopub_medium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:text="@string/medium"
             android:textColor="@android:color/white" />
 
@@ -100,9 +104,9 @@
             android:id="@+id/button_mopub_leaderboard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:text="@string/leaderboard"
             android:textColor="@android:color/white" />
 
@@ -110,21 +114,22 @@
             android:id="@+id/button_mopub_interstitial"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:text="@string/interstitial"
             android:textColor="@android:color/white" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
             android:maxLines="1"
             android:text="@string/dfp"
-            android:textColor="@color/colorPrimaryDark"
+            android:fontFamily="@font/roboto"
+            android:textColor="?colorPrimaryVariant"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -132,9 +137,9 @@
             android:id="@+id/button_dfp_banner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:text="@string/banner"
             android:textColor="@android:color/white" />
 
@@ -142,9 +147,9 @@
             android:id="@+id/button_dfp_medium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:text="@string/medium"
             android:textColor="@android:color/white" />
 
@@ -152,20 +157,19 @@
             android:id="@+id/button_dfp_leaderboard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
-            android:text="@string/leaderboard"
-            android:textColor="@android:color/white" />
+            android:layout_marginEnd="16dp"
+            android:text="@string/leaderboard" />
 
         <Button
             android:id="@+id/button_dfp_interstitial"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="20dp"
             android:text="@string/interstitial"
             android:textColor="@android:color/white" />
 

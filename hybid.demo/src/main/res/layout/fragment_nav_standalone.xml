@@ -18,6 +18,7 @@
             android:layout_marginTop="20dp"
             android:maxLines="1"
             android:text="@string/zone_id"
+            android:fontFamily="@font/roboto"
             android:textColor="@android:color/black"
             android:textSize="16sp" />
 
@@ -48,6 +49,7 @@
                     android:gravity="center"
                     android:maxLines="1"
                     android:text="@string/chosen"
+                    android:fontFamily="@font/roboto"
                     android:textColor="@android:color/black"
                     android:textSize="16sp" />
 
@@ -58,6 +60,7 @@
                     android:layout_marginTop="10dp"
                     android:gravity="center"
                     android:maxLines="1"
+                    android:fontFamily="@font/roboto"
                     android:textColor="@android:color/black"
                     android:textSize="48sp" />
             </LinearLayout>

@@ -27,6 +27,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
             android:layout_toLeftOf="@id/button_add_zone_id"
@@ -61,7 +62,8 @@
         android:gravity="center"
         android:padding="8dp"
         android:text="@string/clear"
-        android:textColor="@android:color/holo_blue_light"
+        android:fontFamily="@font/roboto"
+        android:textColor="?colorSecondary"
         android:textSize="14sp" />
 
     <Button
