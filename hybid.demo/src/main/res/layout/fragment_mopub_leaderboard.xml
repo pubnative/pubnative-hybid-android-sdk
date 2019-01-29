@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="net.pubnative.lite.demo.ui.fragments.mopub.MoPubLeaderboardFragment"
-    tools:showIn="@layout/activity_mopub_leaderboard">
+    tools:showIn="@layout/activity_tab">
 
     <LinearLayout
         android:layout_width="match_parent"
