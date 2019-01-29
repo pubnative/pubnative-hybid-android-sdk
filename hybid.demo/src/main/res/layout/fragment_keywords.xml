@@ -10,9 +10,9 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="20dp">
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="16dp">
 
         <Button
             android:id="@+id/button_add_keyword"
@@ -25,13 +25,13 @@
             android:textColor="@android:color/white" />
 
         <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
-            android:layout_toLeftOf="@id/button_add_keyword"
-            android:layout_toStartOf="@id/button_add_keyword">
+            android:layout_toStartOf="@id/button_add_keyword"
+            android:layout_toLeftOf="@id/button_add_keyword">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_keyword"
@@ -46,9 +46,9 @@
         android:id="@+id/list_keywords"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp" />
 
     <TextView
         android:id="@+id/button_clear_keywords"
@@ -58,10 +58,10 @@
         android:layout_marginTop="8dp"
         android:clickable="true"
         android:focusable="true"
+        android:fontFamily="@font/roboto"
         android:gravity="center"
         android:padding="8dp"
         android:text="@string/clear"
-        android:fontFamily="@font/roboto"
         android:textColor="?colorSecondary"
         android:textSize="14sp" />
 
@@ -69,9 +69,9 @@
         android:id="@+id/button_save_pn_keywords"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
         android:text="@string/save_pn_keywords"
         android:textColor="@android:color/white" />
 

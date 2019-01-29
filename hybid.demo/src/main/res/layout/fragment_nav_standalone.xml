@@ -13,21 +13,21 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
+            android:layout_marginEnd="16dp"
+            android:fontFamily="@font/roboto"
             android:maxLines="1"
             android:text="@string/zone_id"
-            android:fontFamily="@font/roboto"
             android:textColor="@android:color/black"
             android:textSize="16sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="4dp"
+            android:layout_marginEnd="16dp"
             android:orientation="horizontal"
             android:weightSum="3">
 
@@ -46,10 +46,10 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:fontFamily="@font/roboto"
                     android:gravity="center"
                     android:maxLines="1"
                     android:text="@string/chosen"
-                    android:fontFamily="@font/roboto"
                     android:textColor="@android:color/black"
                     android:textSize="16sp" />
 
@@ -58,9 +58,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
+                    android:fontFamily="@font/roboto"
                     android:gravity="center"
                     android:maxLines="1"
-                    android:fontFamily="@font/roboto"
                     android:textColor="@android:color/black"
                     android:textSize="48sp" />
             </LinearLayout>
@@ -70,9 +70,9 @@
             android:id="@+id/button_banner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
+            android:layout_marginEnd="16dp"
             android:text="@string/banner"
             android:textColor="@android:color/white" />
 
@@ -80,9 +80,9 @@
             android:id="@+id/button_medium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:text="@string/medium"
             android:textColor="@android:color/white" />
 
@@ -90,9 +90,9 @@
             android:id="@+id/button_leaderboard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:text="@string/leaderboard"
             android:textColor="@android:color/white" />
 
@@ -100,9 +100,9 @@
             android:id="@+id/button_interstitial"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:text="@string/interstitial"
             android:textColor="@android:color/white" />
 
@@ -110,9 +110,9 @@
             android:id="@+id/button_native"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:text="@string/native_ad"
             android:textColor="@android:color/white" />
 

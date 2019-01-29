@@ -13,12 +13,12 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
+            android:layout_marginEnd="16dp"
+            android:fontFamily="@font/roboto"
             android:maxLines="1"
             android:text="@string/mopub"
-            android:fontFamily="@font/roboto"
             android:textColor="?colorPrimaryVariant"
             android:textSize="14sp"
             android:textStyle="bold" />
@@ -27,9 +27,9 @@
             android:id="@+id/button_mopub_banner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:text="@string/banner"
             android:textColor="@android:color/white" />
 
@@ -37,9 +37,9 @@
             android:id="@+id/button_mopub_medium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:text="@string/medium"
             android:textColor="@android:color/white" />
 
@@ -47,9 +47,9 @@
             android:id="@+id/button_mopub_leaderboard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:text="@string/leaderboard"
             android:textColor="@android:color/white" />
 
@@ -57,9 +57,9 @@
             android:id="@+id/button_mopub_interstitial"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:text="@string/interstitial"
             android:textColor="@android:color/white" />
 
@@ -67,10 +67,10 @@
             android:id="@+id/button_mopub_native"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="20dp"
             android:text="@string/native_ad"
             android:textColor="@android:color/white" />
     </LinearLayout>

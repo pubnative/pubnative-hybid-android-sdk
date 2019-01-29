@@ -14,12 +14,12 @@
             android:id="@+id/label_request_url"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
+            android:layout_marginEnd="16dp"
+            android:fontFamily="@font/roboto"
             android:text="@string/request_url"
             android:textColor="?colorPrimaryVariant"
-            android:fontFamily="@font/roboto"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -27,26 +27,26 @@
             android:id="@+id/view_request_url"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:clickable="true"
             android:focusable="true"
+            android:fontFamily="@font/roboto"
             android:gravity="center"
             android:textColor="@android:color/black"
-            android:fontFamily="@font/roboto"
             android:textSize="16sp" />
 
         <TextView
             android:id="@+id/label_latency"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:fontFamily="@font/roboto"
             android:text="@string/latency"
             android:textColor="?colorPrimaryVariant"
-            android:fontFamily="@font/roboto"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -54,13 +54,13 @@
             android:id="@+id/view_latency"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:clickable="true"
             android:focusable="true"
-            android:gravity="center"
             android:fontFamily="@font/roboto"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:textSize="16sp" />
 
@@ -68,12 +68,12 @@
             android:id="@+id/label_response"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:fontFamily="@font/roboto"
             android:text="@string/response"
             android:textColor="?colorPrimaryVariant"
-            android:fontFamily="@font/roboto"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -81,15 +81,15 @@
             android:id="@+id/view_response"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="20dp"
             android:clickable="true"
             android:focusable="true"
+            android:fontFamily="@font/roboto"
             android:gravity="center"
             android:textColor="@android:color/black"
-            android:fontFamily="@font/roboto"
             android:textSize="16sp" />
     </LinearLayout>
 </ScrollView>

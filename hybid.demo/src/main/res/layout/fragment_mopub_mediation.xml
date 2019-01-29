@@ -15,10 +15,10 @@
             android:id="@+id/button_load_banner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="20dp"
             android:text="@string/load_banner" />
 
         <com.mopub.mobileads.MoPubView
@@ -31,11 +31,11 @@
             android:id="@+id/view_banner_error"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:gravity="center"
+            android:layout_marginEnd="16dp"
             android:fontFamily="@font/roboto"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:textSize="16sp" />
 
@@ -43,10 +43,10 @@
             android:id="@+id/button_load_medium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="10dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="20dp"
             android:text="@string/load_medium" />
 
         <com.mopub.mobileads.MoPubView
@@ -59,11 +59,11 @@
             android:id="@+id/view_mrect_error"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:gravity="center"
+            android:layout_marginEnd="16dp"
             android:fontFamily="@font/roboto"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:textSize="16sp" />
 
@@ -71,20 +71,20 @@
             android:id="@+id/button_load_fullscreen"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="10dp"
+            android:layout_marginEnd="16dp"
             android:text="@string/load_fullscreen" />
 
         <TextView
             android:id="@+id/view_interstitial_error"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:gravity="center"
+            android:layout_marginEnd="16dp"
             android:fontFamily="@font/roboto"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:textSize="16sp" />
 
@@ -92,9 +92,9 @@
             android:id="@+id/button_load_native"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="10dp"
+            android:layout_marginEnd="16dp"
             android:text="@string/load_native" />
 
         <FrameLayout
@@ -102,20 +102,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="20dp"/>
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="16dp" />
 
         <TextView
             android:id="@+id/view_native_error"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
             android:layout_marginBottom="20dp"
-            android:gravity="center"
             android:fontFamily="@font/roboto"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:textSize="16sp" />
     </LinearLayout>

@@ -12,9 +12,9 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="20dp">
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="16dp">
 
         <ImageButton
             android:id="@+id/button_paste_clipboard"
@@ -22,17 +22,17 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
             android:layout_marginTop="4dp"
             android:src="@drawable/baseline_filter_none_white_24" />
 
         <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_toLeftOf="@id/button_paste_clipboard"
-            android:layout_toStartOf="@id/button_paste_clipboard">
+            android:layout_toStartOf="@id/button_paste_clipboard"
+            android:layout_toLeftOf="@id/button_paste_clipboard">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_markup"
@@ -47,11 +47,11 @@
         android:id="@+id/label_ad_size"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:text="@string/ad_size"
+        android:layout_marginEnd="16dp"
         android:fontFamily="@font/roboto"
+        android:text="@string/ad_size"
         android:textColor="?colorPrimaryVariant"
         android:textSize="14sp"
         android:textStyle="bold" />
@@ -60,9 +60,9 @@
         android:id="@+id/group_ad_size"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="4dp"
+        android:layout_marginEnd="16dp"
         android:orientation="horizontal">
 
         <RadioButton
@@ -92,10 +92,10 @@
         android:id="@+id/button_load"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
         android:text="@string/load"
         android:textColor="@android:color/white" />
 

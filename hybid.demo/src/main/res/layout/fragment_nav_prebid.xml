@@ -16,11 +16,11 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
             android:layout_marginEnd="16dp"
+            android:fontFamily="@font/roboto"
             android:maxLines="1"
             android:text="@string/zone_id"
             android:textColor="?colorPrimaryVariant"
             android:textSize="14sp"
-            android:fontFamily="@font/roboto"
             android:textStyle="bold" />
 
         <LinearLayout
@@ -47,10 +47,10 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:fontFamily="@font/roboto"
                     android:gravity="center"
                     android:maxLines="1"
                     android:text="@string/chosen"
-                    android:fontFamily="@font/roboto"
                     android:textColor="@android:color/black"
                     android:textSize="16sp" />
 
@@ -59,9 +59,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
+                    android:fontFamily="@font/roboto"
                     android:gravity="center"
                     android:maxLines="1"
-                    android:fontFamily="@font/roboto"
                     android:textColor="@android:color/black"
                     android:textSize="48sp" />
             </LinearLayout>
@@ -73,9 +73,9 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
             android:layout_marginEnd="16dp"
+            android:fontFamily="@font/roboto"
             android:maxLines="1"
             android:text="@string/mopub"
-            android:fontFamily="@font/roboto"
             android:textColor="?colorPrimaryVariant"
             android:textSize="14sp"
             android:textStyle="bold" />
@@ -126,9 +126,9 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
+            android:fontFamily="@font/roboto"
             android:maxLines="1"
             android:text="@string/dfp"
-            android:fontFamily="@font/roboto"
             android:textColor="?colorPrimaryVariant"
             android:textSize="14sp"
             android:textStyle="bold" />
