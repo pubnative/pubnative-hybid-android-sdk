@@ -37,7 +37,7 @@
                 android:id="@+id/input_zone_id"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/hint_pn_keyword"
+                android:hint="@string/hint_pn_zone_id"
                 android:inputType="number"
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
