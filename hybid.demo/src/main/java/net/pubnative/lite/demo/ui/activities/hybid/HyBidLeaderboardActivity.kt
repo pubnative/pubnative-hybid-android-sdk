@@ -5,7 +5,7 @@ import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.ui.fragments.hybid.HyBidLeaderboardFragment
 
 class HyBidLeaderboardActivity : TabActivity() {
-        override fun getAdFragment() = HyBidLeaderboardFragment()
+    override fun getAdFragment() = HyBidLeaderboardFragment()
 
-        override fun getActivityTitle() = getString(R.string.hybid_leaderboard)
+    override fun getActivityTitle() = getString(R.string.hybid_leaderboard)
 }

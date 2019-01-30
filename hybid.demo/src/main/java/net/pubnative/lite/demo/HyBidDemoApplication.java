@@ -23,8 +23,10 @@
 package net.pubnative.lite.demo;
 
 import android.content.Context;
+
 import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
+
 import android.text.TextUtils;
 
 import com.crashlytics.android.Crashlytics;

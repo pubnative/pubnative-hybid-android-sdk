@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: pubnative/android:26_20171206
+      - image: pubnative/android:28_20190129
 
     working_directory: ~/lite.sdk
 

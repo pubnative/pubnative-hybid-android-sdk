@@ -44,14 +44,13 @@ import net.pubnative.lite.sdk.HyBid
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class KeywordsFragment: Fragment() {
+class KeywordsFragment : Fragment() {
     private lateinit var keywordInput: EditText
     private lateinit var keywordList: RecyclerView
     private lateinit var settingManager: SettingsManager
     private lateinit var adapter: KeywordAdapter
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
-            = inflater.inflate(R.layout.fragment_keywords, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_keywords, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

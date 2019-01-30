@@ -22,10 +22,12 @@ class ClipboardUtils {
         fun copyFromClipboard(context: Context): String {
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clipData = clipboard.primaryClip
-            val itemCount = clipData.itemCount
-            if (itemCount > 0) {
-                val item = clipData.getItemAt(0)
-                return item.text.toString()
+            if (clipData != null) {
+                val itemCount = clipData.itemCount
+                if (itemCount > 0) {
+                    val item = clipData.getItemAt(0)
+                    return item.text.toString()
+                }
             }
             return ""
         }

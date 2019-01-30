@@ -8,7 +8,7 @@ import net.pubnative.lite.demo.ui.adapters.MarkupAdapter
 
 class SampleTextViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     fun bind(quote: MarkupAdapter.Quote) {
-            itemView.findViewById<TextView>(R.id.view_quote).text = quote.quote
-            itemView.findViewById<TextView>(R.id.view_author).text = quote.author
+        itemView.findViewById<TextView>(R.id.view_quote).text = quote.quote
+        itemView.findViewById<TextView>(R.id.view_author).text = quote.author
     }
 }
