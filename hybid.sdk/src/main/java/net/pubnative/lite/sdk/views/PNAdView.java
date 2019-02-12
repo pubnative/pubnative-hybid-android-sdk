@@ -100,7 +100,6 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
 
     protected void cleanup() {
         stopTracking();
-        setBackgroundColor(Color.TRANSPARENT);
         removeAllViews();
         mAd = null;
 
@@ -167,8 +166,6 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
         adLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
 
         addView(view, adLayoutParams);
-
-        setBackgroundColor(Color.BLACK);
 
         invokeOnLoadFinished();
         startTracking();
