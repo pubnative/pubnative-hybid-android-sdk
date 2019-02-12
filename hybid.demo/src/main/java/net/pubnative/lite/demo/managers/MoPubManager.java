@@ -27,6 +27,7 @@ import android.content.Context;
 import com.mopub.common.MoPub;
 import com.mopub.common.SdkConfiguration;
 import com.mopub.common.SdkInitializationListener;
+import com.mopub.common.logging.MoPubLog;
 
 public class MoPubManager {
     public static void initMoPubSdk(Context context, String adUnitId) {
@@ -36,6 +37,7 @@ public class MoPubManager {
     public static void initMoPubSdk(Context context, String adUnitId, final InitialisationListener listener) {
         SdkConfiguration sdkConfiguration = new SdkConfiguration
                 .Builder(adUnitId)
+                .withLogLevel(MoPubLog.LogLevel.DEBUG)
                 .build();
         MoPub.initializeSdk(context, sdkConfiguration, new SdkInitializationListener() {
             @Override
