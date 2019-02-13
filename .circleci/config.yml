@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: pubnative/android:28_20190129
+    - image: pubnative/android:28_20190129
 
     working_directory: ~/lite.sdk
 
@@ -11,22 +11,28 @@ jobs:
       _JAVA_OPTIONS: "-Xmx1400m -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:ParallelGCThreads=2 -Djava.util.concurrent.ForkJoinPool.common.parallelism=2"
 
     steps:
-      - checkout
-      - restore_cache:
-          key: sdk-{{ .Branch }}
-      - run:
-          name: Run Tests
-          command: ./gradlew clean testDebug
-      - run:
-          name: Send reports to coveralls.io
-          command: ./gradlew cobertura coveralls
-      - save_cache:
-          key: sdk-{{ .Branch }}
-          paths:
-            - "/usr/local/android-sdk"
-      - deploy:
-          name: Deploy to Bintray
-          command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ] || [ "${CIRCLE_BRANCH}" == "beta" ] || [ "${CIRCLE_BRANCH}" == "development" ] ; then
-              ./gradlew bintrayUpload
-            fi
+    - checkout
+    - restore_cache:
+        key: sdk-{{ .Branch }}
+    - run:
+        name: Run Tests
+        command: ./gradlew clean testDebug
+    - run:
+        name: Send reports to coveralls.io
+        command: ./gradlew cobertura coveralls
+    - save_cache:
+        key: sdk-{{ .Branch }}
+        paths:
+        - "/usr/local/android-sdk"
+    - deploy:
+        name: Deploy to Fabric
+        command:
+          if [ "${CIRCLE_BRANCH}" == "master" ] || [ "${CIRCLE_BRANCH}" == "beta" ] || [ "${CIRCLE_BRANCH}" == "development" ] || [ "${CIRCLE_BRANCH}" == "development-fix_circleci" ] ; then
+          if [ ! -z $IS_BETA ] ; then ./gradlew assembleDebug crashlyticsUploadDistributionDebug ; fi
+          fi
+    - deploy:
+        name: Deploy to Bintray
+        command: |
+          if [ "${CIRCLE_BRANCH}" == "master" ] || [ "${CIRCLE_BRANCH}" == "beta" ] || [ "${CIRCLE_BRANCH}" == "development" ] || [ "${CIRCLE_BRANCH}" == "development-fix_circleci" ] ; then
+            ./gradlew bintrayUpload
+          fi
