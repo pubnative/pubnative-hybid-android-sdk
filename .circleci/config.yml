@@ -96,9 +96,5 @@ workflows:
     - test_unit
 
     - deploy_crashlytics:
-      filters:
-        branches:
-          only:
-          - development-fix_circleci
       requires:
       - test_unit
