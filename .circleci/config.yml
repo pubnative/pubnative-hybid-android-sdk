@@ -2,13 +2,13 @@ version: 2
 
 references:
   workspace: &workspace
-    ~/hybid.sdk
+               ~/hybid.sdk
 
   android_config: &android_config
     working_directory: *workspace
 
     docker:
-      - image: pubnative/android:28_20190129
+    - image: pubnative/android:28_20190129
 
     environment:
       TERM: dumb
@@ -34,14 +34,14 @@ references:
       save_cache:
         key: *gradle_key
         paths:
-          - ~/.gradle
-          - ~/.m2
+        - ~/.gradle
+        - ~/.m2
 
     save_gems_cache: &save_gems_cache
       save_cache:
         key: *gems_key
         paths:
-          - vendor/bundle
+        - vendor/bundle
 
       ## Dependencies
       ruby_dependencies: &ruby_dependencies
@@ -93,12 +93,12 @@ workflows:
   version: 2
   workflow:
     jobs:
-      - test_unit
+    - test_unit
 
-      - deploy_crashlytics:
-        filters:
-          branches:
-            only:
-              - development-fix_circleci
-        requires:
-          - test_unit
+    - deploy_crashlytics:
+      filters:
+        branches:
+          only:
+          - development-fix_circleci
+      requires:
+      - test_unit
