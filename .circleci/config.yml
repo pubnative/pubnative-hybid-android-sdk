@@ -58,34 +58,34 @@ jobs:
   test_unit:
     <<: *android_config
     steps:
-    - checkout
-    - *restore_gradle_cache
-    - *restore_gems_cache
-    - *ruby_dependencies
-    - *android_dependencies
-    - *save_gradle_cache
-    - *save_gems_cache
-    - run:
+      - checkout
+      - *restore_gradle_cache
+      - *restore_gems_cache
+      - *ruby_dependencies
+      - *android_dependencies
+      - *save_gradle_cache
+      - *save_gems_cache
+      - run:
         name: Run unit tests
         command: bundle exec fastlane unit_tests
-    - store_artifacts:
+      - store_artifacts:
         path: app/build/reports/
         destination: /reports/
-    - store_test_results:
+      - store_test_results:
         path: app/build/test-results/
         destination: /test-results/
 
   deploy_crashlytics:
     <<: *android_config
     steps:
-    - checkout
-    - *restore_gradle_cache
-    - *restore_gems_cache
-    - *ruby_dependencies
-    - *android_dependencies
-    - *save_gradle_cache
-    - *save_gems_cache
-    - run:
+      - checkout
+      - *restore_gradle_cache
+      - *restore_gems_cache
+      - *ruby_dependencies
+      - *android_dependencies
+      - *save_gradle_cache
+      - *save_gems_cache
+      - run:
         name: Deploy to Crashlytics Beta
         command: bundle exec fastlane deploy_to_crashlytics
 
