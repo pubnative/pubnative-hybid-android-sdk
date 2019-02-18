@@ -97,4 +97,4 @@ workflows:
 
       - deploy_crashlytics:
         requires:
-        - test_unit
+          - test_unit
