@@ -4,7 +4,7 @@ jobs:
     docker:
     - image: pubnative/android:28_20190129
 
-    working_directory: ~/lite.sdk
+    working_directory: ~/hybid.sdk
 
     environment:
       TERM: dumb
