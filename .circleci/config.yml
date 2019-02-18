@@ -8,7 +8,7 @@ references:
     working_directory: *workspace
 
     docker:
-    - image: pubnative/android:28_20190129
+      - image: pubnative/android:28_20190129
 
     environment:
       TERM: dumb
@@ -93,9 +93,9 @@ workflows:
   version: 2
   workflow:
     jobs:
-    - test_unit
+      - test_unit
 
-    - deploy_crashlytics:
+      - deploy_crashlytics:
         filters:
           branches:
             only:
