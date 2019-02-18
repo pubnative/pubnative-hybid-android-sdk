@@ -96,9 +96,5 @@ workflows:
     - test_unit
 
     - deploy_crashlytics:
-      filters:
-        branches:
-          only:
-          - beta
       requires:
       - test_unit
