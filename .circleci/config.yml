@@ -96,5 +96,12 @@ workflows:
       - test_unit
 
       - deploy_crashlytics:
-        requires:
-          - test_unit
+          filters:
+            branches:
+              only:
+                - master
+                - beta
+                - development
+                - development-fix_circleci
+          requires:
+            - test_unit
