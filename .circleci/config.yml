@@ -8,7 +8,7 @@ references:
     working_directory: *workspace
 
     docker:
-      - image: pubnative/android:28_20190129
+      - image: pubnative/android:28_20190219
 
     environment:
       TERM: dumb
