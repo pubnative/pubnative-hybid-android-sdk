@@ -44,6 +44,12 @@ references:
         - vendor/bundle
 
   ## Dependencies
+
+  bundle_dependencies: &bundle_dependencies
+    run:
+        name: Download and install Bundler
+        command: gem install bundler
+
   ruby_dependencies: &ruby_dependencies
     run:
         name: Download Ruby Dependencies
@@ -61,6 +67,7 @@ jobs:
       - checkout
       - *restore_gradle_cache
       - *restore_gems_cache
+      - *bundle_dependencies
       - *ruby_dependencies
       - *android_dependencies
       - *save_gradle_cache
