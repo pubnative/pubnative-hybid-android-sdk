@@ -43,6 +43,16 @@ references:
       paths:
         - vendor/bundle
 
+  set_locale: &set_locale
+    run:
+      name: Set UTF-8 Locale
+      command: export LC_ALL=en_US.UTF-8
+
+  set_language: &set_language
+    run:
+      name: Set English Language
+      command: export LANG=en_US.UTF-8
+
   ## Dependencies
   ruby_yum: &ruby_yum
     run:
@@ -65,6 +75,8 @@ jobs:
       - *ruby_dependencies
       - *save_gradle_cache
       - *save_gems_cache
+      - *set_locale
+      - *set_language
       - run:
           name: Run unit tests
           command: bundle exec fastlane unit_tests
@@ -85,6 +97,8 @@ jobs:
       - *ruby_dependencies
       - *save_gradle_cache
       - *save_gems_cache
+      - *set_locale
+      - *set_language
       - run:
           name: Deploy to Crashlytics Beta
           command: bundle exec fastlane deploy_to_crashlytics
@@ -99,6 +113,8 @@ jobs:
       - *ruby_dependencies
       - *save_gradle_cache
       - *save_gems_cache
+      - *set_locale
+      - *set_language
       - run:
           name: Publish to Bintray
           command: bundle exec fastlane publish_to_bintray
