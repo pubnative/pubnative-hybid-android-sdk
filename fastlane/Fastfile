@@ -22,6 +22,6 @@ platform :android do
 
     desc "Submit the HyBid SDK libs to Bintray"
         lane :publish_to_bintray do
-            gradle(task: "bintrayUpload")
+            gradle(task: "clean assembleDebug bintrayUpload")
         end
 end
