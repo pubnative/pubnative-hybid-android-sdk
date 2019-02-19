@@ -75,6 +75,20 @@ jobs:
           path: app/build/test-results/
           destination: /test-results/
 
+  send_coverafe_report:
+    <<: *android_config
+    steps:
+      - checkout
+      - *restore_gradle_cache
+      - *restore_gems_cache
+      - *ruby_yum
+      - *ruby_dependencies
+      - *save_gradle_cache
+      - *save_gems_cache
+      - run:
+          name: Send reports to coveralls.io
+          command: ./gradlew cobertura coveralls
+
   deploy_crashlytics:
     <<: *android_config
     steps:
@@ -108,6 +122,10 @@ workflows:
   build_test_deploy:
     jobs:
       - test_unit
+
+      - send_coverafe_report:
+          requires:
+            - test_unit
 
       - deploy_crashlytics:
           filters:
