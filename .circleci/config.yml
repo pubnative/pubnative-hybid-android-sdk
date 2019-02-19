@@ -44,6 +44,10 @@ references:
         - vendor/bundle
 
   ## Dependencies
+  ruby_yum: &ruby_yum
+    run:
+        name: Install Ruby Dev Libs
+        command: yum install -y ruby-devel
 
   ruby_dependencies: &ruby_dependencies
     run:
@@ -62,6 +66,7 @@ jobs:
       - checkout
       - *restore_gradle_cache
       - *restore_gems_cache
+      - *ruby_yum
       - *ruby_dependencies
       ## - *android_dependencies
       - *save_gradle_cache
@@ -82,6 +87,7 @@ jobs:
       - checkout
       - *restore_gradle_cache
       - *restore_gems_cache
+      - *ruby_yum
       - *ruby_dependencies
       ## - *android_dependencies
       - *save_gradle_cache
