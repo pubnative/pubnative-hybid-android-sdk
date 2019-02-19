@@ -117,7 +117,7 @@ jobs:
       - *set_language
       - run:
           name: Publish to Bintray
-          command: bundle exec fastlane publish_to_bintray
+          command: ./gradlew bintrayUpload
 
 workflows:
   version: 2

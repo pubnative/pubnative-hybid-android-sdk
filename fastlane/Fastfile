@@ -19,9 +19,4 @@ platform :android do
         gradle(task: "clean assembleDebug")
         crashlytics
     end
-
-    desc "Submit the HyBid SDK libs to Bintray"
-        lane :publish_to_bintray do
-            gradle(task: "clean assembleDebug bintrayUpload")
-        end
 end
