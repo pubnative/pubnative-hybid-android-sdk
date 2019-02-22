@@ -31,7 +31,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':hybid.sdk')
-    compileOnly 'com.google.android.gms:play-services-ads:11.8.0'
+    compileOnly 'com.google.android.gms:play-services-ads:17.1.3'
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -48,6 +48,7 @@ publishing {
     publications {
 
         aar(MavenPublication) {
+            //artifact("$buildDir/outputs/aar/hybid.adapters.dfp-release.aar")
             groupId project.group
             artifactId project.name
             version version_name

@@ -1,0 +1,22 @@
+default_platform(:android)
+
+platform :android do
+
+    before_all do |lane, options|
+        @build_type = "Debug"
+        if not options.empty?
+            @build_type = options["release"] ? "Release" : "Debug"
+        end
+    end
+
+    desc "Runs all the tests"
+    lane :unit_tests do
+        gradle(task: "test")
+    end
+
+    desc "Submit a new Beta Build to Crashlytics Beta"
+    lane :deploy_to_crashlytics do
+        gradle(task: "clean assembleDebug")
+        crashlytics
+    end
+end
