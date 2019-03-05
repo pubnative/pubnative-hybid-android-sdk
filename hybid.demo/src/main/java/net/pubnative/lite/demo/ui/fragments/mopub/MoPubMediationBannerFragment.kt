@@ -49,7 +49,7 @@ class MoPubMediationBannerFragment : Fragment(), MoPubView.BannerAdListener {
 
     // ---------------- MoPub Banner Listener ---------------------
     override fun onBannerLoaded(banner: MoPubView?) {
-        Log.d(TAG, "onBannerLoaded")
+        Log.d(TAG, "onAdLoaded")
         displayLogs()
     }
 
@@ -68,7 +68,7 @@ class MoPubMediationBannerFragment : Fragment(), MoPubView.BannerAdListener {
     }
 
     override fun onBannerClicked(banner: MoPubView?) {
-        Log.d(TAG, "onBannerClicked")
+        Log.d(TAG, "onAdClicked")
     }
 
     private fun displayLogs() {

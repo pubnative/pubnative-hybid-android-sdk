@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package net.pubnative.lite.sdk.banner.presenter;
+package net.pubnative.lite.sdk.presenter;
 
 import android.view.View;
 
@@ -30,13 +30,13 @@ import net.pubnative.lite.sdk.models.Ad;
  * Created by erosgarciaponte on 08.01.18.
  */
 
-public interface BannerPresenter {
+public interface AdPresenter {
     interface Listener {
-        void onBannerLoaded(BannerPresenter bannerPresenter, View banner);
+        void onAdLoaded(AdPresenter adPresenter, View adView);
 
-        void onBannerClicked(BannerPresenter bannerPresenter);
+        void onAdClicked(AdPresenter adPresenter);
 
-        void onBannerError(BannerPresenter bannerPresenter);
+        void onAdError(AdPresenter adPresenter);
     }
 
     void setListener(Listener listener);

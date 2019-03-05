@@ -146,7 +146,7 @@ class MoPubMediationFragment : Fragment() {
 
     private val bannerListener = object : MoPubView.BannerAdListener {
         override fun onBannerLoaded(banner: MoPubView?) {
-            Log.d(TAG, "onBannerLoaded")
+            Log.d(TAG, "onAdLoaded")
         }
 
         override fun onBannerFailed(banner: MoPubView?, errorCode: MoPubErrorCode?) {
@@ -155,7 +155,7 @@ class MoPubMediationFragment : Fragment() {
         }
 
         override fun onBannerClicked(banner: MoPubView?) {
-            Log.d(TAG, "onBannerClicked")
+            Log.d(TAG, "onAdClicked")
         }
 
         override fun onBannerExpanded(banner: MoPubView?) {

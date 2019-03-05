@@ -32,20 +32,25 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import net.pubnative.lite.sdk.api.RequestManager;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.Logger;
 
-public abstract class PNAdView extends RelativeLayout implements RequestManager.RequestListener {
+public abstract class PNAdView extends RelativeLayout implements RequestManager.RequestListener, AdPresenter.Listener {
 
     public interface Listener {
         void onAdLoaded();
+
         void onAdLoadFailed(Throwable error);
+
         void onAdImpression();
+
         void onAdClick();
     }
 
     private RequestManager mRequestManager;
     protected Listener mListener;
+    private AdPresenter mPresenter;
     protected Ad mAd;
 
     public PNAdView(Context context) {
@@ -97,31 +102,38 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
         stopTracking();
         removeAllViews();
         mAd = null;
+
+        if (mPresenter != null) {
+            mPresenter.destroy();
+            mPresenter = null;
+        }
     }
 
     protected abstract String getLogTag();
 
     abstract RequestManager getRequestManager();
 
-    protected abstract void renderAd();
+    protected abstract AdPresenter createPresenter();
 
-    protected abstract void startTracking();
-
-    protected abstract void stopTracking();
-
-    @Override
-    public void onRequestSuccess(Ad ad) {
-        if (ad == null) {
-            invokeOnLoadFailed(new Exception("Server returned null ad"));
+    protected void renderAd() {
+        mPresenter = createPresenter();
+        if (mPresenter != null) {
+            mPresenter.load();
         } else {
-            mAd = ad;
-            renderAd();
+            invokeOnLoadFailed(new Exception("The server has returned an unsupported ad asset"));
         }
     }
 
-    @Override
-    public void onRequestFail(Throwable throwable) {
-        invokeOnLoadFailed(new Exception(throwable));
+    protected void startTracking() {
+        if (mPresenter != null) {
+            mPresenter.startTracking();
+        }
+    }
+
+    protected void stopTracking() {
+        if (mPresenter != null) {
+            mPresenter.stopTracking();
+        }
     }
 
     protected void invokeOnLoadFinished() {
@@ -158,5 +170,41 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
         invokeOnLoadFinished();
         startTracking();
         invokeOnImpression();
+    }
+
+    //----------------------------- AdPresenter Callbacks --------------------------------------
+    @Override
+    public void onRequestSuccess(Ad ad) {
+        if (ad == null) {
+            invokeOnLoadFailed(new Exception("Server returned null ad"));
+        } else {
+            mAd = ad;
+            renderAd();
+        }
+    }
+
+    @Override
+    public void onRequestFail(Throwable throwable) {
+        invokeOnLoadFailed(new Exception(throwable));
+    }
+
+    //----------------------------- AdPresenter Callbacks --------------------------------------
+    @Override
+    public void onAdLoaded(AdPresenter adPresenter, View banner) {
+        if (banner == null) {
+            invokeOnLoadFailed(new Exception("An error has occurred while rendering the ad"));
+        } else {
+            setupAdView(banner);
+        }
+    }
+
+    @Override
+    public void onAdError(AdPresenter adPresenter) {
+        invokeOnLoadFailed(new Exception("An error has occurred while rendering the ad"));
+    }
+
+    @Override
+    public void onAdClicked(AdPresenter adPresenter) {
+        invokeOnClick();
     }
 }

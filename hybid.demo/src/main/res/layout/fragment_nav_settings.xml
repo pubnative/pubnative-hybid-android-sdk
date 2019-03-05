@@ -8,8 +8,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:elevation="2dp">
+        android:elevation="2dp"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/button_pn_settings"
@@ -18,19 +18,21 @@
             android:background="?selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
-            android:paddingBottom="16dp"
-            android:paddingEnd="16dp"
+            android:fontFamily="@font/roboto"
             android:paddingStart="16dp"
             android:paddingTop="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="16dp"
             android:text="@string/pn_settings"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="?colorPrimaryVariant"
             android:textSize="18sp" />
+
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@android:color/darker_gray"
             android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"/>
+            android:layout_marginEnd="8dp"
+            android:background="@android:color/darker_gray" />
 
         <TextView
             android:id="@+id/button_mopub_settings"
@@ -39,20 +41,21 @@
             android:background="?selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
-            android:paddingBottom="16dp"
-            android:paddingEnd="16dp"
+            android:fontFamily="@font/roboto"
             android:paddingStart="16dp"
             android:paddingTop="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="16dp"
             android:text="@string/mopub_settings"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="?colorPrimaryVariant"
             android:textSize="18sp" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@android:color/darker_gray"
             android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"/>
+            android:layout_marginEnd="8dp"
+            android:background="@android:color/darker_gray" />
 
         <TextView
             android:id="@+id/button_dfp_settings"
@@ -61,19 +64,21 @@
             android:background="?selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
-            android:paddingBottom="16dp"
-            android:paddingEnd="16dp"
+            android:fontFamily="@font/roboto"
             android:paddingStart="16dp"
             android:paddingTop="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="16dp"
             android:text="@string/dfp_settings"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="?colorPrimaryVariant"
             android:textSize="18sp" />
+
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@android:color/darker_gray"
             android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"/>
+            android:layout_marginEnd="8dp"
+            android:background="@android:color/darker_gray" />
 
         <TextView
             android:id="@+id/button_markup"
@@ -82,18 +87,20 @@
             android:background="?selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
-            android:paddingBottom="16dp"
-            android:paddingEnd="16dp"
+            android:fontFamily="@font/roboto"
             android:paddingStart="16dp"
             android:paddingTop="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="16dp"
             android:text="@string/title_markup"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="?colorPrimaryVariant"
             android:textSize="18sp" />
+
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@android:color/darker_gray"
             android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"/>
+            android:layout_marginEnd="8dp"
+            android:background="@android:color/darker_gray" />
     </LinearLayout>
 </ScrollView>

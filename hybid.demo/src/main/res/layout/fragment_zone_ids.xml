@@ -10,9 +10,9 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="20dp">
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="16dp">
 
         <Button
             android:id="@+id/button_add_zone_id"
@@ -25,18 +25,19 @@
             android:textColor="@android:color/white" />
 
         <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
-            android:layout_toLeftOf="@id/button_add_zone_id"
-            android:layout_toStartOf="@id/button_add_zone_id">
+            android:layout_toStartOf="@id/button_add_zone_id"
+            android:layout_toLeftOf="@id/button_add_zone_id">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_zone_id"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/hint_pn_keyword"
+                android:hint="@string/hint_pn_zone_id"
                 android:inputType="number"
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -46,9 +47,9 @@
         android:id="@+id/list_zone_ids"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp" />
 
     <TextView
         android:id="@+id/button_clear_zone_ids"
@@ -58,19 +59,20 @@
         android:layout_marginTop="8dp"
         android:clickable="true"
         android:focusable="true"
+        android:fontFamily="@font/roboto"
         android:gravity="center"
         android:padding="8dp"
         android:text="@string/clear"
-        android:textColor="@android:color/holo_blue_light"
+        android:textColor="?colorSecondary"
         android:textSize="14sp" />
 
     <Button
         android:id="@+id/button_save_pn_zone_ids"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
         android:text="@string/save_pn_zone_ids"
         android:textColor="@android:color/white" />
 

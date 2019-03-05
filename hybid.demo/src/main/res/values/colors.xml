@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">@color/purple</color>
-    <color name="colorPrimaryDark">@color/purple_dark</color>
-    <color name="colorAccent">@color/purple_light</color>
+    <color name="primary">#6e66a5</color>
+    <color name="primary_light">#9e94d7</color>
+    <color name="primary_dark">#403c76</color>
+    <color name="primary_text">#ffffff</color>
 
-    <color name="purple">#72137c</color>
-    <color name="purple_light">#a34eac</color>
-    <color name="purple_dark">#43004f</color>
+    <color name="secondary">#94b6d6</color>
+    <color name="secondary_light">#c6e8ff</color>
+    <color name="secondary_dark">#6486a5</color>
+    <color name="secondary_text">#000000</color>
 </resources>

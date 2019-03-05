@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="net.pubnative.lite.demo.ui.fragments.mopub.MoPubLeaderboardFragment"
-    tools:showIn="@layout/activity_mopub_leaderboard">
+    tools:showIn="@layout/activity_tab">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,12 +15,12 @@
             android:id="@+id/button_load"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="20dp"
             android:text="@string/load"
-            android:textColor="@android:color/white"/>
+            android:textColor="@android:color/white" />
 
         <com.mopub.mobileads.MoPubView
             android:id="@+id/mopub_leaderboard"
@@ -32,11 +32,12 @@
             android:id="@+id/label_error"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:fontFamily="@font/roboto"
             android:text="@string/error"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="?colorPrimaryVariant"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -44,11 +45,12 @@
             android:id="@+id/view_error"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:clickable="true"
             android:focusable="true"
+            android:fontFamily="@font/roboto"
             android:gravity="center"
             android:textColor="@android:color/black"
             android:textSize="16sp" />

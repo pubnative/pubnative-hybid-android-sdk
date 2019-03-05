@@ -111,7 +111,7 @@ class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView
 
     // ---------------- MoPub Banner Listener ---------------------
     override fun onBannerLoaded(banner: MoPubView?) {
-        Log.d(TAG, "onBannerLoaded")
+        Log.d(TAG, "onAdLoaded")
     }
 
     override fun onBannerFailed(banner: MoPubView?, errorCode: MoPubErrorCode?) {
@@ -127,7 +127,7 @@ class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView
     }
 
     override fun onBannerClicked(banner: MoPubView?) {
-        Log.d(TAG, "onBannerClicked")
+        Log.d(TAG, "onAdClicked")
     }
 
     private fun displayLogs() {

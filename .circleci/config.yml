@@ -1,38 +1,148 @@
 version: 2
-jobs:
-  build:
+
+references:
+  workspace: &workspace
+               ~/hybid.sdk
+
+  android_config: &android_config
+    working_directory: *workspace
+
     docker:
       - image: pubnative/android:28_20190219
 
-    working_directory: ~/lite.sdk
-
     environment:
       TERM: dumb
-      _JAVA_OPTIONS: "-Xmx1400m -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:ParallelGCThreads=2 -Djava.util.concurrent.ForkJoinPool.common.parallelism=2"
+      _JAVA_OPTIONS: "-Xmx2048m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+      GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m"'
 
+    ## Cache
+  gradle_key: &gradle_key
+    jars-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "build.gradle" }}-{{ checksum "hybid.sdk/build.gradle" }}
+
+  gems_key: &gems_key
+    gems-{{ checksum "Gemfile.lock" }}
+
+  restore_gradle_cache: &restore_gradle_cache
+    restore_cache:
+      key: *gradle_key
+
+  restore_gems_cache: &restore_gems_cache
+    restore_cache:
+      key: *gems_key
+
+  save_gradle_cache: &save_gradle_cache
+    save_cache:
+      key: *gradle_key
+      paths:
+        - ~/.gradle
+        - ~/.m2
+
+  save_gems_cache: &save_gems_cache
+    save_cache:
+      key: *gems_key
+      paths:
+        - vendor/bundle
+
+  ## Dependencies
+  ruby_yum: &ruby_yum
+    run:
+        name: Install Ruby Dev Libs
+        command: yum install -y ruby-devel
+
+  ruby_dependencies: &ruby_dependencies
+    run:
+        name: Download Ruby Dependencies
+        command: bundle check || bundle install --path vendor/bundle
+
+jobs:
+  test_unit:
+    <<: *android_config
     steps:
       - checkout
-      - restore_cache:
-          key: sdk-{{ .Branch }}
+      - *restore_gradle_cache
+      - *restore_gems_cache
+      - *ruby_yum
+      - *ruby_dependencies
+      - *save_gradle_cache
+      - *save_gems_cache
       - run:
-          name: Run Tests
-          command: ./gradlew clean testDebug
+          name: Run unit tests
+          command: bundle exec fastlane unit_tests
+      - store_artifacts:
+          path: app/build/reports/
+          destination: /reports/
+      - store_test_results:
+          path: app/build/test-results/
+          destination: /test-results/
+
+  send_coverage_report:
+    <<: *android_config
+    steps:
+      - checkout
+      - *restore_gradle_cache
+      - *restore_gems_cache
+      - *ruby_yum
+      - *ruby_dependencies
+      - *save_gradle_cache
+      - *save_gems_cache
       - run:
           name: Send reports to coveralls.io
           command: ./gradlew cobertura coveralls
-      - save_cache:
-          key: sdk-{{ .Branch }}
-          paths:
-            - "/usr/local/android-sdk"
-      - deploy:
-          name: Deploy to Fabric
-          command:
-            if [ "${CIRCLE_BRANCH}" == "master" ] || [ "${CIRCLE_BRANCH}" == "beta" ] || [ "${CIRCLE_BRANCH}" == "development" ] ; then
-              if [ ! -z $IS_BETA ] ; then ./gradlew assembleDebug crashlyticsUploadDistributionDebug ; fi
-            fi
-      - deploy:
-          name: Deploy to Bintray
-          command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ] || [ "${CIRCLE_BRANCH}" == "beta" ] || [ "${CIRCLE_BRANCH}" == "development" ] ; then
-              ./gradlew bintrayUpload
-            fi
+
+  deploy_crashlytics:
+    <<: *android_config
+    steps:
+      - checkout
+      - *restore_gradle_cache
+      - *restore_gems_cache
+      - *ruby_yum
+      - *ruby_dependencies
+      - *save_gradle_cache
+      - *save_gems_cache
+      - run:
+          name: Deploy to Crashlytics Beta
+          command: bundle exec fastlane deploy_to_crashlytics
+
+  publish_bintray:
+    <<: *android_config
+    steps:
+      - checkout
+      - *restore_gradle_cache
+      - *restore_gems_cache
+      - *ruby_yum
+      - *ruby_dependencies
+      - *save_gradle_cache
+      - *save_gems_cache
+      - run:
+          name: Publish to Bintray
+          command: ./gradlew bintrayUpload
+
+workflows:
+  version: 2
+  build_test_deploy:
+    jobs:
+      - test_unit
+
+      - send_coverage_report:
+          requires:
+            - test_unit
+
+      - deploy_crashlytics:
+          filters:
+            branches:
+              only:
+                - master
+                - beta
+                - development
+          requires:
+            - test_unit
+
+      - publish_bintray:
+          filters:
+            branches:
+              only:
+                - master
+                - beta
+                - development
+          requires:
+            - test_unit
