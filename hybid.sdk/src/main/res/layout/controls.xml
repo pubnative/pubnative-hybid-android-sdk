@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000">
+
+    <FrameLayout
+        android:id="@+id/videoPlayerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextureView
+            android:id="@+id/textureView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <net.pubnative.lite.sdk.vpaid.widget.CountDownView
+            android:id="@+id/count_down"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:layout_margin="5dp"/>
+
+        <ImageView
+            android:id="@+id/muteView"
+            android:layout_width="@dimen/mute_view_size"
+            android:layout_height="@dimen/mute_view_size"
+            android:scaleType="center"
+            android:src="@drawable/unmute" />
+
+        <ImageView
+            android:id="@+id/skipView"
+            android:layout_width="@dimen/skip_view_size"
+            android:layout_height="@dimen/skip_view_size"
+            android:layout_gravity="end"
+            android:scaleType="center"
+            android:visibility="gone"
+            android:src="@drawable/skip" />
+
+    </FrameLayout>
+
+    <include layout="@layout/end_card" />
+
+</FrameLayout>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/endCardLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000">
+
+    <ImageView
+        android:id="@+id/endCardView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitCenter" />
+
+    <ImageView
+        android:id="@+id/replayView"
+        android:layout_width="@dimen/replay_view_size"
+        android:layout_height="@dimen/replay_view_size"
+        android:scaleType="center"
+        android:src="@drawable/replay" />
+
+    <ImageView
+        android:id="@+id/closeView"
+        android:layout_width="@dimen/close_view_size"
+        android:layout_height="@dimen/close_view_size"
+        android:layout_gravity="end"
+        android:scaleType="center"
+        android:src="@drawable/close" />
+
+</FrameLayout>
