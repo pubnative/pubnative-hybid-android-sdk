@@ -39,6 +39,8 @@ class VideoAdControllerVast implements VideoAdController {
     private int mSkipTimeMillis;
     private View mAdView;
 
+    private boolean finishedPlaying = false;
+
     VideoAdControllerVast(BaseVideoAdInternal baseAd, AdParams adParams) {
         mBaseAdInternal = baseAd;
         mAdParams = adParams;
@@ -239,6 +241,8 @@ class VideoAdControllerVast implements VideoAdController {
     }
 
     private void skipVideo(boolean skipEvent) {
+        finishedPlaying = true;
+
         if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
             mMediaPlayer.pause();
         }
@@ -368,5 +372,10 @@ class VideoAdControllerVast implements VideoAdController {
             playAd();
             EventTracker.postEventByType(mAdParams.getEvents(), EventConstants.RESUME);
         }
+    }
+
+    @Override
+    public boolean adFinishedPlaying() {
+        return finishedPlaying;
     }
 }

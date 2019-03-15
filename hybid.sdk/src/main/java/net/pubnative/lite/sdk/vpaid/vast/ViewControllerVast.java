@@ -79,10 +79,12 @@ public class ViewControllerVast implements View.OnClickListener {
         @Override
         public void onVisibilityChanged(int visibility) {
             try {
-                if (visibility == View.VISIBLE) {
-                    mAdController.resume();
-                } else {
-                    mAdController.pause();
+                if (!mAdController.adFinishedPlaying()) {
+                    if (visibility == View.VISIBLE) {
+                        mAdController.resume();
+                    } else {
+                        mAdController.pause();
+                    }
                 }
             } catch (Exception e) {
                 Logger.e(LOG_TAG,"ViewControllerVast.createVisibilityListener: Log: " + Log.getStackTraceString(e));

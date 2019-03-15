@@ -2,8 +2,6 @@ package net.pubnative.lite.sdk.vpaid;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.text.TextUtils;
 import android.view.ViewGroup;
 import android.webkit.CookieManager;
@@ -55,6 +53,7 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
     private boolean mIsStarted;
     private String mVastFileContent;
 
+    private boolean mFinishedPlaying = false;
 
     VideoAdControllerVpaid(BaseVideoAdInternal baseAd, AdParams adParams, AdSpotDimensions adSpotDimensions, String vastFileContent) {
         mBaseAdInternal = baseAd;
@@ -195,6 +194,8 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
         }
         mIsWaitingForSkippableState = true;
         mVpaidBridge.getAdSkippableState();
+
+        mFinishedPlaying = true;
     }
 
     @Override
@@ -333,4 +334,8 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
         }
     }
 
+    @Override
+    public boolean adFinishedPlaying() {
+        return mFinishedPlaying;
+    }
 }
