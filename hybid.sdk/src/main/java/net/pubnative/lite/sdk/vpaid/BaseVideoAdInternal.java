@@ -335,5 +335,4 @@ abstract class BaseVideoAdInternal {
             mVideoAdListener.onAdClicked();
         }
     }
-
 }

@@ -13,6 +13,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.vpaid.enums.EventConstants;
 import net.pubnative.lite.sdk.vpaid.enums.VastError;
 import net.pubnative.lite.sdk.vpaid.helpers.ErrorLog;
@@ -228,11 +229,13 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
         Logger.d(LOG_TAG, "Handle external url");
         if (Utils.isOnline()) {
             Context context = mBaseAdInternal.getContext();
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            context.startActivity(intent);
+            UrlHandler urlHandler = new UrlHandler(context);
+            urlHandler.handleUrl(url);
         } else {
             Logger.e(LOG_TAG, "No internet connection");
         }
+
+        mBaseAdInternal.onAdClicked();
     }
 
     @Override

@@ -1,13 +1,12 @@
 package net.pubnative.lite.sdk.vpaid;
 
 import android.content.Context;
-import android.content.Intent;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.text.TextUtils;
 import android.view.View;
 
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.vpaid.enums.EventConstants;
 import net.pubnative.lite.sdk.vpaid.enums.VastError;
 import net.pubnative.lite.sdk.vpaid.helpers.ErrorLog;
@@ -76,10 +75,10 @@ class VideoAdControllerVast implements VideoAdController {
                 try {
                     startMediaPlayer();
                 } catch (IllegalStateException e) {
-                    Logger.e(LOG_TAG,"mediaPlayer IllegalStateException: " + e.getMessage());
+                    Logger.e(LOG_TAG, "mediaPlayer IllegalStateException: " + e.getMessage());
                     tryReInitMediaPlayer();
                 } catch (IOException e) {
-                    Logger.e(LOG_TAG,"mediaPlayer IOException: " + e.getMessage());
+                    Logger.e(LOG_TAG, "mediaPlayer IOException: " + e.getMessage());
                     closeSelf();
                 }
             }
@@ -93,7 +92,7 @@ class VideoAdControllerVast implements VideoAdController {
                 try {
                     startMediaPlayer();
                 } catch (Exception e) {
-                    Logger.e(LOG_TAG,"mediaPlayer re-init: " + e.getMessage());
+                    Logger.e(LOG_TAG, "mediaPlayer re-init: " + e.getMessage());
                     closeSelf();
                 }
             }
@@ -287,17 +286,35 @@ class VideoAdControllerVast implements VideoAdController {
         }
     }
 
+    private String trackVideoClicks() {
+        String clickUrl = mAdParams.getVideoRedirectUrl();
+
+        for (String trackUrl : mAdParams.getVideoClicks()) {
+            EventTracker.post(trackUrl);
+        }
+
+        return clickUrl;
+    }
+
+    private String trackEndCardClicks() {
+        String clickUrl = mAdParams.getEndCardRedirectUrl();
+
+        for (String trackUrl : mAdParams.getEndCardClicks()) {
+            EventTracker.post(trackUrl);
+        }
+
+        return clickUrl;
+    }
+
     @Override
     public void openUrl(String url) {
         if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
-            url = mAdParams.getVideoRedirectUrl();
-            for (String trackUrl : mAdParams.getVideoClicks()) {
-                EventTracker.post(trackUrl);
-            }
+            url = trackVideoClicks();
         } else {
-            url = mAdParams.getEndCardRedirectUrl();
-            for (String trackUrl : mAdParams.getEndCardClicks()) {
-                EventTracker.post(trackUrl);
+            url = trackEndCardClicks();
+
+            if (url == null) {
+                url = trackVideoClicks();
             }
         }
 
@@ -307,11 +324,13 @@ class VideoAdControllerVast implements VideoAdController {
         Logger.d(LOG_TAG, "Handle external url");
         if (Utils.isOnline()) {
             Context context = mBaseAdInternal.getContext();
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            context.startActivity(intent);
+            UrlHandler urlHandler = new UrlHandler(context);
+            urlHandler.handleUrl(url);
         } else {
             Logger.e(LOG_TAG, "No internet connection");
         }
+
+        mBaseAdInternal.onAdClicked();
     }
 
     public void closeSelf() {
