@@ -30,9 +30,6 @@ import android.widget.RelativeLayout;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.CheckUtils;
-import net.pubnative.lite.sdk.vast.VASTParser;
-import net.pubnative.lite.sdk.vast.VASTPlayer;
-import net.pubnative.lite.sdk.vast.model.VASTModel;
 import net.pubnative.lite.sdk.vpaid.AdBanner;
 import net.pubnative.lite.sdk.vpaid.AdListener;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
@@ -90,12 +87,12 @@ public class VastMRectPresenter implements AdPresenter {
     @Override
     public void startTracking() {
         mVideoAd.show();
-        mVideoAd.resume();
+        //mVideoAd.resume();
     }
 
     @Override
     public void stopTracking() {
-        mVideoAd.pause();
+        //mVideoAd.pause();
         mVideoAd.dismiss();
     }
 
