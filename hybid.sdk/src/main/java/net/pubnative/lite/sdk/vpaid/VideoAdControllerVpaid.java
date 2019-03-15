@@ -31,7 +31,7 @@ import net.pubnative.lite.sdk.vpaid.utils.Utils;
 class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
 
     private static final String LOG_TAG = VideoAdControllerVpaid.class.getSimpleName();
-    private static final String BASE_URL = "http://loopme.me";
+    private static final String BASE_URL = "http://pubnative.net";
     private static final String ENVIRONMENT_VARS = "{ " +
             "slot: document.getElementById('slot'), " +
             "videoSlot: document.getElementById('video-slot'), " +
