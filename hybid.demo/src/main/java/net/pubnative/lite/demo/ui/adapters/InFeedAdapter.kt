@@ -5,21 +5,24 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.models.Quote
+import net.pubnative.lite.demo.ui.listeners.InFeedAdListener
 import net.pubnative.lite.demo.ui.viewholders.HyBidMRectViewHolder
 import net.pubnative.lite.demo.ui.viewholders.SampleTextViewHolder
 import net.pubnative.lite.demo.util.SampleQuotes
 
-class InFeedAdapter(val zoneId: String) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class InFeedAdapter(val zoneId: String, val adListener: InFeedAdListener) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val TYPE_TEXT = 1
     private val TYPE_MRECT = 2
 
     private val list: List<Quote> = SampleQuotes.list
 
+    private var shouldLoadAd: Boolean = false
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
             TYPE_MRECT ->
-                HyBidMRectViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_hybid_mrect, parent, false))
+                HyBidMRectViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_hybid_mrect, parent, false), adListener)
             else ->
                 SampleTextViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_sample_text, parent, false))
         }
@@ -27,7 +30,7 @@ class InFeedAdapter(val zoneId: String) : RecyclerView.Adapter<RecyclerView.View
 
     override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
         when (holder) {
-            is HyBidMRectViewHolder -> holder.bind(zoneId)
+            is HyBidMRectViewHolder -> holder.bind(zoneId, shouldLoadAd)
             else -> {
                 holder as SampleTextViewHolder
                 holder.bind(list[position])
@@ -47,5 +50,6 @@ class InFeedAdapter(val zoneId: String) : RecyclerView.Adapter<RecyclerView.View
 
     fun loadWithAd() {
         notifyDataSetChanged()
+        shouldLoadAd = true
     }
 }

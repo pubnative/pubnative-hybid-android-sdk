@@ -37,6 +37,7 @@ import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.ui.adapters.InFeedAdapter
+import net.pubnative.lite.demo.ui.listeners.InFeedAdListener
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.views.HyBidMRectAdView
 import net.pubnative.lite.sdk.views.PNAdView
@@ -44,7 +45,7 @@ import net.pubnative.lite.sdk.views.PNAdView
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class HyBidMRectFragment : Fragment(), PNAdView.Listener {
+class HyBidMRectFragment : Fragment(), InFeedAdListener {
     val TAG = HyBidMRectFragment::class.java.simpleName
 
     private var zoneId: String? = null
@@ -66,7 +67,7 @@ class HyBidMRectFragment : Fragment(), PNAdView.Listener {
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
-        adapter = InFeedAdapter(zoneId!!)
+        adapter = InFeedAdapter(zoneId!!, this)
 
         recyclerView.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
         recyclerView.itemAnimator = DefaultItemAnimator()
@@ -90,24 +91,15 @@ class HyBidMRectFragment : Fragment(), PNAdView.Listener {
         adapter.loadWithAd()
     }
 
-    // --------------- PNAdView Listener --------------------
-    override fun onAdLoaded() {
-        Log.d(TAG, "onAdLoaded")
+    // --------------- InFeedAdListener Listener --------------------
+
+    override fun onInFeedAdLoaded() {
         displayLogs()
     }
 
-    override fun onAdLoadFailed(error: Throwable?) {
-        Log.e(TAG, "onAdLoadFailed", error)
+    override fun onInFeedAdLoadError(error: Throwable?) {
         errorView.text = error?.message
         displayLogs()
-    }
-
-    override fun onAdImpression() {
-        Log.d(TAG, "onAdImpression")
-    }
-
-    override fun onAdClick() {
-        Log.d(TAG, "onAdClick")
     }
 
     private fun displayLogs() {
