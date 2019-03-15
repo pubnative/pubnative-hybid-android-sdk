@@ -55,6 +55,8 @@ public class VideoAd extends BaseVideoAd {
 
                     getAdController().buildVideoAdView(mBannerView);
                     getAdController().playAd();
+                    getAdController().toggleMute();
+
 
                     if (mBannerView.getVisibility() != View.VISIBLE) {
                         mBannerView.setVisibility(View.VISIBLE);
@@ -105,7 +107,7 @@ public class VideoAd extends BaseVideoAd {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Logger.d(LOG_TAG, "Banner will be dismissed");
+                Logger.d(LOG_TAG, "Video will be dismissed");
                 if (getAdState() == AdState.SHOWING) {
                     if (mBannerView != null) {
                         mBannerView.setVisibility(View.GONE);

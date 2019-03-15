@@ -16,6 +16,8 @@ public interface VideoAdController {
 
     void openUrl(String url);
 
+    void toggleMute();
+
     void setVolume(boolean mute);
 
     void skipVideo();

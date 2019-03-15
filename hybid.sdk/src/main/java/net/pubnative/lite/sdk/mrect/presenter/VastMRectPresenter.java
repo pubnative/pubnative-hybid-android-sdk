@@ -23,6 +23,7 @@
 package net.pubnative.lite.sdk.mrect.presenter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
@@ -87,12 +88,10 @@ public class VastMRectPresenter implements AdPresenter {
     @Override
     public void startTracking() {
         mVideoAd.show();
-        //mVideoAd.resume();
     }
 
     @Override
     public void stopTracking() {
-        //mVideoAd.pause();
         mVideoAd.dismiss();
     }
 
@@ -100,6 +99,8 @@ public class VastMRectPresenter implements AdPresenter {
         RelativeLayout container = new RelativeLayout(mContext);
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+
+        container.setBackgroundColor(Color.BLACK);
 
         container.addView(mVideoPlayer, layoutParams);
 

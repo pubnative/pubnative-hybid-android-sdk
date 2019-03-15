@@ -197,7 +197,7 @@ public class ViewControllerVast implements View.OnClickListener {
         mAdController.playAd();
     }
 
-    private void muteVideo() {
+    public void muteVideo() {
         mMuteState = !mMuteState;
         mAdController.setVolume(mMuteState);
         if (mMuteState) {

@@ -141,6 +141,11 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
     }
 
     @Override
+    public void toggleMute() {
+
+    }
+
+    @Override
     public void setVolume(boolean mute) {
     }
 

@@ -248,13 +248,20 @@ class VideoAdControllerVast implements VideoAdController {
             mTimerWithPause = null;
         }
         if (TextUtils.isEmpty(mImageUri)) {
-            closeSelf();
+            if (skipEvent) {
+                closeSelf();
+            }
         } else {
             mViewControllerVast.showEndCard(mImageUri);
         }
         if (skipEvent) {
             EventTracker.postEventByType(mAdParams.getEvents(), EventConstants.SKIP);
         }
+    }
+
+    @Override
+    public void toggleMute() {
+        mViewControllerVast.muteVideo();
     }
 
     @Override
