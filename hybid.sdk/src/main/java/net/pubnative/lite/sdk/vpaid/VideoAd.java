@@ -8,13 +8,13 @@ import net.pubnative.lite.sdk.vpaid.enums.AdFormat;
 import net.pubnative.lite.sdk.vpaid.enums.AdState;
 import net.pubnative.lite.sdk.vpaid.models.AdSpotDimensions;
 
-public class AdBanner extends BaseAd {
+public class VideoAd extends BaseVideoAd {
 
-    private static final String LOG_TAG = AdBanner.class.getSimpleName();
+    private static final String LOG_TAG = VideoAd.class.getSimpleName();
 
-    private volatile VideoBannerView mBannerView;
+    private volatile VideoAdView mBannerView;
 
-    public AdBanner(Context context, String data) {
+    public VideoAd(Context context, String data) {
         super(context, data);
     }
 
@@ -31,7 +31,7 @@ public class AdBanner extends BaseAd {
         return null;
     }
 
-    public void bindView(VideoBannerView bannerView) {
+    public void bindView(VideoAdView bannerView) {
         if (bannerView != null) {
             Logger.d(LOG_TAG, "Bind view (visibility: " + bannerView.getVisibility() + ")");
             mBannerView = bannerView;

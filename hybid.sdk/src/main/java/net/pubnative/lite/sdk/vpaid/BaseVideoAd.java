@@ -1,7 +1,6 @@
 package net.pubnative.lite.sdk.vpaid;
 
 import android.content.Context;
-import android.os.Build;
 
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.enums.AdState;
@@ -11,11 +10,11 @@ import net.pubnative.lite.sdk.vpaid.utils.FileUtils;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
 
 @SuppressWarnings("unused")
-abstract class BaseAd extends BaseAdInternal {
+abstract class BaseVideoAd extends BaseVideoAdInternal {
 
-    private static final String LOG_TAG = BaseAd.class.getSimpleName();
+    private static final String LOG_TAG = BaseVideoAd.class.getSimpleName();
 
-    BaseAd(Context context, String appKey) {
+    BaseVideoAd(Context context, String appKey) {
         super(context, appKey);
     }
 
@@ -26,7 +25,7 @@ abstract class BaseAd extends BaseAdInternal {
 
     /**
      * Indicates whether ad content was loaded successfully and ready to be displayed.
-     * After you initialized a `AdInterstitial`/`AdBanner` object and triggered the `load` method,
+     * After you initialized a `AdInterstitial`/`VideoAd` object and triggered the `load` method,
      * this property will be set to TRUE on it's successful completion.
      * It is set to FALSE when loaded ad content has expired or already was presented,
      * in this case it requires next `load` method triggering
@@ -36,7 +35,7 @@ abstract class BaseAd extends BaseAdInternal {
     }
 
     /**
-     * Indicates whether `AdInterstitial`/`AdBanner` currently presented on screen.
+     * Indicates whether `AdInterstitial`/`VideoAd` currently presented on screen.
      * Ad status will be set to `AdState.SHOWING` after trigger `show` method
      *
      * @return true - if ad presented on screen
@@ -47,7 +46,7 @@ abstract class BaseAd extends BaseAdInternal {
     }
 
     /**
-     * Indicates whether `AdInterstitial`/`AdBanner` in "loading ad content" process.
+     * Indicates whether `AdInterstitial`/`VideoAd` in "loading ad content" process.
      * Ad status will be set to `AdState.LOADING` after trigger `load` method
      *
      * @return true - if ad is loading now
@@ -58,10 +57,10 @@ abstract class BaseAd extends BaseAdInternal {
     }
 
     /**
-     * @param adListener provides call back methods for AdSpot lifecycle
+     * @param videoAdListener provides call back methods for AdSpot lifecycle
      */
-    public void setAdListener(AdListener adListener) {
-        super.setAdListener(adListener);
+    public void setAdListener(VideoAdListener videoAdListener) {
+        super.setAdListener(videoAdListener);
     }
 
     /**

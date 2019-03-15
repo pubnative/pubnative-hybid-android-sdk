@@ -13,8 +13,8 @@ import android.widget.ImageView;
 
 import net.pubnative.lite.sdk.R;
 import net.pubnative.lite.sdk.utils.Logger;
-import net.pubnative.lite.sdk.vpaid.AdController;
-import net.pubnative.lite.sdk.vpaid.VideoBannerView;
+import net.pubnative.lite.sdk.vpaid.VideoAdController;
+import net.pubnative.lite.sdk.vpaid.VideoAdView;
 import net.pubnative.lite.sdk.vpaid.utils.ImageUtils;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
 import net.pubnative.lite.sdk.vpaid.widget.CountDownView;
@@ -22,9 +22,9 @@ import net.pubnative.lite.sdk.vpaid.widget.CountDownView;
 public class ViewControllerVast implements View.OnClickListener {
     private final static String LOG_TAG = ViewControllerVast.class.getSimpleName();
 
-    private final AdController mAdController;
+    private final VideoAdController mAdController;
 
-    private VideoBannerView mBannerView;
+    private VideoAdView mBannerView;
     private CountDownView mCountdownView;
     private View mVideoPlayerLayout;
     private ImageView mEndCardView;
@@ -35,11 +35,11 @@ public class ViewControllerVast implements View.OnClickListener {
     private View mSkipView;
     private ImageView mMuteView;
 
-    public ViewControllerVast(AdController adController) {
+    public ViewControllerVast(VideoAdController adController) {
         mAdController = adController;
     }
 
-    public void buildVideoAdView(VideoBannerView bannerView) {
+    public void buildVideoAdView(VideoAdView bannerView) {
         Context context = bannerView.getContext();
         mBannerView = bannerView;
         bannerView.setVisibilityListener(mCreateVisibilityListener);
@@ -75,7 +75,7 @@ public class ViewControllerVast implements View.OnClickListener {
         bannerView.addView(mControlsLayout);
     }
 
-    private VideoBannerView.VisibilityListener mCreateVisibilityListener = new VideoBannerView.VisibilityListener() {
+    private VideoAdView.VisibilityListener mCreateVisibilityListener = new VideoAdView.VisibilityListener() {
         @Override
         public void onVisibilityChanged(int visibility) {
             try {

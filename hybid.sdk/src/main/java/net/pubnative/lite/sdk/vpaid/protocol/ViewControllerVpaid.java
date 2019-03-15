@@ -10,23 +10,23 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import net.pubnative.lite.sdk.R;
-import net.pubnative.lite.sdk.vpaid.AdController;
-import net.pubnative.lite.sdk.vpaid.VideoBannerView;
+import net.pubnative.lite.sdk.vpaid.VideoAdController;
+import net.pubnative.lite.sdk.vpaid.VideoAdView;
 import net.pubnative.lite.sdk.vpaid.utils.ImageUtils;
 
 public class ViewControllerVpaid {
 
-    private final AdController mAdController;
+    private final VideoAdController mAdController;
 
     private WebView mWebView;
     private View mEndCardLayout;
     private ImageView mEndCardView;
 
-    public ViewControllerVpaid(AdController adController) {
+    public ViewControllerVpaid(VideoAdController adController) {
         mAdController = adController;
     }
 
-    public void buildVideoAdView(VideoBannerView bannerView, WebView webView) {
+    public void buildVideoAdView(VideoAdView bannerView, WebView webView) {
         Context context = bannerView.getContext();
         mWebView = webView;
 

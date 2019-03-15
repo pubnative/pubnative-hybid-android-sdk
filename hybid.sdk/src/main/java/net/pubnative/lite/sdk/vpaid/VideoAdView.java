@@ -5,7 +5,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
 
-public class VideoBannerView extends FrameLayout {
+public class VideoAdView extends FrameLayout {
 
     private VisibilityListener mVisibilityListener;
 
@@ -13,15 +13,15 @@ public class VideoBannerView extends FrameLayout {
         void onVisibilityChanged(int visibility);
     }
 
-    public VideoBannerView(Context context) {
+    public VideoAdView(Context context) {
         super(context);
     }
 
-    public VideoBannerView(Context context, AttributeSet attrs) {
+    public VideoAdView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public VideoBannerView(Context context, AttributeSet attrs, int defStyle) {
+    public VideoAdView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
 

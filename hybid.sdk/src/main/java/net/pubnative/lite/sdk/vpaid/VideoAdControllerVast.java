@@ -23,14 +23,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-class AdControllerVast implements AdController {
+class VideoAdControllerVast implements VideoAdController {
 
-    private static final String LOG_TAG = AdControllerVast.class.getSimpleName();
+    private static final String LOG_TAG = VideoAdControllerVast.class.getSimpleName();
     private static final int DELAY_UNTIL_EXECUTE = 100;
 
     private final ViewControllerVast mViewControllerVast;
     private final AdParams mAdParams;
-    private final BaseAdInternal mBaseAdInternal;
+    private final BaseVideoAdInternal mBaseAdInternal;
 
     private List<TrackingEvent> mTrackingEventsList = new ArrayList<>();
     private MediaPlayer mMediaPlayer;
@@ -40,7 +40,7 @@ class AdControllerVast implements AdController {
     private int mSkipTimeMillis;
     private View mAdView;
 
-    AdControllerVast(BaseAdInternal baseAd, AdParams adParams) {
+    VideoAdControllerVast(BaseVideoAdInternal baseAd, AdParams adParams) {
         mBaseAdInternal = baseAd;
         mAdParams = adParams;
         mViewControllerVast = new ViewControllerVast(this);
@@ -62,7 +62,7 @@ class AdControllerVast implements AdController {
     }
 
     @Override
-    public void buildVideoAdView(VideoBannerView bannerView) {
+    public void buildVideoAdView(VideoAdView bannerView) {
         mViewControllerVast.buildVideoAdView(bannerView);
         mAdView = bannerView;
     }

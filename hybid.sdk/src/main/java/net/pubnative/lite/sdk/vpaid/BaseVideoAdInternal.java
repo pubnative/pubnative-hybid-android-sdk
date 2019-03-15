@@ -18,9 +18,9 @@ import net.pubnative.lite.sdk.vpaid.utils.Utils;
 
 import java.util.concurrent.Future;
 
-abstract class BaseAdInternal {
+abstract class BaseVideoAdInternal {
 
-    private static final String LOG_TAG = BaseAdInternal.class.getSimpleName();
+    private static final String LOG_TAG = BaseVideoAdInternal.class.getSimpleName();
 
     private final Context mContext;
     private final AssetsLoader mAssetsLoader;
@@ -28,16 +28,16 @@ abstract class BaseAdInternal {
 
     private int mAdState;
     private boolean mIsReady;
-    private AdListener mAdListener;
+    private VideoAdListener mVideoAdListener;
     private long mAdLoadingStartTime;
     private SimpleTimer mExpirationTimer;
-    private AdController mAdController;
+    private VideoAdController mAdController;
     private SimpleTimer mFetcherTimer;
     private SimpleTimer mPrepareTimer;
     private String mVastData;
     private Future mFuture;
 
-    BaseAdInternal(Context context, String data) {
+    BaseVideoAdInternal(Context context, String data) {
         if (context == null || TextUtils.isEmpty(data)) {
             throw new IllegalArgumentException("Wrong parameters");
         }
@@ -58,11 +58,11 @@ abstract class BaseAdInternal {
         return mContext;
     }
 
-    AdListener getAdListener() {
-        return mAdListener;
+    VideoAdListener getAdListener() {
+        return mVideoAdListener;
     }
 
-    AdController getAdController() {
+    VideoAdController getAdController() {
         return mAdController;
     }
 
@@ -78,8 +78,8 @@ abstract class BaseAdInternal {
         return mIsReady;
     }
 
-    void setAdListener(AdListener adListener) {
-        mAdListener = adListener;
+    void setAdListener(VideoAdListener videoAdListener) {
+        mVideoAdListener = videoAdListener;
     }
 
     void initAdLoadingStartTime() {
@@ -133,7 +133,7 @@ abstract class BaseAdInternal {
             @Override
             public void onFinish() {
                 mPrepareTimer = null;
-                if (mAdController != null && mAdController instanceof AdControllerVpaid) {
+                if (mAdController != null && mAdController instanceof VideoAdControllerVpaid) {
                     ErrorLog.postError(VastError.FILE_NOT_FOUND);
                     onAdLoadFail(new PlayerInfo("Problem with js file"));
                 }
@@ -208,9 +208,9 @@ abstract class BaseAdInternal {
 
     private void prepare(AdParams adParams, String vastFileContent) {
         if (adParams.isVpaid()) {
-            mAdController = new AdControllerVpaid(this, adParams, getAdSpotDimensions(), vastFileContent);
+            mAdController = new VideoAdControllerVpaid(this, adParams, getAdSpotDimensions(), vastFileContent);
         } else {
-            mAdController = new AdControllerVast(this, adParams);
+            mAdController = new VideoAdControllerVast(this, adParams);
         }
         mAssetsLoader.load(adParams, mContext, createAssetsLoadListener());
     }
@@ -222,7 +222,7 @@ abstract class BaseAdInternal {
                 if (mAdController == null) {
                     onAdLoadFailInternal(new PlayerInfo("Error during video loading"));
                     ErrorLog.postError(VastError.UNDEFINED);
-                    Logger.d(LOG_TAG, "AdController == null, after onAssetsLoaded success");
+                    Logger.d(LOG_TAG, "VideoAdController == null, after onAssetsLoaded success");
                     return;
                 }
                 mAdController.setVideoFilePath(videoFilePath);
@@ -243,8 +243,8 @@ abstract class BaseAdInternal {
         };
     }
 
-    private AdController.OnPreparedListener createOnPrepareListener() {
-        return new AdController.OnPreparedListener() {
+    private VideoAdController.OnPreparedListener createOnPrepareListener() {
+        return new VideoAdController.OnPreparedListener() {
             @Override
             public void onPrepared() {
                 if (getAdState() == AdState.SHOWING) {
@@ -281,8 +281,8 @@ abstract class BaseAdInternal {
         mIsReady = false;
         mAdState = AdState.NONE;
         mAssetsLoader.breakLoading();
-        if (mAdListener != null) {
-            mAdListener.onAdExpired();
+        if (mVideoAdListener != null) {
+            mVideoAdListener.onAdExpired();
         }
     }
 
@@ -291,8 +291,8 @@ abstract class BaseAdInternal {
         mAdState = AdState.NONE;
         mIsReady = false;
         stopFetcherTimer();
-        if (mAdListener != null) {
-            mAdListener.onAdLoadFail(issue);
+        if (mVideoAdListener != null) {
+            mVideoAdListener.onAdLoadFail(issue);
         } else {
             Logger.w(LOG_TAG, "Warning: empty listener");
         }
@@ -308,8 +308,8 @@ abstract class BaseAdInternal {
         mIsReady = true;
         mAdState = AdState.NONE;
         stopFetcherTimer();
-        if (mAdListener != null) {
-            mAdListener.onAdLoadSuccess();
+        if (mVideoAdListener != null) {
+            mVideoAdListener.onAdLoadSuccess();
         } else {
             Logger.w(LOG_TAG, "Warning: empty listener");
         }
@@ -317,22 +317,22 @@ abstract class BaseAdInternal {
 
     void onAdDidReachEnd() {
         Logger.d(LOG_TAG, "Video reach end");
-        if (mAdListener != null) {
-            mAdListener.onAdDidReachEnd();
+        if (mVideoAdListener != null) {
+            mVideoAdListener.onAdDidReachEnd();
         }
     }
 
     void onAdLeaveApp() {
         Logger.d(LOG_TAG, "adLeaveApp");
-        if (mAdListener != null) {
-            mAdListener.onLeaveApp();
+        if (mVideoAdListener != null) {
+            mVideoAdListener.onLeaveApp();
         }
     }
 
     void onAdClicked() {
         Logger.d(LOG_TAG, "Ad received click event");
-        if (mAdListener != null) {
-            mAdListener.onAdClicked();
+        if (mVideoAdListener != null) {
+            mVideoAdListener.onAdClicked();
         }
     }
 

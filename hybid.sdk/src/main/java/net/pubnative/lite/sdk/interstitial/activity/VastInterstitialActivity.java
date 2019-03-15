@@ -4,25 +4,25 @@ import android.os.Bundle;
 import android.view.View;
 
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
-import net.pubnative.lite.sdk.vpaid.AdBanner;
-import net.pubnative.lite.sdk.vpaid.AdListener;
+import net.pubnative.lite.sdk.vpaid.VideoAd;
+import net.pubnative.lite.sdk.vpaid.VideoAdListener;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
-import net.pubnative.lite.sdk.vpaid.VideoBannerView;
+import net.pubnative.lite.sdk.vpaid.VideoAdView;
 
 public class VastInterstitialActivity extends HyBidInterstitialActivity {
     private boolean mReady = false;
 
-    private VideoBannerView mVideoPlayer;
-    private AdBanner mVideoAd;
+    private VideoAdView mVideoPlayer;
+    private VideoAd mVideoAd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         if (getAd() != null) {
-            mVideoAd = new AdBanner(this, getAd().getVast());
+            mVideoAd = new VideoAd(this, getAd().getVast());
             mVideoAd.bindView(mVideoPlayer);
-            mVideoAd.setAdListener(mAdListener);
+            mVideoAd.setAdListener(mVideoAdListener);
             mVideoAd.load();
         }
     }
@@ -30,7 +30,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
     @Override
     public View getAdView() {
         if (getAd() != null) {
-            mVideoPlayer = new VideoBannerView(this);
+            mVideoPlayer = new VideoAdView(this);
             return mVideoPlayer;
         }
 
@@ -62,7 +62,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
         }
     }
 
-    private final AdListener mAdListener = new AdListener() {
+    private final VideoAdListener mVideoAdListener = new VideoAdListener() {
         @Override
         public void onAdLoadSuccess() {
             if (!mReady) {

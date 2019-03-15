@@ -28,9 +28,9 @@ import net.pubnative.lite.sdk.vpaid.protocol.VpaidBridgeImpl;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
 
-class AdControllerVpaid implements AdController, BridgeEventHandler {
+class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
 
-    private static final String LOG_TAG = AdControllerVpaid.class.getSimpleName();
+    private static final String LOG_TAG = VideoAdControllerVpaid.class.getSimpleName();
     private static final String BASE_URL = "http://loopme.me";
     private static final String ENVIRONMENT_VARS = "{ " +
             "slot: document.getElementById('slot'), " +
@@ -43,7 +43,7 @@ class AdControllerVpaid implements AdController, BridgeEventHandler {
     private final AdSpotDimensions mAdSpotDimensions;
     private final VpaidBridge mVpaidBridge;
     private final AdParams mAdParams;
-    private final BaseAdInternal mBaseAdInternal;
+    private final BaseVideoAdInternal mBaseAdInternal;
     private final ViewControllerVpaid mViewControllerVpaid;
 
     private OnPreparedListener mOnPreparedListener;
@@ -55,7 +55,7 @@ class AdControllerVpaid implements AdController, BridgeEventHandler {
     private String mVastFileContent;
 
 
-    AdControllerVpaid(BaseAdInternal baseAd, AdParams adParams, AdSpotDimensions adSpotDimensions, String vastFileContent) {
+    VideoAdControllerVpaid(BaseVideoAdInternal baseAd, AdParams adParams, AdSpotDimensions adSpotDimensions, String vastFileContent) {
         mBaseAdInternal = baseAd;
         mAdParams = adParams;
         mAdSpotDimensions = adSpotDimensions;
@@ -64,9 +64,9 @@ class AdControllerVpaid implements AdController, BridgeEventHandler {
         mViewControllerVpaid = new ViewControllerVpaid(this);
     }
 
-    //region AdController methods
+    //region VideoAdController methods
     @Override
-    public void prepare(AdController.OnPreparedListener listener) {
+    public void prepare(VideoAdController.OnPreparedListener listener) {
         mOnPreparedListener = listener;
         try {
             initWebView();
@@ -88,7 +88,7 @@ class AdControllerVpaid implements AdController, BridgeEventHandler {
     }
 
     @Override
-    public void buildVideoAdView(VideoBannerView bannerView) {
+    public void buildVideoAdView(VideoAdView bannerView) {
         mViewControllerVpaid.buildVideoAdView(bannerView, mWebView);
     }
 

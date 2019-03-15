@@ -1,6 +1,6 @@
 package net.pubnative.lite.sdk.vpaid;
 
-public abstract class AdListener {
+public abstract class VideoAdListener {
 
     /**
      * Triggered when the AdSpot has successfully loaded the ad content

@@ -1,6 +1,6 @@
 package net.pubnative.lite.sdk.vpaid;
 
-public interface AdController {
+public interface VideoAdController {
 
     interface OnPreparedListener {
         void onPrepared();
@@ -12,7 +12,7 @@ public interface AdController {
 
     void setEndCardFilePath(String filePath);
 
-    void buildVideoAdView(VideoBannerView bannerView);
+    void buildVideoAdView(VideoAdView bannerView);
 
     void openUrl(String url);
 

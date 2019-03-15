@@ -30,10 +30,10 @@ import android.widget.RelativeLayout;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.CheckUtils;
-import net.pubnative.lite.sdk.vpaid.AdBanner;
-import net.pubnative.lite.sdk.vpaid.AdListener;
+import net.pubnative.lite.sdk.vpaid.VideoAd;
+import net.pubnative.lite.sdk.vpaid.VideoAdListener;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
-import net.pubnative.lite.sdk.vpaid.VideoBannerView;
+import net.pubnative.lite.sdk.vpaid.VideoAdView;
 
 public class VastMRectPresenter implements AdPresenter {
     private final Context mContext;
@@ -43,8 +43,8 @@ public class VastMRectPresenter implements AdPresenter {
     private boolean mIsDestroyed;
     private boolean mLoaded = false;
 
-    private VideoBannerView mVideoPlayer;
-    private AdBanner mVideoAd;
+    private VideoAdView mVideoPlayer;
+    private VideoAd mVideoAd;
 
     public VastMRectPresenter(Context context, Ad ad) {
         mContext = context;
@@ -67,10 +67,10 @@ public class VastMRectPresenter implements AdPresenter {
             return;
         }
 
-        mVideoAd = new AdBanner(mContext, mAd.getVast());
-        mVideoPlayer = new VideoBannerView(mContext);
+        mVideoAd = new VideoAd(mContext, mAd.getVast());
+        mVideoPlayer = new VideoAdView(mContext);
         mVideoAd.bindView(mVideoPlayer);
-        mVideoAd.setAdListener(mAdListener);
+        mVideoAd.setAdListener(mVideoAdListener);
 
         mVideoAd.load();
     }
@@ -112,7 +112,7 @@ public class VastMRectPresenter implements AdPresenter {
         return container;
     }
 
-    private final AdListener mAdListener = new AdListener() {
+    private final VideoAdListener mVideoAdListener = new VideoAdListener() {
         @Override
         public void onAdLoadSuccess() {
             if (mIsDestroyed) {
