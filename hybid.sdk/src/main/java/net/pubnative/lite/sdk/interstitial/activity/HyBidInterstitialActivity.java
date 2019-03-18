@@ -63,7 +63,7 @@ public abstract class HyBidInterstitialActivity extends Activity {
                 params.gravity = Gravity.CENTER;
 
                 mCloseableContainer.addView(adView, params);
-                mCloseableContainer.setBackgroundColor(Color.BLACK);
+                mCloseableContainer.setBackgroundColor(Color.WHITE);
                 setContentView(mCloseableContainer);
             } else {
                 finish();
