@@ -23,6 +23,7 @@
 package net.pubnative.lite.sdk.mrect.presenter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
@@ -30,18 +31,21 @@ import android.widget.RelativeLayout;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.CheckUtils;
-import net.pubnative.lite.sdk.vast.VASTParser;
-import net.pubnative.lite.sdk.vast.VASTPlayer;
-import net.pubnative.lite.sdk.vast.model.VASTModel;
+import net.pubnative.lite.sdk.vpaid.VideoAd;
+import net.pubnative.lite.sdk.vpaid.VideoAdListener;
+import net.pubnative.lite.sdk.vpaid.PlayerInfo;
+import net.pubnative.lite.sdk.vpaid.VideoAdView;
 
-public class VastMRectPresenter implements AdPresenter, VASTPlayer.Listener {
+public class VastMRectPresenter implements AdPresenter {
     private final Context mContext;
     private final Ad mAd;
 
     private AdPresenter.Listener mListener;
-    private VASTPlayer mPlayer;
     private boolean mIsDestroyed;
     private boolean mLoaded = false;
+
+    private VideoAdView mVideoPlayer;
+    private VideoAd mVideoAd;
 
     public VastMRectPresenter(Context context, Ad ad) {
         mContext = context;
@@ -64,28 +68,18 @@ public class VastMRectPresenter implements AdPresenter, VASTPlayer.Listener {
             return;
         }
 
-        mPlayer = new VASTPlayer(mContext);
-        mPlayer.setListener(this);
+        mVideoAd = new VideoAd(mContext, mAd.getVast());
+        mVideoPlayer = new VideoAdView(mContext);
+        mVideoAd.bindView(mVideoPlayer);
+        mVideoAd.setAdListener(mVideoAdListener);
 
-        new VASTParser(mContext).setListener(new VASTParser.Listener() {
-            @Override
-            public void onVASTParserError(int error) {
-                if (mListener != null) {
-                    mListener.onAdError(VastMRectPresenter.this);
-                }
-            }
-
-            @Override
-            public void onVASTParserFinished(VASTModel model) {
-                mPlayer.load(model);
-            }
-        }).execute(mAd.getVast());
+        mVideoAd.load();
     }
 
     @Override
     public void destroy() {
-        if (mPlayer != null) {
-            mPlayer.destroy();
+        if (mVideoAd != null) {
+            mVideoAd.destroy();
         }
         mListener = null;
         mIsDestroyed = true;
@@ -93,13 +87,12 @@ public class VastMRectPresenter implements AdPresenter, VASTPlayer.Listener {
 
     @Override
     public void startTracking() {
-        mPlayer.onMuteClick();
-        mPlayer.play();
+        mVideoAd.show();
     }
 
     @Override
     public void stopTracking() {
-        mPlayer.stop();
+        mVideoAd.dismiss();
     }
 
     private View buildView() {
@@ -107,7 +100,9 @@ public class VastMRectPresenter implements AdPresenter, VASTPlayer.Listener {
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
 
-        container.addView(mPlayer, layoutParams);
+        container.setBackgroundColor(Color.BLACK);
+
+        container.addView(mVideoPlayer, layoutParams);
 
         View contentInfo = getAd().getContentInfoContainer(mContext);
         if (contentInfo != null) {
@@ -118,45 +113,57 @@ public class VastMRectPresenter implements AdPresenter, VASTPlayer.Listener {
         return container;
     }
 
-    @Override
-    public void onVASTPlayerLoadFinish() {
-        if (mIsDestroyed) {
-            return;
-        }
+    private final VideoAdListener mVideoAdListener = new VideoAdListener() {
+        @Override
+        public void onAdLoadSuccess() {
+            if (mIsDestroyed) {
+                return;
+            }
 
-        if (!mLoaded) {
-            mLoaded = true;
-            if (mListener != null) {
-                mListener.onAdLoaded(this, buildView());
+            if (!mLoaded) {
+                mLoaded = true;
+                if (mListener != null) {
+                    mListener.onAdLoaded(VastMRectPresenter.this, buildView());
+                }
             }
         }
-    }
 
-    @Override
-    public void onVASTPlayerFail(Exception exception) {
-        if (mListener != null) {
-            mListener.onAdError(this);
-        }
-    }
-
-    @Override
-    public void onVASTPlayerOpenOffer() {
-        if (mIsDestroyed) {
-            return;
+        @Override
+        public void onAdLoadFail(PlayerInfo info) {
+            if (mListener != null) {
+                mListener.onAdError(VastMRectPresenter.this);
+            }
         }
 
-        if (mListener != null) {
-            mListener.onAdClicked(this);
+        @Override
+        public void onAdClicked() {
+            if (mIsDestroyed) {
+                return;
+            }
+
+            if (mListener != null) {
+                mListener.onAdClicked(VastMRectPresenter.this);
+            }
         }
-    }
 
-    @Override
-    public void onVASTPlayerPlaybackStart() {
+        @Override
+        public void onAdDidReachEnd() {
 
-    }
+        }
 
-    @Override
-    public void onVASTPlayerPlaybackFinish() {
+        @Override
+        public void onAdDismissed() {
 
-    }
+        }
+
+        @Override
+        public void onAdExpired() {
+
+        }
+
+        @Override
+        public void onAdStarted() {
+
+        }
+    };
 }

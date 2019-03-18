@@ -5,9 +5,11 @@ import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.models.Quote
 import net.pubnative.lite.demo.ui.viewholders.MarkupBannerViewHolder
 import net.pubnative.lite.demo.ui.viewholders.MarkupMRectViewHolder
 import net.pubnative.lite.demo.ui.viewholders.SampleTextViewHolder
+import net.pubnative.lite.demo.util.SampleQuotes
 
 class MarkupAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private val TYPE_TEXT = 1
@@ -17,11 +19,7 @@ class MarkupAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var selectedSize = R.id.radio_size_banner
     private var markup = ""
 
-    private val list: List<Quote>
-
-    init {
-        list = getSampleQuotes()
-    }
+    private val list: List<Quote> = SampleQuotes.list
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
@@ -64,28 +62,4 @@ class MarkupAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         this.selectedSize = selectedSize
         notifyDataSetChanged()
     }
-
-    fun getSampleQuotes(): List<Quote> {
-        val q1 = Quote(
-                "Our world is built on biology and once we begin to understand it, it then becomes a technology.",
-                "Ryan Bethencourt")
-        val q2 = Quote(
-                "Happiness is not an ideal of reason but of imagination",
-                "Immanuel Kant")
-        val q3 = Quote(
-                "Science and technology revolutionize our lives, but memory, tradition and myth frame our response.",
-                "Arthur M. Schlesinger")
-        val q4 = Quote(
-                "It's not a faith in technology. It's faith in people.",
-                "Steve Jobs")
-        val q5 = Quote(
-                "We can't blame the technology when we make mistakes.",
-                "Tim Berners-Lee")
-        val q6 = Quote(
-                "Life must be understood backward. But it must be lived forward",
-                "Søren Kierkegaard")
-        return listOf(q1, q2, q3, q4, q5, q6)
-    }
-
-    data class Quote(val quote: String, val author: String)
 }

@@ -30,9 +30,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
+import net.pubnative.lite.demo.ui.adapters.InFeedAdapter
+import net.pubnative.lite.demo.ui.listeners.InFeedAdListener
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.views.HyBidMRectAdView
 import net.pubnative.lite.sdk.views.PNAdView
@@ -40,14 +45,16 @@ import net.pubnative.lite.sdk.views.PNAdView
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class HyBidMRectFragment : Fragment(), PNAdView.Listener {
+class HyBidMRectFragment : Fragment(), InFeedAdListener {
     val TAG = HyBidMRectFragment::class.java.simpleName
 
     private var zoneId: String? = null
 
-    private lateinit var hybidMRect: HyBidMRectAdView
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
+    private lateinit var recyclerView: RecyclerView
+
+    private lateinit var adapter: InFeedAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_hybid_mrect, container, false)
 
@@ -56,9 +63,15 @@ class HyBidMRectFragment : Fragment(), PNAdView.Listener {
 
         errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
-        hybidMRect = view.findViewById(R.id.hybid_mrect)
+        recyclerView = view.findViewById(R.id.list)
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
+
+        adapter = InFeedAdapter(zoneId!!, this)
+
+        recyclerView.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
+        recyclerView.itemAnimator = DefaultItemAnimator()
+        recyclerView.adapter = adapter
 
         loadButton.setOnClickListener {
             errorView.text = ""
@@ -71,32 +84,22 @@ class HyBidMRectFragment : Fragment(), PNAdView.Listener {
     }
 
     override fun onDestroy() {
-        hybidMRect.destroy()
         super.onDestroy()
     }
 
     fun loadPNAd() {
-        hybidMRect.load(zoneId, this)
+        adapter.loadWithAd()
     }
 
-    // --------------- PNAdView Listener --------------------
-    override fun onAdLoaded() {
-        Log.d(TAG, "onAdLoaded")
+    // --------------- InFeedAdListener Listener --------------------
+
+    override fun onInFeedAdLoaded() {
         displayLogs()
     }
 
-    override fun onAdLoadFailed(error: Throwable?) {
-        Log.e(TAG, "onAdLoadFailed", error)
+    override fun onInFeedAdLoadError(error: Throwable?) {
         errorView.text = error?.message
         displayLogs()
-    }
-
-    override fun onAdImpression() {
-        Log.d(TAG, "onAdImpression")
-    }
-
-    override fun onAdClick() {
-        Log.d(TAG, "onAdClick")
     }
 
     private fun displayLogs() {

@@ -4,86 +4,44 @@ import android.os.Bundle;
 import android.view.View;
 
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
-import net.pubnative.lite.sdk.interstitial.activity.HyBidInterstitialActivity;
-import net.pubnative.lite.sdk.vast.VASTParser;
-import net.pubnative.lite.sdk.vast.VASTPlayer;
-import net.pubnative.lite.sdk.vast.model.VASTModel;
+import net.pubnative.lite.sdk.vpaid.VideoAd;
+import net.pubnative.lite.sdk.vpaid.VideoAdListener;
+import net.pubnative.lite.sdk.vpaid.PlayerInfo;
+import net.pubnative.lite.sdk.vpaid.VideoAdView;
 
-public class VastInterstitialActivity extends HyBidInterstitialActivity implements VASTPlayer.Listener {
-    private VASTPlayer mPlayer;
+public class VastInterstitialActivity extends HyBidInterstitialActivity {
     private boolean mReady = false;
+
+    private VideoAdView mVideoPlayer;
+    private VideoAd mVideoAd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         if (getAd() != null) {
-            new VASTParser(this).setListener(new VASTParser.Listener() {
-                @Override
-                public void onVASTParserError(int error) {
-                    getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.ERROR);
-                    getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
-                    finish();
-                }
-
-                @Override
-                public void onVASTParserFinished(VASTModel model) {
-                    if (mPlayer != null) {
-                        mPlayer.load(model);
-                    }
-                }
-            }).execute(getAd().getVast());
+            mVideoAd = new VideoAd(this, getAd().getVast());
+            mVideoAd.bindView(mVideoPlayer);
+            mVideoAd.setAdListener(mVideoAdListener);
+            mVideoAd.load();
         }
     }
 
     @Override
     public View getAdView() {
         if (getAd() != null) {
-            mPlayer = new VASTPlayer(this);
-            mPlayer.setListener(this);
-            return mPlayer;
+            mVideoPlayer = new VideoAdView(this);
+            return mVideoPlayer;
         }
 
         return null;
     }
 
     @Override
-    public void onVASTPlayerLoadFinish() {
-        if (!mReady) {
-            mReady = true;
-            mPlayer.onMuteClick();
-            mPlayer.play();
-            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.SHOW);
-        }
-    }
-
-    @Override
-    public void onVASTPlayerFail(Exception exception) {
-        getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.ERROR);
-        getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
-        finish();
-    }
-
-    @Override
-    public void onVASTPlayerOpenOffer() {
-        getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CLICK);
-    }
-
-    @Override
-    public void onVASTPlayerPlaybackStart() {
-
-    }
-
-    @Override
-    public void onVASTPlayerPlaybackFinish() {
-        mReady = false;
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mPlayer != null) {
-            mPlayer.destroy();
+        if (mVideoAd != null) {
+            mVideoAd.destroy();
             mReady = false;
         }
     }
@@ -92,7 +50,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
     protected void onResume() {
         super.onResume();
         if (mReady) {
-            mPlayer.play();
+            mVideoAd.resume();
         }
     }
 
@@ -100,7 +58,51 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
     protected void onPause() {
         super.onPause();
         if (mReady) {
-            mPlayer.pause();
+            mVideoAd.pause();
         }
     }
+
+    private final VideoAdListener mVideoAdListener = new VideoAdListener() {
+        @Override
+        public void onAdLoadSuccess() {
+            if (!mReady) {
+                mReady = true;
+
+                mVideoAd.show();
+                getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.SHOW);
+            }
+        }
+
+        @Override
+        public void onAdLoadFail(PlayerInfo info) {
+            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.ERROR);
+            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
+            finish();
+        }
+
+        @Override
+        public void onAdClicked() {
+            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CLICK);
+        }
+
+        @Override
+        public void onAdDidReachEnd() {
+            mReady = false;
+        }
+
+        @Override
+        public void onAdDismissed() {
+
+        }
+
+        @Override
+        public void onAdExpired() {
+
+        }
+
+        @Override
+        public void onAdStarted() {
+
+        }
+    };
 }
