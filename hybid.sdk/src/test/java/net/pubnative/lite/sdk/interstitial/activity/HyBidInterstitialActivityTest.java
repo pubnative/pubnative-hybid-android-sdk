@@ -29,6 +29,11 @@ public class HyBidInterstitialActivityTest {
             }
             return view;
         }
+
+        @Override
+        protected boolean shouldShowContentInfo() {
+            return false;
+        }
     }
 
     @Before
