@@ -31,6 +31,8 @@ public abstract class HyBidInterstitialActivity extends Activity {
 
     public abstract View getAdView();
 
+    protected abstract boolean shouldShowContentInfo();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,6 +66,12 @@ public abstract class HyBidInterstitialActivity extends Activity {
 
                 mCloseableContainer.addView(adView, params);
                 mCloseableContainer.setBackgroundColor(Color.WHITE);
+
+                if (shouldShowContentInfo()) {
+                    View contentInfo = getAd().getContentInfoContainer(this);
+                    mCloseableContainer.addView(contentInfo);
+                }
+
                 setContentView(mCloseableContainer);
             } else {
                 finish();
