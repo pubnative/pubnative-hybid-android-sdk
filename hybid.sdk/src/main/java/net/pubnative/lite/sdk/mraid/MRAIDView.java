@@ -48,6 +48,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.ClientCertRequest;
@@ -179,6 +180,8 @@ public class MRAIDView extends RelativeLayout {
     private final GestureDetector gestureDetector;
 
     private boolean wasTouched = false;
+
+    private boolean contentInfoAdded = false;
 
     // true if this is an interstitial ad (TODO: move behavior to MRAIDInterstitial)
     private final boolean isInterstitial;
@@ -474,6 +477,7 @@ public class MRAIDView extends RelativeLayout {
         }
 
         currentWebView = null;
+        contentInfoAdded = false;
     }
 
     /**************************************************************************
@@ -1099,8 +1103,9 @@ public class MRAIDView extends RelativeLayout {
     }
 
     private void addContentInfo(View view) {
-        if (contentInfo != null) {
+        if (contentInfo != null && !contentInfoAdded) {
             ((ViewGroup) view).addView(contentInfo);
+            contentInfoAdded = true;
         }
     }
 
