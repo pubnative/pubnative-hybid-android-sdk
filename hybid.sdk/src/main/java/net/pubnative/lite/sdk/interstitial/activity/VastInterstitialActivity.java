@@ -1,5 +1,6 @@
 package net.pubnative.lite.sdk.interstitial.activity;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 
@@ -23,7 +24,13 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
             mVideoAd = new VideoAd(this, getAd().getVast());
             mVideoAd.bindView(mVideoPlayer);
             mVideoAd.setAdListener(mVideoAdListener);
-            mVideoAd.load();
+
+            mVideoPlayer.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mVideoAd.load();
+                }
+            }, 1000);
         }
     }
 
