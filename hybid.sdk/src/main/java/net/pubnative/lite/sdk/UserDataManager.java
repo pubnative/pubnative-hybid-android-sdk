@@ -60,9 +60,6 @@ public class UserDataManager {
 
     public void initialize(UserDataInitialisationListener initialisationListener) {
         determineUserZone(initialisationListener);
-        if (initialisationListener != null) {
-            initialisationListener.onDataInitialised(true);
-        }
     }
 
     public String getConsentPageLink() {
