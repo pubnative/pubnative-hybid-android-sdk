@@ -45,6 +45,11 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
         return adView;
     }
 
+    @Override
+    protected boolean shouldShowContentInfo() {
+        return false;
+    }
+
     // ----------------------------------- MRAIDViewListener ---------------------------------------
 
     @Override

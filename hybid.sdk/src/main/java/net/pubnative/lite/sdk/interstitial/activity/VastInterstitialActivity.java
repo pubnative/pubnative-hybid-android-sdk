@@ -69,6 +69,11 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
         }
     }
 
+    @Override
+    protected boolean shouldShowContentInfo() {
+        return true;
+    }
+
     private final VideoAdListener mVideoAdListener = new VideoAdListener() {
         @Override
         public void onAdLoadSuccess() {
