@@ -182,6 +182,7 @@ public class MRAIDView extends RelativeLayout {
     private boolean wasTouched = false;
 
     private boolean contentInfoAdded = false;
+    private boolean webViewLoaded = false;
 
     // true if this is an interstitial ad (TODO: move behavior to MRAIDInterstitial)
     private final boolean isInterstitial;
@@ -1447,7 +1448,8 @@ public class MRAIDView extends RelativeLayout {
                     addContentInfo(MRAIDView.this);
                 }
 
-                if (listener != null) {
+                if (listener != null && !webViewLoaded) {
+                    webViewLoaded = true;
                     listener.mraidViewLoaded(MRAIDView.this);
                 }
             }
