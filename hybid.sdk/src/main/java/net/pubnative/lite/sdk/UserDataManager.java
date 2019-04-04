@@ -31,7 +31,6 @@ import net.pubnative.lite.sdk.consent.CheckConsentRequest;
 import net.pubnative.lite.sdk.consent.UserConsentActivity;
 import net.pubnative.lite.sdk.consent.UserConsentRequest;
 import net.pubnative.lite.sdk.location.GeoIpRequest;
-import net.pubnative.lite.sdk.models.GeoIpResponse;
 import net.pubnative.lite.sdk.models.UserConsentRequestModel;
 import net.pubnative.lite.sdk.models.UserConsentResponseModel;
 import net.pubnative.lite.sdk.models.UserConsentResponseStatus;

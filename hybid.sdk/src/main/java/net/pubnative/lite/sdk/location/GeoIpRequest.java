@@ -25,11 +25,7 @@ package net.pubnative.lite.sdk.location;
 import android.content.Context;
 import android.net.Uri;
 
-import net.pubnative.lite.sdk.R;
-import net.pubnative.lite.sdk.models.GeoIpResponse;
 import net.pubnative.lite.sdk.network.PNHttpRequest;
-
-import org.json.JSONObject;
 
 public class GeoIpRequest {
 
