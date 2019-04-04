@@ -34,6 +34,7 @@ import android.os.Process;
 import android.provider.Settings;
 import android.text.TextUtils;
 
+import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.PNAdvertisingIdClient;
 import net.pubnative.lite.sdk.utils.PNCrypto;
 
@@ -103,10 +104,10 @@ public class DeviceInfo {
     }
 
     private void fetchAdvertisingId() {
-        PNAdvertisingIdClient client = new PNAdvertisingIdClient();
-        client.request(mContext, new PNAdvertisingIdClient.Listener() {
+        HyBidAdvertisingId client = new HyBidAdvertisingId();
+        client.request(mContext, new HyBidAdvertisingId.Listener() {
             @Override
-            public void onPNAdvertisingIdFinish(String advertisingId, Boolean limitTracking) {
+            public void onHyBidAdvertisingIdFinish(String advertisingId, Boolean limitTracking) {
                 mLimitTracking = limitTracking;
                 if (TextUtils.isEmpty(advertisingId)) {
                     mAdvertisingId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
