@@ -32,11 +32,9 @@ import net.pubnative.lite.sdk.network.PNHttpRequest;
 import org.json.JSONObject;
 
 public class GeoIpRequest {
-    private static final String STATUS_SUCCESS = "success";
-    private static final String STATUS_FAILED = "fail";
 
     public interface GeoIpRequestListener {
-        void onSuccess(GeoIpResponse geoIpResponse);
+        void onSuccess(String countryCode);
 
         void onFailure(Throwable exception);
     }
@@ -46,7 +44,9 @@ public class GeoIpRequest {
         request.start(context, PNHttpRequest.Method.GET, getEndpointUrl(), new PNHttpRequest.Listener() {
             @Override
             public void onPNHttpRequestFinish(PNHttpRequest request, String result) {
-                processStream(result, listener);
+                if (listener != null) {
+                    listener.onSuccess(result);
+                }
             }
 
             @Override
@@ -61,31 +61,9 @@ public class GeoIpRequest {
     private String getEndpointUrl() {
         return new Uri.Builder()
                 .scheme("https")
-                .authority("pro.ip-api.com")
-                .appendPath("json")
-                .appendQueryParameter("key", "4ykqS3YU062TII3")
+                .authority("pubnative.info")
+                .appendPath("country")
                 .build()
                 .toString();
-    }
-
-    private void processStream(String result, GeoIpRequestListener listener) {
-        GeoIpResponse responseModel = null;
-        Exception parseException = null;
-        try {
-            responseModel = new GeoIpResponse(new JSONObject(result));
-        } catch (Exception exception) {
-            parseException = exception;
-        } catch (Error error) {
-            parseException = new Exception("Response cannot be parsed", error);
-        }
-        if (parseException != null) {
-            listener.onFailure(parseException);
-        } else if (responseModel == null) {
-            listener.onFailure(new Exception("GeoIpRequest - Parse error"));
-        } else if (STATUS_SUCCESS.equals(responseModel.status)) {
-            listener.onSuccess(responseModel);
-        } else {
-            listener.onFailure(new Exception("GeoIPRequest - Server error: " + responseModel.message));
-        }
     }
 }

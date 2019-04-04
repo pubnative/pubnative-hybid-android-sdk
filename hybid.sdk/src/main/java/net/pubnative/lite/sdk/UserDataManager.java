@@ -156,9 +156,7 @@ public class UserDataManager {
         GeoIpRequest request = new GeoIpRequest();
         request.fetchGeoIp(mContext, new GeoIpRequest.GeoIpRequestListener() {
             @Override
-            public void onSuccess(GeoIpResponse geoIpResponse) {
-                String countryCode = geoIpResponse.countryCode;
-
+            public void onSuccess(String countryCode) {
                 if (TextUtils.isEmpty(countryCode)) {
                     Logger.w(TAG, "No country code was obtained. The default value will be used, therefore no user data consent will be required.");
                     if (listener != null) {
