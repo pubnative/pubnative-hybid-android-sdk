@@ -31,7 +31,6 @@ import net.pubnative.lite.sdk.consent.CheckConsentRequest;
 import net.pubnative.lite.sdk.consent.UserConsentActivity;
 import net.pubnative.lite.sdk.consent.UserConsentRequest;
 import net.pubnative.lite.sdk.location.GeoIpRequest;
-import net.pubnative.lite.sdk.models.GeoIpResponse;
 import net.pubnative.lite.sdk.models.UserConsentRequestModel;
 import net.pubnative.lite.sdk.models.UserConsentResponseModel;
 import net.pubnative.lite.sdk.models.UserConsentResponseStatus;
@@ -156,9 +155,7 @@ public class UserDataManager {
         GeoIpRequest request = new GeoIpRequest();
         request.fetchGeoIp(mContext, new GeoIpRequest.GeoIpRequestListener() {
             @Override
-            public void onSuccess(GeoIpResponse geoIpResponse) {
-                String countryCode = geoIpResponse.countryCode;
-
+            public void onSuccess(String countryCode) {
                 if (TextUtils.isEmpty(countryCode)) {
                     Logger.w(TAG, "No country code was obtained. The default value will be used, therefore no user data consent will be required.");
                     if (listener != null) {

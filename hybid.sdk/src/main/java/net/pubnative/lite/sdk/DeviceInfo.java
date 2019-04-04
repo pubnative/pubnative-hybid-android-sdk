@@ -30,20 +30,14 @@ import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
-import android.os.Looper;
 import android.os.Process;
 import android.provider.Settings;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
 
-import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNAdvertisingIdClient;
 import net.pubnative.lite.sdk.utils.PNCrypto;
 
 import java.util.Locale;
-import java.util.TimeZone;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
