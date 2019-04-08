@@ -23,70 +23,62 @@
 package net.pubnative.lite.sdk.utils;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 
+import net.pubnative.lite.sdk.models.AdvertisingInfo;
 import net.pubnative.lite.sdk.utils.reflection.MethodBuilderFactory;
 import net.pubnative.lite.sdk.utils.reflection.ReflectionUtils;
 
-public class HyBidAdvertisingId {
+import java.lang.ref.WeakReference;
+
+public class HyBidAdvertisingId extends AsyncTask<Void, Void, AdvertisingInfo> {
 
     private static final String TAG = HyBidAdvertisingId.class.getSimpleName();
-    private static final int GOOGLE_PLAY_SUCCESS_CODE = 0;
-    private static final String IS_LIMIT_AD_TRACKING_ENABLED_KEY = "isLimitAdTrackingEnabled";
-    private static String sAdvertisingIdClientClassName = "com.google.android.gms.ads.identifier.AdvertisingIdClient";
+    private static final String sAdvertisingIdClientClassName = "com.google.android.gms.ads.identifier.AdvertisingIdClient";
 
     public interface Listener {
         void onHyBidAdvertisingIdFinish(String advertisingId, Boolean limitTracking);
     }
 
-    protected Listener mListener;
-    protected Handler mHadler;
+    private WeakReference<Context> mContextRef;
+    private WeakReference<Listener> mListenerRef;
 
-    public void request(Context context, Listener listener) {
-
-        mListener = listener;
-        mHadler = new Handler(Looper.getMainLooper());
-        getAdvertisingId(context);
+    public HyBidAdvertisingId(Context context, Listener listener) {
+        mContextRef = new WeakReference<>(context);
+        mListenerRef = new WeakReference<>(listener);
     }
 
-    protected void getAdvertisingId(final Context context) {
+    @Override
+    protected AdvertisingInfo doInBackground(Void... params) {
+        Object adInfo;
+        String advertisingId = null;
+        boolean isLimitAdTrackingEnabled = false;
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Object adInfo = null;
-                String advertisingId = null;
-                boolean isLimitAdTrackingEnabled = false;
+        if (mContextRef.get() != null) {
+            try {
+                ReflectionUtils.MethodBuilder methodBuilder = MethodBuilderFactory.create(null, "getAdvertisingIdInfo")
+                        .setStatic(Class.forName(sAdvertisingIdClientClassName))
+                        .addParam(Context.class, mContextRef.get());
 
-                if (context != null) {
-                    try {
-                        ReflectionUtils.MethodBuilder methodBuilder = MethodBuilderFactory.create(null, "getAdvertisingIdInfo")
-                                .setStatic(Class.forName(sAdvertisingIdClientClassName))
-                                .addParam(Context.class, context);
-
-                        adInfo = methodBuilder.execute();
-                        advertisingId = reflectedGetAdvertisingId(adInfo, advertisingId);
-                        isLimitAdTrackingEnabled = reflectedIsLimitAdTrackingEnabled(adInfo, isLimitAdTrackingEnabled);
-                    } catch (Exception e) {
-                        Logger.e(TAG, "Unable to obtain Advertising ID.");
-                    }
-                }
-
-                HyBidAdvertisingId.this.invokeOnFinish(advertisingId, isLimitAdTrackingEnabled);
+                adInfo = methodBuilder.execute();
+                advertisingId = reflectedGetAdvertisingId(adInfo, advertisingId);
+                isLimitAdTrackingEnabled = reflectedIsLimitAdTrackingEnabled(adInfo, isLimitAdTrackingEnabled);
+            } catch (Exception e) {
+                Logger.e(TAG, "Unable to obtain Advertising ID.");
             }
-        }).start();
+        }
+
+        return new AdvertisingInfo(advertisingId, isLimitAdTrackingEnabled);
     }
 
-    protected void invokeOnFinish(final String advertisingId, final boolean limitTracking) {
-        mHadler.post(new Runnable() {
-            @Override
-            public void run() {
-                if (mListener != null) {
-                    mListener.onHyBidAdvertisingIdFinish(advertisingId, limitTracking);
-                }
-            }
-        });
+    @Override
+    protected void onPostExecute(AdvertisingInfo advertisingInfo) {
+        super.onPostExecute(advertisingInfo);
+        if (mListenerRef.get() != null) {
+            mListenerRef.get().onHyBidAdvertisingIdFinish(advertisingInfo.getAdvertisingId(), advertisingInfo.isLimitTrackingEnabled());
+        }
     }
 
     private String reflectedGetAdvertisingId(final Object adInfo, final String defaultValue) {

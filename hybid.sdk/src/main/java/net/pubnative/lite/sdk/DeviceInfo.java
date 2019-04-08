@@ -35,7 +35,6 @@ import android.provider.Settings;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
-import net.pubnative.lite.sdk.utils.PNAdvertisingIdClient;
 import net.pubnative.lite.sdk.utils.PNCrypto;
 
 import java.util.Locale;
@@ -104,8 +103,7 @@ public class DeviceInfo {
     }
 
     private void fetchAdvertisingId() {
-        HyBidAdvertisingId client = new HyBidAdvertisingId();
-        client.request(mContext, new HyBidAdvertisingId.Listener() {
+        new HyBidAdvertisingId(mContext, new HyBidAdvertisingId.Listener() {
             @Override
             public void onHyBidAdvertisingIdFinish(String advertisingId, Boolean limitTracking) {
                 mLimitTracking = limitTracking;
@@ -122,7 +120,7 @@ public class DeviceInfo {
                     mListener.onInfoLoaded();
                 }
             }
-        });
+        }).execute();
     }
 
     /**
