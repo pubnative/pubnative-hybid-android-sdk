@@ -35,6 +35,8 @@ import android.provider.Settings;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
+import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.PNAsyncUtils;
 import net.pubnative.lite.sdk.utils.PNCrypto;
 
 import java.util.Locale;
@@ -103,24 +105,25 @@ public class DeviceInfo {
     }
 
     private void fetchAdvertisingId() {
-        new HyBidAdvertisingId(mContext, new HyBidAdvertisingId.Listener() {
-            @Override
-            public void onHyBidAdvertisingIdFinish(String advertisingId, Boolean limitTracking) {
-                mLimitTracking = limitTracking;
-                if (TextUtils.isEmpty(advertisingId)) {
-                    mAdvertisingId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
-                } else {
-                    mAdvertisingId = advertisingId;
-                }
+        try {
+            PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(mContext, new HyBidAdvertisingId.Listener() {
+                @Override
+                public void onHyBidAdvertisingIdFinish(String advertisingId, Boolean limitTracking) {
+                    mLimitTracking = limitTracking;
+                    if (TextUtils.isEmpty(advertisingId)) {
+                        mAdvertisingId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+                    } else {
+                        mAdvertisingId = advertisingId;
+                    }
 
-                mAdvertisingIdMd5 = PNCrypto.md5(mAdvertisingId);
-                mAdvertisingIdSha1 = PNCrypto.sha1(mAdvertisingId);
-
-                if (mListener != null) {
-                    mListener.onInfoLoaded();
+                    if (mListener != null) {
+                        mListener.onInfoLoaded();
+                    }
                 }
-            }
-        }).execute();
+            }));
+        } catch (Exception exception) {
+            Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
+        }
     }
 
     /**

@@ -24,8 +24,6 @@ package net.pubnative.lite.sdk.utils;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Looper;
 
 import net.pubnative.lite.sdk.models.AdvertisingInfo;
 import net.pubnative.lite.sdk.utils.reflection.MethodBuilderFactory;
@@ -43,11 +41,11 @@ public class HyBidAdvertisingId extends AsyncTask<Void, Void, AdvertisingInfo> {
     }
 
     private WeakReference<Context> mContextRef;
-    private WeakReference<Listener> mListenerRef;
+    private Listener mListener;
 
     public HyBidAdvertisingId(Context context, Listener listener) {
         mContextRef = new WeakReference<>(context);
-        mListenerRef = new WeakReference<>(listener);
+        mListener = listener;
     }
 
     @Override
@@ -76,8 +74,8 @@ public class HyBidAdvertisingId extends AsyncTask<Void, Void, AdvertisingInfo> {
     @Override
     protected void onPostExecute(AdvertisingInfo advertisingInfo) {
         super.onPostExecute(advertisingInfo);
-        if (mListenerRef.get() != null) {
-            mListenerRef.get().onHyBidAdvertisingIdFinish(advertisingInfo.getAdvertisingId(), advertisingInfo.isLimitTrackingEnabled());
+        if (mListener != null) {
+            mListener.onHyBidAdvertisingIdFinish(advertisingInfo.getAdvertisingId(), advertisingInfo.isLimitTrackingEnabled());
         }
     }
 
