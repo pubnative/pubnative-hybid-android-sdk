@@ -116,6 +116,9 @@ public class DeviceInfo {
                         mAdvertisingId = advertisingId;
                     }
 
+                    mAdvertisingIdMd5 = PNCrypto.md5(mAdvertisingId);
+                    mAdvertisingIdSha1 = PNCrypto.sha1(mAdvertisingId);
+
                     if (mListener != null) {
                         mListener.onInfoLoaded();
                     }
