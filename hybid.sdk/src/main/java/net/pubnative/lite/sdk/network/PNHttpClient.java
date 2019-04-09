@@ -4,10 +4,15 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.text.TextUtils;
+
+import net.pubnative.lite.sdk.utils.PNCrypto;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
@@ -78,7 +83,15 @@ public class PNHttpClient extends AsyncTask<String, Void, PNHttpClient.Result> {
     }
 
     public void addHeader(String name, String value) {
-        this.mHeaders.put(name, value);
+        if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(value)) {
+            this.mHeaders.put(name, value);
+        }
+    }
+
+    public void setPostBody(String postBody) {
+        if (!TextUtils.isEmpty(postBody)) {
+            mPostBody = postBody;
+        }
     }
 
     @Override
@@ -146,6 +159,18 @@ public class PNHttpClient extends AsyncTask<String, Void, PNHttpClient.Result> {
             }
 
             connection.setDoInput(true);
+
+            if (!TextUtils.isEmpty(mPostBody)) {
+                connection.setUseCaches(false);
+                connection.setDoOutput(true);
+                connection.setRequestProperty("Content-Length", Integer.toString(mPostBody.getBytes().length));
+                connection.setRequestProperty("Content-MD5", PNCrypto.md5(mPostBody));
+                OutputStream connectionOutputStream = connection.getOutputStream();
+                OutputStreamWriter wr = new OutputStreamWriter(connectionOutputStream, "UTF-8");
+                wr.write(mPostBody);
+                wr.flush();
+                wr.close();
+            }
 
             connection.connect();
 

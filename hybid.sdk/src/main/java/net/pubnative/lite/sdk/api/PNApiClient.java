@@ -23,12 +23,15 @@
 package net.pubnative.lite.sdk.api;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.SystemClock;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdResponse;
+import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.network.PNHttpRequest;
 import net.pubnative.lite.sdk.utils.AdRequestRegistry;
 import net.pubnative.lite.sdk.utils.PNApiUrlComposer;
@@ -69,7 +72,32 @@ public class PNApiClient {
         } else {
             final long initTime = System.currentTimeMillis();
 
-            PNHttpRequest httpRequest = new PNHttpRequest();
+            PNHttpClient httpClient = new PNHttpClient(PNHttpClient.Method.GET, new PNHttpClient.Listener() {
+                @Override
+                public void onSuccess(String response) {
+                    registerAdRequest(url, response, initTime);
+                    processStream(response, listener);
+                }
+
+                @Override
+                public void onFailure(Throwable error) {
+                    registerAdRequest(url, error.getMessage(), initTime);
+
+                    if (listener != null) {
+                        listener.onFailure(error);
+                    }
+                }
+
+                @Override
+                public NetworkInfo getActiveNetworkInfo() {
+                    ConnectivityManager connectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+                    NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+                    return networkInfo;
+                }
+            });
+            httpClient.execute(url);
+
+            /*PNHttpRequest httpRequest = new PNHttpRequest();
             httpRequest.start(mContext, PNHttpRequest.Method.GET, url, new PNHttpRequest.Listener() {
                 @Override
                 public void onPNHttpRequestFinish(PNHttpRequest request, String result) {
@@ -86,7 +114,7 @@ public class PNApiClient {
                         listener.onFailure(exception);
                     }
                 }
-            });
+            });*/
         }
     }
 
