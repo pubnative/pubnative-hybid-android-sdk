@@ -23,12 +23,15 @@
 package net.pubnative.lite.sdk.api;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.SystemClock;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdResponse;
+import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.network.PNHttpRequest;
 import net.pubnative.lite.sdk.utils.AdRequestRegistry;
 import net.pubnative.lite.sdk.utils.PNApiUrlComposer;
@@ -69,44 +72,43 @@ public class PNApiClient {
         } else {
             final long initTime = System.currentTimeMillis();
 
-            PNHttpRequest httpRequest = new PNHttpRequest();
-            httpRequest.start(mContext, PNHttpRequest.Method.GET, url, new PNHttpRequest.Listener() {
+            PNHttpClient httpClient = new PNHttpClient(mContext, PNHttpClient.Method.GET, new PNHttpClient.Listener() {
                 @Override
-                public void onPNHttpRequestFinish(PNHttpRequest request, String result) {
-                    registerAdRequest(url, result, initTime);
-
-                    processStream(result, listener);
+                public void onSuccess(String response) {
+                    registerAdRequest(url, response, initTime);
+                    processStream(response, listener);
                 }
 
                 @Override
-                public void onPNHttpRequestFail(PNHttpRequest request, Exception exception) {
-                    registerAdRequest(url, exception.getMessage(), initTime);
+                public void onFailure(Throwable error) {
+                    registerAdRequest(url, error.getMessage(), initTime);
 
                     if (listener != null) {
-                        listener.onFailure(exception);
+                        listener.onFailure(error);
                     }
                 }
             });
+            httpClient.execute(url);
         }
     }
 
     public void trackUrl(String url, final TrackUrlListener listener) {
-        PNHttpRequest httpRequest = new PNHttpRequest();
-        httpRequest.start(mContext, PNHttpRequest.Method.GET, url, new PNHttpRequest.Listener() {
+        PNHttpClient httpClient = new PNHttpClient(mContext, PNHttpClient.Method.GET, new PNHttpClient.Listener() {
             @Override
-            public void onPNHttpRequestFinish(PNHttpRequest request, String result) {
+            public void onSuccess(String response) {
                 if (listener != null) {
                     listener.onSuccess();
                 }
             }
 
             @Override
-            public void onPNHttpRequestFail(PNHttpRequest request, Exception exception) {
+            public void onFailure(Throwable error) {
                 if (listener != null) {
-                    listener.onFailure(exception);
+                    listener.onFailure(error);
                 }
             }
         });
+        httpClient.execute(url);
     }
 
     protected String getAdRequestURL(AdRequest adRequest) {

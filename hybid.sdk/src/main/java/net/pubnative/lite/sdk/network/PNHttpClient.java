@@ -4,20 +4,28 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.text.TextUtils;
 
+import net.pubnative.lite.sdk.exception.PNException;
+import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.PNCrypto;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.lang.ref.WeakReference;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
 public class PNHttpClient extends AsyncTask<String, Void, PNHttpClient.Result> {
+    private static final String TAG = PNHttpClient.class.getSimpleName();
+
     public enum Method {
         GET("GET"),
         POST("POST"),
@@ -40,8 +48,6 @@ public class PNHttpClient extends AsyncTask<String, Void, PNHttpClient.Result> {
         void onSuccess(String response);
 
         void onFailure(Throwable error);
-
-        NetworkInfo getActiveNetworkInfo();
     }
 
     static final class Result {
@@ -65,26 +71,36 @@ public class PNHttpClient extends AsyncTask<String, Void, PNHttpClient.Result> {
         }
     }
 
+    private WeakReference<Context> mContextRef;
     private Listener mListener;
 
     private final Method mMethod;
     private final Map<String, String> mHeaders;
     private String mPostBody;
 
-    public PNHttpClient(Method method, Listener listener) {
+    public PNHttpClient(Context context, Method method, Listener listener) {
+        this.mContextRef = new WeakReference<>(context);
         this.mMethod = method;
         this.mListener = listener;
         this.mHeaders = new LinkedHashMap<>();
     }
 
     public void addHeader(String name, String value) {
-        this.mHeaders.put(name, value);
+        if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(value)) {
+            this.mHeaders.put(name, value);
+        }
+    }
+
+    public void setPostBody(String postBody) {
+        if (!TextUtils.isEmpty(postBody)) {
+            mPostBody = postBody;
+        }
     }
 
     @Override
     protected void onPreExecute() {
         if (mListener != null) {
-            NetworkInfo networkInfo = mListener.getActiveNetworkInfo();
+            NetworkInfo networkInfo = getActiveNetworkInfo();
             if (networkInfo == null || !networkInfo.isConnected()
                     || (networkInfo.getType() != ConnectivityManager.TYPE_WIFI && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE)) {
                 mListener.onFailure(new Exception("Unable to connect to URL. No network connection."));
@@ -128,7 +144,7 @@ public class PNHttpClient extends AsyncTask<String, Void, PNHttpClient.Result> {
         }
     }
 
-    private String fetchUrl(URL url) throws IOException {
+    private String fetchUrl(URL url) throws Exception {
         InputStream stream = null;
         HttpsURLConnection connection = null;
         String result = null;
@@ -147,6 +163,18 @@ public class PNHttpClient extends AsyncTask<String, Void, PNHttpClient.Result> {
 
             connection.setDoInput(true);
 
+            if (!TextUtils.isEmpty(mPostBody)) {
+                connection.setUseCaches(false);
+                connection.setDoOutput(true);
+                connection.setRequestProperty("Content-Length", Integer.toString(mPostBody.getBytes().length));
+                connection.setRequestProperty("Content-MD5", PNCrypto.md5(mPostBody));
+                OutputStream connectionOutputStream = connection.getOutputStream();
+                OutputStreamWriter wr = new OutputStreamWriter(connectionOutputStream, "UTF-8");
+                wr.write(mPostBody);
+                wr.flush();
+                wr.close();
+            }
+
             connection.connect();
 
             int responseCode = connection.getResponseCode();
@@ -156,7 +184,7 @@ public class PNHttpClient extends AsyncTask<String, Void, PNHttpClient.Result> {
 
             stream = connection.getInputStream();
             if (stream != null) {
-                result = readStream(stream, 500);
+                result = stringFromInputStream(stream);
             }
 
         } finally {
@@ -172,23 +200,45 @@ public class PNHttpClient extends AsyncTask<String, Void, PNHttpClient.Result> {
         return result;
     }
 
-    private String readStream(InputStream stream, int maxReadSize) throws IOException, UnsupportedEncodingException {
-        Reader reader = null;
-        reader = new InputStreamReader(stream, "UTF-8");
-        char[] rawbuffer = new char[maxReadSize];
-        int readSize;
-        StringBuffer buffer = new StringBuffer();
-        while (((readSize = reader.read(rawbuffer)) != -1) && maxReadSize > 0) {
-            if (readSize > maxReadSize) {
-                readSize = maxReadSize;
-            }
-            buffer.append(rawbuffer, 0, readSize);
-            maxReadSize -= readSize;
+    protected String stringFromInputStream(InputStream inputStream) throws PNException {
+        if (inputStream == null) {
+            return "";
         }
-        return buffer.toString();
+        String result = null;
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        int length;
+        try {
+            byte[] buffer = new byte[1024];
+            while ((length = inputStream.read(buffer)) != -1) {
+                byteArrayOutputStream.write(buffer, 0, length);
+            }
+            byteArrayOutputStream.flush();
+            result = byteArrayOutputStream.toString();
+            byteArrayOutputStream.close();
+        } catch (IOException e) {
+            Logger.e(TAG, "stringFromInputStream - Error:" + e);
+
+            Map<String, String> errorData = new HashMap<>();
+            if (result == null) {
+                result = byteArrayOutputStream.toString();
+            }
+            errorData.put("serverResponse", result);
+            errorData.put("IOException", e.toString());
+            throw PNException.extraException(errorData);
+        }
+        return result;
     }
 
     private boolean isHttpSuccess(int responseCode) {
         return responseCode / 100 == 2;
+    }
+
+    private NetworkInfo getActiveNetworkInfo() {
+        if (mContextRef.get() == null) {
+            return null;
+        }
+
+        ConnectivityManager connectivityManager = (ConnectivityManager) mContextRef.get().getSystemService(Context.CONNECTIVITY_SERVICE);
+        return connectivityManager.getActiveNetworkInfo();
     }
 }
