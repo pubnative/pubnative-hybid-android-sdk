@@ -1,5 +1,6 @@
 package net.pubnative.lite.sdk.network;
 
+import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -46,8 +48,6 @@ public class PNHttpClient extends AsyncTask<String, Void, PNHttpClient.Result> {
         void onSuccess(String response);
 
         void onFailure(Throwable error);
-
-        NetworkInfo getActiveNetworkInfo();
     }
 
     static final class Result {
@@ -71,13 +71,15 @@ public class PNHttpClient extends AsyncTask<String, Void, PNHttpClient.Result> {
         }
     }
 
+    private WeakReference<Context> mContextRef;
     private Listener mListener;
 
     private final Method mMethod;
     private final Map<String, String> mHeaders;
     private String mPostBody;
 
-    public PNHttpClient(Method method, Listener listener) {
+    public PNHttpClient(Context context, Method method, Listener listener) {
+        this.mContextRef = new WeakReference<>(context);
         this.mMethod = method;
         this.mListener = listener;
         this.mHeaders = new LinkedHashMap<>();
@@ -98,7 +100,7 @@ public class PNHttpClient extends AsyncTask<String, Void, PNHttpClient.Result> {
     @Override
     protected void onPreExecute() {
         if (mListener != null) {
-            NetworkInfo networkInfo = mListener.getActiveNetworkInfo();
+            NetworkInfo networkInfo = getActiveNetworkInfo();
             if (networkInfo == null || !networkInfo.isConnected()
                     || (networkInfo.getType() != ConnectivityManager.TYPE_WIFI && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE)) {
                 mListener.onFailure(new Exception("Unable to connect to URL. No network connection."));
@@ -229,5 +231,14 @@ public class PNHttpClient extends AsyncTask<String, Void, PNHttpClient.Result> {
 
     private boolean isHttpSuccess(int responseCode) {
         return responseCode / 100 == 2;
+    }
+
+    private NetworkInfo getActiveNetworkInfo() {
+        if (mContextRef.get() == null) {
+            return null;
+        }
+
+        ConnectivityManager connectivityManager = (ConnectivityManager) mContextRef.get().getSystemService(Context.CONNECTIVITY_SERVICE);
+        return connectivityManager.getActiveNetworkInfo();
     }
 }

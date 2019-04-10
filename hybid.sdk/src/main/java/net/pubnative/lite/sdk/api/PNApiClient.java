@@ -72,7 +72,7 @@ public class PNApiClient {
         } else {
             final long initTime = System.currentTimeMillis();
 
-            PNHttpClient httpClient = new PNHttpClient(PNHttpClient.Method.GET, new PNHttpClient.Listener() {
+            PNHttpClient httpClient = new PNHttpClient(mContext, PNHttpClient.Method.GET, new PNHttpClient.Listener() {
                 @Override
                 public void onSuccess(String response) {
                     registerAdRequest(url, response, initTime);
@@ -87,54 +87,28 @@ public class PNApiClient {
                         listener.onFailure(error);
                     }
                 }
-
-                @Override
-                public NetworkInfo getActiveNetworkInfo() {
-                    ConnectivityManager connectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-                    NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-                    return networkInfo;
-                }
             });
             httpClient.execute(url);
-
-            /*PNHttpRequest httpRequest = new PNHttpRequest();
-            httpRequest.start(mContext, PNHttpRequest.Method.GET, url, new PNHttpRequest.Listener() {
-                @Override
-                public void onPNHttpRequestFinish(PNHttpRequest request, String result) {
-                    registerAdRequest(url, result, initTime);
-
-                    processStream(result, listener);
-                }
-
-                @Override
-                public void onPNHttpRequestFail(PNHttpRequest request, Exception exception) {
-                    registerAdRequest(url, exception.getMessage(), initTime);
-
-                    if (listener != null) {
-                        listener.onFailure(exception);
-                    }
-                }
-            });*/
         }
     }
 
     public void trackUrl(String url, final TrackUrlListener listener) {
-        PNHttpRequest httpRequest = new PNHttpRequest();
-        httpRequest.start(mContext, PNHttpRequest.Method.GET, url, new PNHttpRequest.Listener() {
+        PNHttpClient httpClient = new PNHttpClient(mContext, PNHttpClient.Method.GET, new PNHttpClient.Listener() {
             @Override
-            public void onPNHttpRequestFinish(PNHttpRequest request, String result) {
+            public void onSuccess(String response) {
                 if (listener != null) {
                     listener.onSuccess();
                 }
             }
 
             @Override
-            public void onPNHttpRequestFail(PNHttpRequest request, Exception exception) {
+            public void onFailure(Throwable error) {
                 if (listener != null) {
-                    listener.onFailure(exception);
+                    listener.onFailure(error);
                 }
             }
         });
+        httpClient.execute(url);
     }
 
     protected String getAdRequestURL(AdRequest adRequest) {
