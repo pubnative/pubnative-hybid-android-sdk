@@ -1,28 +1,29 @@
 package net.pubnative.lite.sdk.network;
 
-import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.text.TextUtils;
 
+import net.pubnative.lite.sdk.exception.PNException;
+import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNCrypto;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.lang.ref.WeakReference;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
 public class PNHttpClient extends AsyncTask<String, Void, PNHttpClient.Result> {
+    private static final String TAG = PNHttpClient.class.getSimpleName();
+
     public enum Method {
         GET("GET"),
         POST("POST"),
@@ -141,7 +142,7 @@ public class PNHttpClient extends AsyncTask<String, Void, PNHttpClient.Result> {
         }
     }
 
-    private String fetchUrl(URL url) throws IOException {
+    private String fetchUrl(URL url) throws Exception {
         InputStream stream = null;
         HttpsURLConnection connection = null;
         String result = null;
@@ -181,7 +182,7 @@ public class PNHttpClient extends AsyncTask<String, Void, PNHttpClient.Result> {
 
             stream = connection.getInputStream();
             if (stream != null) {
-                result = readStream(stream, 500);
+                result = stringFromInputStream(stream);
             }
 
         } finally {
@@ -197,20 +198,33 @@ public class PNHttpClient extends AsyncTask<String, Void, PNHttpClient.Result> {
         return result;
     }
 
-    private String readStream(InputStream stream, int maxReadSize) throws IOException, UnsupportedEncodingException {
-        Reader reader = null;
-        reader = new InputStreamReader(stream, "UTF-8");
-        char[] rawbuffer = new char[maxReadSize];
-        int readSize;
-        StringBuffer buffer = new StringBuffer();
-        while (((readSize = reader.read(rawbuffer)) != -1) && maxReadSize > 0) {
-            if (readSize > maxReadSize) {
-                readSize = maxReadSize;
-            }
-            buffer.append(rawbuffer, 0, readSize);
-            maxReadSize -= readSize;
+    protected String stringFromInputStream(InputStream inputStream) throws PNException {
+        if (inputStream == null) {
+            return "";
         }
-        return buffer.toString();
+        String result = null;
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        int length;
+        try {
+            byte[] buffer = new byte[1024];
+            while ((length = inputStream.read(buffer)) != -1) {
+                byteArrayOutputStream.write(buffer, 0, length);
+            }
+            byteArrayOutputStream.flush();
+            result = byteArrayOutputStream.toString();
+            byteArrayOutputStream.close();
+        } catch (IOException e) {
+            Logger.e(TAG, "stringFromInputStream - Error:" + e);
+
+            Map<String, String> errorData = new HashMap<>();
+            if (result == null) {
+                result = byteArrayOutputStream.toString();
+            }
+            errorData.put("serverResponse", result);
+            errorData.put("IOException", e.toString());
+            throw PNException.extraException(errorData);
+        }
+        return result;
     }
 
     private boolean isHttpSuccess(int responseCode) {
