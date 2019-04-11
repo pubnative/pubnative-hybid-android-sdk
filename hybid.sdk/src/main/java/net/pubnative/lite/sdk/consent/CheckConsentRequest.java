@@ -53,7 +53,7 @@ public class CheckConsentRequest {
             Map<String, String> headers = new HashMap<>();
             headers.put("Authorization", String.format(Locale.ENGLISH, "Bearer %s", appToken));
 
-            PNHttpClient.makeRequest(url, headers, null, new PNHttpClient.Listener() {
+            PNHttpClient.makeRequest(context, url, headers, null, new PNHttpClient.Listener() {
                 @Override
                 public void onSuccess(String response) {
                     if (listener != null) {

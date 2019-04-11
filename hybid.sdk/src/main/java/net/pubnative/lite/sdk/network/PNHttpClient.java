@@ -22,6 +22,9 @@
 //
 package net.pubnative.lite.sdk.network;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -73,47 +76,56 @@ public class PNHttpClient {
         }
     }
 
-    public static void makeRequest(final String url,
+    public static void makeRequest(final Context context,
+                                   final String url,
                                    final Map<String, String> headers,
                                    final String postBody,
                                    final Listener listener) {
-        makeRequest(url, headers, postBody, true, listener);
+        makeRequest(context, url, headers, postBody, true, listener);
     }
 
-    public static void makeRequest(final String url,
+    public static void makeRequest(final Context context,
+                                   final String url,
                                    final Map<String, String> headers,
                                    final String postBody,
                                    final boolean shouldReturnOnMainThread,
                                    final Listener listener) {
-        sExecutor.submit(new Runnable() {
-            @Override
-            public void run() {
-                final Response response = sendRequest(url, headers, postBody);
-                if (response.exception != null) {
-                    if (shouldReturnOnMainThread) {
-                        sUiHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                listener.onFailure(response.exception);
-                            }
-                        });
+
+        NetworkInfo networkInfo = getActiveNetworkInfo(context);
+        if (networkInfo == null || !networkInfo.isConnected()
+                || (networkInfo.getType() != ConnectivityManager.TYPE_WIFI && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE)) {
+            listener.onFailure(new Exception("{\"status\": \"error\", \"error_message\": \"Unable to connect to URL. No network connection.\"}"));
+        } else {
+            sExecutor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    final Response response = sendRequest(url, headers, postBody);
+                    if (response.exception != null) {
+                        if (shouldReturnOnMainThread) {
+                            sUiHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    listener.onFailure(response.exception);
+                                }
+                            });
+                        } else {
+                            listener.onFailure(response.exception);
+                        }
                     } else {
-                        listener.onFailure(response.exception);
-                    }
-                } else {
-                    if (shouldReturnOnMainThread) {
-                        sUiHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                listener.onSuccess(response.response);
-                            }
-                        });
-                    } else {
-                        listener.onSuccess(response.response);
+                        if (shouldReturnOnMainThread) {
+                            sUiHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    listener.onSuccess(response.response);
+                                }
+                            });
+                        } else {
+                            listener.onSuccess(response.response);
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
     }
 
     private static Response sendRequest(String url,
@@ -170,4 +182,14 @@ public class PNHttpClient {
         }
         return resultStream.toString("UTF-8");
     }
+
+    private static NetworkInfo getActiveNetworkInfo(Context context) {
+        if (context == null) {
+            return null;
+        }
+
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        return connectivityManager.getActiveNetworkInfo();
+    }
+
 }

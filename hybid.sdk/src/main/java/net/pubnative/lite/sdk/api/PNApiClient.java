@@ -68,7 +68,7 @@ public class PNApiClient {
         } else {
             final long initTime = System.currentTimeMillis();
 
-            PNHttpClient.makeRequest(url, null, null, new PNHttpClient.Listener() {
+            PNHttpClient.makeRequest(mContext, url, null, null, new PNHttpClient.Listener() {
                 @Override
                 public void onSuccess(String response) {
                     registerAdRequest(url, response, initTime);
@@ -88,7 +88,7 @@ public class PNApiClient {
     }
 
     public void trackUrl(String url, final TrackUrlListener listener) {
-        PNHttpClient.makeRequest(url, null, null, new PNHttpClient.Listener() {
+        PNHttpClient.makeRequest(mContext, url, null, null, new PNHttpClient.Listener() {
             @Override
             public void onSuccess(String response) {
                 if (listener != null) {

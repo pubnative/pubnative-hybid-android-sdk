@@ -87,7 +87,7 @@ public class AssetsLoader {
 
             @Override
             public void onError(PlayerInfo info) {
-                ErrorLog.postError(VastError.COMPANION);
+                ErrorLog.postError(mContext, VastError.COMPANION);
                 endCardFileIndex++;
                 if (endCardFileIndex < mAdParams.getEndCardUrlList().size()) {
                     loadEndCard();

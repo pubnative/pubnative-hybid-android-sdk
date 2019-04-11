@@ -89,7 +89,7 @@ public class TrackingManager {
                     sIsTracking = false;
                     trackNextItem(context);
                 } else {
-                    PNHttpClient.makeRequest(model.url, null, null, new PNHttpClient.Listener() {
+                    PNHttpClient.makeRequest(context, model.url, null, null, new PNHttpClient.Listener() {
                         @Override
                         public void onSuccess(String response) {
                             sIsTracking = false;

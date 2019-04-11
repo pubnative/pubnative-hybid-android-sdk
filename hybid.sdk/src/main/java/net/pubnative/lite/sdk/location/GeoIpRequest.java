@@ -36,7 +36,7 @@ public class GeoIpRequest {
     }
 
     public void fetchGeoIp(Context context, final GeoIpRequestListener listener) {
-        PNHttpClient.makeRequest(getEndpointUrl(), null, null, new PNHttpClient.Listener() {
+        PNHttpClient.makeRequest(context, getEndpointUrl(), null, null, new PNHttpClient.Listener() {
             @Override
             public void onSuccess(String response) {
                 if (listener != null) {

@@ -134,7 +134,7 @@ abstract class BaseVideoAdInternal {
             public void onFinish() {
                 mPrepareTimer = null;
                 if (mAdController != null && mAdController instanceof VideoAdControllerVpaid) {
-                    ErrorLog.postError(VastError.FILE_NOT_FOUND);
+                    ErrorLog.postError(getContext(), VastError.FILE_NOT_FOUND);
                     onAdLoadFail(new PlayerInfo("Problem with js file"));
                 }
                 cancelFetcher();
@@ -165,7 +165,7 @@ abstract class BaseVideoAdInternal {
             @Override
             public void onFinish() {
                 cancelFetcher();
-                ErrorLog.postError(VastError.TIMEOUT);
+                ErrorLog.postError(getContext(), VastError.TIMEOUT);
                 onAdLoadFail(new PlayerInfo("Ad processing timeout"));
             }
         });
@@ -193,7 +193,7 @@ abstract class BaseVideoAdInternal {
     }
 
     private void fetchAd() {
-        VastParser.parseResponse(mVastData, getAdSpotDimensions(), new VastParser.Listener() {
+        VastParser.parseResponse(getContext(), mVastData, getAdSpotDimensions(), new VastParser.Listener() {
             @Override
             public void onParseSuccess(AdParams adParams, String vastFileContent) {
                 prepare(adParams, vastFileContent);
@@ -221,7 +221,7 @@ abstract class BaseVideoAdInternal {
             public void onAssetsLoaded(String videoFilePath, String endCardFilePath) {
                 if (mAdController == null) {
                     onAdLoadFailInternal(new PlayerInfo("Error during video loading"));
-                    ErrorLog.postError(VastError.UNDEFINED);
+                    ErrorLog.postError(getContext(), VastError.UNDEFINED);
                     Logger.d(LOG_TAG, "VideoAdController == null, after onAssetsLoaded success");
                     return;
                 }

@@ -241,7 +241,7 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
 
     @Override
     public void trackError(String message) {
-        ErrorLog.postError(VastError.VPAID);
+        ErrorLog.postError(mBaseAdInternal.getContext(), VastError.VPAID);
     }
 
     @Override

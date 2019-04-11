@@ -53,7 +53,7 @@ public class UserConsentRequest {
             headers.put("Content-Type", "application/json");
             headers.put("Authorization", String.format(Locale.ENGLISH, "Bearer %s", appToken));
 
-            PNHttpClient.makeRequest(url, headers, request.toJson().toString(), new PNHttpClient.Listener() {
+            PNHttpClient.makeRequest(context, url, headers, request.toJson().toString(), new PNHttpClient.Listener() {
                 @Override
                 public void onSuccess(String response) {
                     if (listener != null) {

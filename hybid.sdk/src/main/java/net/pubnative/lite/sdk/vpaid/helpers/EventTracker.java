@@ -39,7 +39,7 @@ public class EventTracker {
             sUsedEvents.add(url);
         }
 
-        PNHttpClient.makeRequest(url, null, null, false, new PNHttpClient.Listener() {
+        PNHttpClient.makeRequest(context, url, null, null, false, new PNHttpClient.Listener() {
             @Override
             public void onSuccess(String response) {
 

@@ -116,7 +116,7 @@ class VideoAdControllerVast implements VideoAdController {
     private MediaPlayer.OnErrorListener mOnErrorListener = new MediaPlayer.OnErrorListener() {
         @Override
         public boolean onError(MediaPlayer mp, int what, int extra) {
-            ErrorLog.postError(VastError.MEDIA_FILE_UNSUPPORTED);
+            ErrorLog.postError(mBaseAdInternal.getContext(), VastError.MEDIA_FILE_UNSUPPORTED);
             return false;
         }
     };
