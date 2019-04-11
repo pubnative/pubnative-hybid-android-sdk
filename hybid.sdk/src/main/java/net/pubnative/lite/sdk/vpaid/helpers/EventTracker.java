@@ -2,11 +2,9 @@ package net.pubnative.lite.sdk.vpaid.helpers;
 
 import android.content.Context;
 
-import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.network.PNHttpExecutor;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.models.vast.Tracking;
-import net.pubnative.lite.sdk.vpaid.utils.HttpUtil;
 
 import java.util.HashSet;
 import java.util.List;
@@ -42,45 +40,17 @@ public class EventTracker {
             sUsedEvents.add(url);
         }
 
-        final long initialTime = System.currentTimeMillis();
-
-        /*new PNHttpClient(context, PNHttpClient.Method.GET, new PNHttpClient.Listener() {
-            @Override
-            public void onSuccess(String response) {
-                long endTime = System.currentTimeMillis();
-                Logger.d("VPAID_TRKR", String.valueOf(endTime - initialTime));
-            }
-
-            @Override
-            public void onFailure(Throwable error) {
-                long endTime = System.currentTimeMillis();
-                Logger.d("VPAID_TRKR", String.valueOf(endTime - initialTime));
-            }
-        }).execute(url);*/
-
         PNHttpExecutor.makeRequest(url, null, null, false, new PNHttpExecutor.Listener() {
             @Override
             public void onSuccess(String response) {
-                long endTime = System.currentTimeMillis();
-                Logger.d("VPAID_TRKR", String.valueOf(endTime - initialTime));
+
             }
 
             @Override
             public void onFailure(Throwable error) {
-                long endTime = System.currentTimeMillis();
-                Logger.d("VPAID_TRKR", String.valueOf(endTime - initialTime));
+
             }
         });
-
-        /*sExecutor.submit(new Runnable() {
-            @Override
-            public void run() {
-                Logger.d(LOG_TAG, url);
-                HttpUtil.sendRequest(url, null, null);
-                long endTime = System.currentTimeMillis();
-                Logger.d("VPAID_TRKR", String.valueOf(endTime - initialTime));
-            }
-        });*/
     }
 
     public static void clear() {
