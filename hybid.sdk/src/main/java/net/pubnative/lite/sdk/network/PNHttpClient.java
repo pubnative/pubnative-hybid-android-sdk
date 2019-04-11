@@ -6,18 +6,14 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.text.TextUtils;
 
-import net.pubnative.lite.sdk.exception.PNException;
-import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNCrypto;
 
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.lang.ref.WeakReference;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -25,6 +21,9 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class PNHttpClient extends AsyncTask<String, Void, PNHttpClient.Result> {
     private static final String TAG = PNHttpClient.class.getSimpleName();
+
+    private static final int READ_TIMEOUT = 10000;
+    private static final int CONNECT_TIMEOUT = 10000;
 
     public enum Method {
         GET("GET"),
@@ -151,8 +150,8 @@ public class PNHttpClient extends AsyncTask<String, Void, PNHttpClient.Result> {
 
         try {
             connection = (HttpsURLConnection) url.openConnection();
-            //connection.setReadTimeout(4000);
-            connection.setConnectTimeout(4000);
+            connection.setReadTimeout(READ_TIMEOUT);
+            connection.setConnectTimeout(CONNECT_TIMEOUT);
             connection.setRequestMethod(mMethod.toString());
 
             if (!mHeaders.isEmpty()) {
@@ -168,14 +167,11 @@ public class PNHttpClient extends AsyncTask<String, Void, PNHttpClient.Result> {
                 connection.setDoOutput(true);
                 connection.setRequestProperty("Content-Length", Integer.toString(mPostBody.getBytes().length));
                 connection.setRequestProperty("Content-MD5", PNCrypto.md5(mPostBody));
-                OutputStream connectionOutputStream = connection.getOutputStream();
-                OutputStreamWriter wr = new OutputStreamWriter(connectionOutputStream, "UTF-8");
-                wr.write(mPostBody);
-                wr.flush();
-                wr.close();
+                DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream());
+                outputStream.writeBytes(mPostBody);
+                outputStream.flush();
+                outputStream.close();
             }
-
-            connection.connect();
 
             int responseCode = connection.getResponseCode();
             if (!isHttpSuccess(responseCode)) {
@@ -184,7 +180,7 @@ public class PNHttpClient extends AsyncTask<String, Void, PNHttpClient.Result> {
 
             stream = connection.getInputStream();
             if (stream != null) {
-                result = stringFromInputStream(stream);
+                result = getStringFromStream(stream);
             }
 
         } finally {
@@ -200,33 +196,15 @@ public class PNHttpClient extends AsyncTask<String, Void, PNHttpClient.Result> {
         return result;
     }
 
-    protected String stringFromInputStream(InputStream inputStream) throws PNException {
-        if (inputStream == null) {
-            return "";
-        }
-        String result = null;
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    private String getStringFromStream(InputStream inputStream) throws IOException {
+        final int BUFFER_SIZE = 4096;
+        ByteArrayOutputStream resultStream = new ByteArrayOutputStream(BUFFER_SIZE);
+        byte[] buffer = new byte[BUFFER_SIZE];
         int length;
-        try {
-            byte[] buffer = new byte[1024];
-            while ((length = inputStream.read(buffer)) != -1) {
-                byteArrayOutputStream.write(buffer, 0, length);
-            }
-            byteArrayOutputStream.flush();
-            result = byteArrayOutputStream.toString();
-            byteArrayOutputStream.close();
-        } catch (IOException e) {
-            Logger.e(TAG, "stringFromInputStream - Error:" + e);
-
-            Map<String, String> errorData = new HashMap<>();
-            if (result == null) {
-                result = byteArrayOutputStream.toString();
-            }
-            errorData.put("serverResponse", result);
-            errorData.put("IOException", e.toString());
-            throw PNException.extraException(errorData);
+        while ((length = inputStream.read(buffer)) != -1) {
+            resultStream.write(buffer, 0, length);
         }
-        return result;
+        return resultStream.toString("UTF-8");
     }
 
     private boolean isHttpSuccess(int responseCode) {

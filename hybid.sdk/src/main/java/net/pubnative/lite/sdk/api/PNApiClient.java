@@ -32,6 +32,7 @@ import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdResponse;
 import net.pubnative.lite.sdk.network.PNHttpClient;
+import net.pubnative.lite.sdk.network.PNHttpExecutor;
 import net.pubnative.lite.sdk.network.PNHttpRequest;
 import net.pubnative.lite.sdk.utils.AdRequestRegistry;
 import net.pubnative.lite.sdk.utils.PNApiUrlComposer;
@@ -72,7 +73,7 @@ public class PNApiClient {
         } else {
             final long initTime = System.currentTimeMillis();
 
-            PNHttpClient httpClient = new PNHttpClient(mContext, PNHttpClient.Method.GET, new PNHttpClient.Listener() {
+            /*PNHttpClient httpClient = new PNHttpClient(mContext, PNHttpClient.Method.GET, new PNHttpClient.Listener() {
                 @Override
                 public void onSuccess(String response) {
                     registerAdRequest(url, response, initTime);
@@ -88,12 +89,29 @@ public class PNApiClient {
                     }
                 }
             });
-            httpClient.execute(url);
+            httpClient.execute(url);*/
+
+            PNHttpExecutor.makeRequest(url, null, null, new PNHttpExecutor.Listener() {
+                @Override
+                public void onSuccess(String response) {
+                    registerAdRequest(url, response, initTime);
+                    processStream(response, listener);
+                }
+
+                @Override
+                public void onFailure(Throwable error) {
+                    registerAdRequest(url, error.getMessage(), initTime);
+
+                    if (listener != null) {
+                        listener.onFailure(error);
+                    }
+                }
+            });
         }
     }
 
     public void trackUrl(String url, final TrackUrlListener listener) {
-        PNHttpClient httpClient = new PNHttpClient(mContext, PNHttpClient.Method.GET, new PNHttpClient.Listener() {
+        PNHttpExecutor.makeRequest(url, null, null, new PNHttpExecutor.Listener() {
             @Override
             public void onSuccess(String response) {
                 if (listener != null) {
@@ -108,7 +126,23 @@ public class PNApiClient {
                 }
             }
         });
-        httpClient.execute(url);
+
+        /*PNHttpClient httpClient = new PNHttpClient(mContext, PNHttpClient.Method.GET, new PNHttpClient.Listener() {
+            @Override
+            public void onSuccess(String response) {
+                if (listener != null) {
+                    listener.onSuccess();
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                if (listener != null) {
+                    listener.onFailure(error);
+                }
+            }
+        });
+        httpClient.execute(url);*/
     }
 
     protected String getAdRequestURL(AdRequest adRequest) {

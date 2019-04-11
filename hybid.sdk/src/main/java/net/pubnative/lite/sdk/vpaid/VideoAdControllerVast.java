@@ -155,7 +155,7 @@ class VideoAdControllerVast implements VideoAdController {
                 List<TrackingEvent> eventsToRemove = new ArrayList<>();
                 for (TrackingEvent event : mTrackingEventsList) {
                     if (doneMillis > event.timeMillis) {
-                        EventTracker.post(event.url);
+                        EventTracker.post(mBaseAdInternal.getContext(), event.url);
                         eventsToRemove.add(event);
                     }
                 }
@@ -227,7 +227,7 @@ class VideoAdControllerVast implements VideoAdController {
         public void onCompletion(MediaPlayer mp) {
             mBaseAdInternal.onAdDidReachEnd();
             skipVideo(false);
-            EventTracker.postEventByType(mAdParams.getEvents(), EventConstants.COMPLETE);
+            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.COMPLETE);
         }
     };
 
@@ -258,7 +258,7 @@ class VideoAdControllerVast implements VideoAdController {
             mViewControllerVast.showEndCard(mImageUri);
         }
         if (skipEvent) {
-            EventTracker.postEventByType(mAdParams.getEvents(), EventConstants.SKIP);
+            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.SKIP);
         }
     }
 
@@ -279,13 +279,13 @@ class VideoAdControllerVast implements VideoAdController {
         if (mute) {
             mMediaPlayer.setVolume(0f, 0f);
             if (postEvent) {
-                EventTracker.postEventByType(mAdParams.getEvents(), EventConstants.MUTE);
+                EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.MUTE);
             }
         } else {
             float systemVolume = Utils.getSystemVolume();
             mMediaPlayer.setVolume(systemVolume, systemVolume);
             if (postEvent) {
-                EventTracker.postEventByType(mAdParams.getEvents(), EventConstants.UNMUTE);
+                EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.UNMUTE);
             }
         }
     }
@@ -294,7 +294,7 @@ class VideoAdControllerVast implements VideoAdController {
         String clickUrl = mAdParams.getVideoRedirectUrl();
 
         for (String trackUrl : mAdParams.getVideoClicks()) {
-            EventTracker.post(trackUrl);
+            EventTracker.post(mBaseAdInternal.getContext(), trackUrl);
         }
 
         return clickUrl;
@@ -304,7 +304,7 @@ class VideoAdControllerVast implements VideoAdController {
         String clickUrl = mAdParams.getEndCardRedirectUrl();
 
         for (String trackUrl : mAdParams.getEndCardClicks()) {
-            EventTracker.post(trackUrl);
+            EventTracker.post(mBaseAdInternal.getContext(), trackUrl);
         }
 
         return clickUrl;
@@ -338,7 +338,7 @@ class VideoAdControllerVast implements VideoAdController {
     }
 
     public void closeSelf() {
-        EventTracker.postEventByType(mAdParams.getEvents(), EventConstants.CLOSE);
+        EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.CLOSE);
         mBaseAdInternal.dismiss();
     }
 
@@ -362,7 +362,7 @@ class VideoAdControllerVast implements VideoAdController {
             if (mTimerWithPause != null) {
                 mTimerWithPause.pause();
             }
-            EventTracker.postEventByType(mAdParams.getEvents(), EventConstants.PAUSE);
+            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.PAUSE);
         }
     }
 
@@ -370,7 +370,7 @@ class VideoAdControllerVast implements VideoAdController {
     public void resume() {
         if (mMediaPlayer != null && !mMediaPlayer.isPlaying() && mViewControllerVast.isEndCard()) {
             playAd();
-            EventTracker.postEventByType(mAdParams.getEvents(), EventConstants.RESUME);
+            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.RESUME);
         }
     }
 

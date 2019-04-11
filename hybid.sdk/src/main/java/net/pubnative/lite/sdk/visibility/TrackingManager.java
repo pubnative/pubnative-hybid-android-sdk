@@ -28,7 +28,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import net.pubnative.lite.sdk.models.TrackingUrlModel;
-import net.pubnative.lite.sdk.network.PNHttpRequest;
+import net.pubnative.lite.sdk.network.PNHttpExecutor;
 
 import org.json.JSONArray;
 
@@ -89,16 +89,15 @@ public class TrackingManager {
                     sIsTracking = false;
                     trackNextItem(context);
                 } else {
-                    new PNHttpRequest().start(context, PNHttpRequest.Method.GET, model.url, new PNHttpRequest.Listener() {
-
+                    PNHttpExecutor.makeRequest(model.url, null, null, new PNHttpExecutor.Listener() {
                         @Override
-                        public void onPNHttpRequestFinish(PNHttpRequest request, String result) {
+                        public void onSuccess(String response) {
                             sIsTracking = false;
                             trackNextItem(context);
                         }
 
                         @Override
-                        public void onPNHttpRequestFail(PNHttpRequest request, Exception exception) {
+                        public void onFailure(Throwable error) {
                             // Since this failed, we re-enqueue it
                             enqueueItem(context, SHARED_FAILED_LIST, model);
                             sIsTracking = false;

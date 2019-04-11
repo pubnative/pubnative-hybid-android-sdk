@@ -222,7 +222,7 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
     @Override
     public void openUrl(String url) {
         for (String trackUrl : mAdParams.getVideoClicks()) {
-            EventTracker.post(trackUrl);
+            EventTracker.post(mBaseAdInternal.getContext(), trackUrl);
         }
         if (TextUtils.isEmpty(url)) {
             url = mAdParams.getVideoRedirectUrl();
@@ -254,7 +254,7 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
                 }
                 int sendEventTime = mAdParams.getDuration() - value;
                 if (Utils.parseDuration(tracking.getOffset()) == sendEventTime) {
-                    EventTracker.post(event.url);
+                    EventTracker.post(mBaseAdInternal.getContext(), event.url);
                 }
             }
         }
@@ -262,7 +262,7 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
 
     @Override
     public void postEvent(String eventType) {
-        EventTracker.postEventByType(mAdParams.getEvents(), eventType);
+        EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), eventType);
     }
     //endregion
 
@@ -329,7 +329,7 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
     @Override
     public void onAdImpression() {
         for (String url : mAdParams.getImpressions()) {
-            EventTracker.post(url);
+            EventTracker.post(mBaseAdInternal.getContext(), url);
             Logger.d(LOG_TAG, "mAdParams.getImpressions() " + url);
         }
     }
