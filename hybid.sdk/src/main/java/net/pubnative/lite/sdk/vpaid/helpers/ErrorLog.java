@@ -2,9 +2,9 @@ package net.pubnative.lite.sdk.vpaid.helpers;
 
 import android.text.TextUtils;
 
+import net.pubnative.lite.sdk.network.PNHttpExecutor;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.enums.VastError;
-import net.pubnative.lite.sdk.vpaid.utils.HttpUtil;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,16 +28,22 @@ public class ErrorLog {
         if (TextUtils.isEmpty(sErrorLogUrl)) {
             return;
         }
-        sExecutor.submit(new Runnable() {
-            @Override
-            public void run() {
-                String url = sErrorLogUrl;
-                if (sErrorLogUrl.contains(ERROR_CODE)) {
-                    url = url.replace(ERROR_CODE, error.getValue());
 
-                }
-                Logger.d(LOG_TAG, url);
-                HttpUtil.sendRequest(url, null, null);
+        String url = sErrorLogUrl;
+        if (sErrorLogUrl.contains(ERROR_CODE)) {
+            url = url.replace(ERROR_CODE, error.getValue());
+        }
+        Logger.d(LOG_TAG, url);
+
+        PNHttpExecutor.makeRequest(url, null, null, new PNHttpExecutor.Listener() {
+            @Override
+            public void onSuccess(String response) {
+
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+
             }
         });
     }
