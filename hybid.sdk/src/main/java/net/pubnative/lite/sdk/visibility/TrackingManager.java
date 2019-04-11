@@ -28,7 +28,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import net.pubnative.lite.sdk.models.TrackingUrlModel;
-import net.pubnative.lite.sdk.network.PNHttpExecutor;
+import net.pubnative.lite.sdk.network.PNHttpClient;
 
 import org.json.JSONArray;
 
@@ -89,7 +89,7 @@ public class TrackingManager {
                     sIsTracking = false;
                     trackNextItem(context);
                 } else {
-                    PNHttpExecutor.makeRequest(model.url, null, null, new PNHttpExecutor.Listener() {
+                    PNHttpClient.makeRequest(model.url, null, null, new PNHttpClient.Listener() {
                         @Override
                         public void onSuccess(String response) {
                             sIsTracking = false;

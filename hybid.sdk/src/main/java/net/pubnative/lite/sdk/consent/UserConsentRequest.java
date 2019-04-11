@@ -27,7 +27,7 @@ import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.models.UserConsentRequestModel;
 import net.pubnative.lite.sdk.models.UserConsentResponseModel;
-import net.pubnative.lite.sdk.network.PNHttpExecutor;
+import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.utils.Logger;
 
 import org.json.JSONObject;
@@ -53,7 +53,7 @@ public class UserConsentRequest {
             headers.put("Content-Type", "application/json");
             headers.put("Authorization", String.format(Locale.ENGLISH, "Bearer %s", appToken));
 
-            PNHttpExecutor.makeRequest(url, headers, request.toJson().toString(), new PNHttpExecutor.Listener() {
+            PNHttpClient.makeRequest(url, headers, request.toJson().toString(), new PNHttpClient.Listener() {
                 @Override
                 public void onSuccess(String response) {
                     if (listener != null) {

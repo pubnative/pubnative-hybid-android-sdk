@@ -28,7 +28,7 @@ import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdResponse;
-import net.pubnative.lite.sdk.network.PNHttpExecutor;
+import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.utils.AdRequestRegistry;
 import net.pubnative.lite.sdk.utils.PNApiUrlComposer;
 
@@ -68,7 +68,7 @@ public class PNApiClient {
         } else {
             final long initTime = System.currentTimeMillis();
 
-            PNHttpExecutor.makeRequest(url, null, null, new PNHttpExecutor.Listener() {
+            PNHttpClient.makeRequest(url, null, null, new PNHttpClient.Listener() {
                 @Override
                 public void onSuccess(String response) {
                     registerAdRequest(url, response, initTime);
@@ -88,7 +88,7 @@ public class PNApiClient {
     }
 
     public void trackUrl(String url, final TrackUrlListener listener) {
-        PNHttpExecutor.makeRequest(url, null, null, new PNHttpExecutor.Listener() {
+        PNHttpClient.makeRequest(url, null, null, new PNHttpClient.Listener() {
             @Override
             public void onSuccess(String response) {
                 if (listener != null) {

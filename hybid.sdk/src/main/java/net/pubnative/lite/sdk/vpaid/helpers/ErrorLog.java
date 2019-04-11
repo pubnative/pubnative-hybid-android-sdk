@@ -2,7 +2,7 @@ package net.pubnative.lite.sdk.vpaid.helpers;
 
 import android.text.TextUtils;
 
-import net.pubnative.lite.sdk.network.PNHttpExecutor;
+import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.enums.VastError;
 
@@ -35,7 +35,7 @@ public class ErrorLog {
         }
         Logger.d(LOG_TAG, url);
 
-        PNHttpExecutor.makeRequest(url, null, null, new PNHttpExecutor.Listener() {
+        PNHttpClient.makeRequest(url, null, null, new PNHttpClient.Listener() {
             @Override
             public void onSuccess(String response) {
 

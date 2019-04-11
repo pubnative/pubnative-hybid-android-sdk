@@ -2,8 +2,7 @@ package net.pubnative.lite.sdk.vpaid.helpers;
 
 import android.content.Context;
 
-import net.pubnative.lite.sdk.network.PNHttpExecutor;
-import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.vpaid.models.vast.Tracking;
 
 import java.util.HashSet;
@@ -40,7 +39,7 @@ public class EventTracker {
             sUsedEvents.add(url);
         }
 
-        PNHttpExecutor.makeRequest(url, null, null, false, new PNHttpExecutor.Listener() {
+        PNHttpClient.makeRequest(url, null, null, false, new PNHttpClient.Listener() {
             @Override
             public void onSuccess(String response) {
 

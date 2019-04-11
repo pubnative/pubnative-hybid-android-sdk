@@ -25,7 +25,7 @@ package net.pubnative.lite.sdk.location;
 import android.content.Context;
 import android.net.Uri;
 
-import net.pubnative.lite.sdk.network.PNHttpExecutor;
+import net.pubnative.lite.sdk.network.PNHttpClient;
 
 public class GeoIpRequest {
 
@@ -36,7 +36,7 @@ public class GeoIpRequest {
     }
 
     public void fetchGeoIp(Context context, final GeoIpRequestListener listener) {
-        PNHttpExecutor.makeRequest(getEndpointUrl(), null, null, new PNHttpExecutor.Listener() {
+        PNHttpClient.makeRequest(getEndpointUrl(), null, null, new PNHttpClient.Listener() {
             @Override
             public void onSuccess(String response) {
                 if (listener != null) {

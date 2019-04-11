@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class PNHttpExecutor {
+public class PNHttpClient {
     private static ExecutorService sExecutor = Executors.newCachedThreadPool();
     private static Handler sUiHandler = new Handler(Looper.getMainLooper());
 
