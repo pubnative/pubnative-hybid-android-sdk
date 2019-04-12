@@ -131,7 +131,9 @@ class MoPubBannerFragment : Fragment(), RequestManager.RequestListener, MoPubVie
     }
 
     private fun displayLogs() {
-        val activity = activity as TabActivity
-        activity.notifyAdUpdated()
+        if (activity != null) {
+            val activity = activity as TabActivity
+            activity.notifyAdUpdated()
+        }
     }
 }

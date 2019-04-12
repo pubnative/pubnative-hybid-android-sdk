@@ -131,7 +131,9 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
     }
 
     private fun displayLogs() {
-        val activity = activity as TabActivity
-        activity.notifyAdUpdated()
+        if (activity != null) {
+            val activity = activity as TabActivity
+            activity.notifyAdUpdated()
+        }
     }
 }

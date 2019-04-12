@@ -144,7 +144,9 @@ class DFPLeaderboardFragment : Fragment(), RequestManager.RequestListener {
     }
 
     private fun displayLogs() {
-        val activity = activity as TabActivity
-        activity.notifyAdUpdated()
+        if (activity != null) {
+            val activity = activity as TabActivity
+            activity.notifyAdUpdated()
+        }
     }
 }

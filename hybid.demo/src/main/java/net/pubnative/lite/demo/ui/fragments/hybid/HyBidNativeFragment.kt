@@ -134,7 +134,9 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
     }
 
     private fun displayLogs() {
-        val activity = activity as TabActivity
-        activity.notifyAdUpdated()
+        if (activity != null) {
+            val activity = activity as TabActivity
+            activity.notifyAdUpdated()
+        }
     }
 }

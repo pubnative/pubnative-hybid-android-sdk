@@ -103,7 +103,9 @@ class HyBidMRectFragment : Fragment(), InFeedAdListener {
     }
 
     private fun displayLogs() {
-        val activity = activity as TabActivity
-        activity.notifyAdUpdated()
+        if (activity != null) {
+            val activity = activity as TabActivity
+            activity.notifyAdUpdated()
+        }
     }
 }

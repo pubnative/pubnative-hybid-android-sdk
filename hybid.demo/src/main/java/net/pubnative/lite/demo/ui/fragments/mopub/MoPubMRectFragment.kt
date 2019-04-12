@@ -131,7 +131,9 @@ class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView
     }
 
     private fun displayLogs() {
-        val activity = activity as TabActivity
-        activity.notifyAdUpdated()
+        if (activity != null) {
+            val activity = activity as TabActivity
+            activity.notifyAdUpdated()
+        }
     }
 }

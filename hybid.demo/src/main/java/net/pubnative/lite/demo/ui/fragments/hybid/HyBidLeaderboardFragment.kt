@@ -76,7 +76,9 @@ class HyBidLeaderboardFragment : Fragment(), PNAdView.Listener {
     }
 
     private fun displayLogs() {
-        val activity = activity as TabActivity
-        activity.notifyAdUpdated()
+        if (activity != null) {
+            val activity = activity as TabActivity
+            activity.notifyAdUpdated()
+        }
     }
 }
