@@ -27,7 +27,7 @@ import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.models.UserConsentRequestModel;
 import net.pubnative.lite.sdk.models.UserConsentResponseModel;
-import net.pubnative.lite.sdk.network.PNHttpRequest;
+import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.utils.Logger;
 
 import org.json.JSONObject;
@@ -49,27 +49,22 @@ public class UserConsentRequest {
         String url = PNConsentEndpoints.getConsentUrl();
 
         try {
-            PNHttpRequest httpRequest = new PNHttpRequest();
-            httpRequest.setPOSTString(request.toJson().toString());
-
             Map<String, String> headers = new HashMap<>();
             headers.put("Content-Type", "application/json");
             headers.put("Authorization", String.format(Locale.ENGLISH, "Bearer %s", appToken));
 
-            httpRequest.setHeaders(headers);
-
-            httpRequest.start(context, PNHttpRequest.Method.POST, url, new PNHttpRequest.Listener() {
+            PNHttpClient.makeRequest(context, url, headers, request.toJson().toString(), new PNHttpClient.Listener() {
                 @Override
-                public void onPNHttpRequestFinish(PNHttpRequest request, String result) {
+                public void onSuccess(String response) {
                     if (listener != null) {
-                        handleResponse(result, listener);
+                        handleResponse(response, listener);
                     }
                 }
 
                 @Override
-                public void onPNHttpRequestFail(PNHttpRequest request, Exception exception) {
+                public void onFailure(Throwable error) {
                     if (listener != null) {
-                        listener.onFailure(exception);
+                        listener.onFailure(error);
                     }
                 }
             });

@@ -183,7 +183,7 @@ public class FileLoader {
                     mConnection.getResponseCode() == HttpURLConnection.HTTP_PARTIAL ||
                     mConnection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
                 Logger.e(LOG_TAG, "File not found by URL: " + mRemoteFileUrl);
-                ErrorLog.postError(VastError.TRAFFICKING);
+                ErrorLog.postError(mContext, VastError.TRAFFICKING);
                 return null;
             } else {
                 return null;
@@ -191,11 +191,11 @@ public class FileLoader {
 
         } catch (SocketTimeoutException e) {
             Logger.e(LOG_TAG, "Timeout by URL: " + mRemoteFileUrl);
-            ErrorLog.postError(VastError.TIMEOUT);
+            ErrorLog.postError(mContext, VastError.TIMEOUT);
             return null;
         } catch (IOException e) {
             Logger.e(LOG_TAG, "File not found by URL: " + mRemoteFileUrl);
-            ErrorLog.postError(VastError.FILE_NOT_FOUND);
+            ErrorLog.postError(mContext, VastError.FILE_NOT_FOUND);
             return null;
         } finally {
             if (mConnection != null) {

@@ -1,5 +1,6 @@
 package net.pubnative.lite.sdk.vpaid.response;
 
+import android.content.Context;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.utils.Logger;
@@ -36,7 +37,7 @@ public class VastParser {
         void onParseError(PlayerInfo message);
     }
 
-    public static void parseResponse(String response, AdSpotDimensions parseParams, Listener listener) {
+    public static void parseResponse(Context context, String response, AdSpotDimensions parseParams, Listener listener) {
         try {
             Vast vast = XmlParser.parse(response, Vast.class);
             if (vast.getStatus() != null && vast.getStatus().getText().equalsIgnoreCase("NO_AD")) {
@@ -45,18 +46,18 @@ public class VastParser {
                 listener.onParseError(info);
             } else {
                 AdParams adParams = new AdParams();
-                fillAdParams(vast, adParams, parseParams);
+                fillAdParams(context, vast, adParams, parseParams);
                 listener.onParseSuccess(adParams, response);
             }
         } catch (Exception e) {
-            ErrorLog.postError(VastError.XML_PARSING);
+            ErrorLog.postError(context, VastError.XML_PARSING);
             Logger.e(LOG_TAG, "Parse VAST failed: " + e.getMessage());
             PlayerInfo info = new PlayerInfo("Parse VAST response failed");
             listener.onParseError(info);
         }
     }
 
-    private static void fillAdParams(Vast vast, AdParams adParams, AdSpotDimensions parseParams) {
+    private static void fillAdParams(Context context, Vast vast, AdParams adParams, AdSpotDimensions parseParams) {
         adParams.setId(vast.getAd().getId());
 
         InLine inLine = vast.getAd().getInLine();
@@ -124,7 +125,7 @@ public class VastParser {
             }
             adParams.setVideoFileUrlsList(videoFileUrlsList);
             if (videoFileUrlsList.isEmpty()) {
-                ErrorLog.postError(VastError.MEDIA_FILE_NO_SUPPORTED_TYPE);
+                ErrorLog.postError(context, VastError.MEDIA_FILE_NO_SUPPORTED_TYPE);
             }
         }
 

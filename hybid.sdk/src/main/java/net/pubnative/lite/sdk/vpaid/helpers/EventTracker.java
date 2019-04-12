@@ -1,8 +1,9 @@
 package net.pubnative.lite.sdk.vpaid.helpers;
 
-import net.pubnative.lite.sdk.utils.Logger;
+import android.content.Context;
+
+import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.vpaid.models.vast.Tracking;
-import net.pubnative.lite.sdk.vpaid.utils.HttpUtil;
 
 import java.util.HashSet;
 import java.util.List;
@@ -20,29 +21,33 @@ public class EventTracker {
     private EventTracker() {
     }
 
-    public static void postEventByType(List<Tracking> events, String eventType) {
+    public static void postEventByType(Context context, List<Tracking> events, String eventType) {
         if (events == null) {
             return;
         }
         for (Tracking event : events) {
             if (event.getEvent().equalsIgnoreCase(eventType)) {
-                post(event.getText());
+                post(context, event.getText());
             }
         }
     }
 
-    public static synchronized void post(final String url) {
+    public static synchronized void post(Context context, final String url) {
         if (sUsedEvents.contains(url)) {
             return;
         } else {
             sUsedEvents.add(url);
         }
 
-        sExecutor.submit(new Runnable() {
+        PNHttpClient.makeRequest(context, url, null, null, false, new PNHttpClient.Listener() {
             @Override
-            public void run() {
-                Logger.d(LOG_TAG, url);
-                HttpUtil.sendRequest(url, null, null);
+            public void onSuccess(String response) {
+
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+
             }
         });
     }
