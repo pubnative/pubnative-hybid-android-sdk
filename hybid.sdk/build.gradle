@@ -37,7 +37,7 @@ android {
 dependencies {
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.robolectric:robolectric:3.8'
-    testImplementation 'org.mockito:mockito-core:2.19.0'
+    testImplementation 'org.mockito:mockito-core:2.24.0'
     testImplementation 'com.google.truth:truth:0.36'
     testImplementation 'com.squareup.assertj:assertj-android:1.1.1'
     androidTestImplementation "androidx.test:runner:1.1.0-beta01", {
