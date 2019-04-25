@@ -157,10 +157,11 @@ public class PNHttpClient {
 
             int responseCode = urlConnection.getResponseCode();
             result.responseCode = responseCode;
-            Logger.d("HTTP util", "ResponseCode:" + responseCode);
 
             if (responseCode == HttpURLConnection.HTTP_OK) {
-                result.response = getStringFromStream(urlConnection.getInputStream());
+                InputStream inputStream = urlConnection.getInputStream();
+                result.response = getStringFromStream(inputStream);
+                inputStream.close();
             }
         } catch (Exception e) {
             result.exception = e;
