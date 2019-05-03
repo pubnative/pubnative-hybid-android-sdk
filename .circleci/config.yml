@@ -75,6 +75,20 @@ jobs:
           path: app/build/test-results/
           destination: /test-results/
 
+  lint_check:
+    <<: *android_config
+    steps:
+      - checkout
+      - *restore_gradle_cache
+      - *restore_gems_cache
+      - *ruby_yum
+      - *ruby_dependencies
+      - *save_gradle_cache
+      - *save_gems_cache
+      - run:
+          name: Run Lint checks
+          command: bundle exec fastlane lint_check
+
   send_coverage_report:
     <<: *android_config
     steps:
@@ -124,6 +138,10 @@ workflows:
       - test_unit
 
       - send_coverage_report:
+          requires:
+            - test_unit
+
+      - lint_check:
           requires:
             - test_unit
 

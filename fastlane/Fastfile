@@ -14,6 +14,11 @@ platform :android do
         gradle(task: "test")
     end
 
+    desc "Runs Lint on the code"
+        lane :lint_check do
+            gradle(task: "lint")
+        end
+
     desc "Submit a new Beta Build to Crashlytics Beta"
     lane :deploy_to_crashlytics do
         gradle(task: "clean assembleDebug")
