@@ -108,7 +108,7 @@ public class HyBidDemoApplication extends MultiDexApplication {
             model = new SettingsModel(
                     Constants.APP_TOKEN,
                     Constants.ZONE_ID_LIST,
-                    ApiManager.INSTANCE.getApiUrl(),
+                    HyBid.BASE_URL,
                     "",
                     "",
                     new ArrayList<>(),

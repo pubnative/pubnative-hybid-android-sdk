@@ -31,7 +31,7 @@ import net.pubnative.lite.sdk.tracking.HyBidCrashTracker;
 import net.pubnative.lite.sdk.utils.Logger;
 
 public class HyBid {
-    public static final String BASE_URL = "https://api.pubnative.net/api/v3/native";
+    public static final String BASE_URL = "https://api.pubnative.net/";
 
     private static String sAppToken;
     @SuppressLint("StaticFieldLeak")
