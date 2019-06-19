@@ -37,6 +37,7 @@ import net.pubnative.lite.demo.managers.MoPubManager;
 import net.pubnative.lite.demo.managers.SettingsManager;
 import net.pubnative.lite.demo.models.SettingsModel;
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.api.ApiManager;
 import net.pubnative.lite.sdk.utils.Logger;
 
 import java.util.ArrayList;
@@ -90,6 +91,9 @@ public class HyBidDemoApplication extends MultiDexApplication {
         }
 
         HyBid.setKeywords(keywordString);
+        if (!TextUtils.isEmpty(settings.getApiUrl())) {
+            ApiManager.INSTANCE.setApiUrl(settings.getApiUrl());
+        }
 
         MoPubManager.initMoPubSdk(this, settings.getMopubBannerAdUnitId());
     }
@@ -104,9 +108,10 @@ public class HyBidDemoApplication extends MultiDexApplication {
             model = new SettingsModel(
                     Constants.APP_TOKEN,
                     Constants.ZONE_ID_LIST,
+                    HyBid.BASE_URL,
                     "",
                     "",
-                    new ArrayList<String>(),
+                    new ArrayList<>(),
                     false,
                     true,
                     Constants.MOPUB_MRAID_BANNER_AD_UNIT,

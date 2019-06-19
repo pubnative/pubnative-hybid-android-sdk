@@ -29,6 +29,7 @@ const val SETTINGS_KEY_INITIALISED = "settings_initialised"
 
 const val SETTINGS_KEY_APP_TOKEN = "app_token"
 const val SETTINGS_KEY_ZONE_ID_LIST = "zone_id_list"
+const val SETTINGS_KEY_API_URL = "pn_api_url"
 const val SETTINGS_KEY_GENDER = "gender"
 const val SETTINGS_KEY_AGE = "age"
 const val SETTINGS_KEY_KEYWORDS = "keywords"

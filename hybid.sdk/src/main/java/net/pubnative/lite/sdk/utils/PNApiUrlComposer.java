@@ -35,6 +35,10 @@ public final class PNApiUrlComposer {
     public static String buildUrl(String baseUrl, AdRequest adRequest) {
         // Base URL
         Uri.Builder uriBuilder = Uri.parse(baseUrl).buildUpon();
+        uriBuilder.appendPath("api");
+        uriBuilder.appendPath("v3");
+        uriBuilder.appendPath("native");
+
         // Appending parameters
         if (!TextUtils.isEmpty(adRequest.apptoken)) {
             uriBuilder.appendQueryParameter("apptoken", adRequest.apptoken);

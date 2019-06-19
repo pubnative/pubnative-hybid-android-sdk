@@ -31,6 +31,7 @@ import net.pubnative.lite.demo.createParcel
  */
 data class SettingsModel(var appToken: String,
                          var zoneIds: List<String>,
+                         var apiUrl: String,
                          var gender: String,
                          var age: String,
                          var keywords: List<String>,
@@ -62,6 +63,7 @@ data class SettingsModel(var appToken: String,
             },
             parcel.readString(),
             parcel.readString(),
+            parcel.readString(),
             mutableListOf<String>().apply {
                 parcel.readStringList(this)
             },
@@ -83,8 +85,8 @@ data class SettingsModel(var appToken: String,
 
     override fun writeToParcel(dest: Parcel?, flags: Int) {
         dest?.writeString(appToken)
-
         dest?.writeStringList(zoneIds)
+        dest?.writeString(apiUrl)
 
         dest?.writeString(gender)
         dest?.writeString(age)

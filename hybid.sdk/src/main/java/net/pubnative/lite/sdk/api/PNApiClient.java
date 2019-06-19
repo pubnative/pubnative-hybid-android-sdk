@@ -23,6 +23,7 @@
 package net.pubnative.lite.sdk.api;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
@@ -54,6 +55,17 @@ public class PNApiClient {
     }
 
     private Context mContext;
+    private String mApiUrl = HyBid.BASE_URL;
+
+    String getApiUrl() {
+        return mApiUrl;
+    }
+
+    void setApiUrl(String url) {
+        if (!TextUtils.isEmpty(url)) {
+            mApiUrl = url;
+        }
+    }
 
     public PNApiClient(Context context) {
         this.mContext = context;
@@ -106,7 +118,7 @@ public class PNApiClient {
     }
 
     protected String getAdRequestURL(AdRequest adRequest) {
-        return PNApiUrlComposer.buildUrl(HyBid.BASE_URL, adRequest);
+        return PNApiUrlComposer.buildUrl(mApiUrl, adRequest);
     }
 
     protected void processStream(String result, AdRequestListener listener) {

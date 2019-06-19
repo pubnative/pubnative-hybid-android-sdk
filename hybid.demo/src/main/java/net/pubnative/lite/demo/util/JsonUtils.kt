@@ -10,7 +10,7 @@ class JsonUtils {
             val parser = JsonParser()
             val jsonObject = parser.parse(json).asJsonObject
 
-            val gson = GsonBuilder().setPrettyPrinting().create()
+            val gson = GsonBuilder().setLenient().setPrettyPrinting().create()
             return gson.toJson(jsonObject)
         }
     }
