@@ -53,6 +53,10 @@ class SettingsManager private constructor(context: Context) {
         preferences.edit().putString(SETTINGS_KEY_APP_TOKEN, appToken).apply()
     }
 
+    fun setApiUrl(apiUrl: String) {
+        preferences.edit().putString(SETTINGS_KEY_API_URL, apiUrl).apply()
+    }
+
     fun setCoppa(enabled: Boolean) {
         preferences.edit().putBoolean(SETTINGS_KEY_COPPA, enabled).apply()
     }
@@ -132,6 +136,7 @@ class SettingsManager private constructor(context: Context) {
     fun setSettings(model: SettingsModel, asynchronously: Boolean) {
         val editor = preferences.edit()
         editor.putString(SETTINGS_KEY_APP_TOKEN, model.appToken)
+        editor.putString(SETTINGS_KEY_API_URL, model.apiUrl)
         editor.putBoolean(SETTINGS_KEY_COPPA, model.coppa)
         editor.putBoolean(SETTINGS_KEY_TEST_MODE, model.testMode)
         editor.putString(SETTINGS_KEY_GENDER, model.gender)
@@ -163,6 +168,7 @@ class SettingsManager private constructor(context: Context) {
 
     fun getSettings(): SettingsModel {
         val appToken = preferences.getString(SETTINGS_KEY_APP_TOKEN, "")
+        val apiUrl = preferences.getString(SETTINGS_KEY_API_URL, "")
         val zoneIds = preferences.getStringSet(SETTINGS_KEY_ZONE_ID_LIST, emptySet()).toList()
         val gender = preferences.getString(SETTINGS_KEY_GENDER, "")
         val age = preferences.getString(SETTINGS_KEY_AGE, "")
@@ -183,7 +189,7 @@ class SettingsManager private constructor(context: Context) {
         val dfpLeaderboardAdUnitId = preferences.getString(SETTINGS_KEY_DFP_LEADERBOARD_AD_UNIT_ID, "")
         val dfpInterstitialAdUnitId = preferences.getString(SETTINGS_KEY_DFP_INTERSTITIAL_AD_UNIT_ID, "")
 
-        val model = SettingsModel(appToken, zoneIds, gender, age, keywords, coppa, testMode,
+        val model = SettingsModel(appToken, zoneIds, apiUrl, gender, age, keywords, coppa, testMode,
                 mopubBannerAdUnitId, mopubMediumAdUnitId, mopubLeaderboardAdUnitId, mopubInterstitialAdUnitId,
                 mopubMediationBannerAdUnitId, mopubMediationMediumAdUnitId, mopubMediationLeaderboardAdUnitId, mopubMediationInterstitialAdUnitId,
                 mopubMediationNativeAdUnitId, dfpBannerAdUnitId, dfpMediumAdUnitId, dfpLeaderboardAdUnitId, dfpInterstitialAdUnitId)

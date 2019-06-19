@@ -43,6 +43,7 @@
 
     <string name="hint_pn_apptoken">App token</string>
     <string name="hint_pn_age">Age</string>
+    <string name="hint_pn_api_url">API Url</string>
     <string name="hint_pn_keyword">New keyword</string>
     <string name="hint_pn_zone_id">New Zone Id</string>
     <string name="check_coppa">COPPA Enabled</string>

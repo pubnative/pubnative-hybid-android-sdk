@@ -34,6 +34,7 @@ import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.config.KeywordsActivity
 import net.pubnative.lite.demo.ui.activities.config.ZoneIdsActivity
 import net.pubnative.lite.sdk.HyBid
+import net.pubnative.lite.sdk.api.ApiManager
 
 /**
  * Created by erosgarciaponte on 30.01.18.
@@ -44,6 +45,7 @@ class HyBidSettingsFragment : Fragment() {
 
     private lateinit var appTokenInput: EditText
     private lateinit var ageInput: EditText
+    private lateinit var apiUrlInput: EditText
     private lateinit var coppaSwitch: Switch
     private lateinit var testModeSwitch: Switch
     private lateinit var genderRadioGroup: RadioGroup
@@ -56,6 +58,7 @@ class HyBidSettingsFragment : Fragment() {
 
         appTokenInput = view.findViewById(R.id.input_pn_apptoken)
         ageInput = view.findViewById(R.id.input_pn_age)
+        apiUrlInput = view.findViewById(R.id.input_pn_api_url)
         coppaSwitch = view.findViewById(R.id.check_coppa)
         testModeSwitch = view.findViewById(R.id.check_test_mode)
         genderRadioGroup = view.findViewById(R.id.group_gender)
@@ -84,6 +87,7 @@ class HyBidSettingsFragment : Fragment() {
     private fun fillSavedValues() {
         val settings = settingManager.getSettings()
         appTokenInput.setText(settings.appToken)
+        apiUrlInput.setText(settings.apiUrl)
         ageInput.setText(settings.age)
         coppaSwitch.isChecked = settings.coppa
         testModeSwitch.isChecked = settings.testMode
@@ -100,6 +104,7 @@ class HyBidSettingsFragment : Fragment() {
     private fun saveData() {
         val appToken = appTokenInput.text.toString()
         val age = ageInput.text.toString()
+        val apiUrl = apiUrlInput.text.toString()
         val coppa = coppaSwitch.isChecked
         val testMode = testModeSwitch.isChecked
 
@@ -110,6 +115,7 @@ class HyBidSettingsFragment : Fragment() {
         }
 
         settingManager.setAppToken(appToken)
+        settingManager.setApiUrl(apiUrl)
         settingManager.setAge(age)
         settingManager.setCoppa(coppa)
         settingManager.setTestMode(testMode)
@@ -120,5 +126,6 @@ class HyBidSettingsFragment : Fragment() {
         HyBid.setCoppaEnabled(coppa)
         HyBid.setTestMode(testMode)
         HyBid.setGender(gender)
+        ApiManager.setApiUrl(apiUrl)
     }
 }
