@@ -24,6 +24,7 @@ package net.pubnative.lite.sdk.views;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Build;
@@ -57,6 +58,8 @@ public class PNWebView extends WebView {
         getSettings().setAllowContentAccess(false);
         getSettings().setAllowFileAccessFromFileURLs(false);
         getSettings().setAllowUniversalAccessFromFileURLs(false);
+
+        enableWebDebugging();
 
         enablePlugins(false);
         setWebChromeClient(new WebChromeClient() {
@@ -108,6 +111,14 @@ public class PNWebView extends WebView {
         }
 
         getSettings().setPluginState(enabled ? WebSettings.PluginState.ON : WebSettings.PluginState.OFF);
+    }
+
+    public void enableWebDebugging() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (0 != (getContext().getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)) {
+                setWebContentsDebuggingEnabled(true);
+            }
+        }
     }
 
     /**
