@@ -23,12 +23,12 @@
 package net.pubnative.lite.demo.ui.fragments.hybid
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.fragment.app.Fragment
 import com.squareup.picasso.Picasso
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R

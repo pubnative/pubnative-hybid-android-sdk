@@ -28,8 +28,8 @@ import android.util.AttributeSet;
 
 import net.pubnative.lite.sdk.api.MRectRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
-import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.mrect.presenter.MRectPresenterFactory;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 
 public class HyBidMRectAdView extends PNAdView {
 

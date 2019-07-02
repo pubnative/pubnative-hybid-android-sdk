@@ -28,8 +28,8 @@ import android.util.AttributeSet;
 
 import net.pubnative.lite.sdk.api.BannerRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
-import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 
 public class HyBidBannerAdView extends PNAdView {
 

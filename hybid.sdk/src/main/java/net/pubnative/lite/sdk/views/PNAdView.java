@@ -24,7 +24,6 @@ package net.pubnative.lite.sdk.views;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.graphics.Color;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -32,8 +31,8 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import net.pubnative.lite.sdk.api.RequestManager;
-import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 
 public abstract class PNAdView extends RelativeLayout implements RequestManager.RequestListener, AdPresenter.Listener {

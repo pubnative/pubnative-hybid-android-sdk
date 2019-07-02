@@ -23,15 +23,12 @@
 package net.pubnative.lite.demo;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
 
-import android.text.TextUtils;
-
 import com.crashlytics.android.Crashlytics;
-
-import io.fabric.sdk.android.Fabric;
 
 import net.pubnative.lite.demo.managers.MoPubManager;
 import net.pubnative.lite.demo.managers.SettingsManager;
@@ -41,6 +38,8 @@ import net.pubnative.lite.sdk.api.ApiManager;
 import net.pubnative.lite.sdk.utils.Logger;
 
 import java.util.ArrayList;
+
+import io.fabric.sdk.android.Fabric;
 
 /**
  * Created by erosgarciaponte on 08.01.18.

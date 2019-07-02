@@ -22,9 +22,9 @@
 //
 package net.pubnative.lite.demo.ui.adapters
 
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.listeners.ZoneIdClickListener
 import net.pubnative.lite.demo.ui.viewholders.ZoneIdViewHolder

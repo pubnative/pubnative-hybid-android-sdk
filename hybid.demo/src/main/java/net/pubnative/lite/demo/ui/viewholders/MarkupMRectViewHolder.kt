@@ -1,12 +1,12 @@
 package net.pubnative.lite.demo.ui.viewholders
 
 import android.graphics.Color
-import androidx.recyclerview.widget.RecyclerView
 import android.text.TextUtils
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.RelativeLayout
+import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.sdk.mraid.*
 import net.pubnative.lite.sdk.utils.Logger

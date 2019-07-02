@@ -5,12 +5,14 @@ import org.junit.Test;
 
 import java.util.Date;
 
-import static net.pubnative.lite.sdk.tracking.HyBidCrashTrackerTestUtils.*;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
+import static net.pubnative.lite.sdk.tracking.HyBidCrashTrackerTestUtils.generateClient;
+import static net.pubnative.lite.sdk.tracking.HyBidCrashTrackerTestUtils.generateSessionStore;
+import static net.pubnative.lite.sdk.tracking.HyBidCrashTrackerTestUtils.generateSessionTrackingApiClient;
 import static org.junit.Assert.assertNotEquals;
 
 /**

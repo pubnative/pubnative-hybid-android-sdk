@@ -1,13 +1,12 @@
 package net.pubnative.lite.sdk.interstitial.activity;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
+import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.VideoAd;
 import net.pubnative.lite.sdk.vpaid.VideoAdListener;
-import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
 
 public class VastInterstitialActivity extends HyBidInterstitialActivity {

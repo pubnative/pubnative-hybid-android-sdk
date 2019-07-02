@@ -1,9 +1,9 @@
 package net.pubnative.lite.demo.ui.adapters
 
-import androidx.recyclerview.widget.RecyclerView
 import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.models.Quote
 import net.pubnative.lite.demo.ui.viewholders.MarkupBannerViewHolder

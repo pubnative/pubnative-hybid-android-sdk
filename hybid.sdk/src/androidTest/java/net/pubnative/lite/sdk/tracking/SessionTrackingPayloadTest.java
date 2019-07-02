@@ -13,11 +13,11 @@ import org.junit.Test;
 import java.io.File;
 import java.util.List;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 import static net.pubnative.lite.sdk.tracking.HyBidCrashTrackerTestUtils.generateSession;
 import static net.pubnative.lite.sdk.tracking.HyBidCrashTrackerTestUtils.generateSessionTracker;
 import static net.pubnative.lite.sdk.tracking.HyBidCrashTrackerTestUtils.streamableToJson;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
 
 /**
  * Created by erosgarciaponte on 13.02.18.
