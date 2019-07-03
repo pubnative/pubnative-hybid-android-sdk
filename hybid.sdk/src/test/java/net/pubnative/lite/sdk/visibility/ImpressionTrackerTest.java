@@ -5,8 +5,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.view.View;
 
-import net.pubnative.lite.sdk.BuildConfig;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

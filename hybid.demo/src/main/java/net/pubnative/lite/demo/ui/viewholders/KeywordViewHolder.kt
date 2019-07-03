@@ -22,9 +22,9 @@
 //
 package net.pubnative.lite.demo.ui.viewholders
 
-import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 
 /**
  * Created by erosgarciaponte on 30.01.18.

@@ -29,8 +29,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 
-import net.pubnative.lite.sdk.utils.Logger;
-
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;

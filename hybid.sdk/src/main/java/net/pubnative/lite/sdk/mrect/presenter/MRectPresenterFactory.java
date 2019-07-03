@@ -24,10 +24,10 @@ package net.pubnative.lite.sdk.mrect.presenter;
 
 import android.content.Context;
 
-import net.pubnative.lite.sdk.presenter.AdPresenter;
-import net.pubnative.lite.sdk.presenter.PresenterFactory;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
+import net.pubnative.lite.sdk.presenter.PresenterFactory;
 import net.pubnative.lite.sdk.utils.Logger;
 
 /**

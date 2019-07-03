@@ -2,9 +2,6 @@ package net.pubnative.lite.sdk.views;
 
 import android.app.Activity;
 
-import net.pubnative.lite.sdk.api.MRectRequestManager;
-import net.pubnative.lite.sdk.api.RequestManager;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

@@ -1,8 +1,9 @@
 package net.pubnative.lite.adapters.mopub.mediation;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
 import android.view.View;
+
+import androidx.annotation.NonNull;
 
 import com.mopub.nativeads.CustomEventNative;
 import com.mopub.nativeads.ImpressionTracker;

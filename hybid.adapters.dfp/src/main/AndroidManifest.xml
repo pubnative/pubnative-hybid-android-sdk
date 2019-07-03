@@ -1,2 +1,1 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="net.pubnative.lite.adapters.dfp" />
+<manifest package="net.pubnative.lite.adapters.dfp" />

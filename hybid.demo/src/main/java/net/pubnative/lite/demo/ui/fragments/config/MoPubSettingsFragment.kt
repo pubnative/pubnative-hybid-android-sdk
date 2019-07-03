@@ -23,13 +23,13 @@
 package net.pubnative.lite.demo.ui.fragments.config
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.MoPubManager
 import net.pubnative.lite.demo.managers.SettingsManager

@@ -24,6 +24,8 @@ package net.pubnative.lite.sdk.mraid;
 
 public interface MRAIDViewCloseLayoutListener {
     void onShowCloseLayout();
+
     void onRemoveCloseLayout();
+
     void onClose();
 }

@@ -34,9 +34,9 @@ import com.google.android.gms.ads.mediation.customevent.CustomEventBanner;
 import com.google.android.gms.ads.mediation.customevent.CustomEventBannerListener;
 
 import net.pubnative.lite.sdk.HyBid;
-import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.mrect.presenter.MRectPresenterFactory;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 
 public class HyBidDFPMRectCustomEvent implements CustomEventBanner, AdPresenter.Listener {

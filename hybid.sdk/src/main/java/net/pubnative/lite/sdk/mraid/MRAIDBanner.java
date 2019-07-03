@@ -50,7 +50,6 @@ public class MRAIDBanner extends MRAIDView {
     }
 
 
-
     @Override
     public boolean onBackPressed() {
         return state != STATE_DEFAULT && super.onBackPressed();
