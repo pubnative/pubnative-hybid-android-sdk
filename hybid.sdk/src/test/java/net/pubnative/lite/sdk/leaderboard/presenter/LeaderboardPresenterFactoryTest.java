@@ -1,8 +1,8 @@
 package net.pubnative.lite.sdk.leaderboard.presenter;
 
-import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.TestUtil;
 
 import org.junit.Before;

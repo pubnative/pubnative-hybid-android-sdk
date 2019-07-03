@@ -4,10 +4,11 @@ import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.SharedPreferences;
 import android.provider.Settings;
+import android.util.DisplayMetrics;
+
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
-import android.util.DisplayMetrics;
 
 import org.json.JSONException;
 import org.json.JSONObject;

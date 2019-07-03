@@ -1,7 +1,6 @@
 package net.pubnative.lite.demo.ui.fragments.mopub
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.fragment.app.Fragment
 import com.mopub.nativeads.*
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager

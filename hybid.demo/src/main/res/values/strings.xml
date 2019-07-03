@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">HyBid demo</string>
-    <string name="action_settings">Settings</string>
 
     <string name="native_ad">"Native"</string>
     <string name="banner">Banner</string>
@@ -19,12 +18,10 @@
     <string name="load_native">Load native</string>
     <string name="load_banner">Load banner</string>
     <string name="load_medium">Load medium</string>
-    <string name="load_leaderboard">Load leaderboard</string>
     <string name="load_fullscreen">Load fullscreen</string>
     <string name="clear">Clear</string>
     <string name="add">Add</string>
 
-    <string name="hybid">HyBid</string>
     <string name="mopub">MoPub</string>
     <string name="dfp">DFP</string>
 
@@ -58,9 +55,6 @@
     <string name="save_pn_zone_ids">Save Zone Ids</string>
     <string name="save_pn_keywords">Save Keywords</string>
 
-    <string name="load_with_mopub">Load with MoPub</string>
-    <string name="load_with_dfp">Load with DFP</string>
-
     <string name="hybid_native">HyBid Native</string>
     <string name="hybid_banner">HyBid Banner</string>
     <string name="hybid_interstitial">HyBid Interstitial</string>
@@ -72,29 +66,22 @@
     <string name="mopub_interstitial">MoPub Interstitial</string>
     <string name="mopub_medium">MoPub Medium</string>
     <string name="mopub_leaderboard">MoPub Leaderboard</string>
-    <string name="mopub_network_mediation">MoPub Mediation</string>
-    <string name="mopub_mediation">MoPub Mediation</string>
 
     <string name="dfp_banner">DFP Banner</string>
     <string name="dfp_interstitial">DFP Interstitial</string>
     <string name="dfp_medium">DFP Medium</string>
     <string name="dfp_leaderboard">DFP Leaderboard</string>
 
-    <string name="title_pn_consent">PubNative Consent</string>
-    <string name="pn_consent">PN Consent</string>
     <string name="pn_owned_consent">PN Owned</string>
     <string name="pn_accept_consent">Accept consent</string>
     <string name="pn_deny_consent">Reject consent</string>
     <string name="pn_can_collect_data">Can collect data?</string>
     <string name="publisher_owned_consent">Publisher Owned</string>
-    <string name="publisher_owned_consent_links">Links:</string>
     <string name="action_check">Check</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
 
-    <string name="selected_zone_id">Selected Zone Id:</string>
     <string name="mediation">Mediation</string>
-    <string name="impression_id">Impression Id:</string>
 
     <string name="error">Error:</string>
     <string name="request_url">PubNative request url:</string>

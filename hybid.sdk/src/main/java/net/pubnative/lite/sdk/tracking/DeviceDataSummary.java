@@ -1,7 +1,7 @@
 package net.pubnative.lite.sdk.tracking;
 
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by erosgarciaponte on 12.02.18.

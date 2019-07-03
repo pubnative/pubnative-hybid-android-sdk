@@ -23,13 +23,12 @@
 package net.pubnative.lite.demo.ui.fragments.hybid
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -39,8 +38,6 @@ import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.ui.adapters.InFeedAdapter
 import net.pubnative.lite.demo.ui.listeners.InFeedAdListener
 import net.pubnative.lite.demo.util.ClipboardUtils
-import net.pubnative.lite.sdk.views.HyBidMRectAdView
-import net.pubnative.lite.sdk.views.PNAdView
 
 /**
  * Created by erosgarciaponte on 30.01.18.
