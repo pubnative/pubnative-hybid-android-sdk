@@ -33,7 +33,7 @@ public class JsonModelFieldCache {
     private static final Map<String, HashMap<String, JsonModel.JsonModelMetadata>> cachedModels;
 
     static {
-        cachedModels = new HashMap<String, HashMap<String, JsonModel.JsonModelMetadata>>();
+        cachedModels = new HashMap<>();
     }
 
     /**

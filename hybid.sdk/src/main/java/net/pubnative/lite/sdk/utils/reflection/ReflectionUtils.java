@@ -19,8 +19,8 @@ public class ReflectionUtils {
             mInstance = instance;
             mMethodName = methodName;
 
-            mParameterClasses = new ArrayList<Class<?>>();
-            mParameters = new ArrayList<Object>();
+            mParameterClasses = new ArrayList<>();
+            mParameters = new ArrayList<>();
 
             mClass = (instance != null) ? instance.getClass() : null;
         }
