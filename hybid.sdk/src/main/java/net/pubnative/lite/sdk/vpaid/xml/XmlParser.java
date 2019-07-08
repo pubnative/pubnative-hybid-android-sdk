@@ -152,12 +152,9 @@ public class XmlParser {
     }
 
     private static void skipTag(XmlPullParser parser, String name, int depth) throws Exception {
-        while (true) {
+        do {
             parser.next();
-            if (parser.getEventType() == XmlPullParser.END_TAG && parser.getName().equalsIgnoreCase(name) && parser.getDepth() == depth) {
-                break;
-            }
-        }
+        } while (parser.getEventType() != XmlPullParser.END_TAG || !parser.getName().equalsIgnoreCase(name) || parser.getDepth() != depth);
         parser.next();
     }
 

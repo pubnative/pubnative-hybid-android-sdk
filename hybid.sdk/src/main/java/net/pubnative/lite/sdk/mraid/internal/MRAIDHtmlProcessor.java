@@ -45,7 +45,7 @@ public class MRAIDHtmlProcessor {
         // <script type = 'text/javascript' src = 'mraid.js' > </script>
 
         // Remove the mraid.js script tag.
-        String regex = "<script\\s+[^>]*\\bsrc\\s*=\\s*([\\\"\\\'])mraid\\.js\\1[^>]*>\\s*</script>\\n*";
+        String regex = "<script\\s+[^>]*\\bsrc\\s*=\\s*([\"'])mraid\\.js\\1[^>]*>\\s*</script>\\n*";
         Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(processedHtml);
 

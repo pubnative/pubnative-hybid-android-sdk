@@ -303,8 +303,7 @@ public abstract class JsonModel {
         if (object == null) {
             return null;
         } else {
-            T w = type.getConstructor(JSONObject.class).newInstance(object);
-            return w;
+            return type.getConstructor(JSONObject.class).newInstance(object);
         }
     }
 }

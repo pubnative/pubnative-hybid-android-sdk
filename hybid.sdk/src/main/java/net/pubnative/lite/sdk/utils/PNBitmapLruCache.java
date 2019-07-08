@@ -28,8 +28,6 @@ import android.util.LruCache;
 
 public class PNBitmapLruCache {
 
-    public static final String TAG = PNBitmapLruCache.class.getSimpleName();
-
     private static final int BYTES_IN_KILOBYTES = 1024;
     private static final int MAX_MEMORY_SIZE = 30 * 1024 * 1024; // 30MB
 

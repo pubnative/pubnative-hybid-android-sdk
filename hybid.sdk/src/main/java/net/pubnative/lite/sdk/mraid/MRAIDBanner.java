@@ -33,7 +33,6 @@ import android.webkit.WebView;
  */
 @SuppressLint("ViewConstructor")
 public class MRAIDBanner extends MRAIDView {
-    private static final String TAG = MRAIDBanner.class.getSimpleName();
 
     public MRAIDBanner(
             Context context,

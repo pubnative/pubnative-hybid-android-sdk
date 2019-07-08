@@ -139,7 +139,7 @@ public class FileLoader {
                 }
             }
         } catch (Exception e) {
-            Logger.e(LOG_TAG, "Unexpected FileLoader error: " + String.valueOf(e));
+            Logger.e(LOG_TAG, "Unexpected FileLoader error: " + e.getMessage());
         }
     }
 
@@ -153,7 +153,7 @@ public class FileLoader {
             mConnection = obtainGetConnection(url, downloadedBytes, headers);
             inputStream = mConnection.getInputStream();
             outputStream = new FileOutputStream(file, true);
-            byte buffer[] = new byte[4096];
+            byte[] buffer = new byte[4096];
             int length;
             while ((length = inputStream.read(buffer)) != -1) {
                 outputStream.write(buffer, 0, length);

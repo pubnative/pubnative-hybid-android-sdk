@@ -35,7 +35,6 @@ import java.util.Map;
 
 public class ImpressionTracker {
 
-    private static final String TAG                         = ImpressionTracker.class.getSimpleName();
     private static final int    VISIBILITY_CHECK_MILLIS     = 250;
     private static final int    VISIBILITY_TIME_MILLIS      = 1000;
     private static final double DEFAULT_MIN_VISIBLE_PERCENT = 0.5;

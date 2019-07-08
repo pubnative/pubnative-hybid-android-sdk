@@ -19,7 +19,6 @@ import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.views.CloseableContainer;
 
 public abstract class HyBidInterstitialActivity extends Activity {
-    private static final String TAG = HyBidInterstitialActivity.class.getSimpleName();
     public static final String EXTRA_ZONE_ID = "extra_pn_zone_id";
     public static final String EXTRA_BROADCAST_ID = "extra_pn_broadcast_id";
 

@@ -25,13 +25,13 @@ public class CloseableContainer extends FrameLayout {
     static final float CLOSE_BUTTON_PADDING_DP = 8.0f;
 
     public enum ClosePosition {
-        TOP_LEFT(Gravity.TOP | Gravity.LEFT),
+        TOP_LEFT(Gravity.TOP | Gravity.START),
         TOP_CENTER(Gravity.TOP | Gravity.CENTER_HORIZONTAL),
-        TOP_RIGHT(Gravity.TOP | Gravity.RIGHT),
+        TOP_RIGHT(Gravity.TOP | Gravity.END),
         CENTER(Gravity.CENTER),
-        BOTTOM_LEFT(Gravity.BOTTOM | Gravity.LEFT),
+        BOTTOM_LEFT(Gravity.BOTTOM | Gravity.START),
         BOTTOM_CENTER(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL),
-        BOTTOM_RIGHT(Gravity.BOTTOM | Gravity.RIGHT);
+        BOTTOM_RIGHT(Gravity.BOTTOM | Gravity.END);
 
         private final int mGravity;
 

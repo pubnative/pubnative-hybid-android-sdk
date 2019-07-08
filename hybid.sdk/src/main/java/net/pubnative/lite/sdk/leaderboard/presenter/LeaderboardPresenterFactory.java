@@ -39,14 +39,10 @@ public class LeaderboardPresenterFactory extends PresenterFactory {
 
     @Override
     protected AdPresenter fromCreativeType(int assetGroupId, Ad ad) {
-        switch (assetGroupId) {
-            case ApiAssetGroupType.MRAID_LEADERBOARD: {
-                return new MraidLeaderboardPresenter(getContext(), ad);
-            }
-            default: {
-                Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for leaderboard ad format.");
-                return null;
-            }
+        if (assetGroupId == ApiAssetGroupType.MRAID_LEADERBOARD) {
+            return new MraidLeaderboardPresenter(getContext(), ad);
         }
+        Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for leaderboard ad format.");
+        return null;
     }
 }
