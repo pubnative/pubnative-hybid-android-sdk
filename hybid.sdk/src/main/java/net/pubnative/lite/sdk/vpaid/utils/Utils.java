@@ -29,14 +29,6 @@ public class Utils {
         sContext = context;
     }
 
-    public static String getPackageName() {
-        if (sContext == null) {
-            return "unknown";
-        } else {
-            return sContext.getPackageName();
-        }
-    }
-
     public static void setDebugMode(boolean mode) {
         debugMode = mode;
     }

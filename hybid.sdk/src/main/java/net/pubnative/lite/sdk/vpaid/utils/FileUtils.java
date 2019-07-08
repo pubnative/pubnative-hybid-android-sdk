@@ -33,7 +33,7 @@ public class FileUtils {
             }
         }
         Logger.d(LOG_TAG, "In cache " + amountOfCachedFiles + " file(s)");
-        float cacheHours = VpaidConstants.CACHED_VIDEO_LIFE_TIME / (1000 * 60 * 60);
+        long cacheHours = VpaidConstants.CACHED_VIDEO_LIFE_TIME / (1000 * 60 * 60);
         Logger.d(LOG_TAG, "Cache time: " + cacheHours + " hours");
     }
 
