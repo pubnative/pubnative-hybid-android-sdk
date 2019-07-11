@@ -181,6 +181,10 @@ public class NativeAd implements ImpressionTracker.Listener {
         return mAd.getContentInfo(context);
     }
 
+    public String getImpressionId() {
+        return mAd != null ? mAd.getImpressionId() : null;
+    }
+
     // Used to inject extra data in urls
     private String injectExtras(String url) {
         String result = url;

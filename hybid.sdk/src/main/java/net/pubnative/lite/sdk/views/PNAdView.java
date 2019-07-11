@@ -108,6 +108,10 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
         }
     }
 
+    public String getImpressionId() {
+        return mAd != null ? mAd.getImpressionId() : null;
+    }
+
     protected abstract String getLogTag();
 
     abstract RequestManager getRequestManager();

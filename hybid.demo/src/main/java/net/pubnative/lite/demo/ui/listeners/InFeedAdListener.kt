@@ -4,4 +4,6 @@ interface InFeedAdListener {
     fun onInFeedAdLoaded()
 
     fun onInFeedAdLoadError(error: Throwable?)
+
+    fun onInFeedAdImpressionId(impressionId: String?)
 }

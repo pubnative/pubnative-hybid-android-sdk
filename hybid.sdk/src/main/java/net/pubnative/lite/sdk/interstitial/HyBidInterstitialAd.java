@@ -52,6 +52,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     private final Listener mListener;
     private final Activity mActivity;
     private final String mZoneId;
+    private Ad mAd;
     private boolean mReady = false;
 
     public HyBidInterstitialAd(Activity activity, String zoneId, Listener listener) {
@@ -100,8 +101,12 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         }
     }
 
-    private void renderAd(Ad ad) {
-        mPresenter = new InterstitialPresenterFactory(mActivity, mZoneId).createInterstitialPresenter(ad, this);
+    public String getImpressionId() {
+        return mAd != null ? mAd.getImpressionId() : null;
+    }
+
+    private void renderAd() {
+        mPresenter = new InterstitialPresenterFactory(mActivity, mZoneId).createInterstitialPresenter(mAd, this);
         if (mPresenter != null) {
             mPresenter.load();
         } else {
@@ -146,7 +151,8 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         if (ad == null) {
             invokeOnLoadFailed(new Exception("Server returned null ad"));
         } else {
-            renderAd(ad);
+            mAd = ad;
+            renderAd();
         }
     }
 

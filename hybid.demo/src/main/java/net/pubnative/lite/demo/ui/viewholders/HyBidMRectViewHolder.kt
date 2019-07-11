@@ -14,7 +14,7 @@ class HyBidMRectViewHolder(itemView: View, val adListener: InFeedAdListener) : R
 
     private val adView: HyBidMRectAdView = itemView.findViewById(R.id.mrect_view)
 
-    fun bind(zoneId: String, shouldLoad : Boolean) {
+    fun bind(zoneId: String, shouldLoad: Boolean) {
         if (!TextUtils.isEmpty(zoneId) && shouldLoad) {
             adView.visibility = View.VISIBLE
             adView.load(zoneId, this)
@@ -25,6 +25,7 @@ class HyBidMRectViewHolder(itemView: View, val adListener: InFeedAdListener) : R
         Log.d(TAG, "onAdLoaded")
 
         adListener.onInFeedAdLoaded()
+        adListener.onInFeedAdImpressionId(adView.impressionId)
     }
 
     override fun onAdLoadFailed(error: Throwable?) {
