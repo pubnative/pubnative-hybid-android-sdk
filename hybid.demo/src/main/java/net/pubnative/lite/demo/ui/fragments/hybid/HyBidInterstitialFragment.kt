@@ -23,6 +23,7 @@
 package net.pubnative.lite.demo.ui.fragments.hybid
 
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -46,6 +47,7 @@ class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
 
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
+    private lateinit var impressionIdView: TextView
     private var interstitial: HyBidInterstitialAd? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_hybid_interstitial, container, false)
@@ -54,6 +56,7 @@ class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
         super.onViewCreated(view, savedInstanceState)
 
         errorView = view.findViewById(R.id.view_error)
+        impressionIdView = view.findViewById(R.id.view_impression_id)
         loadButton = view.findViewById(R.id.button_load)
 
 
@@ -67,6 +70,7 @@ class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
         }
 
         errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
+        impressionIdView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, impressionIdView.text.toString()) }
     }
 
     override fun onDestroy() {
@@ -83,6 +87,9 @@ class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
         Log.d(TAG, "onInterstitialLoaded")
         interstitial?.show()
         displayLogs()
+        if (!TextUtils.isEmpty(interstitial?.impressionId)) {
+            impressionIdView.text = interstitial?.impressionId
+        }
     }
 
     override fun onInterstitialLoadFailed(error: Throwable?) {
