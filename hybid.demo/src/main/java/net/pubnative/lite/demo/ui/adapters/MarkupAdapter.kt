@@ -7,14 +7,18 @@ import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.models.Quote
 import net.pubnative.lite.demo.ui.viewholders.MarkupBannerViewHolder
+import net.pubnative.lite.demo.ui.viewholders.MarkupLeaderboardViewHolder
 import net.pubnative.lite.demo.ui.viewholders.MarkupMRectViewHolder
 import net.pubnative.lite.demo.ui.viewholders.SampleTextViewHolder
 import net.pubnative.lite.demo.util.SampleQuotes
 
 class MarkupAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    private val TYPE_TEXT = 1
-    private val TYPE_MARKUP_BANNER = 2
-    private val TYPE_MARKUP_MRECT = 3
+    companion object {
+        private const val TYPE_TEXT = 1
+        private const val TYPE_MARKUP_BANNER = 2
+        private const val TYPE_MARKUP_MRECT = 3
+        private const val TYPE_MARKUP_LEADERBOARD = 4
+    }
 
     private var selectedSize = R.id.radio_size_banner
     private var markup = ""
@@ -27,6 +31,8 @@ class MarkupAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 MarkupBannerViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_markup_banner, parent, false))
             TYPE_MARKUP_MRECT ->
                 MarkupMRectViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_markup_mrect, parent, false))
+            TYPE_MARKUP_LEADERBOARD ->
+                MarkupLeaderboardViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_markup_leaderboard, parent, false))
             else ->
                 SampleTextViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_sample_text, parent, false))
         }
@@ -51,6 +57,8 @@ class MarkupAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 return TYPE_MARKUP_BANNER
             } else if (selectedSize == R.id.radio_size_medium) {
                 return TYPE_MARKUP_MRECT
+            } else if (selectedSize == R.id.radio_size_leaderboard) {
+                return TYPE_MARKUP_LEADERBOARD
             }
         }
 

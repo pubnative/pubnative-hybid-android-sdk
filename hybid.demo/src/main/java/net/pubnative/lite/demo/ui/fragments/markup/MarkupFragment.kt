@@ -23,7 +23,7 @@ class MarkupFragment : Fragment() {
 
     private lateinit var markupInput: EditText
     private lateinit var adSizeGroup: RadioGroup
-    private lateinit var markupList: androidx.recyclerview.widget.RecyclerView
+    private lateinit var markupList: RecyclerView
     private val adapter = MarkupAdapter()
     private val urlHandler = UrlHandler(activity)
 
@@ -48,7 +48,7 @@ class MarkupFragment : Fragment() {
             loadMarkup()
         }
 
-        adSizeGroup.setOnCheckedChangeListener { group, checkedId ->
+        adSizeGroup.setOnCheckedChangeListener { _, checkedId ->
             selectedSize = checkedId
             updateListVisibility()
         }
@@ -64,7 +64,9 @@ class MarkupFragment : Fragment() {
     }
 
     private fun updateListVisibility() {
-        if (selectedSize == R.id.radio_size_banner || selectedSize == R.id.radio_size_medium) {
+        if (selectedSize == R.id.radio_size_banner
+                || selectedSize == R.id.radio_size_medium
+                || selectedSize == R.id.radio_size_leaderboard) {
             markupList.visibility = View.VISIBLE
         } else {
             markupList.visibility = View.GONE
@@ -149,7 +151,7 @@ class MarkupFragment : Fragment() {
             }
         }
 
-        val emptyContentInfo = FrameLayout(activity)
+        val emptyContentInfo = FrameLayout(activity!!)
 
         interstitial = MRAIDInterstitial(activity,
                 "",
