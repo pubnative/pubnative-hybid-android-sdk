@@ -86,7 +86,6 @@ public class DeviceInfo {
     }
 
     private static final String TAG = DeviceInfo.class.getSimpleName();
-    private static final String UNKNOWN_APP_VERSION_IDENTIFIER = "UNKNOWN";
     private final Context mContext;
     private String mAdvertisingId;
     private String mAdvertisingIdMd5;
@@ -178,40 +177,5 @@ public class DeviceInfo {
 
     public String getOSVersion() {
         return Build.VERSION.RELEASE;
-    }
-
-    private boolean checkPermission(String permission) {
-        if (permission == null) {
-            throw new IllegalArgumentException("permission is null");
-        }
-
-        return mContext.checkPermission(permission, android.os.Process.myPid(), Process.myUid())
-                != PackageManager.PERMISSION_GRANTED;
-    }
-
-    public Connectivity getConnectivity() {
-        if (mConnectivityManager == null || checkPermission(Manifest.permission.ACCESS_NETWORK_STATE)) {
-            return Connectivity.NONE;
-        }
-
-        final NetworkInfo activeNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
-        if (activeNetworkInfo == null) {
-            return Connectivity.NONE;
-        }
-
-        switch (activeNetworkInfo.getType()) {
-            case ConnectivityManager.TYPE_ETHERNET:
-                return Connectivity.ETHERNET;
-            case ConnectivityManager.TYPE_WIFI:
-                return Connectivity.WIFI;
-            case ConnectivityManager.TYPE_MOBILE:
-            case ConnectivityManager.TYPE_MOBILE_DUN:
-            case ConnectivityManager.TYPE_MOBILE_HIPRI:
-            case ConnectivityManager.TYPE_MOBILE_MMS:
-            case ConnectivityManager.TYPE_MOBILE_SUPL:
-                return Connectivity.WWAN;
-            default:
-                return Connectivity.NONE;
-        }
     }
 }

@@ -63,10 +63,6 @@ public class Session implements JsonStream.Streamable {
         return autoCaptured.get();
     }
 
-    void setAutoCaptured(boolean autoCaptured) {
-        this.autoCaptured.set(autoCaptured);
-    }
-
     @Override
     public void toStream(JsonStream writer) throws IOException {
         writer.beginObject()

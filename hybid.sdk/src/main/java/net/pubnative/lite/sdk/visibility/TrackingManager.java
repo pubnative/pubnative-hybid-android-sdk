@@ -36,12 +36,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TrackingManager {
-    private static final   String  TAG                 = TrackingManager.class.getSimpleName();
-    private static final   String  SHARED_PREFERENCES  = "TrackingManager";
-    protected static final String  SHARED_PENDING_LIST = "pending";
-    protected static final String  SHARED_FAILED_LIST  = "failed";
-    private static final   long    ITEM_VALIDITY_TIME  = 1800000; // 30 minutes
-    private static         boolean sIsTracking         = false;
+    private static final String TAG = TrackingManager.class.getSimpleName();
+    private static final String SHARED_PREFERENCES = "TrackingManager";
+    protected static final String SHARED_PENDING_LIST = "pending";
+    protected static final String SHARED_FAILED_LIST = "failed";
+    private static final long ITEM_VALIDITY_TIME = 1800000; // 30 minutes
+    private static boolean sIsTracking = false;
 
     //==============================================================================================
     // PUBLIC

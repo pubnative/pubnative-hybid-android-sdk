@@ -274,18 +274,6 @@ public class Client extends Observable implements Observer {
         return config;
     }
 
-    public void startSession() {
-        sessionTracker.startNewSession(new Date(), user, false);
-    }
-
-    public void startFirstSession(Activity activity) {
-        sessionTracker.startFirstSession(activity);
-    }
-
-    public void setAppVersion(String appVersion) {
-        config.setAppVersion(appVersion);
-    }
-
     public String getContext() {
         return config.getContext();
     }
@@ -298,62 +286,18 @@ public class Client extends Observable implements Observer {
         config.setEndpoint(endpoint);
     }
 
-    public void setBuildUUID(final String buildUuid) {
-        config.setBuildUUID(buildUuid);
-    }
-
     public void setFilters(String... filters) {
         config.setFilters(filters);
-    }
-
-    public void setIgnoreClasses(String... ignoreClasses) {
-        config.setIgnoreClasses(ignoreClasses);
-    }
-
-    public void setNotifyReleaseStages(String... notifyReleaseStages) {
-        config.setNotifyReleaseStages(notifyReleaseStages);
     }
 
     public void setProjectPackages(String... projectPackages) {
         config.setProjectPackages(projectPackages);
     }
 
-    public void setReleaseStage(String releaseStage) {
-        config.setReleaseStage(releaseStage);
-        Logger.setEnabled(!AppData.RELEASE_STAGE_PRODUCTION.equals(releaseStage));
-    }
-
-    public void setSendThreads(boolean sendThreads) {
-        config.setSendThreads(sendThreads);
-    }
-
-    public void setAutoCaptureSessions(boolean autoCapture) {
-        config.setAutoCaptureSessions(autoCapture);
-
-        if (autoCapture) { // track any existing sessions
-            sessionTracker.onAutoCaptureEnabled();
-        }
-    }
-
     public void setUser(String id, String email, String name) {
         setUserId(id);
         setUserEmail(email);
         setUserName(name);
-    }
-
-    public void clearUser() {
-        user.setId(deviceData.getUserId());
-        user.setEmail(null);
-        user.setName(null);
-
-        SharedPreferences sharedPref =
-                appContext.getSharedPreferences(SHARED_PREF_KEY, Context.MODE_PRIVATE);
-        sharedPref.edit()
-                .remove(USER_ID_KEY)
-                .remove(USER_EMAIL_KEY)
-                .remove(USER_NAME_KEY)
-                .apply();
-        notifyHyBidObservers(NotifyType.USER);
     }
 
     public void setUserId(String id) {
@@ -451,22 +395,6 @@ public class Client extends Observable implements Observer {
                 .severityReasonType(HandledState.REASON_HANDLED_EXCEPTION)
                 .build();
         notify(error, DeliveryStyle.ASYNC, callback);
-    }
-
-    public void notify(Throwable exception, Severity severity) {
-        Error error = new Error.Builder(config, exception, sessionTracker.getCurrentSession())
-                .severity(severity)
-                .build();
-        notify(error, !BLOCKING);
-    }
-
-    public void notify(Throwable exception,
-                       MetaData metaData) {
-        Error error = new Error.Builder(config, exception, sessionTracker.getCurrentSession())
-                .metaData(metaData)
-                .severityReasonType(HandledState.REASON_HANDLED_EXCEPTION)
-                .build();
-        notify(error, !BLOCKING);
     }
 
     @Deprecated
@@ -598,33 +526,6 @@ public class Client extends Observable implements Observer {
         notify(error, BLOCKING);
     }
 
-    public void notifyBlocking(Throwable exception, Callback callback) {
-        Error error = new Error.Builder(config, exception, sessionTracker.getCurrentSession())
-                .severityReasonType(HandledState.REASON_HANDLED_EXCEPTION)
-                .build();
-        notify(error, DeliveryStyle.SAME_THREAD, callback);
-    }
-
-    public void notifyBlocking(String name,
-                               String message,
-                               StackTraceElement[] stacktrace,
-                               Callback callback) {
-        Error error = new Error.Builder(config, name, message,
-                stacktrace, sessionTracker.getCurrentSession())
-                .severityReasonType(HandledState.REASON_HANDLED_EXCEPTION)
-                .build();
-        notify(error, DeliveryStyle.SAME_THREAD, callback);
-    }
-
-    public void notifyBlocking(Throwable exception,
-                               MetaData metaData) {
-        Error error = new Error.Builder(config, exception, sessionTracker.getCurrentSession())
-                .severityReasonType(HandledState.REASON_HANDLED_EXCEPTION)
-                .metaData(metaData)
-                .build();
-        notify(error, BLOCKING);
-    }
-
     @Deprecated
     public void notifyBlocking(Throwable exception, Severity severity,
                                MetaData metaData) {
@@ -665,57 +566,6 @@ public class Client extends Observable implements Observer {
         notify(error, BLOCKING);
     }
 
-    public void notifyBlocking(Throwable exception, Severity severity) {
-        Error error = new Error.Builder(config, exception, sessionTracker.getCurrentSession())
-                .severity(severity)
-                .build();
-        notify(error, BLOCKING);
-    }
-
-    public void internalClientNotify(Throwable exception,
-                                     Map<String, Object> clientData,
-                                     boolean blocking,
-                                     Callback callback) {
-        String severity = getKeyFromClientData(clientData, "severity", true);
-        String severityReason =
-                getKeyFromClientData(clientData, "severityReason", true);
-        String logLevel = getKeyFromClientData(clientData, "logLevel", false);
-
-        String msg = String.format("Internal client notify, severity = '%s',"
-                + " severityReason = '%s'", severity, severityReason);
-        Logger.info(msg);
-
-        @SuppressWarnings("WrongConstant")
-        Error error = new Error.Builder(config, exception, sessionTracker.getCurrentSession())
-                .severity(Severity.fromString(severity))
-                .severityReasonType(severityReason)
-                .attributeValue(logLevel)
-                .build();
-
-        DeliveryStyle deliveryStyle = blocking ? DeliveryStyle.SAME_THREAD : DeliveryStyle.ASYNC;
-        notify(error, deliveryStyle, callback);
-    }
-
-    private String getKeyFromClientData(Map<String, Object> clientData,
-                                        String key,
-                                        boolean required) {
-        Object value = clientData.get(key);
-        if (value instanceof String) {
-            return (String) value;
-        } else if (required) {
-            throw new IllegalStateException("Failed to set " + key + " in client data!");
-        }
-        return null;
-    }
-
-    public void addToTab(String tab, String key, Object value) {
-        config.getMetaData().addToTab(tab, key, value);
-    }
-
-    public void clearTab(String tabName) {
-        config.getMetaData().clearTab(tabName);
-    }
-
     public MetaData getMetaData() {
         return config.getMetaData();
     }
@@ -753,15 +603,6 @@ public class Client extends Observable implements Observer {
                 notifyHyBidObservers(NotifyType.BREADCRUMB);
             }
         }
-    }
-
-    public void setMaxBreadcrumbs(int numBreadcrumbs) {
-        breadcrumbs.setSize(numBreadcrumbs);
-    }
-
-    public void clearBreadcrumbs() {
-        breadcrumbs.clear();
-        notifyHyBidObservers(NotifyType.BREADCRUMB);
     }
 
     public void enableExceptionHandler() {
@@ -856,15 +697,7 @@ public class Client extends Observable implements Observer {
         }
     }
 
-    public void setLoggingEnabled(boolean loggingEnabled) {
-        Logger.setEnabled(loggingEnabled);
-    }
-
     public Configuration getConfig() {
         return config;
-    }
-
-    public long getLaunchTimeMs() {
-        return AppData.getDurationMs();
     }
 }

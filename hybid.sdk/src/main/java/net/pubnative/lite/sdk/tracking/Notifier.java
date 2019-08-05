@@ -8,7 +8,7 @@ import java.io.IOException;
 
 public class Notifier implements JsonStream.Streamable {
     static final String NOTIFIER_NAME = "HyBid Notifier";
-    static final String NOTIFIER_VERSION = "0.2.1";
+    static final String NOTIFIER_VERSION = "0.6.1";
     static final String NOTIFIER_URL = "https://pubnative.net";
     private String name;
     private String version;

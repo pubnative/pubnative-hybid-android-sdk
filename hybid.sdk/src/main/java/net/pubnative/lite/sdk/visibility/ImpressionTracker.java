@@ -35,16 +35,16 @@ import java.util.Map;
 
 public class ImpressionTracker {
 
-    private static final int    VISIBILITY_CHECK_MILLIS     = 250;
-    private static final int    VISIBILITY_TIME_MILLIS      = 1000;
+    private static final int VISIBILITY_CHECK_MILLIS = 250;
+    private static final int VISIBILITY_TIME_MILLIS = 1000;
     private static final double DEFAULT_MIN_VISIBLE_PERCENT = 0.5;
 
     protected WeakReference<Listener> mImpressionListener = null;
-    protected List<View> mTrackingViews      = new ArrayList<View>();
-    protected HashMap<View, Long> mVisibleViews       = new HashMap<View, Long>();
-    protected Handler mHandler            = new Handler(Looper.getMainLooper());
+    protected List<View> mTrackingViews = new ArrayList<View>();
+    protected HashMap<View, Long> mVisibleViews = new HashMap<View, Long>();
+    protected Handler mHandler = new Handler(Looper.getMainLooper());
     protected Runnable mImpressionRunnable = new ImpressionRunnable();
-    protected VisibilityTracker mVisibilityTracker  = null;
+    protected VisibilityTracker mVisibilityTracker = null;
     protected VisibilityTracker.Listener mVisibilityListener = new VisibilityTracker.Listener() {
         @Override
         public void onVisibilityCheck(List<View> visibleViews, List<View> invisibleViews) {
@@ -106,6 +106,7 @@ public class ImpressionTracker {
 
     /**
      * Sets listener for callbacks related to the impression of added views
+     *
      * @param listener valid listener for callbacks
      */
     public void setListener(Listener listener) {
@@ -189,9 +190,11 @@ public class ImpressionTracker {
     protected class ImpressionRunnable implements Runnable {
 
         private List<View> mRemovedViews;
+
         ImpressionRunnable() {
             mRemovedViews = new ArrayList<View>();
         }
+
         @Override
         public void run() {
             for (Map.Entry<View, Long> entry : mVisibleViews.entrySet()) {

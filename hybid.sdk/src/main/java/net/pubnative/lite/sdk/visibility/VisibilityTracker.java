@@ -34,16 +34,16 @@ import java.util.List;
 
 public class VisibilityTracker {
 
-    private static final String TAG                    = VisibilityTracker.class.getSimpleName();
-    private static final int    VISIBILITY_CHECK_DELAY = 100;
+    private static final String TAG = VisibilityTracker.class.getSimpleName();
+    private static final int VISIBILITY_CHECK_DELAY = 100;
 
-    protected WeakReference<View> mDeviceView                 = null;
-    protected WeakReference<Listener> mListener                   = null;
-    protected List<PubnativeVisibilityTrackerItem> mTrackedViews               = new ArrayList<PubnativeVisibilityTrackerItem>();
-    protected Handler mHandler                    = new Handler();
-    protected boolean                              mIsVisibilityCheckScheduled = false;
-    protected VisibilityRunnable                   mVisibilityRunnable         = new VisibilityRunnable();
-    protected ViewTreeObserver.OnPreDrawListener   mOnPreDrawListener          = new ViewTreeObserver.OnPreDrawListener() {
+    protected WeakReference<View> mDeviceView = null;
+    protected WeakReference<Listener> mListener = null;
+    protected List<PubnativeVisibilityTrackerItem> mTrackedViews = new ArrayList<PubnativeVisibilityTrackerItem>();
+    protected Handler mHandler = new Handler();
+    protected boolean mIsVisibilityCheckScheduled = false;
+    protected VisibilityRunnable mVisibilityRunnable = new VisibilityRunnable();
+    protected ViewTreeObserver.OnPreDrawListener mOnPreDrawListener = new ViewTreeObserver.OnPreDrawListener() {
         @Override
         public boolean onPreDraw() {
 
@@ -228,9 +228,9 @@ public class VisibilityTracker {
             View view = item.mTrackingView;
 
             if (view != null
-                && view.isShown() // This is specially useful to ensure visibility in lists
-                && view.getParent() != null
-                && view.getLocalVisibleRect(mVisibleRect)) {
+                    && view.isShown() // This is specially useful to ensure visibility in lists
+                    && view.getParent() != null
+                    && view.getLocalVisibleRect(mVisibleRect)) {
                 float visibleArea = mVisibleRect.height() * mVisibleRect.width();
                 float viewArea = view.getHeight() * view.getWidth();
                 double percentVisible = (double) visibleArea / (double) viewArea;

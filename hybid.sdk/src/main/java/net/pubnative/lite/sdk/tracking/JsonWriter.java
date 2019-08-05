@@ -93,28 +93,8 @@ public class JsonWriter implements Closeable {
         }
     }
 
-    public final void setLenient(boolean lenient) {
-        this.lenient = lenient;
-    }
-
-    public boolean isLenient() {
-        return lenient;
-    }
-
-    public final void setHtmlSafe(boolean htmlSafe) {
-        this.htmlSafe = htmlSafe;
-    }
-
-    public final boolean isHtmlSafe() {
-        return htmlSafe;
-    }
-
     public final void setSerializeNulls(boolean serializeNulls) {
         this.serializeNulls = serializeNulls;
-    }
-
-    public final boolean getSerializeNulls() {
-        return serializeNulls;
     }
 
     public JsonWriter beginArray() throws IOException {
