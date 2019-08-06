@@ -38,10 +38,11 @@ class MarkupAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
-    override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is MarkupBannerViewHolder -> holder.bind(markup)
             is MarkupMRectViewHolder -> holder.bind(markup)
+            is MarkupLeaderboardViewHolder -> holder.bind(markup)
             else -> {
                 holder as SampleTextViewHolder
                 holder.bind(list[position])
