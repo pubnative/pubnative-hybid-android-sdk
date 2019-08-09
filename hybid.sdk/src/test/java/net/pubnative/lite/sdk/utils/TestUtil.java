@@ -59,7 +59,7 @@ public class TestUtil {
     }
 
     public static Ad createTestInterstitialAd() {
-        return createTestAd(ApiAssetGroupType.MRAID_INTERSTITIAL);
+        return createTestAd(ApiAssetGroupType.MRAID_INTERSTITIAL_1);
     }
 
     public static Ad createTestVideoInterstitialAd() {
