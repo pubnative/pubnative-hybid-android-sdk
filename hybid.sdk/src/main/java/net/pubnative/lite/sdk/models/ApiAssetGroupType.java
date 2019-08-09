@@ -30,7 +30,9 @@ public interface ApiAssetGroupType {
     int MRAID_BANNER_1 = 10;
     int MRAID_BANNER_2 = 12;
     int MRAID_MRECT = 8;
-    int MRAID_INTERSTITIAL = 21;
+    int MRAID_INTERSTITIAL_1 = 21;
+    int MRAID_INTERSTITIAL_2 = 22;
+    int MRAID_INTERSTITIAL_3 = 23;
     int MRAID_LEADERBOARD = 24;
 
     int VAST_MRECT = 4;
