@@ -61,20 +61,4 @@ public class Report implements JsonStream.Streamable {
     public Error getError() {
         return error;
     }
-
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
-    }
-
-    public void setNotifierVersion(String version) {
-        notifier.setVersion(version);
-    }
-
-    public void setNotifierName(String name) {
-        notifier.setName(name);
-    }
-
-    public void setNotifierURL(String url) {
-        notifier.setURL(url);
-    }
 }

@@ -187,9 +187,8 @@ abstract class BaseVideoAdInternal {
         if (mFuture != null) {
             mFuture.cancel(true);
         }
-        if (mHandler != null) {
-            mHandler.removeCallbacksAndMessages(null);
-        }
+
+        mHandler.removeCallbacksAndMessages(null);
     }
 
     private void fetchAd() {

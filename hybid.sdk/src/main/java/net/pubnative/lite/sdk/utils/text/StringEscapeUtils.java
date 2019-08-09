@@ -173,7 +173,7 @@ public class StringEscapeUtils {
      * @param input  String to escape values in, may be null
      * @return String with escaped values, {@code null} if null string input
      */
-    public static final String escapeJava(final String input) {
+    public static String escapeJava(final String input) {
         return ESCAPE_JAVA.translate(input);
     }
 
@@ -186,7 +186,7 @@ public class StringEscapeUtils {
      * @param input  the {@code String} to unescape, may be null
      * @return a new unescaped {@code String}, {@code null} if null string input
      */
-    public static final String unescapeJava(final String input) {
+    public static String unescapeJava(final String input) {
         return UNESCAPE_JAVA.translate(input);
     }
 }

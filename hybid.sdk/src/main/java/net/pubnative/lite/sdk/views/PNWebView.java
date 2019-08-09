@@ -122,18 +122,6 @@ public class PNWebView extends WebView {
     }
 
     /**
-     * Intended to be used with dummy WebViews to precache WebView javascript and assets.
-     */
-    @SuppressLint("SetJavaScriptEnabled")
-    protected void enableJavascriptCaching() {
-        getSettings().setJavaScriptEnabled(true);
-        getSettings().setDomStorageEnabled(true);
-        getSettings().setAppCacheEnabled(true);
-
-        getSettings().setAppCachePath(getContext().getCacheDir().getAbsolutePath());
-    }
-
-    /**
      * Fixes issue: https://code.google.com/p/android/issues/detail?id=63754
      * <p>
      * On KitKat, when a WebView with HTML5 video is is destroyed it can deadlock the WebView thread until another

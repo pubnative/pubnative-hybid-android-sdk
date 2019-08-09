@@ -112,16 +112,8 @@ public class Configuration extends Observable implements Observer {
         this.metaData.setFilters(filters);
     }
 
-    public String[] getIgnoreClasses() {
-        return ignoreClasses;
-    }
-
     public void setIgnoreClasses(String[] ignoreClasses) {
         this.ignoreClasses = ignoreClasses;
-    }
-
-    public String[] getNotifyReleaseStages() {
-        return notifyReleaseStages;
     }
 
     public void setNotifyReleaseStages(String[] notifyReleaseStages) {
@@ -219,14 +211,6 @@ public class Configuration extends Observable implements Observer {
 
     public void setAutomaticallyCollectBreadcrumbs(boolean automaticallyCollectBreadcrumbs) {
         this.automaticallyCollectBreadcrumbs = automaticallyCollectBreadcrumbs;
-    }
-
-    public void setNotifierType(String notifierType) {
-        this.notifierType = notifierType;
-    }
-
-    public void setCodeBundleId(String codeBundleId) {
-        this.codeBundleId = codeBundleId;
     }
 
     String getCodeBundleId() {

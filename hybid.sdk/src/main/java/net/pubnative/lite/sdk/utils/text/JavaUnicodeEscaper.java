@@ -17,18 +17,6 @@
 package net.pubnative.lite.sdk.utils.text;
 
 public class JavaUnicodeEscaper extends UnicodeEscaper {
-    /**
-     * <p>
-     * Constructs a <code>JavaUnicodeEscaper</code> above the specified value (exclusive).
-     * </p>
-     *
-     * @param codepoint
-     *            above which to escape
-     * @return the newly created {@code UnicodeEscaper} instance
-     */
-    public static JavaUnicodeEscaper above(final int codepoint) {
-        return outsideOf(0, codepoint);
-    }
 
     /**
      * <p>

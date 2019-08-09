@@ -30,8 +30,6 @@ import java.util.Locale;
 
 public class PNCrypto {
 
-    private static final String TAG = PNCrypto.class.getSimpleName();
-
     /**
      * Encrypts the given input string using SHA-1 algorithm
      *
@@ -72,11 +70,11 @@ public class PNCrypto {
                 // Create MD5 Hash
                 MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
                 digest.update(input.getBytes());
-                byte messageDigest[] = digest.digest();
+                byte[] messageDigest = digest.digest();
                 // Create Hex String
-                StringBuffer hexString = new StringBuffer();
-                for (int i = 0; i < messageDigest.length; i++) {
-                    String h = Integer.toHexString(0xFF & messageDigest[i]);
+                StringBuilder hexString = new StringBuilder();
+                for (byte b : messageDigest) {
+                    String h = Integer.toHexString(0xFF & b);
                     while (h.length() < 2) {
                         h = "0" + h;
                     }

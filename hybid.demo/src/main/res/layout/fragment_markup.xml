@@ -63,28 +63,31 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="16dp"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
         <RadioButton
             android:id="@+id/radio_size_banner"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:checked="true"
             android:text="@string/banner" />
 
         <RadioButton
             android:id="@+id/radio_size_medium"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:text="@string/medium" />
 
         <RadioButton
-            android:id="@+id/radio_size_interstitial"
-            android:layout_width="match_parent"
+            android:id="@+id/radio_size_leaderboard"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:text="@string/leaderboard" />
+
+        <RadioButton
+            android:id="@+id/radio_size_interstitial"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="@string/interstitial" />
     </RadioGroup>
 

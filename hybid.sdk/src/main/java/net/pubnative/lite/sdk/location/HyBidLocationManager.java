@@ -40,7 +40,6 @@ import net.pubnative.lite.sdk.utils.PNPermissionUtil;
 
 @SuppressLint("MissingPermission")
 public class HyBidLocationManager implements LocationListener {
-    private static final String TAG = HyBidLocationManager.class.getSimpleName();
 
     private static final int TWO_MINUTES = 1000 * 60 * 2;
     private static final int LOCATION_UPDATE_TIMEOUT = 10000;
@@ -139,10 +138,7 @@ public class HyBidLocationManager implements LocationListener {
             return true;
         } else if (isNewer && !isLessAccurate) {
             return true;
-        } else if (isNewer && !isSignificantlyLessAccurate && isFromSameProvider) {
-            return true;
-        }
-        return false;
+        } else return isNewer && !isSignificantlyLessAccurate && isFromSameProvider;
     }
 
     private boolean isSameProvider(String provider1, String provider2) {

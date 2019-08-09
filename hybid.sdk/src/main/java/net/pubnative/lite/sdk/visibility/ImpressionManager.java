@@ -39,13 +39,14 @@ public class ImpressionManager {
     //==============================================================================================
     private static ImpressionManager instance;
 
-    private ImpressionManager() {}
+    private ImpressionManager() {
+    }
 
     public static ImpressionManager getInstance() {
 
         if (instance == null) {
             instance = new ImpressionManager();
-            instance.mTrackers = new ArrayList<ImpressionTracker>();
+            instance.mTrackers = new ArrayList<>();
         }
         return instance;
     }
@@ -140,7 +141,7 @@ public class ImpressionManager {
             int trackerIndex = indexOfTracker(view);
             ImpressionTracker tracker = mTrackers.get(trackerIndex);
             tracker.removeView(view);
-            if(tracker.isEmpty()) {
+            if (tracker.isEmpty()) {
                 tracker.clear();
                 mTrackers.remove(tracker);
             }
@@ -160,7 +161,7 @@ public class ImpressionManager {
         int result = -1;
         for (int i = 0; i < mTrackers.size(); i++) {
             ImpressionTracker tracker = mTrackers.get(i);
-            if(tracker.equals(view)) {
+            if (tracker.equals(view)) {
                 result = i;
                 break;
             }
@@ -178,7 +179,7 @@ public class ImpressionManager {
         for (int i = 0; i < mTrackers.size(); i++) {
 
             ImpressionTracker tracker = mTrackers.get(i);
-            if(tracker.equals(listener)) {
+            if (tracker.equals(listener)) {
                 result = i;
                 break;
             }

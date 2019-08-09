@@ -62,7 +62,9 @@ public class InterstitialPresenterFactory {
 
     InterstitialPresenter fromCreativeType(int assetGroupId, Ad ad) {
         switch (assetGroupId) {
-            case ApiAssetGroupType.MRAID_INTERSTITIAL: {
+            case ApiAssetGroupType.MRAID_INTERSTITIAL_1:
+            case ApiAssetGroupType.MRAID_INTERSTITIAL_2:
+            case ApiAssetGroupType.MRAID_INTERSTITIAL_3: {
                 return new MraidInterstitialPresenter(mActivity, ad, mZoneId);
             }
             case ApiAssetGroupType.VAST_INTERSTITIAL_1:

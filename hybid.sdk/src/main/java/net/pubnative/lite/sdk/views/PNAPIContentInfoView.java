@@ -43,7 +43,6 @@ public class PNAPIContentInfoView extends RelativeLayout implements View.OnClick
 
     private static final String TAG = PNAPIContentInfoView.class.getSimpleName();
 
-    private RelativeLayout mContainerView;
     private TextView mContentInfoText;
     private ImageView mContentInfoIcon;
 
@@ -72,11 +71,11 @@ public class PNAPIContentInfoView extends RelativeLayout implements View.OnClick
     }
 
     public void init(Context context) {
-        LayoutInflater mInflator = LayoutInflater.from(context);
+        LayoutInflater inflator = LayoutInflater.from(context);
         mHandler = new Handler(Looper.getMainLooper());
-        mContainerView = (RelativeLayout) mInflator.inflate(R.layout.content_info_layout, this, true);
-        mContentInfoIcon = mContainerView.findViewById(R.id.ic_context_icon);
-        mContentInfoText = mContainerView.findViewById(R.id.tv_context_text);
+        RelativeLayout containerView = (RelativeLayout) inflator.inflate(R.layout.content_info_layout, this, true);
+        mContentInfoIcon = containerView.findViewById(R.id.ic_context_icon);
+        mContentInfoText = containerView.findViewById(R.id.tv_context_text);
     }
 
     public void openLayout() {

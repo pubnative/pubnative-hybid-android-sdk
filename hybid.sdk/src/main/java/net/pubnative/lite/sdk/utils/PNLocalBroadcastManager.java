@@ -109,12 +109,10 @@ public final class PNLocalBroadcastManager {
 
             @Override
             public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case MSG_EXEC_PENDING_BROADCASTS:
-                        executePendingBroadcasts();
-                        break;
-                    default:
-                        super.handleMessage(msg);
+                if (msg.what == MSG_EXEC_PENDING_BROADCASTS) {
+                    executePendingBroadcasts();
+                } else {
+                    super.handleMessage(msg);
                 }
             }
         };

@@ -23,6 +23,7 @@
 package net.pubnative.lite.demo.ui.fragments.mopub
 
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -55,6 +56,7 @@ class MoPubBannerFragment : Fragment(), RequestManager.RequestListener, MoPubVie
     private lateinit var mopubBanner: MoPubView
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
+    private lateinit var impressionIdView: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_mopub_banner, container, false)
 
@@ -62,6 +64,9 @@ class MoPubBannerFragment : Fragment(), RequestManager.RequestListener, MoPubVie
         super.onViewCreated(view, savedInstanceState)
 
         errorView = view.findViewById(R.id.view_error)
+        view.findViewById<TextView>(R.id.label_impression_id).visibility = View.VISIBLE
+        impressionIdView = view.findViewById(R.id.view_impression_id)
+        impressionIdView.visibility = View.VISIBLE
         loadButton = view.findViewById(R.id.button_load)
         mopubBanner = view.findViewById(R.id.mopub_banner)
         mopubBanner.bannerAdListener = this
@@ -80,6 +85,7 @@ class MoPubBannerFragment : Fragment(), RequestManager.RequestListener, MoPubVie
         }
 
         errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
+        impressionIdView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, impressionIdView.text.toString()) }
     }
 
     override fun onDestroy() {
@@ -101,6 +107,9 @@ class MoPubBannerFragment : Fragment(), RequestManager.RequestListener, MoPubVie
 
         Log.d(TAG, "onRequestSuccess")
         displayLogs()
+        if (!TextUtils.isEmpty(ad?.impressionId)) {
+            impressionIdView.text = ad?.impressionId
+        }
     }
 
     override fun onRequestFail(throwable: Throwable?) {

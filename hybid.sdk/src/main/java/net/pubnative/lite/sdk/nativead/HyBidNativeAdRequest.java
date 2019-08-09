@@ -28,7 +28,6 @@ import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.NativeAd;
 
 public class HyBidNativeAdRequest implements RequestManager.RequestListener {
-    private static final String TAG = HyBidNativeAdRequest.class.getSimpleName();
 
     public interface RequestListener {
         void onRequestSuccess(NativeAd ad);

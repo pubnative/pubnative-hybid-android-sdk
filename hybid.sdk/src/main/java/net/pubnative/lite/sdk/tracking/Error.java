@@ -114,43 +114,12 @@ public class Error implements JsonStream.Streamable {
         }
     }
 
-    public Severity getSeverity() {
-        return severity;
-    }
-
-    public void setUser(String id, String email, String name) {
-        this.user = new User(id, email, name);
-    }
-
     void setUser(User user) {
         this.user = user;
     }
 
     public User getUser() {
         return user;
-    }
-
-    public void setUserId(String id) {
-        this.user = new User(this.user);
-        this.user.setId(id);
-    }
-
-    public void setUserEmail(String email) {
-        this.user = new User(this.user);
-        this.user.setEmail(email);
-    }
-
-    public void setUserName(String name) {
-        this.user = new User(this.user);
-        this.user.setName(name);
-    }
-
-    public void addToTab(String tabName, String key, Object value) {
-        metaData.addToTab(tabName, key, value);
-    }
-
-    public void clearTab(String tabName) {
-        metaData.clearTab(tabName);
     }
 
     public MetaData getMetaData() {
@@ -180,10 +149,6 @@ public class Error implements JsonStream.Streamable {
 
     public Throwable getException() {
         return exception;
-    }
-
-    public void setDeviceId(String id) {
-        deviceData.id = id;
     }
 
     void setAppData(AppData appData) {

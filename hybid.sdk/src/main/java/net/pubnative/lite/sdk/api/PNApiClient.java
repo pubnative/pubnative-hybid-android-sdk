@@ -40,7 +40,6 @@ import org.json.JSONObject;
  */
 
 public class PNApiClient {
-    private static final String TAG = PNApiClient.class.getSimpleName();
 
     public interface AdRequestListener {
         void onSuccess(Ad ad);

@@ -9,12 +9,8 @@ import net.pubnative.lite.sdk.vpaid.enums.ConnectionType;
 
 public class RequestParametersProvider {
 
-    private static final String LOG_TAG = RequestParametersProvider.class.getSimpleName();
-
     private static RequestParametersProvider sProvider;
 
-    private String mAdvertisingId;
-    private String mId;
     private String mAppKey;
 
     private RequestParametersProvider() {

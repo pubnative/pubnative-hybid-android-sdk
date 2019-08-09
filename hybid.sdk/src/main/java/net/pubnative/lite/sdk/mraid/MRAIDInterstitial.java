@@ -34,7 +34,6 @@ import android.webkit.WebView;
  */
 @SuppressLint("ViewConstructor")
 public class MRAIDInterstitial extends MRAIDView {
-    private final static String TAG = "MRAIDInterstitial";
 
     public MRAIDInterstitial(
             Context context,

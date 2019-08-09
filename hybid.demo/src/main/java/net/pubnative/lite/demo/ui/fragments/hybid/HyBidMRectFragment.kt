@@ -23,6 +23,7 @@
 package net.pubnative.lite.demo.ui.fragments.hybid
 
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -49,6 +50,7 @@ class HyBidMRectFragment : Fragment(), InFeedAdListener {
 
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
+    private lateinit var impressionIdView: TextView
     private lateinit var recyclerView: RecyclerView
 
     private lateinit var adapter: InFeedAdapter
@@ -59,6 +61,7 @@ class HyBidMRectFragment : Fragment(), InFeedAdListener {
         super.onViewCreated(view, savedInstanceState)
 
         errorView = view.findViewById(R.id.view_error)
+        impressionIdView = view.findViewById(R.id.view_impression_id)
         loadButton = view.findViewById(R.id.button_load)
         recyclerView = view.findViewById(R.id.list)
 
@@ -78,6 +81,7 @@ class HyBidMRectFragment : Fragment(), InFeedAdListener {
         }
 
         errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
+        impressionIdView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, impressionIdView.text.toString()) }
     }
 
     override fun onDestroy() {
@@ -97,6 +101,12 @@ class HyBidMRectFragment : Fragment(), InFeedAdListener {
     override fun onInFeedAdLoadError(error: Throwable?) {
         errorView.text = error?.message
         displayLogs()
+    }
+
+    override fun onInFeedAdImpressionId(impressionId: String?) {
+        if (!TextUtils.isEmpty(impressionId)) {
+            impressionIdView.text = impressionId
+        }
     }
 
     private fun displayLogs() {

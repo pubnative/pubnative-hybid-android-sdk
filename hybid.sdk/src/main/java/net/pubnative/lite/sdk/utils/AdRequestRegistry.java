@@ -21,7 +21,7 @@ public class AdRequestRegistry {
     }
 
     public void setLastAdRequest(String url, String response, long latency) {
-        this.mLastAdRequest = new RequestItem(url, response, latency);;
+        this.mLastAdRequest = new RequestItem(url, response, latency);
     }
 
     public RequestItem getLastAdRequest() {
