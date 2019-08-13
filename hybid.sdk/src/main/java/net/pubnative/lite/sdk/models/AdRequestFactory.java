@@ -60,10 +60,11 @@ public class AdRequestFactory {
         mLocationManager = locationManager;
     }
 
-    public void createAdRequest(final Context context, final String zoneid, final String adSize, final Callback callback) {
+    public void createAdRequest(final String zoneid, final String adSize, final Callback callback) {
         String advertisingId = mDeviceInfo.getAdvertisingId();
         boolean limitTracking = mDeviceInfo.limitTracking();
-        if (TextUtils.isEmpty(advertisingId)) {
+        Context context = mDeviceInfo.getContext();
+        if (TextUtils.isEmpty(advertisingId) && context != null) {
             try {
                 PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(context, new HyBidAdvertisingId.Listener() {
                     @Override
@@ -87,7 +88,7 @@ public class AdRequestFactory {
         }
     }
 
-    private AdRequest buildRequest(final String zoneid, final String adSize, final String advertisingId, final boolean limitTracking) {
+    AdRequest buildRequest(final String zoneid, final String adSize, final String advertisingId, final boolean limitTracking) {
         AdRequest adRequest = new AdRequest();
         adRequest.zoneid = zoneid;
         adRequest.apptoken = HyBid.getAppToken();

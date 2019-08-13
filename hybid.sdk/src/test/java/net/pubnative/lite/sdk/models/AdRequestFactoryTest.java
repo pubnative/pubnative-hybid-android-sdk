@@ -50,7 +50,7 @@ public class AdRequestFactoryTest {
 
     @Test
     public void createAdRequest() {
-        AdRequest request = mSubject.createAdRequest("2", "s");
+        AdRequest request = mSubject.buildRequest("2", "s", "aabbccdd", false);
         Assert.assertEquals("aabbccdd", request.gid);
         Assert.assertEquals(PNCrypto.md5("aabbccdd"), request.gidmd5);
         Assert.assertEquals(PNCrypto.sha1("aabbccdd"), request.gidsha1);
