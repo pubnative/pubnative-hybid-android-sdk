@@ -87,8 +87,12 @@ public abstract class RequestManager {
             return;
         }
 
-        AdRequest adRequest = mAdRequestFactory.createAdRequest(mZoneId, getAdSize());
-        requestAdFromApi(adRequest);
+        mAdRequestFactory.createAdRequest(mZoneId, getAdSize(), new AdRequestFactory.Callback() {
+            @Override
+            public void onRequestCreated(AdRequest adRequest) {
+                requestAdFromApi(adRequest);
+            }
+        });
     }
 
     void requestAdFromApi(final AdRequest adRequest) {

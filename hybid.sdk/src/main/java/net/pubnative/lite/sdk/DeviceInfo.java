@@ -178,4 +178,8 @@ public class DeviceInfo {
     public String getOSVersion() {
         return Build.VERSION.RELEASE;
     }
+
+    public Context getContext() {
+        return mContext;
+    }
 }
