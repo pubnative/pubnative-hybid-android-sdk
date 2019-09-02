@@ -56,7 +56,7 @@ dependencies {
         exclude module: 'moat-mobile-app-kit' // To exclude Moat
     }
 
-    implementation 'com.google.android.gms:play-services-ads:18.1.1'
+    implementation 'com.google.android.gms:play-services-ads:18.2.0'
 
     implementation('com.crashlytics.sdk.android:crashlytics:2.8.0@aar') {
         transitive = true
