@@ -22,7 +22,6 @@
 //
 package net.pubnative.lite.adapters.dfp;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -41,7 +40,6 @@ import net.pubnative.lite.sdk.utils.Logger;
 public class HyBidDFPInterstitialCustomEvent implements CustomEventInterstitial, InterstitialPresenter.Listener {
     private static final String TAG = HyBidDFPInterstitialCustomEvent.class.getSimpleName();
 
-    private static final String ZONE_ID_KEY = "pn_zone_id";
     private CustomEventInterstitialListener mInterstitialListener;
     private InterstitialPresenter mPresenter;
 
@@ -56,13 +54,6 @@ public class HyBidDFPInterstitialCustomEvent implements CustomEventInterstitial,
             return;
         }
         mInterstitialListener = listener;
-
-        if (!(context instanceof Activity)) {
-            Logger.e(TAG, "HyBid interstitial ad can only be rendered with an Activity context");
-            mInterstitialListener.onAdFailedToLoad(AdRequest.ERROR_CODE_INTERNAL_ERROR);
-            return;
-        }
-        final Activity activity = (Activity) context;
 
         String zoneIdKey;
         if (!TextUtils.isEmpty(HyBidDFPUtils.getZoneId(serverParameter))) {
@@ -82,7 +73,7 @@ public class HyBidDFPInterstitialCustomEvent implements CustomEventInterstitial,
             return;
         }
 
-        mPresenter = new InterstitialPresenterFactory(activity, zoneIdKey).createInterstitialPresenter(ad, this);
+        mPresenter = new InterstitialPresenterFactory(context, zoneIdKey).createInterstitialPresenter(ad, this);
         if (mPresenter == null) {
             Logger.e(TAG, "Could not create valid interstitial presenter");
             mInterstitialListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NETWORK_ERROR);

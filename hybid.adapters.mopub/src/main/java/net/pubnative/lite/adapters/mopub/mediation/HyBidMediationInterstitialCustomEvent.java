@@ -22,7 +22,6 @@
 //
 package net.pubnative.lite.adapters.mopub.mediation;
 
-import android.app.Activity;
 import android.content.Context;
 
 import com.mopub.mobileads.CustomEventInterstitial;
@@ -50,14 +49,6 @@ public class HyBidMediationInterstitialCustomEvent extends CustomEventInterstiti
         }
         mInterstitialListener = customEventInterstitialListener;
 
-        if (!(context instanceof Activity)) {
-            Logger.e(TAG, "HyBid interstitial ad can only be rendered with an Activity context");
-            mInterstitialListener.onInterstitialFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
-            return;
-        }
-
-        Activity activity = (Activity) context;
-
         String zoneId;
         String appToken;
         if (serverExtras.containsKey(ZONE_ID_KEY) && serverExtras.containsKey(APP_TOKEN_KEY)) {
@@ -75,7 +66,7 @@ public class HyBidMediationInterstitialCustomEvent extends CustomEventInterstiti
             return;
         }
 
-        mInterstitialAd = new HyBidInterstitialAd(activity, zoneId, this);
+        mInterstitialAd = new HyBidInterstitialAd(context, zoneId, this);
         mInterstitialAd.load();
     }
 
@@ -105,7 +96,9 @@ public class HyBidMediationInterstitialCustomEvent extends CustomEventInterstiti
     @Override
     public void onInterstitialLoadFailed(Throwable error) {
         Logger.e(TAG, error.getMessage());
-        mInterstitialListener.onInterstitialFailed(MoPubErrorCode.NETWORK_NO_FILL);
+        if (mInterstitialListener != null) {
+            mInterstitialListener.onInterstitialFailed(MoPubErrorCode.NETWORK_NO_FILL);
+        }
     }
 
     @Override

@@ -42,7 +42,6 @@ import net.pubnative.lite.sdk.utils.Logger;
 public class HyBidDFPMRectCustomEvent implements CustomEventBanner, AdPresenter.Listener {
     private static final String TAG = HyBidDFPMRectCustomEvent.class.getSimpleName();
 
-    private static final String ZONE_ID_KEY = "pn_zone_id";
     private CustomEventBannerListener mMRectListener;
     private AdPresenter mPresenter;
 
