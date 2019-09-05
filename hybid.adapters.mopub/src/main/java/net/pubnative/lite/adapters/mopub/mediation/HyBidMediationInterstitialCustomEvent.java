@@ -105,7 +105,9 @@ public class HyBidMediationInterstitialCustomEvent extends CustomEventInterstiti
     @Override
     public void onInterstitialLoadFailed(Throwable error) {
         Logger.e(TAG, error.getMessage());
-        mInterstitialListener.onInterstitialFailed(MoPubErrorCode.NETWORK_NO_FILL);
+        if (mInterstitialListener != null) {
+            mInterstitialListener.onInterstitialFailed(MoPubErrorCode.NETWORK_NO_FILL);
+        }
     }
 
     @Override

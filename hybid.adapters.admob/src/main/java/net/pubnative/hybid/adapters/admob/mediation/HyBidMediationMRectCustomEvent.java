@@ -38,7 +38,8 @@ public class HyBidMediationMRectCustomEvent implements CustomEventBanner, PNAdVi
 
         String zoneId;
         String appToken;
-        if (!TextUtils.isEmpty(HyBidAdmobUtils.getAppToken(serverParameter)) && !TextUtils.isEmpty(HyBidAdmobUtils.getZoneId(serverParameter))) {
+        if (!TextUtils.isEmpty(HyBidAdmobUtils.getAppToken(serverParameter))
+                && !TextUtils.isEmpty(HyBidAdmobUtils.getZoneId(serverParameter))) {
             zoneId = HyBidAdmobUtils.getAppToken(serverParameter);
             appToken = HyBidAdmobUtils.getZoneId(serverParameter);
         } else {
@@ -61,6 +62,24 @@ public class HyBidMediationMRectCustomEvent implements CustomEventBanner, PNAdVi
 
         mMRectView = new HyBidMRectAdView(context);
         mMRectView.load(zoneId, this);
+    }
+
+    @Override
+    public void onResume() {
+
+    }
+
+    @Override
+    public void onPause() {
+
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mMRectView != null) {
+            mMRectView.destroy();
+            mMRectView = null;
+        }
     }
 
     //------------------------------------ PNAdView Callbacks --------------------------------------
@@ -89,23 +108,5 @@ public class HyBidMediationMRectCustomEvent implements CustomEventBanner, PNAdVi
             mBannerListener.onAdClicked();
             mBannerListener.onAdLeftApplication();
         }
-    }
-
-    //-------------------------------- CustomEventBanner Callbacks ---------------------------------
-    @Override
-    public void onDestroy() {
-        if (mMRectView != null) {
-            mMRectView.destroy();
-        }
-    }
-
-    @Override
-    public void onPause() {
-
-    }
-
-    @Override
-    public void onResume() {
-
     }
 }
