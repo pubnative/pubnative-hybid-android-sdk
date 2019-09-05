@@ -22,7 +22,7 @@
 //
 package net.pubnative.lite.sdk.interstitial.presenter;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
@@ -32,7 +32,7 @@ import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 
 public class VastInterstitialPresenter implements InterstitialPresenter, HyBidInterstitialBroadcastReceiver.Listener {
-    private final Activity mActivity;
+    private final Context mContext;
     private final Ad mAd;
     private final String mZoneId;
     private final HyBidInterstitialBroadcastReceiver mBroadcastReceiver;
@@ -41,12 +41,12 @@ public class VastInterstitialPresenter implements InterstitialPresenter, HyBidIn
     private boolean mIsDestroyed;
     private boolean mReady = false;
 
-    public VastInterstitialPresenter(Activity activity, Ad ad, String zoneId) {
-        mActivity = activity;
+    public VastInterstitialPresenter(Context context, Ad ad, String zoneId) {
+        mContext = context;
         mAd = ad;
         mZoneId = zoneId;
-        if (activity != null && activity.getApplicationContext() != null) {
-            mBroadcastReceiver = new HyBidInterstitialBroadcastReceiver(mActivity);
+        if (context != null && context.getApplicationContext() != null) {
+            mBroadcastReceiver = new HyBidInterstitialBroadcastReceiver(context);
             mBroadcastReceiver.setListener(this);
         } else {
             mBroadcastReceiver = null;
@@ -89,11 +89,11 @@ public class VastInterstitialPresenter implements InterstitialPresenter, HyBidIn
         if (mBroadcastReceiver != null) {
             mBroadcastReceiver.register();
 
-            Intent intent = new Intent(mActivity, VastInterstitialActivity.class);
+            Intent intent = new Intent(mContext, VastInterstitialActivity.class);
             intent.putExtra(HyBidInterstitialActivity.EXTRA_BROADCAST_ID, mBroadcastReceiver.getBroadcastId());
             intent.putExtra(HyBidInterstitialActivity.EXTRA_ZONE_ID, mZoneId);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mActivity.startActivity(intent);
+            mContext.startActivity(intent);
         }
     }
 
