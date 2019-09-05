@@ -8,8 +8,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        tools:context="net.pubnative.lite.demo.ui.fragments.mopub.MoPubMediationFragment"
-        tools:showIn="@layout/activity_mopub_mediation">
+        tools:context="net.pubnative.lite.demo.ui.fragments.mopub.MoPubMediationNativeFragment"
+        tools:showIn="@layout/activity_tab">
 
         <Button
             android:id="@+id/button_load"

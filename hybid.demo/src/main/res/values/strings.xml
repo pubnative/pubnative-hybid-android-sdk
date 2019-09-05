@@ -13,6 +13,7 @@
     <string name="pn_settings">HyBid Settings</string>
     <string name="mopub_settings">MoPub Settings</string>
     <string name="dfp_settings">DFP Settings</string>
+    <string name="admob_settings">Admob Settings</string>
 
     <string name="load">Load</string>
     <string name="load_native">Load native</string>
@@ -24,6 +25,7 @@
 
     <string name="mopub">MoPub</string>
     <string name="dfp">DFP</string>
+    <string name="admob">Admob</string>
 
     <string name="hint_mopub_banner_ad_unit_id">Banner Ad Unit ID</string>
     <string name="hint_mopub_medium_ad_unit_id">Medium Ad Unit ID</string>
@@ -37,6 +39,12 @@
     <string name="hint_dfp_leaderboard_ad_unit_id">Leaderboard Ad Unit ID</string>
     <string name="hint_dfp_interstitial_ad_unit_id">Interstitial Ad Unit ID</string>
     <string name="save_dfp_settings">Save DFP settings</string>
+
+    <string name="hint_admob_banner_ad_unit_id">Banner Ad Unit ID</string>
+    <string name="hint_admob_medium_ad_unit_id">Medium Ad Unit ID</string>
+    <string name="hint_admob_leaderboard_ad_unit_id">Leaderboard Ad Unit ID</string>
+    <string name="hint_admob_interstitial_ad_unit_id">Interstitial Ad Unit ID</string>
+    <string name="save_admob_settings">Save Admob settings</string>
 
     <string name="hint_pn_apptoken">App token</string>
     <string name="hint_pn_age">Age</string>
@@ -71,6 +79,11 @@
     <string name="dfp_interstitial">DFP Interstitial</string>
     <string name="dfp_medium">DFP Medium</string>
     <string name="dfp_leaderboard">DFP Leaderboard</string>
+
+    <string name="admob_banner">Admob Banner</string>
+    <string name="admob_interstitial">Admob Interstitial</string>
+    <string name="admob_medium">Admob Medium</string>
+    <string name="admob_leaderboard">Admob Leaderboard</string>
 
     <string name="pn_owned_consent">PN Owned</string>
     <string name="pn_accept_consent">Accept consent</string>

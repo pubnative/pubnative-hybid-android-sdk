@@ -3,18 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="net.pubnative.lite.demo">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
-    <uses-feature
-        android:name="android.hardware.location.gps"
-        android:required="false" />
-    <uses-feature
-        android:name="android.hardware.location.network"
-        android:required="false" />
-
     <application
         android:name=".HyBidDemoApplication"
         android:allowBackup="false"
@@ -128,6 +116,26 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".ui.activities.admob.AdmobMediationBannerActivity"
+            android:label="@string/admob_banner"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.admob.AdmobMediationMRectActivity"
+            android:label="@string/admob_medium"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.admob.AdmobMediationLeaderboardActivity"
+            android:label="@string/admob_leaderboard"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.admob.AdmobMediationInterstitialActivity"
+            android:label="@string/admob_interstitial"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".ui.activities.config.HyBidSettingsActivity"
             android:label="@string/pn_settings"
             android:screenOrientation="portrait"
@@ -142,6 +150,12 @@
         <activity
             android:name=".ui.activities.config.DFPSettingsActivity"
             android:label="@string/dfp_settings"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".ui.activities.config.AdmobSettingsActivity"
+            android:label="@string/admob_settings"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
@@ -192,5 +206,17 @@
             android:value="true" />
 
     </application>
+    <uses-feature
+        android:name="android.hardware.location.network"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
 </manifest>
