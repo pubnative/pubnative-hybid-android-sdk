@@ -22,7 +22,6 @@
 //
 package net.pubnative.lite.adapters.mopub;
 
-import android.app.Activity;
 import android.content.Context;
 
 import com.mopub.mobileads.CustomEventInterstitial;
@@ -55,13 +54,6 @@ public class HyBidMoPubInterstitialCustomEvent extends CustomEventInterstitial i
         }
         mInterstitialListener = customEventInterstitialListener;
 
-        if (!(context instanceof Activity)) {
-            Logger.e(TAG, "HyBid interstitial ad can only be rendered with an Activity context");
-            mInterstitialListener.onInterstitialFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
-            return;
-        }
-        final Activity activity = (Activity) context;
-
         String zoneIdKey;
         if (localExtras.containsKey(ZONE_ID_KEY)) {
             zoneIdKey = (String) localExtras.get(ZONE_ID_KEY);
@@ -80,7 +72,7 @@ public class HyBidMoPubInterstitialCustomEvent extends CustomEventInterstitial i
             return;
         }
 
-        mInterstitialPresenter = new InterstitialPresenterFactory(activity, zoneIdKey).createInterstitialPresenter(ad, this);
+        mInterstitialPresenter = new InterstitialPresenterFactory(context, zoneIdKey).createInterstitialPresenter(ad, this);
         if (mInterstitialPresenter == null) {
             Logger.e(TAG, "Could not create valid interstitial presenter");
             mInterstitialListener.onInterstitialFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);

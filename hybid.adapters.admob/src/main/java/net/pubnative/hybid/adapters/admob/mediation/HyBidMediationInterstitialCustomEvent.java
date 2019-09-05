@@ -1,6 +1,5 @@
 package net.pubnative.hybid.adapters.admob.mediation;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -33,14 +32,6 @@ public class HyBidMediationInterstitialCustomEvent implements CustomEventInterst
         }
         mInterstitialListener = customEventInterstitialListener;
 
-        if (!(context instanceof Activity)) {
-            Logger.e(TAG, "HyBid interstitial ad can only be rendered with an Activity context");
-            mInterstitialListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NETWORK_ERROR);
-            return;
-        }
-
-        Activity activity = (Activity) context;
-
         String zoneId;
         String appToken;
         if (!TextUtils.isEmpty(HyBidAdmobUtils.getAppToken(serverParameter))
@@ -59,7 +50,7 @@ public class HyBidMediationInterstitialCustomEvent implements CustomEventInterst
             return;
         }
 
-        mInterstitialAd = new HyBidInterstitialAd(activity, zoneId, this);
+        mInterstitialAd = new HyBidInterstitialAd(context, zoneId, this);
         mInterstitialAd.load();
     }
 
