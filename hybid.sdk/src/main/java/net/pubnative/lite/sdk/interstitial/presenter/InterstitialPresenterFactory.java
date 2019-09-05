@@ -23,6 +23,7 @@
 package net.pubnative.lite.sdk.interstitial.presenter;
 
 import android.app.Activity;
+import android.content.Context;
 
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
@@ -35,11 +36,11 @@ import net.pubnative.lite.sdk.utils.Logger;
 
 public class InterstitialPresenterFactory {
     private static final String TAG = InterstitialPresenterFactory.class.getSimpleName();
-    private final Activity mActivity;
+    private final Context mContext;
     private final String mZoneId;
 
-    public InterstitialPresenterFactory(Activity activity, String zoneId) {
-        mActivity = activity;
+    public InterstitialPresenterFactory(Context context, String zoneId) {
+        mContext = context;
         mZoneId = zoneId;
     }
 
@@ -65,13 +66,13 @@ public class InterstitialPresenterFactory {
             case ApiAssetGroupType.MRAID_INTERSTITIAL_1:
             case ApiAssetGroupType.MRAID_INTERSTITIAL_2:
             case ApiAssetGroupType.MRAID_INTERSTITIAL_3: {
-                return new MraidInterstitialPresenter(mActivity, ad, mZoneId);
+                return new MraidInterstitialPresenter(mContext, ad, mZoneId);
             }
             case ApiAssetGroupType.VAST_INTERSTITIAL_1:
             case ApiAssetGroupType.VAST_INTERSTITIAL_2:
             case ApiAssetGroupType.VAST_INTERSTITIAL_3:
             case ApiAssetGroupType.VAST_INTERSTITIAL_4: {
-                return new VastInterstitialPresenter(mActivity, ad, mZoneId);
+                return new VastInterstitialPresenter(mContext, ad, mZoneId);
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for interstitial ad format.");

@@ -23,6 +23,7 @@
 package net.pubnative.lite.sdk.interstitial;
 
 import android.app.Activity;
+import android.content.Context;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.api.InterstitialRequestManager;
@@ -50,14 +51,18 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     private RequestManager mRequestManager;
     private InterstitialPresenter mPresenter;
     private final Listener mListener;
-    private final Activity mActivity;
+    private final Context mContext;
     private final String mZoneId;
     private Ad mAd;
     private boolean mReady = false;
 
     public HyBidInterstitialAd(Activity activity, String zoneId, Listener listener) {
+        this((Context) activity, zoneId, listener);
+    }
+
+    public HyBidInterstitialAd(Context context, String zoneId, Listener listener) {
         mRequestManager = new InterstitialRequestManager();
-        mActivity = activity;
+        mContext = context;
         mZoneId = zoneId;
         mListener = listener;
     }
@@ -106,7 +111,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     }
 
     private void renderAd() {
-        mPresenter = new InterstitialPresenterFactory(mActivity, mZoneId).createInterstitialPresenter(mAd, this);
+        mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, this);
         if (mPresenter != null) {
             mPresenter.load();
         } else {
