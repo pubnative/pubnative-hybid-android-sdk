@@ -8,6 +8,10 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.ui.activities.admob.AdmobMediationBannerActivity
+import net.pubnative.lite.demo.ui.activities.admob.AdmobMediationInterstitialActivity
+import net.pubnative.lite.demo.ui.activities.admob.AdmobMediationLeaderboardActivity
+import net.pubnative.lite.demo.ui.activities.admob.AdmobMediationMRectActivity
 import net.pubnative.lite.demo.ui.activities.mopub.*
 
 class MediationNavFragment : Fragment() {
@@ -38,6 +42,26 @@ class MediationNavFragment : Fragment() {
 
         view.findViewById<Button>(R.id.button_mopub_native).setOnClickListener {
             val intent = Intent(activity, MoPubMediationNativeActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_admob_banner).setOnClickListener {
+            val intent = Intent(activity, AdmobMediationBannerActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_admob_medium).setOnClickListener {
+            val intent = Intent(activity, AdmobMediationMRectActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_admob_leaderboard).setOnClickListener {
+            val intent = Intent(activity, AdmobMediationLeaderboardActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_admob_interstitial).setOnClickListener {
+            val intent = Intent(activity, AdmobMediationInterstitialActivity::class.java)
             startActivity(intent)
         }
     }

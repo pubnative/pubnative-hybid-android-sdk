@@ -40,6 +40,7 @@
     <string name="hint_dfp_interstitial_ad_unit_id">Interstitial Ad Unit ID</string>
     <string name="save_dfp_settings">Save DFP settings</string>
 
+    <string name="hint_admob_app_id">App ID</string>
     <string name="hint_admob_banner_ad_unit_id">Banner Ad Unit ID</string>
     <string name="hint_admob_medium_ad_unit_id">Medium Ad Unit ID</string>
     <string name="hint_admob_leaderboard_ad_unit_id">Leaderboard Ad Unit ID</string>

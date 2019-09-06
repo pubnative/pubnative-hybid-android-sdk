@@ -22,7 +22,7 @@
             android:text="@string/load" />
 
         <FrameLayout
-            android:id="@+id/dfp_leaderboard_container"
+            android:id="@+id/admob_leaderboard_container"
             android:layout_width="728dp"
             android:layout_height="90dp"
             android:layout_gravity="center_horizontal" />

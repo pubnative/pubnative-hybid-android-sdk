@@ -11,15 +11,14 @@
         tools:context="net.pubnative.lite.demo.ui.fragments.mopub.MoPubMediationNativeFragment"
         tools:showIn="@layout/activity_tab">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_load"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
             android:layout_marginEnd="16dp"
-            android:text="@string/load_native"
-            android:textColor="@android:color/white" />
+            android:text="@string/load_native" />
 
         <FrameLayout
             android:id="@+id/ad_container"

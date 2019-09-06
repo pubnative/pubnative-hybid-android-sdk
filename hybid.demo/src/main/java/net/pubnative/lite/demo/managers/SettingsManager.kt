@@ -133,6 +133,26 @@ class SettingsManager private constructor(context: Context) {
         preferences.edit().putString(SETTINGS_KEY_DFP_INTERSTITIAL_AD_UNIT_ID, adUnitId).apply()
     }
 
+    fun setAdmobAppId(appId: String) {
+        preferences.edit().putString(SETTINGS_KEY_ADMOB_APP_ID, appId).apply()
+    }
+
+    fun setAdmobBannerAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_ADMOB_BANNER_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setAdmobMediumAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_ADMOB_MEDIUM_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setAdmobLeaderboardAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_ADMOB_LEADERBOARD_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setAdmobInterstitialAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_ADMOB_INTERSTITIAL_AD_UNIT_ID, adUnitId).apply()
+    }
+
     fun setSettings(model: SettingsModel, asynchronously: Boolean) {
         val editor = preferences.edit()
         editor.putString(SETTINGS_KEY_APP_TOKEN, model.appToken)
@@ -156,6 +176,11 @@ class SettingsManager private constructor(context: Context) {
         editor.putString(SETTINGS_KEY_DFP_MEDIUM_AD_UNIT_ID, model.dfpMediumAdUnitId)
         editor.putString(SETTINGS_KEY_DFP_LEADERBOARD_AD_UNIT_ID, model.dfpLeaderboardAdUnitId)
         editor.putString(SETTINGS_KEY_DFP_INTERSTITIAL_AD_UNIT_ID, model.dfpInterstitialAdUnitId)
+        editor.putString(SETTINGS_KEY_ADMOB_APP_ID, model.admobAppId)
+        editor.putString(SETTINGS_KEY_ADMOB_BANNER_AD_UNIT_ID, model.admobBannerAdUnitId)
+        editor.putString(SETTINGS_KEY_ADMOB_MEDIUM_AD_UNIT_ID, model.admobMediumAdUnitId)
+        editor.putString(SETTINGS_KEY_ADMOB_LEADERBOARD_AD_UNIT_ID, model.admobLeaderboardAdUnitId)
+        editor.putString(SETTINGS_KEY_ADMOB_INTERSTITIAL_AD_UNIT_ID, model.admobInterstitialAdUnitId)
 
         editor.putBoolean(SETTINGS_KEY_INITIALISED, true)
 
@@ -188,11 +213,17 @@ class SettingsManager private constructor(context: Context) {
         val dfpMediumAdUnitId = preferences.getString(SETTINGS_KEY_DFP_MEDIUM_AD_UNIT_ID, "")
         val dfpLeaderboardAdUnitId = preferences.getString(SETTINGS_KEY_DFP_LEADERBOARD_AD_UNIT_ID, "")
         val dfpInterstitialAdUnitId = preferences.getString(SETTINGS_KEY_DFP_INTERSTITIAL_AD_UNIT_ID, "")
+        val admobAppId = preferences.getString(SETTINGS_KEY_ADMOB_APP_ID, "")
+        val admobBannerAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_BANNER_AD_UNIT_ID, "")
+        val admobMediumAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_MEDIUM_AD_UNIT_ID, "")
+        val admobLeaderboardAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_LEADERBOARD_AD_UNIT_ID, "")
+        val admobInterstitialAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_INTERSTITIAL_AD_UNIT_ID, "")
 
         val model = SettingsModel(appToken, zoneIds, apiUrl, gender, age, keywords, coppa, testMode,
                 mopubBannerAdUnitId, mopubMediumAdUnitId, mopubLeaderboardAdUnitId, mopubInterstitialAdUnitId,
                 mopubMediationBannerAdUnitId, mopubMediationMediumAdUnitId, mopubMediationLeaderboardAdUnitId, mopubMediationInterstitialAdUnitId,
-                mopubMediationNativeAdUnitId, dfpBannerAdUnitId, dfpMediumAdUnitId, dfpLeaderboardAdUnitId, dfpInterstitialAdUnitId)
+                mopubMediationNativeAdUnitId, dfpBannerAdUnitId, dfpMediumAdUnitId, dfpLeaderboardAdUnitId, dfpInterstitialAdUnitId,
+                admobAppId, admobBannerAdUnitId, admobMediumAdUnitId, admobLeaderboardAdUnitId, admobInterstitialAdUnitId)
         return model
     }
 }

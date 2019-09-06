@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.ui.activities.config.AdmobSettingsActivity
 import net.pubnative.lite.demo.ui.activities.config.DFPSettingsActivity
 import net.pubnative.lite.demo.ui.activities.config.HyBidSettingsActivity
 import net.pubnative.lite.demo.ui.activities.config.MoPubSettingsActivity
@@ -27,6 +28,11 @@ class SettingsNavFragment : Fragment() {
 
         view.findViewById<TextView>(R.id.button_mopub_settings).setOnClickListener {
             val intent = Intent(activity, MoPubSettingsActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<TextView>(R.id.button_admob_settings).setOnClickListener {
+            val intent = Intent(activity, AdmobSettingsActivity::class.java)
             startActivity(intent)
         }
 

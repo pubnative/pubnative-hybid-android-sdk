@@ -29,6 +29,9 @@ import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 
 import net.pubnative.lite.demo.managers.MoPubManager;
 import net.pubnative.lite.demo.managers.SettingsManager;
@@ -95,6 +98,8 @@ public class HyBidDemoApplication extends MultiDexApplication {
         }
 
         MoPubManager.initMoPubSdk(this, settings.getMopubBannerAdUnitId());
+
+        MobileAds.initialize(this, initializationStatus -> { });
     }
 
     private SettingsModel fetchSettings() {
@@ -125,7 +130,12 @@ public class HyBidDemoApplication extends MultiDexApplication {
                     Constants.DFP_MRAID_BANNER_AD_UNIT,
                     Constants.DFP_MRAID_MEDIUM_AD_UNIT,
                     Constants.DFP_MRAID_LEADERBOARD_AD_UNIT,
-                    Constants.DFP_MRAID_INTERSTITIAL_AD_UNIT);
+                    Constants.DFP_MRAID_INTERSTITIAL_AD_UNIT,
+                    Constants.ADMOB_APP_ID,
+                    Constants.ADMOB_BANNER_AD_UNIT,
+                    Constants.ADMOB_MEDIUM_AD_UNIT,
+                    Constants.ADMOB_LEADERBOARD_AD_UNIT,
+                    Constants.ADMOB_INTERSTITIAL_AD_UNIT);
             manager.setSettings(model, true);
         }
 
