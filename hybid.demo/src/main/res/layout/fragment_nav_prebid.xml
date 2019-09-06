@@ -80,51 +80,47 @@
             android:textSize="14sp"
             android:textStyle="bold" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_mopub_banner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:text="@string/banner"
-            android:textColor="@android:color/white" />
+            android:text="@string/banner" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_mopub_medium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:text="@string/medium"
-            android:textColor="@android:color/white" />
+            android:text="@string/medium" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_mopub_leaderboard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:text="@string/leaderboard"
-            android:textColor="@android:color/white" />
+            android:text="@string/leaderboard" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_mopub_interstitial"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:text="@string/interstitial"
-            android:textColor="@android:color/white" />
+            android:text="@string/interstitial" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="20dp"
             android:layout_marginEnd="16dp"
             android:fontFamily="@font/roboto"
             android:maxLines="1"
@@ -133,37 +129,34 @@
             android:textSize="14sp"
             android:textStyle="bold" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_dfp_banner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:text="@string/banner"
-            android:textColor="@android:color/white" />
+            android:text="@string/banner" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_dfp_medium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:text="@string/medium"
-            android:textColor="@android:color/white" />
+            android:text="@string/medium" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_dfp_leaderboard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:text="@string/leaderboard"
-            android:textColor="@android:color/white" />
+            android:text="@string/leaderboard" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_dfp_interstitial"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -171,8 +164,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="20dp"
-            android:text="@string/interstitial"
-            android:textColor="@android:color/white" />
+            android:text="@string/interstitial" />
 
     </LinearLayout>
 </ScrollView>
