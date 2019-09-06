@@ -11,15 +11,14 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_load"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
             android:layout_marginEnd="16dp"
-            android:text="@string/load"
-            android:textColor="@android:color/white" />
+            android:text="@string/load" />
 
         <RelativeLayout
             android:id="@+id/ad_container"
@@ -88,7 +87,7 @@
                 android:numStars="5"
                 android:rating="2" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/ad_call_to_action"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -99,8 +98,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="8dp"
-                android:clickable="false"
-                android:textColor="@android:color/white" />
+                android:clickable="false" />
 
             <FrameLayout
                 android:id="@+id/ad_choices"

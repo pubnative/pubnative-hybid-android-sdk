@@ -14,15 +14,14 @@
         android:layout_marginTop="20dp"
         android:layout_marginEnd="16dp">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_add_zone_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:text="@string/add"
-            android:textColor="@android:color/white" />
+            android:text="@string/add" />
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -66,14 +65,13 @@
         android:textColor="?colorSecondary"
         android:textSize="14sp" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/button_save_pn_zone_ids"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
-        android:text="@string/save_pn_zone_ids"
-        android:textColor="@android:color/white" />
+        android:text="@string/save_pn_zone_ids" />
 
 </LinearLayout>

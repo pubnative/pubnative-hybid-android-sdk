@@ -120,35 +120,32 @@
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_keywords"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="6dp"
             android:layout_marginEnd="16dp"
-            android:text="@string/title_pn_keywords"
-            android:textColor="@android:color/white" />
+            android:text="@string/title_pn_keywords" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_zone_ids"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="6dp"
             android:layout_marginEnd="16dp"
-            android:text="@string/title_pn_zone_ids"
-            android:textColor="@android:color/white" />
+            android:text="@string/title_pn_zone_ids" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_save_pn_settings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
-            android:text="@string/save_pn_settings"
-            android:textColor="@android:color/white" />
+            android:text="@string/save_pn_settings" />
 
     </LinearLayout>
 
