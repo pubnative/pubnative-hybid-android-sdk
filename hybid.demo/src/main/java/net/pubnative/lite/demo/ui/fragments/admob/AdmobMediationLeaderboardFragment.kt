@@ -70,11 +70,6 @@ class AdmobMediationLeaderboardFragment : Fragment() {
             Log.d(TAG, "onAdFailedToLoad")
         }
 
-        override fun onAdImpression() {
-            super.onAdImpression()
-            Log.d(TAG, "onAdImpression")
-        }
-
         override fun onAdClicked() {
             super.onAdClicked()
             Log.d(TAG, "onAdClicked")

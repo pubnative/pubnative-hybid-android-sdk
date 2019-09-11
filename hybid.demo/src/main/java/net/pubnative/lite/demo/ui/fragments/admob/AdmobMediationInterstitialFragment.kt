@@ -64,11 +64,6 @@ class AdmobMediationInterstitialFragment : Fragment() {
             errorView.text = AdmobErrorParser.getErrorMessage(errorCode)
         }
 
-        override fun onAdImpression() {
-            super.onAdImpression()
-            Log.d(TAG, "onAdImpression")
-        }
-
         override fun onAdClicked() {
             super.onAdClicked()
             Log.d(TAG, "onAdClicked")
