@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:context="net.pubnative.lite.demo.ui.fragments.config.DFPSettingsFragment"
-    tools:showIn="@layout/activity_dfp_settings">
+    tools:context="net.pubnative.lite.demo.ui.fragments.config.AdmobSettingsFragment"
+    tools:showIn="@layout/activity_admob_settings">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,10 +20,27 @@
             android:layout_marginEnd="16dp">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/input_dfp_banner"
+                android:id="@+id/input_admob_app_id"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/hint_dfp_banner_ad_unit_id"
+                android:hint="@string/hint_admob_app_id"
+                android:maxLines="1"
+                android:enabled="false"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/input_admob_banner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_admob_banner_ad_unit_id"
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -36,10 +53,10 @@
             android:layout_marginEnd="16dp">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/input_dfp_medium"
+                android:id="@+id/input_admob_medium"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/hint_dfp_medium_ad_unit_id"
+                android:hint="@string/hint_admob_medium_ad_unit_id"
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -52,10 +69,10 @@
             android:layout_marginEnd="16dp">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/input_dfp_leaderboard"
+                android:id="@+id/input_admob_leaderboard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/hint_dfp_leaderboard_ad_unit_id"
+                android:hint="@string/hint_admob_leaderboard_ad_unit_id"
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -68,22 +85,22 @@
             android:layout_marginEnd="16dp">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/input_dfp_interstitial"
+                android:id="@+id/input_admob_interstitial"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/hint_dfp_interstitial_ad_unit_id"
+                android:hint="@string/hint_admob_interstitial_ad_unit_id"
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_save_dfp_settings"
+            android:id="@+id/button_save_admob_settings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="20dp"
-            android:text="@string/save_dfp_settings" />
+            android:text="@string/save_admob_settings" />
 
     </LinearLayout>
 

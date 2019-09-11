@@ -54,6 +54,12 @@ public class Constants {
     public static final String DFP_MRAID_MEDIUM_AD_UNIT = "/219576711/pnlite_dfp_mrect";
     public static final String DFP_MRAID_LEADERBOARD_AD_UNIT = "/219576711/pnlite_dfp_leaderboard";
 
+    public static final String ADMOB_APP_ID = "ca-app-pub-9763601123242224~7761163696";
+    public static final String ADMOB_BANNER_AD_UNIT = "ca-app-pub-9763601123242224/5027189140";
+    public static final String ADMOB_INTERSTITIAL_AD_UNIT = "ca-app-pub-9763601123242224/6994876935";
+    public static final String ADMOB_MEDIUM_AD_UNIT = "ca-app-pub-9763601123242224/9033705159";
+    public static final String ADMOB_LEADERBOARD_AD_UNIT = "ca-app-pub-9763601123242224/4902888458";
+
     public static final String APP_TOKEN = "dde3c298b47648459f8ada4a982fa92d";
     public static final List<String> ZONE_ID_LIST = Arrays.asList(NATIVE_ZONE_ID, BANNER_MRAID_ZONE_ID,
             MEDIUM_MRAID_ZONE_ID, INTERSTITIAL_MRAID_ZONE_ID, MEDIUM_VIDEO_ZONE_ID,

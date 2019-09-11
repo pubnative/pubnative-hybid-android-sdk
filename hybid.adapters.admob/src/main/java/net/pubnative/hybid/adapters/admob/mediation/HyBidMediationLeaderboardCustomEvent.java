@@ -40,8 +40,8 @@ public class HyBidMediationLeaderboardCustomEvent implements CustomEventBanner, 
         String appToken;
         if (!TextUtils.isEmpty(HyBidAdmobUtils.getAppToken(serverParameter))
                 && !TextUtils.isEmpty(HyBidAdmobUtils.getZoneId(serverParameter))) {
-            zoneId = HyBidAdmobUtils.getAppToken(serverParameter);
-            appToken = HyBidAdmobUtils.getZoneId(serverParameter);
+            zoneId = HyBidAdmobUtils.getZoneId(serverParameter);
+            appToken = HyBidAdmobUtils.getAppToken(serverParameter);
         } else {
             Logger.e(TAG, "Could not find the required params in CustomEventBanner serverExtras");
             mBannerListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NETWORK_ERROR);
