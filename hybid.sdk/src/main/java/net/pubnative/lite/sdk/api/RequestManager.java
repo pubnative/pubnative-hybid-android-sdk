@@ -27,6 +27,7 @@ import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdRequestFactory;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNInitializationHelper;
@@ -123,6 +124,12 @@ public abstract class RequestManager {
                 }
             }
         });
+    }
+
+    public void setIntegrationType(IntegrationType integrationType) {
+        if (mAdRequestFactory != null) {
+            mAdRequestFactory.setIntegrationType(integrationType);
+        }
     }
 
     public void destroy() {

@@ -124,6 +124,14 @@ public final class PNApiUrlComposer {
             uriBuilder.appendQueryParameter("gidsha1", adRequest.gidsha1);
         }
 
+        if (!TextUtils.isEmpty(adRequest.displaymanager)) {
+            uriBuilder.appendQueryParameter("displaymanager", adRequest.displaymanager);
+        }
+
+        if (!TextUtils.isEmpty(adRequest.displaymanagerver)) {
+            uriBuilder.appendQueryParameter("displaymanagerver", adRequest.displaymanagerver);
+        }
+
         return uriBuilder.build().toString();
     }
 }
