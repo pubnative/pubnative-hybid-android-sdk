@@ -2,14 +2,12 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     tools:context=".ui.activities.TabActivity">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/appbar_padding_top"
@@ -36,13 +34,11 @@
             app:tabIndicatorHeight="4dp">
 
             <com.google.android.material.tabs.TabItem
-                android:id="@+id/item_ad"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/ad" />
 
             <com.google.android.material.tabs.TabItem
-                android:id="@+id/item_debug"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/debug" />
