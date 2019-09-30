@@ -31,6 +31,7 @@ import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenter;
 import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenterFactory;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.utils.Logger;
 
 public class HyBidInterstitialAd implements RequestManager.RequestListener, InterstitialPresenter.Listener {
@@ -65,6 +66,8 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         mContext = context;
         mZoneId = zoneId;
         mListener = listener;
+
+        mRequestManager.setIntegrationType(IntegrationType.STANDALONE);
     }
 
     public void load() {
@@ -147,6 +150,12 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     protected void invokeOnDismissed() {
         if (mListener != null) {
             mListener.onInterstitialDismissed();
+        }
+    }
+
+    public void setMediation(boolean isMediation) {
+        if (mRequestManager != null) {
+            mRequestManager.setIntegrationType(isMediation ? IntegrationType.MEDIATION : IntegrationType.STANDALONE);
         }
     }
 

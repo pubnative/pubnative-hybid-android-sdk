@@ -67,6 +67,7 @@ public class HyBidMediationInterstitialCustomEvent extends CustomEventInterstiti
         }
 
         mInterstitialAd = new HyBidInterstitialAd(context, zoneId, this);
+        mInterstitialAd.setMediation(true);
         mInterstitialAd.load();
     }
 

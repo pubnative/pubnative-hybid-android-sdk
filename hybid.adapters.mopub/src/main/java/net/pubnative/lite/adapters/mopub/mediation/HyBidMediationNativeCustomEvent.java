@@ -53,6 +53,7 @@ public class HyBidMediationNativeCustomEvent extends CustomEventNative implement
         }
 
         mAdRequest = new HyBidNativeAdRequest();
+        mAdRequest.setMediation(true);
         mAdRequest.load(zoneId, this);
     }
 

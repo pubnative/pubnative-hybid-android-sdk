@@ -61,6 +61,7 @@ public class HyBidMediationBannerCustomEvent implements CustomEventBanner, PNAdV
         }
 
         mBannerView = new HyBidBannerAdView(context);
+        mBannerView.setMediation(true);
         mBannerView.load(zoneId, this);
     }
 
