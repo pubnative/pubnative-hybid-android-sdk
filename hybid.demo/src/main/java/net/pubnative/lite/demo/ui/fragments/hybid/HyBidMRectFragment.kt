@@ -84,10 +84,6 @@ class HyBidMRectFragment : Fragment(), InFeedAdListener {
         impressionIdView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, impressionIdView.text.toString()) }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
     fun loadPNAd() {
         adapter.loadWithAd()
     }

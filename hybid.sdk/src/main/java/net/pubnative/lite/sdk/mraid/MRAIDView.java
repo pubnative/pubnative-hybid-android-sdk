@@ -847,7 +847,7 @@ public class MRAIDView extends RelativeLayout {
 
     private String getStringFromFileUrl(String fileURL) {
 
-        StringBuffer mLine = new StringBuffer("");
+        StringBuffer mLine = new StringBuffer();
         String[] urlElements = fileURL.split("/");
         if (urlElements[3].equals("android_asset")) {
             try {

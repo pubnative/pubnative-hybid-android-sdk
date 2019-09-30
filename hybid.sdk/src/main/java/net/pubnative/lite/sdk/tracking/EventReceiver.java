@@ -65,7 +65,7 @@ public class EventReceiver extends BroadcastReceiver {
 
     static String shortenActionNameIfNeeded(String action) {
         if (isAndroidKey(action)) {
-            return action.substring(action.lastIndexOf(".") + 1, action.length());
+            return action.substring(action.lastIndexOf(".") + 1);
         } else {
             return action;
         }
