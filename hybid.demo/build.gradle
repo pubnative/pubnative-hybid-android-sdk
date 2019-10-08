@@ -46,7 +46,7 @@ dependencies {
     implementation project(':hybid.adapters.mopub')
     implementation project(':hybid.adapters.admob')
     implementation project(':hybid.adapters.dfp')
-    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta2'
     implementation 'com.google.android.material:material:1.1.0-alpha10'
     implementation 'androidx.multidex:multidex:2.0.1'
@@ -71,7 +71,7 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.google.code.gson:gson:2.8.5'
 
-    implementation 'androidx.vectordrawable:vectordrawable:1.0.1'
+    implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
 }
 
 if (System.getenv("CIRCLECI")) {
