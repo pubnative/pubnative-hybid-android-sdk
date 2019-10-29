@@ -32,6 +32,7 @@ import android.widget.RelativeLayout;
 
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 
@@ -75,6 +76,7 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
 
     private void init(RequestManager requestManager) {
         mRequestManager = requestManager;
+        mRequestManager.setIntegrationType(IntegrationType.STANDALONE);
     }
 
     public void load(String zoneId, Listener listener) {
@@ -173,6 +175,12 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
         invokeOnLoadFinished();
         startTracking();
         invokeOnImpression();
+    }
+
+    public void setMediation(boolean isMediation) {
+        if (mRequestManager != null) {
+            mRequestManager.setIntegrationType(isMediation ? IntegrationType.MEDIATION : IntegrationType.STANDALONE);
+        }
     }
 
     //----------------------------- AdPresenter Callbacks --------------------------------------

@@ -61,6 +61,7 @@ public class HyBidMediationLeaderboardCustomEvent implements CustomEventBanner, 
         }
 
         mLeaderboardView = new HyBidLeaderboardAdView(context);
+        mLeaderboardView.setMediation(true);
         mLeaderboardView.load(zoneId, this);
     }
 

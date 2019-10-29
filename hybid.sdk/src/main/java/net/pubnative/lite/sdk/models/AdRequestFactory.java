@@ -27,6 +27,7 @@ import android.location.Location;
 import android.provider.Settings;
 import android.text.TextUtils;
 
+import net.pubnative.lite.sdk.BuildConfig;
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
@@ -50,6 +51,7 @@ public class AdRequestFactory {
 
     private final DeviceInfo mDeviceInfo;
     private final HyBidLocationManager mLocationManager;
+    private IntegrationType mIntegrationType = IntegrationType.HEADER_BIDDING;
 
     public AdRequestFactory() {
         this(HyBid.getDeviceInfo(), HyBid.getLocationManager());
@@ -77,18 +79,18 @@ public class AdRequestFactory {
             }
         } else {
             if (callback != null) {
-                callback.onRequestCreated(buildRequest(zoneid, adSize, advertisingId, limitTracking));
+                callback.onRequestCreated(buildRequest(zoneid, adSize, advertisingId, limitTracking, mIntegrationType));
             }
         }
     }
 
     private void processAdvertisingId(String zoneId, String adSize, String advertisingId, boolean limitTracking, Callback callback) {
         if (callback != null) {
-            callback.onRequestCreated(buildRequest(zoneId, adSize, advertisingId, limitTracking));
+            callback.onRequestCreated(buildRequest(zoneId, adSize, advertisingId, limitTracking, mIntegrationType));
         }
     }
 
-    AdRequest buildRequest(final String zoneid, final String adSize, final String advertisingId, final boolean limitTracking) {
+    AdRequest buildRequest(final String zoneid, final String adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType) {
         AdRequest adRequest = new AdRequest();
         adRequest.zoneid = zoneid;
         adRequest.apptoken = HyBid.getAppToken();
@@ -126,6 +128,10 @@ public class AdRequestFactory {
 
         adRequest.mf = getDefaultMetaFields();
 
+        adRequest.displaymanager = "HyBid";
+        adRequest.displaymanagerver = String.format(Locale.ENGLISH, "%s_%s_%s",
+                "sdkandroid", integrationType.getCode(), BuildConfig.VERSION_NAME);
+
         Location location = mLocationManager.getUserLocation();
         if (location != null && !HyBid.isCoppaEnabled() && !limitTracking) {
             adRequest.latitude = String.format(Locale.ENGLISH, "%.6f", location.getLatitude());
@@ -133,6 +139,10 @@ public class AdRequestFactory {
         }
 
         return adRequest;
+    }
+
+    public void setIntegrationType(IntegrationType integrationType) {
+        this.mIntegrationType = integrationType;
     }
 
     private String getDefaultMetaFields() {

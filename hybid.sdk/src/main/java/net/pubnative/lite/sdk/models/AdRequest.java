@@ -48,4 +48,6 @@ public class AdRequest {
     public String gidmd5;
     public String gidsha1;
     public String testMode;
+    public String displaymanager;
+    public String displaymanagerver;
 }

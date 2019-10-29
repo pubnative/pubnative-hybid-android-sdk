@@ -25,6 +25,7 @@ package net.pubnative.lite.sdk.nativead;
 import net.pubnative.lite.sdk.api.NativeRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.NativeAd;
 
 public class HyBidNativeAdRequest implements RequestManager.RequestListener {
@@ -40,6 +41,7 @@ public class HyBidNativeAdRequest implements RequestManager.RequestListener {
 
     public HyBidNativeAdRequest() {
         this.mRequestManager = new NativeRequestManager();
+        this.mRequestManager.setIntegrationType(IntegrationType.STANDALONE);
         this.mRequestManager.setRequestListener(this);
     }
 
@@ -64,6 +66,12 @@ public class HyBidNativeAdRequest implements RequestManager.RequestListener {
     private void createNativeAd(Ad ad) {
         if (mListener != null) {
             mListener.onRequestSuccess(new NativeAd(ad));
+        }
+    }
+
+    public void setMediation(boolean isMediation) {
+        if (mRequestManager != null) {
+            mRequestManager.setIntegrationType(isMediation ? IntegrationType.MEDIATION : IntegrationType.STANDALONE);
         }
     }
 }

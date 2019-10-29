@@ -72,6 +72,7 @@ public class HyBidMediationMRectCustomEvent extends CustomEventBanner implements
         }
 
         mMRectView = new HyBidMRectAdView(context);
+        mMRectView.setMediation(true);
         mMRectView.load(zoneId, this);
     }
 

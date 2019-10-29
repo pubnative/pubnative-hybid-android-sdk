@@ -2,6 +2,7 @@ package net.pubnative.lite.sdk.models;
 
 import android.location.Location;
 
+import net.pubnative.lite.sdk.BuildConfig;
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.utils.PNCrypto;
@@ -50,7 +51,7 @@ public class AdRequestFactoryTest {
 
     @Test
     public void createAdRequest() {
-        AdRequest request = mSubject.buildRequest("2", "s", "aabbccdd", false);
+        AdRequest request = mSubject.buildRequest("2", "s", "aabbccdd", false, IntegrationType.HEADER_BIDDING);
         Assert.assertEquals("aabbccdd", request.gid);
         Assert.assertEquals(PNCrypto.md5("aabbccdd"), request.gidmd5);
         Assert.assertEquals(PNCrypto.sha1("aabbccdd"), request.gidsha1);
@@ -65,5 +66,8 @@ public class AdRequestFactoryTest {
         Assert.assertEquals("12.126543", request.latitude);
         Assert.assertEquals("15.151534", request.longitude);
         Assert.assertEquals("points,revenuemodel,contentinfo", request.mf);
+        Assert.assertEquals("HyBid", request.displaymanager);
+        Assert.assertEquals(String.format(Locale.ENGLISH, "%s_%s_%s",
+                "sdkandroid", "hb", BuildConfig.VERSION_NAME), request.displaymanagerver);
     }
 }
