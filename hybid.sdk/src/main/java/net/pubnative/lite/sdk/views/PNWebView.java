@@ -47,7 +47,7 @@ public class PNWebView extends WebView {
     private static boolean sDeadlockCleared = false;
 
     public PNWebView(Context context) {
-        this(context, null);
+        this(context.getApplicationContext(), null);
     }
 
     public PNWebView(Context context, AttributeSet attrs) {
