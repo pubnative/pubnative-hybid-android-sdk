@@ -23,7 +23,9 @@
 package net.pubnative.lite.demo;
 
 import android.content.Context;
+import android.os.Build;
 import android.text.TextUtils;
+import android.webkit.WebView;
 
 import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
@@ -64,6 +66,9 @@ public class HyBidDemoApplication extends MultiDexApplication {
     }
 
     private void initSettings() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            WebView.setWebContentsDebuggingEnabled(true);
+        }
         SettingsModel settings = fetchSettings();
 
         HyBid.initialize(settings.getAppToken(), this, new HyBid.InitialisationListener() {
