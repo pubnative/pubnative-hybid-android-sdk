@@ -99,7 +99,7 @@ public class PNApiClient {
     }
 
     public void trackUrl(String url, final TrackUrlListener listener) {
-        PNHttpClient.makeRequest(mContext, url, null, null, new PNHttpClient.Listener() {
+        PNHttpClient.makeRequest(mContext, url, null, null, false, true, new PNHttpClient.Listener() {
             @Override
             public void onSuccess(String response) {
                 if (listener != null) {
