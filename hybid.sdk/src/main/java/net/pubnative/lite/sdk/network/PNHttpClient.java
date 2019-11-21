@@ -35,13 +35,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayDeque;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class PNHttpClient {
     private static ExecutorService sExecutor = Executors.newCachedThreadPool();
     private static Handler sUiHandler = new Handler(Looper.getMainLooper());
+
+    private static Queue<PendingRequest> sPendingRequests = new ArrayDeque<>();
+    private static Queue<PendingRequest> sCurrentRequests = new ArrayDeque<>();
 
     private static final int READ_TIMEOUT = 10000;
     private static final int CONNECT_TIMEOUT = 10000;
@@ -89,38 +95,65 @@ public class PNHttpClient {
                                    final boolean shouldReturnOnMainThread,
                                    final Listener listener) {
 
+        makeRequest(context, url, headers, postBody, shouldReturnOnMainThread, false, listener);
+    }
+
+    public static void makeRequest(final Context context,
+                                   final String url,
+                                   final Map<String, String> headers,
+                                   final String postBody,
+                                   final boolean shouldReturnOnMainThread,
+                                   final boolean shouldRetryIfFail,
+                                   final Listener listener) {
         NetworkInfo networkInfo = getActiveNetworkInfo(context);
         if (networkInfo == null || !networkInfo.isConnected()
                 || (networkInfo.getType() != ConnectivityManager.TYPE_WIFI && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE)) {
-            listener.onFailure(new Exception("{\"status\": \"error\", \"error_message\": \"Unable to connect to URL. No network connection.\"}"));
+            if (listener != null) {
+                listener.onFailure(new Exception("{\"status\": \"error\", \"error_message\": \"Unable to connect to URL. No network connection.\"}"));
+            }
         } else {
             sExecutor.submit(new Runnable() {
                 @Override
                 public void run() {
                     final Response response = sendRequest(url, headers, postBody);
                     if (response.exception != null) {
+                        if (shouldRetryIfFail) {
+                            if (!TextUtils.isEmpty(url)) {
+                                sPendingRequests.add(new PendingRequest(url, postBody, headers));
+                            }
+                        }
+
                         if (shouldReturnOnMainThread) {
                             sUiHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    listener.onFailure(response.exception);
+                                    if (listener != null) {
+                                        listener.onFailure(response.exception);
+                                    }
                                 }
                             });
                         } else {
-                            listener.onFailure(response.exception);
+                            if (listener != null) {
+                                listener.onFailure(response.exception);
+                            }
                         }
                     } else {
                         if (shouldReturnOnMainThread) {
                             sUiHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    listener.onSuccess(response.response);
+                                    if (listener != null) {
+                                        listener.onSuccess(response.response);
+                                    }
                                 }
                             });
                         } else {
-                            listener.onSuccess(response.response);
+                            if (listener != null) {
+                                listener.onSuccess(response.response);
+                            }
                         }
                     }
+                    performPendingRequests(context);
                 }
             });
         }
@@ -156,10 +189,12 @@ public class PNHttpClient {
             int responseCode = urlConnection.getResponseCode();
             result.responseCode = responseCode;
 
-            if (responseCode == HttpURLConnection.HTTP_OK) {
+            if (isHttpSuccess(responseCode)) {
                 InputStream inputStream = urlConnection.getInputStream();
                 result.response = getStringFromStream(inputStream);
                 inputStream.close();
+            } else {
+                result.exception = new Exception(String.format(Locale.ENGLISH, "Network request failed with code: %s", responseCode));
             }
         } catch (Exception e) {
             result.exception = e;
@@ -169,6 +204,10 @@ public class PNHttpClient {
             }
         }
         return result;
+    }
+
+    private static boolean isHttpSuccess(int responseCode) {
+        return responseCode / 100 == 2;
     }
 
     private static String getStringFromStream(InputStream inputStream) throws IOException {
@@ -191,4 +230,43 @@ public class PNHttpClient {
         return connectivityManager.getActiveNetworkInfo();
     }
 
+    private static void performPendingRequests(Context context) {
+        if (sCurrentRequests.isEmpty() && !sPendingRequests.isEmpty()) {
+            sCurrentRequests.addAll(sPendingRequests);
+            sPendingRequests.clear();
+        }
+
+        if (!sCurrentRequests.isEmpty()) {
+            for (PendingRequest pendingRequest : sCurrentRequests) {
+                makePendingRequest(context,
+                        pendingRequest.getUrl(),
+                        pendingRequest.getHeaders(),
+                        pendingRequest.getPostBody());
+            }
+            sCurrentRequests.clear();
+        }
+    }
+
+    public static void makePendingRequest(final Context context,
+                                   final String url,
+                                   final Map<String, String> headers,
+                                   final String postBody) {
+        NetworkInfo networkInfo = getActiveNetworkInfo(context);
+        if (networkInfo == null || !networkInfo.isConnected()
+                || (networkInfo.getType() != ConnectivityManager.TYPE_WIFI && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE)) {
+
+        } else {
+            sExecutor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    final Response response = sendRequest(url, headers, postBody);
+                    if (response.exception != null) {
+                        if (!TextUtils.isEmpty(url)) {
+                            sPendingRequests.add(new PendingRequest(url, postBody, headers));
+                        }
+                    }
+                }
+            });
+        }
+    }
 }
