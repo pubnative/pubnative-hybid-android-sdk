@@ -45,7 +45,6 @@
         <activity
             android:name=".ui.activities.hybid.HyBidBannerActivity"
             android:label="@string/hybid_banner"
-            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.hybid.HyBidMRectActivity"
@@ -55,7 +54,6 @@
         <activity
             android:name=".ui.activities.hybid.HyBidLeaderboardActivity"
             android:label="@string/hybid_leaderboard"
-            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.hybid.HyBidInterstitialActivity"
@@ -65,7 +63,6 @@
         <activity
             android:name=".ui.activities.mopub.MoPubBannerActivity"
             android:label="@string/mopub_banner"
-            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.mopub.MoPubMRectActivity"
@@ -75,7 +72,6 @@
         <activity
             android:name=".ui.activities.mopub.MoPubLeaderboardActivity"
             android:label="@string/mopub_leaderboard"
-            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.mopub.MoPubInterstitialActivity"
@@ -85,7 +81,6 @@
         <activity
             android:name=".ui.activities.mopub.MoPubMediationBannerActivity"
             android:label="@string/mopub_banner"
-            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.mopub.MoPubMediationMRectActivity"
@@ -95,7 +90,6 @@
         <activity
             android:name=".ui.activities.mopub.MoPubMediationLeaderboardActivity"
             android:label="@string/mopub_leaderboard"
-            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.mopub.MoPubMediationInterstitialActivity"
