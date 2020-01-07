@@ -33,6 +33,7 @@ android {
             minifyEnabled false
             useProguard false
             firebaseAppDistribution {
+                appId="1:786277539067:android:6bb4032ad6f571ab"
                 testers="eros.ponte@pubnative.net"
             }
         }
