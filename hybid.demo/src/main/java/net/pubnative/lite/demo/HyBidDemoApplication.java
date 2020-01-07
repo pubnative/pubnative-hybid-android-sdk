@@ -30,10 +30,7 @@ import android.webkit.WebView;
 import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 
 import net.pubnative.lite.demo.managers.MoPubManager;
 import net.pubnative.lite.demo.managers.SettingsManager;
@@ -44,8 +41,6 @@ import net.pubnative.lite.sdk.utils.Logger;
 
 import java.util.ArrayList;
 
-import io.fabric.sdk.android.Fabric;
-
 /**
  * Created by erosgarciaponte on 08.01.18.
  */
@@ -54,7 +49,6 @@ public class HyBidDemoApplication extends MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-        Fabric.with(this, new Crashlytics());
 
         initSettings();
     }
