@@ -152,7 +152,6 @@ workflows:
                 - master
                 - beta
                 - development
-                - beta-firebase_publishing
           requires:
             - test_unit
 
