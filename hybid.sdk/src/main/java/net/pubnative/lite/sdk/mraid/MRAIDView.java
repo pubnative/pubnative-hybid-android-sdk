@@ -183,7 +183,7 @@ public class MRAIDView extends RelativeLayout {
     private boolean contentInfoAdded = false;
     private boolean webViewLoaded = false;
 
-    // true if this is an interstitial ad (TODO: move behavior to MRAIDInterstitial)
+
     private final boolean isInterstitial;
 
     @MRAIDState
