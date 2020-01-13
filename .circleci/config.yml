@@ -103,7 +103,7 @@ jobs:
           name: Send reports to coveralls.io
           command: ./gradlew cobertura coveralls
 
-  deploy_crashlytics:
+  deploy_firebase:
     <<: *android_config
     steps:
       - checkout
@@ -114,8 +114,8 @@ jobs:
       - *save_gradle_cache
       - *save_gems_cache
       - run:
-          name: Deploy to Crashlytics Beta
-          command: bundle exec fastlane deploy_to_crashlytics
+          name: Deploy to Firebase App Distribution
+          command: bundle exec fastlane deploy_to_firebase
 
   publish_bintray:
     <<: *android_config
@@ -145,7 +145,7 @@ workflows:
           requires:
             - test_unit
 
-      - deploy_crashlytics:
+      - deploy_firebase:
           filters:
             branches:
               only:
