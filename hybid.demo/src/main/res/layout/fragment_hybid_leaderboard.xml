@@ -23,7 +23,7 @@
 
         <net.pubnative.lite.sdk.views.HyBidLeaderboardAdView
             android:id="@+id/hybid_leaderboard"
-            android:layout_width="match_parent"
+            android:layout_width="728dp"
             android:layout_height="90dp"
             android:layout_gravity="center_horizontal" />
 
