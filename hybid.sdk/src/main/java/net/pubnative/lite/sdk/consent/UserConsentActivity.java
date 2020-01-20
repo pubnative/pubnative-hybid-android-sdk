@@ -38,8 +38,8 @@ import net.pubnative.lite.sdk.utils.Logger;
 public class UserConsentActivity extends Activity {
     private static final String TAG = UserConsentActivity.class.getSimpleName();
 
-    private static final String REDIRECT_ACCEPT = "https://pubnative.net/personalize-experience-yes/";
-    private static final String REDIRECT_REJECT = "https://pubnative.net/personalize-experience-no/";
+    private static final String REDIRECT_ACCEPT = "https://cdn.pubnative.net/static/consent/GDPR-consent-dialog-accept.html";
+    private static final String REDIRECT_REJECT = "https://cdn.pubnative.net/static/consent/GDPR-consent-dialog-reject.html";
     private static final String REDIRECT_CLOSE = "https://pubnative.net/";
 
     public static final int RESULT_CONSENT_ACCEPTED = 200;
