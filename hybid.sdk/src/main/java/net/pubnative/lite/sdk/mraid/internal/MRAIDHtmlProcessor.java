@@ -91,6 +91,11 @@ public class MRAIDHtmlProcessor {
         String resizeScript = new String(resizeScriptBytes);
         String resizeTag = "<script>" + ls + resizeScript + ls + "</script>";
 
+        String centerStyle64 = Assets.center_style;
+        byte[] centerStyleBytes = Base64.decode(centerStyle64, Base64.DEFAULT);
+        String centerStyle = new String(centerStyleBytes);
+        String centerTag = "<style>" + ls + centerStyle + ls + "</style>";
+
         // Add meta and style tags to head tag.
         regex = "<head[^>]*>";
         pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
@@ -103,7 +108,7 @@ public class MRAIDHtmlProcessor {
                             "body { margin:0; padding:0;}" + ls +
                             "*:not(input) { -webkit-touch-callout:none; -webkit-user-select:none; -webkit-text-size-adjust:none; }" + ls +
                             "</style>";
-            processedHtml.insert(matcher.end(), ls + metaTag + ls + styleTag + ls + mraidTag + ls + resizeTag);
+            processedHtml.insert(matcher.end(), ls + metaTag + ls + styleTag + ls + mraidTag + ls + resizeTag + ls + centerTag);
         }
 
         return processedHtml.toString();
