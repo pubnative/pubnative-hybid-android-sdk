@@ -146,14 +146,22 @@ public class AdRequestFactory {
     }
 
     private String getDefaultMetaFields() {
-        String[] metaFields = new String[]{APIMeta.POINTS, APIMeta.REVENUE_MODEL, APIMeta.CONTENT_INFO};
+        String[] metaFields = new String[]{
+                APIMeta.POINTS,
+                APIMeta.REVENUE_MODEL,
+                APIMeta.CONTENT_INFO,
+                APIMeta.CREATIVE_ID};
         return TextUtils.join(",", metaFields);
     }
 
     private String getDefaultNativeAssetFields() {
-        String[] assetFields = new String[]{APIAsset.ICON,
-                APIAsset.TITLE, APIAsset.BANNER, APIAsset.CALL_TO_ACTION,
-                APIAsset.RATING, APIAsset.DESCRIPTION};
+        String[] assetFields = new String[]{
+                APIAsset.ICON,
+                APIAsset.TITLE,
+                APIAsset.BANNER,
+                APIAsset.CALL_TO_ACTION,
+                APIAsset.RATING,
+                APIAsset.DESCRIPTION};
         return TextUtils.join(",", assetFields);
     }
 }

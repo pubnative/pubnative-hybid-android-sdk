@@ -113,6 +113,10 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         return mAd != null ? mAd.getImpressionId() : null;
     }
 
+    public String getCreativeId() {
+        return mAd != null ? mAd.getCreativeId() : null;
+    }
+
     private void renderAd() {
         mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, this);
         if (mPresenter != null) {
