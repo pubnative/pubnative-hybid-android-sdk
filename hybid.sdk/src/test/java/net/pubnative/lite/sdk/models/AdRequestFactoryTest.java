@@ -65,7 +65,7 @@ public class AdRequestFactoryTest {
         Assert.assertEquals("0", request.coppa);
         Assert.assertEquals("12.126543", request.latitude);
         Assert.assertEquals("15.151534", request.longitude);
-        Assert.assertEquals("points,revenuemodel,contentinfo", request.mf);
+        Assert.assertEquals("points,revenuemodel,contentinfo,creativeid", request.mf);
         Assert.assertEquals("HyBid", request.displaymanager);
         Assert.assertEquals(String.format(Locale.ENGLISH, "%s_%s_%s",
                 "sdkandroid", "hb", BuildConfig.VERSION_NAME), request.displaymanagerver);
