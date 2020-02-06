@@ -94,6 +94,7 @@
 
     <string name="mediation">Mediation</string>
 
+    <string name="creative_id">Creative ID:</string>
     <string name="impression_id">Impression ID:</string>
     <string name="error">Error:</string>
     <string name="request_url">PubNative request url:</string>

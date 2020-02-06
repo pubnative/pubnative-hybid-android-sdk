@@ -25,7 +25,7 @@ class HyBidMRectViewHolder(itemView: View, val adListener: InFeedAdListener) : R
         Log.d(TAG, "onAdLoaded")
 
         adListener.onInFeedAdLoaded()
-        adListener.onInFeedAdImpressionId(adView.impressionId)
+        adListener.onInFeedAdCreativeId(adView.creativeId)
     }
 
     override fun onAdLoadFailed(error: Throwable?) {

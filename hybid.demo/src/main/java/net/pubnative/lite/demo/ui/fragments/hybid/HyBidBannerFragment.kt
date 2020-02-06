@@ -49,7 +49,7 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
     private lateinit var hybidBanner: HyBidBannerAdView
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
-    private lateinit var impressionIdView: TextView
+    private lateinit var creativeIdView: TextView
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_hybid_banner, container, false)
@@ -58,7 +58,7 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
         super.onViewCreated(view, savedInstanceState)
 
         errorView = view.findViewById(R.id.view_error)
-        impressionIdView = view.findViewById(R.id.view_impression_id)
+        creativeIdView = view.findViewById(R.id.view_creative_id)
         loadButton = view.findViewById(R.id.button_load)
         hybidBanner = view.findViewById(R.id.hybid_banner)
 
@@ -72,7 +72,7 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
         }
 
         errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
-        impressionIdView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, impressionIdView.text.toString()) }
+        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, creativeIdView.text.toString()) }
     }
 
     override fun onDestroy() {
@@ -88,8 +88,8 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
     override fun onAdLoaded() {
         Log.d(TAG, "onAdLoaded")
         displayLogs()
-        if (!TextUtils.isEmpty(hybidBanner.impressionId)) {
-            impressionIdView.text = hybidBanner.impressionId
+        if (!TextUtils.isEmpty(hybidBanner.creativeId)) {
+            creativeIdView.text = hybidBanner.creativeId
         }
     }
 

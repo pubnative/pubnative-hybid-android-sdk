@@ -28,7 +28,7 @@ class InFeedAdapter(val zoneId: String, val adListener: InFeedAdListener) : Recy
         }
     }
 
-    override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is HyBidMRectViewHolder -> holder.bind(zoneId, shouldLoadAd)
             else -> {
