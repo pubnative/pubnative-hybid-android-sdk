@@ -62,7 +62,7 @@ public class UserDataManager {
     }
 
     public String getConsentPageLink() {
-        return "https://pubnative.net/personalize-your-experience/";
+        return "https://cdn.pubnative.net/static/consent/consent.html";
     }
 
     public String getPrivacyPolicyLink() {

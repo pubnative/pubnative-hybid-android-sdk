@@ -23,15 +23,14 @@
 package net.pubnative.lite.demo;
 
 import android.content.Context;
+import android.os.Build;
 import android.text.TextUtils;
+import android.webkit.WebView;
 
 import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 
 import net.pubnative.lite.demo.managers.MoPubManager;
 import net.pubnative.lite.demo.managers.SettingsManager;
@@ -42,8 +41,6 @@ import net.pubnative.lite.sdk.utils.Logger;
 
 import java.util.ArrayList;
 
-import io.fabric.sdk.android.Fabric;
-
 /**
  * Created by erosgarciaponte on 08.01.18.
  */
@@ -52,7 +49,6 @@ public class HyBidDemoApplication extends MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-        Fabric.with(this, new Crashlytics());
 
         initSettings();
     }
@@ -64,6 +60,9 @@ public class HyBidDemoApplication extends MultiDexApplication {
     }
 
     private void initSettings() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            WebView.setWebContentsDebuggingEnabled(true);
+        }
         SettingsModel settings = fetchSettings();
 
         HyBid.initialize(settings.getAppToken(), this, new HyBid.InitialisationListener() {

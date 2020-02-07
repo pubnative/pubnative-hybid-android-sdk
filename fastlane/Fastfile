@@ -19,9 +19,9 @@ platform :android do
             gradle(task: "lint")
         end
 
-    desc "Submit a new Beta Build to Crashlytics Beta"
-    lane :deploy_to_crashlytics do
+    desc "Submit a new Beta Build to Firebase App Distribution"
+    lane :deploy_to_firebase do
         gradle(task: "clean assembleDebug")
-        crashlytics
+        gradle(task: "clean appDistributionUploadDebug")
     end
 end

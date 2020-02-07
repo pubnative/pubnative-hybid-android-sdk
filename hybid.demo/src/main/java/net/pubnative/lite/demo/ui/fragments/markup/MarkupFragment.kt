@@ -25,7 +25,7 @@ class MarkupFragment : Fragment() {
     private lateinit var adSizeGroup: RadioGroup
     private lateinit var markupList: RecyclerView
     private val adapter = MarkupAdapter()
-    private val urlHandler = UrlHandler(activity)
+    private lateinit var urlHandler: UrlHandler
 
     private var selectedSize: Int = R.id.radio_size_banner
 
@@ -39,6 +39,8 @@ class MarkupFragment : Fragment() {
         markupInput = view.findViewById(R.id.input_markup)
         adSizeGroup = view.findViewById(R.id.group_ad_size)
         markupList = view.findViewById(R.id.list_markup)
+
+        urlHandler = UrlHandler(activity)
 
         view.findViewById<ImageButton>(R.id.button_paste_clipboard).setOnClickListener {
             pasteFromClipboard()

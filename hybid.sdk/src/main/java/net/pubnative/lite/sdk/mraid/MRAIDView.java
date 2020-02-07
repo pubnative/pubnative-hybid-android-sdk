@@ -183,7 +183,7 @@ public class MRAIDView extends RelativeLayout {
     private boolean contentInfoAdded = false;
     private boolean webViewLoaded = false;
 
-    // true if this is an interstitial ad (TODO: move behavior to MRAIDInterstitial)
+
     private final boolean isInterstitial;
 
     @MRAIDState
@@ -316,9 +316,10 @@ public class MRAIDView extends RelativeLayout {
         webView = createWebView();
 
         currentWebView = webView;
-        MRAIDLog.d("hz-m loading mraid " + MRAIDHtmlProcessor.processRawHtml(data));
+        String processedHtml = MRAIDHtmlProcessor.processRawHtml(data);
+        MRAIDLog.d("hz-m loading mraid " + processedHtml);
 
-        webView.loadDataWithBaseURL(this.baseUrl, MRAIDHtmlProcessor.processRawHtml(data), "text/html", "UTF-8", null);
+        webView.loadDataWithBaseURL(this.baseUrl, processedHtml, "text/html", "UTF-8", null);
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -422,12 +423,6 @@ public class MRAIDView extends RelativeLayout {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             wv.getSettings().setMediaPlaybackRequiresUserGesture(false);
         }
-
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-//            if ((context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
-//                WebView.setWebContentsDebuggingEnabled(true);
-//            }
-//        }
 
         return wv;
     }

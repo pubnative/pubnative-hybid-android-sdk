@@ -46,6 +46,7 @@ public class Ad extends JsonModel implements Serializable {
     private static final String DATA_CONTENTINFO_LINK_KEY = "link";
     private static final String DATA_CONTENTINFO_ICON_KEY = "icon";
     private static final String DATA_POINTS_NUMBER_KEY = "number";
+    private static final String DATA_TEXT_KEY = "text";
 
     private static final String PN_IMPRESSION_URL = "got.pubnative.net";
     private static final String PN_IMPRESSION_QUERY_PARAM = "t";
@@ -124,7 +125,7 @@ public class Ad extends JsonModel implements Serializable {
             for (AdData data : list) {
                 if (type.equals(data.type)) {
                     if (result == null) {
-                        result = new ArrayList<AdData>();
+                        result = new ArrayList<>();
                     }
                     result.add(data);
                 }
@@ -247,6 +248,18 @@ public class Ad extends JsonModel implements Serializable {
         Integer points = adData.getIntField(DATA_POINTS_NUMBER_KEY);
 
         return points == null ? MIN_POINTS : points;
+    }
+
+    public String getCreativeId() {
+        AdData adData = getMeta(APIMeta.CREATIVE_ID);
+
+        if (adData == null) {
+            return "";
+        }
+
+        String creativeId = adData.getStringField(DATA_TEXT_KEY);
+
+        return TextUtils.isEmpty(creativeId) ? "" : creativeId;
     }
 
     public String getImpressionId() {
