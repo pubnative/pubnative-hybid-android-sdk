@@ -97,6 +97,13 @@ public class AdParams {
         this.events = events;
     }
 
+    public void addEvents(List<Tracking> events) {
+        if (this.events != null && events != null)
+        {
+            this.events.addAll(events);
+        }
+    }
+
     public List<String> getVideoClicks() {
         return videoClicks;
     }

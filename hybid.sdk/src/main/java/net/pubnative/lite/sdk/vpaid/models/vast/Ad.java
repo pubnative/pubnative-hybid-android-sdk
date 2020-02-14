@@ -11,11 +11,18 @@ public class Ad {
     @Tag
     private InLine inLine;
 
+    @Tag
+    private Wrapper wrapper;
+
     public String getId() {
         return id;
     }
 
     public InLine getInLine() {
         return inLine;
+    }
+
+    public Wrapper getWrapper() {
+        return wrapper;
     }
 }
