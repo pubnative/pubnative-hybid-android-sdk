@@ -186,38 +186,41 @@ class VideoAdControllerVast implements VideoAdController {
         for (String url : mAdParams.getImpressions()) {
             mTrackingEventsList.add(new TrackingEvent(url));
         }
-        for (Tracking tracking : mAdParams.getEvents()) {
-            TrackingEvent event = new TrackingEvent(tracking.getText());
-            if (tracking.getEvent().equalsIgnoreCase(EventConstants.CREATIVE_VIEW)) {
-                event.timeMillis = 0;
-                mTrackingEventsList.add(event);
-            }
-            if (tracking.getEvent().equalsIgnoreCase(EventConstants.START)) {
-                event.timeMillis = 0;
-                mTrackingEventsList.add(event);
-            }
-            if (tracking.getEvent().equalsIgnoreCase(EventConstants.FIRST_QUARTILE)) {
-                event.timeMillis = duration / 4;
-                mTrackingEventsList.add(event);
-            }
-            if (tracking.getEvent().equalsIgnoreCase(EventConstants.MIDPOINT)) {
-                event.timeMillis = duration / 2;
-                mTrackingEventsList.add(event);
-            }
-            if (tracking.getEvent().equalsIgnoreCase(EventConstants.THIRD_QUARTILE)) {
-                event.timeMillis = duration * 3 / 4;
-                mTrackingEventsList.add(event);
-            }
-            if (tracking.getEvent().equalsIgnoreCase(EventConstants.PROGRESS)) {
-                if (tracking.getOffset() == null) {
-                    continue;
+
+        if (mAdParams.getEvents() != null) {
+            for (Tracking tracking : mAdParams.getEvents()) {
+                TrackingEvent event = new TrackingEvent(tracking.getText());
+                if (tracking.getEvent().equalsIgnoreCase(EventConstants.CREATIVE_VIEW)) {
+                    event.timeMillis = 0;
+                    mTrackingEventsList.add(event);
                 }
-                if (tracking.getOffset().contains("%")) {
-                    event.timeMillis = duration * Utils.parsePercent(mAdParams.getSkipTime()) / 100;
-                } else {
-                    event.timeMillis = Utils.parseDuration(tracking.getOffset()) * 1000;
+                if (tracking.getEvent().equalsIgnoreCase(EventConstants.START)) {
+                    event.timeMillis = 0;
+                    mTrackingEventsList.add(event);
                 }
-                mTrackingEventsList.add(event);
+                if (tracking.getEvent().equalsIgnoreCase(EventConstants.FIRST_QUARTILE)) {
+                    event.timeMillis = duration / 4;
+                    mTrackingEventsList.add(event);
+                }
+                if (tracking.getEvent().equalsIgnoreCase(EventConstants.MIDPOINT)) {
+                    event.timeMillis = duration / 2;
+                    mTrackingEventsList.add(event);
+                }
+                if (tracking.getEvent().equalsIgnoreCase(EventConstants.THIRD_QUARTILE)) {
+                    event.timeMillis = duration * 3 / 4;
+                    mTrackingEventsList.add(event);
+                }
+                if (tracking.getEvent().equalsIgnoreCase(EventConstants.PROGRESS)) {
+                    if (tracking.getOffset() == null) {
+                        continue;
+                    }
+                    if (tracking.getOffset().contains("%")) {
+                        event.timeMillis = duration * Utils.parsePercent(mAdParams.getSkipTime()) / 100;
+                    } else {
+                        event.timeMillis = Utils.parseDuration(tracking.getOffset()) * 1000;
+                    }
+                    mTrackingEventsList.add(event);
+                }
             }
         }
     }

@@ -5,7 +5,7 @@ import net.pubnative.lite.sdk.vpaid.xml.Tag;
 
 import java.util.List;
 
-public class Wrapper {
+public class Wrapper implements VastAdSource {
     @Attribute
     private boolean followAdditonalWrappers;
 
@@ -16,7 +16,7 @@ public class Wrapper {
     private boolean fallbackOnNoAd;
 
     @Tag
-    private VASTAdTagURI tagURI;
+    private VASTAdTagURI vastAdTagURI;
 
     @Tag
     private AdSystem adSystem;
@@ -42,22 +42,26 @@ public class Wrapper {
         return fallbackOnNoAd;
     }
 
-    public VASTAdTagURI getTagURI() {
-        return tagURI;
+    public VASTAdTagURI getVastAdTagURI() {
+        return vastAdTagURI;
     }
 
+    @Override
     public AdSystem getAdSystem() {
         return adSystem;
     }
 
+    @Override
     public List<Impression> getImpressionList() {
         return impressionList;
     }
 
+    @Override
     public Creatives getCreatives() {
         return creatives;
     }
 
+    @Override
     public Error getError() {
         return error;
     }

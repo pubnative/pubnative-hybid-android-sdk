@@ -4,7 +4,7 @@ import net.pubnative.lite.sdk.vpaid.xml.Tag;
 
 import java.util.List;
 
-public class InLine {
+public class InLine implements VastAdSource {
 
     @Tag
     private AdSystem adSystem;
@@ -18,18 +18,22 @@ public class InLine {
     @Tag
     private Creatives creatives;
 
+    @Override
     public AdSystem getAdSystem() {
         return adSystem;
     }
 
+    @Override
     public Error getError() {
         return error;
     }
 
+    @Override
     public Creatives getCreatives() {
         return creatives;
     }
 
+    @Override
     public List<Impression> getImpressionList() {
         return impressionList;
     }
