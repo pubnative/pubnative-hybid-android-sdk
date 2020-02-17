@@ -31,8 +31,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class VastParser {
-    private static final String LOG_TAG = VastParser.class.getSimpleName();
+public class VastProcessor {
+    private static final String LOG_TAG = VastProcessor.class.getSimpleName();
+    private static final int UNWRAP_DEPTH = 5; //The processor will go maximum 5 wrappers deep to avoid having infinite loops.
 
     public interface Listener {
         void onParseSuccess(AdParams adParams, String vastFileContent);
@@ -40,7 +41,16 @@ public class VastParser {
         void onParseError(PlayerInfo message);
     }
 
-    public static void parseResponse(final Context context, String response, final AdSpotDimensions parseParams, final Listener listener) {
+    private final Context mContext;
+    private final AdSpotDimensions mParseParams;
+    private int unwrapAttempt = 0;
+
+    public VastProcessor(Context context, AdSpotDimensions parseParams) {
+        this.mContext = context;
+        this.mParseParams = parseParams;
+    }
+
+    public void parseResponse(String response, final Listener listener) {
         try {
             Vast vast = XmlParser.parse(response, Vast.class);
             if (vast.getStatus() != null && vast.getStatus().getText().equalsIgnoreCase("NO_AD")) {
@@ -54,37 +64,45 @@ public class VastParser {
                 Wrapper wrapper = vast.getAd().getWrapper();
 
                 if (inLine != null) {
-                    fillAdParams(context, inLine, adParams, parseParams);
+                    fillAdParams(mContext, inLine, adParams, mParseParams);
                     listener.onParseSuccess(adParams, response);
                 } else if (wrapper != null) {
-                    fillAdParams(context, wrapper, adParams, parseParams);
-                    String adTagUri = wrapper.getVastAdTagURI().getText();
+                    fillAdParams(mContext, wrapper, adParams, mParseParams);
 
-                    PNHttpClient.makeRequest(context, adTagUri, null, null, new PNHttpClient.Listener() {
-                        @Override
-                        public void onSuccess(String response) {
-                            parseResponse(context, response, parseParams, listener);
-                        }
+                    if (unwrapAttempt < UNWRAP_DEPTH) {
+                        String adTagUri = wrapper.getVastAdTagURI().getText();
 
-                        @Override
-                        public void onFailure(Throwable error) {
-                            ErrorLog.postError(context, VastError.XML_PARSING);
-                            Logger.e(LOG_TAG, "Parse VAST failed: " + error.getMessage());
-                            PlayerInfo info = new PlayerInfo("Parse VAST response failed");
-                            listener.onParseError(info);
-                        }
-                    });
+                        PNHttpClient.makeRequest(mContext, adTagUri, null, null, new PNHttpClient.Listener() {
+                            @Override
+                            public void onSuccess(String response) {
+                                parseResponse(response, listener);
+                            }
+
+                            @Override
+                            public void onFailure(Throwable error) {
+                                ErrorLog.postError(mContext, VastError.XML_PARSING);
+                                Logger.e(LOG_TAG, "Parse VAST failed: " + error.getMessage());
+                                PlayerInfo info = new PlayerInfo("Parse VAST response failed");
+                                listener.onParseError(info);
+                            }
+                        });
+
+                        unwrapAttempt++;
+                    } else {
+                        PlayerInfo info = new PlayerInfo("Vast processor reached wrapper limit (5)");
+                        listener.onParseError(info);
+                    }
                 }
             }
         } catch (Exception e) {
-            ErrorLog.postError(context, VastError.XML_PARSING);
+            ErrorLog.postError(mContext, VastError.XML_PARSING);
             Logger.e(LOG_TAG, "Parse VAST failed: " + e.getMessage());
             PlayerInfo info = new PlayerInfo("Parse VAST response failed");
             listener.onParseError(info);
         }
     }
 
-    private static void fillAdParams(Context context, VastAdSource adSource, AdParams adParams, AdSpotDimensions parseParams) {
+    private void fillAdParams(Context context, VastAdSource adSource, AdParams adParams, AdSpotDimensions parseParams) {
         if (adSource.getError() != null) {
             ErrorLog.initErrorLog(adSource.getError().getText().trim());
         }
@@ -192,7 +210,7 @@ public class VastParser {
         }
     }
 
-    private static String getVpaidJsUrl(List<MediaFile> mediaFileList) {
+    private String getVpaidJsUrl(List<MediaFile> mediaFileList) {
         for (MediaFile mediaFile : mediaFileList) {
             if (mediaFile.getApiFramework() != null && mediaFile.getApiFramework().equalsIgnoreCase("VPAID")) {
                 return mediaFile.getText().trim();
@@ -201,7 +219,7 @@ public class VastParser {
         return null;
     }
 
-    private static String parseAdParameters(Linear linear) {
+    private String parseAdParameters(Linear linear) {
         try {
             return linear.getAdParameters().getText().trim();
         } catch (Exception e) {
@@ -219,7 +237,7 @@ public class VastParser {
         return new ArrayList<>();
     }
 
-    private static List<MediaFile> sortedMediaFiles(List<MediaFile> mediaFileList, AdSpotDimensions adSpotDimensions) {
+    private List<MediaFile> sortedMediaFiles(List<MediaFile> mediaFileList, AdSpotDimensions adSpotDimensions) {
         List<MediaFile> supportedMediaFilesList = new ArrayList<>();
         for (MediaFile mediaFile : mediaFileList) {
             if (mediaFile.getType().equalsIgnoreCase("video/mp4") ||
@@ -234,7 +252,7 @@ public class VastParser {
         return supportedMediaFilesList;
     }
 
-    private static Comparator<MediaFile> createComparator(final AdSpotDimensions adSpotDimensions) {
+    private Comparator<MediaFile> createComparator(final AdSpotDimensions adSpotDimensions) {
         return new Comparator<MediaFile>() {
             @Override
             public int compare(MediaFile mediaFile1, MediaFile mediaFile2) {
@@ -246,5 +264,4 @@ public class VastParser {
             }
         };
     }
-
 }

@@ -13,7 +13,7 @@ import net.pubnative.lite.sdk.vpaid.helpers.ErrorLog;
 import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
 import net.pubnative.lite.sdk.vpaid.models.AdSpotDimensions;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
-import net.pubnative.lite.sdk.vpaid.response.VastParser;
+import net.pubnative.lite.sdk.vpaid.response.VastProcessor;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
 
 import java.util.concurrent.Future;
@@ -192,7 +192,8 @@ abstract class BaseVideoAdInternal {
     }
 
     private void fetchAd() {
-        VastParser.parseResponse(getContext(), mVastData, getAdSpotDimensions(), new VastParser.Listener() {
+        VastProcessor processor = new VastProcessor(getContext(), getAdSpotDimensions());
+        processor.parseResponse(mVastData, new VastProcessor.Listener() {
             @Override
             public void onParseSuccess(AdParams adParams, String vastFileContent) {
                 prepare(adParams, vastFileContent);
