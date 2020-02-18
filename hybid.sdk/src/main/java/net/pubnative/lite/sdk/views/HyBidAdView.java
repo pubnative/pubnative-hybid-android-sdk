@@ -31,13 +31,14 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import net.pubnative.lite.sdk.api.RequestManager;
+import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 
-public abstract class HyBidAdView extends RelativeLayout implements RequestManager.RequestListener, AdPresenter.Listener {
+public class HyBidAdView extends RelativeLayout implements RequestManager.RequestListener, AdPresenter.Listener {
 
     public interface Listener {
         void onAdLoaded();
@@ -53,7 +54,6 @@ public abstract class HyBidAdView extends RelativeLayout implements RequestManag
     protected PNAdView.Listener mListener;
     private AdPresenter mPresenter;
     protected Ad mAd;
-    private AdSize mAdSize;
 
     public HyBidAdView(Context context) {
         super(context);
@@ -79,20 +79,14 @@ public abstract class HyBidAdView extends RelativeLayout implements RequestManag
     private void init(RequestManager requestManager) {
         mRequestManager = requestManager;
         mRequestManager.setIntegrationType(IntegrationType.STANDALONE);
-        mAdSize = AdSize.SIZE_320x50;
     }
 
     public void setAdSize(AdSize adSize) {
-        this.mAdSize = adSize;
+        mRequestManager.setAdSize(adSize);
     }
 
     public void load(String zoneId, PNAdView.Listener listener) {
-        load(zoneId, mAdSize, listener);
-    }
-
-    public void load(String zoneId, AdSize adSize, PNAdView.Listener listener) {
         cleanup();
-        mAdSize = adSize;
         mListener = listener;
         if (TextUtils.isEmpty(zoneId)) {
             invokeOnLoadFailed(new Exception("Invalid zone id provided"));
@@ -130,11 +124,18 @@ public abstract class HyBidAdView extends RelativeLayout implements RequestManag
         return mAd != null ? mAd.getCreativeId() : null;
     }
 
-    protected abstract String getLogTag();
+    protected String getLogTag() {
+        return HyBidAdView.class.getSimpleName();
+    }
 
-    abstract RequestManager getRequestManager();
+    RequestManager getRequestManager() {
+        return new RequestManager();
+    }
 
-    protected abstract AdPresenter createPresenter();
+    protected AdPresenter createPresenter() {
+        return new BannerPresenterFactory(getContext())
+                .createPresenter(mAd, this);
+    }
 
     protected void renderAd() {
         mPresenter = createPresenter();

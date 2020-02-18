@@ -26,7 +26,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.util.AttributeSet;
 
-public abstract class PNAdView extends HyBidAdView {
+public class PNAdView extends HyBidAdView {
     public interface Listener extends HyBidAdView.Listener { }
 
     public PNAdView(Context context) {
