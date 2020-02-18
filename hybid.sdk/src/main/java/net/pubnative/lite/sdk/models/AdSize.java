@@ -12,7 +12,8 @@ public enum AdSize {
     SIZE_250x250(250, 250, "m"),
     SIZE_300x600(300, 600, "l"),
     SIZE_320x100(320, 100, "s"),
-    SIZE_4800x320(480, 320, "l");
+    SIZE_480x320(480, 320, "l"),
+    SIZE_INTERSTITIAL(0, 0, "l");
 
     private final int width;
     private final int height;

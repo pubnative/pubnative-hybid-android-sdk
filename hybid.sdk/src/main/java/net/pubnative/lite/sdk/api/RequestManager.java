@@ -27,6 +27,7 @@ import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdRequestFactory;
+import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.Logger;
@@ -36,7 +37,7 @@ import net.pubnative.lite.sdk.utils.PNInitializationHelper;
  * Created by erosgarciaponte on 08.01.18.
  */
 
-public abstract class RequestManager {
+public class RequestManager {
     public interface RequestListener {
         void onRequestSuccess(Ad ad);
 
@@ -51,6 +52,7 @@ public abstract class RequestManager {
     private String mZoneId;
     private RequestListener mRequestListener;
     private boolean mIsDestroyed;
+    private AdSize mAdSize;
 
     public RequestManager() {
         this(HyBid.getApiClient(), HyBid.getAdCache(), new AdRequestFactory(), new PNInitializationHelper());
@@ -64,6 +66,7 @@ public abstract class RequestManager {
         mAdCache = adCache;
         mAdRequestFactory = adRequestFactory;
         mInitializationHelper = initializationHelper;
+        mAdSize = AdSize.SIZE_320x50;
     }
 
     public void setRequestListener(RequestListener requestListener) {
@@ -72,6 +75,10 @@ public abstract class RequestManager {
 
     public void setZoneId(String zoneId) {
         mZoneId = zoneId;
+    }
+
+    public void setAdSize(AdSize adSize) {
+        mAdSize = adSize;
     }
 
     public void requestAd() {
@@ -137,5 +144,7 @@ public abstract class RequestManager {
         mIsDestroyed = true;
     }
 
-    protected abstract String getAdSize();
+    protected AdSize getAdSize() {
+        return mAdSize;
+    }
 }
