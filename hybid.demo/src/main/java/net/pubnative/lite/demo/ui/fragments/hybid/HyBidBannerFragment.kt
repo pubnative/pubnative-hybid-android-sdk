@@ -28,13 +28,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
+import android.widget.*
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
+import net.pubnative.lite.sdk.models.AdSize
+import net.pubnative.lite.sdk.views.HyBidAdView
 import net.pubnative.lite.sdk.views.HyBidBannerAdView
 import net.pubnative.lite.sdk.views.PNAdView
 
@@ -46,10 +47,26 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
 
     private var zoneId: String? = null
 
-    private lateinit var hybidBanner: HyBidBannerAdView
+    private lateinit var hybidBanner: HyBidAdView
     private lateinit var loadButton: Button
+    private lateinit var adSizeSpinner: Spinner
+    private lateinit var spinnerAdapter: ArrayAdapter<AdSize>
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
+
+    private val adSizes = arrayOf(
+            AdSize.SIZE_320x50,
+            AdSize.SIZE_160x600,
+            AdSize.SIZE_250x250,
+            AdSize.SIZE_300x50,
+            AdSize.SIZE_300x250,
+            AdSize.SIZE_300x600,
+            AdSize.SIZE_320x100,
+            AdSize.SIZE_320x480,
+            AdSize.SIZE_480x320,
+            AdSize.SIZE_728x90,
+            AdSize.SIZE_768x1024,
+            AdSize.SIZE_1024x768)
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_hybid_banner, container, false)
@@ -61,8 +78,11 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
         creativeIdView = view.findViewById(R.id.view_creative_id)
         loadButton = view.findViewById(R.id.button_load)
         hybidBanner = view.findViewById(R.id.hybid_banner)
+        adSizeSpinner = view.findViewById(R.id.spinner_ad_size)
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
+
+        hybidBanner.setAdSize(AdSize.SIZE_320x50)
 
         loadButton.setOnClickListener {
             errorView.text = ""
@@ -73,6 +93,12 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
 
         errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
         creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, creativeIdView.text.toString()) }
+
+        spinnerAdapter = ArrayAdapter(activity!!, android.R.layout.simple_spinner_item, adSizes)
+        adSizeSpinner.adapter = spinnerAdapter
+        adSizeSpinner.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
+            hybidBanner.setAdSize(adSizes[position])
+        }
     }
 
     override fun onDestroy() {
