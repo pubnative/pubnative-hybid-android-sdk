@@ -30,6 +30,7 @@ import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
  * Created by erosgarciaponte on 12.01.18.
  */
 
+@Deprecated
 public class MRectPresenterFactory extends BannerPresenterFactory {
     public MRectPresenterFactory(Context context) {
         super(context);

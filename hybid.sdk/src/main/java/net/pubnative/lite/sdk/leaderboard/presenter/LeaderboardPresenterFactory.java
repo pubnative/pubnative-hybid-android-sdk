@@ -26,6 +26,7 @@ import android.content.Context;
 
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
 
+@Deprecated
 public class LeaderboardPresenterFactory extends BannerPresenterFactory {
     public LeaderboardPresenterFactory(Context context) {
         super(context);
