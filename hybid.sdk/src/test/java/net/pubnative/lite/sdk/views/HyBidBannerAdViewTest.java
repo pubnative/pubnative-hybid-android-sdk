@@ -17,7 +17,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(RobolectricTestRunner.class)
 public class HyBidBannerAdViewTest {
-    private PNAdView adView;
+    private HyBidAdView adView;
     private Activity activity;
 
     @Mock

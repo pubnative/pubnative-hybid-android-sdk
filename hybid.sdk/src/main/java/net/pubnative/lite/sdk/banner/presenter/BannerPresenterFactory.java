@@ -42,7 +42,7 @@ public class BannerPresenterFactory extends PresenterFactory {
     }
 
     @Override
-    protected AdPresenter fromCreativeType(int assetGroupId, Ad ad) {
+    public AdPresenter fromCreativeType(int assetGroupId, Ad ad) {
         switch (assetGroupId) {
             case ApiAssetGroupType.MRAID_160x600:
             case ApiAssetGroupType.MRAID_250x250:
@@ -59,7 +59,7 @@ public class BannerPresenterFactory extends PresenterFactory {
                 return new MraidAdPresenter(getContext(), ad);
             }
             case ApiAssetGroupType.VAST_MRECT: {
-                return new VastPresenter(getContext(), ad);
+                return new VastAdPresenter(getContext(), ad);
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for banner ad format.");

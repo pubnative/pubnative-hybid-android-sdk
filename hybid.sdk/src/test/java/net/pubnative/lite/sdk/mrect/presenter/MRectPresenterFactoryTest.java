@@ -1,5 +1,7 @@
 package net.pubnative.lite.sdk.mrect.presenter;
 
+import net.pubnative.lite.sdk.banner.presenter.MraidAdPresenter;
+import net.pubnative.lite.sdk.banner.presenter.VastAdPresenter;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
@@ -42,7 +44,7 @@ public class MRectPresenterFactoryTest {
     @Test
     public void fromCreativeType_withHTML() {
         assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_300x250, mTestAd))
-                .isInstanceOf(MraidMRectPresenter.class);
+                .isInstanceOf(MraidAdPresenter.class);
     }
 
     @Test
@@ -55,6 +57,6 @@ public class MRectPresenterFactoryTest {
     @Test
     public void fromCreativeType_withVast() {
         assertThat(mSubject.fromCreativeType(ApiAssetGroupType.VAST_MRECT, mTestAd))
-                .isInstanceOf(VastMRectPresenter.class);
+                .isInstanceOf(VastAdPresenter.class);
     }
 }

@@ -36,7 +36,7 @@ import net.pubnative.lite.sdk.vpaid.VideoAd;
 import net.pubnative.lite.sdk.vpaid.VideoAdListener;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
 
-public class VastPresenter implements AdPresenter {
+public class VastAdPresenter implements AdPresenter {
     private final Context mContext;
     private final Ad mAd;
 
@@ -47,7 +47,7 @@ public class VastPresenter implements AdPresenter {
     private VideoAdView mVideoPlayer;
     private VideoAd mVideoAd;
 
-    public VastPresenter(Context context, Ad ad) {
+    public VastAdPresenter(Context context, Ad ad) {
         mContext = context;
         mAd = ad;
     }
@@ -123,7 +123,7 @@ public class VastPresenter implements AdPresenter {
             if (!mLoaded) {
                 mLoaded = true;
                 if (mListener != null) {
-                    mListener.onAdLoaded(VastPresenter.this, buildView());
+                    mListener.onAdLoaded(VastAdPresenter.this, buildView());
                 }
             }
         }
@@ -131,7 +131,7 @@ public class VastPresenter implements AdPresenter {
         @Override
         public void onAdLoadFail(PlayerInfo info) {
             if (mListener != null) {
-                mListener.onAdError(VastPresenter.this);
+                mListener.onAdError(VastAdPresenter.this);
             }
         }
 
@@ -142,7 +142,7 @@ public class VastPresenter implements AdPresenter {
             }
 
             if (mListener != null) {
-                mListener.onAdClicked(VastPresenter.this);
+                mListener.onAdClicked(VastAdPresenter.this);
             }
         }
 
