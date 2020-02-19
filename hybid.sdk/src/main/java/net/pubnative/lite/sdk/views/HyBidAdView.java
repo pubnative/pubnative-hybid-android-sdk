@@ -51,7 +51,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     }
 
     private RequestManager mRequestManager;
-    protected PNAdView.Listener mListener;
+    protected HyBidAdView.Listener mListener;
     private AdPresenter mPresenter;
     protected Ad mAd;
 
@@ -85,7 +85,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         mRequestManager.setAdSize(adSize);
     }
 
-    public void load(String zoneId, PNAdView.Listener listener) {
+    public void load(String zoneId, HyBidAdView.Listener listener) {
         cleanup();
         mListener = listener;
         if (TextUtils.isEmpty(zoneId)) {

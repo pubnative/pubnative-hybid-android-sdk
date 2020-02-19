@@ -1,5 +1,7 @@
 package net.pubnative.lite.sdk.models;
 
+import java.util.Locale;
+
 public enum AdSize {
     SIZE_320x50(320, 50, "s"),
     SIZE_300x250(300, 250, "m"),
@@ -35,5 +37,10 @@ public enum AdSize {
 
     public String getAdLayoutSize() {
         return adLayoutSize;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(Locale.ENGLISH, "(%d x %d)", getWidth(), getHeight());
     }
 }

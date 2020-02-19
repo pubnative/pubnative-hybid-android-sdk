@@ -28,19 +28,21 @@ import com.mopub.mobileads.CustomEventBanner;
 import com.mopub.mobileads.MoPubErrorCode;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.views.HyBidAdView;
 import net.pubnative.lite.sdk.views.HyBidBannerAdView;
 import net.pubnative.lite.sdk.views.PNAdView;
 
 import java.util.Map;
 
-public class HyBidMediationBannerCustomEvent extends CustomEventBanner implements PNAdView.Listener {
+public class HyBidMediationBannerCustomEvent extends CustomEventBanner implements HyBidAdView.Listener {
     private static final String TAG = HyBidMediationBannerCustomEvent.class.getSimpleName();
 
     private static final String APP_TOKEN_KEY = "pn_app_token";
     private static final String ZONE_ID_KEY = "pn_zone_id";
     private CustomEventBannerListener mBannerListener;
-    private HyBidBannerAdView mBannerView;
+    private HyBidAdView mBannerView;
 
     @Override
     protected void loadBanner(Context context,
@@ -71,7 +73,8 @@ public class HyBidMediationBannerCustomEvent extends CustomEventBanner implement
             return;
         }
 
-        mBannerView = new HyBidBannerAdView(context);
+        mBannerView = new HyBidAdView(context);
+        mBannerView.setAdSize(getAdSize());
         mBannerView.setMediation(true);
         mBannerView.load(zoneId, this);
     }
@@ -82,6 +85,10 @@ public class HyBidMediationBannerCustomEvent extends CustomEventBanner implement
             mBannerView.destroy();
             mBannerView = null;
         }
+    }
+
+    protected AdSize getAdSize() {
+        return AdSize.SIZE_320x50;
     }
 
     //------------------------------------ PNAdView Callbacks --------------------------------------
