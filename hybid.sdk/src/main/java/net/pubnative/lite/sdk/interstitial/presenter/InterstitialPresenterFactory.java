@@ -22,7 +22,6 @@
 //
 package net.pubnative.lite.sdk.interstitial.presenter;
 
-import android.app.Activity;
 import android.content.Context;
 
 import net.pubnative.lite.sdk.models.Ad;
@@ -63,15 +62,14 @@ public class InterstitialPresenterFactory {
 
     InterstitialPresenter fromCreativeType(int assetGroupId, Ad ad) {
         switch (assetGroupId) {
-            case ApiAssetGroupType.MRAID_INTERSTITIAL_1:
-            case ApiAssetGroupType.MRAID_INTERSTITIAL_2:
-            case ApiAssetGroupType.MRAID_INTERSTITIAL_3: {
+            case ApiAssetGroupType.MRAID_300x600:
+            case ApiAssetGroupType.MRAID_320x480:
+            case ApiAssetGroupType.MRAID_480x320:
+            case ApiAssetGroupType.MRAID_1024x768:
+            case ApiAssetGroupType.MRAID_768x1024: {
                 return new MraidInterstitialPresenter(mContext, ad, mZoneId);
             }
-            case ApiAssetGroupType.VAST_INTERSTITIAL_1:
-            case ApiAssetGroupType.VAST_INTERSTITIAL_2:
-            case ApiAssetGroupType.VAST_INTERSTITIAL_3:
-            case ApiAssetGroupType.VAST_INTERSTITIAL_4: {
+            case ApiAssetGroupType.VAST_INTERSTITIAL: {
                 return new VastInterstitialPresenter(mContext, ad, mZoneId);
             }
             default: {

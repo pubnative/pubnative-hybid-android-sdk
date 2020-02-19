@@ -38,7 +38,7 @@ public class LeaderboardPresenterFactoryTest {
 
     @Test
     public void fromCreativeType_withHTML() {
-        assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_LEADERBOARD, mTestAd))
+        assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_728x90, mTestAd))
                 .isInstanceOf(MraidLeaderboardPresenter.class);
     }
 }

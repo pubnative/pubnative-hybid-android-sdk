@@ -41,7 +41,7 @@ public class MRectPresenterFactoryTest {
 
     @Test
     public void fromCreativeType_withHTML() {
-        assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_MRECT, mTestAd))
+        assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_300x250, mTestAd))
                 .isInstanceOf(MraidMRectPresenter.class);
     }
 

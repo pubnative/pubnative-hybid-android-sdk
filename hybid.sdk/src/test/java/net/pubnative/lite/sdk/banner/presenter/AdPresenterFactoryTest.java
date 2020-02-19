@@ -41,7 +41,7 @@ public class AdPresenterFactoryTest {
 
     @Test
     public void fromCreativeType_withHTML() {
-        assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_BANNER_1, mTestAd))
+        assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_320x50, mTestAd))
                 .isInstanceOf(MraidAdPresenter.class);
     }
 }

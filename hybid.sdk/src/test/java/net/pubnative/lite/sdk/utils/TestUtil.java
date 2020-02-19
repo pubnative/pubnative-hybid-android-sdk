@@ -43,11 +43,11 @@ public class TestUtil {
     }
 
     public static Ad createTestBannerAd() {
-        return createTestAd(ApiAssetGroupType.MRAID_BANNER_1);
+        return createTestAd(ApiAssetGroupType.MRAID_320x50);
     }
 
     public static Ad createTestMRectAd() {
-        return createTestAd(ApiAssetGroupType.MRAID_MRECT);
+        return createTestAd(ApiAssetGroupType.MRAID_300x250);
     }
 
     public static Ad createTestVideoMRectAd() {
@@ -55,15 +55,15 @@ public class TestUtil {
     }
 
     public static Ad createTestLeaderboardAd() {
-        return createTestAd(ApiAssetGroupType.MRAID_LEADERBOARD);
+        return createTestAd(ApiAssetGroupType.MRAID_728x90);
     }
 
     public static Ad createTestInterstitialAd() {
-        return createTestAd(ApiAssetGroupType.MRAID_INTERSTITIAL_1);
+        return createTestAd(ApiAssetGroupType.MRAID_320x480);
     }
 
     public static Ad createTestVideoInterstitialAd() {
-        return createTestAd(ApiAssetGroupType.VAST_INTERSTITIAL_1);
+        return createTestAd(ApiAssetGroupType.VAST_INTERSTITIAL);
     }
 
     public static Ad createTestAd(int assetGroupId) {
