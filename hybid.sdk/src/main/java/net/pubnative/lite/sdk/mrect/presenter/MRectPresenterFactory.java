@@ -24,36 +24,14 @@ package net.pubnative.lite.sdk.mrect.presenter;
 
 import android.content.Context;
 
-import net.pubnative.lite.sdk.models.Ad;
-import net.pubnative.lite.sdk.models.ApiAssetGroupType;
-import net.pubnative.lite.sdk.presenter.AdPresenter;
-import net.pubnative.lite.sdk.presenter.PresenterFactory;
-import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
 
 /**
  * Created by erosgarciaponte on 12.01.18.
  */
 
-public class MRectPresenterFactory extends PresenterFactory {
-    private static final String TAG = MRectPresenterFactory.class.getSimpleName();
-
+public class MRectPresenterFactory extends BannerPresenterFactory {
     public MRectPresenterFactory(Context context) {
         super(context);
-    }
-
-    @Override
-    protected AdPresenter fromCreativeType(int assetGroupId, Ad ad) {
-        switch (assetGroupId) {
-            case ApiAssetGroupType.MRAID_MRECT: {
-                return new MraidMRectPresenter(getContext(), ad);
-            }
-            case ApiAssetGroupType.VAST_MRECT: {
-                return new VastMRectPresenter(getContext(), ad);
-            }
-            default: {
-                Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for MRect ad format.");
-                return null;
-            }
-        }
     }
 }

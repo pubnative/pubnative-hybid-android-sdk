@@ -51,12 +51,14 @@ public class AdRequestFactoryTest {
 
     @Test
     public void createAdRequest() {
-        AdRequest request = mSubject.buildRequest("2", "s", "aabbccdd", false, IntegrationType.HEADER_BIDDING);
+        AdRequest request = mSubject.buildRequest("2", AdSize.SIZE_320x50, "aabbccdd", false, IntegrationType.HEADER_BIDDING);
         Assert.assertEquals("aabbccdd", request.gid);
         Assert.assertEquals(PNCrypto.md5("aabbccdd"), request.gidmd5);
         Assert.assertEquals(PNCrypto.sha1("aabbccdd"), request.gidsha1);
         Assert.assertEquals("2", request.zoneid);
         Assert.assertEquals("s", request.al);
+        Assert.assertEquals("320", request.width);
+        Assert.assertEquals("50", request.height);
         Assert.assertEquals("en", request.locale);
         Assert.assertEquals("android", request.os);
         Assert.assertEquals("8.1.0", request.osver);

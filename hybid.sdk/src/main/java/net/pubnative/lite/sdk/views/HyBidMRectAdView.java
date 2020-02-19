@@ -31,7 +31,7 @@ import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.mrect.presenter.MRectPresenterFactory;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 
-public class HyBidMRectAdView extends PNAdView {
+public class HyBidMRectAdView extends HyBidAdView {
 
     public HyBidMRectAdView(Context context) {
         super(context);
@@ -58,11 +58,5 @@ public class HyBidMRectAdView extends PNAdView {
     @Override
     RequestManager getRequestManager() {
         return new MRectRequestManager();
-    }
-
-    @Override
-    protected AdPresenter createPresenter() {
-        return new MRectPresenterFactory(getContext())
-                .createPresenter(mAd, this);
     }
 }

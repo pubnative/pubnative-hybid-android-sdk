@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package net.pubnative.lite.sdk.mrect.presenter;
+package net.pubnative.lite.sdk.banner.presenter;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -36,18 +36,18 @@ import net.pubnative.lite.sdk.vpaid.VideoAd;
 import net.pubnative.lite.sdk.vpaid.VideoAdListener;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
 
-public class VastMRectPresenter implements AdPresenter {
+public class VastAdPresenter implements AdPresenter {
     private final Context mContext;
     private final Ad mAd;
 
-    private AdPresenter.Listener mListener;
+    private Listener mListener;
     private boolean mIsDestroyed;
     private boolean mLoaded = false;
 
     private VideoAdView mVideoPlayer;
     private VideoAd mVideoAd;
 
-    public VastMRectPresenter(Context context, Ad ad) {
+    public VastAdPresenter(Context context, Ad ad) {
         mContext = context;
         mAd = ad;
     }
@@ -123,7 +123,7 @@ public class VastMRectPresenter implements AdPresenter {
             if (!mLoaded) {
                 mLoaded = true;
                 if (mListener != null) {
-                    mListener.onAdLoaded(VastMRectPresenter.this, buildView());
+                    mListener.onAdLoaded(VastAdPresenter.this, buildView());
                 }
             }
         }
@@ -131,7 +131,7 @@ public class VastMRectPresenter implements AdPresenter {
         @Override
         public void onAdLoadFail(PlayerInfo info) {
             if (mListener != null) {
-                mListener.onAdError(VastMRectPresenter.this);
+                mListener.onAdError(VastAdPresenter.this);
             }
         }
 
@@ -142,7 +142,7 @@ public class VastMRectPresenter implements AdPresenter {
             }
 
             if (mListener != null) {
-                mListener.onAdClicked(VastMRectPresenter.this);
+                mListener.onAdClicked(VastAdPresenter.this);
             }
         }
 

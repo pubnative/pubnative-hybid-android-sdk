@@ -28,7 +28,7 @@ public class AdTest {
         JSONObject json = mSubject.toJson();
         Ad parsedAd = new Ad(json);
 
-        Assert.assertEquals(ApiAssetGroupType.MRAID_BANNER_1, parsedAd.assetgroupid);
+        Assert.assertEquals(ApiAssetGroupType.MRAID_320x50, parsedAd.assetgroupid);
         Assert.assertEquals(new Integer(9), parsedAd.getECPM());
 
         Assert.assertEquals("<a href=\"https://ads.com/click/112770_1386565997\"><img src=\"https://cdn.pubnative.net/widget/v3/assets/320x50.jpg\" width=\"320\" height=\"50\" border=\"0\" alt=\"Advertisement\" /></a>", parsedAd.getAssetHtml(APIAsset.HTML_BANNER));
