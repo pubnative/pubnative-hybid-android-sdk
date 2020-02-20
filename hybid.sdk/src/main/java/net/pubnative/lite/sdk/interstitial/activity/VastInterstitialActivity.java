@@ -23,6 +23,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
             mVideoAd = new VideoAd(this, getAd().getVast());
             mVideoAd.bindView(mVideoPlayer);
             mVideoAd.setAdListener(mVideoAdListener);
+            setProgressBarVisible();
 
             mVideoPlayer.postDelayed(new Runnable() {
                 @Override
@@ -79,6 +80,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
             if (!mReady) {
                 mReady = true;
 
+                setProgressBarInvisible();
                 mVideoAd.show();
                 getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.SHOW);
             }
@@ -86,6 +88,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
 
         @Override
         public void onAdLoadFail(PlayerInfo info) {
+            setProgressBarInvisible();
             getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.ERROR);
             getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
             finish();
