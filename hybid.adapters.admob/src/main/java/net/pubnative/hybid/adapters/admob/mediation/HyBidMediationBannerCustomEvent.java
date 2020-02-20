@@ -13,14 +13,14 @@ import com.google.android.gms.ads.mediation.customevent.CustomEventBannerListene
 import net.pubnative.hybid.adapters.admob.HyBidAdmobUtils;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.views.HyBidAdView;
 import net.pubnative.lite.sdk.views.HyBidBannerAdView;
-import net.pubnative.lite.sdk.views.PNAdView;
 
-public class HyBidMediationBannerCustomEvent implements CustomEventBanner, PNAdView.Listener {
+public class HyBidMediationBannerCustomEvent implements CustomEventBanner, HyBidAdView.Listener {
     private static final String TAG = HyBidMediationBannerCustomEvent.class.getSimpleName();
 
     private CustomEventBannerListener mBannerListener;
-    private HyBidBannerAdView mBannerView;
+    private HyBidAdView mBannerView;
 
     @Override
     public void requestBannerAd(Context context,
@@ -48,8 +48,10 @@ public class HyBidMediationBannerCustomEvent implements CustomEventBanner, PNAdV
             return;
         }
 
-        if (adSize.getWidth() < 320 || adSize.getHeight() < 50) {
-            Logger.e(TAG, "The requested ad size is smalled than a Standard Banner (320x50)");
+        net.pubnative.lite.sdk.models.AdSize hyBidAdSize = getAdSize();
+
+        if (adSize.getWidth() < hyBidAdSize.getWidth() || adSize.getHeight() < hyBidAdSize.getHeight()) {
+            Logger.e(TAG, "The requested ad size is smaller than " + hyBidAdSize.toString());
             mBannerListener.onAdFailedToLoad(AdRequest.ERROR_CODE_INVALID_REQUEST);
             return;
         }
@@ -61,6 +63,7 @@ public class HyBidMediationBannerCustomEvent implements CustomEventBanner, PNAdV
         }
 
         mBannerView = new HyBidBannerAdView(context);
+        mBannerView.setAdSize(getAdSize());
         mBannerView.setMediation(true);
         mBannerView.load(zoneId, this);
     }
@@ -81,6 +84,10 @@ public class HyBidMediationBannerCustomEvent implements CustomEventBanner, PNAdV
             mBannerView.destroy();
             mBannerView = null;
         }
+    }
+
+    protected net.pubnative.lite.sdk.models.AdSize getAdSize() {
+        return net.pubnative.lite.sdk.models.AdSize.SIZE_320x50;
     }
 
     //------------------------------------ PNAdView Callbacks --------------------------------------

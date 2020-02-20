@@ -76,22 +76,13 @@
             android:text="@string/banner" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_medium"
+            android:id="@+id/button_banner_infeed"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:text="@string/medium" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_leaderboard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:text="@string/leaderboard" />
+            android:text="@string/banner_in_feed" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_interstitial"

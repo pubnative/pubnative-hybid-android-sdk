@@ -49,13 +49,8 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.activities.hybid.HyBidMRectActivity"
+            android:name=".ui.activities.hybid.HyBidInFeedBannerActivity"
             android:label="@string/hybid_medium"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.activities.hybid.HyBidLeaderboardActivity"
-            android:label="@string/hybid_leaderboard"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

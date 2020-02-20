@@ -26,6 +26,12 @@ import android.content.Context;
 
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
 
+/**
+ * @deprecated
+ * This presenter factory is only kept for backwards compatibility
+ * <p> Use {@link BannerPresenterFactory} instead.</p>
+ */
+@Deprecated
 public class LeaderboardPresenterFactory extends BannerPresenterFactory {
     public LeaderboardPresenterFactory(Context context) {
         super(context);

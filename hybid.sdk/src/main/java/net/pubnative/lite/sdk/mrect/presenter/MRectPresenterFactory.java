@@ -27,9 +27,11 @@ import android.content.Context;
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
 
 /**
- * Created by erosgarciaponte on 12.01.18.
+ * @deprecated
+ * This presenter factory is only kept for backwards compatibility
+ * <p> Use {@link BannerPresenterFactory} instead.</p>
  */
-
+@Deprecated
 public class MRectPresenterFactory extends BannerPresenterFactory {
     public MRectPresenterFactory(Context context) {
         super(context);
