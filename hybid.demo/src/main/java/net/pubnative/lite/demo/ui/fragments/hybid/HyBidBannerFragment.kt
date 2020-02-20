@@ -25,6 +25,7 @@ package net.pubnative.lite.demo.ui.fragments.hybid
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -34,6 +35,7 @@ import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
+import net.pubnative.lite.demo.util.convertDpToPx
 import net.pubnative.lite.sdk.models.AdSize
 import net.pubnative.lite.sdk.views.HyBidAdView
 import net.pubnative.lite.sdk.views.HyBidBannerAdView
@@ -96,9 +98,6 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
 
         spinnerAdapter = ArrayAdapter(activity!!, android.R.layout.simple_spinner_item, adSizes)
         adSizeSpinner.adapter = spinnerAdapter
-        adSizeSpinner.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
-            hybidBanner.setAdSize(adSizes[position])
-        }
     }
 
     override fun onDestroy() {
@@ -107,8 +106,17 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
     }
 
     fun loadPNAd() {
+        val adSize = adSizes[adSizeSpinner.selectedItemPosition]
+        hybidBanner.setAdSize(adSize)
+        val layoutParams = LinearLayout.LayoutParams(
+                convertDpToPx(context!!, adSize.width.toFloat()),
+                convertDpToPx(context!!, adSize.height.toFloat()))
+        layoutParams.gravity = Gravity.CENTER_HORIZONTAL
+
+        hybidBanner.layoutParams = layoutParams
         hybidBanner.load(zoneId, this)
     }
+
 
     // --------------- PNAdView Listener --------------------
     override fun onAdLoaded() {
