@@ -31,7 +31,6 @@ import android.widget.RelativeLayout;
 
 import net.pubnative.lite.sdk.utils.json.BindField;
 import net.pubnative.lite.sdk.utils.json.JsonModel;
-import net.pubnative.lite.sdk.utils.text.StringEscapeUtils;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 
 import org.json.JSONObject;
@@ -145,9 +144,6 @@ public class Ad extends JsonModel implements Serializable {
         AdData data = getAsset(asset);
         if (data != null) {
             result = data.getURL();
-            if (result != null) {
-                result = StringEscapeUtils.unescapeJava(result);
-            }
         }
         return result;
     }
@@ -157,9 +153,6 @@ public class Ad extends JsonModel implements Serializable {
         AdData data = getAsset(asset);
         if (data != null) {
             result = data.getHtml();
-            if (result != null) {
-                result = StringEscapeUtils.unescapeJava(result);
-            }
         }
         return result;
     }
