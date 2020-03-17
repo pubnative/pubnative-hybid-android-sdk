@@ -27,7 +27,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.text.TextUtils;
 
+import net.pubnative.lite.sdk.HyBid;
+
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -56,5 +60,37 @@ public class IntentHandler {
             return true;
         }
         return false;
+    }
+
+    public boolean handleBrowserLink(Uri uri) {
+        if (HyBid.getBrowserManager().containsPriorities()) {
+            Intent intent = null;
+
+            List<String> priorities = HyBid.getBrowserManager().getPackagePriorities();
+            Iterator<String> iterator = priorities.listIterator();
+
+            do {
+                String packageName = iterator.next();
+
+                if (!TextUtils.isEmpty(packageName.trim())) {
+                    Intent newIntent = new Intent(Intent.ACTION_VIEW);
+                    newIntent.setData(uri);
+                    newIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    newIntent.setPackage(packageName);
+                    if (canHandleIntent(newIntent)) {
+                        intent = newIntent;
+                    }
+                }
+            } while (iterator.hasNext() && intent == null);
+
+            if (intent == null) {
+                return handleDeepLink(uri);
+            } else {
+                context.startActivity(intent);
+                return true;
+            }
+        } else {
+            return handleDeepLink(uri);
+        }
     }
 }

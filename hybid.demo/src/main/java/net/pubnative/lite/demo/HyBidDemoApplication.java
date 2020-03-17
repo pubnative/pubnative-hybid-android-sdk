@@ -79,6 +79,9 @@ public class HyBidDemoApplication extends MultiDexApplication {
         HyBid.setAge(settings.getAge());
         HyBid.setGender(settings.getGender());
 
+        HyBid.getBrowserManager().addBrowser("org.mozilla.firefox");
+        HyBid.getBrowserManager().addBrowser("com.opera.mini.native");
+
         StringBuilder keywordsBuilder = new StringBuilder();
         String separator = ",";
         for (String keyword : settings.getKeywords()) {

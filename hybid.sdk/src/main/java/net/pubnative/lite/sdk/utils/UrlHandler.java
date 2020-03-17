@@ -70,7 +70,7 @@ public class UrlHandler {
 
         // Device browser
         else if ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme)) {
-            mIntentHandler.handleDeepLink(processedUri);
+            mIntentHandler.handleBrowserLink(processedUri);
         }
 
         // App deep links
