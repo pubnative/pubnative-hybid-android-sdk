@@ -79,8 +79,11 @@ public class HyBidDemoApplication extends MultiDexApplication {
         HyBid.setAge(settings.getAge());
         HyBid.setGender(settings.getGender());
 
-        HyBid.getBrowserManager().addBrowser("org.mozilla.firefox");
-        HyBid.getBrowserManager().addBrowser("com.opera.mini.native");
+        if (!settings.getBrowserPriorities().isEmpty()) {
+            for (String packageName : settings.getBrowserPriorities()) {
+                HyBid.getBrowserManager().addBrowser(packageName);
+            }
+        }
 
         StringBuilder keywordsBuilder = new StringBuilder();
         String separator = ",";
@@ -101,7 +104,8 @@ public class HyBidDemoApplication extends MultiDexApplication {
 
         MoPubManager.initMoPubSdk(this, settings.getMopubBannerAdUnitId());
 
-        MobileAds.initialize(this, initializationStatus -> { });
+        MobileAds.initialize(this, initializationStatus -> {
+        });
     }
 
     private SettingsModel fetchSettings() {
@@ -117,6 +121,7 @@ public class HyBidDemoApplication extends MultiDexApplication {
                     HyBid.BASE_URL,
                     "",
                     "",
+                    new ArrayList<>(),
                     new ArrayList<>(),
                     false,
                     true,
