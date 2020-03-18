@@ -31,6 +31,7 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
+import net.pubnative.lite.demo.ui.activities.config.BrowserPriorityActivity
 import net.pubnative.lite.demo.ui.activities.config.KeywordsActivity
 import net.pubnative.lite.demo.ui.activities.config.ZoneIdsActivity
 import net.pubnative.lite.sdk.HyBid
@@ -42,6 +43,7 @@ import net.pubnative.lite.sdk.api.ApiManager
 class HyBidSettingsFragment : Fragment() {
     private val REQUEST_KEYWORDS = 1
     private val REQUEST_ZONE_IDS = 2
+    private val REQUEST_BROWSER_PRIORITY = 3
 
     private lateinit var appTokenInput: EditText
     private lateinit var ageInput: EditText
@@ -73,6 +75,11 @@ class HyBidSettingsFragment : Fragment() {
         view.findViewById<Button>(R.id.button_zone_ids).setOnClickListener {
             val intent = Intent(activity, ZoneIdsActivity::class.java)
             startActivityForResult(intent, REQUEST_ZONE_IDS)
+        }
+
+        view.findViewById<Button>(R.id.button_browser_priority).setOnClickListener {
+            val intent = Intent(activity, BrowserPriorityActivity::class.java)
+            startActivityForResult(intent, REQUEST_BROWSER_PRIORITY)
         }
 
         view.findViewById<Button>(R.id.button_save_pn_settings).setOnClickListener {

@@ -49,6 +49,7 @@
     <string name="hint_pn_api_url">API Url</string>
     <string name="hint_pn_keyword">New keyword</string>
     <string name="hint_pn_zone_id">New Zone Id</string>
+    <string name="hint_package_name">New package name</string>
     <string name="check_coppa">COPPA Enabled</string>
     <string name="check_test_mode">Test Mode Enabled</string>
     <string name="title_pn_gender">Gender</string>
@@ -57,9 +58,11 @@
     <string name="radio_gender_female">Female</string>
     <string name="title_pn_keywords">Keywords</string>
     <string name="title_pn_zone_ids">Zone Ids</string>
+    <string name="title_browser_priority">Browser Priority</string>
     <string name="save_pn_settings">Save HyBid settings</string>
     <string name="save_pn_zone_ids">Save Zone Ids</string>
     <string name="save_pn_keywords">Save Keywords</string>
+    <string name="save_package_names">Save Package Names</string>
 
     <string name="hybid_native">HyBid Native</string>
     <string name="hybid_banner">HyBid Banner</string>

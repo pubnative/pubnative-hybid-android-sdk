@@ -139,6 +139,15 @@
             android:text="@string/title_pn_zone_ids" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_browser_priority"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/title_browser_priority" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_save_pn_settings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
