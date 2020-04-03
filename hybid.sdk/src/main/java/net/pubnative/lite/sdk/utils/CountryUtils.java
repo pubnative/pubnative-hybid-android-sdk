@@ -36,7 +36,7 @@ public class CountryUtils {
         GDPR_COUNTRIES.addAll(Arrays.asList(
                 "BE", "EL", "LT", "PT", "BG", "ES", "LU", "RO", "CZ", "FR", "HU", "SI", "DK", "HR",
                 "MT", "SK", "DE", "IT", "NL", "FI", "EE", "CY", "AT", "SE", "IE", "LV", "PL", "UK",
-                "CH", "NO", "IS", "LI"));
+                "GB", "CH", "NO", "IS", "LI"));
     }
 
     public static boolean isGDPRCountry(String countryCode) {
