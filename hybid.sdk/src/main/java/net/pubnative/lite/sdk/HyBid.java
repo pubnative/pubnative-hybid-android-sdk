@@ -26,6 +26,7 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 
 import net.pubnative.lite.sdk.api.PNApiClient;
+import net.pubnative.lite.sdk.browser.BrowserManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.tracking.HyBidCrashTracker;
 import net.pubnative.lite.sdk.utils.Logger;
@@ -43,6 +44,7 @@ public class HyBid {
     @SuppressLint("StaticFieldLeak")
     private static HyBidLocationManager sLocationManager;
     private static AdCache sAdCache;
+    private static BrowserManager sBrowserManager;
     private static boolean sInitialized;
     private static boolean sCoppaEnabled = false;
     private static boolean sTestMode = false;
@@ -83,6 +85,7 @@ public class HyBid {
         });
         sUserDataManager = new UserDataManager(application.getApplicationContext());
         sAdCache = new AdCache();
+        sBrowserManager = new BrowserManager();
         sInitialized = true;
     }
 
@@ -116,6 +119,10 @@ public class HyBid {
 
     public static AdCache getAdCache() {
         return sAdCache;
+    }
+
+    public static BrowserManager getBrowserManager() {
+        return sBrowserManager;
     }
 
     public static boolean isInitialized() {

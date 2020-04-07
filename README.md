@@ -1,4 +1,4 @@
-![PNLogo](https://github.com/pubnative/pubnative-android-mediation-sdk-private/blob/master/PNLogo.png)
+![Logo](https://github.com/pubnative/pubnative-ios-sdk/blob/master/PNLogo.png)
 
 # HyBid #
 

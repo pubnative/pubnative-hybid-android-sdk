@@ -180,6 +180,12 @@
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
         <activity
+            android:name=".ui.activities.config.BrowserPriorityActivity"
+            android:label="@string/title_browser_priority"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
             android:name=".ui.activities.markup.MarkupActivity"
             android:label="@string/title_markup"
             android:screenOrientation="portrait"

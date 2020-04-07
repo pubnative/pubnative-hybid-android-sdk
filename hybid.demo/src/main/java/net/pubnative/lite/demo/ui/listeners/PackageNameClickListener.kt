@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 PubNative GmbH
+// Copyright (c) 2020 PubNative GmbH
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,27 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package net.pubnative.lite.sdk.utils;
+package net.pubnative.lite.demo.ui.listeners
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
-
-public class CountryUtils {
-    private static Set<String> GDPR_COUNTRIES;
-
-    static {
-        GDPR_COUNTRIES = new HashSet<>();
-
-        GDPR_COUNTRIES.addAll(Arrays.asList(
-                "BE", "EL", "LT", "PT", "BG", "ES", "LU", "RO", "CZ", "FR", "HU", "SI", "DK", "HR",
-                "MT", "SK", "DE", "IT", "NL", "FI", "EE", "CY", "AT", "SE", "IE", "LV", "PL", "UK",
-                "GB", "CH", "NO", "IS", "LI"));
-    }
-
-    public static boolean isGDPRCountry(String countryCode) {
-        String code = countryCode.toUpperCase(Locale.ENGLISH);
-        return GDPR_COUNTRIES.contains(code);
-    }
+interface PackageNameClickListener {
+    fun onPackageNameClicked(packageName: String)
 }

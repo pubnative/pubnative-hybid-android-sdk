@@ -33,6 +33,7 @@ const val SETTINGS_KEY_API_URL = "pn_api_url"
 const val SETTINGS_KEY_GENDER = "gender"
 const val SETTINGS_KEY_AGE = "age"
 const val SETTINGS_KEY_KEYWORDS = "keywords"
+const val SETTINGS_KEY_BROWSER_PRIORITIES = "browser_priorities"
 const val SETTINGS_KEY_COPPA = "coppa"
 const val SETTINGS_KEY_TEST_MODE = "test_mode"
 

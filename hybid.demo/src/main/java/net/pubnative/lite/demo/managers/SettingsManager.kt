@@ -81,6 +81,10 @@ class SettingsManager private constructor(context: Context) {
         preferences.edit().putStringSet(SETTINGS_KEY_KEYWORDS, keywords.toSet()).apply()
     }
 
+    fun setBrowserPriorities(browserPriorities: List<String>) {
+        preferences.edit().putStringSet(SETTINGS_KEY_BROWSER_PRIORITIES, browserPriorities.toSet()).apply()
+    }
+
     fun setMoPubBannerAdUnitId(adUnitId: String) {
         preferences.edit().putString(SETTINGS_KEY_MOPUB_BANNER_AD_UNIT_ID, adUnitId).apply()
     }
@@ -163,6 +167,7 @@ class SettingsManager private constructor(context: Context) {
         editor.putString(SETTINGS_KEY_AGE, model.age)
         editor.putStringSet(SETTINGS_KEY_ZONE_ID_LIST, model.zoneIds.toSet())
         editor.putStringSet(SETTINGS_KEY_KEYWORDS, model.keywords.toSet())
+        editor.putStringSet(SETTINGS_KEY_BROWSER_PRIORITIES, model.browserPriorities.toSet())
         editor.putString(SETTINGS_KEY_MOPUB_BANNER_AD_UNIT_ID, model.mopubBannerAdUnitId)
         editor.putString(SETTINGS_KEY_MOPUB_MEDIUM_AD_UNIT_ID, model.mopubMediumAdUnitId)
         editor.putString(SETTINGS_KEY_MOPUB_LEADERBOARD_AD_UNIT_ID, model.mopubLeaderboardAdUnitId)
@@ -198,6 +203,7 @@ class SettingsManager private constructor(context: Context) {
         val gender = preferences.getString(SETTINGS_KEY_GENDER, "")
         val age = preferences.getString(SETTINGS_KEY_AGE, "")
         val keywords = preferences.getStringSet(SETTINGS_KEY_KEYWORDS, emptySet()).toList()
+        val browserPriorities = preferences.getStringSet(SETTINGS_KEY_BROWSER_PRIORITIES, emptySet()).toList()
         val coppa = preferences.getBoolean(SETTINGS_KEY_COPPA, false)
         val testMode = preferences.getBoolean(SETTINGS_KEY_TEST_MODE, false)
         val mopubBannerAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_BANNER_AD_UNIT_ID, "")
@@ -219,7 +225,7 @@ class SettingsManager private constructor(context: Context) {
         val admobLeaderboardAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_LEADERBOARD_AD_UNIT_ID, "")
         val admobInterstitialAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_INTERSTITIAL_AD_UNIT_ID, "")
 
-        val model = SettingsModel(appToken, zoneIds, apiUrl, gender, age, keywords, coppa, testMode,
+        val model = SettingsModel(appToken, zoneIds, apiUrl, gender, age, keywords, browserPriorities, coppa, testMode,
                 mopubBannerAdUnitId, mopubMediumAdUnitId, mopubLeaderboardAdUnitId, mopubInterstitialAdUnitId,
                 mopubMediationBannerAdUnitId, mopubMediationMediumAdUnitId, mopubMediationLeaderboardAdUnitId, mopubMediationInterstitialAdUnitId,
                 mopubMediationNativeAdUnitId, dfpBannerAdUnitId, dfpMediumAdUnitId, dfpLeaderboardAdUnitId, dfpInterstitialAdUnitId,

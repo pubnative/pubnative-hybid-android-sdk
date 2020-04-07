@@ -35,6 +35,7 @@ data class SettingsModel(var appToken: String,
                          var gender: String,
                          var age: String,
                          var keywords: List<String>,
+                         var browserPriorities: List<String>,
                          var coppa: Boolean,
                          var testMode: Boolean,
                          var mopubBannerAdUnitId: String,
@@ -72,6 +73,9 @@ data class SettingsModel(var appToken: String,
             mutableListOf<String>().apply {
                 parcel.readStringList(this)
             },
+            mutableListOf<String>().apply {
+                parcel.readStringList(this)
+            },
             parcel.readInt() != 0,
             parcel.readInt() != 0,
             parcel.readString(),
@@ -102,6 +106,7 @@ data class SettingsModel(var appToken: String,
         dest?.writeString(age)
 
         dest?.writeStringList(keywords)
+        dest?.writeStringList(browserPriorities)
 
         val coppaByte: Int
         if (coppa) {

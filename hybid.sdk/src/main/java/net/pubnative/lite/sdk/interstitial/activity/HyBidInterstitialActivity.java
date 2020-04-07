@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
@@ -27,6 +28,7 @@ public abstract class HyBidInterstitialActivity extends Activity {
     private Ad mAd;
     private String mZoneId;
     private HyBidInterstitialBroadcastSender mBroadcastSender;
+    private ProgressBar progressBar;
 
     public abstract View getAdView();
 
@@ -62,6 +64,14 @@ public abstract class HyBidInterstitialActivity extends Activity {
 
                 FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
                 params.gravity = Gravity.CENTER;
+
+                progressBar = new ProgressBar(this);
+                setProgressBarInvisible();
+
+                FrameLayout.LayoutParams pBarParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+                pBarParams.gravity = Gravity.CENTER;
+
+                mCloseableContainer.addView(progressBar, pBarParams);
 
                 mCloseableContainer.addView(adView, params);
                 mCloseableContainer.setBackgroundColor(Color.WHITE);
@@ -127,5 +137,13 @@ public abstract class HyBidInterstitialActivity extends Activity {
 
     protected HyBidInterstitialBroadcastSender getBroadcastSender() {
         return mBroadcastSender;
+    }
+
+    protected void setProgressBarVisible(){
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    protected void setProgressBarInvisible(){
+        progressBar.setVisibility(View.INVISIBLE);
     }
 }
