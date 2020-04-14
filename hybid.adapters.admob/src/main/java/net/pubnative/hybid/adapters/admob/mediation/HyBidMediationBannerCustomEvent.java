@@ -49,7 +49,7 @@ public class HyBidMediationBannerCustomEvent implements CustomEventBanner, PNAdV
         }
 
         if (adSize.getWidth() < 320 || adSize.getHeight() < 50) {
-            Logger.e(TAG, "The requested ad size is smalled than a Standard Banner (320x50)");
+            Logger.e(TAG, "The requested ad size is smaller than a Standard Banner (320x50)");
             mBannerListener.onAdFailedToLoad(AdRequest.ERROR_CODE_INVALID_REQUEST);
             return;
         }

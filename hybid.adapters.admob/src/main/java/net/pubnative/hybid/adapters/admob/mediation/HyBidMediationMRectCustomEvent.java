@@ -49,7 +49,7 @@ public class HyBidMediationMRectCustomEvent implements CustomEventBanner, PNAdVi
         }
 
         if (adSize.getWidth() < 300 || adSize.getHeight() < 250) {
-            Logger.e(TAG, "The requested ad size is smalled than a Standard Medium Rectangle (300x250)");
+            Logger.e(TAG, "The requested ad size is smaller than a Standard Medium Rectangle (300x250)");
             mBannerListener.onAdFailedToLoad(AdRequest.ERROR_CODE_INVALID_REQUEST);
             return;
         }

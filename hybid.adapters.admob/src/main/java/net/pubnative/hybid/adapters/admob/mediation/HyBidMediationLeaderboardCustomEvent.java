@@ -49,7 +49,7 @@ public class HyBidMediationLeaderboardCustomEvent implements CustomEventBanner, 
         }
 
         if (adSize.getWidth() < 728 || adSize.getHeight() < 90) {
-            Logger.e(TAG, "The requested ad size is smalled than a Leaderboard Banner (728x90)");
+            Logger.e(TAG, "The requested ad size is smaller than a Leaderboard Banner (728x90)");
             mBannerListener.onAdFailedToLoad(AdRequest.ERROR_CODE_INVALID_REQUEST);
             return;
         }
