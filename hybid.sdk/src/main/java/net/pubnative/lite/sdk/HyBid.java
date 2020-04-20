@@ -28,7 +28,6 @@ import android.app.Application;
 import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.browser.BrowserManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
-import net.pubnative.lite.sdk.tracking.HyBidCrashTracker;
 import net.pubnative.lite.sdk.utils.Logger;
 
 public class HyBid {
@@ -63,7 +62,6 @@ public class HyBid {
      */
     public static void initialize(String appToken,
                                   Application application, final InitialisationListener initialisationListener) {
-        HyBidCrashTracker.init(application, "9ef9d95d69bd0ec31bfa7806af72dddd");
 
         sAppToken = appToken;
         sBundleId = application.getPackageName();
