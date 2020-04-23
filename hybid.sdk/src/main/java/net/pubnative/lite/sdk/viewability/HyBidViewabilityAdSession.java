@@ -9,6 +9,9 @@ import com.iab.omid.library.pubnativenet.adsession.AdEvents;
 import com.iab.omid.library.pubnativenet.adsession.AdSession;
 import com.iab.omid.library.pubnativenet.adsession.AdSessionConfiguration;
 import com.iab.omid.library.pubnativenet.adsession.AdSessionContext;
+import com.iab.omid.library.pubnativenet.adsession.CreativeType;
+import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
+import com.iab.omid.library.pubnativenet.adsession.ImpressionType;
 import com.iab.omid.library.pubnativenet.adsession.Owner;
 import com.iab.omid.library.pubnativenet.adsession.VerificationScriptResource;
 
@@ -46,13 +49,19 @@ public class HyBidViewabilityAdSession {
 
         try {
             String customReferenceData = "";
-            AdSessionContext adSessionContext = AdSessionContext.createHtmlAdSessionContext(HyBid.getViewabilityManager().getPartner(), webView,
-                    customReferenceData);
+            String contentUrl = "";
+            AdSessionContext adSessionContext = AdSessionContext.createHtmlAdSessionContext(
+                    HyBid.getViewabilityManager().getPartner(), webView,
+                    contentUrl, customReferenceData);
 
             Owner owner = isVideoAd ? Owner.JAVASCRIPT : Owner.NATIVE;
 
             AdSessionConfiguration adSessionConfiguration =
-                    AdSessionConfiguration.createAdSessionConfiguration(owner, isVideoAd ? owner : null, false);
+                    AdSessionConfiguration.createAdSessionConfiguration(
+                            isVideoAd ? CreativeType.DEFINED_BY_JAVASCRIPT : CreativeType.HTML_DISPLAY,
+                            isVideoAd ? ImpressionType.DEFINED_BY_JAVASCRIPT : ImpressionType.BEGIN_TO_RENDER,
+                            owner,
+                            isVideoAd ? owner : Owner.NONE, false);
 
 
             mAdSession = AdSession.createAdSession(adSessionConfiguration, adSessionContext);
@@ -71,11 +80,14 @@ public class HyBidViewabilityAdSession {
 
         try {
             AdSessionContext adSessionContext = AdSessionContext.createNativeAdSessionContext(HyBid.getViewabilityManager().getPartner(),
-                    HyBid.getViewabilityManager().getServiceJs(), mVerificationScriptResources, null);
+                    HyBid.getViewabilityManager().getServiceJs(), mVerificationScriptResources, "", "");
 
 
             AdSessionConfiguration adSessionConfiguration =
-                    AdSessionConfiguration.createAdSessionConfiguration(Owner.NATIVE, null, false);
+                    AdSessionConfiguration.createAdSessionConfiguration(
+                            CreativeType.NATIVE_DISPLAY,
+                            ImpressionType.BEGIN_TO_RENDER,
+                            Owner.NATIVE, Owner.NONE, false);
 
 
             mAdSession = AdSession.createAdSession(adSessionConfiguration, adSessionContext);
@@ -98,6 +110,20 @@ public class HyBidViewabilityAdSession {
             return true;
         }
         return false;
+    }
+
+    public void fireLoaded() {
+        if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
+            return;
+
+        if (mAdSession != null) {
+            try {
+                AdEvents adEvents = AdEvents.createAdEvents(mAdSession);
+                adEvents.loaded();
+            } catch (IllegalArgumentException | IllegalStateException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void fireImpression() {
@@ -124,10 +150,6 @@ public class HyBidViewabilityAdSession {
         }
     }
 
-    /**
-     * For removing Friendly Obstruction View
-     * @param view to be removed
-     */
     public void removeFriendlyObstruction(View view) {
         if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
             return;
@@ -136,9 +158,6 @@ public class HyBidViewabilityAdSession {
         }
     }
 
-    /**
-     * For clearing the Friendly Obstruction Views
-     */
     public void removeAllFriendlyObstructions() {
         if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
             return;
@@ -147,9 +166,9 @@ public class HyBidViewabilityAdSession {
         }
     }
 
-    public void addFriendlyObstruction(View friendlyObstructionView) {
+    public void addFriendlyObstruction(View friendlyObstructionView, String reason) {
         if (friendlyObstructionView != null && mAdSession != null) {
-            mAdSession.addFriendlyObstruction(friendlyObstructionView);
+            mAdSession.addFriendlyObstruction(friendlyObstructionView, FriendlyObstructionPurpose.OTHER, reason);
         }
     }
 }

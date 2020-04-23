@@ -1448,7 +1448,11 @@ public class MRAIDView extends RelativeLayout {
 
                 if (listener != null && !webViewLoaded) {
                     mViewabilityAdSession.initAdSession(view, false);
+                    if (contentInfo != null && contentInfoAdded) {
+                        mViewabilityAdSession.addFriendlyObstruction(contentInfo, "Content info description for the ad.");
+                    }
                     webViewLoaded = true;
+                    mViewabilityAdSession.fireLoaded();
                     mViewabilityAdSession.fireImpression();
                     listener.mraidViewLoaded(MRAIDView.this);
                 }
