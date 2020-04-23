@@ -29,6 +29,7 @@ import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.browser.BrowserManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.viewability.ViewabilityManager;
 
 public class HyBid {
     public static final String BASE_URL = "https://api.pubnative.net/";
@@ -40,6 +41,8 @@ public class HyBid {
     private static DeviceInfo sDeviceInfo;
     @SuppressLint("StaticFieldLeak")
     private static UserDataManager sUserDataManager;
+    @SuppressLint("StaticFieldLeak")
+    private static ViewabilityManager sViewabilityManager;
     @SuppressLint("StaticFieldLeak")
     private static HyBidLocationManager sLocationManager;
     private static AdCache sAdCache;
@@ -82,6 +85,7 @@ public class HyBid {
             }
         });
         sUserDataManager = new UserDataManager(application.getApplicationContext());
+        sViewabilityManager = new ViewabilityManager(application);
         sAdCache = new AdCache();
         sBrowserManager = new BrowserManager();
         sInitialized = true;
@@ -111,6 +115,10 @@ public class HyBid {
         return sUserDataManager;
     }
 
+    public static ViewabilityManager getViewabilityManager() {
+        return sViewabilityManager;
+    }
+
     public static HyBidLocationManager getLocationManager() {
         return sLocationManager;
     }
@@ -125,6 +133,10 @@ public class HyBid {
 
     public static boolean isInitialized() {
         return sInitialized;
+    }
+
+    public static boolean isViewabilityMeasurementActivated() {
+        return sViewabilityManager.isViewabilityMeasurementActivated();
     }
 
     public static void setCoppaEnabled(boolean isEnabled) {

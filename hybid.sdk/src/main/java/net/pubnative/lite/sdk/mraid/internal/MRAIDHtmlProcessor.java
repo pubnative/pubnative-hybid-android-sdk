@@ -86,6 +86,11 @@ public class MRAIDHtmlProcessor {
         String mraidJs = new String(mraidjsBytes);
         String mraidTag = "<script>" + ls + mraidJs + ls + "</script>";
 
+        String omsdkStr = net.pubnative.lite.sdk.viewability.Assets.omsdkjs;
+        byte[] omsdkBytes = Base64.decode(omsdkStr, Base64.DEFAULT);
+        String omSdk = new String(omsdkBytes);
+        String omsdkTag = "<script>" + ls + omSdk + ls + "</script>";
+
         String resizeScript64 = Assets.resize_script;
         byte[] resizeScriptBytes = Base64.decode(resizeScript64, Base64.DEFAULT);
         String resizeScript = new String(resizeScriptBytes);
@@ -103,7 +108,7 @@ public class MRAIDHtmlProcessor {
                             "body { margin:0; padding:0;}" + ls +
                             "*:not(input) { -webkit-touch-callout:none; -webkit-user-select:none; -webkit-text-size-adjust:none; }" + ls +
                             "</style>";
-            processedHtml.insert(matcher.end(), ls + metaTag + ls + styleTag + ls + mraidTag + ls + resizeTag);
+            processedHtml.insert(matcher.end(), ls + metaTag + ls + styleTag + ls + mraidTag + ls + omsdkTag + ls +  resizeTag);
         }
 
         return processedHtml.toString();

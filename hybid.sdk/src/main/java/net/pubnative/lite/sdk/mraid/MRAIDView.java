@@ -76,6 +76,7 @@ import net.pubnative.lite.sdk.mraid.internal.MRAIDNativeFeatureManager;
 import net.pubnative.lite.sdk.mraid.internal.MRAIDParser;
 import net.pubnative.lite.sdk.mraid.properties.MRAIDOrientationProperties;
 import net.pubnative.lite.sdk.mraid.properties.MRAIDResizeProperties;
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityAdSession;
 import net.pubnative.lite.sdk.views.PNWebView;
 
 import java.io.BufferedReader;
@@ -183,6 +184,7 @@ public class MRAIDView extends RelativeLayout {
     private boolean contentInfoAdded = false;
     private boolean webViewLoaded = false;
 
+    private HyBidViewabilityAdSession mViewabilityAdSession;
 
     private final boolean isInterstitial;
 
@@ -276,7 +278,7 @@ public class MRAIDView extends RelativeLayout {
         useCustomClose = false;
         orientationProperties = new MRAIDOrientationProperties();
         resizeProperties = new MRAIDResizeProperties();
-        nativeFeatureManager = new MRAIDNativeFeatureManager(context, new ArrayList<String>(Arrays.asList(supportedNativeFeatures)));
+        nativeFeatureManager = new MRAIDNativeFeatureManager(context, new ArrayList<>(Arrays.asList(supportedNativeFeatures)));
 
         this.listener = listener;
         this.nativeFeatureListener = nativeFeatureListener;
@@ -309,6 +311,8 @@ public class MRAIDView extends RelativeLayout {
         });
 
         handler = new Handler(Looper.getMainLooper());
+
+        mViewabilityAdSession = new HyBidViewabilityAdSession();
 
         mraidWebChromeClient = new MRAIDWebChromeClient();
         mraidWebViewClient = new MRAIDWebViewClient();
@@ -1443,7 +1447,9 @@ public class MRAIDView extends RelativeLayout {
                 }
 
                 if (listener != null && !webViewLoaded) {
+                    mViewabilityAdSession.initAdSession(view, false);
                     webViewLoaded = true;
+                    mViewabilityAdSession.fireImpression();
                     listener.mraidViewLoaded(MRAIDView.this);
                 }
             }
@@ -1561,6 +1567,12 @@ public class MRAIDView extends RelativeLayout {
                 return new WebResourceResponse("application/javascript", "UTF-8", getMraidJsStream());
             }
             return null;
+        }
+    }
+
+    public void stopAdSession() {
+        if (mViewabilityAdSession != null) {
+            mViewabilityAdSession.stopAdSession();
         }
     }
 

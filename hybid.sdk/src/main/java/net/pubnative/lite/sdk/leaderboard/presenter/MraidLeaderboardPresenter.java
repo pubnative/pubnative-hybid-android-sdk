@@ -100,7 +100,9 @@ public class MraidLeaderboardPresenter implements AdPresenter, MRAIDViewListener
 
     @Override
     public void stopTracking() {
-
+        if (mMRAIDBanner != null) {
+            mMRAIDBanner.stopAdSession();
+        }
     }
 
     @Override
