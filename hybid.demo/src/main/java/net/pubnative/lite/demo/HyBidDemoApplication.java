@@ -79,6 +79,8 @@ public class HyBidDemoApplication extends MultiDexApplication {
         HyBid.setAge(settings.getAge());
         HyBid.setGender(settings.getGender());
 
+        HyBid.getViewabilityManager().setViewabilityMeasurementEnabled(true);
+
         if (!settings.getBrowserPriorities().isEmpty()) {
             for (String packageName : settings.getBrowserPriorities()) {
                 HyBid.getBrowserManager().addBrowser(packageName);

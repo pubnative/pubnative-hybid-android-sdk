@@ -104,7 +104,9 @@ public class MraidMRectPresenter implements AdPresenter, MRAIDViewListener, MRAI
 
     @Override
     public void stopTracking() {
-
+        if (mMRAIDBanner != null) {
+            mMRAIDBanner.stopAdSession();
+        }
     }
 
     @Override
