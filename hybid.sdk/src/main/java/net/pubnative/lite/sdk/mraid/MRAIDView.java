@@ -70,6 +70,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
+
 import net.pubnative.lite.sdk.mraid.internal.MRAIDHtmlProcessor;
 import net.pubnative.lite.sdk.mraid.internal.MRAIDLog;
 import net.pubnative.lite.sdk.mraid.internal.MRAIDNativeFeatureManager;
@@ -77,6 +79,7 @@ import net.pubnative.lite.sdk.mraid.internal.MRAIDParser;
 import net.pubnative.lite.sdk.mraid.properties.MRAIDOrientationProperties;
 import net.pubnative.lite.sdk.mraid.properties.MRAIDResizeProperties;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityAdSession;
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
 import net.pubnative.lite.sdk.views.PNWebView;
 
 import java.io.BufferedReader;
@@ -94,6 +97,7 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -185,6 +189,7 @@ public class MRAIDView extends RelativeLayout {
     private boolean webViewLoaded = false;
 
     private HyBidViewabilityAdSession mViewabilityAdSession;
+    private List<HyBidViewabilityFriendlyObstruction> mViewabilityFriendlyObstructions;
 
     private final boolean isInterstitial;
 
@@ -313,6 +318,7 @@ public class MRAIDView extends RelativeLayout {
         handler = new Handler(Looper.getMainLooper());
 
         mViewabilityAdSession = new HyBidViewabilityAdSession();
+        mViewabilityFriendlyObstructions = new ArrayList<>();
 
         mraidWebChromeClient = new MRAIDWebChromeClient();
         mraidWebViewClient = new MRAIDWebViewClient();
@@ -1449,7 +1455,13 @@ public class MRAIDView extends RelativeLayout {
                 if (listener != null && !webViewLoaded) {
                     mViewabilityAdSession.initAdSession(view, false);
                     if (contentInfo != null && contentInfoAdded) {
-                        mViewabilityAdSession.addFriendlyObstruction(contentInfo, "Content info description for the ad.");
+                        addViewabilityFriendlyObstruction(contentInfo, FriendlyObstructionPurpose.OTHER, "Content info description for the ad");
+                        for (HyBidViewabilityFriendlyObstruction obstruction: mViewabilityFriendlyObstructions) {
+                            mViewabilityAdSession.addFriendlyObstruction(
+                                    obstruction.getView(),
+                                    obstruction.getPurpose(),
+                                    obstruction.getReason());
+                        }
                     }
                     webViewLoaded = true;
                     mViewabilityAdSession.fireLoaded();
@@ -1860,6 +1872,12 @@ public class MRAIDView extends RelativeLayout {
             if (currentRequestedOrientation != originalRequestedOrientation) {
                 activity.setRequestedOrientation(originalRequestedOrientation);
             }
+        }
+    }
+
+    public void addViewabilityFriendlyObstruction(View view, FriendlyObstructionPurpose purpose, String reason) {
+        if (view != null && !TextUtils.isEmpty(reason)) {
+            mViewabilityFriendlyObstructions.add(new HyBidViewabilityFriendlyObstruction(view, purpose, reason));
         }
     }
 }

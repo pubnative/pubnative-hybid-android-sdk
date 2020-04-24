@@ -166,9 +166,9 @@ public class HyBidViewabilityAdSession {
         }
     }
 
-    public void addFriendlyObstruction(View friendlyObstructionView, String reason) {
+    public void addFriendlyObstruction(View friendlyObstructionView, FriendlyObstructionPurpose purpose, String reason) {
         if (friendlyObstructionView != null && mAdSession != null) {
-            mAdSession.addFriendlyObstruction(friendlyObstructionView, FriendlyObstructionPurpose.OTHER, reason);
+            mAdSession.addFriendlyObstruction(friendlyObstructionView, purpose, reason);
         }
     }
 }
