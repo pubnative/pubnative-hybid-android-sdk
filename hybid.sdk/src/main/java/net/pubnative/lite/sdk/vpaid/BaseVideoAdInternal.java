@@ -4,8 +4,13 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.view.View;
+
+import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
 
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeVideoAdSession;
 import net.pubnative.lite.sdk.vpaid.enums.AdState;
 import net.pubnative.lite.sdk.vpaid.enums.VastError;
 import net.pubnative.lite.sdk.vpaid.helpers.AssetsLoader;
@@ -16,6 +21,8 @@ import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.response.VastProcessor;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Future;
 
 abstract class BaseVideoAdInternal {
@@ -37,6 +44,8 @@ abstract class BaseVideoAdInternal {
     private String mVastData;
     private Future mFuture;
 
+    private HyBidViewabilityNativeVideoAdSession mViewabilityAdSession;
+
     BaseVideoAdInternal(Context context, String data) {
         if (context == null || TextUtils.isEmpty(data)) {
             throw new IllegalArgumentException("Wrong parameters");
@@ -46,6 +55,8 @@ abstract class BaseVideoAdInternal {
         mVastData = data;
         mAssetsLoader = new AssetsLoader();
         Utils.init(context);
+
+        mViewabilityAdSession = new HyBidViewabilityNativeVideoAdSession();
     }
 
     abstract void dismiss();
@@ -88,6 +99,10 @@ abstract class BaseVideoAdInternal {
 
     void setReady() {
         this.mIsReady = false;
+    }
+
+    public HyBidViewabilityNativeVideoAdSession getViewabilityAdSession() {
+        return mViewabilityAdSession;
     }
 
     void releaseAdController() {
@@ -208,9 +223,9 @@ abstract class BaseVideoAdInternal {
 
     private void prepare(AdParams adParams, String vastFileContent) {
         if (adParams.isVpaid()) {
-            mAdController = new VideoAdControllerVpaid(this, adParams, getAdSpotDimensions(), vastFileContent);
+            mAdController = new VideoAdControllerVpaid(this, adParams, getAdSpotDimensions(), vastFileContent, getViewabilityAdSession());
         } else {
-            mAdController = new VideoAdControllerVast(this, adParams);
+            mAdController = new VideoAdControllerVast(this, adParams, getViewabilityAdSession());
         }
         mAssetsLoader.load(adParams, mContext, createAssetsLoadListener());
     }

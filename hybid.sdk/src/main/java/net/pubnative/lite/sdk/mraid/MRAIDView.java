@@ -78,7 +78,7 @@ import net.pubnative.lite.sdk.mraid.internal.MRAIDNativeFeatureManager;
 import net.pubnative.lite.sdk.mraid.internal.MRAIDParser;
 import net.pubnative.lite.sdk.mraid.properties.MRAIDOrientationProperties;
 import net.pubnative.lite.sdk.mraid.properties.MRAIDResizeProperties;
-import net.pubnative.lite.sdk.viewability.HyBidViewabilityAdSession;
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityWebAdSession;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
 import net.pubnative.lite.sdk.views.PNWebView;
 
@@ -188,7 +188,7 @@ public class MRAIDView extends RelativeLayout {
     private boolean contentInfoAdded = false;
     private boolean webViewLoaded = false;
 
-    private HyBidViewabilityAdSession mViewabilityAdSession;
+    private HyBidViewabilityWebAdSession mViewabilityAdSession;
     private List<HyBidViewabilityFriendlyObstruction> mViewabilityFriendlyObstructions;
 
     private final boolean isInterstitial;
@@ -317,7 +317,7 @@ public class MRAIDView extends RelativeLayout {
 
         handler = new Handler(Looper.getMainLooper());
 
-        mViewabilityAdSession = new HyBidViewabilityAdSession();
+        mViewabilityAdSession = new HyBidViewabilityWebAdSession();
         mViewabilityFriendlyObstructions = new ArrayList<>();
 
         mraidWebChromeClient = new MRAIDWebChromeClient();

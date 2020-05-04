@@ -13,9 +13,6 @@ import java.util.concurrent.Executors;
 
 public class EventTracker {
 
-    private static final String LOG_TAG = EventTracker.class.getSimpleName();
-
-    private static ExecutorService sExecutor = Executors.newCachedThreadPool();
     private static Set<String> sUsedEvents = new HashSet<>();
 
     private EventTracker() {
