@@ -145,5 +145,6 @@ abstract class BaseVideoAd extends BaseVideoAdInternal {
         setAdState(AdState.NONE);
         cancelFetcher();
         releaseAdController();
+        getViewabilityAdSession().stopAdSession();
     }
 }

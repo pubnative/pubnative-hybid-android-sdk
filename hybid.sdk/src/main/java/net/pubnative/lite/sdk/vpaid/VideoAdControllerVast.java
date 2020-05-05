@@ -3,6 +3,7 @@ package net.pubnative.lite.sdk.vpaid;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 
 import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
@@ -164,6 +165,7 @@ class VideoAdControllerVast implements VideoAdController {
                 List<TrackingEvent> eventsToRemove = new ArrayList<>();
                 for (TrackingEvent event : mTrackingEventsList) {
                     if (doneMillis > event.timeMillis) {
+                        Log.d("EVENT_TEST", event.url);
                         EventTracker.post(mBaseAdInternal.getContext(), event.url);
                         fireViewabilityTrackingEvent(event.name);
                         eventsToRemove.add(event);
