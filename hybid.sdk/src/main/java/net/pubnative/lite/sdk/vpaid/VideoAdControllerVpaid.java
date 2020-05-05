@@ -3,6 +3,7 @@ package net.pubnative.lite.sdk.vpaid;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.TextUtils;
+import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
@@ -10,8 +11,12 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
+
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.UrlHandler;
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeVideoAdSession;
 import net.pubnative.lite.sdk.vpaid.enums.EventConstants;
 import net.pubnative.lite.sdk.vpaid.enums.VastError;
 import net.pubnative.lite.sdk.vpaid.helpers.ErrorLog;
@@ -26,6 +31,9 @@ import net.pubnative.lite.sdk.vpaid.protocol.VpaidBridge;
 import net.pubnative.lite.sdk.vpaid.protocol.VpaidBridgeImpl;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
 
@@ -55,11 +63,19 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
 
     private boolean mFinishedPlaying = false;
 
-    VideoAdControllerVpaid(BaseVideoAdInternal baseAd, AdParams adParams, AdSpotDimensions adSpotDimensions, String vastFileContent) {
+    private HyBidViewabilityNativeVideoAdSession mViewabilityAdSession;
+    private List<HyBidViewabilityFriendlyObstruction> mViewabilityFriendlyObstructions;
+
+    VideoAdControllerVpaid(BaseVideoAdInternal baseAd, AdParams adParams,
+                           AdSpotDimensions adSpotDimensions,
+                           String vastFileContent,
+                           HyBidViewabilityNativeVideoAdSession viewabilityAdSession) {
         mBaseAdInternal = baseAd;
         mAdParams = adParams;
         mAdSpotDimensions = adSpotDimensions;
         mVastFileContent = vastFileContent;
+        mViewabilityAdSession = viewabilityAdSession;
+        mViewabilityFriendlyObstructions = new ArrayList<>();
         mVpaidBridge = new VpaidBridgeImpl(this, createCreativeParams());
         mViewControllerVpaid = new ViewControllerVpaid(this);
     }
@@ -337,5 +353,27 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
     @Override
     public boolean adFinishedPlaying() {
         return mFinishedPlaying;
+    }
+
+    @Override
+    public AdParams getAdParams() {
+        return mAdParams;
+    }
+
+    @Override
+    public HyBidViewabilityNativeVideoAdSession getViewabilityAdSession() {
+        return mViewabilityAdSession;
+    }
+
+    @Override
+    public void addViewabilityFriendlyObstruction(View view, FriendlyObstructionPurpose purpose, String reason) {
+        if (view != null && !TextUtils.isEmpty(reason)) {
+            mViewabilityFriendlyObstructions.add(new HyBidViewabilityFriendlyObstruction(view, purpose, reason));
+        }
+    }
+
+    @Override
+    public List<HyBidViewabilityFriendlyObstruction> getViewabilityFriendlyObstructions() {
+        return mViewabilityFriendlyObstructions;
     }
 }

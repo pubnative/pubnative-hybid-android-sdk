@@ -3,18 +3,22 @@ package net.pubnative.lite.sdk.vpaid.response;
 import android.content.Context;
 import android.text.TextUtils;
 
+import com.iab.omid.library.pubnativenet.adsession.VerificationScriptResource;
+
 import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.enums.VastError;
 import net.pubnative.lite.sdk.vpaid.helpers.ErrorLog;
 import net.pubnative.lite.sdk.vpaid.models.AdSpotDimensions;
+import net.pubnative.lite.sdk.vpaid.models.vast.AdVerifications;
 import net.pubnative.lite.sdk.vpaid.models.vast.ClickThrough;
 import net.pubnative.lite.sdk.vpaid.models.vast.ClickTracking;
 import net.pubnative.lite.sdk.vpaid.models.vast.Companion;
 import net.pubnative.lite.sdk.vpaid.models.vast.CompanionClickThrough;
 import net.pubnative.lite.sdk.vpaid.models.vast.CompanionClickTracking;
 import net.pubnative.lite.sdk.vpaid.models.vast.Creative;
+import net.pubnative.lite.sdk.vpaid.models.vast.Extension;
 import net.pubnative.lite.sdk.vpaid.models.vast.Impression;
 import net.pubnative.lite.sdk.vpaid.models.vast.InLine;
 import net.pubnative.lite.sdk.vpaid.models.vast.Linear;
@@ -22,10 +26,12 @@ import net.pubnative.lite.sdk.vpaid.models.vast.MediaFile;
 import net.pubnative.lite.sdk.vpaid.models.vast.Tracking;
 import net.pubnative.lite.sdk.vpaid.models.vast.Vast;
 import net.pubnative.lite.sdk.vpaid.models.vast.VastAdSource;
+import net.pubnative.lite.sdk.vpaid.models.vast.Verification;
 import net.pubnative.lite.sdk.vpaid.models.vast.Wrapper;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
 import net.pubnative.lite.sdk.vpaid.xml.XmlParser;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,6 +40,8 @@ import java.util.List;
 public class VastProcessor {
     private static final String LOG_TAG = VastProcessor.class.getSimpleName();
     private static final int UNWRAP_DEPTH = 5; //The processor will go maximum 5 wrappers deep to avoid having infinite loops.
+
+    private static final String EXTENSION_TYPE_AD_VERIFICATION = "AdVerifications";
 
     public interface Listener {
         void onParseSuccess(AdParams adParams, String vastFileContent);
@@ -205,6 +213,30 @@ public class VastProcessor {
                     }
                 } catch (Exception e) {
                     // Do nothing, companion is optional
+                }
+            }
+        }
+
+        List<VerificationScriptResource> verificationScriptResources = new ArrayList<>();
+        adParams.setVerificationScriptResources(verificationScriptResources);
+
+        if (adSource.getExtensions() != null) {
+            for (Extension extension : adSource.getExtensions()) {
+                if (extension.getType().equals(EXTENSION_TYPE_AD_VERIFICATION)) {
+                    AdVerifications adVerifications = extension.getAdVerifications();
+                    if (adVerifications != null) {
+                        for (Verification verification : adVerifications.getVerificationList()) {
+                            try {
+                                final URL url = new URL(verification.getJavaScriptResource().getText());
+                                final String vendorKey = verification.getVendor();
+                                final String params = verification.getVerificationParameters().getText();
+                                VerificationScriptResource resource = VerificationScriptResource.
+                                        createVerificationScriptResourceWithParameters(vendorKey, url, params);
+                            } catch (Exception exception) {
+                                Logger.e(LOG_TAG, exception.getMessage());
+                            }
+                        }
+                    }
                 }
             }
         }
