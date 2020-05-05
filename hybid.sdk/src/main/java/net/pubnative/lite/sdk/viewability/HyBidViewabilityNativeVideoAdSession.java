@@ -1,6 +1,5 @@
 package net.pubnative.lite.sdk.viewability;
 
-import android.util.Log;
 import android.view.View;
 
 import com.iab.omid.library.pubnativenet.adsession.AdSession;
@@ -69,7 +68,6 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
         VastProperties vastProperties = VastProperties.createVastPropertiesForNonSkippableMedia(false, Position.STANDALONE);
 
         if (mAdEvents != null) {
-            Log.d("OMTEST", "fireLoaded");
             mAdEvents.loaded(vastProperties);
         }
     }
@@ -79,7 +77,6 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
             return;
 
         if (mMediaEvents != null && !startFired) {
-            Log.d("OMTEST", "fireStart");
             mMediaEvents.start(duration, mute ? 0 : 1);
             startFired = true;
         }
@@ -90,7 +87,6 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
             return;
 
         if (mMediaEvents != null && !firstQuartileFired) {
-            Log.d("OMTEST", "fireFirstQuartile");
             mMediaEvents.firstQuartile();
             firstQuartileFired = true;
         }
@@ -101,7 +97,6 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
             return;
 
         if (mMediaEvents != null && !midpointFired) {
-            Log.d("OMTEST", "fireMidpoint");
             mMediaEvents.midpoint();
             midpointFired = true;
         }
@@ -112,7 +107,6 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
             return;
 
         if (mMediaEvents != null && !thirdQuartileFired) {
-            Log.d("OMTEST", "fireThirdQuartile");
             mMediaEvents.thirdQuartile();
             thirdQuartileFired = true;
         }
@@ -123,7 +117,6 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
             return;
 
         if (mMediaEvents != null && !completeFired) {
-            Log.d("OMTEST", "fireComplete");
             mMediaEvents.complete();
             completeFired = true;
         }
