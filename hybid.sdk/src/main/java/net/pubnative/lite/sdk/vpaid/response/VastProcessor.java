@@ -53,7 +53,7 @@ public class VastProcessor {
     public void parseResponse(String response, final Listener listener) {
         try {
             Vast vast = XmlParser.parse(response, Vast.class);
-            if (vast.getStatus() != null && vast.getStatus().getText().equalsIgnoreCase("NO_AD")) {
+            if (vast.getStatus() == null || vast.getStatus().getText().equalsIgnoreCase("NO_AD")) {
                 PlayerInfo info = new PlayerInfo("No ads found");
                 info.setNoAdsFound();
                 listener.onParseError(info);
@@ -115,7 +115,7 @@ public class VastProcessor {
         }
         adParams.setImpressions(impressions);
 
-        if (adSource.getCreatives() != null) {
+        if (adSource.getCreatives() != null && adSource.getCreatives().getCreativeList() != null) {
             List<Creative> creativeList = adSource.getCreatives().getCreativeList();
 
             Linear linear = null;
@@ -181,30 +181,33 @@ public class VastProcessor {
                     }
                     adParams.setEndCardUrlList(endCardUrlList);
 
-                    Companion companion = companionList.get(0);
-                    CompanionClickThrough clickThrough = companion.getCompanionClickThrough();
-                    if (clickThrough != null) {
-                        String redirectUrl = clickThrough.getText().trim();
-                        adParams.setEndCardRedirectUrl(redirectUrl);
-                    }
-
-                    if (companion.getCompanionClickTracking() != null) {
-                        List<String> clickEvents = new ArrayList<>();
-                        for (CompanionClickTracking tracking : companion.getCompanionClickTracking()) {
-                            clickEvents.add(tracking.getText());
+                    if (!companionList.isEmpty()) {
+                        Companion companion = companionList.get(0);
+                        CompanionClickThrough clickThrough = companion.getCompanionClickThrough();
+                        if (clickThrough != null) {
+                            String redirectUrl = clickThrough.getText().trim();
+                            adParams.setEndCardRedirectUrl(redirectUrl);
                         }
-                        adParams.setEndCardClicks(clickEvents);
-                    }
 
-                    if (companion.getTrackingEvents() != null) {
-                        List<String> events = new ArrayList<>();
-                        for (Tracking tracking : companion.getTrackingEvents().getTrackingList()) {
-                            events.add(tracking.getText());
+                        if (companion.getCompanionClickTracking() != null) {
+                            List<String> clickEvents = new ArrayList<>();
+                            for (CompanionClickTracking tracking : companion.getCompanionClickTracking()) {
+                                clickEvents.add(tracking.getText());
+                            }
+                            adParams.setEndCardClicks(clickEvents);
                         }
-                        adParams.setCompanionCreativeViewEvents(events);
+
+                        if (companion.getTrackingEvents() != null) {
+                            List<String> events = new ArrayList<>();
+                            for (Tracking tracking : companion.getTrackingEvents().getTrackingList()) {
+                                events.add(tracking.getText());
+                            }
+                            adParams.setCompanionCreativeViewEvents(events);
+                        }
                     }
                 } catch (Exception e) {
                     // Do nothing, companion is optional
+                    Logger.e(LOG_TAG, e.getMessage());
                 }
             }
         }
