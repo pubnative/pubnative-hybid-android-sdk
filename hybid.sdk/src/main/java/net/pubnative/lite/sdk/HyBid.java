@@ -68,6 +68,9 @@ public class HyBid {
         sApiClient = new PNApiClient(application);
         sLocationManager = new HyBidLocationManager(application);
         sLocationManager.startLocationUpdates();
+        sUserDataManager = new UserDataManager(application.getApplicationContext());
+        sAdCache = new AdCache();
+        sBrowserManager = new BrowserManager();
         sDeviceInfo = new DeviceInfo(application.getApplicationContext(), new DeviceInfo.Listener() {
             @Override
             public void onInfoLoaded() {
@@ -81,9 +84,6 @@ public class HyBid {
                 });
             }
         });
-        sUserDataManager = new UserDataManager(application.getApplicationContext());
-        sAdCache = new AdCache();
-        sBrowserManager = new BrowserManager();
         sInitialized = true;
     }
 
