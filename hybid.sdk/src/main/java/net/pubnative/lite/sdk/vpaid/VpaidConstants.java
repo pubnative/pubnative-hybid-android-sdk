@@ -7,7 +7,7 @@ public final class VpaidConstants {
     public static long CACHED_VIDEO_LIFE_TIME = 1000 * 60 * 60 * 32; //32 hours
     static final int DEFAULT_EXPIRED_TIME = 1000 * 60 * 10; //10 minutes
     static final long FETCH_TIMEOUT = 1000 * 60 * 3; //3 minutes
-    static final long PREPARE_PLAYER_TIMEOUT = 1000 * 10; //10 sec
+    static final long PREPARE_PLAYER_TIMEOUT = 1000 * 15; //10 sec
 
     private VpaidConstants() {
     }
