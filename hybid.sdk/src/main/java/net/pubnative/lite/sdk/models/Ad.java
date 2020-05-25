@@ -65,6 +65,8 @@ public class Ad extends JsonModel implements Serializable {
     @BindField
     public List<AdData> meta;
 
+    private String zoneId;
+
     //==============================================================================================
     // Interfaces
     //==============================================================================================
@@ -283,5 +285,11 @@ public class Ad extends JsonModel implements Serializable {
         return impressionId;
     }
 
+    public void setZoneId(String zoneId) {
+        this.zoneId = zoneId;
+    }
 
+    public String getZoneId() {
+        return zoneId;
+    }
 }

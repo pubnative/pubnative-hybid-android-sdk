@@ -132,6 +132,7 @@ public abstract class RequestManager {
     }
 
     private void processAd(final AdRequest adRequest, final Ad ad) {
+        ad.setZoneId(adRequest.zoneid);
         mAdCache.put(adRequest.zoneid, ad);
 
         switch (ad.assetgroupid) {
