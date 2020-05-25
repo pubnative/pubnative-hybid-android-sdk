@@ -98,6 +98,10 @@ public class PNApiClient {
         }
     }
 
+    public Context getContext() {
+        return mContext;
+    }
+
     public void trackUrl(String url, final TrackUrlListener listener) {
         PNHttpClient.makeRequest(mContext, url, null, null, false, true, new PNHttpClient.Listener() {
             @Override
