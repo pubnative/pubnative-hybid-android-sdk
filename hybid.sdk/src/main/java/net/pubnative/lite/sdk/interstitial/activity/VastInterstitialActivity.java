@@ -3,9 +3,11 @@ package net.pubnative.lite.sdk.interstitial.activity;
 import android.os.Bundle;
 import android.view.View;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.VideoAd;
+import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdListener;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
 
@@ -24,6 +26,11 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
             mVideoAd.bindView(mVideoPlayer);
             mVideoAd.setAdListener(mVideoAdListener);
             setProgressBarVisible();
+
+            VideoAdCacheItem adCacheItem = HyBid.getVideoAdCache().remove(getZoneId());
+            if (adCacheItem != null) {
+                mVideoAd.setVideoCacheItem(adCacheItem);
+            }
 
             mVideoPlayer.postDelayed(new Runnable() {
                 @Override

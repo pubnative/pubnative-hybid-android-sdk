@@ -24,7 +24,6 @@ public class FileUtils {
                 long currentTime = System.currentTimeMillis();
                 if ((creationTime + VpaidConstants.CACHED_VIDEO_LIFE_TIME < currentTime) ||
                         (file.length() == 0)) {
-                    //noinspection ResultOfMethodCallIgnored
                     file.delete();
                     Logger.d(LOG_TAG, "Deleted cached file: " + file.getAbsolutePath());
                 } else {

@@ -27,10 +27,15 @@ import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdRequestFactory;
+import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNInitializationHelper;
+import net.pubnative.lite.sdk.vpaid.VideoAdCache;
+import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
+import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
+import net.pubnative.lite.sdk.vpaid.response.AdParams;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
@@ -46,6 +51,7 @@ public abstract class RequestManager {
     private static final String TAG = RequestManager.class.getSimpleName();
     private final PNApiClient mApiClient;
     private final AdCache mAdCache;
+    private final VideoAdCache mVideoCache;
     private final AdRequestFactory mAdRequestFactory;
     private final PNInitializationHelper mInitializationHelper;
     private String mZoneId;
@@ -53,15 +59,17 @@ public abstract class RequestManager {
     private boolean mIsDestroyed;
 
     public RequestManager() {
-        this(HyBid.getApiClient(), HyBid.getAdCache(), new AdRequestFactory(), new PNInitializationHelper());
+        this(HyBid.getApiClient(), HyBid.getAdCache(), HyBid.getVideoAdCache(), new AdRequestFactory(), new PNInitializationHelper());
     }
 
     RequestManager(PNApiClient apiClient,
                    AdCache adCache,
+                   VideoAdCache videoCache,
                    AdRequestFactory adRequestFactory,
                    PNInitializationHelper initializationHelper) {
         mApiClient = apiClient;
         mAdCache = adCache;
+        mVideoCache = videoCache;
         mAdRequestFactory = adRequestFactory;
         mInitializationHelper = initializationHelper;
     }
@@ -106,10 +114,7 @@ public abstract class RequestManager {
                 }
 
                 Logger.d(TAG, "Received ad response for zone id: " + adRequest.zoneid);
-                mAdCache.put(adRequest.zoneid, ad);
-                if (mRequestListener != null) {
-                    mRequestListener.onRequestSuccess(ad);
-                }
+                processAd(adRequest, ad);
             }
 
             @Override
@@ -124,6 +129,53 @@ public abstract class RequestManager {
                 }
             }
         });
+    }
+
+    private void processAd(final AdRequest adRequest, final Ad ad) {
+        ad.setZoneId(adRequest.zoneid);
+        mAdCache.put(adRequest.zoneid, ad);
+
+        switch (ad.assetgroupid) {
+            case ApiAssetGroupType.VAST_INTERSTITIAL_1:
+            case ApiAssetGroupType.VAST_INTERSTITIAL_2:
+            case ApiAssetGroupType.VAST_INTERSTITIAL_3:
+            case ApiAssetGroupType.VAST_INTERSTITIAL_4:
+            case ApiAssetGroupType.VAST_MRECT: {
+                VideoAdProcessor videoAdProcessor = new VideoAdProcessor();
+                videoAdProcessor.process(mApiClient.getContext(), ad.getVast(), null, new VideoAdProcessor.Listener() {
+                    @Override
+                    public void onCacheSuccess(AdParams adParams, String videoFilePath, String endCardFilePath) {
+                        if (mIsDestroyed) {
+                            return;
+                        }
+
+                        VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardFilePath);
+                        mVideoCache.put(adRequest.zoneid, adCacheItem);
+                        if (mRequestListener != null) {
+                            mRequestListener.onRequestSuccess(ad);
+                        }
+                    }
+
+                    @Override
+                    public void onCacheError(Throwable error) {
+                        if (mIsDestroyed) {
+                            return;
+                        }
+
+                        Logger.w(TAG, error.getMessage());
+                        if (mRequestListener != null) {
+                            mRequestListener.onRequestFail(error);
+                        }
+                    }
+                });
+                break;
+            }
+            default: {
+                if (mRequestListener != null) {
+                    mRequestListener.onRequestSuccess(ad);
+                }
+            }
+        }
     }
 
     public void setIntegrationType(IntegrationType integrationType) {
