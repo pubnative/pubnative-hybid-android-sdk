@@ -53,7 +53,9 @@ public class VastProcessor {
     public void parseResponse(String response, final Listener listener) {
         try {
             Vast vast = XmlParser.parse(response, Vast.class);
-            if (vast.getStatus() == null || vast.getStatus().getText().equalsIgnoreCase("NO_AD")) {
+            if ((vast.getStatus() == null
+                    || vast.getStatus().getText().equalsIgnoreCase("NO_AD"))
+                    && vast.getAd() == null) {
                 PlayerInfo info = new PlayerInfo("No ads found");
                 info.setNoAdsFound();
                 listener.onParseError(info);
