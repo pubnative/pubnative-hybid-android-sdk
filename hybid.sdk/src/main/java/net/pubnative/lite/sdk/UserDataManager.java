@@ -276,10 +276,10 @@ public class UserDataManager {
         String usPrivacyString = getIABUSPrivacyString(HyBid.getDeviceInfo().getContext());
         if (usPrivacyString.length() >= 3){
             char optOutChar = usPrivacyString.charAt(2);
-            if (optOutChar == 'n' || optOutChar == 'N'){
-                return false;
-            } else {
+            if (optOutChar == 'y' || optOutChar == 'Y'){
                 return true;
+            } else {
+                return false;
             }
         }
         else {
