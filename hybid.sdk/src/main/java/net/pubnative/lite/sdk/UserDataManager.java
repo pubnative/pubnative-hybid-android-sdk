@@ -271,4 +271,19 @@ public class UserDataManager {
         SharedPreferences.Editor editor = mPreferences.edit();
         editor.putString(KEY_CCPA_CONSENT, null).apply();
     }
+
+    public boolean isCCPAOptOut(){
+        String usPrivacyString = getIABUSPrivacyString(HyBid.getDeviceInfo().getContext());
+        if (usPrivacyString.length() >= 3){
+            char optOutChar = usPrivacyString.charAt(2);
+            if (optOutChar == 'y' || optOutChar == 'Y'){
+                return true;
+            } else {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+    }
 }
