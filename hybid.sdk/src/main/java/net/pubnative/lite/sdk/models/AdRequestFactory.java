@@ -91,6 +91,7 @@ public class AdRequestFactory {
     }
 
     AdRequest buildRequest(final String zoneid, final String adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType) {
+        boolean isCCPAOptOut = HyBid.getUserDataManager().isCCPAOptOut();
         AdRequest adRequest = new AdRequest();
         adRequest.zoneid = zoneid;
         adRequest.apptoken = HyBid.getAppToken();
@@ -99,7 +100,8 @@ public class AdRequestFactory {
         adRequest.devicemodel = mDeviceInfo.getModel();
         adRequest.coppa = HyBid.isCoppaEnabled() ? "1" : "0";
 
-        if (HyBid.isCoppaEnabled() || limitTracking || TextUtils.isEmpty(advertisingId)) {
+        if (HyBid.isCoppaEnabled() || limitTracking || TextUtils.isEmpty(advertisingId)
+                || isCCPAOptOut) {
             adRequest.dnt = "1";
         } else {
             adRequest.gid = advertisingId;
@@ -110,7 +112,7 @@ public class AdRequestFactory {
 
         adRequest.locale = mDeviceInfo.getLocale().getLanguage();
 
-        if (!HyBid.isCoppaEnabled() && !limitTracking) {
+        if (!HyBid.isCoppaEnabled() && !limitTracking && !isCCPAOptOut) {
             adRequest.age = HyBid.getAge();
             adRequest.gender = HyBid.getGender();
             adRequest.keywords = HyBid.getKeywords();
