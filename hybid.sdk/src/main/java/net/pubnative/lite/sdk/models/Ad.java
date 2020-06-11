@@ -159,6 +159,24 @@ public class Ad extends JsonModel implements Serializable {
         return result;
     }
 
+    public int getAssetWidth(String asset) {
+        int result = -1;
+        AdData data = getAsset(asset);
+        if (data != null) {
+            result = data.getWidth();
+        }
+        return result;
+    }
+
+    public int getAssetHeight(String asset) {
+        int result = -1;
+        AdData data = getAsset(asset);
+        if (data != null) {
+            result = data.getHeight();
+        }
+        return result;
+    }
+
     public String getVast() {
         String result = null;
         AdData data = getAsset(APIAsset.VAST);
