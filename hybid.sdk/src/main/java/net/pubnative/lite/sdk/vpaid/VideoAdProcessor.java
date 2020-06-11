@@ -4,12 +4,18 @@ import android.content.Context;
 import android.util.DisplayMetrics;
 import android.view.View;
 
+import com.iab.omid.library.pubnativenet.adsession.VerificationScriptResource;
+
+import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.helpers.AssetsLoader;
 import net.pubnative.lite.sdk.vpaid.models.AdSpotDimensions;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.response.VastProcessor;
 
+import java.net.URL;
+
 public class VideoAdProcessor {
+    private static final String TAG = VideoAdProcessor.class.getSimpleName();
     public interface Listener {
         void onCacheSuccess(AdParams adParams, String videoFilePath, String endCardFilePath);
         void onCacheError(Throwable error);
@@ -20,6 +26,7 @@ public class VideoAdProcessor {
         vastProcessor.parseResponse(vast, new VastProcessor.Listener() {
             @Override
             public void onParseSuccess(AdParams adParams, String vastFileContent) {
+                appendOMVerificationScript(adParams);
                 prepare(context, adParams, listener);
             }
 
@@ -30,6 +37,19 @@ public class VideoAdProcessor {
                 }
             }
         });
+    }
+
+    private void appendOMVerificationScript(AdParams adParams) {
+        try {
+            final URL url = new URL("https://s3-us-west-2.amazonaws.com/omsdk-files/compliance-js/omid-validation-verification-script-v1.js");
+            final String vendorKey = "iabtechlab.com-omid";
+            final String params = "iabtechlab-Pubnativenet";
+            VerificationScriptResource resource = VerificationScriptResource.
+                    createVerificationScriptResourceWithParameters(vendorKey, url, params);
+            adParams.getVerificationScriptResources().add(resource);
+        } catch (Exception exception) {
+            Logger.e(TAG, "Error adding verification script: ", exception);
+        }
     }
 
     private void prepare(Context context, final AdParams adParams, final Listener listener) {

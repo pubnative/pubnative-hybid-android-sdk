@@ -237,6 +237,7 @@ public class VastProcessor {
                                 final String params = verification.getVerificationParameters().getText();
                                 VerificationScriptResource resource = VerificationScriptResource.
                                         createVerificationScriptResourceWithParameters(vendorKey, url, params);
+                                verificationScriptResources.add(resource);
                             } catch (Exception exception) {
                                 Logger.e(LOG_TAG, exception.getMessage());
                             }
