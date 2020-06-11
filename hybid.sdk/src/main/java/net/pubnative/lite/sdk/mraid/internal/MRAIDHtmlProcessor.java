@@ -96,6 +96,11 @@ public class MRAIDHtmlProcessor {
         String resizeScript = new String(resizeScriptBytes);
         String resizeTag = "<script>" + ls + resizeScript + ls + "</script>";
 
+        String omVerificationScript64 = Assets.verification_script;
+        byte[] omVerificationBytes = Base64.decode(omVerificationScript64, Base64.DEFAULT);
+        String omVerificationScript = new String(omVerificationBytes);
+        String omVerificationTag = "<script>" + ls + omVerificationScript + ls + "</script>";
+
         // Add meta and style tags to head tag.
         regex = "<head[^>]*>";
         pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
@@ -108,7 +113,8 @@ public class MRAIDHtmlProcessor {
                             "body { margin:0; padding:0;}" + ls +
                             "*:not(input) { -webkit-touch-callout:none; -webkit-user-select:none; -webkit-text-size-adjust:none; }" + ls +
                             "</style>";
-            processedHtml.insert(matcher.end(), ls + metaTag + ls + styleTag + ls + mraidTag + ls + omsdkTag + ls +  resizeTag);
+            processedHtml.insert(matcher.end(), ls + metaTag + ls + styleTag + ls
+                    + mraidTag + ls + omsdkTag + ls + resizeTag + ls + omVerificationTag);
         }
 
         return processedHtml.toString();
