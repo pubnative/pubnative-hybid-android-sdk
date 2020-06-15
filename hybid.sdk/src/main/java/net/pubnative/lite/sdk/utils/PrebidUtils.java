@@ -56,6 +56,17 @@ public final class PrebidUtils {
         return String.format(Locale.ENGLISH, formatString, eCPM);
     }
 
+    public static String getBidFromPoints(Integer points, KeywordMode mode) {
+        Double eCPM = points.doubleValue() / ECPM_POINTS_DIVIDER;
+        String formatString = "%.3f";
+
+        if (mode == KeywordMode.TWO_DECIMALS) {
+            formatString = "%.2f";
+        }
+
+        return String.format(Locale.ENGLISH, formatString, eCPM);
+    }
+
     //---------------------------------- String keywords -------------------------------------------
     public static String getPrebidKeywords(Ad ad) {
         return getPrebidKeywords(ad, "");
