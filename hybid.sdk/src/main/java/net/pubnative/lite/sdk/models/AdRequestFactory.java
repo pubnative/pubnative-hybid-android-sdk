@@ -30,6 +30,7 @@ import android.text.TextUtils;
 import net.pubnative.lite.sdk.BuildConfig;
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.Logger;
@@ -51,15 +52,17 @@ public class AdRequestFactory {
 
     private final DeviceInfo mDeviceInfo;
     private final HyBidLocationManager mLocationManager;
+    private final UserDataManager mUserDataManager;
     private IntegrationType mIntegrationType = IntegrationType.HEADER_BIDDING;
 
     public AdRequestFactory() {
-        this(HyBid.getDeviceInfo(), HyBid.getLocationManager());
+        this(HyBid.getDeviceInfo(), HyBid.getLocationManager(), HyBid.getUserDataManager());
     }
 
-    AdRequestFactory(DeviceInfo deviceInfo, HyBidLocationManager locationManager) {
+    AdRequestFactory(DeviceInfo deviceInfo, HyBidLocationManager locationManager, UserDataManager userDataManager) {
         mDeviceInfo = deviceInfo;
         mLocationManager = locationManager;
+        mUserDataManager = userDataManager;
     }
 
     public void createAdRequest(final String zoneid, final String adSize, final Callback callback) {
@@ -91,7 +94,7 @@ public class AdRequestFactory {
     }
 
     AdRequest buildRequest(final String zoneid, final String adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType) {
-        boolean isCCPAOptOut = HyBid.getUserDataManager().isCCPAOptOut();
+        boolean isCCPAOptOut = mUserDataManager.isCCPAOptOut();
         AdRequest adRequest = new AdRequest();
         adRequest.zoneid = zoneid;
         adRequest.apptoken = HyBid.getAppToken();

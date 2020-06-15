@@ -24,6 +24,7 @@ public class CenteredMraidInterstitialActivity extends HyBidInterstitialActivity
             MRAIDNativeFeature.STORE_PICTURE,
             MRAIDNativeFeature.TEL
     };
+    private MRAIDBanner mMRAIDView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,16 +33,16 @@ public class CenteredMraidInterstitialActivity extends HyBidInterstitialActivity
 
     @Override
     public View getAdView() {
-        MRAIDBanner adView = null;
+        mMRAIDView = null;
         FrameLayout container = new FrameLayout(this);
         container.setBackgroundColor(Color.WHITE);
         if (getAd() != null) {
 
             if (getAd().getAssetUrl(APIAsset.HTML_BANNER) != null) {
-                adView = new MRAIDBanner(this, getAd().getAssetUrl(APIAsset.HTML_BANNER), "", mSupportedNativeFeatures,
+                mMRAIDView = new MRAIDBanner(this, getAd().getAssetUrl(APIAsset.HTML_BANNER), "", mSupportedNativeFeatures,
                         this, this, getAd().getContentInfoContainer(this));
             } else if (getAd().getAssetHtml(APIAsset.HTML_BANNER) != null) {
-                adView = new MRAIDBanner(this, "", getAd().getAssetHtml(APIAsset.HTML_BANNER), mSupportedNativeFeatures,
+                mMRAIDView = new MRAIDBanner(this, "", getAd().getAssetHtml(APIAsset.HTML_BANNER), mSupportedNativeFeatures,
                         this, this, getAd().getContentInfoContainer(this));
             }
 
@@ -55,8 +56,8 @@ public class CenteredMraidInterstitialActivity extends HyBidInterstitialActivity
                 height = 480;
             }
 
-            if (adView != null) {
-                adView.setCloseLayoutListener(this);
+            if (mMRAIDView != null) {
+                mMRAIDView.setCloseLayoutListener(this);
             }
 
             FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
@@ -64,7 +65,7 @@ public class CenteredMraidInterstitialActivity extends HyBidInterstitialActivity
                     (int) ViewUtils.convertDpToPixel(height, this));
             layoutParams.gravity = Gravity.CENTER;
 
-            container.addView(adView, layoutParams);
+            container.addView(mMRAIDView, layoutParams);
         }
         return container;
     }
@@ -72,6 +73,16 @@ public class CenteredMraidInterstitialActivity extends HyBidInterstitialActivity
     @Override
     protected boolean shouldShowContentInfo() {
         return false;
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mMRAIDView != null) {
+            mMRAIDView.stopAdSession();
+            mMRAIDView.destroy();
+        }
+
+        super.onDestroy();
     }
 
 // ----------------------------------- MRAIDViewListener ---------------------------------------
