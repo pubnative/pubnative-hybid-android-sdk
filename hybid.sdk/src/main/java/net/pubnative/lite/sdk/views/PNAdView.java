@@ -118,7 +118,7 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
         return mAd != null ? mAd.getCreativeId() : null;
     }
 
-    public Integer getBidPoint() {
+    public Integer getBidPoints() {
         return mAd != null ? mAd.getECPM() : 0;
     }
 

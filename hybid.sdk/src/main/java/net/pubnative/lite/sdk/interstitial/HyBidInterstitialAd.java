@@ -117,7 +117,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         return mAd != null ? mAd.getCreativeId() : null;
     }
 
-    public Integer getBidPoint() {
+    public Integer getBidPoints() {
         return mAd != null ? mAd.getECPM() : 0;
     }
 

@@ -189,7 +189,7 @@ public class NativeAd implements ImpressionTracker.Listener {
         return mAd != null ? mAd.getCreativeId() : null;
     }
 
-    public Integer getBidPoint() {
+    public Integer getBidPoints() {
         return mAd != null ? mAd.getECPM() : 0;
     }
 
