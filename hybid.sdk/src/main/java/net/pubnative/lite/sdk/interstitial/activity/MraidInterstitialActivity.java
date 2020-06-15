@@ -59,6 +59,7 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
     protected void onDestroy() {
         if (mView != null) {
             mView.stopAdSession();
+            mView.destroy();
         }
 
         super.onDestroy();
