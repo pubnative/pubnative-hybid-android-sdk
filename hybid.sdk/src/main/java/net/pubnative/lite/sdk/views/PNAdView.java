@@ -92,6 +92,10 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
         }
     }
 
+    public void show() {
+        renderAd();
+    }
+
     public void destroy() {
         cleanup();
         if (mRequestManager != null) {
