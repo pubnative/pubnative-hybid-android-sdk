@@ -162,5 +162,6 @@ workflows:
                 - master
                 - beta
                 - development
+                - in-app-bidding
           requires:
             - test_unit
