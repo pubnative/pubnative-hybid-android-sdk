@@ -78,7 +78,7 @@ public class ViewControllerVast implements View.OnClickListener {
         mSkipView = mControlsLayout.findViewById(R.id.skipView);
         mSkipView.setOnClickListener(this);
 
-        mAdController.addViewabilityFriendlyObstruction(mControlsLayout, FriendlyObstructionPurpose.VIDEO_CONTROLS, "");
+        mAdController.addViewabilityFriendlyObstruction(mControlsLayout, FriendlyObstructionPurpose.VIDEO_CONTROLS, "Video controls");
 
         bannerView.addView(mControlsLayout);
     }
