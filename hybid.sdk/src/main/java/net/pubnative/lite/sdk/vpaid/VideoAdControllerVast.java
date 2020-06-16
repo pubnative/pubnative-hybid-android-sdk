@@ -165,7 +165,6 @@ class VideoAdControllerVast implements VideoAdController {
                 List<TrackingEvent> eventsToRemove = new ArrayList<>();
                 for (TrackingEvent event : mTrackingEventsList) {
                     if (doneMillis > event.timeMillis) {
-                        Log.d("EVENT_TEST", event.url);
                         EventTracker.post(mBaseAdInternal.getContext(), event.url);
                         fireViewabilityTrackingEvent(event.name);
                         eventsToRemove.add(event);
