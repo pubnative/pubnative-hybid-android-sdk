@@ -41,7 +41,7 @@ public class VideoAdProcessor {
 
     private void appendOMVerificationScript(AdParams adParams) {
         try {
-            final URL url = new URL("https://s3-us-west-2.amazonaws.com/omsdk-files/compliance-js/omid-validation-verification-script-v1.js");
+            final URL url = new URL("https://s3-us-west-2.amazonaws.com/omsdk-files/compliance-js/omid-validation-verification-script-v1-ssl.js");
             final String vendorKey = "iabtechlab.com-omid";
             final String params = "iabtechlab-Pubnativenet";
             VerificationScriptResource resource = VerificationScriptResource.
