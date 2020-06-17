@@ -22,10 +22,17 @@
 //
 package net.pubnative.lite.adapters.mopub;
 
+import android.app.Activity;
 import android.content.Context;
 import android.view.View;
 
-import com.mopub.mobileads.CustomEventBanner;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.mopub.common.LifecycleListener;
+import com.mopub.mobileads.AdData;
+import com.mopub.mobileads.AdLifecycleListener;
+import com.mopub.mobileads.BaseAd;
 import com.mopub.mobileads.MoPubErrorCode;
 
 import net.pubnative.lite.sdk.HyBid;
@@ -36,18 +43,20 @@ import net.pubnative.lite.sdk.utils.Logger;
 
 import java.util.Map;
 
-public class HyBidMoPubMRectCustomEvent extends CustomEventBanner implements AdPresenter.Listener {
+public class HyBidMoPubMRectCustomEvent extends BaseAd implements AdPresenter.Listener {
     private static final String TAG = HyBidMoPubMRectCustomEvent.class.getSimpleName();
 
     private static final String ZONE_ID_KEY = "pn_zone_id";
 
-    private CustomEventBannerListener mBannerListener;
+    private AdLifecycleListener.LoadListener mBannerLoadListener;
+    private AdLifecycleListener.InteractionListener mBannerInteractionListener;
 
     private AdPresenter mMRectPresenter;
 
     @Override
-    protected void loadBanner(Context context,
-                              CustomEventBannerListener customEventBannerListener,
+    protected void load(Context context,
+                              AdLifecycleListener.LoadListener customEventBannerListener,
+                              AdLifecycleListener.InteractionListener interactionListener,
                               Map<String, Object> localExtras,
                               Map<String, String> serverExtras) {
 
@@ -55,7 +64,8 @@ public class HyBidMoPubMRectCustomEvent extends CustomEventBanner implements AdP
             Logger.e(TAG, "customEventBannerListener is null");
             return;
         }
-        mBannerListener = customEventBannerListener;
+        mBannerLoadListener = customEventBannerListener;
+        mBannerInteractionListener = interactionListener;
 
         String zoneIdKey;
         if (localExtras.containsKey(ZONE_ID_KEY)) {
@@ -64,21 +74,21 @@ public class HyBidMoPubMRectCustomEvent extends CustomEventBanner implements AdP
             zoneIdKey = serverExtras.get(ZONE_ID_KEY);
         } else {
             Logger.e(TAG, "Could not find zone id value in CustomEventBanner localExtras or serverExtras");
-            mBannerListener.onBannerFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
+            mBannerLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
         final Ad ad = HyBid.getAdCache().remove(zoneIdKey);
         if (ad == null) {
             Logger.e(TAG, "Could not find an ad in the cache for zone id with key: " + zoneIdKey);
-            mBannerListener.onBannerFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
+            mBannerLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
         mMRectPresenter = new MRectPresenterFactory(context).createPresenter(ad, this);
         if (mMRectPresenter == null) {
             Logger.e(TAG, "Could not create valid MRect presenter");
-            mBannerListener.onBannerFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
+            mBannerLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
@@ -94,25 +104,47 @@ public class HyBidMoPubMRectCustomEvent extends CustomEventBanner implements AdP
         }
     }
 
+    @Nullable
+    @Override
+    protected LifecycleListener getLifecycleListener() {
+        return null;
+    }
+
+    @NonNull
+    @Override
+    protected String getAdNetworkId() {
+        return null;
+    }
+
+    @Override
+    protected boolean checkAndInitializeSdk(@NonNull Activity launcherActivity, @NonNull AdData adData) throws Exception {
+        return false;
+    }
+
+    @Override
+    protected void load(@NonNull Context context, @NonNull AdData adData) throws Exception {
+
+    }
+
     @Override
     public void onAdLoaded(AdPresenter adPresenter, View banner) {
-        if (mBannerListener != null) {
-            mBannerListener.onBannerLoaded(banner);
+        if (mBannerLoadListener != null) {
+            mBannerLoadListener.onAdLoaded();
             mMRectPresenter.startTracking();
         }
     }
 
     @Override
     public void onAdClicked(AdPresenter adPresenter) {
-        if (mBannerListener != null) {
-            mBannerListener.onBannerClicked();
+        if (mBannerInteractionListener != null) {
+            mBannerInteractionListener.onAdClicked();
         }
     }
 
     @Override
     public void onAdError(AdPresenter adPresenter) {
-        if (mBannerListener != null) {
-            mBannerListener.onBannerFailed(MoPubErrorCode.INTERNAL_ERROR);
+        if (mBannerInteractionListener != null) {
+            mBannerInteractionListener.onAdFailed(MoPubErrorCode.INTERNAL_ERROR);
         }
     }
 }
