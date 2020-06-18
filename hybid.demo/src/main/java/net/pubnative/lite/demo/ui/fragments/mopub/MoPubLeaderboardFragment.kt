@@ -76,12 +76,15 @@ class MoPubLeaderboardFragment : Fragment(), RequestManager.RequestListener, MoP
 
     // --------------- HyBid Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
-        mopubLeaderboard.adUnitId = adUnitId
-        mopubLeaderboard.keywords = PrebidUtils.getPrebidKeywords(ad)
-        mopubLeaderboard.loadAd()
-
         Log.d(TAG, "onRequestSuccess")
         displayLogs()
+        adUnitId?.let {
+            mopubLeaderboard.setAdUnitId(it)
+            mopubLeaderboard.setKeywords(PrebidUtils.getPrebidKeywords(ad))
+            mopubLeaderboard.adSize = MoPubView.MoPubAdSize.HEIGHT_90
+            mopubLeaderboard.loadAd()
+        }
+
         if (!TextUtils.isEmpty(ad?.creativeId)) {
             creativeIdView.text = ad?.creativeId
         }

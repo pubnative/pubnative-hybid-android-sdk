@@ -33,7 +33,8 @@ class MoPubMediationBannerFragment : Fragment(), MoPubView.BannerAdListener {
         val adUnitId = SettingsManager.getInstance(activity!!).getSettings().mopubMediationBannerAdUnitId
 
         mopubBanner.bannerAdListener = this
-        mopubBanner.adUnitId = adUnitId
+        mopubBanner.setAdUnitId(adUnitId)
+        mopubBanner.adSize = MoPubView.MoPubAdSize.HEIGHT_50
         mopubBanner.autorefreshEnabled = false
 
         view.findViewById<Button>(R.id.button_load).setOnClickListener {

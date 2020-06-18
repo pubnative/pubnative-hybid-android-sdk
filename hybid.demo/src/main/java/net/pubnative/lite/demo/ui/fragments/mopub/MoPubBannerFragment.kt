@@ -101,12 +101,16 @@ class MoPubBannerFragment : Fragment(), RequestManager.RequestListener, MoPubVie
 
     // --------------- HyBid Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
-        mopubBanner.adUnitId = adUnitId
-        mopubBanner.keywords = PrebidUtils.getPrebidKeywords(ad, PrebidUtils.KeywordMode.TWO_DECIMALS)
-        mopubBanner.loadAd()
-
         Log.d(TAG, "onRequestSuccess")
         displayLogs()
+
+        adUnitId?.let {
+            mopubBanner.setAdUnitId(it)
+            mopubBanner.setKeywords(PrebidUtils.getPrebidKeywords(ad, PrebidUtils.KeywordMode.TWO_DECIMALS))
+            mopubBanner.adSize = MoPubView.MoPubAdSize.HEIGHT_50
+            mopubBanner.loadAd()
+        }
+
         if (!TextUtils.isEmpty(ad?.creativeId)) {
             creativeIdView.text = ad?.creativeId
         }

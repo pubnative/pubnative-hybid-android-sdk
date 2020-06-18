@@ -69,7 +69,7 @@ public class HyBidMediationNativeCustomEvent extends CustomEventNative implement
         }
     }
 
-    private class HyBidStaticNativeAd extends StaticNativeAd implements NativeAd.Listener {
+    private static class HyBidStaticNativeAd extends StaticNativeAd implements NativeAd.Listener {
         private final CustomEventNativeListener mListener;
         private final NativeAd mNativeAd;
         private final ImpressionTracker mImpressionTracker;
