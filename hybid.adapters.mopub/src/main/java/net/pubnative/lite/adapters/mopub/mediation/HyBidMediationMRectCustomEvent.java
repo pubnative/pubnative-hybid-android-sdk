@@ -93,11 +93,15 @@ public class HyBidMediationMRectCustomEvent extends BaseAd implements PNAdView.L
 
     @Nullable
     @Override
-    protected LifecycleListener getLifecycleListener() { return null; }
+    protected LifecycleListener getLifecycleListener() {
+        return null;
+    }
 
     @NonNull
     @Override
-    protected String getAdNetworkId() { return mZoneID; }
+    protected String getAdNetworkId() {
+        return mZoneID;
+    }
 
     @Nullable
     @Override
@@ -107,7 +111,9 @@ public class HyBidMediationMRectCustomEvent extends BaseAd implements PNAdView.L
 
     //------------------------------------ PNAdView Callbacks --------------------------------------
     @Override
-    public void onAdLoaded() { mLoadListener.onAdLoaded(); }
+    public void onAdLoaded() {
+        mLoadListener.onAdLoaded();
+    }
 
     @Override
     public void onAdLoadFailed(Throwable error) {
@@ -115,8 +121,12 @@ public class HyBidMediationMRectCustomEvent extends BaseAd implements PNAdView.L
     }
 
     @Override
-    public void onAdImpression() { mInteractionListener.onAdImpression(); }
+    public void onAdImpression() {
+        mInteractionListener.onAdImpression();
+    }
 
     @Override
-    public void onAdClick() { mInteractionListener.onAdClicked(); }
+    public void onAdClick() {
+        mInteractionListener.onAdClicked();
+    }
 }
