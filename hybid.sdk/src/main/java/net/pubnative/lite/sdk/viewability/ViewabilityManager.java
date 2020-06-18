@@ -12,7 +12,7 @@ import net.pubnative.lite.sdk.BuildConfig;
 public class ViewabilityManager {
     private static final String TAG = ViewabilityManager.class.getSimpleName();
     private static final String VIEWABILITY_PARTNER_NAME = "Pubnativenet";
-    private static String VIEWABILITY_JS_SERVICE_CONTENT = Assets.omsdkjs;
+    private static String VIEWABILITY_JS_SERVICE_CONTENT;
 
     private static Partner mPubNativePartner = null;
 
