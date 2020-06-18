@@ -22,9 +22,15 @@
 //
 package net.pubnative.lite.adapters.mopub;
 
+import android.app.Activity;
 import android.content.Context;
 
-import com.mopub.mobileads.CustomEventInterstitial;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.mopub.common.LifecycleListener;
+import com.mopub.mobileads.AdData;
+import com.mopub.mobileads.BaseAd;
 import com.mopub.mobileads.MoPubErrorCode;
 
 import net.pubnative.lite.sdk.HyBid;
@@ -33,57 +39,49 @@ import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenterFactor
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.Logger;
 
-import java.util.Map;
-
-public class HyBidMoPubInterstitialCustomEvent extends CustomEventInterstitial implements InterstitialPresenter.Listener {
+public class HyBidMoPubInterstitialCustomEvent extends BaseAd implements InterstitialPresenter.Listener {
     private static final String TAG = HyBidMoPubInterstitialCustomEvent.class.getSimpleName();
 
     private static final String ZONE_ID_KEY = "pn_zone_id";
-    private CustomEventInterstitialListener mInterstitialListener;
+
     private InterstitialPresenter mInterstitialPresenter;
+    private String mZoneID = "";
 
     @Override
-    protected void loadInterstitial(Context context,
-                                    CustomEventInterstitialListener customEventInterstitialListener,
-                                    Map<String, Object> localExtras,
-                                    Map<String, String> serverExtras) {
+    protected boolean checkAndInitializeSdk(@NonNull Activity launcherActivity, @NonNull AdData adData) throws Exception {
+        return false;
+    }
 
-        if (customEventInterstitialListener == null) {
-            Logger.e(TAG, "customEventInterstitialListener is null");
-            return;
-        }
-        mInterstitialListener = customEventInterstitialListener;
-
-        String zoneIdKey;
-        if (localExtras.containsKey(ZONE_ID_KEY)) {
-            zoneIdKey = (String) localExtras.get(ZONE_ID_KEY);
-        } else if (serverExtras.containsKey(ZONE_ID_KEY)) {
-            zoneIdKey = serverExtras.get(ZONE_ID_KEY);
+    @Override
+    protected void load(@NonNull Context context, @NonNull AdData adData) throws Exception {
+        if (adData.getExtras().containsKey(ZONE_ID_KEY)) {
+            mZoneID = adData.getExtras().get(ZONE_ID_KEY);
         } else {
-            Logger.e(TAG, "Could not find zone id value in CustomEventInterstitial localExtras or serverExtras");
-            mInterstitialListener.onInterstitialFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
+            Logger.e(TAG, "Could not find zone id value in BaseAd adData");
+            mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
-        final Ad ad = HyBid.getAdCache().inspect(zoneIdKey);
+        final Ad ad = HyBid.getAdCache().inspect(mZoneID);
         if (ad == null) {
-            Logger.e(TAG, "Could not find an ad in the cache for zone id with key " + zoneIdKey);
-            mInterstitialListener.onInterstitialFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
+            Logger.e(TAG, "Could not find an ad in the cache for zone id with key " + mZoneID);
+            mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
-        mInterstitialPresenter = new InterstitialPresenterFactory(context, zoneIdKey).createInterstitialPresenter(ad, this);
+        mInterstitialPresenter = new InterstitialPresenterFactory(context, mZoneID).createInterstitialPresenter(ad, this);
         if (mInterstitialPresenter == null) {
             Logger.e(TAG, "Could not create valid interstitial presenter");
-            mInterstitialListener.onInterstitialFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
+            mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
+        setAutomaticImpressionAndClickTracking(false);
         mInterstitialPresenter.load();
     }
 
     @Override
-    protected void showInterstitial() {
+    protected void show() {
         if (mInterstitialPresenter != null) {
             mInterstitialPresenter.show();
         }
@@ -97,38 +95,40 @@ public class HyBidMoPubInterstitialCustomEvent extends CustomEventInterstitial i
         }
     }
 
+    @Nullable
+    @Override
+    protected LifecycleListener getLifecycleListener() {
+        return null;
+    }
+
+    @NonNull
+    @Override
+    protected String getAdNetworkId() {
+        return mZoneID;
+    }
+
     @Override
     public void onInterstitialLoaded(InterstitialPresenter interstitialPresenter) {
-        if (mInterstitialListener != null) {
-            mInterstitialListener.onInterstitialLoaded();
-        }
-    }
-
-    @Override
-    public void onInterstitialShown(InterstitialPresenter interstitialPresenter) {
-        if (mInterstitialListener != null) {
-            mInterstitialListener.onInterstitialShown();
-        }
-    }
-
-    @Override
-    public void onInterstitialClicked(InterstitialPresenter interstitialPresenter) {
-        if (mInterstitialListener != null) {
-            mInterstitialListener.onInterstitialClicked();
-        }
-    }
-
-    @Override
-    public void onInterstitialDismissed(InterstitialPresenter interstitialPresenter) {
-        if (mInterstitialListener != null) {
-            mInterstitialListener.onInterstitialDismissed();
-        }
+        mLoadListener.onAdLoaded();
     }
 
     @Override
     public void onInterstitialError(InterstitialPresenter interstitialPresenter) {
-        if (mInterstitialListener != null) {
-            mInterstitialListener.onInterstitialFailed(MoPubErrorCode.INTERNAL_ERROR);
-        }
+        mLoadListener.onAdLoadFailed(MoPubErrorCode.INTERNAL_ERROR);
+    }
+
+    @Override
+    public void onInterstitialShown(InterstitialPresenter interstitialPresenter) {
+        mInteractionListener.onAdShown();
+    }
+
+    @Override
+    public void onInterstitialClicked(InterstitialPresenter interstitialPresenter) {
+        mInteractionListener.onAdClicked();
+    }
+
+    @Override
+    public void onInterstitialDismissed(InterstitialPresenter interstitialPresenter) {
+        mInteractionListener.onAdDismissed();
     }
 }
