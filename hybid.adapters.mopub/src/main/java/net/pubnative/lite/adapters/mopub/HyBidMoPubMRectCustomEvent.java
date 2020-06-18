@@ -48,47 +48,36 @@ public class HyBidMoPubMRectCustomEvent extends BaseAd implements AdPresenter.Li
 
     private static final String ZONE_ID_KEY = "pn_zone_id";
 
-    private AdLifecycleListener.LoadListener mBannerLoadListener;
-    private AdLifecycleListener.InteractionListener mBannerInteractionListener;
-
     private AdPresenter mMRectPresenter;
+    private View mAdView;
+    private String mZoneID = "";
 
     @Override
-    protected void load(Context context,
-                              AdLifecycleListener.LoadListener customEventBannerListener,
-                              AdLifecycleListener.InteractionListener interactionListener,
-                              Map<String, Object> localExtras,
-                              Map<String, String> serverExtras) {
+    protected boolean checkAndInitializeSdk(@NonNull Activity launcherActivity, @NonNull AdData adData) throws Exception {
+        return false;
+    }
 
-        if (customEventBannerListener == null) {
-            Logger.e(TAG, "customEventBannerListener is null");
-            return;
-        }
-        mBannerLoadListener = customEventBannerListener;
-        mBannerInteractionListener = interactionListener;
-
-        String zoneIdKey;
-        if (localExtras.containsKey(ZONE_ID_KEY)) {
-            zoneIdKey = (String) localExtras.get(ZONE_ID_KEY);
-        } else if (serverExtras.containsKey(ZONE_ID_KEY)) {
-            zoneIdKey = serverExtras.get(ZONE_ID_KEY);
+    @Override
+    protected void load(@NonNull Context context, @NonNull AdData adData) throws Exception {
+        if (adData.getExtras().containsKey(ZONE_ID_KEY)) {
+            mZoneID = adData.getExtras().get(ZONE_ID_KEY);
         } else {
-            Logger.e(TAG, "Could not find zone id value in CustomEventBanner localExtras or serverExtras");
-            mBannerLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
+            Logger.e(TAG, "Could not find zone id value in BaseAd adData");
+            mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
-        final Ad ad = HyBid.getAdCache().remove(zoneIdKey);
+        final Ad ad = HyBid.getAdCache().remove(mZoneID);
         if (ad == null) {
-            Logger.e(TAG, "Could not find an ad in the cache for zone id with key: " + zoneIdKey);
-            mBannerLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
+            Logger.e(TAG, "Could not find an ad in the cache for zone id with key: " + mZoneID);
+            mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
         mMRectPresenter = new MRectPresenterFactory(context).createPresenter(ad, this);
         if (mMRectPresenter == null) {
             Logger.e(TAG, "Could not create valid MRect presenter");
-            mBannerLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
+            mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
@@ -113,38 +102,29 @@ public class HyBidMoPubMRectCustomEvent extends BaseAd implements AdPresenter.Li
     @NonNull
     @Override
     protected String getAdNetworkId() {
-        return null;
+        return mZoneID;
     }
 
+    @Nullable
     @Override
-    protected boolean checkAndInitializeSdk(@NonNull Activity launcherActivity, @NonNull AdData adData) throws Exception {
-        return false;
-    }
-
-    @Override
-    protected void load(@NonNull Context context, @NonNull AdData adData) throws Exception {
-
+    protected View getAdView() {
+        return mAdView;
     }
 
     @Override
     public void onAdLoaded(AdPresenter adPresenter, View banner) {
-        if (mBannerLoadListener != null) {
-            mBannerLoadListener.onAdLoaded();
-            mMRectPresenter.startTracking();
-        }
-    }
-
-    @Override
-    public void onAdClicked(AdPresenter adPresenter) {
-        if (mBannerInteractionListener != null) {
-            mBannerInteractionListener.onAdClicked();
-        }
+        mAdView = banner;
+        mLoadListener.onAdLoaded();
+        mMRectPresenter.startTracking();
     }
 
     @Override
     public void onAdError(AdPresenter adPresenter) {
-        if (mBannerInteractionListener != null) {
-            mBannerInteractionListener.onAdFailed(MoPubErrorCode.INTERNAL_ERROR);
-        }
+        mLoadListener.onAdLoadFailed(MoPubErrorCode.INTERNAL_ERROR);
+    }
+
+    @Override
+    public void onAdClicked(AdPresenter adPresenter) {
+        mInteractionListener.onAdClicked();
     }
 }
