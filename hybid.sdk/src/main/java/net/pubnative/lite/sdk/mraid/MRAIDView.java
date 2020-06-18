@@ -1619,6 +1619,7 @@ public class MRAIDView extends RelativeLayout {
     @Override
     protected void onDetachedFromWindow() {
         MRAIDLog.d(MRAID_LOG_TAG, "onDetachedFromWindow");
+        stopAdSession();
         super.onDetachedFromWindow();
     }
 
