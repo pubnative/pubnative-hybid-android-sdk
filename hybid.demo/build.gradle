@@ -57,8 +57,6 @@ dependencies {
 
     implementation('com.mopub:mopub-sdk:5.13.0@aar') {
         transitive = true
-        exclude module: 'libAvid-mopub' // To exclude AVID
-        exclude module: 'moat-mobile-app-kit' // To exclude Moat
     }
 
     implementation 'com.google.android.gms:play-services-ads:19.1.0'

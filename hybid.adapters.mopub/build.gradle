@@ -33,8 +33,6 @@ dependencies {
     implementation project(':hybid.sdk')
     compileOnly('com.mopub:mopub-sdk:5.13.0@aar') {
         transitive = true
-        exclude module: 'libAvid-mopub' // To exclude AVID
-        exclude module: 'moat-mobile-app-kit' // To exclude Moat
     }
 }
 
