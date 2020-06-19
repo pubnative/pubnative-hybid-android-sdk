@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 PubNative GmbH
+// Copyright (c) 2020 PubNative GmbH
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,23 +28,29 @@ import com.mopub.common.MoPub;
 import com.mopub.common.SdkConfiguration;
 import com.mopub.common.SdkInitializationListener;
 import com.mopub.common.logging.MoPubLog;
+import com.mopub.mobileads.HyBidAdapterConfiguration;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class MoPubManager {
-    public static void initMoPubSdk(Context context, String adUnitId) {
-        initMoPubSdk(context, adUnitId, null);
+    public static void initMoPubSdk(Context context, String pubnativeAppToken, String adUnitId) {
+        initMoPubSdk(context, pubnativeAppToken, adUnitId, null);
     }
 
-    public static void initMoPubSdk(Context context, String adUnitId, final InitialisationListener listener) {
+    public static void initMoPubSdk(Context context, String pubnativeAppToken, String adUnitId, final InitialisationListener listener) {
+        /*Map<String, String> pubnativeInitConfig = new HashMap<>();
+        pubnativeInitConfig.put(HyBidAdapterConfiguration.CONFIG_KEY_APP_TOKEN, pubnativeAppToken);*/
+
         SdkConfiguration sdkConfiguration = new SdkConfiguration
                 .Builder(adUnitId)
                 .withLogLevel(MoPubLog.LogLevel.DEBUG)
+                //.withAdditionalNetwork(HyBidAdapterConfiguration.class.getName())
+                //.withMediatedNetworkConfiguration(HyBidAdapterConfiguration.class.getName(), pubnativeInitConfig)
                 .build();
-        MoPub.initializeSdk(context, sdkConfiguration, new SdkInitializationListener() {
-            @Override
-            public void onInitializationFinished() {
-                if (listener != null) {
-                    listener.onInitialisationFinished();
-                }
+        MoPub.initializeSdk(context, sdkConfiguration, () -> {
+            if (listener != null) {
+                listener.onInitialisationFinished();
             }
         });
     }

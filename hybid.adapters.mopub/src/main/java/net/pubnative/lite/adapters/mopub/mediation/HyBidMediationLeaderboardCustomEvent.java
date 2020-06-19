@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 PubNative GmbH
+// Copyright (c) 2020 PubNative GmbH
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.mopub.common.LifecycleListener;
+import com.mopub.common.logging.MoPubLog;
 import com.mopub.mobileads.AdData;
 import com.mopub.mobileads.BaseAd;
 import com.mopub.mobileads.MoPubErrorCode;
@@ -76,6 +77,7 @@ public class HyBidMediationLeaderboardCustomEvent extends BaseAd implements PNAd
         mLeaderboardView = new HyBidLeaderboardAdView(context);
         mLeaderboardView.setMediation(true);
         mLeaderboardView.load(mZoneID, this);
+        MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_ATTEMPTED, TAG);
     }
 
     @Override
@@ -112,21 +114,25 @@ public class HyBidMediationLeaderboardCustomEvent extends BaseAd implements PNAd
     //------------------------------------ PNAdView Callbacks --------------------------------------
     @Override
     public void onAdLoaded() {
+        MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_SUCCESS, TAG);
         mLoadListener.onAdLoaded();
     }
 
     @Override
     public void onAdLoadFailed(Throwable error) {
+        MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_FAILED, TAG);
         mLoadListener.onAdLoadFailed(MoPubErrorCode.NETWORK_NO_FILL);
     }
 
     @Override
     public void onAdImpression() {
+        MoPubLog.log(MoPubLog.AdapterLogEvent.SHOW_SUCCESS, TAG);
         mInteractionListener.onAdImpression();
     }
 
     @Override
     public void onAdClick() {
+        MoPubLog.log(MoPubLog.AdapterLogEvent.CLICKED, TAG);
         mInteractionListener.onAdClicked();
     }
 }

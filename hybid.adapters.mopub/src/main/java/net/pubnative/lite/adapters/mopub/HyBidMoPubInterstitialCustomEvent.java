@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 PubNative GmbH
+// Copyright (c) 2020 PubNative GmbH
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.mopub.common.LifecycleListener;
+import com.mopub.common.logging.MoPubLog;
 import com.mopub.mobileads.AdData;
 import com.mopub.mobileads.BaseAd;
 import com.mopub.mobileads.MoPubErrorCode;
@@ -78,12 +79,14 @@ public class HyBidMoPubInterstitialCustomEvent extends BaseAd implements Interst
 
         setAutomaticImpressionAndClickTracking(false);
         mInterstitialPresenter.load();
+        MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_ATTEMPTED, TAG);
     }
 
     @Override
     protected void show() {
         if (mInterstitialPresenter != null) {
             mInterstitialPresenter.show();
+            MoPubLog.log(MoPubLog.AdapterLogEvent.SHOW_ATTEMPTED, TAG);
         }
     }
 
@@ -109,26 +112,31 @@ public class HyBidMoPubInterstitialCustomEvent extends BaseAd implements Interst
 
     @Override
     public void onInterstitialLoaded(InterstitialPresenter interstitialPresenter) {
+        MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_SUCCESS, TAG);
         mLoadListener.onAdLoaded();
     }
 
     @Override
     public void onInterstitialError(InterstitialPresenter interstitialPresenter) {
+        MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_FAILED, TAG);
         mLoadListener.onAdLoadFailed(MoPubErrorCode.INTERNAL_ERROR);
     }
 
     @Override
     public void onInterstitialShown(InterstitialPresenter interstitialPresenter) {
+        MoPubLog.log(MoPubLog.AdapterLogEvent.SHOW_SUCCESS, TAG);
         mInteractionListener.onAdShown();
     }
 
     @Override
     public void onInterstitialClicked(InterstitialPresenter interstitialPresenter) {
+        MoPubLog.log(MoPubLog.AdapterLogEvent.CLICKED, TAG);
         mInteractionListener.onAdClicked();
     }
 
     @Override
     public void onInterstitialDismissed(InterstitialPresenter interstitialPresenter) {
+        MoPubLog.log(MoPubLog.AdapterLogEvent.DID_DISAPPEAR, TAG);
         mInteractionListener.onAdDismissed();
     }
 }

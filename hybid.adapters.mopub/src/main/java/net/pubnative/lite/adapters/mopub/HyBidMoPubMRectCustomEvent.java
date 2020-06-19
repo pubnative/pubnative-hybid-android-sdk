@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 PubNative GmbH
+// Copyright (c) 2020 PubNative GmbH
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.mopub.common.LifecycleListener;
+import com.mopub.common.logging.MoPubLog;
 import com.mopub.mobileads.AdData;
 import com.mopub.mobileads.AdLifecycleListener;
 import com.mopub.mobileads.BaseAd;
@@ -82,6 +83,7 @@ public class HyBidMoPubMRectCustomEvent extends BaseAd implements AdPresenter.Li
         }
 
         mMRectPresenter.load();
+        MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_ATTEMPTED, TAG);
     }
 
     @Override
@@ -114,17 +116,20 @@ public class HyBidMoPubMRectCustomEvent extends BaseAd implements AdPresenter.Li
     @Override
     public void onAdLoaded(AdPresenter adPresenter, View banner) {
         mAdView = banner;
+        MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_SUCCESS, TAG);
         mLoadListener.onAdLoaded();
         mMRectPresenter.startTracking();
     }
 
     @Override
     public void onAdError(AdPresenter adPresenter) {
+        MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_FAILED, TAG);
         mLoadListener.onAdLoadFailed(MoPubErrorCode.INTERNAL_ERROR);
     }
 
     @Override
     public void onAdClicked(AdPresenter adPresenter) {
+        MoPubLog.log(MoPubLog.AdapterLogEvent.CLICKED, TAG);
         mInteractionListener.onAdClicked();
     }
 }
