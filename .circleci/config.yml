@@ -162,5 +162,6 @@ workflows:
                 - master
                 - beta
                 - development
+                - mopub_5.13_update
           requires:
             - test_unit
