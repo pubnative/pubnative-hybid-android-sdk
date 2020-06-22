@@ -51,7 +51,7 @@ dependencies {
     implementation project(':hybid.adapters.admob')
     implementation project(':hybid.adapters.dfp')
     implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta6'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta7'
     implementation 'com.google.android.material:material:1.3.0-alpha01'
     implementation 'androidx.multidex:multidex:2.0.1'
 
