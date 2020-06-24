@@ -139,15 +139,28 @@ public class PNApiClient {
         } else {
             WebView webView = new WebView(mContext);
             webView.getSettings().setJavaScriptEnabled(true);
+
+            String processedJS = processJS(js);
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-                webView.loadUrl("javascript:" + js);
+                webView.loadUrl("javascript:" + processedJS);
             } else {
-                webView.evaluateJavascript(js, null);
+                webView.evaluateJavascript(processedJS, null);
             }
+
             if (listener != null) {
                 listener.onSuccess();
             }
         }
+    }
+
+    private String processJS(String js) {
+        String scriptOpen = "<script>";
+        String scriptClose = "</script>";
+
+        String processed = js.replace(scriptOpen, "");
+        processed = processed.replace(scriptClose, "");
+
+        return processed;
     }
 
     protected String getAdRequestURL(AdRequest adRequest) {
