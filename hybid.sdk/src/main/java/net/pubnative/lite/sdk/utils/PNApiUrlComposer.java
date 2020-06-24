@@ -132,6 +132,10 @@ public final class PNApiUrlComposer {
             uriBuilder.appendQueryParameter("displaymanagerver", adRequest.displaymanagerver);
         }
 
+        if (!TextUtils.isEmpty(adRequest.usprivacy)) {
+            uriBuilder.appendQueryParameter("usprivacy", adRequest.usprivacy);
+        }
+
         return uriBuilder.build().toString();
     }
 }

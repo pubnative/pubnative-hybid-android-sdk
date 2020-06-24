@@ -6,7 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.sdk.HyBid
@@ -22,6 +24,8 @@ class ConsentNavFragment : Fragment() {
     private lateinit var consentResultLabel: TextView
     private lateinit var consentResultView: TextView
     private lateinit var canCollectDataView: TextView
+    private lateinit var ccpaConsentStringText: EditText
+    private lateinit var ccpaConsentStringView: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_nav_consent, container, false)
 
@@ -34,6 +38,8 @@ class ConsentNavFragment : Fragment() {
         consentResultLabel = view.findViewById(R.id.label_consent_result)
         consentResultView = view.findViewById(R.id.view_consent_result)
         canCollectDataView = view.findViewById(R.id.view_can_collect_data)
+        ccpaConsentStringText = view.findViewById(R.id.text_input_ccpa_string)
+        ccpaConsentStringView = view.findViewById(R.id.view_ccpa_consent_string)
 
         view.findViewById<Button>(R.id.button_pn_owned).setOnClickListener {
             /*
@@ -73,6 +79,29 @@ class ConsentNavFragment : Fragment() {
         view.findViewById<Button>(R.id.button_can_collect_data).setOnClickListener {
             notifyCanCollectData(HyBid.getUserDataManager().canCollectData())
         }
+
+        view.findViewById<Button>(R.id.button_set_ccpa_consent).setOnClickListener{
+            var ccpaString = ccpaConsentStringText.text.toString()
+
+            if (!ccpaString.isNullOrEmpty()) {
+                HyBid.getUserDataManager().iabusPrivacyString = ccpaString
+                Toast.makeText(activity, "Stored CCPA String: $ccpaString", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(activity, "Please enter a CCPA String", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        view.findViewById<Button>(R.id.button_get_ccpa_consent).setOnClickListener{
+            ccpaConsentStringView.text = HyBid.getUserDataManager().iabusPrivacyString
+            ccpaConsentStringView.visibility = View.VISIBLE
+        }
+
+        view.findViewById<Button>(R.id.button_remove_ccpa_consent).setOnClickListener{
+            HyBid.getUserDataManager().removeIABUSPrivacyString()
+            ccpaConsentStringView.visibility = View.GONE
+        }
+
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

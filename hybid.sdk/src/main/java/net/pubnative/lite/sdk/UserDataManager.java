@@ -258,22 +258,22 @@ public class UserDataManager {
         void onDataInitialised(boolean success);
     }
 
-    public void setIABUSPrivacyString(Context context, String IABUSPrivacyString) {
+    public void setIABUSPrivacyString(String IABUSPrivacyString) {
         SharedPreferences.Editor editor = mPreferences.edit();
         editor.putString(KEY_CCPA_CONSENT, IABUSPrivacyString).apply();
     }
 
-    public String getIABUSPrivacyString(Context context) {
+    public String getIABUSPrivacyString() {
         return mPreferences.getString(KEY_CCPA_CONSENT, null);
     }
 
-    public void removeIABUSPrivacyString(Context context) {
+    public void removeIABUSPrivacyString() {
         SharedPreferences.Editor editor = mPreferences.edit();
         editor.putString(KEY_CCPA_CONSENT, null).apply();
     }
 
     public boolean isCCPAOptOut() {
-        String usPrivacyString = getIABUSPrivacyString(HyBid.getDeviceInfo().getContext());
+        String usPrivacyString = getIABUSPrivacyString();
         if (!TextUtils.isEmpty(usPrivacyString) && usPrivacyString.length() >= 3) {
             char optOutChar = usPrivacyString.charAt(2);
             if (optOutChar == 'y' || optOutChar == 'Y') {
