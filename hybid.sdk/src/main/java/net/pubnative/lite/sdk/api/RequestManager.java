@@ -83,8 +83,18 @@ public abstract class RequestManager {
     }
 
     public void requestAd() {
-        if (!CheckUtils.NoThrow.checkArgument(mInitializationHelper.isInitialized(), "HyBid SDK has not been initialized. " +
-                "Please call HyBid#initialize in your application's onCreate method.")) {
+        if (!CheckUtils.NoThrow.checkArgument(mInitializationHelper.isInitialized(),
+                "HyBid SDK has not been initialized. Please call HyBid#initialize in your application's onCreate method.")) {
+            return;
+        }
+
+        if (!CheckUtils.NoThrow.checkNotNull(HyBid.getDeviceInfo(),
+                "HyBid SDK has not been initialized yet. Please call HyBid#initialize in your application's onCreate method.")) {
+            return;
+        }
+
+        if (!CheckUtils.NoThrow.checkNotNull(HyBid.getUserDataManager(),
+                "HyBid SDK has not been initialized yet. Please call HyBid#initialize in your application's onCreate method.")) {
             return;
         }
 

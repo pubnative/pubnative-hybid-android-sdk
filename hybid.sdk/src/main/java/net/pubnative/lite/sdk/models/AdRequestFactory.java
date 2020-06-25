@@ -24,7 +24,6 @@ package net.pubnative.lite.sdk.models;
 
 import android.content.Context;
 import android.location.Location;
-import android.provider.Settings;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.BuildConfig;
@@ -34,7 +33,6 @@ import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.Logger;
-import net.pubnative.lite.sdk.utils.PNAdvertisingIdClient;
 import net.pubnative.lite.sdk.utils.PNAsyncUtils;
 
 import java.util.Locale;
@@ -66,26 +64,22 @@ public class AdRequestFactory {
     }
 
     public void createAdRequest(final String zoneid, final String adSize, final Callback callback) {
-        if (mDeviceInfo == null) {
-            processAdvertisingId(zoneid, adSize, "", true, callback);
-        } else {
-            String advertisingId = mDeviceInfo.getAdvertisingId();
-            boolean limitTracking = mDeviceInfo.limitTracking();
-            Context context = mDeviceInfo.getContext();
-            if (TextUtils.isEmpty(advertisingId) && context != null) {
-                try {
-                    PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(context, new HyBidAdvertisingId.Listener() {
-                        @Override
-                        public void onHyBidAdvertisingIdFinish(String advertisingId, Boolean limitTracking) {
-                            processAdvertisingId(zoneid, adSize, advertisingId, limitTracking, callback);
-                        }
-                    }));
-                } catch (Exception exception) {
-                    Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
-                }
-            } else {
-                processAdvertisingId(zoneid, adSize, advertisingId, limitTracking, callback);
+        String advertisingId = mDeviceInfo.getAdvertisingId();
+        boolean limitTracking = mDeviceInfo.limitTracking();
+        Context context = mDeviceInfo.getContext();
+        if (TextUtils.isEmpty(advertisingId) && context != null) {
+            try {
+                PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(context, new HyBidAdvertisingId.Listener() {
+                    @Override
+                    public void onHyBidAdvertisingIdFinish(String advertisingId, Boolean limitTracking) {
+                        processAdvertisingId(zoneid, adSize, advertisingId, limitTracking, callback);
+                    }
+                }));
+            } catch (Exception exception) {
+                Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
             }
+        } else {
+            processAdvertisingId(zoneid, adSize, advertisingId, limitTracking, callback);
         }
     }
 
@@ -96,18 +90,13 @@ public class AdRequestFactory {
     }
 
     AdRequest buildRequest(final String zoneid, final String adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType) {
-        boolean isCCPAOptOut = mUserDataManager != null && mUserDataManager.isCCPAOptOut();
+        boolean isCCPAOptOut = mUserDataManager.isCCPAOptOut();
         AdRequest adRequest = new AdRequest();
         adRequest.zoneid = zoneid;
         adRequest.apptoken = HyBid.getAppToken();
         adRequest.os = "android";
-
-        if (mDeviceInfo != null) {
-            adRequest.osver = mDeviceInfo.getOSVersion();
-            adRequest.devicemodel = mDeviceInfo.getModel();
-            adRequest.locale = mDeviceInfo.getLocale().getLanguage();
-        }
-
+        adRequest.osver = mDeviceInfo.getOSVersion();
+        adRequest.devicemodel = mDeviceInfo.getModel();
         adRequest.coppa = HyBid.isCoppaEnabled() ? "1" : "0";
 
         if (HyBid.isCoppaEnabled() || limitTracking || TextUtils.isEmpty(advertisingId)
@@ -116,15 +105,12 @@ public class AdRequestFactory {
         } else {
             adRequest.gid = advertisingId;
 
-            if (mDeviceInfo != null) {
-                adRequest.gidmd5 = mDeviceInfo.getAdvertisingIdMd5();
-                adRequest.gidsha1 = mDeviceInfo.getAdvertisingIdSha1();
-            }
-
-            if (mUserDataManager != null) {
-                adRequest.usprivacy = mUserDataManager.getIABUSPrivacyString();
-            }
+            adRequest.gidmd5 = mDeviceInfo.getAdvertisingIdMd5();
+            adRequest.gidsha1 = mDeviceInfo.getAdvertisingIdSha1();
+            adRequest.usprivacy = mUserDataManager.getIABUSPrivacyString();
         }
+
+        adRequest.locale = mDeviceInfo.getLocale().getLanguage();
 
         if (!HyBid.isCoppaEnabled() && !limitTracking && !isCCPAOptOut) {
             adRequest.age = HyBid.getAge();
@@ -148,10 +134,12 @@ public class AdRequestFactory {
         adRequest.displaymanagerver = String.format(Locale.ENGLISH, "%s_%s_%s",
                 "sdkandroid", integrationType.getCode(), BuildConfig.VERSION_NAME);
 
-        Location location = mLocationManager.getUserLocation();
-        if (location != null && !HyBid.isCoppaEnabled() && !limitTracking) {
-            adRequest.latitude = String.format(Locale.ENGLISH, "%.6f", location.getLatitude());
-            adRequest.longitude = String.format(Locale.ENGLISH, "%.6f", location.getLongitude());
+        if (mLocationManager != null) {
+            Location location = mLocationManager.getUserLocation();
+            if (location != null && !HyBid.isCoppaEnabled() && !limitTracking) {
+                adRequest.latitude = String.format(Locale.ENGLISH, "%.6f", location.getLatitude());
+                adRequest.longitude = String.format(Locale.ENGLISH, "%.6f", location.getLongitude());
+            }
         }
 
         return adRequest;
