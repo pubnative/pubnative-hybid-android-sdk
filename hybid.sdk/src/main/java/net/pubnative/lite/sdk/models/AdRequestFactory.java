@@ -66,23 +66,25 @@ public class AdRequestFactory {
     }
 
     public void createAdRequest(final String zoneid, final String adSize, final Callback callback) {
-        String advertisingId = mDeviceInfo.getAdvertisingId();
-        boolean limitTracking = mDeviceInfo.limitTracking();
-        Context context = mDeviceInfo.getContext();
-        if (TextUtils.isEmpty(advertisingId) && context != null) {
-            try {
-                PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(context, new HyBidAdvertisingId.Listener() {
-                    @Override
-                    public void onHyBidAdvertisingIdFinish(String advertisingId, Boolean limitTracking) {
-                        processAdvertisingId(zoneid, adSize, advertisingId, limitTracking, callback);
-                    }
-                }));
-            } catch (Exception exception) {
-                Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
-            }
+        if (mDeviceInfo == null) {
+            processAdvertisingId(zoneid, adSize, "", true, callback);
         } else {
-            if (callback != null) {
-                callback.onRequestCreated(buildRequest(zoneid, adSize, advertisingId, limitTracking, mIntegrationType));
+            String advertisingId = mDeviceInfo.getAdvertisingId();
+            boolean limitTracking = mDeviceInfo.limitTracking();
+            Context context = mDeviceInfo.getContext();
+            if (TextUtils.isEmpty(advertisingId) && context != null) {
+                try {
+                    PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(context, new HyBidAdvertisingId.Listener() {
+                        @Override
+                        public void onHyBidAdvertisingIdFinish(String advertisingId, Boolean limitTracking) {
+                            processAdvertisingId(zoneid, adSize, advertisingId, limitTracking, callback);
+                        }
+                    }));
+                } catch (Exception exception) {
+                    Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
+                }
+            } else {
+                processAdvertisingId(zoneid, adSize, advertisingId, limitTracking, callback);
             }
         }
     }
@@ -94,13 +96,18 @@ public class AdRequestFactory {
     }
 
     AdRequest buildRequest(final String zoneid, final String adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType) {
-        boolean isCCPAOptOut = mUserDataManager.isCCPAOptOut();
+        boolean isCCPAOptOut = mUserDataManager != null && mUserDataManager.isCCPAOptOut();
         AdRequest adRequest = new AdRequest();
         adRequest.zoneid = zoneid;
         adRequest.apptoken = HyBid.getAppToken();
         adRequest.os = "android";
-        adRequest.osver = mDeviceInfo.getOSVersion();
-        adRequest.devicemodel = mDeviceInfo.getModel();
+
+        if (mDeviceInfo != null) {
+            adRequest.osver = mDeviceInfo.getOSVersion();
+            adRequest.devicemodel = mDeviceInfo.getModel();
+            adRequest.locale = mDeviceInfo.getLocale().getLanguage();
+        }
+
         adRequest.coppa = HyBid.isCoppaEnabled() ? "1" : "0";
 
         if (HyBid.isCoppaEnabled() || limitTracking || TextUtils.isEmpty(advertisingId)
@@ -109,12 +116,15 @@ public class AdRequestFactory {
         } else {
             adRequest.gid = advertisingId;
 
-            adRequest.gidmd5 = mDeviceInfo.getAdvertisingIdMd5();
-            adRequest.gidsha1 = mDeviceInfo.getAdvertisingIdSha1();
-            adRequest.usprivacy = mUserDataManager.getIABUSPrivacyString();
-        }
+            if (mDeviceInfo != null) {
+                adRequest.gidmd5 = mDeviceInfo.getAdvertisingIdMd5();
+                adRequest.gidsha1 = mDeviceInfo.getAdvertisingIdSha1();
+            }
 
-        adRequest.locale = mDeviceInfo.getLocale().getLanguage();
+            if (mUserDataManager != null) {
+                adRequest.usprivacy = mUserDataManager.getIABUSPrivacyString();
+            }
+        }
 
         if (!HyBid.isCoppaEnabled() && !limitTracking && !isCCPAOptOut) {
             adRequest.age = HyBid.getAge();
