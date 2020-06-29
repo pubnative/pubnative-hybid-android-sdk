@@ -15,7 +15,6 @@ buildscript {
         classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.2'
 
         classpath 'com.google.firebase:firebase-appdistribution-gradle:2.0.0'
-
     }
 }
 
