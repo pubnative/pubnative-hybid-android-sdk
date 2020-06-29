@@ -26,7 +26,6 @@ public class VideoAdProcessor {
         vastProcessor.parseResponse(vast, new VastProcessor.Listener() {
             @Override
             public void onParseSuccess(AdParams adParams, String vastFileContent) {
-                appendOMVerificationScript(adParams);
                 prepare(context, adParams, listener);
             }
 
@@ -37,19 +36,6 @@ public class VideoAdProcessor {
                 }
             }
         });
-    }
-
-    private void appendOMVerificationScript(AdParams adParams) {
-        try {
-            final URL url = new URL("https://s3-us-west-2.amazonaws.com/omsdk-files/compliance-js/omid-validation-verification-script-v1-ssl.js");
-            final String vendorKey = "iabtechlab.com-omid";
-            final String params = "iabtechlab-Pubnativenet";
-            VerificationScriptResource resource = VerificationScriptResource.
-                    createVerificationScriptResourceWithParameters(vendorKey, url, params);
-            adParams.getVerificationScriptResources().add(resource);
-        } catch (Exception exception) {
-            Logger.e(TAG, "Error adding verification script: ", exception);
-        }
     }
 
     private void prepare(Context context, final AdParams adParams, final Listener listener) {
