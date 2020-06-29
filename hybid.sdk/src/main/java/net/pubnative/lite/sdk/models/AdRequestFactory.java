@@ -24,7 +24,6 @@ package net.pubnative.lite.sdk.models;
 
 import android.content.Context;
 import android.location.Location;
-import android.provider.Settings;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.BuildConfig;
@@ -34,7 +33,6 @@ import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.Logger;
-import net.pubnative.lite.sdk.utils.PNAdvertisingIdClient;
 import net.pubnative.lite.sdk.utils.PNAsyncUtils;
 
 import java.util.Locale;
@@ -81,9 +79,7 @@ public class AdRequestFactory {
                 Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
             }
         } else {
-            if (callback != null) {
-                callback.onRequestCreated(buildRequest(zoneid, adSize, advertisingId, limitTracking, mIntegrationType));
-            }
+            processAdvertisingId(zoneid, adSize, advertisingId, limitTracking, callback);
         }
     }
 
@@ -138,10 +134,12 @@ public class AdRequestFactory {
         adRequest.displaymanagerver = String.format(Locale.ENGLISH, "%s_%s_%s",
                 "sdkandroid", integrationType.getCode(), BuildConfig.VERSION_NAME);
 
-        Location location = mLocationManager.getUserLocation();
-        if (location != null && !HyBid.isCoppaEnabled() && !limitTracking) {
-            adRequest.latitude = String.format(Locale.ENGLISH, "%.6f", location.getLatitude());
-            adRequest.longitude = String.format(Locale.ENGLISH, "%.6f", location.getLongitude());
+        if (mLocationManager != null) {
+            Location location = mLocationManager.getUserLocation();
+            if (location != null && !HyBid.isCoppaEnabled() && !limitTracking) {
+                adRequest.latitude = String.format(Locale.ENGLISH, "%.6f", location.getLatitude());
+                adRequest.longitude = String.format(Locale.ENGLISH, "%.6f", location.getLongitude());
+            }
         }
 
         return adRequest;
