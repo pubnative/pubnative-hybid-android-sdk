@@ -22,6 +22,8 @@
 //
 package net.pubnative.lite.sdk.utils;
 
+import android.text.TextUtils;
+
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.models.AdData;
@@ -58,6 +60,7 @@ public class AdTracker {
     private boolean mClickTracked;
 
     private PNApiClient.TrackUrlListener mTrackUrlListener;
+    private PNApiClient.TrackJSListener mTrackJSListener;
 
     public AdTracker(List<AdData> impressionUrls,
                      List<AdData> clickUrls) {
@@ -72,6 +75,18 @@ public class AdTracker {
         mClickUrls = clickUrls;
 
         mTrackUrlListener = new PNApiClient.TrackUrlListener() {
+            @Override
+            public void onSuccess() {
+
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+
+            }
+        };
+
+        mTrackJSListener = new PNApiClient.TrackJSListener() {
             @Override
             public void onSuccess() {
 
@@ -109,8 +124,15 @@ public class AdTracker {
     private void trackUrls(List<AdData> urls, Type type) {
         if (urls != null) {
             for (final AdData url : urls) {
-                Logger.d(TAG, "Tracking " + type.toString() + " url: " + url);
-                mApiClient.trackUrl(url.getURL(), mTrackUrlListener);
+                if (!TextUtils.isEmpty(url.getURL())) {
+                    Logger.d(TAG, "Tracking " + type.toString() + " url: " + url.getURL());
+                    mApiClient.trackUrl(url.getURL(), mTrackUrlListener);
+                }
+
+                if (!TextUtils.isEmpty(url.getJS())) {
+                    Logger.d(TAG, "Tracking " + type.toString() + " js: " + url.getJS());
+                    mApiClient.trackJS(url.getJS(), mTrackJSListener);
+                }
             }
         }
     }

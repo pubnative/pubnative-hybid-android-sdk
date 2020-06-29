@@ -50,4 +50,5 @@ public class AdRequest {
     public String testMode;
     public String displaymanager;
     public String displaymanagerver;
+    public String usprivacy;
 }

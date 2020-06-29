@@ -22,8 +22,12 @@
 //
 package net.pubnative.lite.sdk.api;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Build;
 import android.text.TextUtils;
+import android.webkit.ValueCallback;
+import android.webkit.WebView;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
@@ -48,6 +52,12 @@ public class PNApiClient {
     }
 
     public interface TrackUrlListener {
+        void onSuccess();
+
+        void onFailure(Throwable throwable);
+    }
+
+    public interface TrackJSListener {
         void onSuccess();
 
         void onFailure(Throwable throwable);
@@ -118,6 +128,39 @@ public class PNApiClient {
                 }
             }
         });
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    public void trackJS(String js, final TrackJSListener listener) {
+        if (TextUtils.isEmpty(js)) {
+            if (listener != null) {
+                listener.onFailure(new Exception("Empty JS tracking beacon"));
+            }
+        } else {
+            WebView webView = new WebView(mContext);
+            webView.getSettings().setJavaScriptEnabled(true);
+
+            String processedJS = processJS(js);
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+                webView.loadUrl("javascript:" + processedJS);
+            } else {
+                webView.evaluateJavascript(processedJS, null);
+            }
+
+            if (listener != null) {
+                listener.onSuccess();
+            }
+        }
+    }
+
+    private String processJS(String js) {
+        String scriptOpen = "<script>";
+        String scriptClose = "</script>";
+
+        String processed = js.replace(scriptOpen, "");
+        processed = processed.replace(scriptClose, "");
+
+        return processed;
     }
 
     protected String getAdRequestURL(AdRequest adRequest) {
