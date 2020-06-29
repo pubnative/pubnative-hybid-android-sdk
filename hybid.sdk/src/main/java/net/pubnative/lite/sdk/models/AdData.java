@@ -60,6 +60,11 @@ public class AdData extends JsonModel implements Serializable {
         return getStringField("url");
     }
 
+    public String getJS() {
+
+        return getStringField("js");
+    }
+
     public String getHtml() {
 
         return getStringField("html");
