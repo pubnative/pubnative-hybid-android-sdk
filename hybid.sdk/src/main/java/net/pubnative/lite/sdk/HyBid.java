@@ -24,6 +24,7 @@ package net.pubnative.lite.sdk;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
+import android.content.Context;
 
 import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.browser.BrowserManager;
@@ -66,8 +67,10 @@ public class HyBid {
         sAppToken = appToken;
         sBundleId = application.getPackageName();
         sApiClient = new PNApiClient(application);
-        sLocationManager = new HyBidLocationManager(application);
-        sLocationManager.startLocationUpdates();
+        if (application.getSystemService(Context.LOCATION_SERVICE) != null) {
+            sLocationManager = new HyBidLocationManager(application);
+            sLocationManager.startLocationUpdates();
+        }
         sUserDataManager = new UserDataManager(application.getApplicationContext());
         sAdCache = new AdCache();
         sBrowserManager = new BrowserManager();
