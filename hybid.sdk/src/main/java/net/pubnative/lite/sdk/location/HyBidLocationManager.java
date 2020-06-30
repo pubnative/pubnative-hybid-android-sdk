@@ -39,10 +39,9 @@ import net.pubnative.lite.sdk.utils.PNPermissionUtil;
  */
 
 @SuppressLint("MissingPermission")
-public class HyBidLocationManager implements LocationListener {
+public class HyBidLocationManager {
 
     private static final int TWO_MINUTES = 1000 * 60 * 2;
-    private static final int LOCATION_UPDATE_TIMEOUT = 10000;
 
     private Context mContext;
     private LocationManager mManager;
@@ -80,27 +79,6 @@ public class HyBidLocationManager implements LocationListener {
 
     private boolean hasNetworkProvider() {
         return mManager.getProvider(LocationManager.NETWORK_PROVIDER) != null;
-    }
-
-    /**
-     * Triggers a location update request and sets a timeout of 10 seconds to obtain the location
-     */
-    public void startLocationUpdates() {
-        if (hasFinePermission()) {
-            if (hasGPSProvider()) {
-                mManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-            }
-            if (hasNetworkProvider()) {
-                mManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-            }
-        } else if (hasCoarsePermission()) {
-            mManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-        }
-        new Handler(Looper.myLooper()).postDelayed(mStopUpdatesRunnable, LOCATION_UPDATE_TIMEOUT);
-    }
-
-    public void stopLocationUpdates() {
-        mManager.removeUpdates(this);
     }
 
     protected boolean isBetterLocation(Location location, Location currentBestLocation) {
@@ -179,38 +157,7 @@ public class HyBidLocationManager implements LocationListener {
                 }
             }
             result = mCurrentBestLocation;
-            startLocationUpdates();
         }
         return result;
-    }
-
-    private Runnable mStopUpdatesRunnable = new Runnable() {
-        @Override
-        public void run() {
-            stopLocationUpdates();
-        }
-    };
-
-    @Override
-    public void onLocationChanged(Location location) {
-        if (isBetterLocation(location, mCurrentBestLocation)) {
-            mCurrentBestLocation = location;
-            stopLocationUpdates();
-        }
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-
     }
 }

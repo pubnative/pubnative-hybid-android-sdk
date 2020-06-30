@@ -69,7 +69,6 @@ public class HyBid {
         sApiClient = new PNApiClient(application);
         if (application.getSystemService(Context.LOCATION_SERVICE) != null) {
             sLocationManager = new HyBidLocationManager(application);
-            sLocationManager.startLocationUpdates();
         }
         sUserDataManager = new UserDataManager(application.getApplicationContext());
         sAdCache = new AdCache();
