@@ -18,6 +18,9 @@ public class InLine implements VastAdSource {
     @Tag
     private Creatives creatives;
 
+    @Tag("Extensions")
+    private List<Extension> extensionList;
+
     @Override
     public AdSystem getAdSystem() {
         return adSystem;
@@ -36,5 +39,9 @@ public class InLine implements VastAdSource {
     @Override
     public List<Impression> getImpressionList() {
         return impressionList;
+    }
+
+    public List<Extension> getExtensions() {
+        return extensionList;
     }
 }

@@ -10,4 +10,6 @@ public interface VastAdSource {
     Creatives getCreatives();
 
     Error getError();
+
+    List<Extension> getExtensions();
 }

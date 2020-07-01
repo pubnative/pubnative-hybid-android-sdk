@@ -100,6 +100,7 @@ public class HyBidLocationManager implements LocationListener {
     }
 
     public void stopLocationUpdates() {
+
         mManager.removeUpdates(this);
     }
 

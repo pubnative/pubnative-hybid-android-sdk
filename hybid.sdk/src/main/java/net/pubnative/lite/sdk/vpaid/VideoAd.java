@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.View;
 
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
 import net.pubnative.lite.sdk.vpaid.enums.AdFormat;
 import net.pubnative.lite.sdk.vpaid.enums.AdState;
 import net.pubnative.lite.sdk.vpaid.models.AdSpotDimensions;
@@ -53,10 +54,20 @@ public class VideoAd extends BaseVideoAd {
                     setAdState(AdState.SHOWING);
                     stopExpirationTimer();
 
+                    getViewabilityAdSession().initAdSession(mBannerView, getAdController().getAdParams());
                     getAdController().buildVideoAdView(mBannerView);
+
+                    for (HyBidViewabilityFriendlyObstruction obstruction: getAdController().getViewabilityFriendlyObstructions()) {
+                        getViewabilityAdSession().addFriendlyObstruction(
+                                obstruction.getView(),
+                                obstruction.getPurpose(),
+                                obstruction.getReason());
+                    }
+
+                    getViewabilityAdSession().fireLoaded();
+                    getViewabilityAdSession().fireImpression();
                     getAdController().playAd();
                     getAdController().toggleMute();
-
 
                     if (mBannerView.getVisibility() != View.VISIBLE) {
                         mBannerView.setVisibility(View.VISIBLE);

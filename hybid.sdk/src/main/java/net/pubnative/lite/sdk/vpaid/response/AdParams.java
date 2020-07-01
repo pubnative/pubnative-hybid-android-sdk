@@ -1,5 +1,7 @@
 package net.pubnative.lite.sdk.vpaid.response;
 
+import com.iab.omid.library.pubnativenet.adsession.VerificationScriptResource;
+
 import net.pubnative.lite.sdk.vpaid.models.vast.Tracking;
 
 import java.util.ArrayList;
@@ -24,6 +26,9 @@ public class AdParams {
     private List<String> videoClicks = new ArrayList<>();
     private List<String> endCardClicks = new ArrayList<>();
     private List<Tracking> events = new ArrayList<>();
+
+    List<VerificationScriptResource> verificationScriptResources = new ArrayList<>();
+
 
     public int getDuration() {
         return duration;
@@ -150,5 +155,13 @@ public class AdParams {
 
     public void setSkipTime(String skipTime) {
         this.skipTime = skipTime;
+    }
+
+    public List<VerificationScriptResource> getVerificationScriptResources() {
+        return verificationScriptResources;
+    }
+
+    public void setVerificationScriptResources(List<VerificationScriptResource> verificationScriptResources) {
+        this.verificationScriptResources = verificationScriptResources;
     }
 }

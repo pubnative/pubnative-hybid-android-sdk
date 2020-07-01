@@ -1,7 +1,10 @@
 package net.pubnative.lite.sdk.interstitial.activity;
 
+import android.graphics.Color;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
+import android.widget.FrameLayout;
 
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.models.APIAsset;
@@ -11,8 +14,9 @@ import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewCloseLayoutListener;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
+import net.pubnative.lite.sdk.utils.ViewUtils;
 
-public class MraidInterstitialActivity extends HyBidInterstitialActivity implements MRAIDViewListener, MRAIDNativeFeatureListener, MRAIDViewCloseLayoutListener {
+public class CenteredMraidInterstitialActivity extends HyBidInterstitialActivity implements MRAIDViewListener, MRAIDNativeFeatureListener, MRAIDViewCloseLayoutListener {
     private String[] mSupportedNativeFeatures = new String[]{
             MRAIDNativeFeature.CALENDAR,
             MRAIDNativeFeature.INLINE_VIDEO,
@@ -20,8 +24,7 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
             MRAIDNativeFeature.STORE_PICTURE,
             MRAIDNativeFeature.TEL
     };
-
-    private MRAIDBanner mView;
+    private MRAIDBanner mMRAIDView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,24 +33,41 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
 
     @Override
     public View getAdView() {
-        MRAIDBanner adView = null;
+        mMRAIDView = null;
+        FrameLayout container = new FrameLayout(this);
+        container.setBackgroundColor(Color.WHITE);
         if (getAd() != null) {
+
             if (getAd().getAssetUrl(APIAsset.HTML_BANNER) != null) {
-                adView = new MRAIDBanner(this, getAd().getAssetUrl(APIAsset.HTML_BANNER), "", mSupportedNativeFeatures,
+                mMRAIDView = new MRAIDBanner(this, getAd().getAssetUrl(APIAsset.HTML_BANNER), "", mSupportedNativeFeatures,
                         this, this, getAd().getContentInfoContainer(this));
             } else if (getAd().getAssetHtml(APIAsset.HTML_BANNER) != null) {
-                adView = new MRAIDBanner(this, "", getAd().getAssetHtml(APIAsset.HTML_BANNER), mSupportedNativeFeatures,
+                mMRAIDView = new MRAIDBanner(this, "", getAd().getAssetHtml(APIAsset.HTML_BANNER), mSupportedNativeFeatures,
                         this, this, getAd().getContentInfoContainer(this));
             }
 
-            if (adView != null) {
-                adView.setCloseLayoutListener(this);
+            int width = getAd().getAssetWidth(APIAsset.HTML_BANNER);
+            if (width == -1) {
+                width = 320;
             }
+
+            int height = getAd().getAssetHeight(APIAsset.HTML_BANNER);
+            if (height == -1) {
+                height = 480;
+            }
+
+            if (mMRAIDView != null) {
+                mMRAIDView.setCloseLayoutListener(this);
+            }
+
+            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
+                    (int) ViewUtils.convertDpToPixel(width, this),
+                    (int) ViewUtils.convertDpToPixel(height, this));
+            layoutParams.gravity = Gravity.CENTER;
+
+            container.addView(mMRAIDView, layoutParams);
         }
-
-        mView = adView;
-
-        return adView;
+        return container;
     }
 
     @Override
@@ -57,15 +77,15 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
 
     @Override
     protected void onDestroy() {
-        if (mView != null) {
-            mView.stopAdSession();
-            mView.destroy();
+        if (mMRAIDView != null) {
+            mMRAIDView.stopAdSession();
+            mMRAIDView.destroy();
         }
 
         super.onDestroy();
     }
 
-    // ----------------------------------- MRAIDViewListener ---------------------------------------
+// ----------------------------------- MRAIDViewListener ---------------------------------------
 
     @Override
     public void mraidViewLoaded(MRAIDView mraidView) {

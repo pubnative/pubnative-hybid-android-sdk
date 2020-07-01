@@ -24,11 +24,15 @@ package net.pubnative.lite.sdk;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
+import android.content.Context;
+import android.location.LocationManager;
 
 import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.browser.BrowserManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.viewability.ViewabilityManager;
+import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 
 public class HyBid {
     public static final String BASE_URL = "https://api.pubnative.net/";
@@ -41,8 +45,11 @@ public class HyBid {
     @SuppressLint("StaticFieldLeak")
     private static UserDataManager sUserDataManager;
     @SuppressLint("StaticFieldLeak")
+    private static ViewabilityManager sViewabilityManager;
+    @SuppressLint("StaticFieldLeak")
     private static HyBidLocationManager sLocationManager;
     private static AdCache sAdCache;
+    private static VideoAdCache sVideoAdCache;
     private static BrowserManager sBrowserManager;
     private static boolean sInitialized;
     private static boolean sCoppaEnabled = false;
@@ -66,10 +73,14 @@ public class HyBid {
         sAppToken = appToken;
         sBundleId = application.getPackageName();
         sApiClient = new PNApiClient(application);
-        sLocationManager = new HyBidLocationManager(application);
-        sLocationManager.startLocationUpdates();
+        if (application.getSystemService(Context.LOCATION_SERVICE) != null) {
+            sLocationManager = new HyBidLocationManager(application);
+            sLocationManager.startLocationUpdates();
+        }
         sUserDataManager = new UserDataManager(application.getApplicationContext());
+        sViewabilityManager = new ViewabilityManager(application);
         sAdCache = new AdCache();
+        sVideoAdCache = new VideoAdCache();
         sBrowserManager = new BrowserManager();
         sDeviceInfo = new DeviceInfo(application.getApplicationContext(), new DeviceInfo.Listener() {
             @Override
@@ -111,6 +122,10 @@ public class HyBid {
         return sUserDataManager;
     }
 
+    public static ViewabilityManager getViewabilityManager() {
+        return sViewabilityManager;
+    }
+
     public static HyBidLocationManager getLocationManager() {
         return sLocationManager;
     }
@@ -119,12 +134,20 @@ public class HyBid {
         return sAdCache;
     }
 
+    public static VideoAdCache getVideoAdCache() {
+        return sVideoAdCache;
+    }
+
     public static BrowserManager getBrowserManager() {
         return sBrowserManager;
     }
 
     public static boolean isInitialized() {
         return sInitialized;
+    }
+
+    public static boolean isViewabilityMeasurementActivated() {
+        return sViewabilityManager.isViewabilityMeasurementActivated();
     }
 
     public static void setCoppaEnabled(boolean isEnabled) {

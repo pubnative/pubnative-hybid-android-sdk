@@ -35,6 +35,8 @@ android {
 }
 
 dependencies {
+    implementation 'net.pubnative:hybid.omsdk:1.3.6'
+
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.robolectric:robolectric:3.8'
     testImplementation 'org.mockito:mockito-core:2.24.0'
@@ -77,6 +79,28 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
+def addDependency(dependency, dependenciesNode) { //finish with dependencies
+    if(dependency.group!=null && dependency.name != null) {
+        def dependencyNode = dependenciesNode.appendNode('dependency')
+        dependencyNode.appendNode('groupId', dependency.group)
+        dependencyNode.appendNode('artifactId', dependency.name)
+        dependencyNode.appendNode('version', dependency.version)
+
+        if (dependency.excludeRules.size() > 0) {
+            def exclusions = dependencyNode.appendNode('exclusions')
+            dependency.excludeRules.each { ExcludeRule ex ->
+                def exclusion = exclusions.appendNode('exclusion')
+                exclusion.appendNode('groupId', ex.group)
+                if (ex.module == null || ex.module.isEmpty()) {
+                    exclusion.appendNode('artifactId', "*")
+                } else {
+                    exclusion.appendNode('artifactId', ex.module)
+                }
+            }
+        }
+    }
+}
+
 publishing {
     publications {
         aar(MavenPublication) {
@@ -91,17 +115,12 @@ publishing {
                 if (variant.buildType.name == "debug") return
                 artifact variant.outputs[0].packageLibrary // This is the aar library
             }
+
             pom.withXml {
                 def dependenciesNode = asNode().appendNode('dependencies')
 
-                configurations.compile.allDependencies.each {
-
-                    if (it.name != 'unspecified') {
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', it.group)
-                        dependencyNode.appendNode('artifactId', it.name)
-                        dependencyNode.appendNode('version', it.version)
-                    }
+                configurations.implementation.allDependencies.withType(ModuleDependency).each {
+                    addDependency(it, dependenciesNode)
                 }
             }
         }

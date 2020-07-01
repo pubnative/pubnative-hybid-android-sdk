@@ -30,6 +30,9 @@ public class Wrapper implements VastAdSource {
     @Tag
     private Error error;
 
+    @Tag("Extensions")
+    private List<Extension> extensionList;
+
     public boolean isFollowAdditonalWrappers() {
         return followAdditonalWrappers;
     }
@@ -64,5 +67,9 @@ public class Wrapper implements VastAdSource {
     @Override
     public Error getError() {
         return error;
+    }
+
+    public List<Extension> getExtensions() {
+        return extensionList;
     }
 }
