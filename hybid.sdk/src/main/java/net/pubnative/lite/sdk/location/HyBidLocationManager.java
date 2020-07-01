@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.utils.PNPermissionUtil;
 
 /**
@@ -179,7 +180,10 @@ public class HyBidLocationManager implements LocationListener {
                 }
             }
             result = mCurrentBestLocation;
-            startLocationUpdates();
+
+            if (HyBid.areLocationUpdatesEnabled()) {
+                startLocationUpdates();
+            }
         }
         return result;
     }

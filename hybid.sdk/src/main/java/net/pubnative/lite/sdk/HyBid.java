@@ -24,6 +24,7 @@ package net.pubnative.lite.sdk;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
+import android.content.Context;
 
 import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.browser.BrowserManager;
@@ -47,6 +48,7 @@ public class HyBid {
     private static boolean sInitialized;
     private static boolean sCoppaEnabled = false;
     private static boolean sTestMode = false;
+    private static boolean sLocationUpdatesEnabled = true;
     private static String sAge;
     private static String sGender;
     private static String sKeywords;
@@ -66,8 +68,12 @@ public class HyBid {
         sAppToken = appToken;
         sBundleId = application.getPackageName();
         sApiClient = new PNApiClient(application);
-        sLocationManager = new HyBidLocationManager(application);
-        sLocationManager.startLocationUpdates();
+        if (application.getSystemService(Context.LOCATION_SERVICE) != null) {
+            sLocationManager = new HyBidLocationManager(application);
+            if (areLocationUpdatesEnabled()) {
+                sLocationManager.startLocationUpdates();
+            }
+        }
         sUserDataManager = new UserDataManager(application.getApplicationContext());
         sAdCache = new AdCache();
         sBrowserManager = new BrowserManager();
@@ -141,6 +147,14 @@ public class HyBid {
 
     public static boolean isTestMode() {
         return sTestMode;
+    }
+
+    public static void setLocationUpdatesEnabled(boolean isEnabled) {
+        sLocationUpdatesEnabled = isEnabled;
+    }
+
+    public static boolean areLocationUpdatesEnabled() {
+        return sLocationUpdatesEnabled;
     }
 
     public static void setAge(String age) {
