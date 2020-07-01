@@ -107,7 +107,11 @@ public class AdRequestFactory {
 
             adRequest.gidmd5 = mDeviceInfo.getAdvertisingIdMd5();
             adRequest.gidsha1 = mDeviceInfo.getAdvertisingIdSha1();
-            adRequest.usprivacy = mUserDataManager.getIABUSPrivacyString();
+        }
+
+        String usPrivacyString = mUserDataManager.getIABUSPrivacyString();
+        if (!TextUtils.isEmpty(usPrivacyString)) {
+            adRequest.usprivacy = usPrivacyString;
         }
 
         adRequest.locale = mDeviceInfo.getLocale().getLanguage();
