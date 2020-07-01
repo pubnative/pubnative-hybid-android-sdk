@@ -5,6 +5,7 @@ buildscript {
         google()
         jcenter()
         maven { url "https://s3.amazonaws.com/moat-sdk-builds" }
+        maven { url 'https://dl.bintray.com/pubnative/maven' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.0.0'
@@ -33,6 +34,7 @@ allprojects {
         google()
         jcenter()
         maven { url "https://s3.amazonaws.com/moat-sdk-builds" }
+        maven { url 'https://dl.bintray.com/pubnative/maven' }
     }
 }
 

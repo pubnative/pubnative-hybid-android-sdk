@@ -1,1 +1,1 @@
-include ':hybid.sdk', ':hybid.demo', ':hybid.adapters.mopub', ':hybid.adapters.dfp', ':hybid.adapters.admob', ':hybid.omsdk'
+include ':hybid.sdk', ':hybid.demo', ':hybid.adapters.mopub', ':hybid.adapters.dfp', ':hybid.adapters.admob'
