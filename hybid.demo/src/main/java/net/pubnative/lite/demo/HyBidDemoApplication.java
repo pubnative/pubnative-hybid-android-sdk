@@ -78,6 +78,7 @@ public class HyBidDemoApplication extends MultiDexApplication {
         HyBid.setCoppaEnabled(settings.getCoppa());
         HyBid.setAge(settings.getAge());
         HyBid.setGender(settings.getGender());
+        //HyBid.setLocationUpdatesEnabled(false);
 
         HyBid.getViewabilityManager().setViewabilityMeasurementEnabled(true);
 
