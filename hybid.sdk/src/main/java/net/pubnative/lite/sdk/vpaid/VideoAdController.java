@@ -1,5 +1,15 @@
 package net.pubnative.lite.sdk.vpaid;
 
+import android.view.View;
+
+import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
+
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeVideoAdSession;
+import net.pubnative.lite.sdk.vpaid.response.AdParams;
+
+import java.util.List;
+
 public interface VideoAdController {
 
     interface OnPreparedListener {
@@ -15,6 +25,14 @@ public interface VideoAdController {
     void buildVideoAdView(VideoAdView bannerView);
 
     void openUrl(String url);
+
+    AdParams getAdParams();
+
+    HyBidViewabilityNativeVideoAdSession getViewabilityAdSession();
+
+    void addViewabilityFriendlyObstruction(View view, FriendlyObstructionPurpose purpose, String reason);
+
+    List<HyBidViewabilityFriendlyObstruction> getViewabilityFriendlyObstructions();
 
     void toggleMute();
 

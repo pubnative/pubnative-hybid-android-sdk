@@ -43,6 +43,7 @@ public class UserDataManager {
     private static final String PREFERENCES_CONSENT = "net.pubnative.lite.dataconsent";
     private static final String KEY_GDPR_CONSENT_STATE = "gdpr_consent_state";
     private static final String KEY_GDPR_ADVERTISING_ID = "gdpr_advertising_id";
+    private static final String KEY_CCPA_CONSENT = "ccpa_consent";
     private static final String DEVICE_ID_TYPE = "gaid";
 
     private static final int CONSENT_STATE_ACCEPTED = 1;
@@ -255,5 +256,33 @@ public class UserDataManager {
 
     interface UserDataInitialisationListener {
         void onDataInitialised(boolean success);
+    }
+
+    public void setIABUSPrivacyString(String IABUSPrivacyString) {
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putString(KEY_CCPA_CONSENT, IABUSPrivacyString).apply();
+    }
+
+    public String getIABUSPrivacyString() {
+        return mPreferences.getString(KEY_CCPA_CONSENT, null);
+    }
+
+    public void removeIABUSPrivacyString() {
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putString(KEY_CCPA_CONSENT, null).apply();
+    }
+
+    public boolean isCCPAOptOut() {
+        String usPrivacyString = getIABUSPrivacyString();
+        if (!TextUtils.isEmpty(usPrivacyString) && usPrivacyString.length() >= 3) {
+            char optOutChar = usPrivacyString.charAt(2);
+            if (optOutChar == 'y' || optOutChar == 'Y') {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 }

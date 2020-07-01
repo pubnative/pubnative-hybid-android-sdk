@@ -119,7 +119,7 @@ class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView
     }
 
     // ---------------- MoPub Banner Listener ---------------------
-    override fun onBannerLoaded(banner: MoPubView?) {
+    override fun onBannerLoaded(banner: MoPubView) {
         Log.d(TAG, "onAdLoaded")
     }
 

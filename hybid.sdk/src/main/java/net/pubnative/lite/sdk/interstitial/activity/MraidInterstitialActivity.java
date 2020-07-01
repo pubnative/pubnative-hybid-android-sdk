@@ -21,6 +21,8 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
             MRAIDNativeFeature.TEL
     };
 
+    private MRAIDBanner mView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,12 +44,25 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
                 adView.setCloseLayoutListener(this);
             }
         }
+
+        mView = adView;
+
         return adView;
     }
 
     @Override
     protected boolean shouldShowContentInfo() {
         return false;
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mView != null) {
+            mView.stopAdSession();
+            mView.destroy();
+        }
+
+        super.onDestroy();
     }
 
     // ----------------------------------- MRAIDViewListener ---------------------------------------

@@ -95,6 +95,10 @@
     <string name="action_check">Check</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="set_ccpa_consent">Set CCPA Consent</string>
+    <string name="get_ccpa_consent">Get CCPA Consent</string>
+    <string name="remove_ccpa_consent">Remove CCPA Consent</string>
+    <string name="enter_ccpa_consent_here">Enter CCPA Consent String here</string>
 
     <string name="mediation">Mediation</string>
 

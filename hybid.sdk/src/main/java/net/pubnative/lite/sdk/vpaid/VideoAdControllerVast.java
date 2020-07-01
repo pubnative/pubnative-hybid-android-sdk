@@ -3,10 +3,15 @@ package net.pubnative.lite.sdk.vpaid;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
+
+import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
 
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.UrlHandler;
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeVideoAdSession;
 import net.pubnative.lite.sdk.vpaid.enums.EventConstants;
 import net.pubnative.lite.sdk.vpaid.enums.VastError;
 import net.pubnative.lite.sdk.vpaid.helpers.ErrorLog;
@@ -41,9 +46,14 @@ class VideoAdControllerVast implements VideoAdController {
 
     private boolean finishedPlaying = false;
 
-    VideoAdControllerVast(BaseVideoAdInternal baseAd, AdParams adParams) {
+    private HyBidViewabilityNativeVideoAdSession mViewabilityAdSession;
+    private List<HyBidViewabilityFriendlyObstruction> mViewabilityFriendlyObstructions;
+
+    VideoAdControllerVast(BaseVideoAdInternal baseAd, AdParams adParams, HyBidViewabilityNativeVideoAdSession viewabilityAdSession) {
         mBaseAdInternal = baseAd;
         mAdParams = adParams;
+        mViewabilityAdSession = viewabilityAdSession;
+        mViewabilityFriendlyObstructions = new ArrayList<>();
         mViewControllerVast = new ViewControllerVast(this);
     }
 
@@ -70,12 +80,12 @@ class VideoAdControllerVast implements VideoAdController {
 
     @Override
     public void playAd() {
-        // fix back screen for Samsung tablet android 4.4.4
         postDelayed(new Runnable() {
             @Override
             public void run() {
                 try {
                     startMediaPlayer();
+
                 } catch (IllegalStateException e) {
                     Logger.e(LOG_TAG, "mediaPlayer IllegalStateException: " + e.getMessage());
                     tryReInitMediaPlayer();
@@ -156,6 +166,7 @@ class VideoAdControllerVast implements VideoAdController {
                 for (TrackingEvent event : mTrackingEventsList) {
                     if (doneMillis > event.timeMillis) {
                         EventTracker.post(mBaseAdInternal.getContext(), event.url);
+                        fireViewabilityTrackingEvent(event.name);
                         eventsToRemove.add(event);
                     }
                 }
@@ -167,6 +178,25 @@ class VideoAdControllerVast implements VideoAdController {
             public void onFinish() {
             }
         }.create();
+    }
+
+    private void fireViewabilityTrackingEvent(String name) {
+        if (!TextUtils.isEmpty(name)) {
+            switch (name) {
+                case EventConstants.START:
+                    getViewabilityAdSession().fireStart(getAdParams().getDuration(), true);
+                    break;
+                case EventConstants.FIRST_QUARTILE:
+                    getViewabilityAdSession().fireFirstQuartile();
+                    break;
+                case EventConstants.MIDPOINT:
+                    getViewabilityAdSession().fireMidpoint();
+                    break;
+                case EventConstants.THIRD_QUARTILE:
+                    getViewabilityAdSession().fireThirdQuartile();
+                    break;
+            }
+        }
     }
 
     private void initSkipTime(int duration) {
@@ -192,22 +222,27 @@ class VideoAdControllerVast implements VideoAdController {
                 TrackingEvent event = new TrackingEvent(tracking.getText());
                 if (tracking.getEvent().equalsIgnoreCase(EventConstants.CREATIVE_VIEW)) {
                     event.timeMillis = 0;
+                    event.name = EventConstants.CREATIVE_VIEW;
                     mTrackingEventsList.add(event);
                 }
                 if (tracking.getEvent().equalsIgnoreCase(EventConstants.START)) {
                     event.timeMillis = 0;
+                    event.name = EventConstants.START;
                     mTrackingEventsList.add(event);
                 }
                 if (tracking.getEvent().equalsIgnoreCase(EventConstants.FIRST_QUARTILE)) {
                     event.timeMillis = duration / 4;
+                    event.name = EventConstants.FIRST_QUARTILE;
                     mTrackingEventsList.add(event);
                 }
                 if (tracking.getEvent().equalsIgnoreCase(EventConstants.MIDPOINT)) {
                     event.timeMillis = duration / 2;
+                    event.name = EventConstants.MIDPOINT;
                     mTrackingEventsList.add(event);
                 }
                 if (tracking.getEvent().equalsIgnoreCase(EventConstants.THIRD_QUARTILE)) {
                     event.timeMillis = duration * 3 / 4;
+                    event.name = EventConstants.THIRD_QUARTILE;
                     mTrackingEventsList.add(event);
                 }
                 if (tracking.getEvent().equalsIgnoreCase(EventConstants.PROGRESS)) {
@@ -246,6 +281,12 @@ class VideoAdControllerVast implements VideoAdController {
     private void skipVideo(boolean skipEvent) {
         finishedPlaying = true;
 
+        if (skipEvent) {
+            getViewabilityAdSession().fireSkipped();
+        } else {
+            getViewabilityAdSession().fireComplete();
+        }
+
         if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
             mMediaPlayer.pause();
         }
@@ -279,6 +320,7 @@ class VideoAdControllerVast implements VideoAdController {
         if (mMediaPlayer == null) {
             return;
         }
+        getViewabilityAdSession().fireVolumeChange(mute);
         if (mute) {
             mMediaPlayer.setVolume(0f, 0f);
             if (postEvent) {
@@ -366,6 +408,7 @@ class VideoAdControllerVast implements VideoAdController {
                 mTimerWithPause.pause();
             }
             EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.PAUSE);
+            getViewabilityAdSession().firePause();
         }
     }
 
@@ -374,11 +417,33 @@ class VideoAdControllerVast implements VideoAdController {
         if (mMediaPlayer != null && !mMediaPlayer.isPlaying() && mViewControllerVast.isEndCard()) {
             playAd();
             EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.RESUME);
+            getViewabilityAdSession().fireResume();
         }
     }
 
     @Override
     public boolean adFinishedPlaying() {
         return finishedPlaying;
+    }
+
+    @Override
+    public AdParams getAdParams() {
+        return mAdParams;
+    }
+
+    public HyBidViewabilityNativeVideoAdSession getViewabilityAdSession() {
+        return mViewabilityAdSession;
+    }
+
+    @Override
+    public void addViewabilityFriendlyObstruction(View view, FriendlyObstructionPurpose purpose, String reason) {
+        if (view != null && !TextUtils.isEmpty(reason)) {
+            mViewabilityFriendlyObstructions.add(new HyBidViewabilityFriendlyObstruction(view, purpose, reason));
+        }
+    }
+
+    @Override
+    public List<HyBidViewabilityFriendlyObstruction> getViewabilityFriendlyObstructions() {
+        return mViewabilityFriendlyObstructions;
     }
 }

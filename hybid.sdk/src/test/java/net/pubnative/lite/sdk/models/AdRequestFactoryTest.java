@@ -1,9 +1,11 @@
 package net.pubnative.lite.sdk.models;
 
+import android.content.Context;
 import android.location.Location;
 
 import net.pubnative.lite.sdk.BuildConfig;
 import net.pubnative.lite.sdk.DeviceInfo;
+import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.utils.PNCrypto;
 
@@ -17,6 +19,7 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.util.Locale;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -29,6 +32,8 @@ public class AdRequestFactoryTest {
     private DeviceInfo mMockDeviceInfo;
     @Mock
     private HyBidLocationManager mLocationManager;
+    @Mock
+    private UserDataManager mMockUserDataManager;
 
     @InjectMocks
     private AdRequestFactory mSubject;
@@ -47,6 +52,8 @@ public class AdRequestFactoryTest {
         mockLocation.setLatitude(12.126543);
         mockLocation.setLongitude(15.151534);
         when(mLocationManager.getUserLocation()).thenReturn(mockLocation);
+
+        when(mMockUserDataManager.isCCPAOptOut()).thenReturn(false);
     }
 
     @Test

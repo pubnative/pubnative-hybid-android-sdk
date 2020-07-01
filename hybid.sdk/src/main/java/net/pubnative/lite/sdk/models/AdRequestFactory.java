@@ -24,16 +24,15 @@ package net.pubnative.lite.sdk.models;
 
 import android.content.Context;
 import android.location.Location;
-import android.provider.Settings;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.BuildConfig;
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.Logger;
-import net.pubnative.lite.sdk.utils.PNAdvertisingIdClient;
 import net.pubnative.lite.sdk.utils.PNAsyncUtils;
 
 import java.util.Locale;
@@ -51,15 +50,17 @@ public class AdRequestFactory {
 
     private final DeviceInfo mDeviceInfo;
     private final HyBidLocationManager mLocationManager;
+    private final UserDataManager mUserDataManager;
     private IntegrationType mIntegrationType = IntegrationType.HEADER_BIDDING;
 
     public AdRequestFactory() {
-        this(HyBid.getDeviceInfo(), HyBid.getLocationManager());
+        this(HyBid.getDeviceInfo(), HyBid.getLocationManager(), HyBid.getUserDataManager());
     }
 
-    AdRequestFactory(DeviceInfo deviceInfo, HyBidLocationManager locationManager) {
+    AdRequestFactory(DeviceInfo deviceInfo, HyBidLocationManager locationManager, UserDataManager userDataManager) {
         mDeviceInfo = deviceInfo;
         mLocationManager = locationManager;
+        mUserDataManager = userDataManager;
     }
 
     public void createAdRequest(final String zoneid, final AdSize adSize, final Callback callback) {
@@ -78,9 +79,7 @@ public class AdRequestFactory {
                 Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
             }
         } else {
-            if (callback != null) {
-                callback.onRequestCreated(buildRequest(zoneid, adSize, advertisingId, limitTracking, mIntegrationType));
-            }
+            processAdvertisingId(zoneid, adSize, advertisingId, limitTracking, callback);
         }
     }
 
@@ -91,6 +90,7 @@ public class AdRequestFactory {
     }
 
     AdRequest buildRequest(final String zoneid, AdSize adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType) {
+        boolean isCCPAOptOut = mUserDataManager.isCCPAOptOut();
         AdRequest adRequest = new AdRequest();
         adRequest.zoneid = zoneid;
         adRequest.apptoken = HyBid.getAppToken();
@@ -99,7 +99,8 @@ public class AdRequestFactory {
         adRequest.devicemodel = mDeviceInfo.getModel();
         adRequest.coppa = HyBid.isCoppaEnabled() ? "1" : "0";
 
-        if (HyBid.isCoppaEnabled() || limitTracking || TextUtils.isEmpty(advertisingId)) {
+        if (HyBid.isCoppaEnabled() || limitTracking || TextUtils.isEmpty(advertisingId)
+                || isCCPAOptOut) {
             adRequest.dnt = "1";
         } else {
             adRequest.gid = advertisingId;
@@ -108,9 +109,14 @@ public class AdRequestFactory {
             adRequest.gidsha1 = mDeviceInfo.getAdvertisingIdSha1();
         }
 
+        String usPrivacyString = mUserDataManager.getIABUSPrivacyString();
+        if (!TextUtils.isEmpty(usPrivacyString)) {
+            adRequest.usprivacy = usPrivacyString;
+        }
+
         adRequest.locale = mDeviceInfo.getLocale().getLanguage();
 
-        if (!HyBid.isCoppaEnabled() && !limitTracking) {
+        if (!HyBid.isCoppaEnabled() && !limitTracking && !isCCPAOptOut) {
             adRequest.age = HyBid.getAge();
             adRequest.gender = HyBid.getGender();
             adRequest.keywords = HyBid.getKeywords();
@@ -140,10 +146,12 @@ public class AdRequestFactory {
         adRequest.displaymanagerver = String.format(Locale.ENGLISH, "%s_%s_%s",
                 "sdkandroid", integrationType.getCode(), BuildConfig.VERSION_NAME);
 
-        Location location = mLocationManager.getUserLocation();
-        if (location != null && !HyBid.isCoppaEnabled() && !limitTracking) {
-            adRequest.latitude = String.format(Locale.ENGLISH, "%.6f", location.getLatitude());
-            adRequest.longitude = String.format(Locale.ENGLISH, "%.6f", location.getLongitude());
+        if (mLocationManager != null) {
+            Location location = mLocationManager.getUserLocation();
+            if (location != null && !HyBid.isCoppaEnabled() && !limitTracking) {
+                adRequest.latitude = String.format(Locale.ENGLISH, "%.6f", location.getLatitude());
+                adRequest.longitude = String.format(Locale.ENGLISH, "%.6f", location.getLongitude());
+            }
         }
 
         return adRequest;

@@ -95,6 +95,10 @@ public abstract class HyBidInterstitialActivity extends Activity {
         finish();
     }
 
+    protected String getZoneId() {
+        return mZoneId;
+    }
+
     @Override
     protected void onDestroy() {
         if (mCloseableContainer != null) {

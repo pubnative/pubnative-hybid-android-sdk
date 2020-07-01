@@ -161,5 +161,55 @@
             android:textSize="16sp"
             android:visibility="gone" />
 
+        <EditText
+            android:id="@+id/text_input_ccpa_string"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="16dp"
+            android:hint="@string/enter_ccpa_consent_here" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_set_ccpa_consent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/set_ccpa_consent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_get_ccpa_consent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/get_ccpa_consent" />
+
+        <TextView
+            android:id="@+id/view_ccpa_consent_string"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="20dp"
+            android:autoLink="web"
+            android:fontFamily="@font/roboto"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_remove_ccpa_consent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/remove_ccpa_consent" />
+
     </LinearLayout>
 </ScrollView>

@@ -11,13 +11,19 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
+
 import net.pubnative.lite.sdk.R;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeVideoAdSession;
 import net.pubnative.lite.sdk.vpaid.VideoAdController;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
 import net.pubnative.lite.sdk.vpaid.utils.ImageUtils;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
 import net.pubnative.lite.sdk.vpaid.widget.CountDownView;
+
+import java.util.List;
 
 public class ViewControllerVast implements View.OnClickListener {
     private final static String LOG_TAG = ViewControllerVast.class.getSimpleName();
@@ -71,6 +77,8 @@ public class ViewControllerVast implements View.OnClickListener {
 
         mSkipView = mControlsLayout.findViewById(R.id.skipView);
         mSkipView.setOnClickListener(this);
+
+        mAdController.addViewabilityFriendlyObstruction(mControlsLayout, FriendlyObstructionPurpose.VIDEO_CONTROLS, "Video controls");
 
         bannerView.addView(mControlsLayout);
     }

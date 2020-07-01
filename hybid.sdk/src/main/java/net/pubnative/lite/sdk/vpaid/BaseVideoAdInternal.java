@@ -4,8 +4,13 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.view.View;
+
+import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
 
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeVideoAdSession;
 import net.pubnative.lite.sdk.vpaid.enums.AdState;
 import net.pubnative.lite.sdk.vpaid.enums.VastError;
 import net.pubnative.lite.sdk.vpaid.helpers.AssetsLoader;
@@ -16,6 +21,8 @@ import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.response.VastProcessor;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Future;
 
 abstract class BaseVideoAdInternal {
@@ -35,7 +42,10 @@ abstract class BaseVideoAdInternal {
     private SimpleTimer mFetcherTimer;
     private SimpleTimer mPrepareTimer;
     private String mVastData;
-    private Future mFuture;
+
+    private VideoAdCacheItem mCacheItem;
+
+    private HyBidViewabilityNativeVideoAdSession mViewabilityAdSession;
 
     BaseVideoAdInternal(Context context, String data) {
         if (context == null || TextUtils.isEmpty(data)) {
@@ -46,6 +56,8 @@ abstract class BaseVideoAdInternal {
         mVastData = data;
         mAssetsLoader = new AssetsLoader();
         Utils.init(context);
+
+        mViewabilityAdSession = new HyBidViewabilityNativeVideoAdSession();
     }
 
     abstract void dismiss();
@@ -82,12 +94,24 @@ abstract class BaseVideoAdInternal {
         mVideoAdListener = videoAdListener;
     }
 
+    public void setVideoCacheItem(VideoAdCacheItem adCacheItem) {
+        this.mCacheItem = adCacheItem;
+    }
+
     void initAdLoadingStartTime() {
         mAdLoadingStartTime = System.currentTimeMillis();
     }
 
     void setReady() {
         this.mIsReady = false;
+    }
+
+    protected HyBidViewabilityNativeVideoAdSession getViewabilityAdSession() {
+        return mViewabilityAdSession;
+    }
+
+    protected VideoAdCacheItem getCacheItem() {
+        return mCacheItem;
     }
 
     void releaseAdController() {
@@ -154,7 +178,11 @@ abstract class BaseVideoAdInternal {
 
 
     void proceedLoad() {
-        fetchAd();
+        if (mCacheItem != null) {
+            prepare(mCacheItem.getAdParams(), mVastData);
+        } else {
+            fetchAd();
+        }
     }
 
     void startFetcherTimer() {
@@ -184,9 +212,6 @@ abstract class BaseVideoAdInternal {
     void cancelFetcher() {
         Logger.d(LOG_TAG, "Cancel ad fetcher");
         mAssetsLoader.breakLoading();
-        if (mFuture != null) {
-            mFuture.cancel(true);
-        }
 
         mHandler.removeCallbacksAndMessages(null);
     }
@@ -208,32 +233,22 @@ abstract class BaseVideoAdInternal {
 
     private void prepare(AdParams adParams, String vastFileContent) {
         if (adParams.isVpaid()) {
-            mAdController = new VideoAdControllerVpaid(this, adParams, getAdSpotDimensions(), vastFileContent);
+            mAdController = new VideoAdControllerVpaid(this, adParams, getAdSpotDimensions(), vastFileContent, getViewabilityAdSession());
         } else {
-            mAdController = new VideoAdControllerVast(this, adParams);
+            mAdController = new VideoAdControllerVast(this, adParams, getViewabilityAdSession());
         }
-        mAssetsLoader.load(adParams, mContext, createAssetsLoadListener());
+        if (mCacheItem != null) {
+            prepareAdController(mCacheItem.getVideoFilePath(), mCacheItem.getEndCardFilePath());
+        } else {
+            mAssetsLoader.load(adParams, mContext, createAssetsLoadListener());
+        }
     }
 
     private AssetsLoader.OnAssetsLoaded createAssetsLoadListener() {
         return new AssetsLoader.OnAssetsLoaded() {
             @Override
             public void onAssetsLoaded(String videoFilePath, String endCardFilePath) {
-                if (mAdController == null) {
-                    onAdLoadFailInternal(new PlayerInfo("Error during video loading"));
-                    ErrorLog.postError(getContext(), VastError.UNDEFINED);
-                    Logger.d(LOG_TAG, "VideoAdController == null, after onAssetsLoaded success");
-                    return;
-                }
-                mAdController.setVideoFilePath(videoFilePath);
-                mAdController.setEndCardFilePath(endCardFilePath);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        startPrepareTimer();
-                        mAdController.prepare(createOnPrepareListener());
-                    }
-                });
+                prepareAdController(videoFilePath, endCardFilePath);
             }
 
             @Override
@@ -241,6 +256,24 @@ abstract class BaseVideoAdInternal {
                 onAdLoadFailInternal(info);
             }
         };
+    }
+
+    private void prepareAdController(String videoFilePath, String endCardFilePath) {
+        if (mAdController == null) {
+            onAdLoadFailInternal(new PlayerInfo("Error during video loading"));
+            ErrorLog.postError(getContext(), VastError.UNDEFINED);
+            Logger.d(LOG_TAG, "VideoAdController == null, after onAssetsLoaded success");
+            return;
+        }
+        mAdController.setVideoFilePath(videoFilePath);
+        mAdController.setEndCardFilePath(endCardFilePath);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                startPrepareTimer();
+                mAdController.prepare(createOnPrepareListener());
+            }
+        });
     }
 
     private VideoAdController.OnPreparedListener createOnPrepareListener() {
