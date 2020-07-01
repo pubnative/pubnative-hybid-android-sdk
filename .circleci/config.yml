@@ -162,6 +162,5 @@ workflows:
                 - master
                 - beta
                 - development
-                - remove_om_verification
           requires:
             - test_unit
