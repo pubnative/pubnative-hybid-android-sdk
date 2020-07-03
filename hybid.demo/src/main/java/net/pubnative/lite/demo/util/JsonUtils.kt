@@ -4,6 +4,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonParseException
 import com.google.gson.JsonParser
 import net.pubnative.lite.sdk.utils.Logger
+import java.lang.Exception
 
 class JsonUtils {
     companion object {
@@ -16,7 +17,7 @@ class JsonUtils {
 
                 val gson = GsonBuilder().setLenient().setPrettyPrinting().create()
                 return gson.toJson(jsonObject)
-            } catch (exception: JsonParseException) {
+            } catch (exception: Exception) {
                 Logger.e(TAG, "Error parsing json: ", exception)
                 return json
             }
