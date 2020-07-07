@@ -149,7 +149,6 @@ workflows:
           filters:
             branches:
               only:
-                - master
                 - beta
                 - development
                 - feature/banner_ad_sizes_refactor
