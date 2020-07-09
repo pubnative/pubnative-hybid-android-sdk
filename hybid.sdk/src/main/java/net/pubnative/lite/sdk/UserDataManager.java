@@ -46,6 +46,8 @@ public class UserDataManager {
     private static final String KEY_GDPR_ADVERTISING_ID = "gdpr_advertising_id";
     private static final String KEY_CCPA_PUBLIC_CONSENT = "IABUSPrivacy_String";
     private static final String KEY_GDPR_PUBLIC_CONSENT = "IABConsent_ConsentString";
+    private static final String KEY_SUBJECT_TO_GDPR_PUBLIC = "IABConsent_SubjectToGDPR";
+    private static final String KEY_CMP_PRESENT_PUBLIC = "IABConsent_CMPPresent";
     private static final String KEY_CCPA_CONSENT = "ccpa_consent";
     private static final String KEY_GDPR_CONSENT = "gdpr_consent";
     private static final String DEVICE_ID_TYPE = "gaid";
