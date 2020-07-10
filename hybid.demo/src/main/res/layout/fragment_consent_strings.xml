@@ -23,7 +23,6 @@
                 android:id="@+id/input_gdpr_consent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:enabled="false"
                 android:hint="@string/hint_gdpr_consent"
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -66,7 +65,6 @@
                 android:id="@+id/input_ccpa_consent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:enabled="false"
                 android:hint="@string/hint_ccpa_consent"
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>

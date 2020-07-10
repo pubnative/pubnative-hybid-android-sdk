@@ -275,6 +275,8 @@ public class UserDataManager {
                     String consentString = sharedPreferences.getString(KEY_GDPR_PUBLIC_CONSENT, null);
                     if (!TextUtils.isEmpty(consentString)) {
                         setIABGDPRConsentString(consentString);
+                    } else {
+                        removeIABGDPRConsentString();
                     }
                     break;
                 }
@@ -282,6 +284,8 @@ public class UserDataManager {
                     String consentString = sharedPreferences.getString(KEY_CCPA_PUBLIC_CONSENT, null);
                     if (!TextUtils.isEmpty(consentString)) {
                         setIABUSPrivacyString(consentString);
+                    } else {
+                        removeIABUSPrivacyString();
                     }
                     break;
                 }
