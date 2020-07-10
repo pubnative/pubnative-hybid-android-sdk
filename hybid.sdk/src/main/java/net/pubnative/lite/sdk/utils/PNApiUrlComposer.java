@@ -136,6 +136,10 @@ public final class PNApiUrlComposer {
             uriBuilder.appendQueryParameter("usprivacy", adRequest.usprivacy);
         }
 
+        if (!TextUtils.isEmpty(adRequest.userconsent)) {
+            uriBuilder.appendQueryParameter("userconsent", adRequest.userconsent);
+        }
+
         return uriBuilder.build().toString();
     }
 }
