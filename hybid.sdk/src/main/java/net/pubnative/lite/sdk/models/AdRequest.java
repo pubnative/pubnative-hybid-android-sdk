@@ -51,4 +51,5 @@ public class AdRequest {
     public String displaymanager;
     public String displaymanagerver;
     public String usprivacy;
+    public String userconsent;
 }

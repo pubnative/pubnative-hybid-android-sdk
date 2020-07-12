@@ -198,6 +198,20 @@
             android:windowSoftInputMode="stateHidden" />
 
         <activity
+            android:name=".ui.activities.consent.CMPActivity"
+            android:label="@string/title_cmp"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden" />
+
+        <activity
+            android:name=".ui.activities.consent.ConsentStringsActivity"
+            android:label="@string/title_consent_strings"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden" />
+
+        <activity
             android:name="com.mopub.mobileads.MoPubActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
