@@ -101,8 +101,6 @@ public class DeviceInfo {
         mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         fetchAdvertisingId();
-
-        getDeviceScreenDimensions();
     }
 
     private void fetchAdvertisingId() {
@@ -130,7 +128,7 @@ public class DeviceInfo {
         }
     }
 
-    private void getDeviceScreenDimensions(){
+    public void getDeviceScreenDimensions(){
         ScreenDimensionsUtils screenDimensionsUtils = new ScreenDimensionsUtils();
         Point point = screenDimensionsUtils.getScreenDimensionsToPoint(mContext);
         deviceWidth = Integer.toString(point.x);

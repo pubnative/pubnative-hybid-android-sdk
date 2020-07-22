@@ -151,6 +151,7 @@ public class AdRequestFactory {
             }
         }
 
+        mDeviceInfo.getDeviceScreenDimensions();
         adRequest.deviceHeight = mDeviceInfo.getDeviceHeight();
         adRequest.deviceWidth = mDeviceInfo.getDeviceWidth();
 
