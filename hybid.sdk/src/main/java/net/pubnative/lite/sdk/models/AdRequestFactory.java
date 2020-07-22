@@ -151,6 +151,9 @@ public class AdRequestFactory {
             }
         }
 
+        adRequest.deviceHeight = mDeviceInfo.getDeviceHeight();
+        adRequest.deviceWidth = mDeviceInfo.getDeviceWidth();
+
         return adRequest;
     }
 
