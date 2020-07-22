@@ -22,15 +22,12 @@
 //
 package net.pubnative.lite.sdk;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Build;
-import android.os.Process;
 import android.provider.Settings;
 import android.text.TextUtils;
 
@@ -38,6 +35,7 @@ import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNAsyncUtils;
 import net.pubnative.lite.sdk.utils.PNCrypto;
+import net.pubnative.lite.sdk.utils.ScreenDimensionsUtils;
 
 import java.util.Locale;
 
@@ -93,6 +91,8 @@ public class DeviceInfo {
     private boolean mLimitTracking = false;
     private final ConnectivityManager mConnectivityManager;
     private Listener mListener;
+    private String deviceHeight;
+    private String deviceWidth;
 
     public DeviceInfo(Context context, Listener listener) {
         mContext = context.getApplicationContext();
@@ -101,6 +101,8 @@ public class DeviceInfo {
         mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         fetchAdvertisingId();
+
+        getDeviceScreenDimensions();
     }
 
     private void fetchAdvertisingId() {
@@ -126,6 +128,13 @@ public class DeviceInfo {
         } catch (Exception exception) {
             Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
         }
+    }
+
+    private void getDeviceScreenDimensions(){
+        ScreenDimensionsUtils screenDimensionsUtils = new ScreenDimensionsUtils();
+        Point point = screenDimensionsUtils.getScreenDimensionsToPoint(mContext);
+        deviceWidth = Integer.toString(point.x);
+        deviceHeight = Integer.toString(point.y);
     }
 
     /**
@@ -182,4 +191,8 @@ public class DeviceInfo {
     public Context getContext() {
         return mContext;
     }
+
+    public String getDeviceHeight() {return deviceHeight; }
+
+    public String getDeviceWidth() {return deviceWidth; }
 }
