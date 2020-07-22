@@ -1560,10 +1560,15 @@ public class MRAIDView extends RelativeLayout {
                 parseCommandUrl(url);
                 return true;
             } else {
-                try {
-                    open(URLEncoder.encode(url, "UTF-8"));
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                // Fix for Verve custom creatives
+                if (isVerveCustomExpand(url)) {
+                    expand(url);
+                } else {
+                    try {
+                        open(URLEncoder.encode(url, "UTF-8"));
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
                 }
                 return true;
             }
@@ -1594,6 +1599,18 @@ public class MRAIDView extends RelativeLayout {
 
     public boolean isLoaded() {
         return isPageFinished;
+    }
+
+    private boolean isVerveCustomExpand(String url) {
+        if (TextUtils.isEmpty(url)) {
+            return false;
+        }
+
+        if (url.contains("tags-prod.vrvm.com") && url.contains("type=expandable")) {
+            return true;
+        }
+
+        return false;
     }
 
     /**************************************************************************
