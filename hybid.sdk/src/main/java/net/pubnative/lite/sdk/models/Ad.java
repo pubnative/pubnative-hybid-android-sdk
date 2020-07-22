@@ -155,55 +155,6 @@ public class Ad extends JsonModel implements Serializable {
         AdData data = getAsset(asset);
         if (data != null) {
             result = data.getHtml();
-            result = "<![CDATA[\n" +
-                    "<html>\n" +
-                    "<head>\n" +
-                    "    <meta name=\"HandheldFriendly\" content=\"true\"/>\n" +
-                    "    <meta name=\"MobileOptimized\" content=\"width\"/>\n" +
-                    "    <meta name=\"viewport\" content=\"width=device-width, minimum-scale=1, maximum-scale=1, user-scalable=no\"/>\n" +
-                    "</head>\n" +
-                    "<body style=\"margin: 0; padding: 0\">\n" +
-                    "<div class=\"vrvWrap\" style=\"width: 100%; height: 100%;\"><img style=\"display: none;\" onerror=\"(function(w, d, i) { var tagElement = i.parentNode;\n" +
-                    "\t\t\tvar c = {\n" +
-                    "\t\t\t'creativeParams': {\n" +
-                    "\t\t\t'variant': '',\n" +
-                    "\t\t\t'landingPageUrl': 'https://www.peapod.com/pages/summer-grilling?utm_source=Verve&amp;utm_medium=Display&amp;utm_campaign=Universal&amp;c3ch=Mobile&amp;c3nid=VERVE-',\n" +
-                    "\t\t\t'segmentId': ''\n" +
-                    "\t\t\t},\n" +
-                    "\t\t\t'trackImp': 'https://414-img.c3tag.com/v.gif?cid=414&amp;c3ch=Mobile&amp;c3nid=VERVE-',\n" +
-                    "\t\t\t'trackClick': 'https://www.peapod.com/pages/summer-grilling?utm_source=Verve&amp;utm_medium=Display&amp;utm_campaign=Universal&amp;c3ch=Mobile&amp;c3nid=VERVE-',\n" +
-                    "\t\t\t'type': 'expandable',\n" +
-                    "\t\t\t'width': '320',\n" +
-                    "\t\t\t'height': '50',\n" +
-                    "\t\t\t'bannerUrl': 'https://ad.vrvm.com/creative/custom/giantfood/nat8233-p6/NAT-8237/expandable-banner/banner.html',\n" +
-                    "\t\t\t'panelUrl': 'https://ad.vrvm.com/creative/custom/giantfood/nat8233-p6/NAT-8237/expandable-banner/panel.html',\n" +
-                    "\t\t\t'expandedUrl': 'https://tags-prod.vrvm.com/tags/dYpGlm/expanded.html?tagjs_version=1.6.0',\n" +
-                    "\t\t\t'transition': 'fade'\n" +
-                    "\t\t\t};\n" +
-                    "\t\t\t'function'!=typeof Object.assign&amp;&amp;!function(){Object.assign=function(n){'use strict';if(void 0===n||null===n)throw new TypeError('Cannot convert undefined or null to object');for(var t=Object(n),r=1;r<arguments.length;r++){var e=arguments[r];if(void 0!==e&amp;&amp;null!==e)for(var o in e)e.hasOwnProperty(o)&amp;&amp;(t[o]=e[o])}return t}}();\n" +
-                    "\t\t\tvar d = {\n" +
-                    "\t\t\t'trackBase': 'http%3A%2F%2Fgo.vrvm.com%2Ft%3Fc%3D2785659%26f%3D1%26adnet%3D54%26paid%3D5723%26poid%3D38%26r%3D0000015b5ed5e071114333ba94d5feda%26uis%3Di%26countryCode%3DUS',\n" +
-                    "\t\t\t'appmw': 'app',\n" +
-                    "\t\t\t'latitude': '32.95',\n" +
-                    "\t\t\t'longitude': '-117.22',\n" +
-                    "\t\t\t'flightId': '1',\n" +
-                    "\t\t\t'creativeId': '2785659',\n" +
-                    "\t\t\t'requestId': '0000015b5ed5e071114333ba94d5feda',\n" +
-                    "\t\t\t'adnetId': '54',\n" +
-                    "\t\t\t'dfpUrl': ''\n" +
-                    "\t\t\t};\n" +
-                    "\t\t\tObject.assign(c, d);\n" +
-                    "\t\t\tvar script = document.createElement('script'); script.src = 'https://creative-platform.vrvm.com/tagjs/tag.1.6.0.js'; script.onload = function() { Verve.controllers.factories.AdFactory.makeAd(tagElement, c); }; tagElement.appendChild(script); })(window, document, this);\"\n" +
-                    "                                                             src=\"data:image/png,vrvm\"/></div>\n" +
-                    "<div style=\"position:absolute; z-index:-9999; display:none;\">\n" +
-                    "    <!-- DELETE THIS LINE AND ADD ALL THIRD PARTY TRACKERS HERE -->\n" +
-                    "    <img src=\"https://p.placed.com/api/v2/sync/impression?partner=verve&amp;version=1.0&amp;plaid=giantfood_csmp6_951&amp;payload_campaign_identifier=&amp;payload_device_identifier=&amp;payload_timestamp=&amp;payload_type=impression&amp;t_creative=\"\n" +
-                    "         border=\"0\" width=\"1\" height=\"1\"/>\n" +
-                    "</div>\n" +
-                    "</body>\n" +
-                    "</html><img\n" +
-                    "        src=\"http://go.vrvm.com/t?r=0000015b5ed5e071114333ba94d5feda&amp;e=AdImpInternal&amp;adnet=54&amp;countryCode=US&amp;paid=5723&amp;poid=38&amp;uis=I&amp;f=1&amp;c=2785659\"\n" +
-                    "        width=\"1\" height=\"1\" style=\"display:none;\"/>]]>\n";
         }
         return result;
     }
