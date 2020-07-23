@@ -1635,7 +1635,7 @@ public class MRAIDView extends RelativeLayout {
             return false;
         }
 
-        if (url.contains("tags-prod.vrvm.com") && url.contains("expanded.html")) {
+        if (url.contains("tags-prod.vrvm.com") && url.contains("type=expandable")) {
             return true;
         }
 
