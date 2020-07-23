@@ -114,6 +114,11 @@ public class AdRequestFactory {
             adRequest.usprivacy = usPrivacyString;
         }
 
+        String gdprConsentString = mUserDataManager.getIABGDPRConsentString();
+        if (!TextUtils.isEmpty(gdprConsentString)) {
+            adRequest.userconsent = gdprConsentString;
+        }
+
         adRequest.locale = mDeviceInfo.getLocale().getLanguage();
 
         if (!HyBid.isCoppaEnabled() && !limitTracking && !isCCPAOptOut) {
