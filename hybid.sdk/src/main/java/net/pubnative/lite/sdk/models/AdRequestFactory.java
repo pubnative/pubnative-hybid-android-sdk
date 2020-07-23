@@ -23,6 +23,7 @@
 package net.pubnative.lite.sdk.models;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.location.Location;
 import android.text.TextUtils;
 
@@ -151,9 +152,9 @@ public class AdRequestFactory {
             }
         }
 
-        mDeviceInfo.getDeviceScreenDimensions();
-        adRequest.deviceHeight = mDeviceInfo.getDeviceHeight();
-        adRequest.deviceWidth = mDeviceInfo.getDeviceWidth();
+        Point screenDimensionsPoint = mDeviceInfo.getDeviceScreenDimensions();
+        adRequest.deviceHeight = Integer.toString(screenDimensionsPoint.y);
+        adRequest.deviceWidth = Integer.toString(screenDimensionsPoint.x);
 
         return adRequest;
     }

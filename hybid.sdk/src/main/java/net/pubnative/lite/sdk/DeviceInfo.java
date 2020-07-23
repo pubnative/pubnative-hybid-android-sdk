@@ -91,8 +91,6 @@ public class DeviceInfo {
     private boolean mLimitTracking = false;
     private final ConnectivityManager mConnectivityManager;
     private Listener mListener;
-    private String deviceHeight;
-    private String deviceWidth;
 
     public DeviceInfo(Context context, Listener listener) {
         mContext = context.getApplicationContext();
@@ -128,11 +126,10 @@ public class DeviceInfo {
         }
     }
 
-    public void getDeviceScreenDimensions(){
+    public Point getDeviceScreenDimensions(){
         ScreenDimensionsUtils screenDimensionsUtils = new ScreenDimensionsUtils();
         Point point = screenDimensionsUtils.getScreenDimensionsToPoint(mContext);
-        deviceWidth = Integer.toString(point.x);
-        deviceHeight = Integer.toString(point.y);
+        return point;
     }
 
     /**
@@ -190,7 +187,4 @@ public class DeviceInfo {
         return mContext;
     }
 
-    public String getDeviceHeight() {return deviceHeight; }
-
-    public String getDeviceWidth() {return deviceWidth; }
 }
