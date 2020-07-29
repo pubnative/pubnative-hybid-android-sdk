@@ -243,6 +243,9 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
         if (TextUtils.isEmpty(url)) {
             url = mAdParams.getVideoRedirectUrl();
         }
+
+        mViewabilityAdSession.fireClick();
+
         Logger.d(LOG_TAG, "Handle external url");
         if (Utils.isOnline()) {
             Context context = mBaseAdInternal.getContext();
