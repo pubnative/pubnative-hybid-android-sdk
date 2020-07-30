@@ -64,6 +64,10 @@ public final class PNApiUrlComposer {
             uriBuilder.appendQueryParameter("dw", adRequest.deviceWidth);
         }
 
+        if(!TextUtils.isEmpty(adRequest.orientation)){
+            uriBuilder.appendQueryParameter("scro", adRequest.orientation);
+        }
+
         if (!TextUtils.isEmpty(adRequest.dnt)) {
             uriBuilder.appendQueryParameter("dnt", adRequest.dnt);
         }

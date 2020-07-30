@@ -155,6 +155,8 @@ public class AdRequestFactory {
         adRequest.deviceHeight = mDeviceInfo.getDeviceHeight();
         adRequest.deviceWidth = mDeviceInfo.getDeviceWidth();
 
+        adRequest.orientation = mDeviceInfo.getOrientation().toString();
+
         return adRequest;
     }
 

@@ -33,6 +33,7 @@ public class AdRequest {
     public String devicemodel;
     public String deviceHeight;
     public String deviceWidth;
+    public String orientation;
     public String dnt;
     public String al;
     public String mf;
