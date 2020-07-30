@@ -50,6 +50,7 @@ public class AdRequestFactoryTest {
         when(mMockDeviceInfo.getLocale()).thenReturn(new Locale("EN", "US"));
         when(mMockDeviceInfo.getDeviceHeight()).thenReturn("1080");
         when(mMockDeviceInfo.getDeviceWidth()).thenReturn("1920");
+        when(mMockDeviceInfo.getOrientation()).thenReturn(DeviceInfo.Orientation.PORTRAIT);
 
         Location mockLocation = new Location("");
         mockLocation.setLatitude(12.126543);
@@ -79,6 +80,7 @@ public class AdRequestFactoryTest {
         Assert.assertEquals("HyBid", request.displaymanager);
         Assert.assertEquals("1920", request.deviceWidth);
         Assert.assertEquals("1080", request.deviceHeight);
+        Assert.assertEquals("portrait", request.orientation);
         Assert.assertEquals(String.format(Locale.ENGLISH, "%s_%s_%s",
                 "sdkandroid", "hb", BuildConfig.VERSION_NAME), request.displaymanagerver);
     }
