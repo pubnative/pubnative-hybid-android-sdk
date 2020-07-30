@@ -48,7 +48,8 @@ public class AdRequestFactoryTest {
         when(mMockDeviceInfo.getAdvertisingIdMd5()).thenReturn(PNCrypto.md5("aabbccdd"));
         when(mMockDeviceInfo.getAdvertisingIdSha1()).thenReturn(PNCrypto.sha1("aabbccdd"));
         when(mMockDeviceInfo.getLocale()).thenReturn(new Locale("EN", "US"));
-        when(mMockDeviceInfo.getDeviceScreenDimensions()).thenReturn(new Point(1920,1080));
+        when(mMockDeviceInfo.getDeviceHeight()).thenReturn("1080");
+        when(mMockDeviceInfo.getDeviceWidth()).thenReturn("1920");
 
         Location mockLocation = new Location("");
         mockLocation.setLatitude(12.126543);
