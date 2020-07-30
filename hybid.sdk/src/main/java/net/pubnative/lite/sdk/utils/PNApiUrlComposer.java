@@ -56,6 +56,14 @@ public final class PNApiUrlComposer {
             uriBuilder.appendQueryParameter("devicemodel", adRequest.devicemodel);
         }
 
+        if (!TextUtils.isEmpty(adRequest.deviceHeight)) {
+            uriBuilder.appendQueryParameter("dh", adRequest.deviceHeight);
+        }
+
+        if (!TextUtils.isEmpty(adRequest.deviceWidth)) {
+            uriBuilder.appendQueryParameter("dw", adRequest.deviceWidth);
+        }
+
         if (!TextUtils.isEmpty(adRequest.dnt)) {
             uriBuilder.appendQueryParameter("dnt", adRequest.dnt);
         }

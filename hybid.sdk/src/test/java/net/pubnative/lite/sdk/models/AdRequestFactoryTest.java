@@ -1,6 +1,7 @@
 package net.pubnative.lite.sdk.models;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.location.Location;
 
 import net.pubnative.lite.sdk.BuildConfig;
@@ -47,6 +48,8 @@ public class AdRequestFactoryTest {
         when(mMockDeviceInfo.getAdvertisingIdMd5()).thenReturn(PNCrypto.md5("aabbccdd"));
         when(mMockDeviceInfo.getAdvertisingIdSha1()).thenReturn(PNCrypto.sha1("aabbccdd"));
         when(mMockDeviceInfo.getLocale()).thenReturn(new Locale("EN", "US"));
+        when(mMockDeviceInfo.getDeviceHeight()).thenReturn("1080");
+        when(mMockDeviceInfo.getDeviceWidth()).thenReturn("1920");
 
         Location mockLocation = new Location("");
         mockLocation.setLatitude(12.126543);
@@ -74,6 +77,8 @@ public class AdRequestFactoryTest {
         Assert.assertEquals("15.151534", request.longitude);
         Assert.assertEquals("points,revenuemodel,contentinfo,creativeid", request.mf);
         Assert.assertEquals("HyBid", request.displaymanager);
+        Assert.assertEquals("1920", request.deviceWidth);
+        Assert.assertEquals("1080", request.deviceHeight);
         Assert.assertEquals(String.format(Locale.ENGLISH, "%s_%s_%s",
                 "sdkandroid", "hb", BuildConfig.VERSION_NAME), request.displaymanagerver);
     }
