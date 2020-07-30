@@ -152,9 +152,8 @@ public class AdRequestFactory {
             }
         }
 
-        Point screenDimensionsPoint = mDeviceInfo.getDeviceScreenDimensions();
-        adRequest.deviceHeight = Integer.toString(screenDimensionsPoint.y);
-        adRequest.deviceWidth = Integer.toString(screenDimensionsPoint.x);
+        adRequest.deviceHeight = mDeviceInfo.getDeviceHeight();
+        adRequest.deviceWidth = mDeviceInfo.getDeviceWidth();
 
         return adRequest;
     }
