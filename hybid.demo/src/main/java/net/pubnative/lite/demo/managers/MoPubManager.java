@@ -26,27 +26,17 @@ import android.content.Context;
 
 import com.mopub.common.MoPub;
 import com.mopub.common.SdkConfiguration;
-import com.mopub.common.SdkInitializationListener;
 import com.mopub.common.logging.MoPubLog;
-import com.mopub.mobileads.HyBidAdapterConfiguration;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class MoPubManager {
-    public static void initMoPubSdk(Context context, String pubnativeAppToken, String adUnitId) {
-        initMoPubSdk(context, pubnativeAppToken, adUnitId, null);
+    public static void initMoPubSdk(Context context, String adUnitId) {
+        initMoPubSdk(context, adUnitId, null);
     }
 
-    public static void initMoPubSdk(Context context, String pubnativeAppToken, String adUnitId, final InitialisationListener listener) {
-        /*Map<String, String> pubnativeInitConfig = new HashMap<>();
-        pubnativeInitConfig.put(HyBidAdapterConfiguration.CONFIG_KEY_APP_TOKEN, pubnativeAppToken);*/
-
+    public static void initMoPubSdk(Context context, String adUnitId, final InitialisationListener listener) {
         SdkConfiguration sdkConfiguration = new SdkConfiguration
                 .Builder(adUnitId)
                 .withLogLevel(MoPubLog.LogLevel.DEBUG)
-                //.withAdditionalNetwork(HyBidAdapterConfiguration.class.getName())
-                //.withMediatedNetworkConfiguration(HyBidAdapterConfiguration.class.getName(), pubnativeInitConfig)
                 .build();
         MoPub.initializeSdk(context, sdkConfiguration, () -> {
             if (listener != null) {

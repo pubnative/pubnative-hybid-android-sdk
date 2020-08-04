@@ -108,7 +108,7 @@ public class HyBidDemoApplication extends MultiDexApplication {
             ApiManager.INSTANCE.setApiUrl(settings.getApiUrl());
         }
 
-        MoPubManager.initMoPubSdk(this, appToken, settings.getMopubBannerAdUnitId());
+        MoPubManager.initMoPubSdk(this, appToken);
 
         MobileAds.initialize(this, initializationStatus -> {
         });

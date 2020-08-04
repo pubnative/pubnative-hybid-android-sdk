@@ -88,7 +88,7 @@ class MoPubSettingsFragment : Fragment() {
             settingManager.setMoPubMediationInterstitialAdUnitId(mediationInterstitialAdUnitId)
             settingManager.setMoPubMediationNativeAdUnitId(mediationNativeAdUnitId)
 
-            MoPubManager.initMoPubSdk(activity, settingManager.getSettings().appToken, bannerAdUnitId) {
+            MoPubManager.initMoPubSdk(activity, bannerAdUnitId) {
                 Toast.makeText(activity, "MoPub settings saved successfully.", Toast.LENGTH_SHORT).show()
                 activity?.finish()
             }
