@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 PubNative GmbH
+// Copyright (c) 2020 PubNative GmbH
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,53 +22,68 @@
 //
 package net.pubnative.lite.adapters.mopub.mediation;
 
+import android.app.Activity;
 import android.content.Context;
 
-import com.mopub.mobileads.CustomEventInterstitial;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.mopub.common.LifecycleListener;
+import com.mopub.common.logging.MoPubLog;
+import com.mopub.mobileads.AdData;
+import com.mopub.mobileads.BaseAd;
 import com.mopub.mobileads.MoPubErrorCode;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd;
 import net.pubnative.lite.sdk.utils.Logger;
 
-import java.util.Map;
-
-public class HyBidMediationInterstitialCustomEvent extends CustomEventInterstitial implements HyBidInterstitialAd.Listener {
+public class HyBidMediationInterstitialCustomEvent extends BaseAd implements HyBidInterstitialAd.Listener {
     private static final String TAG = HyBidMediationInterstitialCustomEvent.class.getSimpleName();
 
     private static final String APP_TOKEN_KEY = "pn_app_token";
     private static final String ZONE_ID_KEY = "pn_zone_id";
-    private CustomEventInterstitialListener mInterstitialListener;
+
     private HyBidInterstitialAd mInterstitialAd;
+    private String mZoneID = "";
 
     @Override
-    protected void loadInterstitial(Context context, CustomEventInterstitialListener customEventInterstitialListener, Map<String, Object> localExtras, Map<String, String> serverExtras) {
-        if (customEventInterstitialListener == null) {
-            Logger.e(TAG, "customEventInterstitialListener is null");
-            return;
-        }
-        mInterstitialListener = customEventInterstitialListener;
+    protected boolean checkAndInitializeSdk(@NonNull Activity launcherActivity, @NonNull AdData adData) throws Exception {
+        return false;
+    }
 
-        String zoneId;
+    @Override
+    protected void load(@NonNull Context context, @NonNull AdData adData) throws Exception {
+
         String appToken;
-        if (serverExtras.containsKey(ZONE_ID_KEY) && serverExtras.containsKey(APP_TOKEN_KEY)) {
-            zoneId = serverExtras.get(ZONE_ID_KEY);
-            appToken = serverExtras.get(APP_TOKEN_KEY);
+        if (adData.getExtras().containsKey(ZONE_ID_KEY) && adData.getExtras().containsKey(APP_TOKEN_KEY)) {
+            mZoneID = adData.getExtras().get(ZONE_ID_KEY);
+            appToken = adData.getExtras().get(APP_TOKEN_KEY);
         } else {
-            Logger.e(TAG, "Could not find the required params in CustomEventInterstitial serverExtras");
-            mInterstitialListener.onInterstitialFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
+            Logger.e(TAG, "Could not find the required params in CustomEventBanner serverExtras");
+            mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
         if (appToken == null || !appToken.equals(HyBid.getAppToken())) {
             Logger.e(TAG, "The provided app token doesn't match the one used to initialise HyBid");
-            mInterstitialListener.onInterstitialFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
+            mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
-        mInterstitialAd = new HyBidInterstitialAd(context, zoneId, this);
+        setAutomaticImpressionAndClickTracking(false);
+        mInterstitialAd = new HyBidInterstitialAd(context, mZoneID, this);
         mInterstitialAd.setMediation(true);
         mInterstitialAd.load();
+        MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_ATTEMPTED, TAG);
+    }
+
+    @Override
+    protected void show() {
+        if (mInterstitialAd != null) {
+            mInterstitialAd.show();
+            MoPubLog.log(MoPubLog.AdapterLogEvent.SHOW_ATTEMPTED, TAG);
+        }
     }
 
     @Override
@@ -79,47 +94,46 @@ public class HyBidMediationInterstitialCustomEvent extends CustomEventInterstiti
         }
     }
 
+    @Nullable
     @Override
-    protected void showInterstitial() {
-        if (mInterstitialAd != null) {
-            mInterstitialAd.show();
-        }
+    protected LifecycleListener getLifecycleListener() {
+        return null;
+    }
+
+    @NonNull
+    @Override
+    protected String getAdNetworkId() {
+        return mZoneID;
     }
 
     //--------------------------------- PNInterstitialAd Callbacks ---------------------------------
     @Override
     public void onInterstitialLoaded() {
-        if (mInterstitialListener != null) {
-            mInterstitialListener.onInterstitialLoaded();
-        }
+        MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_SUCCESS, TAG);
+        mLoadListener.onAdLoaded();
     }
 
     @Override
     public void onInterstitialLoadFailed(Throwable error) {
-        Logger.e(TAG, error.getMessage());
-        if (mInterstitialListener != null) {
-            mInterstitialListener.onInterstitialFailed(MoPubErrorCode.NETWORK_NO_FILL);
-        }
+        MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_FAILED, TAG);
+        mLoadListener.onAdLoadFailed(MoPubErrorCode.NETWORK_NO_FILL);
     }
 
     @Override
     public void onInterstitialImpression() {
-        if (mInterstitialListener != null) {
-            mInterstitialListener.onInterstitialShown();
-        }
+        MoPubLog.log(MoPubLog.AdapterLogEvent.SHOW_SUCCESS, TAG);
+        mInteractionListener.onAdImpression();
     }
 
     @Override
     public void onInterstitialDismissed() {
-        if (mInterstitialListener != null) {
-            mInterstitialListener.onInterstitialDismissed();
-        }
+        MoPubLog.log(MoPubLog.AdapterLogEvent.DID_DISAPPEAR, TAG);
+        mInteractionListener.onAdDismissed();
     }
 
     @Override
     public void onInterstitialClick() {
-        if (mInterstitialListener != null) {
-            mInterstitialListener.onInterstitialClicked();
-        }
+        MoPubLog.log(MoPubLog.AdapterLogEvent.CLICKED, TAG);
+        mInteractionListener.onAdClicked();
     }
 }

@@ -41,7 +41,7 @@ import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.api.MRectRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
-import net.pubnative.lite.sdk.utils.PrebidUtils
+import net.pubnative.lite.sdk.utils.HeaderBiddingUtils
 
 /**
  * Created by erosgarciaponte on 30.01.18.
@@ -101,12 +101,15 @@ class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView
 
     // --------------- HyBid Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
-        mopubMRect.adUnitId = adUnitId
-        mopubMRect.keywords = PrebidUtils.getPrebidKeywords(ad)
-        mopubMRect.loadAd()
-
         Log.d(TAG, "onRequestSuccess")
         displayLogs()
+        adUnitId?.let {
+            mopubMRect.setAdUnitId(it)
+            mopubMRect.setKeywords(HeaderBiddingUtils.getPrebidKeywords(ad))
+            mopubMRect.adSize = MoPubView.MoPubAdSize.HEIGHT_250
+            mopubMRect.loadAd()
+        }
+
         if (!TextUtils.isEmpty(ad?.creativeId)) {
             creativeIdView.text = ad?.creativeId
         }

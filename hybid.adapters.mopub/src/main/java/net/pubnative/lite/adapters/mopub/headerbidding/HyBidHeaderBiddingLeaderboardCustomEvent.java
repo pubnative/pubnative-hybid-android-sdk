@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 PubNative GmbH
+// Copyright (c) 2020 PubNative GmbH
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,12 +20,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package net.pubnative.lite.adapters.mopub;
+package net.pubnative.lite.adapters.mopub.headerbidding;
 
+import android.app.Activity;
 import android.content.Context;
 import android.view.View;
 
-import com.mopub.mobileads.CustomEventBanner;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.mopub.common.LifecycleListener;
+import com.mopub.common.logging.MoPubLog;
+import com.mopub.mobileads.AdData;
+import com.mopub.mobileads.BaseAd;
 import com.mopub.mobileads.MoPubErrorCode;
 
 import net.pubnative.lite.sdk.HyBid;
@@ -34,53 +41,46 @@ import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 
-import java.util.Map;
-
-public class HyBidMoPubLeaderboardCustomEvent extends CustomEventBanner implements AdPresenter.Listener {
-    private static final String TAG = HyBidMoPubBannerCustomEvent.class.getSimpleName();
+public class HyBidHeaderBiddingLeaderboardCustomEvent extends BaseAd implements AdPresenter.Listener {
+    private static final String TAG = HyBidHeaderBiddingBannerCustomEvent.class.getSimpleName();
 
     private static final String ZONE_ID_KEY = "pn_zone_id";
-    private CustomEventBannerListener mBannerListener;
+
     private AdPresenter mLeaderboardPresenter;
+    private View mAdView;
+    private String mZoneID = "";
 
     @Override
-    protected void loadBanner(Context context,
-                              CustomEventBannerListener customEventBannerListener,
-                              Map<String, Object> localExtras,
-                              Map<String, String> serverExtras) {
+    protected boolean checkAndInitializeSdk(@NonNull Activity launcherActivity, @NonNull AdData adData) throws Exception {
+        return false;
+    }
 
-        if (customEventBannerListener == null) {
-            Logger.e(TAG, "customEventBannerListener is null");
-            return;
-        }
-        mBannerListener = customEventBannerListener;
-
-        String zoneIdKey;
-        if (localExtras.containsKey(ZONE_ID_KEY)) {
-            zoneIdKey = (String) localExtras.get(ZONE_ID_KEY);
-        } else if (serverExtras.containsKey(ZONE_ID_KEY)) {
-            zoneIdKey = serverExtras.get(ZONE_ID_KEY);
+    @Override
+    protected void load(@NonNull Context context, @NonNull AdData adData) throws Exception {
+        if (adData.getExtras().containsKey(ZONE_ID_KEY)) {
+            mZoneID = adData.getExtras().get(ZONE_ID_KEY);
         } else {
-            Logger.e(TAG, "Could not find zone id value in CustomEventBanner localExtras or serverExtras");
-            mBannerListener.onBannerFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
+            Logger.e(TAG, "Could not find zone id value in BaseAd adData");
+            mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
-        final Ad ad = HyBid.getAdCache().remove(zoneIdKey);
+        final Ad ad = HyBid.getAdCache().remove(mZoneID);
         if (ad == null) {
-            Logger.e(TAG, "Could not find an ad in the cache for zone id with key: " + zoneIdKey);
-            mBannerListener.onBannerFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
+            Logger.e(TAG, "Could not find an ad in the cache for zone id with key: " + mZoneID);
+            mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
         mLeaderboardPresenter = new LeaderboardPresenterFactory(context).createPresenter(ad, this);
         if (mLeaderboardPresenter == null) {
             Logger.e(TAG, "Could not create valid leaderboard presenter");
-            mBannerListener.onBannerFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
+            mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
         mLeaderboardPresenter.load();
+        MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_ATTEMPTED, TAG);
     }
 
     @Override
@@ -92,25 +92,41 @@ public class HyBidMoPubLeaderboardCustomEvent extends CustomEventBanner implemen
         }
     }
 
+    @Nullable
+    @Override
+    protected LifecycleListener getLifecycleListener() {
+        return null;
+    }
+
+    @NonNull
+    @Override
+    protected String getAdNetworkId() {
+        return mZoneID;
+    }
+
+    @Nullable
+    @Override
+    protected View getAdView() {
+        return mAdView;
+    }
+
     @Override
     public void onAdLoaded(AdPresenter adPresenter, View banner) {
-        if (mBannerListener != null) {
-            mBannerListener.onBannerLoaded(banner);
-            mLeaderboardPresenter.startTracking();
-        }
+        mAdView = banner;
+        MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_SUCCESS, TAG);
+        mLoadListener.onAdLoaded();
+        mLeaderboardPresenter.startTracking();
     }
 
     @Override
     public void onAdError(AdPresenter adPresenter) {
-        if (mBannerListener != null) {
-            mBannerListener.onBannerFailed(MoPubErrorCode.INTERNAL_ERROR);
-        }
+        MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_FAILED, TAG);
+        mLoadListener.onAdLoadFailed(MoPubErrorCode.INTERNAL_ERROR);
     }
 
     @Override
     public void onAdClicked(AdPresenter adPresenter) {
-        if (mBannerListener != null) {
-            mBannerListener.onBannerClicked();
-        }
+        MoPubLog.log(MoPubLog.AdapterLogEvent.CLICKED, TAG);
+        mInteractionListener.onAdClicked();
     }
 }
