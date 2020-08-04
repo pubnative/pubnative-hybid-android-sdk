@@ -19,7 +19,7 @@ import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.api.LeaderboardRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
-import net.pubnative.lite.sdk.utils.PrebidUtils
+import net.pubnative.lite.sdk.utils.HeaderBiddingUtils
 
 class MoPubLeaderboardFragment : Fragment(), RequestManager.RequestListener, MoPubView.BannerAdListener {
     val TAG = MoPubLeaderboardFragment::class.java.simpleName
@@ -80,7 +80,7 @@ class MoPubLeaderboardFragment : Fragment(), RequestManager.RequestListener, MoP
         displayLogs()
         adUnitId?.let {
             mopubLeaderboard.setAdUnitId(it)
-            mopubLeaderboard.setKeywords(PrebidUtils.getPrebidKeywords(ad))
+            mopubLeaderboard.setKeywords(HeaderBiddingUtils.getPrebidKeywords(ad))
             mopubLeaderboard.adSize = MoPubView.MoPubAdSize.HEIGHT_90
             mopubLeaderboard.loadAd()
         }

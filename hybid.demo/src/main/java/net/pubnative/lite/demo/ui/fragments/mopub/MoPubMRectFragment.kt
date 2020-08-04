@@ -41,7 +41,7 @@ import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.api.MRectRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
-import net.pubnative.lite.sdk.utils.PrebidUtils
+import net.pubnative.lite.sdk.utils.HeaderBiddingUtils
 
 /**
  * Created by erosgarciaponte on 30.01.18.
@@ -105,7 +105,7 @@ class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView
         displayLogs()
         adUnitId?.let {
             mopubMRect.setAdUnitId(it)
-            mopubMRect.setKeywords(PrebidUtils.getPrebidKeywords(ad))
+            mopubMRect.setKeywords(HeaderBiddingUtils.getPrebidKeywords(ad))
             mopubMRect.adSize = MoPubView.MoPubAdSize.HEIGHT_250
             mopubMRect.loadAd()
         }

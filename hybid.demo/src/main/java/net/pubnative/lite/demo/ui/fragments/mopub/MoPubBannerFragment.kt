@@ -41,7 +41,7 @@ import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.api.BannerRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
-import net.pubnative.lite.sdk.utils.PrebidUtils
+import net.pubnative.lite.sdk.utils.HeaderBiddingUtils
 
 /**
  * Created by erosgarciaponte on 30.01.18.
@@ -106,7 +106,7 @@ class MoPubBannerFragment : Fragment(), RequestManager.RequestListener, MoPubVie
 
         adUnitId?.let {
             mopubBanner.setAdUnitId(it)
-            mopubBanner.setKeywords(PrebidUtils.getPrebidKeywords(ad, PrebidUtils.KeywordMode.TWO_DECIMALS))
+            mopubBanner.setKeywords(HeaderBiddingUtils.getPrebidKeywords(ad, HeaderBiddingUtils.KeywordMode.TWO_DECIMALS))
             mopubBanner.adSize = MoPubView.MoPubAdSize.HEIGHT_50
             mopubBanner.loadAd()
         }
