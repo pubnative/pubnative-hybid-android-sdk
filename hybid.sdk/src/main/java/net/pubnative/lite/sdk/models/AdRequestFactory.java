@@ -23,6 +23,7 @@
 package net.pubnative.lite.sdk.models;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.location.Location;
 import android.text.TextUtils;
 
@@ -150,6 +151,11 @@ public class AdRequestFactory {
                 adRequest.longitude = String.format(Locale.ENGLISH, "%.6f", location.getLongitude());
             }
         }
+
+        adRequest.deviceHeight = mDeviceInfo.getDeviceHeight();
+        adRequest.deviceWidth = mDeviceInfo.getDeviceWidth();
+
+        adRequest.orientation = mDeviceInfo.getOrientation().toString();
 
         return adRequest;
     }

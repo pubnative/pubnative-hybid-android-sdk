@@ -55,6 +55,7 @@ public class ViewControllerVast implements View.OnClickListener {
         mControlsLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mAdController.getViewabilityAdSession().fireClick();
                 mAdController.openUrl(null);
             }
         });
