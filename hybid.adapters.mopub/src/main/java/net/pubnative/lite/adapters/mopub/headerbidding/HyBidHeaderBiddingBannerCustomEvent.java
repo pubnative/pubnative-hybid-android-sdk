@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package net.pubnative.lite.adapters.mopub;
+package net.pubnative.lite.adapters.mopub.headerbidding;
 
 import android.app.Activity;
 import android.content.Context;
@@ -36,19 +36,17 @@ import com.mopub.mobileads.BaseAd;
 import com.mopub.mobileads.MoPubErrorCode;
 
 import net.pubnative.lite.sdk.HyBid;
-import net.pubnative.lite.sdk.leaderboard.presenter.LeaderboardPresenterFactory;
+import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 
-import java.util.Map;
-
-public class HyBidMoPubLeaderboardCustomEvent extends BaseAd implements AdPresenter.Listener {
-    private static final String TAG = HyBidMoPubBannerCustomEvent.class.getSimpleName();
+public class HyBidHeaderBiddingBannerCustomEvent extends BaseAd implements AdPresenter.Listener {
+    private static final String TAG = HyBidHeaderBiddingBannerCustomEvent.class.getSimpleName();
 
     private static final String ZONE_ID_KEY = "pn_zone_id";
 
-    private AdPresenter mLeaderboardPresenter;
+    private AdPresenter mAdPresenter;
     private View mAdView;
     private String mZoneID = "";
 
@@ -74,23 +72,23 @@ public class HyBidMoPubLeaderboardCustomEvent extends BaseAd implements AdPresen
             return;
         }
 
-        mLeaderboardPresenter = new LeaderboardPresenterFactory(context).createPresenter(ad, this);
-        if (mLeaderboardPresenter == null) {
-            Logger.e(TAG, "Could not create valid leaderboard presenter");
+        mAdPresenter = new BannerPresenterFactory(context).createPresenter(ad, this);
+        if (mAdPresenter == null) {
+            Logger.e(TAG, "Could not create valid banner presenter");
             mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
-        mLeaderboardPresenter.load();
+        mAdPresenter.load();
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_ATTEMPTED, TAG);
     }
 
     @Override
     protected void onInvalidate() {
-        if (mLeaderboardPresenter != null) {
-            mLeaderboardPresenter.stopTracking();
-            mLeaderboardPresenter.destroy();
-            mLeaderboardPresenter = null;
+        if (mAdPresenter != null) {
+            mAdPresenter.stopTracking();
+            mAdPresenter.destroy();
+            mAdPresenter = null;
         }
     }
 
@@ -117,7 +115,7 @@ public class HyBidMoPubLeaderboardCustomEvent extends BaseAd implements AdPresen
         mAdView = banner;
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_SUCCESS, TAG);
         mLoadListener.onAdLoaded();
-        mLeaderboardPresenter.startTracking();
+        mAdPresenter.startTracking();
     }
 
     @Override

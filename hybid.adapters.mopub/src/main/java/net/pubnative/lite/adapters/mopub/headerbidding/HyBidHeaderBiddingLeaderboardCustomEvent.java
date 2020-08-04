@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package net.pubnative.lite.adapters.mopub;
+package net.pubnative.lite.adapters.mopub.headerbidding;
 
 import android.app.Activity;
 import android.content.Context;
@@ -32,24 +32,21 @@ import androidx.annotation.Nullable;
 import com.mopub.common.LifecycleListener;
 import com.mopub.common.logging.MoPubLog;
 import com.mopub.mobileads.AdData;
-import com.mopub.mobileads.AdLifecycleListener;
 import com.mopub.mobileads.BaseAd;
 import com.mopub.mobileads.MoPubErrorCode;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.leaderboard.presenter.LeaderboardPresenterFactory;
 import net.pubnative.lite.sdk.models.Ad;
-import net.pubnative.lite.sdk.mrect.presenter.MRectPresenterFactory;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 
-import java.util.Map;
-
-public class HyBidMoPubMRectCustomEvent extends BaseAd implements AdPresenter.Listener {
-    private static final String TAG = HyBidMoPubMRectCustomEvent.class.getSimpleName();
+public class HyBidHeaderBiddingLeaderboardCustomEvent extends BaseAd implements AdPresenter.Listener {
+    private static final String TAG = HyBidHeaderBiddingBannerCustomEvent.class.getSimpleName();
 
     private static final String ZONE_ID_KEY = "pn_zone_id";
 
-    private AdPresenter mMRectPresenter;
+    private AdPresenter mLeaderboardPresenter;
     private View mAdView;
     private String mZoneID = "";
 
@@ -75,23 +72,23 @@ public class HyBidMoPubMRectCustomEvent extends BaseAd implements AdPresenter.Li
             return;
         }
 
-        mMRectPresenter = new MRectPresenterFactory(context).createPresenter(ad, this);
-        if (mMRectPresenter == null) {
-            Logger.e(TAG, "Could not create valid MRect presenter");
+        mLeaderboardPresenter = new LeaderboardPresenterFactory(context).createPresenter(ad, this);
+        if (mLeaderboardPresenter == null) {
+            Logger.e(TAG, "Could not create valid leaderboard presenter");
             mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
-        mMRectPresenter.load();
+        mLeaderboardPresenter.load();
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_ATTEMPTED, TAG);
     }
 
     @Override
     protected void onInvalidate() {
-        if (mMRectPresenter != null) {
-            mMRectPresenter.stopTracking();
-            mMRectPresenter.destroy();
-            mMRectPresenter = null;
+        if (mLeaderboardPresenter != null) {
+            mLeaderboardPresenter.stopTracking();
+            mLeaderboardPresenter.destroy();
+            mLeaderboardPresenter = null;
         }
     }
 
@@ -118,7 +115,7 @@ public class HyBidMoPubMRectCustomEvent extends BaseAd implements AdPresenter.Li
         mAdView = banner;
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_SUCCESS, TAG);
         mLoadListener.onAdLoaded();
-        mMRectPresenter.startTracking();
+        mLeaderboardPresenter.startTracking();
     }
 
     @Override

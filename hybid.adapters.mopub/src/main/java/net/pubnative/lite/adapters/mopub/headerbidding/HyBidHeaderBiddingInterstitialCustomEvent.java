@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package net.pubnative.lite.adapters.mopub;
+package net.pubnative.lite.adapters.mopub.headerbidding;
 
 import android.app.Activity;
 import android.content.Context;
@@ -40,8 +40,8 @@ import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenterFactor
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.Logger;
 
-public class HyBidMoPubInterstitialCustomEvent extends BaseAd implements InterstitialPresenter.Listener {
-    private static final String TAG = HyBidMoPubInterstitialCustomEvent.class.getSimpleName();
+public class HyBidHeaderBiddingInterstitialCustomEvent extends BaseAd implements InterstitialPresenter.Listener {
+    private static final String TAG = HyBidHeaderBiddingInterstitialCustomEvent.class.getSimpleName();
 
     private static final String ZONE_ID_KEY = "pn_zone_id";
 
