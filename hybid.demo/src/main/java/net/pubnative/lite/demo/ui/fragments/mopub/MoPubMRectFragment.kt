@@ -105,7 +105,7 @@ class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView
         displayLogs()
         adUnitId?.let {
             mopubMRect.setAdUnitId(it)
-            mopubMRect.setKeywords(HeaderBiddingUtils.getPrebidKeywords(ad))
+            mopubMRect.setKeywords(HeaderBiddingUtils.getHeaderBiddingKeywords(ad))
             mopubMRect.adSize = MoPubView.MoPubAdSize.HEIGHT_250
             mopubMRect.loadAd()
         }

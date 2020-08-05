@@ -101,7 +101,7 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
 
     // --------------- HyBid Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
-        mopubInterstitial.setKeywords(HeaderBiddingUtils.getPrebidKeywords(ad))
+        mopubInterstitial.setKeywords(HeaderBiddingUtils.getHeaderBiddingKeywords(ad))
         mopubInterstitial.load()
 
         Log.d(TAG, "onRequestSuccess")

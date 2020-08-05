@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 PubNative GmbH
+// Copyright (c) 2020 PubNative GmbH
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -57,19 +57,19 @@ public class HeaderBiddingUtils {
     }
 
     //---------------------------------- String keywords -------------------------------------------
-    public static String getPrebidKeywords(Ad ad) {
-        return getPrebidKeywords(ad, "");
+    public static String getHeaderBiddingKeywords(Ad ad) {
+        return getHeaderBiddingKeywords(ad, "");
     }
 
-    public static String getPrebidKeywords(Ad ad, KeywordMode mode) {
-        return getPrebidKeywords(ad, "", mode);
+    public static String getHeaderBiddingKeywords(Ad ad, KeywordMode mode) {
+        return getHeaderBiddingKeywords(ad, "", mode);
     }
 
-    public static String getPrebidKeywords(Ad ad, String zoneId) {
-        return getPrebidKeywords(ad, zoneId, KeywordMode.THREE_DECIMALS);
+    public static String getHeaderBiddingKeywords(Ad ad, String zoneId) {
+        return getHeaderBiddingKeywords(ad, zoneId, KeywordMode.THREE_DECIMALS);
     }
 
-    public static String getPrebidKeywords(Ad ad, String zoneId, KeywordMode mode) {
+    public static String getHeaderBiddingKeywords(Ad ad, String zoneId, KeywordMode mode) {
         StringBuilder stringBuilder = new StringBuilder();
 
         stringBuilder.append(KEYS.PN_BID).append(':').append(getBidECPM(ad, mode));
@@ -78,19 +78,19 @@ public class HeaderBiddingUtils {
     }
 
     //---------------------------------- Bundle keywords -------------------------------------------
-    public static Bundle getPrebidKeywordsBundle(Ad ad) {
-        return getPrebidKeywordsBundle(ad, "");
+    public static Bundle getHeaderBiddingKeywordsBundle(Ad ad) {
+        return getHeaderBiddingKeywordsBundle(ad, "");
     }
 
-    public static Bundle getPrebidKeywordsBundle(Ad ad, KeywordMode mode) {
-        return getPrebidKeywordsBundle(ad, "", mode);
+    public static Bundle getHeaderBiddingKeywordsBundle(Ad ad, KeywordMode mode) {
+        return getHeaderBiddingKeywordsBundle(ad, "", mode);
     }
 
-    public static Bundle getPrebidKeywordsBundle(Ad ad, String zoneid) {
-        return getPrebidKeywordsBundle(ad, zoneid, KeywordMode.THREE_DECIMALS);
+    public static Bundle getHeaderBiddingKeywordsBundle(Ad ad, String zoneid) {
+        return getHeaderBiddingKeywordsBundle(ad, zoneid, KeywordMode.THREE_DECIMALS);
     }
 
-    public static Bundle getPrebidKeywordsBundle(Ad ad, String zoneid, KeywordMode mode) {
+    public static Bundle getHeaderBiddingKeywordsBundle(Ad ad, String zoneid, KeywordMode mode) {
         Bundle bundle = new Bundle();
 
         bundle.putString(KEYS.PN_BID, getBidECPM(ad, mode));
@@ -99,19 +99,19 @@ public class HeaderBiddingUtils {
     }
 
     //------------------------------------ Set keywords --------------------------------------------
-    public static Set<String> getPrebidKeywordsSet(Ad ad) {
-        return getPrebidKeywordsSet(ad, "");
+    public static Set<String> getHeaderBiddingKeywordsSet(Ad ad) {
+        return getHeaderBiddingKeywordsSet(ad, "");
     }
 
-    public static Set<String> getPrebidKeywordsSet(Ad ad, KeywordMode mode) {
-        return getPrebidKeywordsSet(ad, "", mode);
+    public static Set<String> getHeaderBiddingKeywordsSet(Ad ad, KeywordMode mode) {
+        return getHeaderBiddingKeywordsSet(ad, "", mode);
     }
 
-    public static Set<String> getPrebidKeywordsSet(Ad ad, String zoneid) {
-        return getPrebidKeywordsSet(ad, zoneid, KeywordMode.THREE_DECIMALS);
+    public static Set<String> getHeaderBiddingKeywordsSet(Ad ad, String zoneid) {
+        return getHeaderBiddingKeywordsSet(ad, zoneid, KeywordMode.THREE_DECIMALS);
     }
 
-    public static Set<String> getPrebidKeywordsSet(Ad ad, String zoneid, KeywordMode mode) {
+    public static Set<String> getHeaderBiddingKeywordsSet(Ad ad, String zoneid, KeywordMode mode) {
         Set<String> set = new LinkedHashSet<>(3);
 
         set.add(KEYS.PN_BID.concat(":").concat(getBidECPM(ad, mode)));
