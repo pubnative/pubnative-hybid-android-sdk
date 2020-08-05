@@ -106,7 +106,7 @@ class MoPubBannerFragment : Fragment(), RequestManager.RequestListener, MoPubVie
 
         adUnitId?.let {
             mopubBanner.setAdUnitId(it)
-            mopubBanner.setKeywords(HeaderBiddingUtils.getPrebidKeywords(ad, HeaderBiddingUtils.KeywordMode.TWO_DECIMALS))
+            mopubBanner.setKeywords(HeaderBiddingUtils.getHeaderBiddingKeywords(ad, HeaderBiddingUtils.KeywordMode.TWO_DECIMALS))
             mopubBanner.adSize = MoPubView.MoPubAdSize.HEIGHT_50
             mopubBanner.loadAd()
         }

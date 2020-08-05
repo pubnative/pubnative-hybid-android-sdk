@@ -105,12 +105,12 @@ class DFPMRectFragment : Fragment(), RequestManager.RequestListener {
     override fun onRequestSuccess(ad: Ad?) {
         val builder = PublisherAdRequest.Builder()
 
-        val keywordSet = HeaderBiddingUtils.getPrebidKeywordsSet(ad)
+        val keywordSet = HeaderBiddingUtils.getHeaderBiddingKeywordsSet(ad)
         for (key in keywordSet) {
             builder.addKeyword(key)
         }
 
-        val keywordBundle = HeaderBiddingUtils.getPrebidKeywordsBundle(ad)
+        val keywordBundle = HeaderBiddingUtils.getHeaderBiddingKeywordsBundle(ad)
         for (key in keywordBundle.keySet()) {
             builder.addCustomTargeting(key, keywordBundle.getString(key))
         }

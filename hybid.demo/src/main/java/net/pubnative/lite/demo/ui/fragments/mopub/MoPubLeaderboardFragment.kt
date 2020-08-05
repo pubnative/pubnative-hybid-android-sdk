@@ -80,7 +80,7 @@ class MoPubLeaderboardFragment : Fragment(), RequestManager.RequestListener, MoP
         displayLogs()
         adUnitId?.let {
             mopubLeaderboard.setAdUnitId(it)
-            mopubLeaderboard.setKeywords(HeaderBiddingUtils.getPrebidKeywords(ad))
+            mopubLeaderboard.setKeywords(HeaderBiddingUtils.getHeaderBiddingKeywords(ad))
             mopubLeaderboard.adSize = MoPubView.MoPubAdSize.HEIGHT_90
             mopubLeaderboard.loadAd()
         }
