@@ -58,7 +58,7 @@ public class MRAIDHtmlProcessor {
 
         if (!hasHtmlTag) {
             if (!hasBodyTag) {
-                processedHtml.insert(0, "<body><div align='center'>" + ls);
+                processedHtml.insert(0, "<body><div id='hybid-ad' align='center'>" + ls);
                 processedHtml.append("</div></body>");
             }
             if (!hasHeadTag) {
@@ -91,10 +91,10 @@ public class MRAIDHtmlProcessor {
         String omSdk = new String(omsdkBytes);
         String omsdkTag = "<script>" + ls + omSdk + ls + "</script>";
 
-        String resizeScript64 = Assets.resize_script;
-        byte[] resizeScriptBytes = Base64.decode(resizeScript64, Base64.DEFAULT);
-        String resizeScript = new String(resizeScriptBytes);
-        String resizeTag = "<script>" + ls + resizeScript + ls + "</script>";
+        String scalingStr = Assets.scaling_script;
+        byte[] scalingBytes = Base64.decode(scalingStr, Base64.DEFAULT);
+        String scaling = new String(scalingBytes);
+        String scalingTag = "<script>" + ls + scaling + ls + "</script>";
 
         // Add meta and style tags to head tag.
         regex = "<head[^>]*>";
@@ -109,7 +109,7 @@ public class MRAIDHtmlProcessor {
                             "*:not(input) { -webkit-touch-callout:none; -webkit-user-select:none; -webkit-text-size-adjust:none; }" + ls +
                             "</style>";
             processedHtml.insert(matcher.end(), ls + metaTag + ls + styleTag + ls
-                    + mraidTag + ls + omsdkTag + ls + resizeTag);
+                    + mraidTag + ls + omsdkTag + ls + scalingTag);
         }
 
         return processedHtml.toString();
