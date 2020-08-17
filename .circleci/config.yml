@@ -161,5 +161,6 @@ workflows:
                 - master
                 - beta
                 - development
+                - interstitial_scaling
           requires:
             - test_unit
