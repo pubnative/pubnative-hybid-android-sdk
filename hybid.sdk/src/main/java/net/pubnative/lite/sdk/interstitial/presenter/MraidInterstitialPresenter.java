@@ -95,13 +95,14 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, HyBidI
         if (mBroadcastReceiver != null) {
             mBroadcastReceiver.register();
 
-            Intent intent;
+            /*Intent intent;
             if (mAd.getAssetWidth(APIAsset.HTML_BANNER) != -1
                     && mAd.getAssetHeight(APIAsset.HTML_BANNER) != -1) {
-                intent = new Intent(mContext, CenteredMraidInterstitialActivity.class);
+                intent = new Intent(mContext, MraidInterstitialActivity.class);
             } else {
                 intent = new Intent(mContext, MraidInterstitialActivity.class);
-            }
+            }*/
+            Intent intent = new Intent(mContext, MraidInterstitialActivity.class);
 
             intent.putExtra(HyBidInterstitialActivity.EXTRA_BROADCAST_ID, mBroadcastReceiver.getBroadcastId());
             intent.putExtra(HyBidInterstitialActivity.EXTRA_ZONE_ID, mZoneId);
