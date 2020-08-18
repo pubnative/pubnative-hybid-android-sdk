@@ -62,9 +62,10 @@ public class HyBidLeaderboardAdView extends PNAdView {
     }
 
     @Override
-    protected void renderAd(String htmlAd){
+    public void renderAd(String htmlAd){
         mAd = new Ad();
         mAd.setZoneId("24");
+        super.renderAd(htmlAd);
     }
 
     @Override

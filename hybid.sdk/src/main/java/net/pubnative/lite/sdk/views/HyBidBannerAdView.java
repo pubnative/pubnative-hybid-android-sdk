@@ -71,6 +71,7 @@ public class HyBidBannerAdView extends PNAdView {
     public void renderAd(String htmlAd){
         mAd = new Ad();
         mAd.setZoneId("10");
+        super.renderAd(htmlAd);
     }
 
 }

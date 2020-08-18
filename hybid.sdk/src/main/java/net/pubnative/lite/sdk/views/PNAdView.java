@@ -30,6 +30,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
+import net.pubnative.lite.sdk.AdCache;
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.IntegrationType;
@@ -52,6 +54,7 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
     protected Listener mListener;
     private AdPresenter mPresenter;
     protected Ad mAd;
+    protected AdCache mAdCache;
     private boolean autoShowOnLoad = true;
 
     public PNAdView(Context context) {
@@ -150,10 +153,13 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
         }
     }
 
-    protected void renderAd(String htmlAd){
+    public void renderAd(String htmlAd){
         mAd.link = htmlAd;
 
-        renderAd();
+        mAdCache = HyBid.getAdCache();
+        mAdCache.put(mAd.getZoneId(), mAd);
+
+        onRequestSuccess(mAd);
     }
 
     protected void startTracking() {
