@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 PubNative GmbH
+// Copyright (c) 2020 PubNative GmbH
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,6 @@ import android.content.Context;
 
 import com.mopub.common.MoPub;
 import com.mopub.common.SdkConfiguration;
-import com.mopub.common.SdkInitializationListener;
 import com.mopub.common.logging.MoPubLog;
 
 public class MoPubManager {
@@ -39,12 +38,9 @@ public class MoPubManager {
                 .Builder(adUnitId)
                 .withLogLevel(MoPubLog.LogLevel.DEBUG)
                 .build();
-        MoPub.initializeSdk(context, sdkConfiguration, new SdkInitializationListener() {
-            @Override
-            public void onInitializationFinished() {
-                if (listener != null) {
-                    listener.onInitialisationFinished();
-                }
+        MoPub.initializeSdk(context, sdkConfiguration, () -> {
+            if (listener != null) {
+                listener.onInitialisationFinished();
             }
         });
     }

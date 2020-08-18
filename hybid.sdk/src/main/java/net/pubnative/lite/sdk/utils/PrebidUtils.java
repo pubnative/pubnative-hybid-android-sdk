@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 PubNative GmbH
+// Copyright (c) 2020 PubNative GmbH
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,107 +26,71 @@ import android.os.Bundle;
 
 import net.pubnative.lite.sdk.models.Ad;
 
-import java.util.LinkedHashSet;
-import java.util.Locale;
 import java.util.Set;
 
-/**
- * Created by erosgarciaponte on 11.01.18.
- */
-
-public final class PrebidUtils {
+public class PrebidUtils {
     public enum KeywordMode {
         TWO_DECIMALS, THREE_DECIMALS
     }
 
-    private static final double ECPM_POINTS_DIVIDER = 1000.0;
-
-    public interface KEYS {
-        String PN_BID = "pn_bid";
-    }
-
-    private static String getBidECPM(Ad ad, KeywordMode mode) {
-        Double eCPM = ad.getECPM().doubleValue() / ECPM_POINTS_DIVIDER;
-        String formatString = "%.3f";
-
-        if (mode == KeywordMode.TWO_DECIMALS) {
-            formatString = "%.2f";
-        }
-
-        return String.format(Locale.ENGLISH, formatString, eCPM);
-    }
-
-    public static String getBidFromPoints(Integer points, KeywordMode mode) {
-        Double eCPM = points.doubleValue() / ECPM_POINTS_DIVIDER;
-        String formatString = "%.3f";
-
-        if (mode == KeywordMode.TWO_DECIMALS) {
-            formatString = "%.2f";
-        }
-
-        return String.format(Locale.ENGLISH, formatString, eCPM);
-    }
-
     //---------------------------------- String keywords -------------------------------------------
     public static String getPrebidKeywords(Ad ad) {
-        return getPrebidKeywords(ad, "");
+        return HeaderBiddingUtils.getHeaderBiddingKeywords(ad);
     }
 
     public static String getPrebidKeywords(Ad ad, KeywordMode mode) {
-        return getPrebidKeywords(ad, "", mode);
+        return HeaderBiddingUtils.getHeaderBiddingKeywords(ad, mapKeywordMode(mode));
     }
 
     public static String getPrebidKeywords(Ad ad, String zoneId) {
-        return getPrebidKeywords(ad, zoneId, KeywordMode.THREE_DECIMALS);
+        return HeaderBiddingUtils.getHeaderBiddingKeywords(ad, zoneId);
     }
 
     public static String getPrebidKeywords(Ad ad, String zoneId, KeywordMode mode) {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        stringBuilder.append(KEYS.PN_BID).append(':').append(getBidECPM(ad, mode));
-
-        return stringBuilder.toString();
+        return HeaderBiddingUtils.getHeaderBiddingKeywords(ad, zoneId, mapKeywordMode(mode));
     }
 
     //---------------------------------- Bundle keywords -------------------------------------------
     public static Bundle getPrebidKeywordsBundle(Ad ad) {
-        return getPrebidKeywordsBundle(ad, "");
+        return HeaderBiddingUtils.getHeaderBiddingKeywordsBundle(ad);
     }
 
     public static Bundle getPrebidKeywordsBundle(Ad ad, KeywordMode mode) {
-        return getPrebidKeywordsBundle(ad, "", mode);
+        return HeaderBiddingUtils.getHeaderBiddingKeywordsBundle(ad, mapKeywordMode(mode));
     }
 
     public static Bundle getPrebidKeywordsBundle(Ad ad, String zoneid) {
-        return getPrebidKeywordsBundle(ad, zoneid, KeywordMode.THREE_DECIMALS);
+        return HeaderBiddingUtils.getHeaderBiddingKeywordsBundle(ad, zoneid);
     }
 
     public static Bundle getPrebidKeywordsBundle(Ad ad, String zoneid, KeywordMode mode) {
-        Bundle bundle = new Bundle();
-
-        bundle.putString(KEYS.PN_BID, getBidECPM(ad, mode));
-
-        return bundle;
+        return HeaderBiddingUtils.getHeaderBiddingKeywordsBundle(ad, zoneid, mapKeywordMode(mode));
     }
 
     //------------------------------------ Set keywords --------------------------------------------
     public static Set<String> getPrebidKeywordsSet(Ad ad) {
-        return getPrebidKeywordsSet(ad, "");
+        return HeaderBiddingUtils.getHeaderBiddingKeywordsSet(ad);
     }
 
     public static Set<String> getPrebidKeywordsSet(Ad ad, KeywordMode mode) {
-        return getPrebidKeywordsSet(ad, "", mode);
+        return HeaderBiddingUtils.getHeaderBiddingKeywordsSet(ad, mapKeywordMode(mode));
     }
 
     public static Set<String> getPrebidKeywordsSet(Ad ad, String zoneid) {
-        return getPrebidKeywordsSet(ad, zoneid, KeywordMode.THREE_DECIMALS);
+        return HeaderBiddingUtils.getHeaderBiddingKeywordsSet(ad, zoneid);
     }
 
     public static Set<String> getPrebidKeywordsSet(Ad ad, String zoneid, KeywordMode mode) {
-        Set<String> set = new LinkedHashSet<>(3);
+        return HeaderBiddingUtils.getHeaderBiddingKeywordsSet(ad, zoneid, mapKeywordMode(mode));
+    }
 
-        set.add(KEYS.PN_BID.concat(":").concat(getBidECPM(ad, mode)));
-
-        return set;
+    /*
+     * This method is added for backward compatibility in the SDK
+     */
+    private static HeaderBiddingUtils.KeywordMode mapKeywordMode(KeywordMode mode) {
+        if (mode == KeywordMode.TWO_DECIMALS) {
+            return HeaderBiddingUtils.KeywordMode.TWO_DECIMALS;
+        }
+        return HeaderBiddingUtils.KeywordMode.THREE_DECIMALS;
     }
 }

@@ -41,7 +41,7 @@ import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.api.InterstitialRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
-import net.pubnative.lite.sdk.utils.PrebidUtils
+import net.pubnative.lite.sdk.utils.HeaderBiddingUtils
 
 /**
  * Created by erosgarciaponte on 30.01.18.
@@ -101,7 +101,7 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
 
     // --------------- HyBid Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
-        mopubInterstitial.keywords = PrebidUtils.getPrebidKeywords(ad)
+        mopubInterstitial.setKeywords(HeaderBiddingUtils.getHeaderBiddingKeywords(ad))
         mopubInterstitial.load()
 
         Log.d(TAG, "onRequestSuccess")
