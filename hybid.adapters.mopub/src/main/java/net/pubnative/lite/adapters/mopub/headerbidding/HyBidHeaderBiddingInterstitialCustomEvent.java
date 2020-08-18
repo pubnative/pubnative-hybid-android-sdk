@@ -20,11 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package net.pubnative.lite.adapters.mopub.mediation;
+package net.pubnative.lite.adapters.mopub.headerbidding;
 
 import android.app.Activity;
 import android.content.Context;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,17 +35,17 @@ import com.mopub.mobileads.BaseAd;
 import com.mopub.mobileads.MoPubErrorCode;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenter;
+import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenterFactory;
+import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.Logger;
-import net.pubnative.lite.sdk.views.HyBidLeaderboardAdView;
-import net.pubnative.lite.sdk.views.PNAdView;
 
-public class HyBidMediationLeaderboardCustomEvent extends BaseAd implements PNAdView.Listener {
-    private static final String TAG = HyBidMediationBannerCustomEvent.class.getSimpleName();
+public class HyBidHeaderBiddingInterstitialCustomEvent extends BaseAd implements InterstitialPresenter.Listener {
+    private static final String TAG = HyBidHeaderBiddingInterstitialCustomEvent.class.getSimpleName();
 
-    private static final String APP_TOKEN_KEY = "pn_app_token";
     private static final String ZONE_ID_KEY = "pn_zone_id";
 
-    private HyBidLeaderboardAdView mLeaderboardView;
+    private InterstitialPresenter mInterstitialPresenter;
     private String mZoneID = "";
 
     @Override
@@ -56,40 +55,46 @@ public class HyBidMediationLeaderboardCustomEvent extends BaseAd implements PNAd
 
     @Override
     protected void load(@NonNull Context context, @NonNull AdData adData) throws Exception {
-
-        String appToken;
-        if (adData.getExtras().containsKey(ZONE_ID_KEY) && adData.getExtras().containsKey(APP_TOKEN_KEY)) {
+        if (adData.getExtras().containsKey(ZONE_ID_KEY)) {
             mZoneID = adData.getExtras().get(ZONE_ID_KEY);
-            appToken = adData.getExtras().get(APP_TOKEN_KEY);
         } else {
-            Logger.e(TAG, "Could not find the required params in CustomEventBanner serverExtras");
+            Logger.e(TAG, "Could not find zone id value in BaseAd adData");
             mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
-        if (appToken == null || !appToken.equals(HyBid.getAppToken())) {
-            Logger.e(TAG, "The provided app token doesn't match the one used to initialise HyBid");
+        final Ad ad = HyBid.getAdCache().inspect(mZoneID);
+        if (ad == null) {
+            Logger.e(TAG, "Could not find an ad in the cache for zone id with key " + mZoneID);
+            mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
+            return;
+        }
+
+        mInterstitialPresenter = new InterstitialPresenterFactory(context, mZoneID).createInterstitialPresenter(ad, this);
+        if (mInterstitialPresenter == null) {
+            Logger.e(TAG, "Could not create valid interstitial presenter");
             mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
         setAutomaticImpressionAndClickTracking(false);
-        mLeaderboardView = new HyBidLeaderboardAdView(context);
-        mLeaderboardView.setMediation(true);
-        mLeaderboardView.load(mZoneID, this);
+        mInterstitialPresenter.load();
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_ATTEMPTED, TAG);
     }
 
     @Override
     protected void show() {
-        super.show();
+        if (mInterstitialPresenter != null) {
+            mInterstitialPresenter.show();
+            MoPubLog.log(MoPubLog.AdapterLogEvent.SHOW_ATTEMPTED, TAG);
+        }
     }
 
     @Override
     protected void onInvalidate() {
-        if (mLeaderboardView != null) {
-            mLeaderboardView.destroy();
-            mLeaderboardView = null;
+        if (mInterstitialPresenter != null) {
+            mInterstitialPresenter.destroy();
+            mInterstitialPresenter = null;
         }
     }
 
@@ -105,34 +110,33 @@ public class HyBidMediationLeaderboardCustomEvent extends BaseAd implements PNAd
         return mZoneID;
     }
 
-    @Nullable
     @Override
-    protected View getAdView() {
-        return mLeaderboardView;
-    }
-
-    //------------------------------------ PNAdView Callbacks --------------------------------------
-    @Override
-    public void onAdLoaded() {
+    public void onInterstitialLoaded(InterstitialPresenter interstitialPresenter) {
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_SUCCESS, TAG);
         mLoadListener.onAdLoaded();
     }
 
     @Override
-    public void onAdLoadFailed(Throwable error) {
+    public void onInterstitialError(InterstitialPresenter interstitialPresenter) {
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_FAILED, TAG);
-        mLoadListener.onAdLoadFailed(MoPubErrorCode.NETWORK_NO_FILL);
+        mLoadListener.onAdLoadFailed(MoPubErrorCode.INTERNAL_ERROR);
     }
 
     @Override
-    public void onAdImpression() {
+    public void onInterstitialShown(InterstitialPresenter interstitialPresenter) {
         MoPubLog.log(MoPubLog.AdapterLogEvent.SHOW_SUCCESS, TAG);
-        mInteractionListener.onAdImpression();
+        mInteractionListener.onAdShown();
     }
 
     @Override
-    public void onAdClick() {
+    public void onInterstitialClicked(InterstitialPresenter interstitialPresenter) {
         MoPubLog.log(MoPubLog.AdapterLogEvent.CLICKED, TAG);
         mInteractionListener.onAdClicked();
+    }
+
+    @Override
+    public void onInterstitialDismissed(InterstitialPresenter interstitialPresenter) {
+        MoPubLog.log(MoPubLog.AdapterLogEvent.DID_DISAPPEAR, TAG);
+        mInteractionListener.onAdDismissed();
     }
 }

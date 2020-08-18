@@ -23,6 +23,7 @@
 package net.pubnative.lite.sdk.models;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.location.Location;
 import android.text.TextUtils;
 
@@ -114,6 +115,11 @@ public class AdRequestFactory {
             adRequest.usprivacy = usPrivacyString;
         }
 
+        String gdprConsentString = mUserDataManager.getIABGDPRConsentString();
+        if (!TextUtils.isEmpty(gdprConsentString)) {
+            adRequest.userconsent = gdprConsentString;
+        }
+
         adRequest.locale = mDeviceInfo.getLocale().getLanguage();
 
         if (!HyBid.isCoppaEnabled() && !limitTracking && !isCCPAOptOut) {
@@ -145,6 +151,11 @@ public class AdRequestFactory {
                 adRequest.longitude = String.format(Locale.ENGLISH, "%.6f", location.getLongitude());
             }
         }
+
+        adRequest.deviceHeight = mDeviceInfo.getDeviceHeight();
+        adRequest.deviceWidth = mDeviceInfo.getDeviceWidth();
+
+        adRequest.orientation = mDeviceInfo.getOrientation().toString();
 
         return adRequest;
     }

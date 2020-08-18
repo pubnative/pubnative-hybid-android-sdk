@@ -56,6 +56,18 @@ public final class PNApiUrlComposer {
             uriBuilder.appendQueryParameter("devicemodel", adRequest.devicemodel);
         }
 
+        if (!TextUtils.isEmpty(adRequest.deviceHeight)) {
+            uriBuilder.appendQueryParameter("dh", adRequest.deviceHeight);
+        }
+
+        if (!TextUtils.isEmpty(adRequest.deviceWidth)) {
+            uriBuilder.appendQueryParameter("dw", adRequest.deviceWidth);
+        }
+
+        if(!TextUtils.isEmpty(adRequest.orientation)){
+            uriBuilder.appendQueryParameter("scro", adRequest.orientation);
+        }
+
         if (!TextUtils.isEmpty(adRequest.dnt)) {
             uriBuilder.appendQueryParameter("dnt", adRequest.dnt);
         }
@@ -134,6 +146,10 @@ public final class PNApiUrlComposer {
 
         if (!TextUtils.isEmpty(adRequest.usprivacy)) {
             uriBuilder.appendQueryParameter("usprivacy", adRequest.usprivacy);
+        }
+
+        if (!TextUtils.isEmpty(adRequest.userconsent)) {
+            uriBuilder.appendQueryParameter("userconsent", adRequest.userconsent);
         }
 
         return uriBuilder.build().toString();

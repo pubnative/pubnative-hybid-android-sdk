@@ -94,10 +94,19 @@
     <string name="action_check">Check</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-    <string name="set_ccpa_consent">Set CCPA Consent</string>
-    <string name="get_ccpa_consent">Get CCPA Consent</string>
-    <string name="remove_ccpa_consent">Remove CCPA Consent</string>
-    <string name="enter_ccpa_consent_here">Enter CCPA Consent String here</string>
+
+    <string name="action_set">Set</string>
+    <string name="action_remove">Remove</string>
+    <string name="title_cmp">Consent Management Provider</string>
+    <string name="title_consent_strings">Consent Strings</string>
+    <string name="hint_ccpa_consent">CCPA consent string</string>
+    <string name="hint_gdpr_consent">GDPR consent string</string>
+    <string name="empty_gdpr_consent_field">Please input a valid GDPR consent string</string>
+    <string name="empty_ccpa_consent_field">Please input a valid CCPA consent string</string>
+    <string name="updated_gdpr_consent">GDPR consent string has been updated in the app shared preferences</string>
+    <string name="updated_ccpa_consent">CCPA consent string has been updated in the app shared preferences</string>
+    <string name="removed_gdpr_consent">GDPR consent string has been removed from the app shared preferences</string>
+    <string name="removed_ccpa_consent">CCPA consent string has been removed from the app shared preferences</string>
 
     <string name="mediation">Mediation</string>
 

@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package net.pubnative.lite.adapters.mopub.mediation;
+package net.pubnative.lite.adapters.mopub.headerbidding;
 
 import android.app.Activity;
 import android.content.Context;
@@ -36,17 +36,18 @@ import com.mopub.mobileads.BaseAd;
 import com.mopub.mobileads.MoPubErrorCode;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.mrect.presenter.MRectPresenterFactory;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
-import net.pubnative.lite.sdk.views.HyBidLeaderboardAdView;
-import net.pubnative.lite.sdk.views.PNAdView;
 
-public class HyBidMediationLeaderboardCustomEvent extends BaseAd implements PNAdView.Listener {
-    private static final String TAG = HyBidMediationBannerCustomEvent.class.getSimpleName();
+public class HyBidHeaderBiddingMRectCustomEvent extends BaseAd implements AdPresenter.Listener {
+    private static final String TAG = HyBidHeaderBiddingMRectCustomEvent.class.getSimpleName();
 
-    private static final String APP_TOKEN_KEY = "pn_app_token";
     private static final String ZONE_ID_KEY = "pn_zone_id";
 
-    private HyBidLeaderboardAdView mLeaderboardView;
+    private AdPresenter mMRectPresenter;
+    private View mAdView;
     private String mZoneID = "";
 
     @Override
@@ -56,40 +57,38 @@ public class HyBidMediationLeaderboardCustomEvent extends BaseAd implements PNAd
 
     @Override
     protected void load(@NonNull Context context, @NonNull AdData adData) throws Exception {
-
-        String appToken;
-        if (adData.getExtras().containsKey(ZONE_ID_KEY) && adData.getExtras().containsKey(APP_TOKEN_KEY)) {
+        if (adData.getExtras().containsKey(ZONE_ID_KEY)) {
             mZoneID = adData.getExtras().get(ZONE_ID_KEY);
-            appToken = adData.getExtras().get(APP_TOKEN_KEY);
         } else {
-            Logger.e(TAG, "Could not find the required params in CustomEventBanner serverExtras");
+            Logger.e(TAG, "Could not find zone id value in BaseAd adData");
             mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
-        if (appToken == null || !appToken.equals(HyBid.getAppToken())) {
-            Logger.e(TAG, "The provided app token doesn't match the one used to initialise HyBid");
+        final Ad ad = HyBid.getAdCache().remove(mZoneID);
+        if (ad == null) {
+            Logger.e(TAG, "Could not find an ad in the cache for zone id with key: " + mZoneID);
             mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
-        setAutomaticImpressionAndClickTracking(false);
-        mLeaderboardView = new HyBidLeaderboardAdView(context);
-        mLeaderboardView.setMediation(true);
-        mLeaderboardView.load(mZoneID, this);
+        mMRectPresenter = new MRectPresenterFactory(context).createPresenter(ad, this);
+        if (mMRectPresenter == null) {
+            Logger.e(TAG, "Could not create valid MRect presenter");
+            mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
+            return;
+        }
+
+        mMRectPresenter.load();
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_ATTEMPTED, TAG);
     }
 
     @Override
-    protected void show() {
-        super.show();
-    }
-
-    @Override
     protected void onInvalidate() {
-        if (mLeaderboardView != null) {
-            mLeaderboardView.destroy();
-            mLeaderboardView = null;
+        if (mMRectPresenter != null) {
+            mMRectPresenter.stopTracking();
+            mMRectPresenter.destroy();
+            mMRectPresenter = null;
         }
     }
 
@@ -108,30 +107,25 @@ public class HyBidMediationLeaderboardCustomEvent extends BaseAd implements PNAd
     @Nullable
     @Override
     protected View getAdView() {
-        return mLeaderboardView;
+        return mAdView;
     }
 
-    //------------------------------------ PNAdView Callbacks --------------------------------------
     @Override
-    public void onAdLoaded() {
+    public void onAdLoaded(AdPresenter adPresenter, View banner) {
+        mAdView = banner;
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_SUCCESS, TAG);
         mLoadListener.onAdLoaded();
+        mMRectPresenter.startTracking();
     }
 
     @Override
-    public void onAdLoadFailed(Throwable error) {
+    public void onAdError(AdPresenter adPresenter) {
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_FAILED, TAG);
-        mLoadListener.onAdLoadFailed(MoPubErrorCode.NETWORK_NO_FILL);
+        mLoadListener.onAdLoadFailed(MoPubErrorCode.INTERNAL_ERROR);
     }
 
     @Override
-    public void onAdImpression() {
-        MoPubLog.log(MoPubLog.AdapterLogEvent.SHOW_SUCCESS, TAG);
-        mInteractionListener.onAdImpression();
-    }
-
-    @Override
-    public void onAdClick() {
+    public void onAdClicked(AdPresenter adPresenter) {
         MoPubLog.log(MoPubLog.AdapterLogEvent.CLICKED, TAG);
         mInteractionListener.onAdClicked();
     }
