@@ -141,13 +141,19 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
 
     protected abstract AdPresenter createPresenter();
 
-    protected void renderAd() {
+    public void renderAd() {
         mPresenter = createPresenter();
         if (mPresenter != null) {
             mPresenter.load();
         } else {
             invokeOnLoadFailed(new Exception("The server has returned an unsupported ad asset"));
         }
+    }
+
+    protected void renderAd(String htmlAd){
+        mAd.link = htmlAd;
+
+        renderAd();
     }
 
     protected void startTracking() {

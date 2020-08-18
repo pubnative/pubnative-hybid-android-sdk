@@ -29,6 +29,7 @@ import android.util.AttributeSet;
 import net.pubnative.lite.sdk.api.LeaderboardRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.leaderboard.presenter.LeaderboardPresenterFactory;
+import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 
 public class HyBidLeaderboardAdView extends PNAdView {
@@ -58,6 +59,12 @@ public class HyBidLeaderboardAdView extends PNAdView {
     @Override
     RequestManager getRequestManager() {
         return new LeaderboardRequestManager();
+    }
+
+    @Override
+    protected void renderAd(String htmlAd){
+        mAd = new Ad();
+        mAd.setZoneId("24");
     }
 
     @Override

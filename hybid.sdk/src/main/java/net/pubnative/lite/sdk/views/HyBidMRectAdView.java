@@ -28,6 +28,7 @@ import android.util.AttributeSet;
 
 import net.pubnative.lite.sdk.api.MRectRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
+import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.mrect.presenter.MRectPresenterFactory;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 
@@ -58,6 +59,12 @@ public class HyBidMRectAdView extends PNAdView {
     @Override
     RequestManager getRequestManager() {
         return new MRectRequestManager();
+    }
+
+    @Override
+    protected void renderAd(String htmlAd){
+        mAd = new Ad();
+        mAd.setZoneId("8");
     }
 
     @Override

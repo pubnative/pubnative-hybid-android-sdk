@@ -29,6 +29,7 @@ import android.util.AttributeSet;
 import net.pubnative.lite.sdk.api.BannerRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
+import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 
 public class HyBidBannerAdView extends PNAdView {
@@ -65,4 +66,11 @@ public class HyBidBannerAdView extends PNAdView {
         return new BannerPresenterFactory(getContext())
                 .createPresenter(mAd, this);
     }
+
+    @Override
+    public void renderAd(String htmlAd){
+        mAd = new Ad();
+        mAd.setZoneId("10");
+    }
+
 }
