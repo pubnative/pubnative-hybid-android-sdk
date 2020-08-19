@@ -162,5 +162,6 @@ workflows:
                 - beta
                 - development
                 - in-app-bidding
+                - maxads_mediation
           requires:
             - test_unit
