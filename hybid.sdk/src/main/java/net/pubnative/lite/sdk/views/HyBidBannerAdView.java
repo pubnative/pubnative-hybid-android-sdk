@@ -75,7 +75,7 @@ public class HyBidBannerAdView extends PNAdView {
         mListener = listener;
 
         if (!TextUtils.isEmpty(adValue)) {
-            mAd = new Ad(10, adValue);
+            mAd = new Ad(10, adValue, Ad.AdType.HTML);
             renderFromCustomAd();
         } else {
             invokeOnLoadFailed(new Exception("The server has returned an invalid ad asset"));

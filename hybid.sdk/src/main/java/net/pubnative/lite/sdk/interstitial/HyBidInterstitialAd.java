@@ -151,9 +151,11 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         if (!TextUtils.isEmpty(adValue)) {
             final String zoneId;
             final int assetGroupId;
+            final Ad.AdType type;
             if (MarkupUtils.isVastXml(adValue)) {
                 zoneId = "4";
                 assetGroupId = 15;
+                type = Ad.AdType.VIDEO;
                 VideoAdProcessor videoAdProcessor = new VideoAdProcessor();
                 videoAdProcessor.process(mContext, adValue, null, new VideoAdProcessor.Listener() {
                     @Override
@@ -163,7 +165,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
                         }
 
                         VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardFilePath);
-                        mAd = new Ad(assetGroupId, adValue);
+                        mAd = new Ad(assetGroupId, adValue, type);
                         mAdCache.put(zoneId, mAd);
                         mVideoCache.put(zoneId, adCacheItem);
                         mPresenter = new InterstitialPresenterFactory(mContext, zoneId).createInterstitialPresenter(mAd, HyBidInterstitialAd.this);
@@ -187,7 +189,8 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
             } else {
                 zoneId = "3";
                 assetGroupId = 21;
-                mAd = new Ad(assetGroupId, adValue);
+                type = Ad.AdType.HTML;
+                mAd = new Ad(assetGroupId, adValue, type);
                 mAdCache.put(zoneId, mAd);
                 mPresenter = new InterstitialPresenterFactory(mContext, zoneId).createInterstitialPresenter(mAd, this);
                 if (mPresenter != null) {

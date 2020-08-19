@@ -78,7 +78,9 @@ public abstract class HyBidInterstitialActivity extends Activity {
 
                 if (shouldShowContentInfo()) {
                     View contentInfo = getAd().getContentInfoContainer(this);
-                    mCloseableContainer.addView(contentInfo);
+                    if (contentInfo != null) {
+                        mCloseableContainer.addView(contentInfo);
+                    }
                 }
 
                 setContentView(mCloseableContainer);

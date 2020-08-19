@@ -80,6 +80,10 @@ public class Ad extends JsonModel implements Serializable {
         String CLICK = "click";
     }
 
+    public enum AdType {
+        HTML, VIDEO
+    }
+
     public Ad() {
     }
 
@@ -87,11 +91,18 @@ public class Ad extends JsonModel implements Serializable {
         fromJson(jsonObject);
     }
 
-    public Ad(int assetGroupId, String htmlBanner) {
+    public Ad(int assetGroupId, String adValue, AdType type) {
         this.assetgroupid = assetGroupId;
-        String apiAsset = APIAsset.HTML_BANNER;
+        String apiAsset;
         assets = new ArrayList<>();
-        AdData adData = new AdData("html", apiAsset, htmlBanner);
+        AdData adData;
+        if (type == AdType.VIDEO) {
+            apiAsset = APIAsset.VAST;
+            adData = new AdData("vast2", apiAsset, adValue);
+        } else {
+            apiAsset = APIAsset.HTML_BANNER;
+            adData = new AdData("html", apiAsset, adValue);
+        }
         assets.add(adData);
     }
 

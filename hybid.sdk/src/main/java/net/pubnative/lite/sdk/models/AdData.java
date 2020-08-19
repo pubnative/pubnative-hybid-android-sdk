@@ -46,9 +46,9 @@ public class AdData extends JsonModel implements Serializable {
         fromJson(jsonObject);
     }
 
-    public AdData(String key, String apiAsset, String html) {
+    public AdData(String key, String apiAsset, String assetValue) {
         data = new HashMap<>();
-        data.put(key, html);
+        data.put(key, assetValue);
         type = apiAsset;
     }
 
