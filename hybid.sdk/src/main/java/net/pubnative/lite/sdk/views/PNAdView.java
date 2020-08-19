@@ -153,7 +153,7 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
         }
     }
 
-    public abstract void renderAd(String htmlAd);
+    public abstract void renderAd(String adValue, final Listener listener);
 
     protected void renderFromCustomAd() {
         mPresenter = createPresenter();

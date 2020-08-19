@@ -26,6 +26,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.text.TextUtils;
 
+import net.pubnative.lite.sdk.AdCache;
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.api.InterstitialRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenter;
@@ -33,6 +35,11 @@ import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenterFactor
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.MarkupUtils;
+import net.pubnative.lite.sdk.vpaid.VideoAdCache;
+import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
+import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
+import net.pubnative.lite.sdk.vpaid.response.AdParams;
 
 public class HyBidInterstitialAd implements RequestManager.RequestListener, InterstitialPresenter.Listener {
     private static final String TAG = HyBidInterstitialAd.class.getSimpleName();
@@ -54,8 +61,15 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     private final Listener mListener;
     private final Context mContext;
     private final String mZoneId;
+    private final AdCache mAdCache;
+    private final VideoAdCache mVideoCache;
     private Ad mAd;
     private boolean mReady = false;
+    private boolean mIsDestroyed = false;
+
+    public HyBidInterstitialAd(Activity activity, Listener listener) {
+        this((Context) activity, "", listener);
+    }
 
     public HyBidInterstitialAd(Activity activity, String zoneId, Listener listener) {
         this((Context) activity, zoneId, listener);
@@ -66,6 +80,8 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         mContext = context;
         mZoneId = zoneId;
         mListener = listener;
+        mAdCache = HyBid.getAdCache();
+        mVideoCache = HyBid.getVideoAdCache();
 
         mRequestManager.setIntegrationType(IntegrationType.STANDALONE);
     }
@@ -95,6 +111,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
 
     public void destroy() {
         cleanup();
+        mIsDestroyed = true;
         if (mRequestManager != null) {
             mRequestManager.destroy();
             mRequestManager = null;
@@ -130,15 +147,54 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         }
     }
 
-    public void renderAd(String htmlAd) {
-        if (!TextUtils.isEmpty(htmlAd)) {
-            String zoneId = "3";
-            mAd = new Ad(21, htmlAd);
-            mPresenter = new InterstitialPresenterFactory(mContext, zoneId).createInterstitialPresenter(mAd, this);
-            if (mPresenter != null) {
-                mPresenter.load();
+    public void prepareAd(final String adValue) {
+        if (!TextUtils.isEmpty(adValue)) {
+            final String zoneId;
+            final int assetGroupId;
+            if (MarkupUtils.isVastXml(adValue)) {
+                zoneId = "4";
+                assetGroupId = 15;
+                VideoAdProcessor videoAdProcessor = new VideoAdProcessor();
+                videoAdProcessor.process(mContext, adValue, null, new VideoAdProcessor.Listener() {
+                    @Override
+                    public void onCacheSuccess(AdParams adParams, String videoFilePath, String endCardFilePath) {
+                        if (mIsDestroyed) {
+                            return;
+                        }
+
+                        VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardFilePath);
+                        mAd = new Ad(assetGroupId, adValue);
+                        mAdCache.put(zoneId, mAd);
+                        mVideoCache.put(zoneId, adCacheItem);
+                        mPresenter = new InterstitialPresenterFactory(mContext, zoneId).createInterstitialPresenter(mAd, HyBidInterstitialAd.this);
+                        if (mPresenter != null) {
+                            mPresenter.load();
+                        } else {
+                            invokeOnLoadFailed(new Exception("The server has returned an unsupported ad asset"));
+                        }
+                    }
+
+                    @Override
+                    public void onCacheError(Throwable error) {
+                        if (mIsDestroyed) {
+                            return;
+                        }
+
+                        Logger.w(TAG, error.getMessage());
+                        invokeOnLoadFailed(new Exception(error));
+                    }
+                });
             } else {
-                invokeOnLoadFailed(new Exception("The server has returned an unsupported ad asset"));
+                zoneId = "3";
+                assetGroupId = 21;
+                mAd = new Ad(assetGroupId, adValue);
+                mAdCache.put(zoneId, mAd);
+                mPresenter = new InterstitialPresenterFactory(mContext, zoneId).createInterstitialPresenter(mAd, this);
+                if (mPresenter != null) {
+                    mPresenter.load();
+                } else {
+                    invokeOnLoadFailed(new Exception("The server has returned an unsupported ad asset"));
+                }
             }
         } else {
             invokeOnLoadFailed(new Exception("The server has returned an invalid ad asset"));

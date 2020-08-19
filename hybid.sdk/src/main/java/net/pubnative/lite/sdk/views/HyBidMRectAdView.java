@@ -33,6 +33,8 @@ import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.mrect.presenter.MRectPresenterFactory;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
+import net.pubnative.lite.sdk.utils.MarkupUtils;
+import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 
 public class HyBidMRectAdView extends PNAdView {
 
@@ -70,9 +72,19 @@ public class HyBidMRectAdView extends PNAdView {
     }
 
     @Override
-    public void renderAd(String htmlAd) {
-        if (!TextUtils.isEmpty(htmlAd)) {
-            mAd = new Ad(8, htmlAd);
+    public void renderAd(String adValue, Listener listener) {
+        cleanup();
+        mListener = listener;
+
+        if (!TextUtils.isEmpty(adValue)) {
+            int assetGroup;
+            if (MarkupUtils.isVastXml(adValue)) {
+                assetGroup = 4;
+            } else {
+                assetGroup = 8;
+            }
+
+            mAd = new Ad(assetGroup, adValue);
             renderFromCustomAd();
         } else {
             invokeOnLoadFailed(new Exception("The server has returned an invalid ad asset"));

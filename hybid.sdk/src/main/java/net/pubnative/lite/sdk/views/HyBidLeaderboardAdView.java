@@ -70,9 +70,12 @@ public class HyBidLeaderboardAdView extends PNAdView {
     }
 
     @Override
-    public void renderAd(String htmlAd) {
-        if (!TextUtils.isEmpty(htmlAd)) {
-            mAd = new Ad(24, htmlAd);
+    public void renderAd(String adValue, Listener listener) {
+        cleanup();
+        mListener = listener;
+
+        if (!TextUtils.isEmpty(adValue)) {
+            mAd = new Ad(24, adValue);
             renderFromCustomAd();
         } else {
             invokeOnLoadFailed(new Exception("The server has returned an invalid ad asset"));
