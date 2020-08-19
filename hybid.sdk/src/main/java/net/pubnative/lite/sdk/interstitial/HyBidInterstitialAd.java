@@ -130,6 +130,21 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         }
     }
 
+    public void renderAd(String htmlAd) {
+        if (!TextUtils.isEmpty(htmlAd)) {
+            String zoneId = "3";
+            mAd = new Ad(21, htmlAd);
+            mPresenter = new InterstitialPresenterFactory(mContext, zoneId).createInterstitialPresenter(mAd, this);
+            if (mPresenter != null) {
+                mPresenter.load();
+            } else {
+                invokeOnLoadFailed(new Exception("The server has returned an unsupported ad asset"));
+            }
+        } else {
+            invokeOnLoadFailed(new Exception("The server has returned an invalid ad asset"));
+        }
+    }
+
     protected void invokeOnLoadFinished() {
         if (mListener != null) {
             mListener.onInterstitialLoaded();

@@ -71,7 +71,7 @@ public class HyBidMRectAdView extends PNAdView {
 
     @Override
     public void renderAd(String htmlAd) {
-        if (TextUtils.isEmpty(htmlAd)) {
+        if (!TextUtils.isEmpty(htmlAd)) {
             mAd = new Ad(8, htmlAd);
             renderFromCustomAd();
         } else {
