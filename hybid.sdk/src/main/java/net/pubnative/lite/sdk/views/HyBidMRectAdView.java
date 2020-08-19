@@ -24,10 +24,12 @@ package net.pubnative.lite.sdk.views;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 
 import net.pubnative.lite.sdk.api.MRectRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
+import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.mrect.presenter.MRectPresenterFactory;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
@@ -62,15 +64,18 @@ public class HyBidMRectAdView extends PNAdView {
     }
 
     @Override
-    public void renderAd(String htmlAd){
-        mAd = new Ad();
-        mAd.setZoneId("8");
-        super.renderAd(htmlAd);
-    }
-
-    @Override
     protected AdPresenter createPresenter() {
         return new MRectPresenterFactory(getContext())
                 .createPresenter(mAd, this);
+    }
+
+    @Override
+    public void renderAd(String htmlAd) {
+        if (TextUtils.isEmpty(htmlAd)) {
+            mAd = new Ad(8, htmlAd);
+            renderFromCustomAd();
+        } else {
+            invokeOnLoadFailed(new Exception("The server has returned an invalid ad asset"));
+        }
     }
 }

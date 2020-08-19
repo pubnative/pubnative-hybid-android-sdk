@@ -87,6 +87,14 @@ public class Ad extends JsonModel implements Serializable {
         fromJson(jsonObject);
     }
 
+    public Ad(int assetGroupId, String htmlBanner) {
+        this.assetgroupid = assetGroupId;
+        String apiAsset = APIAsset.HTML_BANNER;
+        assets = new ArrayList<>();
+        AdData adData = new AdData("html", apiAsset, htmlBanner);
+        assets.add(adData);
+    }
+
     //==============================================================================================
     // Asset
     //==============================================================================================

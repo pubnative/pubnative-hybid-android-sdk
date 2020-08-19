@@ -24,11 +24,13 @@ package net.pubnative.lite.sdk.views;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 
 import net.pubnative.lite.sdk.api.LeaderboardRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.leaderboard.presenter.LeaderboardPresenterFactory;
+import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 
@@ -62,15 +64,18 @@ public class HyBidLeaderboardAdView extends PNAdView {
     }
 
     @Override
-    public void renderAd(String htmlAd){
-        mAd = new Ad();
-        mAd.setZoneId("24");
-        super.renderAd(htmlAd);
-    }
-
-    @Override
     protected AdPresenter createPresenter() {
         return new LeaderboardPresenterFactory(getContext())
                 .createPresenter(mAd, this);
+    }
+
+    @Override
+    public void renderAd(String htmlAd) {
+        if (TextUtils.isEmpty(htmlAd)) {
+            mAd = new Ad(24, htmlAd);
+            renderFromCustomAd();
+        } else {
+            invokeOnLoadFailed(new Exception("The server has returned an invalid ad asset"));
+        }
     }
 }

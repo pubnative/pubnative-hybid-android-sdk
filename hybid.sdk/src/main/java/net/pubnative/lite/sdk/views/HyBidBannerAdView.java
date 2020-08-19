@@ -24,11 +24,13 @@ package net.pubnative.lite.sdk.views;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 
 import net.pubnative.lite.sdk.api.BannerRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
+import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 
@@ -68,10 +70,12 @@ public class HyBidBannerAdView extends PNAdView {
     }
 
     @Override
-    public void renderAd(String htmlAd){
-        mAd = new Ad();
-        mAd.setZoneId("10");
-        super.renderAd(htmlAd);
+    public void renderAd(String htmlAd) {
+        if (TextUtils.isEmpty(htmlAd)) {
+            mAd = new Ad(10, htmlAd);
+            renderFromCustomAd();
+        } else {
+            invokeOnLoadFailed(new Exception("The server has returned an invalid ad asset"));
+        }
     }
-
 }

@@ -33,6 +33,7 @@ import android.widget.RelativeLayout;
 import net.pubnative.lite.sdk.AdCache;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.api.RequestManager;
+import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
@@ -54,7 +55,6 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
     protected Listener mListener;
     private AdPresenter mPresenter;
     protected Ad mAd;
-    protected AdCache mAdCache;
     private boolean autoShowOnLoad = true;
 
     public PNAdView(Context context) {
@@ -153,13 +153,15 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
         }
     }
 
-    public void renderAd(String htmlAd){
-        mAd.link = htmlAd;
+    public abstract void renderAd(String htmlAd);
 
-        mAdCache = HyBid.getAdCache();
-        mAdCache.put(mAd.getZoneId(), mAd);
-
-        onRequestSuccess(mAd);
+    protected void renderFromCustomAd() {
+        mPresenter = createPresenter();
+        if (mPresenter != null) {
+            mPresenter.load();
+        } else {
+            invokeOnLoadFailed(new Exception("The server has returned an unsupported ad asset"));
+        }
     }
 
     protected void startTracking() {

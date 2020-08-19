@@ -28,6 +28,7 @@ import net.pubnative.lite.sdk.utils.json.JsonModel;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 public class AdData extends JsonModel implements Serializable {
@@ -43,6 +44,12 @@ public class AdData extends JsonModel implements Serializable {
 
     public AdData(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
+    }
+
+    public AdData(String key, String apiAsset, String html) {
+        data = new HashMap<>();
+        data.put(key, html);
+        type = apiAsset;
     }
 
     public String getText() {
