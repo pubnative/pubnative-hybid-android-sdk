@@ -96,6 +96,7 @@ class MarkupFragment : Fragment() {
         val interstitialListener = object : HyBidInterstitialAd.Listener {
             override fun onInterstitialLoaded() {
                 Logger.d(TAG, "onInterstitialLoaded")
+                interstitial?.show()
             }
 
             override fun onInterstitialLoadFailed(error: Throwable?) {
@@ -116,5 +117,6 @@ class MarkupFragment : Fragment() {
         }
 
         interstitial = HyBidInterstitialAd(requireActivity(), interstitialListener)
+        interstitial?.prepareAd(markup)
     }
 }
