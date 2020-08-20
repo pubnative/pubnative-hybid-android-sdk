@@ -33,6 +33,10 @@ public class PrebidUtils {
         TWO_DECIMALS, THREE_DECIMALS
     }
 
+    public static String getBidFromPoints(Integer points, PrebidUtils.KeywordMode mode) {
+        return HeaderBiddingUtils.getBidFromPoints(points, mode);
+    }
+
     //---------------------------------- String keywords -------------------------------------------
     public static String getPrebidKeywords(Ad ad) {
         return HeaderBiddingUtils.getHeaderBiddingKeywords(ad);

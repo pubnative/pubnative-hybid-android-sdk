@@ -56,6 +56,17 @@ public class HeaderBiddingUtils {
         return String.format(Locale.ENGLISH, formatString, eCPM);
     }
 
+    public static String getBidFromPoints(Integer points, PrebidUtils.KeywordMode mode) {
+        Double eCPM = points.doubleValue() / ECPM_POINTS_DIVIDER;
+        String formatString = "%.3f";
+
+        if (mode == PrebidUtils.KeywordMode.TWO_DECIMALS) {
+            formatString = "%.2f";
+        }
+
+        return String.format(Locale.ENGLISH, formatString, eCPM);
+    }
+
     //---------------------------------- String keywords -------------------------------------------
     public static String getHeaderBiddingKeywords(Ad ad) {
         return getHeaderBiddingKeywords(ad, "");

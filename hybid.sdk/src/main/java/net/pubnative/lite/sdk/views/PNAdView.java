@@ -52,6 +52,7 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
     protected Listener mListener;
     private AdPresenter mPresenter;
     protected Ad mAd;
+    private boolean autoShowOnLoad = true;
 
     public PNAdView(Context context) {
         super(context);
@@ -91,6 +92,10 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
         }
     }
 
+    public void show() {
+        renderAd();
+    }
+
     public void destroy() {
         cleanup();
         if (mRequestManager != null) {
@@ -116,6 +121,18 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
 
     public String getCreativeId() {
         return mAd != null ? mAd.getCreativeId() : null;
+    }
+
+    public Integer getBidPoints() {
+        return mAd != null ? mAd.getECPM() : 0;
+    }
+
+    public boolean isAutoShowOnLoad() {
+        return autoShowOnLoad;
+    }
+
+    public void setAutoShowOnLoad(boolean autoShowOnLoad) {
+        this.autoShowOnLoad = autoShowOnLoad;
     }
 
     protected abstract String getLogTag();
@@ -176,7 +193,10 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
 
         addView(view, adLayoutParams);
 
-        invokeOnLoadFinished();
+        if (autoShowOnLoad) {
+            invokeOnLoadFinished();
+        }
+
         startTracking();
         invokeOnImpression();
     }
@@ -194,7 +214,11 @@ public abstract class PNAdView extends RelativeLayout implements RequestManager.
             invokeOnLoadFailed(new Exception("Server returned null ad"));
         } else {
             mAd = ad;
-            renderAd();
+            if (autoShowOnLoad) {
+                renderAd();
+            } else {
+                invokeOnLoadFinished();
+            }
         }
     }
 
