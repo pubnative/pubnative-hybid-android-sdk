@@ -8,6 +8,7 @@ import com.iab.omid.library.pubnativenet.adsession.AdSessionContext;
 import com.iab.omid.library.pubnativenet.adsession.CreativeType;
 import com.iab.omid.library.pubnativenet.adsession.ImpressionType;
 import com.iab.omid.library.pubnativenet.adsession.Owner;
+import com.iab.omid.library.pubnativenet.adsession.media.InteractionType;
 import com.iab.omid.library.pubnativenet.adsession.media.MediaEvents;
 import com.iab.omid.library.pubnativenet.adsession.media.Position;
 import com.iab.omid.library.pubnativenet.adsession.media.VastProperties;
@@ -182,6 +183,15 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
 
         if (mMediaEvents != null) {
             mMediaEvents.skipped();
+        }
+    }
+
+    public void fireClick() {
+        if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
+            return;
+
+        if (mMediaEvents != null) {
+            mMediaEvents.adUserInteraction(InteractionType.CLICK);
         }
     }
 }

@@ -588,6 +588,10 @@ public class MRAIDView extends RelativeLayout {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @JavascriptMRAIDCallback
     protected void expand(String url) {
+        expandCreative(url, false);
+    }
+
+    private void expandCreative(String url, final boolean isCustomExpand) {
         MRAIDLog.d("hz-m MRAIDView - expand " + url);
         MRAIDLog.d(MRAID_LOG_TAG + "-JS callback", "expand " + (url != null ? url : "(1-part)"));
 
@@ -631,28 +635,53 @@ public class MRAIDView extends RelativeLayout {
             @Override
             public void run() {
                 MRAIDLog.d("hz-m MRAIDView - expand - url loading thread");
-                final String content = getStringFromUrl(finalUrl);
-                if (!TextUtils.isEmpty(content) && context instanceof Activity) {
-                    // Get back onto the main thread to create and load a new WebView.
-                    ((Activity) context).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (state == STATE_RESIZED) {
-                                removeResizeView();
-                                addView(webView);
+                if (isCustomExpand) {
+                    if (context instanceof Activity) {
+                        // Get back onto the main thread to create and load a new WebView.
+                        ((Activity) context).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (state == STATE_RESIZED) {
+                                    removeResizeView();
+                                    addView(webView);
+                                }
+                                webView.setWebChromeClient(null);
+                                webView.setWebViewClient(null);
+                                webViewPart2 = createWebView();
+                                webViewPart2.loadUrl(finalUrl);
+                                MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for " + webViewPart2);
+                                currentWebView = webViewPart2;
+                                isExpandingPart2 = true;
+                                expandHelper(currentWebView);
                             }
-                            webView.setWebChromeClient(null);
-                            webView.setWebViewClient(null);
-                            webViewPart2 = createWebView();
-                            webViewPart2.loadDataWithBaseURL(baseUrl, content, "text/html", "UTF-8", null);
-                            MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for " + webViewPart2);
-                            currentWebView = webViewPart2;
-                            isExpandingPart2 = true;
-                            expandHelper(currentWebView);
-                        }
-                    });
+                        });
+                    } else {
+                        MRAIDLog.e("Could not load part 2 expanded content for URL: " + finalUrl);
+                    }
                 } else {
-                    MRAIDLog.e("Could not load part 2 expanded content for URL: " + finalUrl);
+                    final String content = getStringFromUrl(finalUrl);
+                    if (!TextUtils.isEmpty(content) && context instanceof Activity) {
+                        // Get back onto the main thread to create and load a new WebView.
+                        ((Activity) context).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (state == STATE_RESIZED) {
+                                    removeResizeView();
+                                    addView(webView);
+                                }
+                                webView.setWebChromeClient(null);
+                                webView.setWebViewClient(null);
+                                webViewPart2 = createWebView();
+                                webViewPart2.loadDataWithBaseURL(baseUrl, content, "text/html", "UTF-8", null);
+                                MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for " + webViewPart2);
+                                currentWebView = webViewPart2;
+                                isExpandingPart2 = true;
+                                expandHelper(currentWebView);
+                            }
+                        });
+                    } else {
+                        MRAIDLog.e("Could not load part 2 expanded content for URL: " + finalUrl);
+                    }
                 }
             }
         }, "2-part-content").start();
@@ -1560,10 +1589,15 @@ public class MRAIDView extends RelativeLayout {
                 parseCommandUrl(url);
                 return true;
             } else {
-                try {
-                    open(URLEncoder.encode(url, "UTF-8"));
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                // Fix for Verve custom creatives
+                if (isVerveCustomExpand(url)) {
+                    expandCreative(url, true);
+                } else {
+                    try {
+                        open(URLEncoder.encode(url, "UTF-8"));
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
                 }
                 return true;
             }
@@ -1594,6 +1628,18 @@ public class MRAIDView extends RelativeLayout {
 
     public boolean isLoaded() {
         return isPageFinished;
+    }
+
+    private boolean isVerveCustomExpand(String url) {
+        if (TextUtils.isEmpty(url)) {
+            return false;
+        }
+
+        if (url.contains("tags-prod.vrvm.com") && url.contains("type=expandable")) {
+            return true;
+        }
+
+        return false;
     }
 
     /**************************************************************************
