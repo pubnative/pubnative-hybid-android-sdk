@@ -6,7 +6,6 @@
     <application>
         <activity android:name=".consent.UserConsentActivity" />
         <activity android:name=".interstitial.activity.MraidInterstitialActivity" />
-        <activity android:name=".interstitial.activity.CenteredMraidInterstitialActivity" />
         <activity android:name=".interstitial.activity.VastInterstitialActivity" />
     </application>
 </manifest>
