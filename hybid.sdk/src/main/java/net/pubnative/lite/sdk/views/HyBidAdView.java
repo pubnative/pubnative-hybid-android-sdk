@@ -98,6 +98,10 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         }
     }
 
+    public void show() {
+        renderAd();
+    }
+
     public void destroy() {
         cleanup();
         if (mRequestManager != null) {
