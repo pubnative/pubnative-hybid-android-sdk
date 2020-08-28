@@ -65,7 +65,9 @@ public class HyBidDemoApplication extends MultiDexApplication {
         }
         SettingsModel settings = fetchSettings();
 
-        HyBid.initialize(settings.getAppToken(), this, new HyBid.InitialisationListener() {
+        String appToken = settings.getAppToken();
+
+        HyBid.initialize(appToken, this, new HyBid.InitialisationListener() {
             @Override
             public void onInitialisationFinished(boolean success) {
                 // HyBid SDK has been initialised
@@ -80,14 +82,6 @@ public class HyBidDemoApplication extends MultiDexApplication {
         HyBid.setGender(settings.getGender());
         //HyBid.setLocationUpdatesEnabled(false);
 
-        HyBid.getViewabilityManager().setViewabilityMeasurementEnabled(true);
-
-        if (!settings.getBrowserPriorities().isEmpty()) {
-            for (String packageName : settings.getBrowserPriorities()) {
-                HyBid.getBrowserManager().addBrowser(packageName);
-            }
-        }
-
         StringBuilder keywordsBuilder = new StringBuilder();
         String separator = ",";
         for (String keyword : settings.getKeywords()) {
@@ -101,11 +95,20 @@ public class HyBidDemoApplication extends MultiDexApplication {
         }
 
         HyBid.setKeywords(keywordString);
+
+        HyBid.getViewabilityManager().setViewabilityMeasurementEnabled(true);
+
+        if (!settings.getBrowserPriorities().isEmpty()) {
+            for (String packageName : settings.getBrowserPriorities()) {
+                HyBid.getBrowserManager().addBrowser(packageName);
+            }
+        }
+
         if (!TextUtils.isEmpty(settings.getApiUrl())) {
             ApiManager.INSTANCE.setApiUrl(settings.getApiUrl());
         }
 
-        MoPubManager.initMoPubSdk(this, settings.getMopubBannerAdUnitId());
+        MoPubManager.initMoPubSdk(this, appToken);
 
         MobileAds.initialize(this, initializationStatus -> {
         });

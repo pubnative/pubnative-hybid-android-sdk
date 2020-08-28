@@ -54,6 +54,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     protected HyBidAdView.Listener mListener;
     private AdPresenter mPresenter;
     protected Ad mAd;
+    private boolean autoShowOnLoad = true;
 
     public HyBidAdView(Context context) {
         super(context);
@@ -189,7 +190,10 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
 
         addView(view, adLayoutParams);
 
-        invokeOnLoadFinished();
+        if (autoShowOnLoad) {
+            invokeOnLoadFinished();
+        }
+
         startTracking();
         invokeOnImpression();
     }
@@ -207,7 +211,11 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
             invokeOnLoadFailed(new Exception("Server returned null ad"));
         } else {
             mAd = ad;
-            renderAd();
+            if (autoShowOnLoad) {
+                renderAd();
+            } else {
+                invokeOnLoadFinished();
+            }
         }
     }
 

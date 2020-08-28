@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 PubNative GmbH
+// Copyright (c) 2020 PubNative GmbH
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,9 @@
 //
 package net.pubnative.lite.adapters.mopub;
 
-public class HyBidMoPubLeaderboardCustomEvent extends HyBidMoPubBannerCustomEvent {
+import net.pubnative.lite.adapters.mopub.headerbidding.HyBidHeaderBiddingLeaderboardCustomEvent;
+
+public class HyBidMoPubLeaderboardCustomEvent extends HyBidHeaderBiddingLeaderboardCustomEvent {
     /*
      *  This class is kept for backwards compatibility.
      */

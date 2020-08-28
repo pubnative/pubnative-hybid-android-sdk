@@ -41,7 +41,7 @@ import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.api.InterstitialRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
-import net.pubnative.lite.sdk.utils.PrebidUtils
+import net.pubnative.lite.sdk.utils.HeaderBiddingUtils
 
 /**
  * Created by erosgarciaponte on 30.01.18.
@@ -95,12 +95,12 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
     override fun onRequestSuccess(ad: Ad?) {
         val builder = PublisherAdRequest.Builder()
 
-        val keywordSet = PrebidUtils.getPrebidKeywordsSet(ad)
+        val keywordSet = HeaderBiddingUtils.getHeaderBiddingKeywordsSet(ad)
         for (key in keywordSet) {
             builder.addKeyword(key)
         }
 
-        val keywordBundle = PrebidUtils.getPrebidKeywordsBundle(ad)
+        val keywordBundle = HeaderBiddingUtils.getHeaderBiddingKeywordsBundle(ad)
         for (key in keywordBundle.keySet()) {
             builder.addCustomTargeting(key, keywordBundle.getString(key))
         }
