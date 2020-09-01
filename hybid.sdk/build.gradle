@@ -35,6 +35,7 @@ android {
 }
 
 dependencies {
+    // Remember to update OMSDK version constant found in HyBid.java
     implementation 'net.pubnative:hybid.omsdk:1.3.10'
 
     testImplementation 'junit:junit:4.12'
