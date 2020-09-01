@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 PubNative GmbH
+// Copyright (c) 2020 PubNative GmbH
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,8 @@ import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 
 public class HyBid {
     public static final String BASE_URL = "https://api.pubnative.net/";
+    public static final String OMSDK_VERSION = "1.3.10";
+    public static final String OM_PARTNER_NAME = "pubnative";
 
     private static String sAppToken;
     @SuppressLint("StaticFieldLeak")
