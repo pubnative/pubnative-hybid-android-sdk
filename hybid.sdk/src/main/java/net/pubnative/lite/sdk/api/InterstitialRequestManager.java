@@ -22,6 +22,9 @@
 //
 package net.pubnative.lite.sdk.api;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Created by erosgarciaponte on 11.01.18.
  */
@@ -30,5 +33,10 @@ public class InterstitialRequestManager extends RequestManager {
     @Override
     protected String getAdSize() {
         return "l";
+    }
+
+    @Override
+    protected List<String> getSupportedFrameworks(){
+        return Arrays.asList("3","5");
     }
 }
