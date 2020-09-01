@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 PubNative GmbH
+// Copyright (c) 2020 PubNative GmbH
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,6 @@
 package net.pubnative.lite.sdk.models;
 
 import android.content.Context;
-import android.graphics.Point;
 import android.location.Location;
 import android.text.TextUtils;
 
@@ -36,6 +35,7 @@ import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNAsyncUtils;
 
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -64,7 +64,7 @@ public class AdRequestFactory {
         mUserDataManager = userDataManager;
     }
 
-    public void createAdRequest(final String zoneid, final String adSize, final Callback callback) {
+    public void createAdRequest(final String zoneid, final String adSize, final List<String> supportedFrameworks, final Callback callback) {
         String advertisingId = mDeviceInfo.getAdvertisingId();
         boolean limitTracking = mDeviceInfo.limitTracking();
         Context context = mDeviceInfo.getContext();
@@ -73,24 +73,24 @@ public class AdRequestFactory {
                 PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(context, new HyBidAdvertisingId.Listener() {
                     @Override
                     public void onHyBidAdvertisingIdFinish(String advertisingId, Boolean limitTracking) {
-                        processAdvertisingId(zoneid, adSize, advertisingId, limitTracking, callback);
+                        processAdvertisingId(zoneid, adSize, supportedFrameworks, advertisingId, limitTracking, callback);
                     }
                 }));
             } catch (Exception exception) {
                 Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
             }
         } else {
-            processAdvertisingId(zoneid, adSize, advertisingId, limitTracking, callback);
+            processAdvertisingId(zoneid, adSize, supportedFrameworks, advertisingId, limitTracking, callback);
         }
     }
 
-    private void processAdvertisingId(String zoneId, String adSize, String advertisingId, boolean limitTracking, Callback callback) {
+    private void processAdvertisingId(String zoneId, String adSize, List<String> supportedFrameworks, String advertisingId, boolean limitTracking, Callback callback) {
         if (callback != null) {
-            callback.onRequestCreated(buildRequest(zoneId, adSize, advertisingId, limitTracking, mIntegrationType));
+            callback.onRequestCreated(buildRequest(zoneId, adSize, supportedFrameworks, advertisingId, limitTracking, mIntegrationType));
         }
     }
 
-    AdRequest buildRequest(final String zoneid, final String adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType) {
+    AdRequest buildRequest(final String zoneid, final String adSize, final List<String> supportedFrameworks,final String advertisingId, final boolean limitTracking, final IntegrationType integrationType) {
         boolean isCCPAOptOut = mUserDataManager.isCCPAOptOut();
         AdRequest adRequest = new AdRequest();
         adRequest.zoneid = zoneid;
@@ -99,6 +99,9 @@ public class AdRequestFactory {
         adRequest.osver = mDeviceInfo.getOSVersion();
         adRequest.devicemodel = mDeviceInfo.getModel();
         adRequest.coppa = HyBid.isCoppaEnabled() ? "1" : "0";
+        adRequest.omidpn = HyBid.OM_PARTNER_NAME;
+        adRequest.omidpv = HyBid.OMSDK_VERSION;
+        adRequest.api = supportedFrameworks;
 
         if (HyBid.isCoppaEnabled() || limitTracking || TextUtils.isEmpty(advertisingId)
                 || isCCPAOptOut) {
