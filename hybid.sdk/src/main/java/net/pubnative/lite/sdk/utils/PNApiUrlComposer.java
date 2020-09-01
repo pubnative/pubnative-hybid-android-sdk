@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 PubNative GmbH
+// Copyright (c) 2020 PubNative GmbH
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -142,6 +142,20 @@ public final class PNApiUrlComposer {
 
         if (!TextUtils.isEmpty(adRequest.displaymanagerver)) {
             uriBuilder.appendQueryParameter("displaymanagerver", adRequest.displaymanagerver);
+        }
+
+        if (!TextUtils.isEmpty(adRequest.omidpn)){
+            uriBuilder.appendQueryParameter("omidpn", adRequest.omidpn);
+        }
+
+        if (!TextUtils.isEmpty(adRequest.omidpv)){
+            uriBuilder.appendQueryParameter("omidpv", adRequest.omidpv);
+        }
+
+        if (!adRequest.api.isEmpty()){
+            String listString = adRequest.api.toString();
+            listString = listString.substring(1, listString.length()-1);
+            uriBuilder.appendQueryParameter("api", listString.replaceAll("\\s+",""));
         }
 
         if (!TextUtils.isEmpty(adRequest.usprivacy)) {
