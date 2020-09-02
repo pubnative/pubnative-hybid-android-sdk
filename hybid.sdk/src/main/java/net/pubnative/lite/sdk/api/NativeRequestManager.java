@@ -1,6 +1,7 @@
 package net.pubnative.lite.sdk.api;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NativeRequestManager extends RequestManager {
@@ -11,6 +12,6 @@ public class NativeRequestManager extends RequestManager {
 
     @Override
     protected List<String> getSupportedFrameworks(){
-        return null;
+        return new ArrayList();
     }
 }
