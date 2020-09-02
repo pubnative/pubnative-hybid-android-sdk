@@ -6,6 +6,7 @@ import android.location.Location;
 
 import net.pubnative.lite.sdk.BuildConfig;
 import net.pubnative.lite.sdk.DeviceInfo;
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.utils.PNCrypto;
@@ -18,6 +19,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.robolectric.RobolectricTestRunner;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 import static org.mockito.Mockito.mock;
@@ -38,6 +41,8 @@ public class AdRequestFactoryTest {
 
     @InjectMocks
     private AdRequestFactory mSubject;
+
+    private List<String> mMockSupportedFrameworks = Arrays.asList("5","7");
 
     @Before
     public void setup() {
@@ -62,7 +67,7 @@ public class AdRequestFactoryTest {
 
     @Test
     public void createAdRequest() {
-        AdRequest request = mSubject.buildRequest("2", "s", "aabbccdd", false, IntegrationType.HEADER_BIDDING);
+        AdRequest request = mSubject.buildRequest("2", "s", mMockSupportedFrameworks, "aabbccdd", false, IntegrationType.HEADER_BIDDING);
         Assert.assertEquals("aabbccdd", request.gid);
         Assert.assertEquals(PNCrypto.md5("aabbccdd"), request.gidmd5);
         Assert.assertEquals(PNCrypto.sha1("aabbccdd"), request.gidsha1);
@@ -81,6 +86,10 @@ public class AdRequestFactoryTest {
         Assert.assertEquals("1920", request.deviceWidth);
         Assert.assertEquals("1080", request.deviceHeight);
         Assert.assertEquals("portrait", request.orientation);
+        Assert.assertEquals(HyBid.OMSDK_VERSION, request.omidpv);
+        Assert.assertEquals(HyBid.OM_PARTNER_NAME, request.omidpn);
+        Assert.assertEquals(Arrays.asList("5","7"), request.api);
+
         Assert.assertEquals(String.format(Locale.ENGLISH, "%s_%s_%s",
                 "sdkandroid", "hb", BuildConfig.VERSION_NAME), request.displaymanagerver);
     }
