@@ -36,6 +36,8 @@ public class AdRequest {
     public String orientation;
     public String dnt;
     public String al;
+    public String width;
+    public String height;
     public String mf;
     public String af;
     public String zoneid;

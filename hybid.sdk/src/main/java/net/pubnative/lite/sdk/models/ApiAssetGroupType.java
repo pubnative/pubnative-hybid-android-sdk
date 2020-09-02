@@ -27,17 +27,19 @@ package net.pubnative.lite.sdk.models;
  */
 
 public interface ApiAssetGroupType {
-    int MRAID_BANNER_1 = 10;
-    int MRAID_BANNER_2 = 12;
-    int MRAID_MRECT = 8;
-    int MRAID_INTERSTITIAL_1 = 21;
-    int MRAID_INTERSTITIAL_2 = 22;
-    int MRAID_INTERSTITIAL_3 = 23;
-    int MRAID_LEADERBOARD = 24;
+    int MRAID_320x50 = 10;
+    int MRAID_300x50 = 12;
+    int MRAID_300x250 = 8;
+    int MRAID_320x480 = 21;
+    int MRAID_1024x768 = 22;
+    int MRAID_768x1024 = 23;
+    int MRAID_728x90 = 24;
+    int MRAID_160x600 = 25;
+    int MRAID_250x250 = 26;
+    int MRAID_300x600 = 27;
+    int MRAID_320x100 = 28;
+    int MRAID_480x320 = 29;
 
     int VAST_MRECT = 4;
-    int VAST_INTERSTITIAL_1 = 15;
-    int VAST_INTERSTITIAL_2 = 18;
-    int VAST_INTERSTITIAL_3 = 19;
-    int VAST_INTERSTITIAL_4 = 20;
+    int VAST_INTERSTITIAL = 15;
 }

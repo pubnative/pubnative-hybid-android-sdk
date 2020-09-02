@@ -3,6 +3,7 @@ package net.pubnative.lite.sdk.views;
 import android.app.Activity;
 
 import net.pubnative.lite.sdk.api.BannerRequestManager;
+import net.pubnative.lite.sdk.api.LeaderboardRequestManager;
 import net.pubnative.lite.sdk.api.MRectRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
 
@@ -17,9 +18,9 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
 
 @RunWith(RobolectricTestRunner.class)
-public class PNAdViewTest {
+public class HyBidAdViewTest {
 
-    private PNAdView adView;
+    private HyBidAdView adView;
     private Activity activity;
 
     @Before
@@ -29,15 +30,21 @@ public class PNAdViewTest {
     }
 
     @Test
-    public void testCreateBannerView() throws Exception {
+    public void testCreateBannerView() {
         adView = new HyBidBannerAdView(activity);
         Assert.assertThat(adView.getRequestManager(), Matchers.<RequestManager>instanceOf(BannerRequestManager.class));
     }
 
     @Test
-    public void testCreateMRectView() throws Exception {
+    public void testCreateMRectView() {
         adView = new HyBidMRectAdView(activity);
         Assert.assertThat(adView.getRequestManager(), Matchers.<RequestManager>instanceOf(MRectRequestManager.class));
+    }
+
+    @Test
+    public void testCreateLeaderboardView() {
+        adView = new HyBidLeaderboardAdView(activity);
+        Assert.assertThat(adView.getRequestManager(), Matchers.<RequestManager>instanceOf(LeaderboardRequestManager.class));
     }
 
     @After

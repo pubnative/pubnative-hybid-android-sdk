@@ -151,6 +151,7 @@ workflows:
               only:
                 - beta
                 - development
+                - feature/banner_ad_sizes_refactor
           requires:
             - test_unit
 

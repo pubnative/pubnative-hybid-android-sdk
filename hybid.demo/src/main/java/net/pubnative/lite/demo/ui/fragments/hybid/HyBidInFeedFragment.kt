@@ -27,7 +27,9 @@ import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -39,23 +41,39 @@ import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.ui.adapters.InFeedAdapter
 import net.pubnative.lite.demo.ui.listeners.InFeedAdListener
 import net.pubnative.lite.demo.util.ClipboardUtils
+import net.pubnative.lite.sdk.models.AdSize
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class HyBidMRectFragment : Fragment(), InFeedAdListener {
-    val TAG = HyBidMRectFragment::class.java.simpleName
+class HyBidInFeedFragment : Fragment(), InFeedAdListener {
+    val TAG = HyBidInFeedFragment::class.java.simpleName
 
     private var zoneId: String? = null
 
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
+    private lateinit var adSizeSpinner: Spinner
+    private lateinit var spinnerAdapter: ArrayAdapter<AdSize>
     private lateinit var creativeIdView: TextView
     private lateinit var recyclerView: RecyclerView
-
     private lateinit var adapter: InFeedAdapter
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_hybid_mrect, container, false)
+    private val adSizes = arrayOf(
+            AdSize.SIZE_300x250,
+            AdSize.SIZE_320x50,
+            AdSize.SIZE_160x600,
+            AdSize.SIZE_250x250,
+            AdSize.SIZE_300x50,
+            AdSize.SIZE_300x600,
+            AdSize.SIZE_320x100,
+            AdSize.SIZE_320x480,
+            AdSize.SIZE_480x320,
+            AdSize.SIZE_728x90,
+            AdSize.SIZE_768x1024,
+            AdSize.SIZE_1024x768)
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_hybid_infeed_banner, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -64,6 +82,7 @@ class HyBidMRectFragment : Fragment(), InFeedAdListener {
         creativeIdView = view.findViewById(R.id.view_creative_id)
         loadButton = view.findViewById(R.id.button_load)
         recyclerView = view.findViewById(R.id.list)
+        adSizeSpinner = view.findViewById(R.id.spinner_ad_size)
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
@@ -82,10 +101,14 @@ class HyBidMRectFragment : Fragment(), InFeedAdListener {
 
         errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
         creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, creativeIdView.text.toString()) }
+
+        spinnerAdapter = ArrayAdapter(activity!!, android.R.layout.simple_spinner_item, adSizes)
+        adSizeSpinner.adapter = spinnerAdapter
     }
 
     fun loadPNAd() {
-        adapter.loadWithAd()
+        val adSize = adSizes[adSizeSpinner.selectedItemPosition]
+        adapter.loadWithAd(adSize)
     }
 
     // --------------- InFeedAdListener Listener --------------------

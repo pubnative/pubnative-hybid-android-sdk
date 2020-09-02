@@ -7,6 +7,7 @@
     <string name="medium">Medium</string>
     <string name="leaderboard">Leaderboard</string>
 
+    <string name="banner_in_feed">In-Feed Banner</string>
     <string name="zone_id">Zone ID:</string>
     <string name="chosen">Chosen:</string>
 
@@ -113,6 +114,7 @@
     <string name="creative_id">Creative ID:</string>
     <string name="impression_id">Impression ID:</string>
     <string name="error">Error:</string>
+    <string name="banner_ad_size">Ad Size:</string>
     <string name="request_url">PubNative request url:</string>
     <string name="response">PubNative response:</string>
     <string name="latency">PubNative latency (milliseconds):</string>

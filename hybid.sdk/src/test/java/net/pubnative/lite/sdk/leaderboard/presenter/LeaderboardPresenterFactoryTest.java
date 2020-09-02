@@ -1,5 +1,6 @@
 package net.pubnative.lite.sdk.leaderboard.presenter;
 
+import net.pubnative.lite.sdk.banner.presenter.MraidAdPresenter;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
@@ -38,7 +39,7 @@ public class LeaderboardPresenterFactoryTest {
 
     @Test
     public void fromCreativeType_withHTML() {
-        assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_LEADERBOARD, mTestAd))
-                .isInstanceOf(MraidLeaderboardPresenter.class);
+        assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_728x90, mTestAd))
+                .isInstanceOf(MraidAdPresenter.class);
     }
 }

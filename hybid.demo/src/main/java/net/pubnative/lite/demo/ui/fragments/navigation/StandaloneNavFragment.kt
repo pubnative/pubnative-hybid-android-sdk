@@ -20,8 +20,7 @@ import net.pubnative.lite.demo.ui.listeners.ZoneIdClickListener
 class StandaloneNavFragment : Fragment() {
 
     private lateinit var bannerButton: Button
-    private lateinit var mediumButton: Button
-    private lateinit var leaderboardButton: Button
+    private lateinit var inFeedBannerButton: Button
     private lateinit var interstitialButton: Button
     private lateinit var nativeButton: Button
 
@@ -62,16 +61,9 @@ class StandaloneNavFragment : Fragment() {
             startActivity(intent)
         }
 
-        mediumButton = view.findViewById(R.id.button_medium)
-        mediumButton.setOnClickListener {
-            val intent = Intent(activity, HyBidMRectActivity::class.java)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
-            startActivity(intent)
-        }
-
-        leaderboardButton = view.findViewById(R.id.button_leaderboard)
-        leaderboardButton.setOnClickListener {
-            val intent = Intent(activity, HyBidLeaderboardActivity::class.java)
+        inFeedBannerButton = view.findViewById(R.id.button_banner_infeed)
+        inFeedBannerButton.setOnClickListener {
+            val intent = Intent(activity, HyBidInFeedBannerActivity::class.java)
             intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
             startActivity(intent)
         }
@@ -108,8 +100,7 @@ class StandaloneNavFragment : Fragment() {
 
     private fun enableZones() {
         bannerButton.isEnabled = true
-        mediumButton.isEnabled = true
-        leaderboardButton.isEnabled = true
+        inFeedBannerButton.isEnabled = true
         interstitialButton.isEnabled = true
         nativeButton.isEnabled = true
     }
@@ -118,8 +109,7 @@ class StandaloneNavFragment : Fragment() {
         chosenZoneIdView.text = ""
         chosenZoneId = ""
         bannerButton.isEnabled = false
-        mediumButton.isEnabled = false
-        leaderboardButton.isEnabled = false
+        inFeedBannerButton.isEnabled = false
         interstitialButton.isEnabled = false
         nativeButton.isEnabled = false
     }
