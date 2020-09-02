@@ -162,5 +162,6 @@ workflows:
                 - master
                 - beta
                 - development
+                - iqv_interface
           requires:
             - test_unit
