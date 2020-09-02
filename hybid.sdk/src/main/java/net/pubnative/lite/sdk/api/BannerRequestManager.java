@@ -37,6 +37,6 @@ public class BannerRequestManager extends RequestManager {
 
     @Override
     protected List<String> getSupportedFrameworks(){
-        return Arrays.asList("3","5");
+        return Arrays.asList("5","7");
     }
 }
