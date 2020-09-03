@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 PubNative GmbH
+// Copyright (c) 2020 PubNative GmbH
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -110,15 +110,32 @@ public class UserDataManager {
         }
     }
 
+    /**
+     * This method is being deprecated
+     *
+     * @deprecated use {@link #setIABGDPRConsentString(String gdprConsentString)} instead.
+     */
+    @Deprecated
     public void grantConsent() {
-
         notifyConsentGiven();
     }
 
+    /**
+     * This method is being deprecated
+     *
+     * @deprecated use {@link #removeIABGDPRConsentString()} instead.
+     */
+    @Deprecated
     public void denyConsent() {
         notifyConsentDenied();
     }
 
+    /**
+     * This method is being deprecated
+     *
+     * @deprecated use {@link #removeIABGDPRConsentString()} instead.
+     */
+    @Deprecated
     public void revokeConsent() {
         notifyConsentDenied();
     }
