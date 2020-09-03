@@ -110,15 +110,32 @@ public class UserDataManager {
         }
     }
 
+    /**
+     * This method is being deprecated
+     *
+     * @deprecated use {@link #setIABGDPRConsentString(String gdprConsentString)} instead.
+     */
+    @Deprecated
     public void grantConsent() {
-
         notifyConsentGiven();
     }
 
+    /**
+     * This method is being deprecated
+     *
+     * @deprecated use {@link #removeIABGDPRConsentString()} instead.
+     */
+    @Deprecated
     public void denyConsent() {
         notifyConsentDenied();
     }
 
+    /**
+     * This method is being deprecated
+     *
+     * @deprecated use {@link #removeIABGDPRConsentString()} instead.
+     */
+    @Deprecated
     public void revokeConsent() {
         notifyConsentDenied();
     }
