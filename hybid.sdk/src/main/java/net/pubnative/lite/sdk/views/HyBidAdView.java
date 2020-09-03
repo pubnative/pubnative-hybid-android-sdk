@@ -129,6 +129,18 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         return mAd != null ? mAd.getCreativeId() : null;
     }
 
+    public Integer getBidPoints() {
+        return mAd != null ? mAd.getECPM() : 0;
+    }
+
+    public boolean isAutoShowOnLoad() {
+        return autoShowOnLoad;
+    }
+
+    public void setAutoShowOnLoad(boolean autoShowOnLoad) {
+        this.autoShowOnLoad = autoShowOnLoad;
+    }
+
     protected String getLogTag() {
         return HyBidAdView.class.getSimpleName();
     }
