@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="net.pubnative.lite.demo.ui.activities.consent.CMPActivity">
+    tools:context="net.pubnative.lite.demo.ui.activities.consent.PNCMPActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -22,10 +22,10 @@
 
     <fragment
         android:id="@+id/fragment"
-        android:name="net.pubnative.lite.demo.ui.fragments.consent.CMPFragment"
+        android:name="net.pubnative.lite.demo.ui.fragments.consent.PNCMPFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:layout="@layout/fragment_cmp" />
+        tools:layout="@layout/fragment_pn_cmp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

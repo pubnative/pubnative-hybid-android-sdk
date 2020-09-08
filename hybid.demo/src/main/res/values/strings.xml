@@ -96,10 +96,23 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
 
+    <string name="action_ask_consent">Ask consent</string>
+    <string name="action_edit_consent">Edit consent</string>
+    <string name="action_get_consent_string">Show consent string</string>
+    <string name="action_check_purpose">Check purpose</string>
+    <string name="action_check_vendor">Check vendor</string>
+    <string name="action_check_vendor_purpose">Check all purposes for vendor</string>
     <string name="action_set">Set</string>
     <string name="action_remove">Remove</string>
-    <string name="title_cmp">Consent Management Provider</string>
+    <string name="title_pn_cmp">PubNative CMP</string>
+    <string name="title_ogury_cmp">Ogury CMP</string>
+    <string name="title_google_cmp">Funding Choices CMP</string>
     <string name="title_consent_strings">Consent Strings</string>
+    <string name="title_iab_v2_consent_string">TCF 2.0 Consent String:</string>
+    <string name="title_iab_v1_consent_string">TCF 1.0 Consent String:</string>
+    <string name="title_purpose">Purposes:</string>
+    <string name="title_consent_result">Consent result:</string>
+    <string name="hint_vendor_id">Vendor ID</string>
     <string name="hint_ccpa_consent">CCPA consent string</string>
     <string name="hint_gdpr_consent">GDPR consent string</string>
     <string name="empty_gdpr_consent_field">Please input a valid GDPR consent string</string>
@@ -108,6 +121,23 @@
     <string name="updated_ccpa_consent">CCPA consent string has been updated in the app shared preferences</string>
     <string name="removed_gdpr_consent">GDPR consent string has been removed from the app shared preferences</string>
     <string name="removed_ccpa_consent">CCPA consent string has been removed from the app shared preferences</string>
+    <string name="consent_string_not_set">Not set</string>
+
+    <string name="purpose_tcf2_personalised_ads">Create personalised ads</string>
+    <string name="purpose_tcf2_personalised_content">Create personalised content</string>
+    <string name="purpose_tcf2_develop_improve_product">Develop and improve products</string>
+    <string name="purpose_tcf2_market_research">Market research</string>
+    <string name="purpose_tcf2_measure_ad_performance">Measure ad performance</string>
+    <string name="purpose_tcf2_measure_content_performance">Measure content performance</string>
+    <string name="purpose_tcf2_select_basic_ads">Select basic content</string>
+    <string name="purpose_tcf2_select_personalised_ads">Select personalised ads</string>
+    <string name="purpose_tcf2_select_personalised_content">Select personalised content</string>
+    <string name="purpose_tcf2_store_information">Store information</string>
+    <string name="purpose_tcf1_ad">Ad</string>
+    <string name="purpose_tcf1_content">Content</string>
+    <string name="purpose_tcf1_information">Information</string>
+    <string name="purpose_tcf1_measurement">Measurement</string>
+    <string name="purpose_tcf1_personalisation">Personalisation</string>
 
     <string name="mediation">Mediation</string>
 

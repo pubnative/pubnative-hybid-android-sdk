@@ -72,6 +72,8 @@ public class Constants {
             MRAID_250x250_ZONE_ID, MRAID_300x600_ZONE_ID, MRAID_320x100_ZONE_ID,
             MRAID_480x320_ZONE_ID);
 
+    public static final String OGURY_KEY = "OGY-7B028F43E33F";
+
     public final class IntentParams {
         public static final String ZONE_ID = "zone_id";
     }
