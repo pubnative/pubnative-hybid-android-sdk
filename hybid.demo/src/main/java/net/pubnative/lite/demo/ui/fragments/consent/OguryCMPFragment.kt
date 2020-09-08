@@ -11,6 +11,7 @@ import com.ogury.cm.OguryConsentListener
 import com.ogury.core.OguryError
 import kotlinx.android.synthetic.main.fragment_ogury_cmp.*
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.utils.Logger
 import java.lang.RuntimeException
 import java.util.*
@@ -97,6 +98,10 @@ class OguryCMPFragment : Fragment() {
     private val consentListener = object : OguryConsentListener {
         override fun onComplete(answer: OguryChoiceManager.Answer?) {
             Logger.d(TAG, "Ogury consent: onComplete")
+            val consentString = OguryChoiceManager.TcfV2.getIabString()
+            if (!TextUtils.isEmpty(consentString)) {
+                HyBid.getUserDataManager().iabgdprConsentString = consentString
+            }
         }
 
         override fun onError(error: OguryError?) {
