@@ -63,13 +63,13 @@ data class SettingsModel(var appToken: String,
     }
 
     protected constructor(parcel: Parcel) : this(
-            parcel.readString(),
+            parcel.readString()!!,
             mutableListOf<String>().apply {
                 parcel.readStringList(this)
             },
-            parcel.readString(),
-            parcel.readString(),
-            parcel.readString(),
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
             mutableListOf<String>().apply {
                 parcel.readStringList(this)
             },
@@ -78,24 +78,24 @@ data class SettingsModel(var appToken: String,
             },
             parcel.readInt() != 0,
             parcel.readInt() != 0,
-            parcel.readString(),
-            parcel.readString(),
-            parcel.readString(),
-            parcel.readString(),
-            parcel.readString(),
-            parcel.readString(),
-            parcel.readString(),
-            parcel.readString(),
-            parcel.readString(),
-            parcel.readString(),
-            parcel.readString(),
-            parcel.readString(),
-            parcel.readString(),
-            parcel.readString(),
-            parcel.readString(),
-            parcel.readString(),
-            parcel.readString(),
-            parcel.readString())
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!)
 
     override fun writeToParcel(dest: Parcel?, flags: Int) {
         dest?.writeString(appToken)
