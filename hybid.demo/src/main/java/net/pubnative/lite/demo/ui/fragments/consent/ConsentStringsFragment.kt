@@ -17,7 +17,7 @@ import net.pubnative.lite.sdk.HyBid
 class ConsentStringsFragment : Fragment() {
     companion object {
         private const val KEY_CCPA_PUBLIC_CONSENT = "IABUSPrivacy_String"
-        private const val KEY_GDPR_PUBLIC_CONSENT = "IABConsent_ConsentString"
+        private const val KEY_GDPR_PUBLIC_CONSENT = "IABTCF_TCString"
     }
 
     private lateinit var gdprConsentInput: EditText
