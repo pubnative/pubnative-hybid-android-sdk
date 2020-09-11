@@ -193,8 +193,22 @@
             android:windowSoftInputMode="stateHidden" />
 
         <activity
-            android:name=".ui.activities.consent.CMPActivity"
-            android:label="@string/title_cmp"
+            android:name=".ui.activities.consent.PNCMPActivity"
+            android:label="@string/title_pn_cmp"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden" />
+
+        <activity
+            android:name=".ui.activities.consent.OguryCMPActivity"
+            android:label="@string/title_ogury_cmp"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden" />
+
+        <activity
+            android:name=".ui.activities.consent.GoogleCMPActivity"
+            android:label="@string/title_google_cmp"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
