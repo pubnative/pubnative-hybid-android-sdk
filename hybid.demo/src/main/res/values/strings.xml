@@ -98,6 +98,9 @@
 
     <string name="action_ask_consent">Ask consent</string>
     <string name="action_edit_consent">Edit consent</string>
+    <string name="action_request_consent_info">Request info</string>
+    <string name="action_load_form">Load form</string>
+    <string name="action_show_form">Show form</string>
     <string name="action_get_consent_string">Show consent string</string>
     <string name="action_check_purpose">Check purpose</string>
     <string name="action_check_vendor">Check vendor</string>
@@ -122,6 +125,10 @@
     <string name="removed_gdpr_consent">GDPR consent string has been removed from the app shared preferences</string>
     <string name="removed_ccpa_consent">CCPA consent string has been removed from the app shared preferences</string>
     <string name="consent_string_not_set">Not set</string>
+    <string name="consent_info_update_success">Consent info update success</string>
+    <string name="consent_form_load_success">Consent form load success</string>
+    <string name="consent_info_not_available">Consent info not available</string>
+    <string name="consent_form_not_available">Consent form not available</string>
 
     <string name="purpose_tcf2_personalised_ads">Create personalised ads</string>
     <string name="purpose_tcf2_personalised_content">Create personalised content</string>
