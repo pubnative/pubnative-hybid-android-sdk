@@ -7,4 +7,5 @@ public class LeaderboardRequestManager extends RequestManager {
     protected AdSize getAdSize() {
         return AdSize.SIZE_728x90;
     }
+
 }

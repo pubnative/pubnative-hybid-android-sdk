@@ -33,4 +33,5 @@ public class InterstitialRequestManager extends RequestManager {
     protected AdSize getAdSize() {
         return AdSize.SIZE_INTERSTITIAL;
     }
+
 }

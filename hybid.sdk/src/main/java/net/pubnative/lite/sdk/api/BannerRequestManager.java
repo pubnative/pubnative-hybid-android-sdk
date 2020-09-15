@@ -33,4 +33,5 @@ public class BannerRequestManager extends RequestManager {
     protected AdSize getAdSize() {
         return AdSize.SIZE_320x50;
     }
+
 }

@@ -1,11 +1,10 @@
 package net.pubnative.lite.sdk.models;
 
-import android.content.Context;
-import android.graphics.Point;
 import android.location.Location;
 
 import net.pubnative.lite.sdk.BuildConfig;
 import net.pubnative.lite.sdk.DeviceInfo;
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.utils.PNCrypto;
@@ -18,6 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.robolectric.RobolectricTestRunner;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 import static org.mockito.Mockito.mock;
@@ -38,6 +39,8 @@ public class AdRequestFactoryTest {
 
     @InjectMocks
     private AdRequestFactory mSubject;
+
+    private List<String> mMockSupportedFrameworks = Arrays.asList("5","7");
 
     @Before
     public void setup() {
@@ -83,6 +86,9 @@ public class AdRequestFactoryTest {
         Assert.assertEquals("1920", request.deviceWidth);
         Assert.assertEquals("1080", request.deviceHeight);
         Assert.assertEquals("portrait", request.orientation);
+        Assert.assertEquals(HyBid.OMSDK_VERSION, request.omidpv);
+        Assert.assertEquals(HyBid.OM_PARTNER_NAME, request.omidpn);
+
         Assert.assertEquals(String.format(Locale.ENGLISH, "%s_%s_%s",
                 "sdkandroid", "hb", BuildConfig.VERSION_NAME), request.displaymanagerver);
     }

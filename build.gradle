@@ -25,6 +25,7 @@ subprojects {
     ext {
         branchName = "${System.getenv("CIRCLE_BRANCH")}"
         buildNumber = "${System.getenv("CIRCLE_BUILD_NUM")}"
+        omid_version = '1.3.10'
     }
     version = "1.5.5"
     group = "net.pubnative"

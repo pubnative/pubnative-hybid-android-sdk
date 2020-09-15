@@ -33,4 +33,5 @@ public class MRectRequestManager extends RequestManager {
     protected AdSize getAdSize() {
         return AdSize.SIZE_300x250;
     }
+
 }
