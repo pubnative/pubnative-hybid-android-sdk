@@ -22,8 +22,6 @@
 //
 package net.pubnative.lite.sdk.models;
 
-import java.util.List;
-
 /**
  * Created by erosgarciaponte on 10.01.18.
  */
@@ -55,7 +53,6 @@ public class AdRequest {
     public String testMode;
     public String displaymanager;
     public String displaymanagerver;
-    public List<String> api;
     public String omidpn;
     public String omidpv;
     public String usprivacy;

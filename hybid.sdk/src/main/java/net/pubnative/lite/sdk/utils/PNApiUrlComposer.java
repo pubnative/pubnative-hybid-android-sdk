@@ -152,12 +152,6 @@ public final class PNApiUrlComposer {
             uriBuilder.appendQueryParameter("omidpv", adRequest.omidpv);
         }
 
-        if (adRequest.api != null && !adRequest.api.isEmpty()){
-            String listString = adRequest.api.toString();
-            listString = listString.substring(1, listString.length()-1);
-            uriBuilder.appendQueryParameter("api", listString.replaceAll("\\s+",""));
-        }
-
         if (!TextUtils.isEmpty(adRequest.usprivacy)) {
             uriBuilder.appendQueryParameter("usprivacy", adRequest.usprivacy);
         }

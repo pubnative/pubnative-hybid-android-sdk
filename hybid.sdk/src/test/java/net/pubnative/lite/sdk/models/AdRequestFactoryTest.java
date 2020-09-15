@@ -1,7 +1,5 @@
 package net.pubnative.lite.sdk.models;
 
-import android.content.Context;
-import android.graphics.Point;
 import android.location.Location;
 
 import net.pubnative.lite.sdk.BuildConfig;
@@ -67,7 +65,7 @@ public class AdRequestFactoryTest {
 
     @Test
     public void createAdRequest() {
-        AdRequest request = mSubject.buildRequest("2", "s", mMockSupportedFrameworks, "aabbccdd", false, IntegrationType.HEADER_BIDDING);
+        AdRequest request = mSubject.buildRequest("2", "s", "aabbccdd", false, IntegrationType.HEADER_BIDDING);
         Assert.assertEquals("aabbccdd", request.gid);
         Assert.assertEquals(PNCrypto.md5("aabbccdd"), request.gidmd5);
         Assert.assertEquals(PNCrypto.sha1("aabbccdd"), request.gidsha1);
@@ -88,7 +86,6 @@ public class AdRequestFactoryTest {
         Assert.assertEquals("portrait", request.orientation);
         Assert.assertEquals(HyBid.OMSDK_VERSION, request.omidpv);
         Assert.assertEquals(HyBid.OM_PARTNER_NAME, request.omidpn);
-        Assert.assertEquals(Arrays.asList("5","7"), request.api);
 
         Assert.assertEquals(String.format(Locale.ENGLISH, "%s_%s_%s",
                 "sdkandroid", "hb", BuildConfig.VERSION_NAME), request.displaymanagerver);

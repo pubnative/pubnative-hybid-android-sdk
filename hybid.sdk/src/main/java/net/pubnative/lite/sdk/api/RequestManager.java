@@ -37,8 +37,6 @@ import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 
-import java.util.List;
-
 /**
  * Created by erosgarciaponte on 08.01.18.
  */
@@ -108,7 +106,7 @@ public abstract class RequestManager {
             return;
         }
 
-        mAdRequestFactory.createAdRequest(mZoneId, getAdSize(), getSupportedFrameworks(), new AdRequestFactory.Callback() {
+        mAdRequestFactory.createAdRequest(mZoneId, getAdSize(), new AdRequestFactory.Callback() {
             @Override
             public void onRequestCreated(AdRequest adRequest) {
                 requestAdFromApi(adRequest);
@@ -203,6 +201,4 @@ public abstract class RequestManager {
 
     protected abstract String getAdSize();
 
-    // Frameworks: 2 - VPAID2.0, 3 - MRAID-1, 5 - MRAID-2, 7 - OMID-1
-    protected abstract List<String> getSupportedFrameworks();
 }
