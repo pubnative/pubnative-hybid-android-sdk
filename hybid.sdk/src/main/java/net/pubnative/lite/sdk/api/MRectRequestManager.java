@@ -22,14 +22,16 @@
 //
 package net.pubnative.lite.sdk.api;
 
+import net.pubnative.lite.sdk.models.AdSize;
+
 /**
  * Created by erosgarciaponte on 12.01.18.
  */
 
 public class MRectRequestManager extends RequestManager {
     @Override
-    protected String getAdSize() {
-        return "m";
+    protected AdSize getAdSize() {
+        return AdSize.SIZE_300x250;
     }
 
 }

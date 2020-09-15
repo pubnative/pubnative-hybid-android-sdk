@@ -6,6 +6,7 @@ buildscript {
         jcenter()
         maven { url "https://s3.amazonaws.com/moat-sdk-builds" }
         maven { url 'https://dl.bintray.com/pubnative/maven' }
+        maven { url 'https://maven.ogury.co' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.0.1'
@@ -26,7 +27,7 @@ subprojects {
         buildNumber = "${System.getenv("CIRCLE_BUILD_NUM")}"
         omid_version = '1.3.10'
     }
-    version = "1.5.1"
+    version = "1.5.5"
     group = "net.pubnative"
 }
 
@@ -36,6 +37,7 @@ allprojects {
         jcenter()
         maven { url "https://s3.amazonaws.com/moat-sdk-builds" }
         maven { url 'https://dl.bintray.com/pubnative/maven' }
+        maven { url 'https://maven.ogury.co' }
     }
 }
 

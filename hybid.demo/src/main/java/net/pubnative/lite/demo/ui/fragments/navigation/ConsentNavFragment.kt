@@ -8,8 +8,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
-import net.pubnative.lite.demo.ui.activities.consent.CMPActivity
+import net.pubnative.lite.demo.ui.activities.consent.PNCMPActivity
 import net.pubnative.lite.demo.ui.activities.consent.ConsentStringsActivity
+import net.pubnative.lite.demo.ui.activities.consent.GoogleCMPActivity
+import net.pubnative.lite.demo.ui.activities.consent.OguryCMPActivity
 
 class ConsentNavFragment : Fragment() {
 
@@ -18,8 +20,18 @@ class ConsentNavFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        view.findViewById<TextView>(R.id.button_cmp).setOnClickListener {
-            val intent = Intent(activity, CMPActivity::class.java)
+        view.findViewById<TextView>(R.id.button_pn_cmp).setOnClickListener {
+            val intent = Intent(activity, PNCMPActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<TextView>(R.id.button_ogury_cmp).setOnClickListener {
+            val intent = Intent(activity, OguryCMPActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<TextView>(R.id.button_google_cmp).setOnClickListener {
+            val intent = Intent(activity, GoogleCMPActivity::class.java)
             startActivity(intent)
         }
 

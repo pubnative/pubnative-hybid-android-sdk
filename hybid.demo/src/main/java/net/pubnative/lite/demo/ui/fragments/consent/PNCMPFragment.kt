@@ -12,7 +12,7 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.consent.UserConsentActivity
 
-class CMPFragment : Fragment() {
+class PNCMPFragment : Fragment() {
     companion object {
         private const val REQUEST_CONSENT: Int = 290
     }
@@ -25,7 +25,7 @@ class CMPFragment : Fragment() {
     private lateinit var consentResultView: TextView
     private lateinit var canCollectDataView: TextView
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_cmp, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_pn_cmp, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

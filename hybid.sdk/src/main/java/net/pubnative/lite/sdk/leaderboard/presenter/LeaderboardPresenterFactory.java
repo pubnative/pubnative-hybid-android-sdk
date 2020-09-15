@@ -24,25 +24,16 @@ package net.pubnative.lite.sdk.leaderboard.presenter;
 
 import android.content.Context;
 
-import net.pubnative.lite.sdk.models.Ad;
-import net.pubnative.lite.sdk.models.ApiAssetGroupType;
-import net.pubnative.lite.sdk.presenter.AdPresenter;
-import net.pubnative.lite.sdk.presenter.PresenterFactory;
-import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
 
-public class LeaderboardPresenterFactory extends PresenterFactory {
-    private static final String TAG = LeaderboardPresenterFactory.class.getSimpleName();
-
+/**
+ * @deprecated
+ * This presenter factory is only kept for backwards compatibility
+ * <p> Use {@link BannerPresenterFactory} instead.</p>
+ */
+@Deprecated
+public class LeaderboardPresenterFactory extends BannerPresenterFactory {
     public LeaderboardPresenterFactory(Context context) {
         super(context);
-    }
-
-    @Override
-    protected AdPresenter fromCreativeType(int assetGroupId, Ad ad) {
-        if (assetGroupId == ApiAssetGroupType.MRAID_LEADERBOARD) {
-            return new MraidLeaderboardPresenter(getContext(), ad);
-        }
-        Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for leaderboard ad format.");
-        return null;
     }
 }

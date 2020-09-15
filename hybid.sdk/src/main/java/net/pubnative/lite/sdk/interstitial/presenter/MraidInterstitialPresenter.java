@@ -26,10 +26,8 @@ import android.content.Context;
 import android.content.Intent;
 
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
-import net.pubnative.lite.sdk.interstitial.activity.CenteredMraidInterstitialActivity;
 import net.pubnative.lite.sdk.interstitial.activity.HyBidInterstitialActivity;
 import net.pubnative.lite.sdk.interstitial.activity.MraidInterstitialActivity;
-import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 
@@ -95,13 +93,6 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, HyBidI
         if (mBroadcastReceiver != null) {
             mBroadcastReceiver.register();
 
-            /*Intent intent;
-            if (mAd.getAssetWidth(APIAsset.HTML_BANNER) != -1
-                    && mAd.getAssetHeight(APIAsset.HTML_BANNER) != -1) {
-                intent = new Intent(mContext, MraidInterstitialActivity.class);
-            } else {
-                intent = new Intent(mContext, MraidInterstitialActivity.class);
-            }*/
             Intent intent = new Intent(mContext, MraidInterstitialActivity.class);
 
             intent.putExtra(HyBidInterstitialActivity.EXTRA_BROADCAST_ID, mBroadcastReceiver.getBroadcastId());

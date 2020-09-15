@@ -36,17 +36,16 @@ import com.mopub.mobileads.BaseAd;
 import com.mopub.mobileads.MoPubErrorCode;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.utils.Logger;
-import net.pubnative.lite.sdk.views.HyBidBannerAdView;
-import net.pubnative.lite.sdk.views.PNAdView;
+import net.pubnative.lite.sdk.views.HyBidAdView;
 
-public class HyBidMediationBannerCustomEvent extends BaseAd implements PNAdView.Listener {
+public class HyBidMediationBannerCustomEvent extends BaseAd implements HyBidAdView.Listener {
     private static final String TAG = HyBidMediationBannerCustomEvent.class.getSimpleName();
 
     private static final String APP_TOKEN_KEY = "pn_app_token";
     private static final String ZONE_ID_KEY = "pn_zone_id";
-
-    private HyBidBannerAdView mBannerView;
+    private HyBidAdView mBannerView;
     private String mZoneID = "";
 
     @Override
@@ -74,7 +73,8 @@ public class HyBidMediationBannerCustomEvent extends BaseAd implements PNAdView.
         }
 
         setAutomaticImpressionAndClickTracking(false);
-        mBannerView = new HyBidBannerAdView(context);
+        mBannerView = new HyBidAdView(context);
+        mBannerView.setAdSize(getAdSize());
         mBannerView.setMediation(true);
         mBannerView.load(mZoneID, this);
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_ATTEMPTED, TAG);
@@ -109,6 +109,10 @@ public class HyBidMediationBannerCustomEvent extends BaseAd implements PNAdView.
     @Override
     protected View getAdView() {
         return mBannerView;
+    }
+
+    protected AdSize getAdSize() {
+        return AdSize.SIZE_320x50;
     }
 
     //------------------------------------ PNAdView Callbacks --------------------------------------

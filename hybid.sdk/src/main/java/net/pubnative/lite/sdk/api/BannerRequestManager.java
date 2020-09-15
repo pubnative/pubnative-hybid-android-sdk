@@ -22,14 +22,16 @@
 //
 package net.pubnative.lite.sdk.api;
 
+import net.pubnative.lite.sdk.models.AdSize;
+
 /**
  * Created by erosgarciaponte on 11.01.18.
  */
 
 public class BannerRequestManager extends RequestManager {
     @Override
-    protected String getAdSize() {
-        return "s";
+    protected AdSize getAdSize() {
+        return AdSize.SIZE_320x50;
     }
 
 }

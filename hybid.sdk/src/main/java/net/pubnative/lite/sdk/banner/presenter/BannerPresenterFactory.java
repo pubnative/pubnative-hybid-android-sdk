@@ -38,15 +38,28 @@ public class BannerPresenterFactory extends PresenterFactory {
     private static final String TAG = BannerPresenterFactory.class.getSimpleName();
 
     public BannerPresenterFactory(Context context) {
-       super(context);
+        super(context);
     }
 
     @Override
-    protected AdPresenter fromCreativeType(int assetGroupId, Ad ad) {
+    public AdPresenter fromCreativeType(int assetGroupId, Ad ad) {
         switch (assetGroupId) {
-            case ApiAssetGroupType.MRAID_BANNER_1:
-            case ApiAssetGroupType.MRAID_BANNER_2: {
+            case ApiAssetGroupType.MRAID_160x600:
+            case ApiAssetGroupType.MRAID_250x250:
+            case ApiAssetGroupType.MRAID_300x50:
+            case ApiAssetGroupType.MRAID_300x250:
+            case ApiAssetGroupType.MRAID_300x600:
+            case ApiAssetGroupType.MRAID_320x50:
+            case ApiAssetGroupType.MRAID_320x100:
+            case ApiAssetGroupType.MRAID_320x480:
+            case ApiAssetGroupType.MRAID_480x320:
+            case ApiAssetGroupType.MRAID_728x90:
+            case ApiAssetGroupType.MRAID_768x1024:
+            case ApiAssetGroupType.MRAID_1024x768: {
                 return new MraidAdPresenter(getContext(), ad);
+            }
+            case ApiAssetGroupType.VAST_MRECT: {
+                return new VastAdPresenter(getContext(), ad);
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for banner ad format.");
