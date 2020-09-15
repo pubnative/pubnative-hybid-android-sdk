@@ -35,8 +35,8 @@ import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 
 public class HyBid {
     public static final String BASE_URL = "https://api.pubnative.net/";
-    public static final String OMSDK_VERSION = "1.3.10";
-    public static final String OM_PARTNER_NAME = "pubnativenet";
+    public static final String OMSDK_VERSION = BuildConfig.OMIDPV;
+    public static final String OM_PARTNER_NAME = BuildConfig.OMIDPN;
 
     private static String sAppToken;
     @SuppressLint("StaticFieldLeak")
