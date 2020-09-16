@@ -88,6 +88,7 @@ jobs:
       - *restore_gradle_cache
       - *restore_gems_cache
       - *ruby_yum
+      - *bundler_update
       - *ruby_dependencies
       - *save_gradle_cache
       - *save_gems_cache
@@ -102,6 +103,7 @@ jobs:
       - *restore_gradle_cache
       - *restore_gems_cache
       - *ruby_yum
+      - *bundler_update
       - *ruby_dependencies
       - *save_gradle_cache
       - *save_gems_cache
@@ -116,6 +118,7 @@ jobs:
       - *restore_gradle_cache
       - *restore_gems_cache
       - *ruby_yum
+      - *bundler_update
       - *ruby_dependencies
       - *save_gradle_cache
       - *save_gems_cache
@@ -130,6 +133,7 @@ jobs:
       - *restore_gradle_cache
       - *restore_gems_cache
       - *ruby_yum
+      - *bundler_update
       - *ruby_dependencies
       - *save_gradle_cache
       - *save_gems_cache
