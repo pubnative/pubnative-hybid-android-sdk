@@ -49,6 +49,11 @@ references:
       name: Install Ruby Dev Libs
       command: yum install -y ruby-devel
 
+  bundler_update: &bundler_update
+    run:
+      name: Update bundler
+      command: gem install bundler --version 1.16.3
+
   ruby_dependencies: &ruby_dependencies
     run:
       name: Download Ruby Dependencies
@@ -62,6 +67,7 @@ jobs:
       - *restore_gradle_cache
       - *restore_gems_cache
       - *ruby_yum
+      - *bundler_update
       - *ruby_dependencies
       - *save_gradle_cache
       - *save_gems_cache
