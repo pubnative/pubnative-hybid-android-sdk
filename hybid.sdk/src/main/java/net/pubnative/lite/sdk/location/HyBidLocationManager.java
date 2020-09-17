@@ -45,14 +45,16 @@ public class HyBidLocationManager implements LocationListener {
     private static final int TWO_MINUTES = 1000 * 60 * 2;
     private static final int LOCATION_UPDATE_TIMEOUT = 10000;
 
-    private Context mContext;
-    private LocationManager mManager;
+    private final Context mContext;
+    private final LocationManager mManager;
+    private final boolean mLocationSupported;
 
     private Location mCurrentBestLocation;
 
     public HyBidLocationManager(Context context) {
         mManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         mContext = context;
+        mLocationSupported = mManager != null;
     }
 
     private Location getLastKnownNetworkLocation() {
@@ -76,11 +78,15 @@ public class HyBidLocationManager implements LocationListener {
     }
 
     private boolean hasGPSProvider() {
-        return mManager.getProvider(LocationManager.GPS_PROVIDER) != null;
+        return isLocationSupported() && mManager.getProvider(LocationManager.GPS_PROVIDER) != null;
     }
 
     private boolean hasNetworkProvider() {
-        return mManager.getProvider(LocationManager.NETWORK_PROVIDER) != null;
+        return isLocationSupported() && mManager.getProvider(LocationManager.NETWORK_PROVIDER) != null;
+    }
+
+    public boolean isLocationSupported() {
+        return mLocationSupported;
     }
 
     /**
@@ -101,8 +107,9 @@ public class HyBidLocationManager implements LocationListener {
     }
 
     public void stopLocationUpdates() {
-
-        mManager.removeUpdates(this);
+        if (isLocationSupported()) {
+            mManager.removeUpdates(this);
+        }
     }
 
     protected boolean isBetterLocation(Location location, Location currentBestLocation) {
