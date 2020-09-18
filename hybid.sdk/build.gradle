@@ -80,6 +80,7 @@ task javadoc(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
     classpath += project.rootProject.files(android.getBootClasspath().join(File.pathSeparator))
     options.memberLevel = JavadocMemberLevel.PUBLIC
+    failOnError false
 }
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
