@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 PubNative GmbH
+// Copyright (c) 2020 PubNative GmbH
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -46,6 +46,7 @@ public class UserDataManager {
     private static final String KEY_GDPR_ADVERTISING_ID = "gdpr_advertising_id";
     private static final String KEY_CCPA_PUBLIC_CONSENT = "IABUSPrivacy_String";
     private static final String KEY_GDPR_PUBLIC_CONSENT = "IABConsent_ConsentString";
+    private static final String KEY_GDPR_TCF_2_PUBLIC_CONSENT = "IABTCF_TCString";
     private static final String KEY_SUBJECT_TO_GDPR_PUBLIC = "IABConsent_SubjectToGDPR";
     private static final String KEY_CMP_PRESENT_PUBLIC = "IABConsent_CMPPresent";
     private static final String KEY_CCPA_CONSENT = "ccpa_consent";
@@ -110,15 +111,32 @@ public class UserDataManager {
         }
     }
 
+    /**
+     * This method is being deprecated
+     *
+     * @deprecated use {@link #setIABGDPRConsentString(String gdprConsentString)} instead.
+     */
+    @Deprecated
     public void grantConsent() {
-
         notifyConsentGiven();
     }
 
+    /**
+     * This method is being deprecated
+     *
+     * @deprecated use {@link #removeIABGDPRConsentString()} instead.
+     */
+    @Deprecated
     public void denyConsent() {
         notifyConsentDenied();
     }
 
+    /**
+     * This method is being deprecated
+     *
+     * @deprecated use {@link #removeIABGDPRConsentString()} instead.
+     */
+    @Deprecated
     public void revokeConsent() {
         notifyConsentDenied();
     }
@@ -280,6 +298,15 @@ public class UserDataManager {
                     }
                     break;
                 }
+                case KEY_GDPR_TCF_2_PUBLIC_CONSENT: {
+                    String consentString = sharedPreferences.getString(KEY_GDPR_TCF_2_PUBLIC_CONSENT, null);
+                    if (!TextUtils.isEmpty(consentString)) {
+                        setIABGDPRConsentString(consentString);
+                    } else {
+                        removeIABGDPRConsentString();
+                    }
+                    break;
+                }
                 case KEY_CCPA_PUBLIC_CONSENT: {
                     String consentString = sharedPreferences.getString(KEY_CCPA_PUBLIC_CONSENT, null);
                     if (!TextUtils.isEmpty(consentString)) {
@@ -330,7 +357,10 @@ public class UserDataManager {
     public String getIABGDPRConsentString() {
         String consentString = mPreferences.getString(KEY_GDPR_CONSENT, null);
         if (TextUtils.isEmpty(consentString)) {
-            consentString = mAppPreferences.getString(KEY_GDPR_PUBLIC_CONSENT, null);
+            consentString = mAppPreferences.getString(KEY_GDPR_TCF_2_PUBLIC_CONSENT, null);
+            if (TextUtils.isEmpty(consentString)) {
+                consentString = mAppPreferences.getString(KEY_GDPR_PUBLIC_CONSENT, null);
+            }
         }
         return consentString;
     }

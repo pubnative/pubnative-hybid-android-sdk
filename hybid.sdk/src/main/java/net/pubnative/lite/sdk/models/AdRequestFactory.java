@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 PubNative GmbH
+// Copyright (c) 2020 PubNative GmbH
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,6 @@
 package net.pubnative.lite.sdk.models;
 
 import android.content.Context;
-import android.graphics.Point;
 import android.location.Location;
 import android.text.TextUtils;
 
@@ -99,6 +98,8 @@ public class AdRequestFactory {
         adRequest.osver = mDeviceInfo.getOSVersion();
         adRequest.devicemodel = mDeviceInfo.getModel();
         adRequest.coppa = HyBid.isCoppaEnabled() ? "1" : "0";
+        adRequest.omidpn = HyBid.OM_PARTNER_NAME;
+        adRequest.omidpv = HyBid.OMSDK_VERSION;
 
         if (HyBid.isCoppaEnabled() || limitTracking || TextUtils.isEmpty(advertisingId)
                 || isCCPAOptOut) {

@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 PubNative GmbH
+// Copyright (c) 2020 PubNative GmbH
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -55,6 +55,8 @@ public class AdRequest {
     public String testMode;
     public String displaymanager;
     public String displaymanagerver;
+    public String omidpn;
+    public String omidpv;
     public String usprivacy;
     public String userconsent;
 }

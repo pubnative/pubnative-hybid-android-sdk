@@ -13,7 +13,7 @@ class ClipboardUtils {
             if (!TextUtils.isEmpty(text)) {
                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 val clip = ClipData.newPlainText("hybid_demo_debug", text)
-                clipboard.primaryClip = clip
+                clipboard.setPrimaryClip(clip)
                 Toast.makeText(context, "Text copied to clipboard", Toast.LENGTH_SHORT).show()
             }
         }
