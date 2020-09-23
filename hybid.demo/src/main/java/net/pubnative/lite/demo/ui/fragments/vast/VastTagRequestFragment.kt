@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.network.PNHttpClient
@@ -22,7 +21,7 @@ class VastTagRequestFragment : Fragment(), PNAdView.Listener {
     private lateinit var adSizeGroup: RadioGroup
 
     private lateinit var mResponse: String
-    private lateinit var mRectContainer : RelativeLayout
+    private lateinit var mMRect : HyBidMRectAdView
 
     private var selectedSize: Int = R.id.radio_vast_size_medium
 
@@ -31,7 +30,7 @@ class VastTagRequestFragment : Fragment(), PNAdView.Listener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mRectContainer = view.findViewById(R.id.mrect_vast_adview)
+        mMRect = view.findViewById(R.id.mrect_vast_adview)
         adSizeGroup = view.findViewById(R.id.group_vast_ad_size)
         vastTagInput = view.findViewById(R.id.input_vast_tag)
 
@@ -58,9 +57,9 @@ class VastTagRequestFragment : Fragment(), PNAdView.Listener {
 
     private fun updateListVisibility() {
         if (selectedSize == R.id.radio_vast_size_medium) {
-            mRectContainer.visibility = View.VISIBLE
+            mMRect.visibility = View.VISIBLE
         } else {
-            mRectContainer.visibility = View.GONE
+            mMRect.visibility = View.GONE
         }
     }
 
@@ -74,15 +73,14 @@ class VastTagRequestFragment : Fragment(), PNAdView.Listener {
         }
     }
 
-    private fun requestVastTag(url : String){
-        PNHttpClient.makeRequest(activity, url, null, null, object : PNHttpClient.Listener{
+    private fun requestVastTag(url: String){
+        PNHttpClient.makeRequest(activity, url, null, null, object : PNHttpClient.Listener {
 
             override fun onSuccess(response: String) {
-                if (TextUtils.isEmpty(response)){
+                if (TextUtils.isEmpty(response)) {
                     Toast.makeText(activity, "AdServer response is empty or null", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(activity, response, Toast.LENGTH_LONG).show()
-                    //renderVast(response)
+                    renderVast(response)
                 }
             }
 
@@ -94,7 +92,7 @@ class VastTagRequestFragment : Fragment(), PNAdView.Listener {
     }
 
 
-    private fun renderVast(vastXmlResponse : String){
+    private fun renderVast(vastXmlResponse: String){
         if (selectedSize == R.id.radio_size_interstitial) {
             loadInterstitialVast(vastXmlResponse)
         } else {
@@ -107,10 +105,7 @@ class VastTagRequestFragment : Fragment(), PNAdView.Listener {
     }
 
     private fun loadMrectVast(vastXmlResponse: String){
-        //mRectContainer.addView(mRectAdView)
-        val adView = HyBidMRectAdView(context)
-        mRectContainer.addView(adView)
-        adView.renderAd(vastXmlResponse, this)
+        mMRect.renderAd(vastXmlResponse, this)
     }
 
     override fun onAdLoaded() {
@@ -129,4 +124,10 @@ class VastTagRequestFragment : Fragment(), PNAdView.Listener {
         Logger.d(TAG, "onAdClick")
     }
 
+    override fun onDestroy() {
+        if (mMRect != null) {
+            mMRect.destroy()
+        }
+        super.onDestroy()
+    }
 }
