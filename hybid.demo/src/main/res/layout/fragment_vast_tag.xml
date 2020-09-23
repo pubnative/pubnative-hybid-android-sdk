@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp">
 
         <ImageButton
@@ -39,7 +39,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/vast_tag_input"
-                android:maxLines="5" />
+                android:maxLines="2" />
         </com.google.android.material.textfield.TextInputLayout>
     </RelativeLayout>
 
@@ -67,14 +67,14 @@
         <RadioButton
             android:id="@+id/radio_vast_size_medium"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="32dp"
             android:text="@string/medium"
             android:checked="true"/>
 
         <RadioButton
             android:id="@+id/radio_vast_size_interstitial"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="32dp"
             android:text="@string/interstitial" />
     </RadioGroup>
 
@@ -83,9 +83,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="8dp"
         android:text="@string/load" />
 
     <net.pubnative.lite.sdk.views.HyBidMRectAdView
