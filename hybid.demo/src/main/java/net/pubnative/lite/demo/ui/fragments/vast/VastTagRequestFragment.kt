@@ -9,19 +9,20 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.util.ClipboardUtils
+import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd
 import net.pubnative.lite.sdk.network.PNHttpClient
 import net.pubnative.lite.sdk.utils.Logger
 import net.pubnative.lite.sdk.views.HyBidMRectAdView
 import net.pubnative.lite.sdk.views.PNAdView
 
-class VastTagRequestFragment : Fragment(), PNAdView.Listener {
+class VastTagRequestFragment : Fragment(), PNAdView.Listener, HyBidInterstitialAd.Listener{
     private val TAG = VastTagRequestFragment::class.java.simpleName
 
     private lateinit var vastTagInput: EditText
     private lateinit var adSizeGroup: RadioGroup
 
-    private lateinit var mResponse: String
     private lateinit var mMRect : HyBidMRectAdView
+    private lateinit var mInterstitial : HyBidInterstitialAd
 
     private var selectedSize: Int = R.id.radio_vast_size_medium
 
@@ -91,23 +92,25 @@ class VastTagRequestFragment : Fragment(), PNAdView.Listener {
         })
     }
 
-
     private fun renderVast(vastXmlResponse: String){
-        if (selectedSize == R.id.radio_size_interstitial) {
+        if (selectedSize == R.id.radio_vast_size_interstitial) {
             loadInterstitialVast(vastXmlResponse)
         } else {
             loadMrectVast(vastXmlResponse)
         }
     }
 
-    private fun loadInterstitialVast(vastXmlResponse: String){
-
-    }
-
     private fun loadMrectVast(vastXmlResponse: String){
+        mMRect.visibility = View.VISIBLE
         mMRect.renderAd(vastXmlResponse, this)
     }
 
+    private fun loadInterstitialVast(vastXmlResponse: String){
+        mInterstitial = HyBidInterstitialAd(activity, this)
+        mInterstitial.prepareAd(vastXmlResponse)
+    }
+
+    // Mrect listeners
     override fun onAdLoaded() {
         Logger.d(TAG, "onAdLoaded")
     }
@@ -129,5 +132,27 @@ class VastTagRequestFragment : Fragment(), PNAdView.Listener {
             mMRect.destroy()
         }
         super.onDestroy()
+    }
+
+    // Interstitial listeners
+    override fun onInterstitialLoaded() {
+        Logger.d(TAG, "onInterstitialAdLoaded")
+        mInterstitial.show()
+    }
+
+    override fun onInterstitialLoadFailed(error: Throwable?) {
+        Logger.e(TAG, "onInterstitialAdLoadFailed", error)
+    }
+
+    override fun onInterstitialImpression() {
+        Logger.d(TAG, "onInterstitialAdImpression")
+    }
+
+    override fun onInterstitialDismissed() {
+        Logger.d(TAG, "onInterstitialAdDismissed")
+    }
+
+    override fun onInterstitialClick() {
+        Logger.d(TAG, "onInterstitialAdClick")
     }
 }
