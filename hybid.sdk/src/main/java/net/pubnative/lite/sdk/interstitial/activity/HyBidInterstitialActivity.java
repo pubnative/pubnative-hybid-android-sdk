@@ -76,7 +76,7 @@ public abstract class HyBidInterstitialActivity extends Activity {
                 mCloseableContainer.addView(adView, params);
                 mCloseableContainer.setBackgroundColor(Color.WHITE);
 
-                if (shouldShowContentInfo()) {
+                if (shouldShowContentInfo() && getAd() != null) {
                     View contentInfo = getAd().getContentInfoContainer(this);
                     if (contentInfo != null) {
                         mCloseableContainer.addView(contentInfo);
@@ -136,7 +136,9 @@ public abstract class HyBidInterstitialActivity extends Activity {
 
     protected Ad getAd() {
         if (mAd == null) {
-            mAd = HyBid.getAdCache().remove(mZoneId);
+            if (HyBid.getAdCache() != null) {
+                mAd = HyBid.getAdCache().remove(mZoneId);
+            }
         }
         return mAd;
     }

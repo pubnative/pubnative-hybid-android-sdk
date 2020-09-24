@@ -15,11 +15,11 @@ version = version_name
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 30
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 28
+        targetSdkVersion 30
         versionCode System.getenv("CIRCLE_BUILD_NUM") ? System.getenv("CIRCLE_BUILD_NUM").toInteger() : 1
         versionName version_name
 
@@ -30,12 +30,19 @@ android {
         release {
             minifyEnabled System.getenv("CI") ? true : false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'lite.sdk.pro'
+            buildConfigField "String", "OMIDPV", "\"$omid_version\""
+            buildConfigField "String", "OMIDPN", "\"pubnativenet\""
+        }
+        debug {
+            buildConfigField "String", "OMIDPV", "\"$omid_version\""
+            buildConfigField "String", "OMIDPN", "\"pubnativenet\""
         }
     }
 }
 
 dependencies {
-    implementation 'net.pubnative:hybid.omsdk:1.3.10'
+    // Remember to update OMSDK version constant found in HyBid.java
+    implementation "net.pubnative:hybid.omsdk:$omid_version"
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.robolectric:robolectric:3.8'
@@ -73,6 +80,7 @@ task javadoc(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
     classpath += project.rootProject.files(android.getBootClasspath().join(File.pathSeparator))
     options.memberLevel = JavadocMemberLevel.PUBLIC
+    failOnError false
 }
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'

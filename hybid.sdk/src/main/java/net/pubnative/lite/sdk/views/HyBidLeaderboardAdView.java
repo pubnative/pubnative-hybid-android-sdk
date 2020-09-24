@@ -34,7 +34,7 @@ import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 
-public class HyBidLeaderboardAdView extends PNAdView {
+public class HyBidLeaderboardAdView extends HyBidAdView {
 
     public HyBidLeaderboardAdView(Context context) {
         super(context);
@@ -61,12 +61,6 @@ public class HyBidLeaderboardAdView extends PNAdView {
     @Override
     RequestManager getRequestManager() {
         return new LeaderboardRequestManager();
-    }
-
-    @Override
-    protected AdPresenter createPresenter() {
-        return new LeaderboardPresenterFactory(getContext())
-                .createPresenter(mAd, this);
     }
 
     @Override

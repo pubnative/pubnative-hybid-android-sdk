@@ -31,6 +31,8 @@ import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
 
 import com.google.android.gms.ads.MobileAds;
+import com.ogury.cm.OguryChoiceManager;
+import com.ogury.cm.OguryCmConfig;
 
 import net.pubnative.lite.demo.managers.MoPubManager;
 import net.pubnative.lite.demo.managers.SettingsManager;
@@ -112,6 +114,8 @@ public class HyBidDemoApplication extends MultiDexApplication {
 
         MobileAds.initialize(this, initializationStatus -> {
         });
+
+        OguryChoiceManager.initialize(this, Constants.OGURY_KEY, new OguryCmConfig());
     }
 
     private SettingsModel fetchSettings() {

@@ -31,12 +31,17 @@ import java.util.List;
 
 public class Constants {
     public static final String NATIVE_ZONE_ID = "7";
-    public static final String BANNER_MRAID_ZONE_ID = "2";
     public static final String INTERSTITIAL_MRAID_ZONE_ID = "3";
-    public static final String MEDIUM_MRAID_ZONE_ID = "5";
-    public static final String LEADERBOARD_MRAID_ZONE_ID = "8";
     public static final String INTERSTITIAL_VIDEO_ZONE_ID = "4";
     public static final String MEDIUM_VIDEO_ZONE_ID = "6";
+    public static final String MRAID_320x50_ZONE_ID = "2";
+    public static final String MRAID_300x250_ZONE_ID = "5";
+    public static final String MRAID_728x90_ZONE_ID = "8";
+    public static final String MRAID_160x600_ZONE_ID = "25";
+    public static final String MRAID_250x250_ZONE_ID = "26";
+    public static final String MRAID_300x600_ZONE_ID = "27";
+    public static final String MRAID_320x100_ZONE_ID = "28";
+    public static final String MRAID_480x320_ZONE_ID = "29";
 
     public static final String MOPUB_MEDIATION_BANNER_AD_UNIT = "38864d35877d4684af11319530993074";
     public static final String MOPUB_MEDIATION_INTERSTITIAL_AD_UNIT = "2bb6db4d69fa407a87b0c96c55d7c2b4";
@@ -61,9 +66,13 @@ public class Constants {
     public static final String ADMOB_LEADERBOARD_AD_UNIT = "ca-app-pub-9763601123242224/4902888458";
 
     public static final String APP_TOKEN = "dde3c298b47648459f8ada4a982fa92d";
-    public static final List<String> ZONE_ID_LIST = Arrays.asList(NATIVE_ZONE_ID, BANNER_MRAID_ZONE_ID,
-            MEDIUM_MRAID_ZONE_ID, INTERSTITIAL_MRAID_ZONE_ID, MEDIUM_VIDEO_ZONE_ID,
-            INTERSTITIAL_VIDEO_ZONE_ID, LEADERBOARD_MRAID_ZONE_ID);
+    public static final List<String> ZONE_ID_LIST = Arrays.asList(NATIVE_ZONE_ID, MRAID_320x50_ZONE_ID,
+            MRAID_300x250_ZONE_ID, INTERSTITIAL_MRAID_ZONE_ID, MEDIUM_VIDEO_ZONE_ID,
+            INTERSTITIAL_VIDEO_ZONE_ID, MRAID_728x90_ZONE_ID, MRAID_160x600_ZONE_ID,
+            MRAID_250x250_ZONE_ID, MRAID_300x600_ZONE_ID, MRAID_320x100_ZONE_ID,
+            MRAID_480x320_ZONE_ID);
+
+    public static final String OGURY_KEY = "OGY-7B028F43E33F";
 
     public final class IntentParams {
         public static final String ZONE_ID = "zone_id";

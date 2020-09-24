@@ -36,7 +36,7 @@ import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.MarkupUtils;
 import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 
-public class HyBidMRectAdView extends PNAdView {
+public class HyBidMRectAdView extends HyBidAdView {
 
     public HyBidMRectAdView(Context context) {
         super(context);
@@ -63,12 +63,6 @@ public class HyBidMRectAdView extends PNAdView {
     @Override
     RequestManager getRequestManager() {
         return new MRectRequestManager();
-    }
-
-    @Override
-    protected AdPresenter createPresenter() {
-        return new MRectPresenterFactory(getContext())
-                .createPresenter(mAd, this);
     }
 
     @Override

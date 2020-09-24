@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 PubNative GmbH
+// Copyright (c) 2020 PubNative GmbH
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,6 @@
 package net.pubnative.lite.sdk.models;
 
 import android.content.Context;
-import android.graphics.Point;
 import android.location.Location;
 import android.text.TextUtils;
 
@@ -64,7 +63,7 @@ public class AdRequestFactory {
         mUserDataManager = userDataManager;
     }
 
-    public void createAdRequest(final String zoneid, final String adSize, final Callback callback) {
+    public void createAdRequest(final String zoneid, final AdSize adSize, final Callback callback) {
         String advertisingId = mDeviceInfo.getAdvertisingId();
         boolean limitTracking = mDeviceInfo.limitTracking();
         Context context = mDeviceInfo.getContext();
@@ -84,13 +83,13 @@ public class AdRequestFactory {
         }
     }
 
-    private void processAdvertisingId(String zoneId, String adSize, String advertisingId, boolean limitTracking, Callback callback) {
+    private void processAdvertisingId(String zoneId, AdSize adSize, String advertisingId, boolean limitTracking, Callback callback) {
         if (callback != null) {
             callback.onRequestCreated(buildRequest(zoneId, adSize, advertisingId, limitTracking, mIntegrationType));
         }
     }
 
-    AdRequest buildRequest(final String zoneid, final String adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType) {
+    AdRequest buildRequest(final String zoneid, AdSize adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType) {
         boolean isCCPAOptOut = mUserDataManager.isCCPAOptOut();
         AdRequest adRequest = new AdRequest();
         adRequest.zoneid = zoneid;
@@ -99,6 +98,8 @@ public class AdRequestFactory {
         adRequest.osver = mDeviceInfo.getOSVersion();
         adRequest.devicemodel = mDeviceInfo.getModel();
         adRequest.coppa = HyBid.isCoppaEnabled() ? "1" : "0";
+        adRequest.omidpn = HyBid.OM_PARTNER_NAME;
+        adRequest.omidpv = HyBid.OMSDK_VERSION;
 
         if (HyBid.isCoppaEnabled() || limitTracking || TextUtils.isEmpty(advertisingId)
                 || isCCPAOptOut) {
@@ -132,10 +133,18 @@ public class AdRequestFactory {
         adRequest.testMode = HyBid.isTestMode() ? "1" : "0";
 
         // If the ad size is empty it means it's a native ad
-        if (TextUtils.isEmpty(adSize)) {
+        if (adSize == null) {
             adRequest.af = getDefaultNativeAssetFields();
         } else {
-            adRequest.al = adSize;
+            adRequest.al = adSize.getAdLayoutSize();
+
+            if (adSize.getWidth() != 0) {
+                adRequest.width = String.valueOf(adSize.getWidth());
+            }
+
+            if (adSize.getHeight() != 0) {
+                adRequest.height = String.valueOf(adSize.getHeight());
+            }
         }
 
         adRequest.mf = getDefaultMetaFields();

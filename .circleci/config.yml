@@ -8,7 +8,7 @@ references:
     working_directory: *workspace
 
     docker:
-      - image: pubnative/android:28_20190219
+      - image: pubnative/android:30_20200916
 
     environment:
       TERM: dumb
@@ -49,6 +49,11 @@ references:
       name: Install Ruby Dev Libs
       command: yum install -y ruby-devel
 
+  bundler_update: &bundler_update
+    run:
+      name: Update bundler
+      command: gem install bundler --version 1.16.3
+
   ruby_dependencies: &ruby_dependencies
     run:
       name: Download Ruby Dependencies
@@ -62,6 +67,7 @@ jobs:
       - *restore_gradle_cache
       - *restore_gems_cache
       - *ruby_yum
+      - *bundler_update
       - *ruby_dependencies
       - *save_gradle_cache
       - *save_gems_cache
@@ -82,6 +88,7 @@ jobs:
       - *restore_gradle_cache
       - *restore_gems_cache
       - *ruby_yum
+      - *bundler_update
       - *ruby_dependencies
       - *save_gradle_cache
       - *save_gems_cache
@@ -96,6 +103,7 @@ jobs:
       - *restore_gradle_cache
       - *restore_gems_cache
       - *ruby_yum
+      - *bundler_update
       - *ruby_dependencies
       - *save_gradle_cache
       - *save_gems_cache
@@ -110,6 +118,7 @@ jobs:
       - *restore_gradle_cache
       - *restore_gems_cache
       - *ruby_yum
+      - *bundler_update
       - *ruby_dependencies
       - *save_gradle_cache
       - *save_gems_cache
@@ -124,6 +133,7 @@ jobs:
       - *restore_gradle_cache
       - *restore_gems_cache
       - *ruby_yum
+      - *bundler_update
       - *ruby_dependencies
       - *save_gradle_cache
       - *save_gems_cache
@@ -161,7 +171,5 @@ workflows:
                 - master
                 - beta
                 - development
-                - in-app-bidding
-                - maxads_mediation
           requires:
             - test_unit
