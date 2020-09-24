@@ -214,7 +214,6 @@
         <activity
             android:name=".ui.activities.vast.VastTagRequestActivity"
             android:label="@string/title_vast_tag"
-            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
 
