@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
+    android:orientation="vertical"
+    tools:context="net.pubnative.lite.demo.ui.fragments.vast.VastTagRequestFragment"
+    tools:showIn="@layout/activity_vast_tags">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp">
+
+        <ImageButton
+            android:id="@+id/button_vast_paste_clipboard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="4dp"
+            android:src="@drawable/baseline_filter_none_white_24" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@id/button_vast_paste_clipboard"
+            android:layout_toLeftOf="@id/button_vast_paste_clipboard">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/input_vast_tag"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/vast_tag_input"
+                android:maxLines="2" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:fontFamily="@font/roboto"
+        android:text="@string/ad_size"
+        android:textColor="?colorPrimaryVariant"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <RadioGroup
+        android:id="@+id/group_vast_ad_size"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="16dp"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/radio_vast_size_medium"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="@string/medium"
+            android:checked="true"/>
+
+        <RadioButton
+            android:id="@+id/radio_vast_size_interstitial"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="@string/interstitial" />
+    </RadioGroup>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_vast_load"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/load" />
+
+    <net.pubnative.lite.sdk.views.HyBidMRectAdView
+        android:id="@+id/mrect_vast_adview"
+        android:layout_width="300dp"
+        android:layout_height="250dp"
+        android:layout_gravity="center_horizontal"
+        android:visibility="invisible"
+        />
+
+</LinearLayout>
