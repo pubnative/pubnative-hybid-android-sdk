@@ -1,6 +1,7 @@
 package net.pubnative.lite.sdk.interstitial.activity;
 
 import android.os.Bundle;
+import android.text.format.DateUtils;
 import android.view.View;
 
 import net.pubnative.lite.sdk.HyBid;
@@ -33,6 +34,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
 
             VideoAdCacheItem adCacheItem = HyBid.getVideoAdCache().remove(getZoneId());
             if (adCacheItem != null) {
+                adCacheItem.getAdParams().setPublisherSkipSeconds(mSkipOffset);
                 mVideoAd.setVideoCacheItem(adCacheItem);
             }
 
