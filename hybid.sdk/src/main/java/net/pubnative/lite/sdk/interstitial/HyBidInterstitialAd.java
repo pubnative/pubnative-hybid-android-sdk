@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 PubNative GmbH
+// Copyright (c) 2020 PubNative GmbH
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -56,6 +56,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     private final String mZoneId;
     private Ad mAd;
     private boolean mReady = false;
+    private int mSkipOffset = 0;
 
     public HyBidInterstitialAd(Activity activity, String zoneId, Listener listener) {
         this((Context) activity, zoneId, listener);
@@ -121,8 +122,14 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         return mAd != null ? mAd.getECPM() : 0;
     }
 
+    public void setSkipOffset(int seconds) {
+        if (seconds >= 0) {
+            mSkipOffset = seconds;
+        }
+    }
+
     private void renderAd() {
-        mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, this);
+        mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mSkipOffset, this);
         if (mPresenter != null) {
             mPresenter.load();
         } else {

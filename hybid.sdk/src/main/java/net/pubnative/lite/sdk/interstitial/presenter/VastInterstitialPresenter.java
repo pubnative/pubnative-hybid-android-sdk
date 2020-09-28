@@ -35,16 +35,18 @@ public class VastInterstitialPresenter implements InterstitialPresenter, HyBidIn
     private final Context mContext;
     private final Ad mAd;
     private final String mZoneId;
+    private final int mSkipOffset;
     private final HyBidInterstitialBroadcastReceiver mBroadcastReceiver;
 
     private InterstitialPresenter.Listener mListener;
     private boolean mIsDestroyed;
     private boolean mReady = false;
 
-    public VastInterstitialPresenter(Context context, Ad ad, String zoneId) {
+    public VastInterstitialPresenter(Context context, Ad ad, String zoneId, int skipOffset) {
         mContext = context;
         mAd = ad;
         mZoneId = zoneId;
+        mSkipOffset = skipOffset;
         if (context != null && context.getApplicationContext() != null) {
             mBroadcastReceiver = new HyBidInterstitialBroadcastReceiver(context);
             mBroadcastReceiver.setListener(this);
@@ -92,6 +94,7 @@ public class VastInterstitialPresenter implements InterstitialPresenter, HyBidIn
             Intent intent = new Intent(mContext, VastInterstitialActivity.class);
             intent.putExtra(HyBidInterstitialActivity.EXTRA_BROADCAST_ID, mBroadcastReceiver.getBroadcastId());
             intent.putExtra(HyBidInterstitialActivity.EXTRA_ZONE_ID, mZoneId);
+            intent.putExtra(HyBidInterstitialActivity.EXTRA_SKIP_OFFSET, mSkipOffset);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mContext.startActivity(intent);
         }

@@ -80,6 +80,7 @@ class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
 
     fun loadPNAd() {
         interstitial = HyBidInterstitialAd(activity, zoneId, this)
+        interstitial?.setSkipOffset(10)
         interstitial?.load()
     }
 

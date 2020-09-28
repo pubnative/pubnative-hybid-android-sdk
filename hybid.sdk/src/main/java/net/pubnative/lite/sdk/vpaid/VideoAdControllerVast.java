@@ -200,6 +200,7 @@ class VideoAdControllerVast implements VideoAdController {
     }
 
     private void initSkipTime(int duration) {
+        int publisherSkipMilliseconds = mAdParams.getPublisherSkipSeconds() * 1000;
         if (TextUtils.isEmpty(mAdParams.getSkipTime())) {
             mSkipTimeMillis = -1;
         } else {
@@ -208,6 +209,9 @@ class VideoAdControllerVast implements VideoAdController {
             } else {
                 mSkipTimeMillis = Utils.parseDuration(mAdParams.getSkipTime()) * 1000;
             }
+        }
+        if (publisherSkipMilliseconds > 0 && publisherSkipMilliseconds > mSkipTimeMillis) {
+            mSkipTimeMillis = publisherSkipMilliseconds;
         }
     }
 

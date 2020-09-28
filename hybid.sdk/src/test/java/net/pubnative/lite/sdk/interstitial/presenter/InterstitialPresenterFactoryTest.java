@@ -53,13 +53,13 @@ public class InterstitialPresenterFactoryTest {
 
     @Test
     public void fromCreativeType_withHTML() {
-        assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_320x480, mTestAd))
+        assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_320x480, mTestAd, 0))
                 .isInstanceOf(MraidInterstitialPresenter.class);
     }
 
     @Test
     public void fromCreativeType_withVAST() {
-        assertThat(mSubject.fromCreativeType(ApiAssetGroupType.VAST_INTERSTITIAL, mTestAd))
+        assertThat(mSubject.fromCreativeType(ApiAssetGroupType.VAST_INTERSTITIAL, mTestAd, 0))
                 .isInstanceOf(VastInterstitialPresenter.class);
     }
 }
