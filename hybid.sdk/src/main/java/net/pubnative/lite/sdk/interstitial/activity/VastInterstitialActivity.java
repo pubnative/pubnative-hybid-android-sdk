@@ -1,6 +1,7 @@
 package net.pubnative.lite.sdk.interstitial.activity;
 
 import android.os.Bundle;
+import android.text.format.DateUtils;
 import android.view.View;
 
 import net.pubnative.lite.sdk.HyBid;
@@ -16,12 +17,16 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
 
     private VideoAdView mVideoPlayer;
     private VideoAd mVideoAd;
+    private int mSkipOffset;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        hideInterstitialCloseButton();
+
         if (getAd() != null) {
+            mSkipOffset = getIntent().getIntExtra(EXTRA_SKIP_OFFSET, 0);
             mVideoAd = new VideoAd(this, getAd().getVast());
             mVideoAd.bindView(mVideoPlayer);
             mVideoAd.setAdListener(mVideoAdListener);
@@ -29,6 +34,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
 
             VideoAdCacheItem adCacheItem = HyBid.getVideoAdCache().remove(getZoneId());
             if (adCacheItem != null) {
+                adCacheItem.getAdParams().setPublisherSkipSeconds(mSkipOffset);
                 mVideoAd.setVideoCacheItem(adCacheItem);
             }
 
@@ -109,11 +115,12 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
         @Override
         public void onAdDidReachEnd() {
             mReady = false;
+            showInterstitialCloseButton();
         }
 
         @Override
         public void onAdDismissed() {
-
+            finish();
         }
 
         @Override
