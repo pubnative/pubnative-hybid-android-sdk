@@ -117,6 +117,6 @@ class MarkupFragment : Fragment() {
         }
 
         interstitial = HyBidInterstitialAd(requireActivity(), interstitialListener)
-        interstitial?.prepareAd(markup)
+        interstitial?.prepareCustomMarkup(markup)
     }
 }

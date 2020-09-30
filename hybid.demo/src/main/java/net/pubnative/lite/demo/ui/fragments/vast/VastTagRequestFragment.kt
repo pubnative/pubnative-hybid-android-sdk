@@ -102,12 +102,12 @@ class VastTagRequestFragment : Fragment(), PNAdView.Listener, HyBidInterstitialA
 
     private fun loadMrectVast(vastXmlResponse: String){
         mMRect.visibility = View.VISIBLE
-        mMRect.renderAd(vastXmlResponse, this)
+        mMRect.renderCustomMarkup(vastXmlResponse, this)
     }
 
     private fun loadInterstitialVast(vastXmlResponse: String){
         mInterstitial = HyBidInterstitialAd(activity, this)
-        mInterstitial.prepareAd(vastXmlResponse)
+        mInterstitial.prepareCustomMarkup(vastXmlResponse)
     }
 
     // Mrect listeners

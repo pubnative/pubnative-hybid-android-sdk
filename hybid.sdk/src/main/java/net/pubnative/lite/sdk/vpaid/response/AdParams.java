@@ -17,6 +17,7 @@ public class AdParams {
     private String adParams;
     private String vpaidJsUrl;
     private String skipTime;
+    private int publisherSkipSeconds = 0;
 
     private List<String> videoFileUrlsList = new ArrayList<>();
     private List<String> endCardUrlList = new ArrayList<>();
@@ -155,6 +156,14 @@ public class AdParams {
 
     public void setSkipTime(String skipTime) {
         this.skipTime = skipTime;
+    }
+
+    public int getPublisherSkipSeconds() {
+        return publisherSkipSeconds;
+    }
+
+    public void setPublisherSkipSeconds(int seconds) {
+        this.publisherSkipSeconds = seconds;
     }
 
     public List<VerificationScriptResource> getVerificationScriptResources() {

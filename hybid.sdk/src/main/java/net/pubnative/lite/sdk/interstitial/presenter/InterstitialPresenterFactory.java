@@ -46,8 +46,15 @@ public class InterstitialPresenterFactory {
     public InterstitialPresenter createInterstitialPresenter(
             Ad ad,
             InterstitialPresenter.Listener interstitialPresenterListener) {
+        return createInterstitialPresenter(ad, 0, interstitialPresenterListener);
+    }
 
-        final InterstitialPresenter interstitialPresenter = fromCreativeType(ad.assetgroupid, ad);
+    public InterstitialPresenter createInterstitialPresenter(
+            Ad ad,
+            int skipOffset,
+            InterstitialPresenter.Listener interstitialPresenterListener) {
+
+        final InterstitialPresenter interstitialPresenter = fromCreativeType(ad.assetgroupid, ad, skipOffset);
         if (interstitialPresenter == null) {
             return null;
         }
@@ -60,7 +67,7 @@ public class InterstitialPresenterFactory {
         return interstitialPresenterDecorator;
     }
 
-    InterstitialPresenter fromCreativeType(int assetGroupId, Ad ad) {
+    InterstitialPresenter fromCreativeType(int assetGroupId, Ad ad, int skipOffset) {
         switch (assetGroupId) {
             case ApiAssetGroupType.MRAID_300x600:
             case ApiAssetGroupType.MRAID_320x480:
@@ -70,7 +77,7 @@ public class InterstitialPresenterFactory {
                 return new MraidInterstitialPresenter(mContext, ad, mZoneId);
             }
             case ApiAssetGroupType.VAST_INTERSTITIAL: {
-                return new VastInterstitialPresenter(mContext, ad, mZoneId);
+                return new VastInterstitialPresenter(mContext, ad, mZoneId, skipOffset);
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for interstitial ad format.");

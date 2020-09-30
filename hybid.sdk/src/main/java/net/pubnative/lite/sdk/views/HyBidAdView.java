@@ -30,14 +30,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
+import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.AdResponse;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.MarkupUtils;
+
+import org.json.JSONObject;
 
 public class HyBidAdView extends RelativeLayout implements RequestManager.RequestListener, AdPresenter.Listener {
 
@@ -170,6 +174,17 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         mListener = listener;
 
         if (!TextUtils.isEmpty(adValue)) {
+            processAdValue(adValue);
+        } else {
+            invokeOnLoadFailed(new Exception("The server has returned an invalid ad asset"));
+        }
+    }
+
+    public void renderCustomMarkup(String adValue, Listener listener) {
+        cleanup();
+        mListener = listener;
+
+        if (!TextUtils.isEmpty(adValue)) {
             int assetGroup;
             Ad.AdType type;
             switch (mRequestManager.getAdSize()) {
@@ -206,6 +221,33 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
             mPresenter.load();
         } else {
             invokeOnLoadFailed(new Exception("The server has returned an unsupported ad asset"));
+        }
+    }
+
+    private void processAdValue(String response) {
+        AdResponse apiResponseModel = null;
+        Exception parseException = null;
+        try {
+            apiResponseModel = new AdResponse(new JSONObject(response));
+        } catch (Exception exception) {
+            parseException = exception;
+        } catch (Error error) {
+            parseException = new Exception("Response cannot be parsed", error);
+        }
+        if (parseException != null) {
+            invokeOnLoadFailed(parseException);
+        } else if (apiResponseModel == null) {
+            invokeOnLoadFailed(new Exception("PNApiClient - Parse error"));
+        } else if (AdResponse.Status.OK.equals(apiResponseModel.status)) {
+            // STATUS 'OK'
+            if (apiResponseModel.ads != null && !apiResponseModel.ads.isEmpty()) {
+                mAd = apiResponseModel.ads.get(0);
+                renderFromCustomAd();
+            } else {
+                invokeOnLoadFailed(new Exception("HyBid - No fill"));
+            }
+        } else {
+            invokeOnLoadFailed(new Exception("HyBid - Server error: " + apiResponseModel.error_message));
         }
     }
 

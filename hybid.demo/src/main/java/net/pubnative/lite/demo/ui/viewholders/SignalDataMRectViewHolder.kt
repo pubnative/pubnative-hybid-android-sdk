@@ -14,11 +14,11 @@ import net.pubnative.lite.sdk.utils.UrlHandler
 import net.pubnative.lite.sdk.views.HyBidMRectAdView
 import net.pubnative.lite.sdk.views.PNAdView
 
-class MarkupMRectViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), PNAdView.Listener {
-    private val TAG = MarkupBannerViewHolder::class.java.simpleName
+class SignalDataMRectViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), PNAdView.Listener {
+    private val TAG = SignalDataMRectViewHolder::class.java.simpleName
 
-    fun bind(markup: String) {
-        if (!TextUtils.isEmpty(markup)) {
+    fun bind(signalData: String) {
+        if (!TextUtils.isEmpty(signalData)) {
             val container = itemView.findViewById<FrameLayout>(R.id.mrect_container)
             container.removeAllViews()
 
@@ -29,7 +29,7 @@ class MarkupMRectViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
             container.addView(mRect, adLayoutParams)
             container.setBackgroundColor(Color.BLACK)
 
-            mRect.renderCustomMarkup(markup, this)
+            mRect.renderAd(signalData, this)
         }
     }
 

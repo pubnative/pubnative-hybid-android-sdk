@@ -62,17 +62,4 @@ public class HyBidLeaderboardAdView extends HyBidAdView {
     RequestManager getRequestManager() {
         return new LeaderboardRequestManager();
     }
-
-    @Override
-    public void renderAd(String adValue, Listener listener) {
-        cleanup();
-        mListener = listener;
-
-        if (!TextUtils.isEmpty(adValue)) {
-            mAd = new Ad(24, adValue, Ad.AdType.HTML);
-            renderFromCustomAd();
-        } else {
-            invokeOnLoadFailed(new Exception("The server has returned an invalid ad asset"));
-        }
-    }
 }

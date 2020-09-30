@@ -27,7 +27,7 @@ class MarkupBannerViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
             container.addView(banner, adLayoutParams)
             container.setBackgroundColor(Color.BLACK)
 
-            banner.renderAd(markup, this)
+            banner.renderCustomMarkup(markup, this)
         }
     }
 

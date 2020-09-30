@@ -62,17 +62,4 @@ public class HyBidBannerAdView extends HyBidAdView {
     RequestManager getRequestManager() {
         return new BannerRequestManager();
     }
-
-    @Override
-    public void renderAd(String adValue, Listener listener) {
-        cleanup();
-        mListener = listener;
-
-        if (!TextUtils.isEmpty(adValue)) {
-            mAd = new Ad(10, adValue, Ad.AdType.HTML);
-            renderFromCustomAd();
-        } else {
-            invokeOnLoadFailed(new Exception("The server has returned an invalid ad asset"));
-        }
-    }
 }

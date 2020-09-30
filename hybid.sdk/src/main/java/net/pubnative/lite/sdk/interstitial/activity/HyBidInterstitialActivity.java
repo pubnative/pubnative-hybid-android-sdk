@@ -22,6 +22,7 @@ import net.pubnative.lite.sdk.views.CloseableContainer;
 public abstract class HyBidInterstitialActivity extends Activity {
     public static final String EXTRA_ZONE_ID = "extra_pn_zone_id";
     public static final String EXTRA_BROADCAST_ID = "extra_pn_broadcast_id";
+    public static final String EXTRA_SKIP_OFFSET = "extra_pn_skip_offset";
 
     private CloseableContainer mCloseableContainer;
     private UrlHandler mUrlHandlerDelegate;

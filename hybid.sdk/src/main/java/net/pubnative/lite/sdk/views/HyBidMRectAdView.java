@@ -64,27 +64,4 @@ public class HyBidMRectAdView extends HyBidAdView {
     RequestManager getRequestManager() {
         return new MRectRequestManager();
     }
-
-    @Override
-    public void renderAd(String adValue, Listener listener) {
-        cleanup();
-        mListener = listener;
-
-        if (!TextUtils.isEmpty(adValue)) {
-            int assetGroup;
-            Ad.AdType type;
-            if (MarkupUtils.isVastXml(adValue)) {
-                assetGroup = 4;
-                type = Ad.AdType.VIDEO;
-            } else {
-                assetGroup = 8;
-                type = Ad.AdType.HTML;
-            }
-
-            mAd = new Ad(assetGroup, adValue, type);
-            renderFromCustomAd();
-        } else {
-            invokeOnLoadFailed(new Exception("The server has returned an invalid ad asset"));
-        }
-    }
 }
