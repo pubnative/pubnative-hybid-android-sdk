@@ -172,8 +172,10 @@
     <string name="consent_refused">Refused</string>
 
     <string name="title_markup">Custom markup</string>
+    <string name="title_signal_data_tester">Signal data tester</string>
     <string name="ad_size">Ad size:</string>
 
     <string name="title_vast_tag">Vast Testing</string>
     <string name="vast_tag_input">Enter Vast Adserver URL</string>
+    <string name="hint_signal_data">Signal data</string>
 </resources>

@@ -13,6 +13,7 @@ import net.pubnative.lite.demo.ui.activities.config.DFPSettingsActivity
 import net.pubnative.lite.demo.ui.activities.config.HyBidSettingsActivity
 import net.pubnative.lite.demo.ui.activities.config.MoPubSettingsActivity
 import net.pubnative.lite.demo.ui.activities.markup.MarkupActivity
+import net.pubnative.lite.demo.ui.activities.signaldata.SignalDataActivity
 import net.pubnative.lite.demo.ui.activities.vast.VastTagRequestActivity
 
 class SettingsNavFragment : Fragment() {
@@ -44,6 +45,11 @@ class SettingsNavFragment : Fragment() {
 
         view.findViewById<TextView>(R.id.button_markup).setOnClickListener {
             val intent = Intent(activity, MarkupActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<TextView>(R.id.button_signal_data).setOnClickListener {
+            val intent = Intent(activity, SignalDataActivity::class.java)
             startActivity(intent)
         }
 

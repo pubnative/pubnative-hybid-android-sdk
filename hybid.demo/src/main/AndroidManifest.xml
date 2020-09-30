@@ -191,6 +191,12 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".ui.activities.signaldata.SignalDataActivity"
+            android:label="@string/title_signal_data_tester"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden" />
 
         <activity
             android:name=".ui.activities.consent.PNCMPActivity"

@@ -27,7 +27,7 @@ class MarkupLeaderboardViewHolder(itemView: View) : RecyclerView.ViewHolder(item
             container.addView(leaderboard, adLayoutParams)
             container.setBackgroundColor(Color.BLACK)
 
-            leaderboard.renderAd(markup, this)
+            leaderboard.renderCustomMarkup(markup, this)
         }
     }
 
