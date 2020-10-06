@@ -108,6 +108,9 @@ public class HyBidMediationBannerCustomEvent extends BaseAd implements HyBidAdVi
     @Nullable
     @Override
     protected View getAdView() {
+        if (mInteractionListener != null) {
+            mInteractionListener.onAdImpression();
+        }
         return mBannerView;
     }
 
@@ -131,12 +134,13 @@ public class HyBidMediationBannerCustomEvent extends BaseAd implements HyBidAdVi
     @Override
     public void onAdImpression() {
         MoPubLog.log(MoPubLog.AdapterLogEvent.SHOW_SUCCESS, TAG);
-        mInteractionListener.onAdImpression();
     }
 
     @Override
     public void onAdClick() {
         MoPubLog.log(MoPubLog.AdapterLogEvent.CLICKED, TAG);
-        mInteractionListener.onAdClicked();
+        if (mInteractionListener != null) {
+            mInteractionListener.onAdClicked();
+        }
     }
 }
