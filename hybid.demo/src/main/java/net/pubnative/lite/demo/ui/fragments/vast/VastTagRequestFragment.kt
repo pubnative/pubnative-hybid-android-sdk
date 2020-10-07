@@ -70,9 +70,19 @@ class VastTagRequestFragment : Fragment(), PNAdView.Listener, HyBidInterstitialA
         if (TextUtils.isEmpty(vastUrl)){
             Toast.makeText(activity, "Please input some vast adserver URL", Toast.LENGTH_SHORT).show()
         } else {
-            requestVastTag(vastUrl)
+            if (selectedSize == R.id.radio_vast_size_medium){
+                requestVastTag(vastUrl)
+            } else {
+                loadVastTagDirectly(vastUrl)
+            }
         }
     }
+
+    private fun loadVastTagDirectly(url: String){
+        mInterstitial = HyBidInterstitialAd(activity, this)
+        mInterstitial.prepareVideoTag(url)
+    }
+
 
     private fun requestVastTag(url: String){
         PNHttpClient.makeRequest(activity, url, null, null, object : PNHttpClient.Listener {
@@ -81,7 +91,7 @@ class VastTagRequestFragment : Fragment(), PNAdView.Listener, HyBidInterstitialA
                 if (TextUtils.isEmpty(response)) {
                     Toast.makeText(activity, "AdServer response is empty or null", Toast.LENGTH_SHORT).show()
                 } else {
-                    renderVast(response)
+                    loadMrectVast(response)
                 }
             }
 
@@ -92,22 +102,9 @@ class VastTagRequestFragment : Fragment(), PNAdView.Listener, HyBidInterstitialA
         })
     }
 
-    private fun renderVast(vastXmlResponse: String){
-        if (selectedSize == R.id.radio_vast_size_interstitial) {
-            loadInterstitialVast(vastXmlResponse)
-        } else {
-            loadMrectVast(vastXmlResponse)
-        }
-    }
-
     private fun loadMrectVast(vastXmlResponse: String){
         mMRect.visibility = View.VISIBLE
         mMRect.renderCustomMarkup(vastXmlResponse, this)
-    }
-
-    private fun loadInterstitialVast(vastXmlResponse: String){
-        mInterstitial = HyBidInterstitialAd(activity, this)
-        mInterstitial.prepareCustomMarkup(vastXmlResponse)
     }
 
     // Mrect listeners
