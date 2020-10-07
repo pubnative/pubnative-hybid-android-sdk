@@ -122,18 +122,24 @@ public class HyBidMediationInterstitialCustomEvent extends BaseAd implements HyB
     @Override
     public void onInterstitialImpression() {
         MoPubLog.log(MoPubLog.AdapterLogEvent.SHOW_SUCCESS, TAG);
-        mInteractionListener.onAdImpression();
+        if (mInteractionListener != null) {
+            mInteractionListener.onAdImpression();
+        }
     }
 
     @Override
     public void onInterstitialDismissed() {
         MoPubLog.log(MoPubLog.AdapterLogEvent.DID_DISAPPEAR, TAG);
-        mInteractionListener.onAdDismissed();
+        if (mInteractionListener != null) {
+            mInteractionListener.onAdDismissed();
+        }
     }
 
     @Override
     public void onInterstitialClick() {
         MoPubLog.log(MoPubLog.AdapterLogEvent.CLICKED, TAG);
-        mInteractionListener.onAdClicked();
+        if (mInteractionListener != null) {
+            mInteractionListener.onAdClicked();
+        }
     }
 }

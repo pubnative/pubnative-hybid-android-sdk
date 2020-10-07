@@ -24,6 +24,7 @@ package net.pubnative.lite.sdk.utils;
 
 import android.content.Context;
 import android.net.Uri;
+import android.text.TextUtils;
 
 import java.util.Locale;
 
@@ -74,7 +75,7 @@ public class UrlHandler {
         }
 
         // App deep links
-        else if (!scheme.isEmpty()) {
+        else if (!TextUtils.isEmpty(scheme)) {
             mIntentHandler.handleDeepLink(processedUri);
         }
     }
