@@ -309,6 +309,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
             @Override
             public void onFailure(Throwable error) {
                 Logger.e(TAG, "Request failed: " + error.toString());
+                invokeOnLoadFailed(new Exception("The server has returned an invalid ad asset"));
             }
         });
     }
