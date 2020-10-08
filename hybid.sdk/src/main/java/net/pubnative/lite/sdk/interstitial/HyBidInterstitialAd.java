@@ -36,6 +36,7 @@ import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdResponse;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.models.IntegrationType;
+import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.MarkupUtils;
 import net.pubnative.lite.sdk.vpaid.VideoAdCache;
@@ -294,6 +295,23 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         } else {
             invokeOnLoadFailed(new Exception("The server has returned an invalid ad asset"));
         }
+    }
+
+    public void prepareVideoTag(final String adValue){
+        PNHttpClient.makeRequest(mContext, adValue, null, null, new PNHttpClient.Listener() {
+            @Override
+            public void onSuccess(String response) {
+                if (!TextUtils.isEmpty(response)){
+                    prepareCustomMarkup(response);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Logger.e(TAG, "Request failed: " + error.toString());
+                invokeOnLoadFailed(new Exception("The server has returned an invalid ad asset"));
+            }
+        });
     }
 
     protected void invokeOnLoadFinished() {
