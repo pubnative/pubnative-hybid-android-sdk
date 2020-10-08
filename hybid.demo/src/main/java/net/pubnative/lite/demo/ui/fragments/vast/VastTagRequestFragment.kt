@@ -10,28 +10,21 @@ import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd
-import net.pubnative.lite.sdk.network.PNHttpClient
 import net.pubnative.lite.sdk.utils.Logger
-import net.pubnative.lite.sdk.views.HyBidMRectAdView
-import net.pubnative.lite.sdk.views.PNAdView
 
-class VastTagRequestFragment : Fragment(), PNAdView.Listener, HyBidInterstitialAd.Listener{
+class VastTagRequestFragment : Fragment(), HyBidInterstitialAd.Listener{
     private val TAG = VastTagRequestFragment::class.java.simpleName
 
     private lateinit var vastTagInput: EditText
     private lateinit var adSizeGroup: RadioGroup
 
-    private lateinit var mMRect : HyBidMRectAdView
     private lateinit var mInterstitial : HyBidInterstitialAd
-
-    private var selectedSize: Int = R.id.radio_vast_size_medium
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_vast_tag, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mMRect = view.findViewById(R.id.mrect_vast_adview)
         adSizeGroup = view.findViewById(R.id.group_vast_ad_size)
         vastTagInput = view.findViewById(R.id.input_vast_tag)
 
@@ -42,11 +35,6 @@ class VastTagRequestFragment : Fragment(), PNAdView.Listener, HyBidInterstitialA
         view.findViewById<Button>(R.id.button_vast_load).setOnClickListener {
             loadVastTag()
         }
-
-        adSizeGroup.setOnCheckedChangeListener { _, checkedId ->
-            selectedSize = checkedId
-            updateListVisibility()
-        }
     }
 
     private fun pasteFromClipboard() {
@@ -56,79 +44,19 @@ class VastTagRequestFragment : Fragment(), PNAdView.Listener, HyBidInterstitialA
         }
     }
 
-    private fun updateListVisibility() {
-        if (selectedSize == R.id.radio_vast_size_medium) {
-            mMRect.visibility = View.VISIBLE
-        } else {
-            mMRect.visibility = View.GONE
-        }
-    }
-
     private fun loadVastTag(){
         val vastUrl = vastTagInput.text.toString()
 
         if (TextUtils.isEmpty(vastUrl)){
             Toast.makeText(activity, "Please input some vast adserver URL", Toast.LENGTH_SHORT).show()
         } else {
-            if (selectedSize == R.id.radio_vast_size_medium){
-                requestVastTag(vastUrl)
-            } else {
-                loadVastTagDirectly(vastUrl)
-            }
+            loadVastTagDirectly(vastUrl)
         }
     }
 
     private fun loadVastTagDirectly(url: String){
         mInterstitial = HyBidInterstitialAd(activity, this)
         mInterstitial.prepareVideoTag(url)
-    }
-
-
-    private fun requestVastTag(url: String){
-        PNHttpClient.makeRequest(activity, url, null, null, object : PNHttpClient.Listener {
-
-            override fun onSuccess(response: String) {
-                if (TextUtils.isEmpty(response)) {
-                    Toast.makeText(activity, "AdServer response is empty or null", Toast.LENGTH_SHORT).show()
-                } else {
-                    loadMrectVast(response)
-                }
-            }
-
-            override fun onFailure(error: Throwable?) {
-                Logger.e(TAG, "Request failed: " + error.toString());
-                Toast.makeText(activity, "AdServer response is empty or null", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
-    private fun loadMrectVast(vastXmlResponse: String){
-        mMRect.visibility = View.VISIBLE
-        mMRect.renderCustomMarkup(vastXmlResponse, this)
-    }
-
-    // Mrect listeners
-    override fun onAdLoaded() {
-        Logger.d(TAG, "onAdLoaded")
-    }
-
-    override fun onAdLoadFailed(error: Throwable?) {
-        Logger.e(TAG, "onAdLoadFailed", error)
-    }
-
-    override fun onAdImpression() {
-        Logger.d(TAG, "onAdImpression")
-    }
-
-    override fun onAdClick() {
-        Logger.d(TAG, "onAdClick")
-    }
-
-    override fun onDestroy() {
-        if (mMRect != null) {
-            mMRect.destroy()
-        }
-        super.onDestroy()
     }
 
     // Interstitial listeners

@@ -65,17 +65,11 @@
         android:orientation="vertical">
 
         <RadioButton
-            android:id="@+id/radio_vast_size_medium"
-            android:layout_width="wrap_content"
-            android:layout_height="32dp"
-            android:text="@string/medium"
-            android:checked="true"/>
-
-        <RadioButton
             android:id="@+id/radio_vast_size_interstitial"
             android:layout_width="wrap_content"
             android:layout_height="32dp"
-            android:text="@string/interstitial" />
+            android:text="@string/interstitial"
+            android:checked="true"/>
     </RadioGroup>
 
     <com.google.android.material.button.MaterialButton
