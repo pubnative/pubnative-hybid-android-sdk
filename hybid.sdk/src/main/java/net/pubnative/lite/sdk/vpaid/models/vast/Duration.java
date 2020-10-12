@@ -1,5 +1,7 @@
 package net.pubnative.lite.sdk.vpaid.models.vast;
 
+import android.text.TextUtils;
+
 import net.pubnative.lite.sdk.vpaid.xml.Text;
 
 public class Duration {
@@ -8,6 +10,10 @@ public class Duration {
     private String text;
 
     public String getText() {
-        return text;
+        if (!TextUtils.isEmpty(text)){
+            return text;
+        } else {
+            return "00:00:10";
+        }
     }
 }
