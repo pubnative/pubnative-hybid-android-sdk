@@ -34,7 +34,7 @@ public class ViewabilityManager {
 
                 if (Omid.isActive() && mPubNativePartner == null) {
                     try {
-                        mPubNativePartner = Partner.createPartner(VIEWABILITY_PARTNER_NAME, BuildConfig.VERSION_NAME);
+                        mPubNativePartner = Partner.createPartner(VIEWABILITY_PARTNER_NAME, BuildConfig.SDK_VERSION);
                     } catch (IllegalArgumentException e) {
                         e.printStackTrace();
                     }
