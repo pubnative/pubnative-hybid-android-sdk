@@ -90,6 +90,6 @@ public class AdRequestFactoryTest {
         Assert.assertEquals(HyBid.OM_PARTNER_NAME, request.omidpn);
 
         Assert.assertEquals(String.format(Locale.ENGLISH, "%s_%s_%s",
-                "sdkandroid", "hb", BuildConfig.VERSION_NAME), request.displaymanagerver);
+                "sdkandroid", "hb", BuildConfig.SDK_VERSION), request.displaymanagerver);
     }
 }
