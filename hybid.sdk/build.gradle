@@ -31,10 +31,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'lite.sdk.pro'
             buildConfigField "String", "OMIDPV", "\"$omid_version\""
             buildConfigField "String", "OMIDPN", "\"pubnativenet\""
+            buildConfigField "String", "SDK_VERSION", "\"$version_name\""
         }
         debug {
             buildConfigField "String", "OMIDPV", "\"$omid_version\""
             buildConfigField "String", "OMIDPN", "\"pubnativenet\""
+            buildConfigField "String", "SDK_VERSION", "\"$version_name\""
         }
     }
 }

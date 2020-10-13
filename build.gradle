@@ -4,16 +4,16 @@ buildscript {
     repositories {
         google()
         jcenter()
-        maven { url "https://s3.amazonaws.com/moat-sdk-builds" }
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
         maven { url 'https://dl.bintray.com/pubnative/maven' }
         maven { url 'https://maven.ogury.co' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.2'
+        classpath 'com.android.tools.build:gradle:4.1.0'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
-        classpath 'net.saliman:gradle-cobertura-plugin:3.0.0'
+        classpath 'net.saliman:gradle-cobertura-plugin:3.0.1-SNAPSHOT'
         classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.2'
 
         classpath 'com.google.firebase:firebase-appdistribution-gradle:2.0.1'
@@ -35,7 +35,7 @@ allprojects {
     repositories {
         google()
         jcenter()
-        maven { url "https://s3.amazonaws.com/moat-sdk-builds" }
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
         maven { url 'https://dl.bintray.com/pubnative/maven' }
         maven { url 'https://maven.ogury.co' }
     }

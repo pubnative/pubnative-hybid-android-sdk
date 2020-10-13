@@ -151,7 +151,7 @@ public class AdRequestFactory {
 
         adRequest.displaymanager = "HyBid";
         adRequest.displaymanagerver = String.format(Locale.ENGLISH, "%s_%s_%s",
-                "sdkandroid", integrationType.getCode(), BuildConfig.VERSION_NAME);
+                "sdkandroid", integrationType.getCode(), BuildConfig.SDK_VERSION);
 
         if (mLocationManager != null) {
             Location location = mLocationManager.getUserLocation();
