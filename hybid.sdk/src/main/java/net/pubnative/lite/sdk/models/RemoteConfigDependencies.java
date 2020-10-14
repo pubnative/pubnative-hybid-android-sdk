@@ -7,18 +7,17 @@ import org.json.JSONObject;
 
 import java.util.List;
 
-public class RemoteConfigPlacementInfo extends JsonModel {
+public class RemoteConfigDependencies extends JsonModel {
     @BindField
-    public int timeout;
-
+    public List<String> models;
     @BindField
-    public List<RemoteConfigPlacement> placements;
+    public List<String> metadata;
 
-    public RemoteConfigPlacementInfo(){
+    public RemoteConfigDependencies() {
 
     }
 
-    public RemoteConfigPlacementInfo(JSONObject jsonObject) throws Exception{
+    public RemoteConfigDependencies(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
     }
 }

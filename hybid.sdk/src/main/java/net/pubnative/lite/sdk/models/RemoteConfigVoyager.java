@@ -13,13 +13,13 @@ public class RemoteConfigVoyager  extends JsonModel {
     @BindField
     public int session_sample;
     @BindField
-    public List<RemoteConfigVoyagerData> app_info;
+    public RemoteConfigAppInfo app_info;
     @BindField
-    public List<RemoteConfigVoyagerData> models;
+    public List<RemoteConfigMLModel> models;
     @BindField
-    public List<RemoteConfigVoyagerData> audiences;
+    public List<RemoteConfigAudience> audiences;
     @BindField
-    public List<RemoteConfigVoyagerData> metadata;
+    public List<RemoteConfigMetadata> metadata;
 
 
     public RemoteConfigVoyager() {
