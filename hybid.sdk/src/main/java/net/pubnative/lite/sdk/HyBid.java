@@ -37,6 +37,7 @@ public class HyBid {
     public static final String BASE_URL = "https://api.pubnative.net/";
     public static final String OMSDK_VERSION = BuildConfig.OMIDPV;
     public static final String OM_PARTNER_NAME = BuildConfig.OMIDPN;
+    public static final String HYBID_VERSION = BuildConfig.SDK_VERSION;
 
     private static String sAppToken;
     @SuppressLint("StaticFieldLeak")
@@ -100,6 +101,10 @@ public class HyBid {
             }
         });
         sInitialized = true;
+    }
+
+    public static String getHyBidVersion(){
+        return HYBID_VERSION;
     }
 
     public static String getAppToken() {
