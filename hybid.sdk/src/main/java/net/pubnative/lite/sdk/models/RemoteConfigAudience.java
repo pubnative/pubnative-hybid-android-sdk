@@ -29,7 +29,12 @@ public class RemoteConfigAudience extends JsonModel {
 
 
     public Integer getDistanceThreshold(){
-        return (Integer) getParamsField("distance_threshold");
+        Object value = getParamsField("distance_threshold");
+        if (value instanceof Integer){
+            return (Integer) value;
+        } else {
+            return null;
+        }
     }
 
     protected Object getParamsField(String param) {

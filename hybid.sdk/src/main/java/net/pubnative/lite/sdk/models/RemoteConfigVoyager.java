@@ -29,24 +29,4 @@ public class RemoteConfigVoyager  extends JsonModel {
     public RemoteConfigVoyager(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
     }
-
-
-
-
-
-
-    //todo need to create some similar find method?
-    /*protected RemoteConfigVoyagerData find(String type, List<RemoteConfigVoyagerData> list) {
-
-        RemoteConfigVoyagerData result = null;
-        if (list != null) {
-            for (RemoteConfigVoyagerData data : list) {
-                if (type.equals(data.name)) {
-                    result = data;
-                    break;
-                }
-            }
-        }
-        return result;
-    }*/
 }
