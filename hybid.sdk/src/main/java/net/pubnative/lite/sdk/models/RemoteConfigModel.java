@@ -16,11 +16,11 @@ public class RemoteConfigModel extends JsonModel {
     @BindField
     public int ttl;
     @BindField
-    private List<RemoteConfigPlacementInfo> placement_info;
+    private RemoteConfigPlacementInfo placement_info;
     @BindField
-    public List<RemoteConfigMeasurement> measurement;
+    public RemoteConfigMeasurement measurement;
     @BindField
-    public List<RemoteConfigVoyager> voyager;
+    public RemoteConfigVoyager voyager;
 
     public RemoteConfigModel(){
 

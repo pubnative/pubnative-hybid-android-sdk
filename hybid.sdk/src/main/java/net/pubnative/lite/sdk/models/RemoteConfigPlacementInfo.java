@@ -10,7 +10,6 @@ import java.util.List;
 public class RemoteConfigPlacementInfo extends JsonModel {
     @BindField
     public int timeout;
-
     @BindField
     public List<RemoteConfigPlacement> placements;
 

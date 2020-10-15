@@ -11,7 +11,7 @@ public class RemoteConfigAudience extends JsonModel {
     @BindField
     public String name;
     @BindField
-    public String min_score;
+    public float min_score;
     @BindField
     public boolean requires_geolocation;
     @BindField
