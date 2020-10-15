@@ -26,4 +26,18 @@ public class RemoteConfigAudience extends JsonModel {
     public RemoteConfigAudience(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
     }
+
+
+    public Integer getDistanceThreshold(){
+        return (Integer) getParamsField("distance_threshold");
+    }
+
+    protected Object getParamsField(String param) {
+        Object result = null;
+        if (params != null && params.containsKey(param)) {
+            result = params.get(param);
+        }
+        return result;
+    }
+
 }
