@@ -28,15 +28,15 @@ import android.content.Context;
 import net.pubnative.lite.sdk.AdCache;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.api.RequestManager;
-import net.pubnative.lite.sdk.api.RewardedVideoRequestManager;
+import net.pubnative.lite.sdk.api.RewardedRequestManager;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.IntegrationType;
-import net.pubnative.lite.sdk.rewarded.presenter.RewardedVideoPresenter;
+import net.pubnative.lite.sdk.rewarded.presenter.RewardedPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 
-public class HyBidRewardedVideo implements RequestManager.RequestListener, RewardedVideoPresenter.Listener {
-    private static final String TAG = HyBidRewardedVideo.class.getSimpleName();
+public class HyBidRewardedAd implements RequestManager.RequestListener, RewardedPresenter.Listener {
+    private static final String TAG = HyBidRewardedAd.class.getSimpleName();
 
     public interface Listener {
         void onRewardedLoaded();
@@ -53,7 +53,7 @@ public class HyBidRewardedVideo implements RequestManager.RequestListener, Rewar
     }
 
     private RequestManager mRequestManager;
-    private RewardedVideoPresenter mPresenter;
+    private RewardedPresenter mPresenter;
     private final Listener mListener;
     private final Context mContext;
     private final String mZoneId;
@@ -63,16 +63,16 @@ public class HyBidRewardedVideo implements RequestManager.RequestListener, Rewar
     private boolean mReady = false;
     private boolean mIsDestroyed = false;
 
-    public HyBidRewardedVideo(Activity activity, Listener listener) {
+    public HyBidRewardedAd(Activity activity, Listener listener) {
         this((Context) activity, "", listener);
     }
 
-    public HyBidRewardedVideo(Activity activity, String zoneId, Listener listener) {
+    public HyBidRewardedAd(Activity activity, String zoneId, Listener listener) {
         this((Context) activity, zoneId, listener);
     }
 
-    public HyBidRewardedVideo(Context context, String zoneId, Listener listener) {
-        mRequestManager = new RewardedVideoRequestManager();
+    public HyBidRewardedAd(Context context, String zoneId, Listener listener) {
+        mRequestManager = new RewardedRequestManager();
         mContext = context;
         mZoneId = zoneId;
         mListener = listener;
@@ -171,33 +171,33 @@ public class HyBidRewardedVideo implements RequestManager.RequestListener, Rewar
 
     //------------------------- RewardedVideoPresenter Callbacks -----------------------------------
     @Override
-    public void onRewardedLoaded(RewardedVideoPresenter interstitialPresenter) {
+    public void onRewardedLoaded(RewardedPresenter rewardedPresenter) {
         mReady = true;
         invokeOnLoadFinished();
     }
 
     @Override
-    public void onRewardedError(RewardedVideoPresenter interstitialPresenter) {
-        invokeOnLoadFailed(new Exception("An error has occurred while rendering the interstitial"));
+    public void onRewardedError(RewardedPresenter rewardedPresenter) {
+        invokeOnLoadFailed(new Exception("An error has occurred while rendering the rewarded ad"));
     }
 
     @Override
-    public void onRewardedOpened(RewardedVideoPresenter interstitialPresenter) {
+    public void onRewardedOpened(RewardedPresenter rewardedPresenter) {
         invokeOnOpened();
     }
 
     @Override
-    public void onRewardedClosed(RewardedVideoPresenter interstitialPresenter) {
+    public void onRewardedClosed(RewardedPresenter rewardedPresenter) {
         invokeOnClosed();
     }
 
     @Override
-    public void onRewardedFinished(RewardedVideoPresenter interstitialPresenter) {
+    public void onRewardedFinished(RewardedPresenter rewardedPresenter) {
         invokeOnReward();
     }
 
     @Override
-    public void onRewardedClicked(RewardedVideoPresenter interstitialPresenter) {
+    public void onRewardedClicked(RewardedPresenter rewardedPresenter) {
         invokeOnClick();
     }
 }

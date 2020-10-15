@@ -28,7 +28,7 @@ import net.pubnative.lite.sdk.models.AdSize;
  * Created by erosgarciaponte on 11.01.18.
  */
 
-public class RewardedVideoRequestManager extends RequestManager {
+public class RewardedRequestManager extends RequestManager {
     @Override
     public AdSize getAdSize() {
         return AdSize.SIZE_INTERSTITIAL;
