@@ -6,6 +6,7 @@
     <string name="interstitial">Interstitial</string>
     <string name="medium">Medium</string>
     <string name="leaderboard">Leaderboard</string>
+    <string name="rewarded">Rewarded</string>
 
     <string name="banner_in_feed">In-Feed Banner</string>
     <string name="zone_id">Zone ID:</string>
@@ -70,6 +71,7 @@
     <string name="hybid_interstitial">HyBid Interstitial</string>
     <string name="hybid_medium">HyBid Medium</string>
     <string name="hybid_leaderboard">HyBid Leaderboard</string>
+    <string name="hybid_rewarded">HyBid Rewarded</string>
 
     <string name="mopub_native">MoPub Native</string>
     <string name="mopub_banner">MoPub Banner</string>
