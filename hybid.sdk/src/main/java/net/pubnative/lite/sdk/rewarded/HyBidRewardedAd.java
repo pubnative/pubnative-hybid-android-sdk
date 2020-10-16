@@ -24,6 +24,7 @@ package net.pubnative.lite.sdk.rewarded;
 
 import android.app.Activity;
 import android.content.Context;
+import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.AdCache;
 import net.pubnative.lite.sdk.HyBid;
@@ -32,6 +33,7 @@ import net.pubnative.lite.sdk.api.RewardedRequestManager;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.rewarded.presenter.RewardedPresenter;
+import net.pubnative.lite.sdk.rewarded.presenter.RewardedPresenterFactory;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 
@@ -83,11 +85,22 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     }
 
     public void load() {
-
+        if (TextUtils.isEmpty(mZoneId)) {
+            invokeOnLoadFailed(new Exception("Invalid zone id provided"));
+        } else {
+            cleanup();
+            mRequestManager.setZoneId(mZoneId);
+            mRequestManager.setRequestListener(this);
+            mRequestManager.requestAd();
+        }
     }
 
     public void show() {
-
+        if (mPresenter != null && mReady) {
+            mPresenter.show();
+        } else {
+            Logger.e(TAG, "Can't display ad. Rewarded ad not ready.");
+        }
     }
 
     public boolean isReady() {
@@ -95,11 +108,20 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     }
 
     public void destroy() {
-
+        cleanup();
+        mIsDestroyed = true;
+        if (mRequestManager != null) {
+            mRequestManager.destroy();
+            mRequestManager = null;
+        }
     }
 
     private void cleanup() {
-
+        mReady = false;
+        if (mPresenter != null) {
+            mPresenter.destroy();
+            mPresenter = null;
+        }
     }
 
     public String getCreativeId() {
@@ -107,7 +129,12 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     }
 
     private void renderAd() {
-
+        mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, this);
+        if (mPresenter != null) {
+            mPresenter.load();
+        } else {
+            invokeOnLoadFailed(new Exception("The server has returned an unsupported ad asset"));
+        }
     }
 
     protected void invokeOnLoadFinished() {
