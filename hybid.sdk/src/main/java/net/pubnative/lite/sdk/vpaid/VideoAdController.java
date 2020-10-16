@@ -53,4 +53,6 @@ public interface VideoAdController {
     void destroy();
 
     boolean adFinishedPlaying();
+
+    boolean isRewarded();
 }

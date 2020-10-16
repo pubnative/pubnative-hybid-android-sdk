@@ -55,8 +55,12 @@ public class ViewControllerVast implements View.OnClickListener {
         mControlsLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mAdController.getViewabilityAdSession().fireClick();
-                mAdController.openUrl(null);
+                if (mAdController.isRewarded() && !mAdController.adFinishedPlaying()) {
+                    // Define pause/resume behaviour
+                } else {
+                    mAdController.getViewabilityAdSession().fireClick();
+                    mAdController.openUrl(null);
+                }
             }
         });
 
