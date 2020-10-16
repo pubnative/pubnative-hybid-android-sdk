@@ -23,6 +23,7 @@ class StandaloneNavFragment : Fragment() {
     private lateinit var inFeedBannerButton: Button
     private lateinit var interstitialButton: Button
     private lateinit var nativeButton: Button
+    private lateinit var rewardedButton: Button
 
     private lateinit var zoneIdList: RecyclerView
     private lateinit var chosenZoneIdView: TextView
@@ -81,6 +82,13 @@ class StandaloneNavFragment : Fragment() {
             intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
             startActivity(intent)
         }
+
+        rewardedButton = view.findViewById(R.id.button_rewarded)
+        rewardedButton.setOnClickListener{
+            val intent = Intent(activity, HyBidRewardedActivity::class.java)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            startActivity(intent)
+        }
     }
 
     override fun onResume() {
@@ -103,6 +111,7 @@ class StandaloneNavFragment : Fragment() {
         inFeedBannerButton.isEnabled = true
         interstitialButton.isEnabled = true
         nativeButton.isEnabled = true
+        rewardedButton.isEnabled = true
     }
 
     private fun disableZones() {
@@ -112,5 +121,6 @@ class StandaloneNavFragment : Fragment() {
         inFeedBannerButton.isEnabled = false
         interstitialButton.isEnabled = false
         nativeButton.isEnabled = false
+        rewardedButton.isEnabled = false
     }
 }
