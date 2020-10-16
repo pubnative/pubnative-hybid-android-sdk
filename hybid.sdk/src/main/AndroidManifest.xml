@@ -7,5 +7,6 @@
         <activity android:name=".consent.UserConsentActivity" />
         <activity android:name=".interstitial.activity.MraidInterstitialActivity" />
         <activity android:name=".interstitial.activity.VastInterstitialActivity" />
+        <activity android:name=".rewarded.activity.VastRewardedActivity" />
     </application>
 </manifest>

@@ -359,6 +359,11 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
     }
 
     @Override
+    public boolean isRewarded() {
+        return mBaseAdInternal.isRewarded();
+    }
+
+    @Override
     public AdParams getAdParams() {
         return mAdParams;
     }

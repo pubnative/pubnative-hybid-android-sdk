@@ -18,6 +18,14 @@ abstract class BaseVideoAd extends BaseVideoAdInternal {
         super(context, appKey);
     }
 
+    public boolean isRewarded() {
+        return super.isRewarded();
+    }
+
+    public void setRewarded(boolean isRewarded) {
+        super.setRewarded(isRewarded);
+    }
+
     /**
      * Stop ad processing and remove AdSpot from screen.
      */

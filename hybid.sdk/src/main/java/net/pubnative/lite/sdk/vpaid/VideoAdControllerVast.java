@@ -158,7 +158,9 @@ class VideoAdControllerVast implements VideoAdController {
                 int doneMillis = duration - (int) millisUntilFinished;
 
                 if (mSkipTimeMillis >= 0 && doneMillis > mSkipTimeMillis) {
-                    mViewControllerVast.showSkipButton();
+                    if (!mBaseAdInternal.isRewarded()) {
+                        mViewControllerVast.showSkipButton();
+                    }
                     mSkipTimeMillis = -1;
                 }
 
@@ -428,6 +430,11 @@ class VideoAdControllerVast implements VideoAdController {
     @Override
     public boolean adFinishedPlaying() {
         return finishedPlaying;
+    }
+
+    @Override
+    public boolean isRewarded() {
+        return mBaseAdInternal.isRewarded();
     }
 
     @Override

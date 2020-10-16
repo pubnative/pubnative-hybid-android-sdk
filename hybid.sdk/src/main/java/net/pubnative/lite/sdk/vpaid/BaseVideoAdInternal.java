@@ -35,6 +35,7 @@ abstract class BaseVideoAdInternal {
 
     private int mAdState;
     private boolean mIsReady;
+    private boolean mIsRewarded = false;
     private VideoAdListener mVideoAdListener;
     private long mAdLoadingStartTime;
     private SimpleTimer mExpirationTimer;
@@ -88,6 +89,14 @@ abstract class BaseVideoAdInternal {
 
     boolean isReady() {
         return mIsReady;
+    }
+
+    boolean isRewarded() {
+        return mIsRewarded;
+    }
+
+    void setRewarded(boolean isRewarded) {
+        this.mIsRewarded = isRewarded;
     }
 
     void setAdListener(VideoAdListener videoAdListener) {
