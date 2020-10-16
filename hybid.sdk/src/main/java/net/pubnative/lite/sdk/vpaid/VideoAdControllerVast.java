@@ -158,7 +158,9 @@ class VideoAdControllerVast implements VideoAdController {
                 int doneMillis = duration - (int) millisUntilFinished;
 
                 if (mSkipTimeMillis >= 0 && doneMillis > mSkipTimeMillis) {
-                    mViewControllerVast.showSkipButton();
+                    if (!mBaseAdInternal.isRewarded()) {
+                        mViewControllerVast.showSkipButton();
+                    }
                     mSkipTimeMillis = -1;
                 }
 

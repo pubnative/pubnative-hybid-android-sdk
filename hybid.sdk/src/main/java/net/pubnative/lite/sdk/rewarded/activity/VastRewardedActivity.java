@@ -13,6 +13,7 @@ import net.pubnative.lite.sdk.vpaid.VideoAdView;
 
 public class VastRewardedActivity extends HyBidRewardedActivity {
     private boolean mReady = false;
+    private boolean mFinished = false;
 
     private VideoAdView mVideoPlayer;
     private VideoAd mVideoAd;
@@ -77,6 +78,13 @@ public class VastRewardedActivity extends HyBidRewardedActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        if (mFinished) {
+            super.onBackPressed();
+        }
+    }
+
     private final VideoAdListener mVideoAdListener = new VideoAdListener() {
         @Override
         public void onAdLoadSuccess() {
@@ -104,6 +112,7 @@ public class VastRewardedActivity extends HyBidRewardedActivity {
         @Override
         public void onAdDidReachEnd() {
             mReady = false;
+            mFinished = true;
             showRewardedCloseButton();
             getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.FINISH);
         }
