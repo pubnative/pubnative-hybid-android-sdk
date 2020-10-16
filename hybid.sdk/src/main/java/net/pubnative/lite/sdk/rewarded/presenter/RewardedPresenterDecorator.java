@@ -1,5 +1,7 @@
 package net.pubnative.lite.sdk.rewarded.presenter;
 
+import android.text.TextUtils;
+
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.CheckUtils;
@@ -112,7 +114,14 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             return;
         }
 
-        String errorMessage = "Rewarded error for zone id: ";
+        String zoneId = getAd().getZoneId();
+        String errorMessage;
+        if (TextUtils.isEmpty(zoneId)) {
+            errorMessage = "Rewarded error";
+        } else {
+            errorMessage = "Rewarded error for zone id: " + zoneId;
+        }
+
         Logger.d(TAG, errorMessage);
         mListener.onRewardedError(rewardedPresenter);
     }
