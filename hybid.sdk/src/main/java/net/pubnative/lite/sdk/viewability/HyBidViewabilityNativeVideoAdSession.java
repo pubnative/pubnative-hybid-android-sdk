@@ -169,7 +169,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
         if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
             return;
 
-        if (mMediaEvents != null) {
+        if (mMediaEvents != null && !completeFired) {
             mMediaEvents.volumeChange(mute ? 0 : 1);
         }
     }
