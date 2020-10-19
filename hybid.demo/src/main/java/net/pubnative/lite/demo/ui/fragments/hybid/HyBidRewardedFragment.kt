@@ -20,6 +20,7 @@ class HyBidRewardedFragment : Fragment(), HyBidRewardedAd.Listener{
     private var zoneId: String? = null
 
     private lateinit var loadButton: Button
+    private lateinit var showButton: Button
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
     private var rewardedAd: HyBidRewardedAd? = null
@@ -32,6 +33,7 @@ class HyBidRewardedFragment : Fragment(), HyBidRewardedAd.Listener{
         errorView = view.findViewById(R.id.view_error)
         creativeIdView = view.findViewById(R.id.view_creative_id)
         loadButton = view.findViewById(R.id.button_load)
+        showButton = view.findViewById(R.id.button_show)
 
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
@@ -41,6 +43,12 @@ class HyBidRewardedFragment : Fragment(), HyBidRewardedAd.Listener{
             val activity = activity as TabActivity
             activity.notifyAdCleaned()
             loadPNRewardedAd()
+        }
+
+        showButton.setOnClickListener{
+            rewardedAd?.show()
+            displayLogs()
+            showButton.isEnabled = false
         }
 
         errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
@@ -62,8 +70,7 @@ class HyBidRewardedFragment : Fragment(), HyBidRewardedAd.Listener{
 
     override fun onRewardedLoaded() {
         Log.d(TAG, "onRewardedLoaded")
-        rewardedAd?.show()
-        displayLogs()
+        showButton.isEnabled = true
     }
 
     override fun onRewardedOpened() {
@@ -79,6 +86,7 @@ class HyBidRewardedFragment : Fragment(), HyBidRewardedAd.Listener{
     }
 
     override fun onRewardedLoadFailed(error: Throwable?) {
+        showButton.isEnabled = false
         Log.e(TAG, "onRewardedLoadFailed", error)
         errorView.text = error?.message
         displayLogs()
