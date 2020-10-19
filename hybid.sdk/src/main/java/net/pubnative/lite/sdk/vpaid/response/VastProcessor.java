@@ -187,7 +187,9 @@ public class VastProcessor {
                     List<Companion> companionList = getSortedCompanions(creativeList);
                     List<String> endCardUrlList = new ArrayList<>();
                     for (Companion companion : companionList) {
-                        endCardUrlList.add(companion.getStaticResource().getText().trim());
+                        if (companion.getStaticResource() != null && !TextUtils.isEmpty(companion.getStaticResource().getText())) {
+                            endCardUrlList.add(companion.getStaticResource().getText().trim());
+                        }
                     }
                     adParams.setEndCardUrlList(endCardUrlList);
 
