@@ -70,6 +70,7 @@ public abstract class HyBidInterstitialActivity extends Activity {
 
                 mCloseableContainer.addView(adView, params);
                 mCloseableContainer.setBackgroundColor(Color.WHITE);
+                showInterstitialCloseButton();
 
                 if (shouldShowContentInfo() && getAd() != null) {
                     View contentInfo = getAd().getContentInfoContainer(this);
