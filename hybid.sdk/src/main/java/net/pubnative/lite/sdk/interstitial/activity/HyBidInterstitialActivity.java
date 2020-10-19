@@ -56,12 +56,6 @@ public abstract class HyBidInterstitialActivity extends Activity {
             if (adView != null) {
 
                 mCloseableContainer = new CloseableContainer(this);
-                mCloseableContainer.setOnCloseListener(new CloseableContainer.OnCloseListener() {
-                    @Override
-                    public void onClose() {
-                        dismiss();
-                    }
-                });
 
                 FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
                 params.gravity = Gravity.CENTER;
@@ -93,6 +87,13 @@ public abstract class HyBidInterstitialActivity extends Activity {
         }
     }
 
+    private final CloseableContainer.OnCloseListener mCloseListener = new CloseableContainer.OnCloseListener() {
+        @Override
+        public void onClose() {
+            dismiss();
+        }
+    };
+
     protected void dismiss() {
         getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
         finish();
@@ -122,12 +123,14 @@ public abstract class HyBidInterstitialActivity extends Activity {
     protected void showInterstitialCloseButton() {
         if (mCloseableContainer != null) {
             mCloseableContainer.setCloseVisible(true);
+            mCloseableContainer.setOnCloseListener(mCloseListener);
         }
     }
 
     protected void hideInterstitialCloseButton() {
         if (mCloseableContainer != null) {
             mCloseableContainer.setCloseVisible(false);
+            mCloseableContainer.setOnCloseListener(null);
         }
     }
 

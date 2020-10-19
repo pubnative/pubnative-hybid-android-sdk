@@ -75,13 +75,7 @@ public abstract class HyBidRewardedActivity extends Activity {
             if (adView != null) {
 
                 mCloseableContainer = new CloseableContainer(this);
-                mCloseableContainer.setCloseVisible(false);
-                mCloseableContainer.setOnCloseListener(new CloseableContainer.OnCloseListener() {
-                    @Override
-                    public void onClose() {
-                        dismiss();
-                    }
-                });
+                hideRewardedCloseButton();
 
                 FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
                 params.gravity = Gravity.CENTER;
@@ -113,6 +107,13 @@ public abstract class HyBidRewardedActivity extends Activity {
         }
     }
 
+    private final CloseableContainer.OnCloseListener mCloseListener = new CloseableContainer.OnCloseListener() {
+        @Override
+        public void onClose() {
+            dismiss();
+        }
+    };
+
     protected void dismiss() {
         getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLOSE);
         finish();
@@ -142,12 +143,14 @@ public abstract class HyBidRewardedActivity extends Activity {
     protected void showRewardedCloseButton() {
         if (mCloseableContainer != null) {
             mCloseableContainer.setCloseVisible(true);
+            mCloseableContainer.setOnCloseListener(mCloseListener);
         }
     }
 
     protected void hideRewardedCloseButton() {
         if (mCloseableContainer != null) {
             mCloseableContainer.setCloseVisible(false);
+            mCloseableContainer.setOnCloseListener(null);
         }
     }
 
