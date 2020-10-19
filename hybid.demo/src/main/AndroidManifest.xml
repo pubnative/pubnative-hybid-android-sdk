@@ -59,6 +59,11 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".ui.activities.hybid.HyBidRewardedActivity"
+            android:label="@string/hybid_rewarded"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".ui.activities.mopub.MoPubBannerActivity"
             android:label="@string/mopub_banner"
             android:screenOrientation="portrait"
