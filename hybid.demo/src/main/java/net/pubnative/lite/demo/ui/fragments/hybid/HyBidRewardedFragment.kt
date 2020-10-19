@@ -1,6 +1,7 @@
 package net.pubnative.lite.demo.ui.fragments.hybid
 
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -49,6 +50,9 @@ class HyBidRewardedFragment : Fragment(), HyBidRewardedAd.Listener{
             rewardedAd?.show()
             displayLogs()
             showButton.isEnabled = false
+            if (!TextUtils.isEmpty(rewardedAd?.creativeId)) {
+                creativeIdView.text = rewardedAd?.creativeId
+            }
         }
 
         errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
