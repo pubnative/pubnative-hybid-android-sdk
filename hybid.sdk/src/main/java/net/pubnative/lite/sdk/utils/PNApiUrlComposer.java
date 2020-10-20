@@ -160,6 +160,10 @@ public final class PNApiUrlComposer {
             uriBuilder.appendQueryParameter("omidpv", adRequest.omidpv);
         }
 
+        if (!TextUtils.isEmpty(adRequest.rv)){
+            uriBuilder.appendQueryParameter("rv", adRequest.rv);
+        }
+
         if (!TextUtils.isEmpty(adRequest.usprivacy)) {
             uriBuilder.appendQueryParameter("usprivacy", adRequest.usprivacy);
         }

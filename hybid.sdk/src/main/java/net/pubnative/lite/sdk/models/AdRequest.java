@@ -59,4 +59,5 @@ public class AdRequest {
     public String omidpv;
     public String usprivacy;
     public String userconsent;
+    public String rv;
 }
