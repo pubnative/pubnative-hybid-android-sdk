@@ -59,6 +59,7 @@ public class RequestManager {
     private RequestListener mRequestListener;
     private boolean mIsDestroyed;
     private AdSize mAdSize;
+    private boolean mIsRewarded = false;
 
     public RequestManager() {
         this(HyBid.getApiClient(), HyBid.getAdCache(), HyBid.getVideoAdCache(), new AdRequestFactory(), new PNInitializationHelper());
@@ -113,7 +114,7 @@ public class RequestManager {
             return;
         }
 
-        mAdRequestFactory.createAdRequest(mZoneId, getAdSize(), new AdRequestFactory.Callback() {
+        mAdRequestFactory.createAdRequest(mZoneId, getAdSize(), isRewarded(), new AdRequestFactory.Callback() {
             @Override
             public void onRequestCreated(AdRequest adRequest) {
                 requestAdFromApi(adRequest);
@@ -205,5 +206,9 @@ public class RequestManager {
 
     public AdSize getAdSize() {
         return mAdSize;
+    }
+
+    public boolean isRewarded(){
+        return mIsRewarded;
     }
 }

@@ -34,4 +34,8 @@ public class RewardedRequestManager extends RequestManager {
         return AdSize.SIZE_INTERSTITIAL;
     }
 
+    @Override
+    public boolean isRewarded(){
+        return true;
+    }
 }

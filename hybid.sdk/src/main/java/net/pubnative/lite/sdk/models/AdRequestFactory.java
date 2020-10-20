@@ -52,6 +52,7 @@ public class AdRequestFactory {
     private final HyBidLocationManager mLocationManager;
     private final UserDataManager mUserDataManager;
     private IntegrationType mIntegrationType = IntegrationType.HEADER_BIDDING;
+    private boolean mIsRewarded;
 
     public AdRequestFactory() {
         this(HyBid.getDeviceInfo(), HyBid.getLocationManager(), HyBid.getUserDataManager());
@@ -63,10 +64,11 @@ public class AdRequestFactory {
         mUserDataManager = userDataManager;
     }
 
-    public void createAdRequest(final String zoneid, final AdSize adSize, final Callback callback) {
+    public void createAdRequest(final String zoneid, final AdSize adSize, final boolean isRewarded, final Callback callback) {
         String advertisingId = mDeviceInfo.getAdvertisingId();
         boolean limitTracking = mDeviceInfo.limitTracking();
         Context context = mDeviceInfo.getContext();
+        mIsRewarded = isRewarded;
         if (TextUtils.isEmpty(advertisingId) && context != null) {
             try {
                 PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(context, new HyBidAdvertisingId.Listener() {
@@ -159,6 +161,12 @@ public class AdRequestFactory {
                 adRequest.latitude = String.format(Locale.ENGLISH, "%.6f", location.getLatitude());
                 adRequest.longitude = String.format(Locale.ENGLISH, "%.6f", location.getLongitude());
             }
+        }
+
+        if (mIsRewarded){
+            adRequest.rv = "1";
+        } else {
+            adRequest.rv = "0";
         }
 
         adRequest.deviceHeight = mDeviceInfo.getDeviceHeight();
