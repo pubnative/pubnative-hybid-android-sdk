@@ -51,9 +51,9 @@ public class Ad extends JsonModel implements Serializable {
     private static final String PN_IMPRESSION_QUERY_PARAM = "t";
     private static final int MIN_POINTS = 10;
 
-    private static final String HC_CONTENT_INFO_LINK_URL = "https://pubnative.net/content-info";
-    private static final String HC_CONTENT_INFO_ICON_URL = "https://cdn.pubnative.net/static/adserver/contentinfo.png";
-    private static final String HC_CONTENT_INFO_TEXT = "Learn about this ad";
+    private static final String CONTENT_INFO_LINK_URL = "https://pubnative.net/content-info";
+    private static final String CONTENT_INFO_ICON_URL = "https://cdn.pubnative.net/static/adserver/contentinfo.png";
+    private static final String CONTENT_INFO_TEXT = "Learn about this ad";
 
     //==============================================================================================
     // Fields
@@ -214,7 +214,7 @@ public class Ad extends JsonModel implements Serializable {
         AdData data = getMeta(APIMeta.CONTENT_INFO);
         if (data == null) {
             Log.e(TAG, "getContentInfo - contentInfo data not found");
-            return hardcodeContentInfo(context, result);
+            return getDefaultContentInfo(context, result);
         } else if (TextUtils.isEmpty(data.getStringField(DATA_CONTENTINFO_ICON_KEY))) {
             Log.e(TAG, "getContentInfo - contentInfo icon not found");
         } else if (TextUtils.isEmpty(data.getStringField(DATA_CONTENTINFO_LINK_KEY))) {
@@ -255,11 +255,11 @@ public class Ad extends JsonModel implements Serializable {
         }
     }
 
-    private PNAPIContentInfoView hardcodeContentInfo(Context context, PNAPIContentInfoView result){
+    private PNAPIContentInfoView getDefaultContentInfo(Context context, PNAPIContentInfoView result){
         result = new PNAPIContentInfoView(context);
-        result.setIconUrl(HC_CONTENT_INFO_ICON_URL);
-        result.setIconClickUrl(HC_CONTENT_INFO_LINK_URL);
-        result.setContextText(HC_CONTENT_INFO_TEXT);
+        result.setIconUrl(CONTENT_INFO_ICON_URL);
+        result.setIconClickUrl(CONTENT_INFO_LINK_URL);
+        result.setContextText(CONTENT_INFO_TEXT);
         result.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
