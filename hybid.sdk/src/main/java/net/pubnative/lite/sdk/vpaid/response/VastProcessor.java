@@ -142,7 +142,13 @@ public class VastProcessor {
                 adParams.addEvents(linear.getTrackingEvents().getTrackingList());
             }
 
-            int duration = Utils.parseDuration(linear.getDuration().getText());
+            String durationText;
+            if (linear.getDuration() != null) {
+                durationText = linear.getDuration().getText();
+            } else {
+                durationText = "00:00:10";
+            }
+            int duration = Utils.parseDuration(durationText);
             adParams.setDuration(duration);
 
             String adParameters = parseAdParameters(linear);
@@ -229,7 +235,7 @@ public class VastProcessor {
 
         if (adSource.getExtensions() != null) {
             for (Extension extension : adSource.getExtensions()) {
-                if (extension.getType().equals(EXTENSION_TYPE_AD_VERIFICATION)) {
+                if (!TextUtils.isEmpty(extension.getType()) && extension.getType().equals(EXTENSION_TYPE_AD_VERIFICATION)) {
                     AdVerifications adVerifications = extension.getAdVerifications();
                     if (adVerifications != null) {
                         for (Verification verification : adVerifications.getVerificationList()) {
