@@ -43,6 +43,9 @@ import net.pubnative.lite.sdk.utils.Logger;
 
 import java.util.ArrayList;
 
+import me.numbereight.audiences.Audiences;
+import me.numbereight.sdk.NumberEight;
+
 /**
  * Created by erosgarciaponte on 08.01.18.
  */
@@ -116,6 +119,9 @@ public class HyBidDemoApplication extends MultiDexApplication {
         });
 
         OguryChoiceManager.initialize(this, Constants.OGURY_KEY, new OguryCmConfig());
+
+        NumberEight.APIToken apiToken = NumberEight.start(Constants.NUMBEREIGHT_API_TOKEN, this);
+        Audiences.startRecording(apiToken);
     }
 
     private SettingsModel fetchSettings() {
