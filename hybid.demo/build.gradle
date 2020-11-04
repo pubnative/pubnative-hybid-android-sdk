@@ -1,5 +1,8 @@
 repositories {
     mavenCentral()
+    maven {
+        url 'http://repo.numbereight.me/artifactory/gradle-release-local'
+    }
 }
 
 apply plugin: 'com.android.application'
@@ -68,6 +71,11 @@ dependencies {
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
     implementation 'co.ogury:ogury-sdk:4.7.7'
     implementation 'com.google.android.ump:user-messaging-platform:1.0.0'
+
+    implementation 'me.numbereight.sdk:audiences:0.38.4'
+    implementation('me.numbereight.sdk:nesdk:0.38.4@aar') {
+        transitive = true
+    }
 }
 
 apply plugin: 'kotlin-android-extensions'
