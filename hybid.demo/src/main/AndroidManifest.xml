@@ -232,6 +232,13 @@
             android:windowSoftInputMode="stateHidden" />
 
         <activity
+            android:name=".ui.activities.audiences.NumberEightAudiencesActivity"
+            android:label="@string/title_numbereight_audiences"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden" />
+
+        <activity
             android:name=".ui.activities.vast.VastTagRequestActivity"
             android:label="@string/title_vast_tag"
             android:theme="@style/AppTheme.NoActionBar"

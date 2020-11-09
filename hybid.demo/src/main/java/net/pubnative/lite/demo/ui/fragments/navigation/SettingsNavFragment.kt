@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.ui.activities.audiences.NumberEightAudiencesActivity
 import net.pubnative.lite.demo.ui.activities.config.AdmobSettingsActivity
 import net.pubnative.lite.demo.ui.activities.config.DFPSettingsActivity
 import net.pubnative.lite.demo.ui.activities.config.HyBidSettingsActivity
@@ -57,5 +58,11 @@ class SettingsNavFragment : Fragment() {
             val intent = Intent(activity, VastTagRequestActivity::class.java)
             startActivity(intent)
         }
+
+        view.findViewById<TextView>(R.id.button_numbereight_audiences).setOnClickListener{
+            val intent = Intent(activity, NumberEightAudiencesActivity::class.java)
+            startActivity(intent)
+        }
+
     }
 }
