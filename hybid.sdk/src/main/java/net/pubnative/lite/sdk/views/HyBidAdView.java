@@ -37,6 +37,7 @@ import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdResponse;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.IntegrationType;
+import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.MarkupUtils;
@@ -44,6 +45,7 @@ import net.pubnative.lite.sdk.utils.MarkupUtils;
 import org.json.JSONObject;
 
 public class HyBidAdView extends RelativeLayout implements RequestManager.RequestListener, AdPresenter.Listener {
+    private static final String TAG = HyBidAdView.class.getSimpleName();
 
     public interface Listener {
         void onAdLoaded();
@@ -178,6 +180,23 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         } else {
             invokeOnLoadFailed(new Exception("The server has returned an invalid ad asset"));
         }
+    }
+
+    public void renderVideoTag(final String adValue, final Listener listener){
+        PNHttpClient.makeRequest(getContext(), adValue, null, null, new PNHttpClient.Listener() {
+            @Override
+            public void onSuccess(String response) {
+                if (!TextUtils.isEmpty(response)){
+                    renderCustomMarkup(response, listener);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Logger.e(TAG, "Request failed: " + error.toString());
+                invokeOnLoadFailed(new Exception("The server has returned an invalid ad asset"));
+            }
+        });
     }
 
     public void renderCustomMarkup(String adValue, Listener listener) {
