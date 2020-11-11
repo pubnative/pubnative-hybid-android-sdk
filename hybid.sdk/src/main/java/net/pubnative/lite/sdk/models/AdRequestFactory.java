@@ -104,7 +104,7 @@ public class AdRequestFactory {
         adRequest.omidpv = HyBid.OMSDK_VERSION;
 
         if (HyBid.isCoppaEnabled() || limitTracking || TextUtils.isEmpty(advertisingId)
-                || isCCPAOptOut) {
+                || isCCPAOptOut || mUserDataManager.isConsentDenied()) {
             adRequest.dnt = "1";
         } else {
             adRequest.gid = advertisingId;
@@ -125,7 +125,7 @@ public class AdRequestFactory {
 
         adRequest.locale = mDeviceInfo.getLocale().getLanguage();
 
-        if (!HyBid.isCoppaEnabled() && !limitTracking && !isCCPAOptOut) {
+        if (!HyBid.isCoppaEnabled() && !limitTracking && !isCCPAOptOut && !mUserDataManager.isConsentDenied()) {
             adRequest.age = HyBid.getAge();
             adRequest.gender = HyBid.getGender();
             adRequest.keywords = HyBid.getKeywords();
@@ -157,7 +157,7 @@ public class AdRequestFactory {
 
         if (mLocationManager != null) {
             Location location = mLocationManager.getUserLocation();
-            if (location != null && !HyBid.isCoppaEnabled() && !limitTracking) {
+            if (location != null && !HyBid.isCoppaEnabled() && !limitTracking && !mUserDataManager.isConsentDenied()) {
                 adRequest.latitude = String.format(Locale.ENGLISH, "%.6f", location.getLatitude());
                 adRequest.longitude = String.format(Locale.ENGLISH, "%.6f", location.getLongitude());
             }
