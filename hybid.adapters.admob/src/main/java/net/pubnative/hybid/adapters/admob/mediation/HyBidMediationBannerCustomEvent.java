@@ -14,7 +14,6 @@ import net.pubnative.hybid.adapters.admob.HyBidAdmobUtils;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.views.HyBidAdView;
-import net.pubnative.lite.sdk.views.HyBidBannerAdView;
 
 public class HyBidMediationBannerCustomEvent implements CustomEventBanner, HyBidAdView.Listener {
     private static final String TAG = HyBidMediationBannerCustomEvent.class.getSimpleName();
@@ -62,7 +61,7 @@ public class HyBidMediationBannerCustomEvent implements CustomEventBanner, HyBid
             return;
         }
 
-        mBannerView = new HyBidBannerAdView(context);
+        mBannerView = new HyBidAdView(context);
         mBannerView.setAdSize(getAdSize());
         mBannerView.setMediation(true);
         mBannerView.load(zoneId, this);
