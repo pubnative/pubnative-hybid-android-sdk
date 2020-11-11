@@ -111,6 +111,14 @@ public class UserDataManager {
         }
     }
 
+    /**]
+     * Only for internal use in the ad request
+     * @return if consent has explicitly been denied.
+     */
+    public boolean isConsentDenied() {
+        return mPreferences.contains(KEY_GDPR_CONSENT_STATE) && mPreferences.getInt(KEY_GDPR_CONSENT_STATE, CONSENT_STATE_DENIED) == CONSENT_STATE_DENIED;
+    }
+
     /**
      * This method is being deprecated
      *
@@ -142,6 +150,7 @@ public class UserDataManager {
     }
 
     private void notifyConsentGiven() {
+        setConsentState(CONSENT_STATE_ACCEPTED);
         UserConsentRequestModel requestModel = new UserConsentRequestModel(
                 HyBid.getDeviceInfo().getAdvertisingId(),
                 DEVICE_ID_TYPE, true);
@@ -151,7 +160,7 @@ public class UserDataManager {
             @Override
             public void onSuccess(UserConsentResponseModel model) {
                 if (model.getStatus().equals(UserConsentResponseStatus.OK)) {
-                    setConsentState(CONSENT_STATE_ACCEPTED);
+                    Logger.d(TAG, "Positive user consent has been notified");
                 }
             }
 
@@ -163,6 +172,7 @@ public class UserDataManager {
     }
 
     private void notifyConsentDenied() {
+        setConsentState(CONSENT_STATE_DENIED);
         UserConsentRequestModel requestModel = new UserConsentRequestModel(
                 HyBid.getDeviceInfo().getAdvertisingId(),
                 DEVICE_ID_TYPE, false);
@@ -172,7 +182,7 @@ public class UserDataManager {
             @Override
             public void onSuccess(UserConsentResponseModel model) {
                 if (model.getStatus().equals(UserConsentResponseStatus.OK)) {
-                    setConsentState(CONSENT_STATE_DENIED);
+                    Logger.d(TAG, "Negative user consent has been notified");
                 }
             }
 
