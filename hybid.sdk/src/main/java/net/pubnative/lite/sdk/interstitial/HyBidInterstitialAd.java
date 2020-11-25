@@ -39,6 +39,7 @@ import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.MarkupUtils;
+import net.pubnative.lite.sdk.vpaid.vast.VastUrlUtils;
 import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
@@ -275,7 +276,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
                             return;
                         }
 
-                        Logger.w(TAG, error.getMessage());
+                        Logger.w(TAG, "onCacheError", error);
                         invokeOnLoadFailed(new Exception(error));
                     }
                 });
@@ -297,11 +298,14 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         }
     }
 
-    public void prepareVideoTag(final String adValue){
-        PNHttpClient.makeRequest(mContext, adValue, null, null, new PNHttpClient.Listener() {
+    public void prepareVideoTag(final String adValue) {
+
+        String url = VastUrlUtils.formatURL(adValue);
+
+        PNHttpClient.makeRequest(mContext, url, null, null, new PNHttpClient.Listener() {
             @Override
             public void onSuccess(String response) {
-                if (!TextUtils.isEmpty(response)){
+                if (!TextUtils.isEmpty(response)) {
                     prepareCustomMarkup(response);
                 }
             }
@@ -313,6 +317,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
             }
         });
     }
+
 
     protected void invokeOnLoadFinished() {
         if (mListener != null) {

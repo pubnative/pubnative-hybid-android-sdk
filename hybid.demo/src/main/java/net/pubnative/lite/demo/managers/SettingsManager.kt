@@ -117,6 +117,10 @@ class SettingsManager private constructor(context: Context) {
         preferences.edit().putString(SETTINGS_KEY_MOPUB_MEDIATION_INTERSTITIAL_AD_UNIT_ID, adUnitId).apply()
     }
 
+    fun setMoPubMediationRewardedAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_MOPUB_MEDIATION_REWARDED_AD_UNIT_ID, adUnitId).apply()
+    }
+
     fun setMoPubMediationNativeAdUnitId(adUnitId: String) {
         preferences.edit().putString(SETTINGS_KEY_MOPUB_MEDIATION_NATIVE_AD_UNIT_ID, adUnitId).apply()
     }
@@ -137,6 +141,26 @@ class SettingsManager private constructor(context: Context) {
         preferences.edit().putString(SETTINGS_KEY_DFP_INTERSTITIAL_AD_UNIT_ID, adUnitId).apply()
     }
 
+    fun setDFPMediationBannerAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_DFP_MEDIATION_BANNER_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setDFPMediationMediumAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_DFP_MEDIATION_MEDIUM_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setDFPMediationLeaderboardAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_DFP_MEDIATION_LEADERBOARD_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setDFPMediationInterstitialAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_DFP_MEDIATION_INTERSTITIAL_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setDFPMediationRewardedAdUnitId(adUnitId: String){
+        preferences.edit().putString(SETTINGS_KEY_DFP_MEDIATION_REWARDED_AD_UNIT_ID, adUnitId).apply()
+    }
+
     fun setAdmobAppId(appId: String) {
         preferences.edit().putString(SETTINGS_KEY_ADMOB_APP_ID, appId).apply()
     }
@@ -151,6 +175,10 @@ class SettingsManager private constructor(context: Context) {
 
     fun setAdmobLeaderboardAdUnitId(adUnitId: String) {
         preferences.edit().putString(SETTINGS_KEY_ADMOB_LEADERBOARD_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setAdmobRewardedAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_ADMOB_REWARDED_AD_UNIT_ID, adUnitId).apply()
     }
 
     fun setAdmobInterstitialAdUnitId(adUnitId: String) {
@@ -176,15 +204,22 @@ class SettingsManager private constructor(context: Context) {
         editor.putString(SETTINGS_KEY_MOPUB_MEDIATION_MEDIUM_AD_UNIT_ID, model.mopubMediationMediumAdUnitId)
         editor.putString(SETTINGS_KEY_MOPUB_MEDIATION_LEADERBOARD_AD_UNIT_ID, model.mopubMediationLeaderboardAdUnitId)
         editor.putString(SETTINGS_KEY_MOPUB_MEDIATION_INTERSTITIAL_AD_UNIT_ID, model.mopubMediationInterstitialAdUnitId)
+        editor.putString(SETTINGS_KEY_MOPUB_MEDIATION_REWARDED_AD_UNIT_ID, model.mopubMediationRewardedAdUnitId)
         editor.putString(SETTINGS_KEY_MOPUB_MEDIATION_NATIVE_AD_UNIT_ID, model.mopubMediationNativeAdUnitId)
         editor.putString(SETTINGS_KEY_DFP_BANNER_AD_UNIT_ID, model.dfpBannerAdUnitId)
         editor.putString(SETTINGS_KEY_DFP_MEDIUM_AD_UNIT_ID, model.dfpMediumAdUnitId)
         editor.putString(SETTINGS_KEY_DFP_LEADERBOARD_AD_UNIT_ID, model.dfpLeaderboardAdUnitId)
         editor.putString(SETTINGS_KEY_DFP_INTERSTITIAL_AD_UNIT_ID, model.dfpInterstitialAdUnitId)
+        editor.putString(SETTINGS_KEY_DFP_MEDIATION_BANNER_AD_UNIT_ID, model.dfpMediationBannerAdUnitId)
+        editor.putString(SETTINGS_KEY_DFP_MEDIATION_MEDIUM_AD_UNIT_ID, model.dfpMediationMediumAdUnitId)
+        editor.putString(SETTINGS_KEY_DFP_MEDIATION_LEADERBOARD_AD_UNIT_ID, model.dfpMediationLeaderboardAdUnitId)
+        editor.putString(SETTINGS_KEY_DFP_MEDIATION_INTERSTITIAL_AD_UNIT_ID, model.dfpMediationInterstitialAdUnitId)
+        editor.putString(SETTINGS_KEY_DFP_MEDIATION_REWARDED_AD_UNIT_ID, model.dfpMediationRewardedAdUnitId)
         editor.putString(SETTINGS_KEY_ADMOB_APP_ID, model.admobAppId)
         editor.putString(SETTINGS_KEY_ADMOB_BANNER_AD_UNIT_ID, model.admobBannerAdUnitId)
         editor.putString(SETTINGS_KEY_ADMOB_MEDIUM_AD_UNIT_ID, model.admobMediumAdUnitId)
         editor.putString(SETTINGS_KEY_ADMOB_LEADERBOARD_AD_UNIT_ID, model.admobLeaderboardAdUnitId)
+        editor.putString(SETTINGS_KEY_ADMOB_REWARDED_AD_UNIT_ID, model.admobRewardedAdUnitId)
         editor.putString(SETTINGS_KEY_ADMOB_INTERSTITIAL_AD_UNIT_ID, model.admobInterstitialAdUnitId)
 
         editor.putBoolean(SETTINGS_KEY_INITIALISED, true)
@@ -214,22 +249,31 @@ class SettingsManager private constructor(context: Context) {
         val mopubMediationMediumAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_MEDIATION_MEDIUM_AD_UNIT_ID, "")!!
         val mopubMediationLeaderboardAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_MEDIATION_LEADERBOARD_AD_UNIT_ID, "")!!
         val mopubMediationInterstitialAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_MEDIATION_INTERSTITIAL_AD_UNIT_ID, "")!!
+        val mopubMediationRewardedAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_MEDIATION_REWARDED_AD_UNIT_ID, "")!!
         val mopubMediationNativeAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_MEDIATION_NATIVE_AD_UNIT_ID, "")!!
         val dfpBannerAdUnitId = preferences.getString(SETTINGS_KEY_DFP_BANNER_AD_UNIT_ID, "")!!
         val dfpMediumAdUnitId = preferences.getString(SETTINGS_KEY_DFP_MEDIUM_AD_UNIT_ID, "")!!
         val dfpLeaderboardAdUnitId = preferences.getString(SETTINGS_KEY_DFP_LEADERBOARD_AD_UNIT_ID, "")!!
         val dfpInterstitialAdUnitId = preferences.getString(SETTINGS_KEY_DFP_INTERSTITIAL_AD_UNIT_ID, "")!!
+        val dfpMediationBannerAdUnitId = preferences.getString(SETTINGS_KEY_DFP_MEDIATION_BANNER_AD_UNIT_ID, "")!!
+        val dfpMediationMediumAdUnitId = preferences.getString(SETTINGS_KEY_DFP_MEDIATION_MEDIUM_AD_UNIT_ID, "")!!
+        val dfpMediationLeaderboardAdUnitId = preferences.getString(SETTINGS_KEY_DFP_MEDIATION_LEADERBOARD_AD_UNIT_ID, "")!!
+        val dfpMediationInterstitialAdUnitId = preferences.getString(SETTINGS_KEY_DFP_MEDIATION_INTERSTITIAL_AD_UNIT_ID, "")!!
+        val dfpMediationRewardedAdUnitId = preferences.getString(SETTINGS_KEY_DFP_MEDIATION_REWARDED_AD_UNIT_ID, "")!!
         val admobAppId = preferences.getString(SETTINGS_KEY_ADMOB_APP_ID, "")!!
         val admobBannerAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_BANNER_AD_UNIT_ID, "")!!
         val admobMediumAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_MEDIUM_AD_UNIT_ID, "")!!
         val admobLeaderboardAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_LEADERBOARD_AD_UNIT_ID, "")!!
+        val admobRewardedAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_REWARDED_AD_UNIT_ID, "")!!
         val admobInterstitialAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_INTERSTITIAL_AD_UNIT_ID, "")!!
 
         val model = SettingsModel(appToken, zoneIds, apiUrl, gender, age, keywords, browserPriorities, coppa, testMode,
                 mopubBannerAdUnitId, mopubMediumAdUnitId, mopubLeaderboardAdUnitId, mopubInterstitialAdUnitId,
                 mopubMediationBannerAdUnitId, mopubMediationMediumAdUnitId, mopubMediationLeaderboardAdUnitId, mopubMediationInterstitialAdUnitId,
-                mopubMediationNativeAdUnitId, dfpBannerAdUnitId, dfpMediumAdUnitId, dfpLeaderboardAdUnitId, dfpInterstitialAdUnitId,
-                admobAppId, admobBannerAdUnitId, admobMediumAdUnitId, admobLeaderboardAdUnitId, admobInterstitialAdUnitId)
+                mopubMediationRewardedAdUnitId, mopubMediationNativeAdUnitId, dfpBannerAdUnitId, dfpMediumAdUnitId, dfpLeaderboardAdUnitId,
+                dfpInterstitialAdUnitId, dfpMediationBannerAdUnitId, dfpMediationMediumAdUnitId, dfpMediationLeaderboardAdUnitId,
+                dfpMediationInterstitialAdUnitId, dfpMediationRewardedAdUnitId, admobAppId, admobBannerAdUnitId,
+                admobMediumAdUnitId, admobLeaderboardAdUnitId, admobRewardedAdUnitId, admobInterstitialAdUnitId)
         return model
     }
 }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
 
+import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.mediation.MediationAdRequest;
@@ -43,7 +44,10 @@ public class HyBidMediationBannerCustomEvent implements CustomEventBanner, HyBid
             appToken = HyBidAdmobUtils.getAppToken(serverParameter);
         } else {
             Logger.e(TAG, "Could not find the required params in CustomEventBanner serverExtras");
-            mBannerListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NETWORK_ERROR);
+            mBannerListener.onAdFailedToLoad(new AdError(AdRequest.ERROR_CODE_NETWORK_ERROR,
+                    "Could not find the required params in CustomEventBanner serverExtras",
+                    AdError.UNDEFINED_DOMAIN
+            ));
             return;
         }
 
@@ -51,13 +55,19 @@ public class HyBidMediationBannerCustomEvent implements CustomEventBanner, HyBid
 
         if (adSize.getWidth() < hyBidAdSize.getWidth() || adSize.getHeight() < hyBidAdSize.getHeight()) {
             Logger.e(TAG, "The requested ad size is smaller than " + hyBidAdSize.toString());
-            mBannerListener.onAdFailedToLoad(AdRequest.ERROR_CODE_INVALID_REQUEST);
+            mBannerListener.onAdFailedToLoad(new AdError(AdRequest.ERROR_CODE_INVALID_REQUEST,
+                    "The requested ad size is smaller than " + hyBidAdSize.toString(),
+                    AdError.UNDEFINED_DOMAIN
+            ));
             return;
         }
 
         if (appToken == null || !appToken.equals(HyBid.getAppToken())) {
             Logger.e(TAG, "The provided app token doesn't match the one used to initialise HyBid");
-            mBannerListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NETWORK_ERROR);
+            mBannerListener.onAdFailedToLoad(new AdError(AdRequest.ERROR_CODE_NETWORK_ERROR,
+                    "The provided app token doesn't match the one used to initialise HyBid",
+                    AdError.UNDEFINED_DOMAIN
+            ));
             return;
         }
 
@@ -100,7 +110,10 @@ public class HyBidMediationBannerCustomEvent implements CustomEventBanner, HyBid
     @Override
     public void onAdLoadFailed(Throwable error) {
         if (mBannerListener != null) {
-            mBannerListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NO_FILL);
+            mBannerListener.onAdFailedToLoad(new AdError(AdRequest.ERROR_CODE_NO_FILL,
+                    "No fill.",
+                    AdError.UNDEFINED_DOMAIN
+            ));
         }
     }
 

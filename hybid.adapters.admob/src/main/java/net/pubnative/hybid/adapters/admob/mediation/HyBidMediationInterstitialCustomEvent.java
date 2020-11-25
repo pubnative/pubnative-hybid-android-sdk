@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
 
+import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.mediation.MediationAdRequest;
 import com.google.android.gms.ads.mediation.customevent.CustomEventInterstitial;
@@ -40,13 +41,19 @@ public class HyBidMediationInterstitialCustomEvent implements CustomEventInterst
             appToken = HyBidAdmobUtils.getAppToken(serverParameter);
         } else {
             Logger.e(TAG, "Could not find the required params in CustomEventInterstitial serverExtras");
-            mInterstitialListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NETWORK_ERROR);
+            mInterstitialListener.onAdFailedToLoad(new AdError(AdRequest.ERROR_CODE_NETWORK_ERROR,
+                    "Could not find the required params in CustomEventInterstitial serverExtras",
+                    AdError.UNDEFINED_DOMAIN
+            ));
             return;
         }
 
         if (appToken == null || !appToken.equals(HyBid.getAppToken())) {
             Logger.e(TAG, "The provided app token doesn't match the one used to initialise HyBid");
-            mInterstitialListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NETWORK_ERROR);
+            mInterstitialListener.onAdFailedToLoad(new AdError(AdRequest.ERROR_CODE_NETWORK_ERROR,
+                    "The provided app token doesn't match the one used to initialise HyBid",
+                    AdError.UNDEFINED_DOMAIN
+            ));
             return;
         }
 
@@ -92,7 +99,10 @@ public class HyBidMediationInterstitialCustomEvent implements CustomEventInterst
     public void onInterstitialLoadFailed(Throwable error) {
         Logger.e(TAG, error.getMessage());
         if (mInterstitialListener != null) {
-            mInterstitialListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NO_FILL);
+            mInterstitialListener.onAdFailedToLoad(new AdError(AdRequest.ERROR_CODE_NO_FILL,
+                    "No fill.",
+                    AdError.UNDEFINED_DOMAIN
+            ));
         }
     }
 

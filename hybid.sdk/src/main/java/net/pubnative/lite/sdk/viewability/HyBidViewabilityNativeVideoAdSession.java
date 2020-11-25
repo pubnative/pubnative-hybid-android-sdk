@@ -1,5 +1,6 @@
 package net.pubnative.lite.sdk.viewability;
 
+import android.util.Log;
 import android.view.View;
 
 import com.iab.omid.library.pubnativenet.adsession.AdSession;
@@ -49,95 +50,129 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
             createAdEvents();
             createMediaEvents();
             mAdSession.start();
-        } catch (IllegalArgumentException e) {
-            Logger.e("", e.getMessage());
-        } catch (NullPointerException exception) {
+        } catch (Exception exception) {
             Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
         }
     }
 
     protected void createMediaEvents() {
-        if (mAdSession != null) {
-            mMediaEvents = MediaEvents.createMediaEvents(mAdSession);
+        try {
+            if (mAdSession != null) {
+                mMediaEvents = MediaEvents.createMediaEvents(mAdSession);
+            }
+        } catch (Exception exception) {
+            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
         }
     }
 
     public void fireLoaded() {
-        if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
-            return;
+        try {
+            if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
+                return;
 
-        VastProperties vastProperties = VastProperties.createVastPropertiesForNonSkippableMedia(false, Position.STANDALONE);
+            VastProperties vastProperties = VastProperties.createVastPropertiesForNonSkippableMedia(false, Position.STANDALONE);
 
-        if (mAdEvents != null) {
-            mAdEvents.loaded(vastProperties);
+            if (mAdEvents != null) {
+                mAdEvents.loaded(vastProperties);
+            }
+        } catch (Exception exception) {
+            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
         }
     }
 
     public void fireStart(float duration, boolean mute) {
-        if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
-            return;
+        try {
+            if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
+                return;
 
-        if (mMediaEvents != null && !startFired) {
-            mMediaEvents.start(duration, mute ? 0 : 1);
-            startFired = true;
+            if (mMediaEvents != null && !startFired) {
+                mMediaEvents.start(duration, mute ? 0 : 1);
+                startFired = true;
+            }
+        } catch (Exception exception) {
+            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
         }
     }
 
     public void fireFirstQuartile() {
-        if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
-            return;
+        try {
+            if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
+                return;
 
-        if (mMediaEvents != null && !firstQuartileFired) {
-            mMediaEvents.firstQuartile();
-            firstQuartileFired = true;
+            if (mMediaEvents != null && !firstQuartileFired) {
+                mMediaEvents.firstQuartile();
+                firstQuartileFired = true;
+            }
+        } catch (Exception exception) {
+            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
         }
     }
 
     public void fireMidpoint() {
-        if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
-            return;
+        try {
+            if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
+                return;
 
-        if (mMediaEvents != null && !midpointFired) {
-            mMediaEvents.midpoint();
-            midpointFired = true;
+            if (mMediaEvents != null && !midpointFired) {
+                mMediaEvents.midpoint();
+                midpointFired = true;
+            }
+        } catch (Exception exception) {
+            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
         }
     }
 
     public void fireThirdQuartile() {
-        if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
-            return;
+        try {
+            if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
+                return;
 
-        if (mMediaEvents != null && !thirdQuartileFired) {
-            mMediaEvents.thirdQuartile();
-            thirdQuartileFired = true;
+            if (mMediaEvents != null && !thirdQuartileFired) {
+                mMediaEvents.thirdQuartile();
+                thirdQuartileFired = true;
+            }
+        } catch (Exception exception) {
+            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
         }
     }
 
     public void fireComplete() {
-        if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
-            return;
+        try {
+            if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
+                return;
 
-        if (mMediaEvents != null && !completeFired) {
-            mMediaEvents.complete();
-            completeFired = true;
+            if (mMediaEvents != null && !completeFired) {
+                mMediaEvents.complete();
+                completeFired = true;
+            }
+        } catch (Exception exception) {
+            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
         }
     }
 
     public void firePause() {
-        if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
-            return;
+        try {
+            if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
+                return;
 
-        if (mMediaEvents != null) {
-            mMediaEvents.pause();
+            if (mMediaEvents != null) {
+                mMediaEvents.pause();
+            }
+        } catch (Exception exception) {
+            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
         }
     }
 
     public void fireResume() {
-        if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
-            return;
+        try {
+            if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
+                return;
 
-        if (mMediaEvents != null) {
-            mMediaEvents.resume();
+            if (mMediaEvents != null) {
+                mMediaEvents.resume();
+            }
+        } catch (Exception exception) {
+            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
         }
     }
 
@@ -145,11 +180,15 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
      * playback paused due to buffering
      */
     public void fireBufferStart() {
-        if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
-            return;
+        try {
+            if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
+                return;
 
-        if (mMediaEvents != null) {
-            mMediaEvents.bufferStart();
+            if (mMediaEvents != null) {
+                mMediaEvents.bufferStart();
+            }
+        } catch (Exception exception) {
+            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
         }
     }
 
@@ -157,20 +196,28 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
      * playback resumes after buffering
      */
     public void fireBufferFinish() {
-        if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
-            return;
+        try {
+            if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
+                return;
 
-        if (mMediaEvents != null) {
-            mMediaEvents.bufferFinish();
+            if (mMediaEvents != null) {
+                mMediaEvents.bufferFinish();
+            }
+        } catch (Exception exception) {
+            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
         }
     }
 
     public void fireVolumeChange(boolean mute) {
-        if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
-            return;
+        try {
+            if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
+                return;
 
-        if (mMediaEvents != null && !completeFired) {
-            mMediaEvents.volumeChange(mute ? 0 : 1);
+            if (mMediaEvents != null && !completeFired) {
+                mMediaEvents.volumeChange(mute ? 0 : 1);
+            }
+        } catch (Exception exception) {
+            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
         }
     }
 
@@ -178,20 +225,28 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
      * any early termination of playback
      */
     public void fireSkipped() {
-        if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
-            return;
+        try {
+            if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
+                return;
 
-        if (mMediaEvents != null) {
-            mMediaEvents.skipped();
+            if (mMediaEvents != null) {
+                mMediaEvents.skipped();
+            }
+        } catch (Exception exception) {
+            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
         }
     }
 
     public void fireClick() {
-        if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
-            return;
+        try {
+            if (!HyBid.getViewabilityManager().isViewabilityMeasurementEnabled())
+                return;
 
-        if (mMediaEvents != null) {
-            mMediaEvents.adUserInteraction(InteractionType.CLICK);
+            if (mMediaEvents != null) {
+                mMediaEvents.adUserInteraction(InteractionType.CLICK);
+            }
+        } catch (Exception exception) {
+            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
         }
     }
 }

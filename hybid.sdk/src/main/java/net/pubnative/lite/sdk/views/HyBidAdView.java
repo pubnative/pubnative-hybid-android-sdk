@@ -30,7 +30,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
-import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
 import net.pubnative.lite.sdk.models.Ad;
@@ -41,6 +40,7 @@ import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.MarkupUtils;
+import net.pubnative.lite.sdk.vpaid.vast.VastUrlUtils;
 
 import org.json.JSONObject;
 
@@ -182,22 +182,25 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         }
     }
 
-    public void renderVideoTag(final String adValue, final Listener listener){
-        PNHttpClient.makeRequest(getContext(), adValue, null, null, new PNHttpClient.Listener() {
-            @Override
-            public void onSuccess(String response) {
-                if (!TextUtils.isEmpty(response)){
-                    renderCustomMarkup(response, listener);
-                }
-            }
+    public void renderVideoTag(final String adValue, final Listener listener) {
+        String url = VastUrlUtils.formatURL(adValue);
+        PNHttpClient.makeRequest(getContext(), url, null,
+                null, new PNHttpClient.Listener() {
+                    @Override
+                    public void onSuccess(String response) {
+                        if (!TextUtils.isEmpty(response)) {
+                            renderCustomMarkup(response, listener);
+                        }
+                    }
 
-            @Override
-            public void onFailure(Throwable error) {
-                Logger.e(TAG, "Request failed: " + error.toString());
-                invokeOnLoadFailed(new Exception("The server has returned an invalid ad asset"));
-            }
-        });
+                    @Override
+                    public void onFailure(Throwable error) {
+                        Logger.e(TAG, "Request failed: " + error.toString());
+                        invokeOnLoadFailed(new Exception("The server has returned an invalid ad asset"));
+                    }
+                });
     }
+
 
     public void renderCustomMarkup(String adValue, Listener listener) {
         cleanup();

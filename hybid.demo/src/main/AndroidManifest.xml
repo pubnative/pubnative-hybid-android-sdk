@@ -104,6 +104,11 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".ui.activities.mopub.MoPubMediationRewardedActivity"
+            android:label="@string/mopub_rewarded"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".ui.activities.mopub.MoPubMediationNativeActivity"
             android:label="@string/mopub_native"
             android:screenOrientation="portrait"
@@ -146,6 +151,11 @@
         <activity
             android:name=".ui.activities.admob.AdmobMediationInterstitialActivity"
             android:label="@string/admob_interstitial"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.admob.AdmobMediationRewardedActivity"
+            android:label="@string/admob_rewarded"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

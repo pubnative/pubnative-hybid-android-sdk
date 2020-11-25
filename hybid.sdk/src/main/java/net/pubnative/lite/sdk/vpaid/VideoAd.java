@@ -9,6 +9,8 @@ import net.pubnative.lite.sdk.vpaid.enums.AdFormat;
 import net.pubnative.lite.sdk.vpaid.enums.AdState;
 import net.pubnative.lite.sdk.vpaid.models.AdSpotDimensions;
 
+import static net.pubnative.lite.sdk.vpaid.utils.Utils.isPhoneMuted;
+
 public class VideoAd extends BaseVideoAd {
 
     private static final String LOG_TAG = VideoAd.class.getSimpleName();
@@ -54,25 +56,34 @@ public class VideoAd extends BaseVideoAd {
                     setAdState(AdState.SHOWING);
                     stopExpirationTimer();
 
-                    getViewabilityAdSession().initAdSession(mBannerView, getAdController().getAdParams());
-                    getAdController().buildVideoAdView(mBannerView);
+                    if (getAdController() != null) {
+                        getViewabilityAdSession().initAdSession(mBannerView, getAdController().getAdParams());
+                        getAdController().buildVideoAdView(mBannerView);
 
-                    for (HyBidViewabilityFriendlyObstruction obstruction: getAdController().getViewabilityFriendlyObstructions()) {
-                        getViewabilityAdSession().addFriendlyObstruction(
-                                obstruction.getView(),
-                                obstruction.getPurpose(),
-                                obstruction.getReason());
+                        for (HyBidViewabilityFriendlyObstruction obstruction : getAdController().getViewabilityFriendlyObstructions()) {
+                            getViewabilityAdSession().addFriendlyObstruction(
+                                    obstruction.getView(),
+                                    obstruction.getPurpose(),
+                                    obstruction.getReason());
+                        }
+                        getViewabilityAdSession().fireLoaded();
+                        getViewabilityAdSession().fireImpression();
+                        getAdController().playAd();
+
+                        if (isPhoneMuted())
+                            getAdController().toggleMute();
+
+                        if (mBannerView.getVisibility() != View.VISIBLE) {
+                            mBannerView.setVisibility(View.VISIBLE);
+                        }
+                        onBannerShow();
+                    } else {
+                        Logger.e(LOG_TAG, "getAdController() is null and can not set attributes to banner view ");
+                        if (getAdListener() != null) {
+                            PlayerInfo info = new PlayerInfo("getAdController() is null and can not set attributes to banner view ");
+                            getAdListener().onAdLoadFail(info);
+                        }
                     }
-
-                    getViewabilityAdSession().fireLoaded();
-                    getViewabilityAdSession().fireImpression();
-                    getAdController().playAd();
-                    getAdController().toggleMute();
-
-                    if (mBannerView.getVisibility() != View.VISIBLE) {
-                        mBannerView.setVisibility(View.VISIBLE);
-                    }
-                    onBannerShow();
                 } else {
                     Logger.e(LOG_TAG, "Banner is not ready");
                 }

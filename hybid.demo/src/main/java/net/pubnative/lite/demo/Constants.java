@@ -45,6 +45,7 @@ public class Constants {
 
     public static final String MOPUB_MEDIATION_BANNER_AD_UNIT = "38864d35877d4684af11319530993074";
     public static final String MOPUB_MEDIATION_INTERSTITIAL_AD_UNIT = "2bb6db4d69fa407a87b0c96c55d7c2b4";
+    public static final String MOPUB_MEDIATION_REWARDED_AD_UNIT = "4f6a64ece43847ecbc3475219e8dd9b6";
     public static final String MOPUB_MEDIATION_MEDIUM_AD_UNIT = "0af490cac3d34256b0010fac17f26759";
     public static final String MOPUB_MEDIATION_LEADERBOARD_AD_UNIT = "5e744edb00c344f9a92f7939fa58e970";
     public static final String MOPUB_MEDIATION_NATIVE_AD_UNIT = "2dfcd13fb5dc4e9d9bc6ab3e382ffeb7";
@@ -59,11 +60,18 @@ public class Constants {
     public static final String DFP_MRAID_MEDIUM_AD_UNIT = "/219576711/pnlite_dfp_mrect";
     public static final String DFP_MRAID_LEADERBOARD_AD_UNIT = "/219576711/pnlite_dfp_leaderboard";
 
+    public static final String DFP_MEDIATION_BANNER_AD_UNIT = "";
+    public static final String DFP_MEDIATION_INTERSTITIAL_AD_UNIT = "";
+    public static final String DFP_MEDIATION_MEDIUM_AD_UNIT = "";
+    public static final String DFP_MEDIATION_LEADERBOARD_AD_UNIT = "";
+    public static final String DFP_MEDIATION_REWARDED_AD_UNIT = "";
+
     public static final String ADMOB_APP_ID = "ca-app-pub-9763601123242224~7761163696";
     public static final String ADMOB_BANNER_AD_UNIT = "ca-app-pub-9763601123242224/5027189140";
     public static final String ADMOB_INTERSTITIAL_AD_UNIT = "ca-app-pub-9763601123242224/6994876935";
     public static final String ADMOB_MEDIUM_AD_UNIT = "ca-app-pub-9763601123242224/9033705159";
     public static final String ADMOB_LEADERBOARD_AD_UNIT = "ca-app-pub-9763601123242224/4902888458";
+    public static final String ADMOB_REWARDED_AD_UNIT = "ca-app-pub-9763601123242224/1139038306";
 
     public static final String APP_TOKEN = "dde3c298b47648459f8ada4a982fa92d";
     public static final List<String> ZONE_ID_LIST = Arrays.asList(NATIVE_ZONE_ID, MRAID_320x50_ZONE_ID,

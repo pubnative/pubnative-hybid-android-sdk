@@ -8,10 +8,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
-import net.pubnative.lite.demo.ui.activities.admob.AdmobMediationBannerActivity
-import net.pubnative.lite.demo.ui.activities.admob.AdmobMediationInterstitialActivity
-import net.pubnative.lite.demo.ui.activities.admob.AdmobMediationLeaderboardActivity
-import net.pubnative.lite.demo.ui.activities.admob.AdmobMediationMRectActivity
+import net.pubnative.lite.demo.ui.activities.admob.*
+import net.pubnative.lite.demo.ui.activities.dfp.*
 import net.pubnative.lite.demo.ui.activities.mopub.*
 
 class MediationNavFragment : Fragment() {
@@ -40,6 +38,11 @@ class MediationNavFragment : Fragment() {
             startActivity(intent)
         }
 
+        view.findViewById<Button>(R.id.button_mopub_rewarded).setOnClickListener {
+            val intent = Intent(activity, MoPubMediationRewardedActivity::class.java)
+            startActivity(intent)
+        }
+
         view.findViewById<Button>(R.id.button_mopub_native).setOnClickListener {
             val intent = Intent(activity, MoPubMediationNativeActivity::class.java)
             startActivity(intent)
@@ -64,5 +67,36 @@ class MediationNavFragment : Fragment() {
             val intent = Intent(activity, AdmobMediationInterstitialActivity::class.java)
             startActivity(intent)
         }
+
+        view.findViewById<Button>(R.id.button_admob_rewarded).setOnClickListener {
+            val intent = Intent(activity, AdmobMediationRewardedActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_dfp_banner).setOnClickListener {
+            val intent = Intent(activity, DFPMediationBannerActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_dfp_medium).setOnClickListener {
+            val intent = Intent(activity, DFPMediationMRectActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_dfp_leaderboard).setOnClickListener {
+            val intent = Intent(activity, DFPMediationLeaderboardActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_dfp_interstitial).setOnClickListener {
+            val intent = Intent(activity, DFPMediationInterstitialActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_dfp_rewarded).setOnClickListener {
+            val intent = Intent(activity, DFPMediationRewardedActivity::class.java)
+            startActivity(intent)
+        }
+
     }
 }

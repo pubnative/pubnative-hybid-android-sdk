@@ -22,11 +22,11 @@ public class AdParams {
     private List<String> videoFileUrlsList = new ArrayList<>();
     private List<String> endCardUrlList = new ArrayList<>();
 
-    private List<String> impressions = new ArrayList<>();
-    private List<String> companionCreativeViewEvents = new ArrayList<>();
+    private final List<String> impressions = new ArrayList<>();
+    private final List<String> companionCreativeViewEvents = new ArrayList<>();
     private List<String> videoClicks = new ArrayList<>();
     private List<String> endCardClicks = new ArrayList<>();
-    private List<Tracking> events = new ArrayList<>();
+    private final List<Tracking> events = new ArrayList<>();
 
     List<VerificationScriptResource> verificationScriptResources = new ArrayList<>();
 
@@ -84,7 +84,7 @@ public class AdParams {
     }
 
     public void setImpressions(List<String> impressions) {
-        this.impressions = impressions;
+        this.impressions.addAll(impressions);
     }
 
     public List<String> getCompanionCreativeViewEvents() {
@@ -92,15 +92,11 @@ public class AdParams {
     }
 
     public void setCompanionCreativeViewEvents(List<String> companionCreativeViewEvents) {
-        this.companionCreativeViewEvents = companionCreativeViewEvents;
+        this.companionCreativeViewEvents.addAll(companionCreativeViewEvents);
     }
 
     public List<Tracking> getEvents() {
         return events;
-    }
-
-    public void setEvents(List<Tracking> events) {
-        this.events = events;
     }
 
     public void addEvents(List<Tracking> events) {

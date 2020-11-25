@@ -33,7 +33,18 @@ import org.json.JSONObject;
 public class HyBidDFPUtils {
     private static final String TAG = HyBidDFPUtils.class.getSimpleName();
 
+    private static final String APP_TOKEN_KEY = "pn_app_token";
     private static final String ZONE_ID = "pn_zone_id";
+
+    public static String getAppToken(String extras) {
+
+        return getParameter(extras, APP_TOKEN_KEY);
+    }
+
+    public static String getAppToken(Bundle extras) {
+
+        return getParameter(extras, APP_TOKEN_KEY);
+    }
 
     public static String getZoneId(String extras) {
 

@@ -71,7 +71,6 @@ public abstract class HyBidInterstitialActivity extends Activity {
                 mCloseableContainer.addView(adView, params);
                 mCloseableContainer.setBackgroundColor(Color.WHITE);
                 showInterstitialCloseButton();
-
                 if (shouldShowContentInfo() && getAd() != null) {
                     View contentInfo = getAd().getContentInfoContainer(this);
                     if (contentInfo != null) {
@@ -135,6 +134,10 @@ public abstract class HyBidInterstitialActivity extends Activity {
         }
     }
 
+    protected void setClosePosition(CloseableContainer.ClosePosition closePosition) {
+        mCloseableContainer.setClosePosition(closePosition);
+    }
+
     protected UrlHandler getUrlHandler() {
         return mUrlHandlerDelegate;
     }
@@ -152,11 +155,11 @@ public abstract class HyBidInterstitialActivity extends Activity {
         return mBroadcastSender;
     }
 
-    protected void setProgressBarVisible(){
+    protected void setProgressBarVisible() {
         progressBar.setVisibility(View.VISIBLE);
     }
 
-    protected void setProgressBarInvisible(){
+    protected void setProgressBarInvisible() {
         progressBar.setVisibility(View.INVISIBLE);
     }
 }

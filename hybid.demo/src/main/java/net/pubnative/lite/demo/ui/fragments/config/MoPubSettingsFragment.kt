@@ -47,6 +47,7 @@ class MoPubSettingsFragment : Fragment() {
     private lateinit var mediationMediumInput: EditText
     private lateinit var mediationLeaderboardInput: EditText
     private lateinit var mediationInterstitialInput: EditText
+    private lateinit var mediationRewardedInput: EditText
     private lateinit var mediationNativeInput: EditText
     private lateinit var settingManager: SettingsManager
 
@@ -63,6 +64,7 @@ class MoPubSettingsFragment : Fragment() {
         mediationMediumInput = view.findViewById(R.id.input_mopub_mediation_medium)
         mediationLeaderboardInput = view.findViewById(R.id.input_mopub_mediation_leaderboard)
         mediationInterstitialInput = view.findViewById(R.id.input_mopub_mediation_interstitial)
+        mediationRewardedInput = view.findViewById(R.id.input_mopub_mediation_rewarded)
         mediationNativeInput = view.findViewById(R.id.input_mopub_mediation_native)
 
         settingManager = SettingsManager.getInstance(context!!)
@@ -76,6 +78,7 @@ class MoPubSettingsFragment : Fragment() {
             val mediationMediumAdUnitId = mediationMediumInput.text.toString()
             val mediationLeaderboardAdUnitId = mediationLeaderboardInput.text.toString()
             val mediationInterstitialAdUnitId = mediationInterstitialInput.text.toString()
+            val mediationRewardedAdUnitId = mediationRewardedInput.text.toString()
             val mediationNativeAdUnitId = mediationNativeInput.text.toString()
 
             settingManager.setMoPubBannerAdUnitId(bannerAdUnitId)
@@ -86,6 +89,7 @@ class MoPubSettingsFragment : Fragment() {
             settingManager.setMoPubMediationMediumAdUnitId(mediationMediumAdUnitId)
             settingManager.setMoPubMediationLeaderboardAdUnitId(mediationLeaderboardAdUnitId)
             settingManager.setMoPubMediationInterstitialAdUnitId(mediationInterstitialAdUnitId)
+            settingManager.setMoPubMediationRewardedAdUnitId(mediationRewardedAdUnitId)
             settingManager.setMoPubMediationNativeAdUnitId(mediationNativeAdUnitId)
 
             MoPubManager.initMoPubSdk(activity, bannerAdUnitId) {
@@ -107,6 +111,7 @@ class MoPubSettingsFragment : Fragment() {
         mediationMediumInput.setText(settings.mopubMediationMediumAdUnitId)
         mediationLeaderboardInput.setText(settings.mopubMediationLeaderboardAdUnitId)
         mediationInterstitialInput.setText(settings.mopubMediationInterstitialAdUnitId)
+        mediationRewardedInput.setText(settings.mopubMediationRewardedAdUnitId)
         mediationNativeInput.setText(settings.mopubMediationNativeAdUnitId)
     }
 }

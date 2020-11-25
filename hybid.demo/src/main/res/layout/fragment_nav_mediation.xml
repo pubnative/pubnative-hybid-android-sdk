@@ -60,6 +60,15 @@
             android:text="@string/interstitial" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_mopub_rewarded"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/rewarded" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_mopub_native"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -115,8 +124,77 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginBottom="20dp"
             android:text="@string/interstitial" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_admob_rewarded"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="20dp"
+            android:text="@string/rewarded" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="16dp"
+            android:fontFamily="@font/roboto"
+            android:maxLines="1"
+            android:text="@string/dfp"
+            android:textColor="?colorPrimaryVariant"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_dfp_banner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/banner" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_dfp_medium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/medium" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_dfp_leaderboard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/leaderboard" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_dfp_interstitial"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/interstitial" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_dfp_rewarded"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="20dp"
+            android:text="@string/rewarded" />
+
 
     </LinearLayout>
 </ScrollView>

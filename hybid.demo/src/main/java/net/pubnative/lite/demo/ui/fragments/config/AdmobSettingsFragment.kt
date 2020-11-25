@@ -18,6 +18,7 @@ class AdmobSettingsFragment : Fragment() {
     private lateinit var mediumInput: EditText
     private lateinit var leaderboardInput: EditText
     private lateinit var interstitialInput: EditText
+    private lateinit var rewardedInput: EditText
     private lateinit var settingManager: SettingsManager
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_admob_settings, container, false)
@@ -30,6 +31,7 @@ class AdmobSettingsFragment : Fragment() {
         mediumInput = view.findViewById(R.id.input_admob_medium)
         leaderboardInput = view.findViewById(R.id.input_admob_leaderboard)
         interstitialInput = view.findViewById(R.id.input_admob_interstitial)
+        rewardedInput = view.findViewById(R.id.input_admob_rewarded)
 
         settingManager = SettingsManager.getInstance(context!!)
 
@@ -39,12 +41,14 @@ class AdmobSettingsFragment : Fragment() {
             val mediumAdUnitId = mediumInput.text.toString()
             val leaderboardAdUnitId = leaderboardInput.text.toString()
             val interstitialAdUnitId = interstitialInput.text.toString()
+            val rewardedAdUnitId = rewardedInput.text.toString()
 
             settingManager.setAdmobAppId(appId)
             settingManager.setAdmobBannerAdUnitId(bannerAdUnitId)
             settingManager.setAdmobMediumAdUnitId(mediumAdUnitId)
             settingManager.setAdmobLeaderboardAdUnitId(leaderboardAdUnitId)
             settingManager.setAdmobInterstitialAdUnitId(interstitialAdUnitId)
+            settingManager.setAdmobRewardedAdUnitId(rewardedAdUnitId)
 
             Toast.makeText(activity, "Admob settings saved successfully.", Toast.LENGTH_SHORT).show()
             activity?.finish()
@@ -60,5 +64,6 @@ class AdmobSettingsFragment : Fragment() {
         mediumInput.setText(settings.admobMediumAdUnitId)
         leaderboardInput.setText(settings.admobLeaderboardAdUnitId)
         interstitialInput.setText(settings.admobInterstitialAdUnitId)
+        rewardedInput.setText(settings.admobRewardedAdUnitId)
     }
 }

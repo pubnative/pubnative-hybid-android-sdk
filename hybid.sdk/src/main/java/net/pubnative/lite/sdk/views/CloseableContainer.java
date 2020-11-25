@@ -14,6 +14,8 @@ import android.widget.FrameLayout;
 import net.pubnative.lite.sdk.utils.DrawableResources;
 import net.pubnative.lite.sdk.utils.ViewUtils;
 
+import java.util.Random;
+
 public class CloseableContainer extends FrameLayout {
     public interface OnCloseListener {
         void onClose();
@@ -31,7 +33,8 @@ public class CloseableContainer extends FrameLayout {
         CENTER(Gravity.CENTER),
         BOTTOM_LEFT(Gravity.BOTTOM | Gravity.START),
         BOTTOM_CENTER(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL),
-        BOTTOM_RIGHT(Gravity.BOTTOM | Gravity.END);
+        BOTTOM_RIGHT(Gravity.BOTTOM | Gravity.END),
+        RANDOM(0);
 
         private final int mGravity;
 
@@ -41,6 +44,11 @@ public class CloseableContainer extends FrameLayout {
 
         int getGravity() {
             return mGravity;
+        }
+
+        public static ClosePosition getRandomPosition() {
+            Random random = new Random();
+            return values()[random.nextInt(values().length)];
         }
     }
 
@@ -107,7 +115,11 @@ public class CloseableContainer extends FrameLayout {
 
     public void setClosePosition(ClosePosition closePosition) {
         if (closePosition != null) {
-            mClosePosition = closePosition;
+            if (closePosition == ClosePosition.RANDOM) {
+                mClosePosition = ClosePosition.getRandomPosition();
+            } else {
+                mClosePosition = closePosition;
+            }
             mCloseBoundChanged = true;
             invalidate();
         }
@@ -257,6 +269,7 @@ public class CloseableContainer extends FrameLayout {
         public void run() {
             setClosePressed(false);
         }
+
     }
 
     void setCloseBounds(Rect closeBounds) {

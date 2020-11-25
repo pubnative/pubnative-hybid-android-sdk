@@ -11,6 +11,7 @@ import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewCloseLayoutListener;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
+import net.pubnative.lite.sdk.views.CloseableContainer;
 
 public class MraidInterstitialActivity extends HyBidInterstitialActivity implements MRAIDViewListener, MRAIDNativeFeatureListener, MRAIDViewCloseLayoutListener {
     private String[] mSupportedNativeFeatures = new String[]{
@@ -44,9 +45,7 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
                 adView.setCloseLayoutListener(this);
             }
         }
-
         mView = adView;
-
         return adView;
     }
 

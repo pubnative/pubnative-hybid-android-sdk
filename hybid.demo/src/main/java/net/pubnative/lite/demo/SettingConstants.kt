@@ -46,6 +46,7 @@ const val SETTINGS_KEY_MOPUB_MEDIATION_BANNER_AD_UNIT_ID = "mopub_mediation_bann
 const val SETTINGS_KEY_MOPUB_MEDIATION_MEDIUM_AD_UNIT_ID = "mopub_mediation_medium_ad_unit_id"
 const val SETTINGS_KEY_MOPUB_MEDIATION_LEADERBOARD_AD_UNIT_ID = "mopub_mediation_leaderboard_ad_unit_id"
 const val SETTINGS_KEY_MOPUB_MEDIATION_INTERSTITIAL_AD_UNIT_ID = "mopub_mediation_interstitial_ad_unit_id"
+const val SETTINGS_KEY_MOPUB_MEDIATION_REWARDED_AD_UNIT_ID = "mopub_mediation_rewarded_ad_unit_id"
 const val SETTINGS_KEY_MOPUB_MEDIATION_NATIVE_AD_UNIT_ID = "mopub_mediation_native_ad_unit_id"
 
 const val SETTINGS_KEY_DFP_BANNER_AD_UNIT_ID = "dfp_banner_ad_unit_id"
@@ -53,8 +54,15 @@ const val SETTINGS_KEY_DFP_MEDIUM_AD_UNIT_ID = "dfp_medium_ad_unit_id"
 const val SETTINGS_KEY_DFP_LEADERBOARD_AD_UNIT_ID = "dfp_leaderboard_ad_unit_id"
 const val SETTINGS_KEY_DFP_INTERSTITIAL_AD_UNIT_ID = "dfp_interstitial_ad_unit_id"
 
+const val SETTINGS_KEY_DFP_MEDIATION_BANNER_AD_UNIT_ID = "dfp_mediation_banner_ad_unit_id"
+const val SETTINGS_KEY_DFP_MEDIATION_MEDIUM_AD_UNIT_ID = "dfp_mediation_medium_ad_unit_id"
+const val SETTINGS_KEY_DFP_MEDIATION_LEADERBOARD_AD_UNIT_ID = "dfp_mediation_leaderboard_ad_unit_id"
+const val SETTINGS_KEY_DFP_MEDIATION_INTERSTITIAL_AD_UNIT_ID = "dfp_mediation_interstitial_ad_unit_id"
+const val SETTINGS_KEY_DFP_MEDIATION_REWARDED_AD_UNIT_ID = "dfp_mediation_rewarded_ad_unit_id"
+
 const val SETTINGS_KEY_ADMOB_APP_ID = "admob_app_id"
 const val SETTINGS_KEY_ADMOB_BANNER_AD_UNIT_ID = "admob_banner_ad_unit_id"
 const val SETTINGS_KEY_ADMOB_MEDIUM_AD_UNIT_ID = "admob_medium_ad_unit_id"
 const val SETTINGS_KEY_ADMOB_LEADERBOARD_AD_UNIT_ID = "admob_leaderboard_ad_unit_id"
+const val SETTINGS_KEY_ADMOB_REWARDED_AD_UNIT_ID = "admob_rewarded_ad_unit_id"
 const val SETTINGS_KEY_ADMOB_INTERSTITIAL_AD_UNIT_ID = "admob_interstitial_ad_unit_id"

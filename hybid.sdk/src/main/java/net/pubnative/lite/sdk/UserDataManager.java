@@ -257,7 +257,7 @@ public class UserDataManager {
     }
 
 
-    private boolean gdprApplies() {
+    public boolean gdprApplies() {
         return inGDPRZone;
     }
 

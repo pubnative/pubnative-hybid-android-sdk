@@ -9,6 +9,8 @@ import android.os.Build;
 import android.view.Gravity;
 import android.widget.FrameLayout;
 
+import net.pubnative.lite.sdk.utils.Logger;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +22,8 @@ public class Utils {
         STRETCH,
         NO_STRETCH
     }
+
+    private static final String TAG = Utils.class.getSimpleName();
 
     private static Context sContext;
 
@@ -72,6 +76,17 @@ public class Utils {
         } else {
             return 1.0f;
         }
+    }
+
+    public static boolean isPhoneMuted() {
+        if (sContext == null) {
+            return false;
+        }
+        AudioManager am = (AudioManager) sContext.getSystemService(Context.AUDIO_SERVICE);
+        if (am == null) {
+            return false;
+        }
+        return am.getRingerMode() == AudioManager.RINGER_MODE_SILENT;
     }
 
     public static FrameLayout.LayoutParams calculateNewLayoutParams(
@@ -143,11 +158,16 @@ public class Utils {
      * @return in seconds
      */
     public static int parseDuration(String duration) {
-        String[] data = duration.split(":");
-        int hours = Integer.parseInt(data[0]);
-        int minutes = Integer.parseInt(data[1]);
-        int seconds = Integer.parseInt(data[2]);
-        return seconds + 60 * minutes + 3600 * hours;
+        try {
+            String[] data = duration.split(":");
+            int hours = Integer.parseInt(data[0]);
+            int minutes = Integer.parseInt(data[1]);
+            int seconds = Double.valueOf(data[2]).intValue();
+            return seconds + 60 * minutes + 3600 * hours;
+        } catch (RuntimeException e) {
+            Logger.e(TAG, "Error while parsing ad duration");
+        }
+        return 10;
     }
 
     public static int parsePercent(String duration) {

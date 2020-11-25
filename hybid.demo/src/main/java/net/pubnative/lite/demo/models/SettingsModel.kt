@@ -46,15 +46,22 @@ data class SettingsModel(var appToken: String,
                          var mopubMediationMediumAdUnitId: String,
                          var mopubMediationLeaderboardAdUnitId: String,
                          var mopubMediationInterstitialAdUnitId: String,
+                         var mopubMediationRewardedAdUnitId: String,
                          var mopubMediationNativeAdUnitId: String,
                          var dfpBannerAdUnitId: String,
                          var dfpMediumAdUnitId: String,
                          var dfpLeaderboardAdUnitId: String,
                          var dfpInterstitialAdUnitId: String,
+                         var dfpMediationBannerAdUnitId: String,
+                         var dfpMediationMediumAdUnitId: String,
+                         var dfpMediationLeaderboardAdUnitId: String,
+                         var dfpMediationInterstitialAdUnitId: String,
+                         var dfpMediationRewardedAdUnitId: String,
                          var admobAppId: String,
                          var admobBannerAdUnitId: String,
                          var admobMediumAdUnitId: String,
                          var admobLeaderboardAdUnitId: String,
+                         var admobRewardedAdUnitId: String,
                          var admobInterstitialAdUnitId: String) : Parcelable {
     companion object {
         @JvmField
@@ -78,6 +85,13 @@ data class SettingsModel(var appToken: String,
             },
             parcel.readInt() != 0,
             parcel.readInt() != 0,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
             parcel.readString()!!,
             parcel.readString()!!,
             parcel.readString()!!,
@@ -133,6 +147,7 @@ data class SettingsModel(var appToken: String,
         dest?.writeString(mopubMediationMediumAdUnitId)
         dest?.writeString(mopubMediationLeaderboardAdUnitId)
         dest?.writeString(mopubMediationInterstitialAdUnitId)
+        dest?.writeString(mopubMediationRewardedAdUnitId)
         dest?.writeString(mopubMediationNativeAdUnitId)
 
         dest?.writeString(dfpBannerAdUnitId)
@@ -140,10 +155,17 @@ data class SettingsModel(var appToken: String,
         dest?.writeString(dfpLeaderboardAdUnitId)
         dest?.writeString(dfpInterstitialAdUnitId)
 
+        dest?.writeString(dfpMediationBannerAdUnitId)
+        dest?.writeString(dfpMediationMediumAdUnitId)
+        dest?.writeString(dfpMediationLeaderboardAdUnitId)
+        dest?.writeString(dfpMediationInterstitialAdUnitId)
+        dest?.writeString(dfpMediationRewardedAdUnitId)
+
         dest?.writeString(admobAppId)
         dest?.writeString(admobBannerAdUnitId)
         dest?.writeString(admobMediumAdUnitId)
         dest?.writeString(admobLeaderboardAdUnitId)
+        dest?.writeString(admobRewardedAdUnitId)
         dest?.writeString(admobInterstitialAdUnitId)
     }
 

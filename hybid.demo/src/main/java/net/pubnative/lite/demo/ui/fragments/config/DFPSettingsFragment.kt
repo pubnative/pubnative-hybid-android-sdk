@@ -42,6 +42,11 @@ class DFPSettingsFragment : Fragment() {
     private lateinit var mediumInput: EditText
     private lateinit var leaderboardInput: EditText
     private lateinit var interstitialInput: EditText
+    private lateinit var mediationBannerInput: EditText
+    private lateinit var mediationMediumInput: EditText
+    private lateinit var mediationLeaderboardInput: EditText
+    private lateinit var mediationInterstitialInput: EditText
+    private lateinit var mediationRewardedInput: EditText
     private lateinit var settingManager: SettingsManager
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_dfp_settings, container, false)
@@ -53,6 +58,11 @@ class DFPSettingsFragment : Fragment() {
         mediumInput = view.findViewById(R.id.input_dfp_medium)
         leaderboardInput = view.findViewById(R.id.input_dfp_leaderboard)
         interstitialInput = view.findViewById(R.id.input_dfp_interstitial)
+        mediationBannerInput = view.findViewById(R.id.input_dfp_mediation_banner)
+        mediationMediumInput = view.findViewById(R.id.input_dfp_mediation_medium)
+        mediationLeaderboardInput = view.findViewById(R.id.input_dfp_mediation_leaderboard)
+        mediationInterstitialInput = view.findViewById(R.id.input_dfp_mediation_interstitial)
+        mediationRewardedInput = view.findViewById(R.id.input_dfp_mediation_rewarded)
 
         settingManager = SettingsManager.getInstance(context!!)
 
@@ -61,11 +71,22 @@ class DFPSettingsFragment : Fragment() {
             val mediumAdUnitId = mediumInput.text.toString()
             val leaderboardAdUnitId = leaderboardInput.text.toString()
             val interstitialAdUnitId = interstitialInput.text.toString()
+            val mediationBannerAdUnitId = mediationBannerInput.text.toString()
+            val mediationMediumAdUnitId = mediationMediumInput.text.toString()
+            val mediationLeaderboardAdUnitId = mediationLeaderboardInput.text.toString()
+            val mediationInterstitialAdUnitId = mediationInterstitialInput.text.toString()
+            val mediationRewardedAdUnitId = mediationRewardedInput.text.toString()
 
             settingManager.setDFPBannerAdUnitId(bannerAdUnitId)
             settingManager.setDFPMediumAdUnitId(mediumAdUnitId)
             settingManager.setDFPLeaderboardAdUnitId(leaderboardAdUnitId)
             settingManager.setDFPInterstitialAdUnitId(interstitialAdUnitId)
+            settingManager.setDFPMediationBannerAdUnitId(mediationBannerAdUnitId)
+            settingManager.setDFPMediationMediumAdUnitId(mediationMediumAdUnitId)
+            settingManager.setDFPMediationLeaderboardAdUnitId(mediationLeaderboardAdUnitId)
+            settingManager.setDFPMediationInterstitialAdUnitId(mediationInterstitialAdUnitId)
+            settingManager.setDFPMediationRewardedAdUnitId(mediationRewardedAdUnitId)
+
 
             Toast.makeText(activity, "DFP settings saved successfully.", Toast.LENGTH_SHORT).show()
             activity?.finish()
@@ -80,5 +101,10 @@ class DFPSettingsFragment : Fragment() {
         mediumInput.setText(settings.dfpMediumAdUnitId)
         leaderboardInput.setText(settings.dfpLeaderboardAdUnitId)
         interstitialInput.setText(settings.dfpInterstitialAdUnitId)
+        mediationBannerInput.setText(settings.dfpMediationBannerAdUnitId)
+        mediationMediumInput.setText(settings.dfpMediationMediumAdUnitId)
+        mediationLeaderboardInput.setText(settings.dfpMediationLeaderboardAdUnitId)
+        mediationInterstitialInput.setText(settings.dfpMediationInterstitialAdUnitId)
+        mediationRewardedInput.setText(settings.dfpMediationRewardedAdUnitId)
     }
 }

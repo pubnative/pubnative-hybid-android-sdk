@@ -51,6 +51,7 @@ public class VastProcessor {
 
     private final Context mContext;
     private final AdSpotDimensions mParseParams;
+    private final AdParams adParams = new AdParams();
     private int unwrapAttempt = 0;
 
     public VastProcessor(Context context, AdSpotDimensions parseParams) {
@@ -68,7 +69,6 @@ public class VastProcessor {
                 info.setNoAdsFound();
                 listener.onParseError(info);
             } else {
-                AdParams adParams = new AdParams();
                 adParams.setId(vast.getAd().getId());
                 InLine inLine = vast.getAd().getInLine();
                 Wrapper wrapper = vast.getAd().getWrapper();
@@ -91,8 +91,8 @@ public class VastProcessor {
                             @Override
                             public void onFailure(Throwable error) {
                                 ErrorLog.postError(mContext, VastError.XML_PARSING);
-                                Logger.e(LOG_TAG, "Parse VAST failed: " + error.getMessage());
-                                PlayerInfo info = new PlayerInfo("Parse VAST response failed");
+                                Logger.e(LOG_TAG, "Parse VAST failed: " , error);
+                                PlayerInfo info = new PlayerInfo("Parse VAST response failed " +error.getMessage());
                                 listener.onParseError(info);
                             }
                         });
@@ -106,14 +106,14 @@ public class VastProcessor {
             }
         } catch (Exception e) {
             ErrorLog.postError(mContext, VastError.XML_PARSING);
-            Logger.e(LOG_TAG, "Parse VAST failed: " + e.getMessage());
-            PlayerInfo info = new PlayerInfo("Parse VAST response failed");
+            Logger.e(LOG_TAG, "Parse VAST failed: ", e );
+            PlayerInfo info = new PlayerInfo("Parse VAST response failed"+ e.getMessage());
             listener.onParseError(info);
         }
     }
 
     private void fillAdParams(Context context, VastAdSource adSource, AdParams adParams, AdSpotDimensions parseParams) {
-        if (adSource.getError() != null) {
+        if (adSource.getError() != null && adSource.getError().getText() != null) {
             ErrorLog.initErrorLog(adSource.getError().getText().trim());
         }
 
@@ -181,7 +181,9 @@ public class VastProcessor {
                     List<MediaFile> sortedVideoFilesList = sortedMediaFiles(mediaFileList, parseParams);
                     List<String> videoFileUrlsList = new ArrayList<>();
                     for (MediaFile mediaFile : sortedVideoFilesList) {
-                        videoFileUrlsList.add(mediaFile.getText().trim());
+                        if (mediaFile.getText() != null) {
+                            videoFileUrlsList.add(mediaFile.getText().trim());
+                        }
                     }
                     adParams.setVideoFileUrlsList(videoFileUrlsList);
                     if (videoFileUrlsList.isEmpty()) {
@@ -193,7 +195,7 @@ public class VastProcessor {
                     List<Companion> companionList = getSortedCompanions(creativeList);
                     List<String> endCardUrlList = new ArrayList<>();
                     for (Companion companion : companionList) {
-                        if (companion.getStaticResource() != null && !TextUtils.isEmpty(companion.getStaticResource().getText())) {
+                        if (companion.getStaticResource() != null && companion.getStaticResource().getText() != null && !TextUtils.isEmpty(companion.getStaticResource().getText())) {
                             endCardUrlList.add(companion.getStaticResource().getText().trim());
                         }
                     }
@@ -202,7 +204,7 @@ public class VastProcessor {
                     if (!companionList.isEmpty()) {
                         Companion companion = companionList.get(0);
                         CompanionClickThrough clickThrough = companion.getCompanionClickThrough();
-                        if (clickThrough != null) {
+                        if (clickThrough != null && clickThrough.getText() != null) {
                             String redirectUrl = clickThrough.getText().trim();
                             adParams.setEndCardRedirectUrl(redirectUrl);
                         }
@@ -258,7 +260,7 @@ public class VastProcessor {
 
     private String getVpaidJsUrl(List<MediaFile> mediaFileList) {
         for (MediaFile mediaFile : mediaFileList) {
-            if (mediaFile.getApiFramework() != null && mediaFile.getApiFramework().equalsIgnoreCase("VPAID")) {
+            if (mediaFile.getText() != null && mediaFile.getApiFramework() != null && mediaFile.getApiFramework().equalsIgnoreCase("VPAID")) {
                 return mediaFile.getText().trim();
             }
         }

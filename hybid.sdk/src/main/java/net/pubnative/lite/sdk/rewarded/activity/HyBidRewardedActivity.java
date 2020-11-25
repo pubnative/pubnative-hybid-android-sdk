@@ -154,6 +154,10 @@ public abstract class HyBidRewardedActivity extends Activity {
         }
     }
 
+    protected void setClosePosition(CloseableContainer.ClosePosition closePosition) {
+        mCloseableContainer.setClosePosition(closePosition);
+    }
+
     protected UrlHandler getUrlHandler() {
         return mUrlHandlerDelegate;
     }

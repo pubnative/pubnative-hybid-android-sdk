@@ -1,15 +1,15 @@
 package net.pubnative.lite.demo.ui.fragments.audiences
 
+import ai.numbereight.audiences.Audiences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import me.numbereight.audiences.Audiences
 import net.pubnative.lite.demo.R
 
-class NumberEightAudiencesFragment: Fragment() {
+class NumberEightAudiencesFragment : Fragment() {
 
     private lateinit var audiencesView: TextView
 

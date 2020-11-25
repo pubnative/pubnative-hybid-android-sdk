@@ -1,6 +1,7 @@
 package net.pubnative.lite.demo.ui.fragments.navigation
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -59,9 +60,14 @@ class SettingsNavFragment : Fragment() {
             startActivity(intent)
         }
 
-        view.findViewById<TextView>(R.id.button_numbereight_audiences).setOnClickListener{
-            val intent = Intent(activity, NumberEightAudiencesActivity::class.java)
-            startActivity(intent)
+        // NumberEight SDK crashes below API level 26.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            view.findViewById<TextView>(R.id.button_numbereight_audiences).setOnClickListener {
+                val intent = Intent(activity, NumberEightAudiencesActivity::class.java)
+                startActivity(intent)
+            }
+        } else {
+            view.findViewById<TextView>(R.id.button_numbereight_audiences).setVisibility(View.GONE)
         }
 
     }
