@@ -1806,7 +1806,13 @@ public class MRAIDView extends RelativeLayout {
 
             MRAIDLog.d(MRAID_LOG_TAG, "calculateMaxSize frame [" + frame.left + "," + frame.top + "][" + frame.right + "," + frame.bottom + "] (" + frame.width() + "x" + frame.height() + ")");
 
-            contentViewTop = window.findViewById(Window.ID_ANDROID_CONTENT).getTop();
+            View screenContentView = window.findViewById(Window.ID_ANDROID_CONTENT);
+            if (screenContentView != null) {
+                contentViewTop = window.findViewById(Window.ID_ANDROID_CONTENT).getTop();
+            } else {
+                // Root content view not found, therefore the app must be fullscreen
+                contentViewTop = frame.top;
+            }
             int statusHeight = frame.top;
             int titleHeight = contentViewTop - statusHeight;
             MRAIDLog.d(MRAID_LOG_TAG, "calculateMaxSize statusHeight " + statusHeight);
