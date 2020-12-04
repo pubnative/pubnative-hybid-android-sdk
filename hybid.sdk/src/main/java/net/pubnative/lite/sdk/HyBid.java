@@ -111,7 +111,7 @@ public class HyBid {
         return sAppToken;
     }
 
-    public static void setAppToken(String appToken) {
+    public synchronized static void setAppToken(String appToken) {
         sAppToken = appToken;
     }
 
@@ -143,7 +143,7 @@ public class HyBid {
         return sAdCache;
     }
 
-    public static VideoAdCache getVideoAdCache() {
+    public synchronized static VideoAdCache getVideoAdCache() {
         return sVideoAdCache;
     }
 

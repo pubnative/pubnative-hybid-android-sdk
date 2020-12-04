@@ -57,7 +57,11 @@ public class VideoAd extends BaseVideoAd {
                     stopExpirationTimer();
 
                     if (getAdController() != null) {
-                        getViewabilityAdSession().initAdSession(mBannerView, getAdController().getAdParams());
+                        synchronized (this) {
+                            if (getAdController() != null && getAdController().getAdParams() != null) {
+                                getViewabilityAdSession().initAdSession(mBannerView, getAdController().getAdParams());
+                            }
+                        }
                         getAdController().buildVideoAdView(mBannerView);
 
                         for (HyBidViewabilityFriendlyObstruction obstruction : getAdController().getViewabilityFriendlyObstructions()) {

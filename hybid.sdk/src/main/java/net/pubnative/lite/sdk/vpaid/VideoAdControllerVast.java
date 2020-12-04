@@ -256,7 +256,7 @@ class VideoAdControllerVast implements VideoAdController {
                         continue;
                     }
                     if (tracking.getOffset().contains("%")) {
-                        event.timeMillis = duration * Utils.parsePercent(mAdParams.getSkipTime()) / 100;
+                        event.timeMillis = duration * Utils.parsePercent(tracking.getOffset()) / 100;
                     } else {
                         event.timeMillis = Utils.parseDuration(tracking.getOffset()) * 1000;
                     }

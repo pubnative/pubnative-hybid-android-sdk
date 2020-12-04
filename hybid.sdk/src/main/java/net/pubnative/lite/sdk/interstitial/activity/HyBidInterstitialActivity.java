@@ -144,8 +144,10 @@ public abstract class HyBidInterstitialActivity extends Activity {
 
     protected Ad getAd() {
         if (mAd == null) {
-            if (HyBid.getAdCache() != null) {
-                mAd = HyBid.getAdCache().remove(mZoneId);
+            synchronized (this) {
+                if (HyBid.getAdCache() != null) {
+                    mAd = HyBid.getAdCache().remove(mZoneId);
+                }
             }
         }
         return mAd;

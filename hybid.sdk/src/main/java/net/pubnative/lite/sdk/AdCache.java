@@ -40,15 +40,15 @@ public class AdCache {
         mAdMap = new HashMap<>();
     }
 
-    public Ad remove(String zoneId) {
+    public synchronized Ad remove(String zoneId) {
         return mAdMap.remove(zoneId);
     }
 
-    public Ad inspect(String zoneId) {
+    public synchronized Ad inspect(String zoneId) {
         return mAdMap.get(zoneId);
     }
 
-    public void put(String zoneId, Ad ad) {
+    public synchronized void put(String zoneId, Ad ad) {
         Logger.d(TAG, "AdCache putting ad for zone id: " + zoneId);
         mAdMap.put(zoneId, ad);
     }
