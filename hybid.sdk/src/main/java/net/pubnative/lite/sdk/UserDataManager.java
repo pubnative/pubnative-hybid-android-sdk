@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.consent.CheckConsentRequest;
@@ -36,7 +37,12 @@ import net.pubnative.lite.sdk.models.UserConsentRequestModel;
 import net.pubnative.lite.sdk.models.UserConsentResponseModel;
 import net.pubnative.lite.sdk.models.UserConsentResponseStatus;
 import net.pubnative.lite.sdk.utils.CountryUtils;
+import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.PNAsyncUtils;
+import net.pubnative.lite.sdk.utils.PNCrypto;
+
+import java.util.Locale;
 
 public class UserDataManager {
     private static final String TAG = UserDataManager.class.getSimpleName();
@@ -111,8 +117,10 @@ public class UserDataManager {
         }
     }
 
-    /**]
+    /**
+     * ]
      * Only for internal use in the ad request
+     *
      * @return if consent has explicitly been denied.
      */
     public boolean isConsentDenied() {
@@ -126,7 +134,7 @@ public class UserDataManager {
      */
     @Deprecated
     public void grantConsent() {
-        notifyConsentGiven();
+        processConsent(true);
     }
 
     /**
@@ -136,7 +144,7 @@ public class UserDataManager {
      */
     @Deprecated
     public void denyConsent() {
-        notifyConsentDenied();
+        processConsent(false);
     }
 
     /**
@@ -146,43 +154,44 @@ public class UserDataManager {
      */
     @Deprecated
     public void revokeConsent() {
-        notifyConsentDenied();
+        denyConsent();
     }
 
-    private void notifyConsentGiven() {
-        setConsentState(CONSENT_STATE_ACCEPTED);
+    private void processConsent(final boolean given) {
+        String advertisingId = HyBid.getDeviceInfo().getAdvertisingId();
+        if (!TextUtils.isEmpty(advertisingId)) {
+
+            notifyConsentGiven(advertisingId, given);
+        } else {
+            try {
+                PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(mContext, new HyBidAdvertisingId.Listener() {
+                    @Override
+                    public void onHyBidAdvertisingIdFinish(String advertisingId, Boolean limitTracking) {
+                        if (TextUtils.isEmpty(advertisingId)) {
+                            Logger.e(TAG, "Consent request failed with an empty advertising ID.");
+                        } else {
+                            notifyConsentGiven(advertisingId, given);
+                        }
+                    }
+                }));
+            } catch (Exception exception) {
+                Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
+            }
+        }
+    }
+
+    private void notifyConsentGiven(String advertisingId, final boolean given) {
+        setConsentState(given ? CONSENT_STATE_ACCEPTED : CONSENT_STATE_DENIED);
         UserConsentRequestModel requestModel = new UserConsentRequestModel(
-                HyBid.getDeviceInfo().getAdvertisingId(),
-                DEVICE_ID_TYPE, true);
+                advertisingId,
+                DEVICE_ID_TYPE, given);
 
         UserConsentRequest request = new UserConsentRequest();
         request.doRequest(mContext, HyBid.getAppToken(), requestModel, new UserConsentRequest.UserConsentListener() {
             @Override
             public void onSuccess(UserConsentResponseModel model) {
                 if (model.getStatus().equals(UserConsentResponseStatus.OK)) {
-                    Logger.d(TAG, "Positive user consent has been notified");
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable error) {
-                Logger.e(TAG, error.getMessage());
-            }
-        });
-    }
-
-    private void notifyConsentDenied() {
-        setConsentState(CONSENT_STATE_DENIED);
-        UserConsentRequestModel requestModel = new UserConsentRequestModel(
-                HyBid.getDeviceInfo().getAdvertisingId(),
-                DEVICE_ID_TYPE, false);
-
-        UserConsentRequest request = new UserConsentRequest();
-        request.doRequest(mContext, HyBid.getAppToken(), requestModel, new UserConsentRequest.UserConsentListener() {
-            @Override
-            public void onSuccess(UserConsentResponseModel model) {
-                if (model.getStatus().equals(UserConsentResponseStatus.OK)) {
-                    Logger.d(TAG, "Negative user consent has been notified");
+                    Logger.d(TAG, String.format(Locale.ENGLISH, "%s user consent has been notified", given ? "Positive" : "Negative"));
                 }
             }
 

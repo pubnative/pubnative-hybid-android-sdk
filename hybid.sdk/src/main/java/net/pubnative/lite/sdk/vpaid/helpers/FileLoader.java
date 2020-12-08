@@ -91,7 +91,7 @@ public class FileLoader {
     }
 
     private void maybeLoadFile() {
-        int connectionType = RequestParametersProvider.getInstance().getConnectionType(mContext);
+        int connectionType = RequestParametersProvider.getConnectionType(mContext);
         if (connectionType != ConnectionType.WIFI && !useMobileNetworkForCaching) {
             if (mCallback != null) {
                 mCallback.onError(new PlayerInfo("Mobile network. File will not be cached"));
