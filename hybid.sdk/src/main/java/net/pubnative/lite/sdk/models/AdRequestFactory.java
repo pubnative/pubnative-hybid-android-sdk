@@ -157,13 +157,14 @@ public class AdRequestFactory {
 
         if (mLocationManager != null) {
             Location location = mLocationManager.getUserLocation();
-            if (location != null && !HyBid.isCoppaEnabled() && !limitTracking && !mUserDataManager.isConsentDenied()) {
+            if (location != null && !HyBid.isCoppaEnabled() && !limitTracking
+                    && !mUserDataManager.isConsentDenied() && HyBid.isLocationTrackingEnabled()) {
                 adRequest.latitude = String.format(Locale.ENGLISH, "%.6f", location.getLatitude());
                 adRequest.longitude = String.format(Locale.ENGLISH, "%.6f", location.getLongitude());
             }
         }
 
-        if (mIsRewarded){
+        if (mIsRewarded) {
             adRequest.rv = "1";
         } else {
             adRequest.rv = "0";

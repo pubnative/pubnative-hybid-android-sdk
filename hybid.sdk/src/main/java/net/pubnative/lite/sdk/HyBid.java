@@ -57,6 +57,7 @@ public class HyBid {
     private static boolean sCoppaEnabled = false;
     private static boolean sTestMode = false;
     private static boolean sLocationUpdatesEnabled = true;
+    private static boolean sLocationTrackingEnabled = true;
     private static String sAge;
     private static String sGender;
     private static String sKeywords;
@@ -78,7 +79,7 @@ public class HyBid {
         sApiClient = new PNApiClient(application);
         if (application.getSystemService(Context.LOCATION_SERVICE) != null) {
             sLocationManager = new HyBidLocationManager(application);
-            if (areLocationUpdatesEnabled()) {
+            if (isLocationTrackingEnabled() && areLocationUpdatesEnabled()) {
                 sLocationManager.startLocationUpdates();
             }
         }
@@ -181,6 +182,14 @@ public class HyBid {
 
     public static boolean areLocationUpdatesEnabled() {
         return sLocationUpdatesEnabled;
+    }
+
+    public static void setLocationTrackingEnabled(boolean isEnabled) {
+        sLocationTrackingEnabled = isEnabled;
+    }
+
+    public static boolean isLocationTrackingEnabled() {
+        return sLocationTrackingEnabled;
     }
 
     public static void setAge(String age) {

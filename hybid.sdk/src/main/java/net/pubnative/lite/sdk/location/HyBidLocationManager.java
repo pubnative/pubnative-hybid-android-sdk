@@ -183,7 +183,7 @@ public class HyBidLocationManager implements LocationListener {
             }
             result = mCurrentBestLocation;
 
-            if (HyBid.areLocationUpdatesEnabled()) {
+            if (HyBid.isLocationTrackingEnabled() && HyBid.areLocationUpdatesEnabled()) {
                 startLocationUpdates();
             }
         }
