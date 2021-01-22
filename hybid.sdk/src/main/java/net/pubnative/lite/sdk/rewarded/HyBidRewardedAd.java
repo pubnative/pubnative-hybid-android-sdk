@@ -124,8 +124,16 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
         }
     }
 
+    public String getImpressionId() {
+        return mAd != null ? mAd.getImpressionId() : null;
+    }
+
     public String getCreativeId() {
         return mAd != null ? mAd.getCreativeId() : null;
+    }
+
+    public Integer getBidPoints() {
+        return mAd != null ? mAd.getECPM() : 0;
     }
 
     private void renderAd() {
