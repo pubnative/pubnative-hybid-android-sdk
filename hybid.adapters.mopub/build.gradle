@@ -1,6 +1,6 @@
 def project_name = project.name
 def version_name = project.version
-if (branchName != "master") {
+if (branchName != "compatibility/v0.11.3") {
     version_name = "${version_name}-${branchName}.${buildNumber}"
     project_name = "${project_name}.beta"
 }
@@ -31,8 +31,10 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(':hybid.sdk')
-    compileOnly('com.mopub:mopub-sdk:5.15.0@aar') {
+    compileOnly('com.mopub:mopub-sdk:5.10.0@aar') {
         transitive = true
+        exclude module: 'libAvid-mopub' // To exclude AVID
+        exclude module: 'moat-mobile-app-kit' // To exclude Moat
     }
 }
 

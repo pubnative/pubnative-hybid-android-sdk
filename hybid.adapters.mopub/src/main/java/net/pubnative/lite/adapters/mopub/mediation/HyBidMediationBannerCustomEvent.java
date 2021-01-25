@@ -22,17 +22,10 @@
 //
 package net.pubnative.lite.adapters.mopub.mediation;
 
-import android.app.Activity;
 import android.content.Context;
-import android.view.View;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.mopub.common.LifecycleListener;
 import com.mopub.common.logging.MoPubLog;
-import com.mopub.mobileads.AdData;
-import com.mopub.mobileads.BaseAd;
+import com.mopub.mobileads.CustomEventBanner;
 import com.mopub.mobileads.MoPubErrorCode;
 
 import net.pubnative.lite.sdk.HyBid;
@@ -40,35 +33,41 @@ import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.views.HyBidAdView;
 
-public class HyBidMediationBannerCustomEvent extends BaseAd implements HyBidAdView.Listener {
+import java.util.Map;
+
+public class HyBidMediationBannerCustomEvent extends CustomEventBanner implements HyBidAdView.Listener {
     private static final String TAG = HyBidMediationBannerCustomEvent.class.getSimpleName();
 
     private static final String APP_TOKEN_KEY = "pn_app_token";
     private static final String ZONE_ID_KEY = "pn_zone_id";
+
+    private CustomEventBanner.CustomEventBannerListener mBannerListener;
     private HyBidAdView mBannerView;
-    private String mZoneID = "";
 
     @Override
-    protected boolean checkAndInitializeSdk(@NonNull Activity launcherActivity, @NonNull AdData adData) throws Exception {
-        return false;
-    }
+    protected void loadBanner(Context context, CustomEventBannerListener customEventBannerListener,
+                              Map<String, Object> localExtras, Map<String, String> serverExtras) {
+        if (customEventBannerListener == null) {
+            Logger.e(TAG, "customEventBannerListener is null");
+            return;
+        }
 
-    @Override
-    protected void load(@NonNull Context context, @NonNull AdData adData) throws Exception {
+        mBannerListener = customEventBannerListener;
 
         String appToken;
-        if (adData.getExtras().containsKey(ZONE_ID_KEY) && adData.getExtras().containsKey(APP_TOKEN_KEY)) {
-            mZoneID = adData.getExtras().get(ZONE_ID_KEY);
-            appToken = adData.getExtras().get(APP_TOKEN_KEY);
+        String zoneID;
+        if (serverExtras.containsKey(ZONE_ID_KEY) && serverExtras.containsKey(APP_TOKEN_KEY)) {
+            zoneID = serverExtras.get(ZONE_ID_KEY);
+            appToken = serverExtras.get(APP_TOKEN_KEY);
         } else {
             Logger.e(TAG, "Could not find the required params in CustomEventBanner serverExtras");
-            mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
+            mBannerListener.onBannerFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
         if (appToken == null || !appToken.equals(HyBid.getAppToken())) {
             Logger.e(TAG, "The provided app token doesn't match the one used to initialise HyBid");
-            mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
+            mBannerListener.onBannerFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
             return;
         }
 
@@ -76,13 +75,8 @@ public class HyBidMediationBannerCustomEvent extends BaseAd implements HyBidAdVi
         mBannerView = new HyBidAdView(context);
         mBannerView.setAdSize(getAdSize());
         mBannerView.setMediation(true);
-        mBannerView.load(mZoneID, this);
+        mBannerView.load(zoneID, this);
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_ATTEMPTED, TAG);
-    }
-
-    @Override
-    protected void show() {
-        super.show();
     }
 
     @Override
@@ -93,27 +87,6 @@ public class HyBidMediationBannerCustomEvent extends BaseAd implements HyBidAdVi
         }
     }
 
-    @Nullable
-    @Override
-    protected LifecycleListener getLifecycleListener() {
-        return null;
-    }
-
-    @NonNull
-    @Override
-    protected String getAdNetworkId() {
-        return mZoneID;
-    }
-
-    @Nullable
-    @Override
-    protected View getAdView() {
-        if (mInteractionListener != null) {
-            mInteractionListener.onAdImpression();
-        }
-        return mBannerView;
-    }
-
     protected AdSize getAdSize() {
         return AdSize.SIZE_320x50;
     }
@@ -122,25 +95,32 @@ public class HyBidMediationBannerCustomEvent extends BaseAd implements HyBidAdVi
     @Override
     public void onAdLoaded() {
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_SUCCESS, TAG);
-        mLoadListener.onAdLoaded();
+        if (mBannerListener != null) {
+            mBannerListener.onBannerLoaded(mBannerView);
+        }
     }
 
     @Override
     public void onAdLoadFailed(Throwable error) {
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_FAILED, TAG);
-        mLoadListener.onAdLoadFailed(MoPubErrorCode.NETWORK_NO_FILL);
+        if (mBannerListener != null) {
+            mBannerListener.onBannerFailed(MoPubErrorCode.NETWORK_NO_FILL);
+        }
     }
 
     @Override
     public void onAdImpression() {
         MoPubLog.log(MoPubLog.AdapterLogEvent.SHOW_SUCCESS, TAG);
+        if (mBannerListener != null) {
+            mBannerListener.onBannerImpression();
+        }
     }
 
     @Override
     public void onAdClick() {
         MoPubLog.log(MoPubLog.AdapterLogEvent.CLICKED, TAG);
-        if (mInteractionListener != null) {
-            mInteractionListener.onAdClicked();
+        if (mBannerListener != null) {
+            mBannerListener.onBannerClicked();
         }
     }
 }
