@@ -34,6 +34,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -45,6 +46,11 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.hybid.HyBidBannerActivity"
+            android:label="@string/hybid_banner"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.unity.StickyTopBottomBannerActivity"
             android:label="@string/hybid_banner"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
@@ -134,6 +140,26 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".ui.activities.dfp.DFPMediationBannerActivity"
+            android:label="@string/dfp_banner"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.dfp.DFPMediationMRectActivity"
+            android:label="@string/dfp_medium"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.dfp.DFPMediationLeaderboardActivity"
+            android:label="@string/dfp_leaderboard"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.dfp.DFPMediationInterstitialActivity"
+            android:label="@string/dfp_interstitial"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".ui.activities.admob.AdmobMediationBannerActivity"
             android:label="@string/admob_banner"
             android:screenOrientation="portrait"
@@ -156,6 +182,11 @@
         <activity
             android:name=".ui.activities.admob.AdmobMediationRewardedActivity"
             android:label="@string/admob_rewarded"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.admob.AdmobMediationNativeActivity"
+            android:label="@string/admob_native"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
@@ -228,6 +259,13 @@
             android:windowSoftInputMode="stateHidden" />
 
         <activity
+            android:name=".ui.activities.consent.VgiIdActivity"
+            android:label="@string/title_vgi_id"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden" />
+
+        <activity
             android:name=".ui.activities.consent.GoogleCMPActivity"
             android:label="@string/title_google_cmp"
             android:screenOrientation="portrait"
@@ -242,6 +280,13 @@
             android:windowSoftInputMode="stateHidden" />
 
         <activity
+            android:name=".ui.activities.consent.MoPubCMPActivity"
+            android:label="@string/title_mopub_cmp"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden" />
+
+        <activity
             android:name=".ui.activities.audiences.NumberEightAudiencesActivity"
             android:label="@string/title_numbereight_audiences"
             android:screenOrientation="portrait"
@@ -251,6 +296,12 @@
         <activity
             android:name=".ui.activities.vast.VastTagRequestActivity"
             android:label="@string/title_vast_tag"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden" />
+
+        <activity
+            android:name=".ui.activities.analytics.AnalyticsActivity"
+            android:label="@string/title_analytics"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
 

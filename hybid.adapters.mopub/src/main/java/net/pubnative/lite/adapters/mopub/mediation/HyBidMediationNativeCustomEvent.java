@@ -34,8 +34,9 @@ import com.mopub.nativeads.NativeErrorCode;
 import com.mopub.nativeads.StaticNativeAd;
 
 import net.pubnative.lite.sdk.HyBid;
+
 import net.pubnative.lite.sdk.models.NativeAd;
-import net.pubnative.lite.sdk.nativead.HyBidNativeAdRequest;
+import net.pubnative.lite.sdk.request.HyBidNativeAdRequest;
 import net.pubnative.lite.sdk.utils.Logger;
 
 import java.util.Map;
@@ -84,7 +85,9 @@ public class HyBidMediationNativeCustomEvent extends CustomEventNative implement
     @Override
     public void onRequestSuccess(NativeAd ad) {
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_SUCCESS, TAG);
-        new HyBidStaticNativeAd(ad, new ImpressionTracker(mContext), mListener);
+        if (mListener != null) {
+            mListener.onNativeAdLoaded(new HyBidStaticNativeAd(ad, new ImpressionTracker(mContext)));
+        }
     }
 
     @Override
@@ -96,20 +99,14 @@ public class HyBidMediationNativeCustomEvent extends CustomEventNative implement
     }
 
     private static class HyBidStaticNativeAd extends StaticNativeAd implements NativeAd.Listener {
-        private final CustomEventNativeListener mListener;
         private final NativeAd mNativeAd;
         private final ImpressionTracker mImpressionTracker;
 
         public HyBidStaticNativeAd(NativeAd nativeAd,
-                                   ImpressionTracker impressionTracker,
-                                   CustomEventNativeListener listener) {
+                                   ImpressionTracker impressionTracker) {
             this.mNativeAd = nativeAd;
             this.mImpressionTracker = impressionTracker;
-            this.mListener = listener;
             fillData();
-            if (mListener != null) {
-                mListener.onNativeAdLoaded(this);
-            }
         }
 
         private void fillData() {
@@ -143,7 +140,6 @@ public class HyBidMediationNativeCustomEvent extends CustomEventNative implement
 
         @Override
         public void onAdClick(NativeAd ad, View view) {
-            MoPubLog.log(MoPubLog.AdapterLogEvent.CLICKED, TAG);
             notifyAdClicked();
         }
     }

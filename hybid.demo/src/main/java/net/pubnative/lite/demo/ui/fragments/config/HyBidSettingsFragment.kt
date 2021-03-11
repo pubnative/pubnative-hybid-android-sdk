@@ -50,6 +50,7 @@ class HyBidSettingsFragment : Fragment() {
     private lateinit var apiUrlInput: EditText
     private lateinit var coppaSwitch: Switch
     private lateinit var testModeSwitch: Switch
+    private lateinit var locationTrackingSwitch: Switch
     private lateinit var genderRadioGroup: RadioGroup
     private lateinit var settingManager: SettingsManager
 
@@ -63,9 +64,10 @@ class HyBidSettingsFragment : Fragment() {
         apiUrlInput = view.findViewById(R.id.input_pn_api_url)
         coppaSwitch = view.findViewById(R.id.check_coppa)
         testModeSwitch = view.findViewById(R.id.check_test_mode)
+        locationTrackingSwitch = view.findViewById(R.id.check_location_tracking)
         genderRadioGroup = view.findViewById(R.id.group_gender)
 
-        settingManager = SettingsManager.getInstance(context!!)
+        settingManager = SettingsManager.getInstance(requireContext())
 
         view.findViewById<Button>(R.id.button_keywords).setOnClickListener {
             val intent = Intent(activity, KeywordsActivity::class.java)
@@ -98,6 +100,7 @@ class HyBidSettingsFragment : Fragment() {
         ageInput.setText(settings.age)
         coppaSwitch.isChecked = settings.coppa
         testModeSwitch.isChecked = settings.testMode
+        locationTrackingSwitch.isChecked = settings.locationTracking
 
         val selectedGender = when (settings.gender) {
             "male" -> R.id.radio_gender_male
@@ -114,6 +117,7 @@ class HyBidSettingsFragment : Fragment() {
         val apiUrl = apiUrlInput.text.toString()
         val coppa = coppaSwitch.isChecked
         val testMode = testModeSwitch.isChecked
+        val locationTracking = locationTrackingSwitch.isChecked
 
         val gender = when (genderRadioGroup.checkedRadioButtonId) {
             R.id.radio_gender_male -> "male"
@@ -127,11 +131,13 @@ class HyBidSettingsFragment : Fragment() {
         settingManager.setCoppa(coppa)
         settingManager.setTestMode(testMode)
         settingManager.setGender(gender)
+        settingManager.setLocationTracking(locationTracking)
 
         HyBid.setAppToken(appToken)
         HyBid.setAge(age)
         HyBid.setCoppaEnabled(coppa)
         HyBid.setTestMode(testMode)
+        HyBid.setLocationTrackingEnabled(locationTracking)
         HyBid.setGender(gender)
         ApiManager.setApiUrl(apiUrl)
     }

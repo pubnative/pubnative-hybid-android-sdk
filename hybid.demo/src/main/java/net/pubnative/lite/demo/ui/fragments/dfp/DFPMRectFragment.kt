@@ -72,7 +72,7 @@ class DFPMRectFragment : Fragment(), RequestManager.RequestListener {
         requestManager = MRectRequestManager()
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
-        adUnitId = SettingsManager.getInstance(activity!!).getSettings().dfpMediumAdUnitId
+        adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().dfpMediumAdUnitId
 
         dfpMRect = PublisherAdView(activity)
         dfpMRect.adUnitId = adUnitId
@@ -87,7 +87,7 @@ class DFPMRectFragment : Fragment(), RequestManager.RequestListener {
             loadPNAd()
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
+        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
     }
 
     override fun onDestroy() {

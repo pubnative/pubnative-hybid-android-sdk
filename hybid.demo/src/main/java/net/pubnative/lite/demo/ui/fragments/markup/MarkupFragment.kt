@@ -71,7 +71,7 @@ class MarkupFragment : Fragment() {
     }
 
     private fun pasteFromClipboard() {
-        val clipboardText = ClipboardUtils.copyFromClipboard(activity!!)
+        val clipboardText = ClipboardUtils.copyFromClipboard(requireActivity())
         if (!TextUtils.isEmpty(clipboardText)) {
             markupInput.setText(clipboardText)
         }

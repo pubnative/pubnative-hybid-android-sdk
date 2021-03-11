@@ -55,7 +55,7 @@ class ZoneIdsFragment : Fragment() {
 
         zoneIdInput = view.findViewById(R.id.input_zone_id)
         zoneIdList = view.findViewById(R.id.list_zone_ids)
-        settingManager = SettingsManager.getInstance(context!!)
+        settingManager = SettingsManager.getInstance(requireContext())
 
         adapter = ZoneIdAdapter(null)
         val layoutManager = GridLayoutManager(activity, 6, RecyclerView.VERTICAL, false)

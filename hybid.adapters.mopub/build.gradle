@@ -30,8 +30,16 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation project(':hybid.sdk')
-    compileOnly('com.mopub:mopub-sdk:5.15.0@aar') {
+
+    implementation project(':hybid.sdk.core')
+    implementation project(':hybid.sdk.native')
+    implementation project(':hybid.sdk.fullscreen')
+    implementation project(':hybid.sdk.banner')
+    implementation project(':hybid.sdk.rewarded')
+    implementation project(':hybid.sdk.logger')
+    implementation project(':hybid.sdk.source.pnapi')
+    
+    compileOnly('com.mopub:mopub-sdk:5.16.0@aar') {
         transitive = true
     }
 }

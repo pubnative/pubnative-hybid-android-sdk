@@ -45,6 +45,15 @@
             android:layout_marginEnd="16dp"
             android:text="@string/check_test_mode" />
 
+        <Switch
+            android:id="@+id/check_location_tracking"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/check_location_tracking" />
+
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"

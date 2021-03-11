@@ -65,6 +65,10 @@ class SettingsManager private constructor(context: Context) {
         preferences.edit().putBoolean(SETTINGS_KEY_TEST_MODE, enabled).apply()
     }
 
+    fun setLocationTracking(enabled: Boolean) {
+        preferences.edit().putBoolean(SETTINGS_KEY_LOCATION_TRACKING, enabled).apply()
+    }
+
     fun setGender(gender: String) {
         preferences.edit().putString(SETTINGS_KEY_GENDER, gender).apply()
     }
@@ -185,12 +189,17 @@ class SettingsManager private constructor(context: Context) {
         preferences.edit().putString(SETTINGS_KEY_ADMOB_INTERSTITIAL_AD_UNIT_ID, adUnitId).apply()
     }
 
+    fun setAdmobNativeAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_ADMOB_NATIVE_AD_UNIT_ID, adUnitId).apply()
+    }
+
     fun setSettings(model: SettingsModel, asynchronously: Boolean) {
         val editor = preferences.edit()
         editor.putString(SETTINGS_KEY_APP_TOKEN, model.appToken)
         editor.putString(SETTINGS_KEY_API_URL, model.apiUrl)
         editor.putBoolean(SETTINGS_KEY_COPPA, model.coppa)
         editor.putBoolean(SETTINGS_KEY_TEST_MODE, model.testMode)
+        editor.putBoolean(SETTINGS_KEY_LOCATION_TRACKING, model.locationTracking)
         editor.putString(SETTINGS_KEY_GENDER, model.gender)
         editor.putString(SETTINGS_KEY_AGE, model.age)
         editor.putStringSet(SETTINGS_KEY_ZONE_ID_LIST, model.zoneIds.toSet())
@@ -221,6 +230,7 @@ class SettingsManager private constructor(context: Context) {
         editor.putString(SETTINGS_KEY_ADMOB_LEADERBOARD_AD_UNIT_ID, model.admobLeaderboardAdUnitId)
         editor.putString(SETTINGS_KEY_ADMOB_REWARDED_AD_UNIT_ID, model.admobRewardedAdUnitId)
         editor.putString(SETTINGS_KEY_ADMOB_INTERSTITIAL_AD_UNIT_ID, model.admobInterstitialAdUnitId)
+        editor.putString(SETTINGS_KEY_ADMOB_NATIVE_AD_UNIT_ID, model.admobNativeAdUnitId)
 
         editor.putBoolean(SETTINGS_KEY_INITIALISED, true)
 
@@ -241,6 +251,7 @@ class SettingsManager private constructor(context: Context) {
         val browserPriorities = preferences.getStringSet(SETTINGS_KEY_BROWSER_PRIORITIES, emptySet())?.toList()!!
         val coppa = preferences.getBoolean(SETTINGS_KEY_COPPA, false)
         val testMode = preferences.getBoolean(SETTINGS_KEY_TEST_MODE, false)
+        val locationTracking = preferences.getBoolean(SETTINGS_KEY_LOCATION_TRACKING, false)
         val mopubBannerAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_BANNER_AD_UNIT_ID, "")!!
         val mopubMediumAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_MEDIUM_AD_UNIT_ID, "")!!
         val mopubLeaderboardAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_LEADERBOARD_AD_UNIT_ID, "")!!
@@ -266,14 +277,15 @@ class SettingsManager private constructor(context: Context) {
         val admobLeaderboardAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_LEADERBOARD_AD_UNIT_ID, "")!!
         val admobRewardedAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_REWARDED_AD_UNIT_ID, "")!!
         val admobInterstitialAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_INTERSTITIAL_AD_UNIT_ID, "")!!
+        val admobNativeAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_NATIVE_AD_UNIT_ID, "")!!
 
         val model = SettingsModel(appToken, zoneIds, apiUrl, gender, age, keywords, browserPriorities, coppa, testMode,
-                mopubBannerAdUnitId, mopubMediumAdUnitId, mopubLeaderboardAdUnitId, mopubInterstitialAdUnitId,
+                locationTracking, mopubBannerAdUnitId, mopubMediumAdUnitId, mopubLeaderboardAdUnitId, mopubInterstitialAdUnitId,
                 mopubMediationBannerAdUnitId, mopubMediationMediumAdUnitId, mopubMediationLeaderboardAdUnitId, mopubMediationInterstitialAdUnitId,
                 mopubMediationRewardedAdUnitId, mopubMediationNativeAdUnitId, dfpBannerAdUnitId, dfpMediumAdUnitId, dfpLeaderboardAdUnitId,
                 dfpInterstitialAdUnitId, dfpMediationBannerAdUnitId, dfpMediationMediumAdUnitId, dfpMediationLeaderboardAdUnitId,
                 dfpMediationInterstitialAdUnitId, dfpMediationRewardedAdUnitId, admobAppId, admobBannerAdUnitId,
-                admobMediumAdUnitId, admobLeaderboardAdUnitId, admobRewardedAdUnitId, admobInterstitialAdUnitId)
+                admobMediumAdUnitId, admobLeaderboardAdUnitId, admobRewardedAdUnitId, admobInterstitialAdUnitId, admobNativeAdUnitId)
         return model
     }
 }

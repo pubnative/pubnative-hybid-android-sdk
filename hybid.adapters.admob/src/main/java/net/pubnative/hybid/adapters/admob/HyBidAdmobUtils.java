@@ -35,6 +35,8 @@ public class HyBidAdmobUtils {
 
     private static final String APP_TOKEN_KEY = "pn_app_token";
     private static final String ZONE_ID_KEY = "pn_zone_id";
+    private static final String ECPM_KEY = "cpm";
+
 
     public static String getAppToken(String extras) {
 
@@ -54,6 +56,16 @@ public class HyBidAdmobUtils {
     public static String getZoneId(Bundle extras) {
 
         return getParameter(extras, ZONE_ID_KEY);
+    }
+
+    public static String getEcpm(String extras) {
+
+        return getParameter(extras, ECPM_KEY);
+    }
+
+    public static String getEcpm(Bundle extras) {
+
+        return getParameter(extras, ECPM_KEY);
     }
 
     private static String getParameter(String extras, String parameter) {

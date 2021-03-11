@@ -67,7 +67,7 @@ class MoPubSettingsFragment : Fragment() {
         mediationRewardedInput = view.findViewById(R.id.input_mopub_mediation_rewarded)
         mediationNativeInput = view.findViewById(R.id.input_mopub_mediation_native)
 
-        settingManager = SettingsManager.getInstance(context!!)
+        settingManager = SettingsManager.getInstance(requireContext())
 
         view.findViewById<Button>(R.id.button_save_mopub_settings).setOnClickListener {
             val bannerAdUnitId = bannerInput.text.toString()

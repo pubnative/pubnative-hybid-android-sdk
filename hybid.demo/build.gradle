@@ -29,6 +29,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'lite.sdk.pro'
+            buildConfigField "String", "BASE_URL", "\"https://api.pubnative.net/\""
         }
         debug {
             minifyEnabled false
@@ -36,6 +37,7 @@ android {
             firebaseAppDistribution {
                 appId = "1:786277539067:android:6bb4032ad6f571ab"
             }
+            buildConfigField "String", "BASE_URL", "\"https://api.pubnative.net/\""
         }
     }
 
@@ -51,22 +53,37 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation project(':hybid.sdk')
+
+    //Hybid Adapters
     implementation project(':hybid.adapters.mopub')
+    implementation project(':appmonet.hybid')
     implementation project(':hybid.adapters.admob')
     implementation project(':hybid.adapters.dfp')
+
+    //Hybid SDK modules
+    implementation project(':hybid.sdk')
+    implementation project(':hybid.sdk.native')
+    implementation project(':hybid.sdk.core')
+    implementation project(':hybid.sdk.fullscreen')
+    implementation project(':hybid.sdk.banner')
+    implementation project(':hybid.sdk.rewarded')
+    implementation project(':hybid.sdk.reporting')
+    implementation project(':hybid.sdk.viewability')
+    implementation project(':hybid.sdk.logger')
+    implementation project(':hybid.sdk.source.pnapi')
+
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation 'com.google.android.material:material:1.3.0-alpha04'
+    implementation 'com.google.android.material:material:1.3.0'
     implementation 'androidx.multidex:multidex:2.0.1'
 
-    implementation('com.mopub:mopub-sdk:5.15.0@aar') {
+    implementation('com.mopub:mopub-sdk:5.16.0@aar') {
         transitive = true
     }
 
-    implementation 'com.google.android.gms:play-services-ads:19.5.0'
-    implementation "androidx.navigation:navigation-fragment-ktx:2.3.1"
-    implementation "androidx.navigation:navigation-ui-ktx:2.3.1"
+    implementation 'com.google.android.gms:play-services-ads:19.7.0'
+    implementation "androidx.navigation:navigation-fragment-ktx:2.3.3"
+    implementation "androidx.navigation:navigation-ui-ktx:2.3.3"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation 'com.squareup.picasso:picasso:2.71828'
@@ -79,6 +96,8 @@ dependencies {
     implementation('ai.numbereight.sdk:nesdk:1.1.+@aar') {
         transitive = true
     }
+
+    testImplementation 'com.google.truth:truth:0.36'
 }
 
 apply plugin: 'kotlin-android-extensions'

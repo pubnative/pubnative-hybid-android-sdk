@@ -40,7 +40,7 @@ class AdmobMediationRewardedFragment : Fragment() {
         loadButton = view.findViewById(R.id.button_load)
         showButton = view.findViewById(R.id.button_show)
 
-        val adUnitId = SettingsManager.getInstance(activity!!).getSettings().admobRewardedAdUnitId
+        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().admobRewardedAdUnitId
         showButton.isEnabled = false
 
         admobRewarded = RewardedAd(requireActivity(), adUnitId)
@@ -90,7 +90,7 @@ class AdmobMediationRewardedFragment : Fragment() {
             }
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
+        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
     }
 
     private fun displayLogs() {

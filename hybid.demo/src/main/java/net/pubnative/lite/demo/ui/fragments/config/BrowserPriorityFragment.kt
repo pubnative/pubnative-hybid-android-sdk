@@ -33,7 +33,6 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
@@ -54,7 +53,7 @@ class BrowserPriorityFragment : Fragment() {
 
         packageNameInput = view.findViewById(R.id.input_package_name)
         packageNameList = view.findViewById(R.id.list_package_names)
-        settingManager = SettingsManager.getInstance(context!!)
+        settingManager = SettingsManager.getInstance(requireContext())
 
         adapter = PackageNameAdapter(null)
         val layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)

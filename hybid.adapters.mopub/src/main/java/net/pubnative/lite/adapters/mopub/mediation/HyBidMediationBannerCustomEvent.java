@@ -43,10 +43,10 @@ import net.pubnative.lite.sdk.views.HyBidAdView;
 public class HyBidMediationBannerCustomEvent extends BaseAd implements HyBidAdView.Listener {
     private static final String TAG = HyBidMediationBannerCustomEvent.class.getSimpleName();
 
-    private static final String APP_TOKEN_KEY = "pn_app_token";
-    private static final String ZONE_ID_KEY = "pn_zone_id";
-    private HyBidAdView mBannerView;
-    private String mZoneID = "";
+    protected static final String APP_TOKEN_KEY = "pn_app_token";
+    protected static final String ZONE_ID_KEY = "pn_zone_id";
+    protected HyBidAdView mBannerView;
+    protected String mZoneID = "";
 
     @Override
     protected boolean checkAndInitializeSdk(@NonNull Activity launcherActivity, @NonNull AdData adData) throws Exception {
@@ -74,7 +74,7 @@ public class HyBidMediationBannerCustomEvent extends BaseAd implements HyBidAdVi
 
         setAutomaticImpressionAndClickTracking(false);
         mBannerView = new HyBidAdView(context);
-        mBannerView.setAdSize(getAdSize());
+        mBannerView.setAdSize(getAdSize(adData));
         mBannerView.setMediation(true);
         mBannerView.load(mZoneID, this);
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_ATTEMPTED, TAG);
@@ -114,7 +114,7 @@ public class HyBidMediationBannerCustomEvent extends BaseAd implements HyBidAdVi
         return mBannerView;
     }
 
-    protected AdSize getAdSize() {
+    protected AdSize getAdSize(AdData adData) {
         return AdSize.SIZE_320x50;
     }
 

@@ -1,7 +1,6 @@
 package net.pubnative.lite.demo.util
 
 import com.google.gson.GsonBuilder
-import com.google.gson.JsonParseException
 import com.google.gson.JsonParser
 import net.pubnative.lite.sdk.utils.Logger
 import java.lang.Exception

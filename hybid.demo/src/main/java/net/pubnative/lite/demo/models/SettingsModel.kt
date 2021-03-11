@@ -38,6 +38,7 @@ data class SettingsModel(var appToken: String,
                          var browserPriorities: List<String>,
                          var coppa: Boolean,
                          var testMode: Boolean,
+                         var locationTracking: Boolean,
                          var mopubBannerAdUnitId: String,
                          var mopubMediumAdUnitId: String,
                          var mopubLeaderboardAdUnitId: String,
@@ -62,7 +63,8 @@ data class SettingsModel(var appToken: String,
                          var admobMediumAdUnitId: String,
                          var admobLeaderboardAdUnitId: String,
                          var admobRewardedAdUnitId: String,
-                         var admobInterstitialAdUnitId: String) : Parcelable {
+                         var admobInterstitialAdUnitId: String,
+                         var admobNativeAdUnitId: String) : Parcelable {
     companion object {
         @JvmField
         @Suppress("unused")
@@ -85,6 +87,8 @@ data class SettingsModel(var appToken: String,
             },
             parcel.readInt() != 0,
             parcel.readInt() != 0,
+            parcel.readInt() != 0,
+            parcel.readString()!!,
             parcel.readString()!!,
             parcel.readString()!!,
             parcel.readString()!!,
@@ -138,6 +142,14 @@ data class SettingsModel(var appToken: String,
         }
         dest?.writeInt(testModeByte)
 
+        val locationTrackingByte: Int
+        if (locationTracking) {
+            locationTrackingByte = 1
+        } else {
+            locationTrackingByte = 0
+        }
+        dest?.writeInt(locationTrackingByte)
+
         dest?.writeString(mopubBannerAdUnitId)
         dest?.writeString(mopubMediumAdUnitId)
         dest?.writeString(mopubLeaderboardAdUnitId)
@@ -167,6 +179,7 @@ data class SettingsModel(var appToken: String,
         dest?.writeString(admobLeaderboardAdUnitId)
         dest?.writeString(admobRewardedAdUnitId)
         dest?.writeString(admobInterstitialAdUnitId)
+        dest?.writeString(admobNativeAdUnitId)
     }
 
     override fun describeContents(): Int = 0

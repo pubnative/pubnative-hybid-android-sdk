@@ -36,15 +36,18 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.demo.util.convertDpToPx
+import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.models.AdSize
+import net.pubnative.lite.sdk.reporting.ReportingEventBridge
 import net.pubnative.lite.sdk.views.HyBidAdView
-import net.pubnative.lite.sdk.views.HyBidBannerAdView
 import net.pubnative.lite.sdk.views.PNAdView
+
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
 class HyBidBannerFragment : Fragment(), PNAdView.Listener {
+
     val TAG = HyBidBannerFragment::class.java.simpleName
 
     private var zoneId: String? = null
@@ -70,8 +73,8 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
             AdSize.SIZE_768x1024,
             AdSize.SIZE_1024x768)
 
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_hybid_banner, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+            inflater.inflate(R.layout.fragment_hybid_banner, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -93,28 +96,32 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
             loadPNAd()
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
-        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, creativeIdView.text.toString()) }
+        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
+        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), creativeIdView.text.toString()) }
 
-        spinnerAdapter = ArrayAdapter(activity!!, android.R.layout.simple_spinner_item, adSizes)
+        spinnerAdapter = ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, adSizes)
         adSizeSpinner.adapter = spinnerAdapter
     }
 
-    override fun onDestroy() {
-        hybidBanner.destroy()
-        super.onDestroy()
-    }
-
     fun loadPNAd() {
+
         val adSize = adSizes[adSizeSpinner.selectedItemPosition]
+
         hybidBanner.setAdSize(adSize)
+
         val layoutParams = LinearLayout.LayoutParams(
-                convertDpToPx(context!!, adSize.width.toFloat()),
-                convertDpToPx(context!!, adSize.height.toFloat()))
+                convertDpToPx(requireContext(), adSize.width.toFloat()),
+                convertDpToPx(requireContext(), adSize.height.toFloat()))
         layoutParams.gravity = Gravity.CENTER_HORIZONTAL
 
         hybidBanner.layoutParams = layoutParams
+
         hybidBanner.load(zoneId, this)
+
+        val event = ReportingEventBridge("Standalone Banner")
+        event.setAdSize(adSize)
+
+        HyBid.getReportingController().reportEvent(event.reportingEvent)
     }
 
 
@@ -131,6 +138,7 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
         Log.e(TAG, "onAdLoadFailed", error)
         errorView.text = error?.message
         displayLogs()
+        creativeIdView.text = ""
     }
 
     override fun onAdImpression() {
@@ -146,5 +154,10 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
             val activity = activity as TabActivity
             activity.notifyAdUpdated()
         }
+    }
+
+    override fun onDestroy() {
+        hybidBanner.destroy()
+        super.onDestroy()
     }
 }

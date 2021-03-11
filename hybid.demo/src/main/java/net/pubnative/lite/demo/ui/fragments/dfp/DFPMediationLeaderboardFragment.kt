@@ -33,7 +33,7 @@ class DFPMediationLeaderboardFragment : Fragment(){
         loadButton = view.findViewById(R.id.button_load)
         dfpLeaderboardContainer = view.findViewById(R.id.dfp_leaderboard_container)
 
-        val adUnitId = SettingsManager.getInstance(activity!!).getSettings().admobLeaderboardAdUnitId
+        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().admobLeaderboardAdUnitId
 
         dfpLeaderboard = AdView(activity)
         dfpLeaderboard.adSize = AdSize.LEADERBOARD
@@ -49,7 +49,7 @@ class DFPMediationLeaderboardFragment : Fragment(){
                     .build())
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
+        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
     }
 
     // ------------------ Admob Ad Listener ---------------------

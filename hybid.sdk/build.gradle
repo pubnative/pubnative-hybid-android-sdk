@@ -13,6 +13,8 @@ version = version_name
 // ANDROID
 //==================================================================================================
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 30
@@ -32,18 +34,34 @@ android {
             buildConfigField "String", "OMIDPV", "\"$omid_version\""
             buildConfigField "String", "OMIDPN", "\"pubnativenet\""
             buildConfigField "String", "SDK_VERSION", "\"$version_name\""
+            buildConfigField "String", "BASE_URL", "\"https://api.pubnative.net/\""
         }
         debug {
             buildConfigField "String", "OMIDPV", "\"$omid_version\""
             buildConfigField "String", "OMIDPN", "\"pubnativenet\""
             buildConfigField "String", "SDK_VERSION", "\"$version_name\""
+            buildConfigField "String", "BASE_URL", "\"https://api.pubnative.net/\""
         }
     }
 }
 
 dependencies {
+
+    implementation project(':hybid.sdk.core')
+    implementation project(':hybid.sdk.banner')
+    implementation project(':hybid.sdk.consent')
+    implementation project(':hybid.sdk.fullscreen')
+    implementation project(':hybid.sdk.native')
+    implementation project(':hybid.sdk.rewarded')
+    implementation project(':hybid.sdk.reporting')
+    implementation project(':hybid.sdk.source.pnapi')
+    implementation project(':hybid.sdk.viewability')
+    implementation project(':hybid.sdk.logger')
+
     // Remember to update OMSDK version constant found in HyBid.java
     implementation "net.pubnative:hybid.omsdk:$omid_version"
+
+    testImplementation 'com.google.truth:truth:0.36'
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.robolectric:robolectric:3.8'

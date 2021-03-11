@@ -13,9 +13,12 @@ import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
+import net.pubnative.lite.sdk.HyBid
+import net.pubnative.lite.sdk.models.AdSize
+import net.pubnative.lite.sdk.reporting.ReportingEventBridge
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedAd
 
-class HyBidRewardedFragment : Fragment(), HyBidRewardedAd.Listener{
+class HyBidRewardedFragment : Fragment(), HyBidRewardedAd.Listener {
     val TAG = HyBidRewardedFragment::class.java.simpleName
 
     private var zoneId: String? = null
@@ -46,23 +49,25 @@ class HyBidRewardedFragment : Fragment(), HyBidRewardedAd.Listener{
             loadPNRewardedAd()
         }
 
-        showButton.setOnClickListener{
+        showButton.setOnClickListener {
             rewardedAd?.show()
             displayLogs()
             showButton.isEnabled = false
-            if (!TextUtils.isEmpty(rewardedAd?.creativeId)) {
-                creativeIdView.text = rewardedAd?.creativeId
-            }
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
-        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, creativeIdView.text.toString()) }
+        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
+        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), creativeIdView.text.toString()) }
     }
 
 
-    private fun loadPNRewardedAd(){
+    private fun loadPNRewardedAd() {
         rewardedAd = HyBidRewardedAd(activity, zoneId, this)
         rewardedAd?.load()
+
+        val event = ReportingEventBridge("Standalone Rewarded")
+        event.setAdSize(AdSize.SIZE_INTERSTITIAL)
+
+        HyBid.getReportingController().reportEvent(event.reportingEvent)
     }
 
 
@@ -75,6 +80,9 @@ class HyBidRewardedFragment : Fragment(), HyBidRewardedAd.Listener{
     override fun onRewardedLoaded() {
         Log.d(TAG, "onRewardedLoaded")
         showButton.isEnabled = true
+        if (!TextUtils.isEmpty(rewardedAd?.creativeId)) {
+            creativeIdView.text = rewardedAd?.creativeId
+        }
     }
 
     override fun onRewardedOpened() {
@@ -93,6 +101,7 @@ class HyBidRewardedFragment : Fragment(), HyBidRewardedAd.Listener{
         showButton.isEnabled = false
         Log.e(TAG, "onRewardedLoadFailed", error)
         errorView.text = error?.message
+        creativeIdView.text = ""
         displayLogs()
     }
 

@@ -8,10 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
-import net.pubnative.lite.demo.ui.activities.consent.PNCMPActivity
-import net.pubnative.lite.demo.ui.activities.consent.ConsentStringsActivity
-import net.pubnative.lite.demo.ui.activities.consent.GoogleCMPActivity
-import net.pubnative.lite.demo.ui.activities.consent.OguryCMPActivity
+import net.pubnative.lite.demo.ui.activities.consent.*
 
 class ConsentNavFragment : Fragment() {
 
@@ -37,6 +34,16 @@ class ConsentNavFragment : Fragment() {
 
         view.findViewById<TextView>(R.id.button_consent_strings).setOnClickListener {
             val intent = Intent(activity, ConsentStringsActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<TextView>(R.id.button_vgi_id).setOnClickListener {
+            val intent = Intent(activity, VgiIdActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<TextView>(R.id.button_mopub_cmp).setOnClickListener {
+            val intent = Intent(activity, MoPubCMPActivity::class.java)
             startActivity(intent)
         }
     }

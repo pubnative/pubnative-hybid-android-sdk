@@ -93,10 +93,9 @@ class MediationNavFragment : Fragment() {
             startActivity(intent)
         }
 
-        view.findViewById<Button>(R.id.button_dfp_rewarded).setOnClickListener {
-            val intent = Intent(activity, DFPMediationRewardedActivity::class.java)
+        view.findViewById<Button>(R.id.button_admob_native).setOnClickListener {
+            val intent = Intent(activity, AdmobMediationNativeActivity::class.java)
             startActivity(intent)
         }
-
     }
 }

@@ -18,8 +18,8 @@ import net.pubnative.lite.sdk.utils.Logger;
 public class HyBidMediationInterstitialCustomEvent implements CustomEventInterstitial, HyBidInterstitialAd.Listener {
     private static final String TAG = HyBidMediationInterstitialCustomEvent.class.getSimpleName();
 
-    private CustomEventInterstitialListener mInterstitialListener;
-    private HyBidInterstitialAd mInterstitialAd;
+    protected CustomEventInterstitialListener mInterstitialListener;
+    protected HyBidInterstitialAd mInterstitialAd;
 
     @Override
     public void requestInterstitialAd(Context context,

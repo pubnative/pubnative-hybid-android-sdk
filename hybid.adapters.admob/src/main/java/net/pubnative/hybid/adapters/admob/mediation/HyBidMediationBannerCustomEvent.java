@@ -19,8 +19,8 @@ import net.pubnative.lite.sdk.views.HyBidAdView;
 public class HyBidMediationBannerCustomEvent implements CustomEventBanner, HyBidAdView.Listener {
     private static final String TAG = HyBidMediationBannerCustomEvent.class.getSimpleName();
 
-    private CustomEventBannerListener mBannerListener;
-    private HyBidAdView mBannerView;
+    protected CustomEventBannerListener mBannerListener;
+    protected HyBidAdView mBannerView;
 
     @Override
     public void requestBannerAd(Context context,
@@ -51,7 +51,7 @@ public class HyBidMediationBannerCustomEvent implements CustomEventBanner, HyBid
             return;
         }
 
-        net.pubnative.lite.sdk.models.AdSize hyBidAdSize = getAdSize();
+        net.pubnative.lite.sdk.models.AdSize hyBidAdSize = getAdSize(adSize);
 
         if (adSize.getWidth() < hyBidAdSize.getWidth() || adSize.getHeight() < hyBidAdSize.getHeight()) {
             Logger.e(TAG, "The requested ad size is smaller than " + hyBidAdSize.toString());
@@ -72,7 +72,7 @@ public class HyBidMediationBannerCustomEvent implements CustomEventBanner, HyBid
         }
 
         mBannerView = new HyBidAdView(context);
-        mBannerView.setAdSize(getAdSize());
+        mBannerView.setAdSize(hyBidAdSize);
         mBannerView.setMediation(true);
         mBannerView.load(zoneId, this);
     }
@@ -95,7 +95,7 @@ public class HyBidMediationBannerCustomEvent implements CustomEventBanner, HyBid
         }
     }
 
-    protected net.pubnative.lite.sdk.models.AdSize getAdSize() {
+    protected net.pubnative.lite.sdk.models.AdSize getAdSize(AdSize adSize) {
         return net.pubnative.lite.sdk.models.AdSize.SIZE_320x50;
     }
 

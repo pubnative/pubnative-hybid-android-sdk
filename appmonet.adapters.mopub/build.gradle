@@ -1,0 +1,103 @@
+def project_name = project.name
+def version_name = project.version
+if (branchName != "master") {
+    version_name = "${version_name}-${branchName}.${buildNumber}"
+    project_name = "${project_name}.beta"
+}
+
+version = version_name
+//==================================================================================================
+// ANDROID
+//==================================================================================================
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 30
+
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 30
+        versionCode System.getenv("CIRCLE_BUILD_NUM") ? System.getenv("CIRCLE_BUILD_NUM").toInteger() : 1
+        versionName version_name
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation project(':hybid.sdk')
+    implementation project(':hybid.sdk.core')
+    implementation project(':hybid.sdk.banner')
+    implementation project(':hybid.sdk.fullscreen')
+    implementation project(':hybid.sdk.rewarded')
+    implementation project(':hybid.sdk.native')
+    implementation project(':hybid.sdk.source.pnapi')
+    implementation project(':hybid.sdk.logger')
+    implementation project(':hybid.adapters.mopub')
+
+    compileOnly('com.mopub:mopub-sdk:5.16.0@aar') {
+        transitive = true
+    }
+}
+
+//--------------------------------------------------------------------------------------------------
+// MAVEN
+// -------------------------------------------------------------------------------------------------
+apply plugin: 'maven-publish'
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+publishing {
+    publications {
+
+        aar(MavenPublication) {
+            groupId project.group
+            artifactId project.name
+            version version_name
+            if (branchName == "master") {
+                artifact sourcesJar
+            }
+            android.libraryVariants.all { variant ->
+                if (variant.buildType.name == "debug") return
+                artifact variant.outputs[0].packageLibrary // This is the aar library
+            }
+        }
+    }
+}
+
+//----------------------------------------------------------------------------------------------
+// BINTRAY
+//----------------------------------------------------------------------------------------------
+apply plugin: 'com.jfrog.bintray'
+
+bintray {
+    user = System.getenv("BINTRAY_USER")
+    key = System.getenv("BINTRAY_API_KEY")
+    publish = branchName != "master"
+    override = true
+    publications = ['aar']
+    pkg {
+        configurations = ['archives']
+        userOrg = 'pubnative'
+        repo = 'maven'
+        desc = 'HyBid SDK AppMonet MoPub Adapter'
+        websiteUrl = "https://pubnative.net"
+        name = project_name
+        licenses = ['MIT']
+        labels = ['android', 'advertising', 'sdk', 'pubnative', 'hybid', 'appmonet', 'ads', 'development', 'mopub', 'adapter']
+        version {
+            name = version_name
+            vcsTag = version_name
+            released = new Date()
+            vcsUrl = System.getenv("CIRCLE_REPOSITORY_URL")
+        }
+    }
+}

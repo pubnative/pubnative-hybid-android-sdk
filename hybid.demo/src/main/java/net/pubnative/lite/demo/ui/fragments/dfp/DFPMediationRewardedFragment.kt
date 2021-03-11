@@ -40,7 +40,7 @@ class DFPMediationRewardedFragment : Fragment() {
         loadButton = view.findViewById(R.id.button_load)
         showButton = view.findViewById(R.id.button_show)
 
-        val adUnitId = SettingsManager.getInstance(activity!!).getSettings().dfpMediationRewardedAdUnitId
+        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().dfpMediationRewardedAdUnitId
         showButton.isEnabled = false
 
         dfpRewarded = RewardedAd(requireActivity(), adUnitId)
@@ -90,7 +90,7 @@ class DFPMediationRewardedFragment : Fragment() {
             }
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
+        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
     }
 
     private fun displayLogs() {

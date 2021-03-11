@@ -50,7 +50,7 @@ class MoPubLeaderboardFragment : Fragment(), RequestManager.RequestListener, MoP
         requestManager = LeaderboardRequestManager()
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
-        adUnitId = SettingsManager.getInstance(activity!!).getSettings().mopubLeaderboardAdUnitId
+        adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubLeaderboardAdUnitId
 
         loadButton.setOnClickListener {
             errorView.text = ""
@@ -59,8 +59,8 @@ class MoPubLeaderboardFragment : Fragment(), RequestManager.RequestListener, MoP
             loadPNAd()
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
-        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, creativeIdView.text.toString()) }
+        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
+        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), creativeIdView.text.toString()) }
     }
 
     override fun onDestroy() {
@@ -93,6 +93,7 @@ class MoPubLeaderboardFragment : Fragment(), RequestManager.RequestListener, MoP
     override fun onRequestFail(throwable: Throwable?) {
         Log.d(TAG, "onRequestFail: ", throwable)
         errorView.text = throwable?.message
+        creativeIdView.text = ""
         displayLogs()
     }
 

@@ -14,12 +14,14 @@ import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.hybid.*
+import net.pubnative.lite.demo.ui.activities.unity.StickyTopBottomBannerActivity
 import net.pubnative.lite.demo.ui.adapters.ZoneIdAdapter
 import net.pubnative.lite.demo.ui.listeners.ZoneIdClickListener
 
 class StandaloneNavFragment : Fragment() {
 
     private lateinit var bannerButton: Button
+    private lateinit var stickyButton: Button
     private lateinit var inFeedBannerButton: Button
     private lateinit var interstitialButton: Button
     private lateinit var nativeButton: Button
@@ -34,7 +36,7 @@ class StandaloneNavFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        settingsManager = SettingsManager.getInstance(activity!!)
+        settingsManager = SettingsManager.getInstance(requireActivity())
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_nav_standalone, container, false)
@@ -58,6 +60,13 @@ class StandaloneNavFragment : Fragment() {
         bannerButton = view.findViewById(R.id.button_banner)
         bannerButton.setOnClickListener {
             val intent = Intent(activity, HyBidBannerActivity::class.java)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            startActivity(intent)
+        }
+
+        stickyButton = view.findViewById(R.id.sticky_banner)
+        stickyButton.setOnClickListener {
+            val intent = Intent(activity, StickyTopBottomBannerActivity::class.java)
             intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
             startActivity(intent)
         }
@@ -108,6 +117,7 @@ class StandaloneNavFragment : Fragment() {
 
     private fun enableZones() {
         bannerButton.isEnabled = true
+        stickyButton.isEnabled = true
         inFeedBannerButton.isEnabled = true
         interstitialButton.isEnabled = true
         nativeButton.isEnabled = true
@@ -118,6 +128,7 @@ class StandaloneNavFragment : Fragment() {
         chosenZoneIdView.text = ""
         chosenZoneId = ""
         bannerButton.isEnabled = false
+        stickyButton.isEnabled = false
         inFeedBannerButton.isEnabled = false
         interstitialButton.isEnabled = false
         nativeButton.isEnabled = false

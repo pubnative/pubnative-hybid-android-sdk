@@ -8,7 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import net.pubnative.lite.demo.BuildConfig
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.ui.activities.analytics.AnalyticsActivity
 import net.pubnative.lite.demo.ui.activities.audiences.NumberEightAudiencesActivity
 import net.pubnative.lite.demo.ui.activities.config.AdmobSettingsActivity
 import net.pubnative.lite.demo.ui.activities.config.DFPSettingsActivity
@@ -20,10 +22,14 @@ import net.pubnative.lite.demo.ui.activities.vast.VastTagRequestActivity
 
 class SettingsNavFragment : Fragment() {
 
+    private lateinit var versionTextView: TextView
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_nav_settings, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        versionTextView = view.findViewById(R.id.text_version)
 
         view.findViewById<TextView>(R.id.button_pn_settings).setOnClickListener {
             val intent = Intent(activity, HyBidSettingsActivity::class.java)
@@ -70,5 +76,18 @@ class SettingsNavFragment : Fragment() {
             view.findViewById<TextView>(R.id.button_numbereight_audiences).setVisibility(View.GONE)
         }
 
+        view.findViewById<TextView>(R.id.button_analytics).setOnClickListener{
+            val intent = Intent(activity, AnalyticsActivity::class.java)
+            startActivity(intent)
+        }
+
+        setBuildAndVersion()
+    }
+
+    private fun setBuildAndVersion(){
+        val buildVersion = BuildConfig.VERSION_CODE
+        val sdkVersion = net.pubnative.lite.sdk.BuildConfig.SDK_VERSION
+
+        versionTextView.text = "SDK Version: $sdkVersion build: $buildVersion "
     }
 }

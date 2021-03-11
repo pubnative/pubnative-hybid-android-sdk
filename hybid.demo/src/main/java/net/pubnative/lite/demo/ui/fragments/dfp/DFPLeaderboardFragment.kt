@@ -13,6 +13,7 @@ import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.doubleclick.PublisherAdRequest
 import com.google.android.gms.ads.doubleclick.PublisherAdView
+import net.pubnative.lite.adapters.dfp.HyBidGAMBidUtils
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
@@ -47,7 +48,7 @@ class DFPLeaderboardFragment : Fragment(), RequestManager.RequestListener {
         requestManager = LeaderboardRequestManager()
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
-        adUnitId = SettingsManager.getInstance(activity!!).getSettings().dfpLeaderboardAdUnitId
+        adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().dfpLeaderboardAdUnitId
 
         dfpLeaderboard = PublisherAdView(activity)
         dfpLeaderboard.adUnitId = adUnitId
@@ -63,7 +64,7 @@ class DFPLeaderboardFragment : Fragment(), RequestManager.RequestListener {
             loadPNAd()
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
+        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
     }
 
     override fun onDestroy() {
@@ -81,15 +82,7 @@ class DFPLeaderboardFragment : Fragment(), RequestManager.RequestListener {
     override fun onRequestSuccess(ad: Ad?) {
         val builder = PublisherAdRequest.Builder()
 
-        val keywordSet = HeaderBiddingUtils.getHeaderBiddingKeywordsSet(ad)
-        for (key in keywordSet) {
-            builder.addKeyword(key)
-        }
-
-        val keywordBundle = HeaderBiddingUtils.getHeaderBiddingKeywordsBundle(ad)
-        for (key in keywordBundle.keySet()) {
-            builder.addCustomTargeting(key, keywordBundle.getString(key))
-        }
+        HyBidGAMBidUtils.addBids(ad,builder)
 
         val adRequest = builder.build()
 

@@ -47,6 +47,7 @@
     <string name="hint_admob_medium_ad_unit_id">Medium Ad Unit ID</string>
     <string name="hint_admob_leaderboard_ad_unit_id">Leaderboard Ad Unit ID</string>
     <string name="hint_admob_interstitial_ad_unit_id">Interstitial Ad Unit ID</string>
+    <string name="hint_admob_native_ad_unit_id">Native Ad Unit ID</string>
     <string name="hint_admob_rewarded_ad_unit_id">Rewarded Ad Unit ID</string>
     <string name="save_admob_settings">Save Admob settings</string>
 
@@ -58,6 +59,7 @@
     <string name="hint_package_name">New package name</string>
     <string name="check_coppa">COPPA Enabled</string>
     <string name="check_test_mode">Test Mode Enabled</string>
+    <string name="check_location_tracking">Location Tracking Enabled</string>
     <string name="title_pn_gender">Gender</string>
     <string name="radio_gender_not_set">Not set</string>
     <string name="radio_gender_male">Male</string>
@@ -90,6 +92,7 @@
     <string name="dfp_leaderboard">DFP Leaderboard</string>
     <string name="dfp_rewarded">DFP Rewarded</string>
 
+    <string name="admob_native">Admob Native</string>
     <string name="admob_banner">Admob Banner</string>
     <string name="admob_interstitial">Admob Interstitial</string>
     <string name="admob_medium">Admob Medium</string>
@@ -120,6 +123,8 @@
     <string name="title_ogury_cmp">Ogury CMP</string>
     <string name="title_google_cmp">Funding Choices CMP</string>
     <string name="title_consent_strings">Consent Strings</string>
+    <string name="title_vgi_id">VGI ID</string>
+    <string name="title_mopub_cmp">MoPub CMP</string>
     <string name="title_iab_v2_consent_string">TCF 2.0 Consent String:</string>
     <string name="title_iab_v1_consent_string">TCF 1.0 Consent String:</string>
     <string name="title_purpose">Purposes:</string>
@@ -179,6 +184,9 @@
     <string name="consent_result">Consent result:</string>
     <string name="consent_given">Accepted</string>
     <string name="consent_refused">Refused</string>
+    <string name="consent_dnt">DNT</string>
+    <string name="consent_unknown">Unknown</string>
+
 
     <string name="title_markup">Custom markup</string>
     <string name="title_signal_data_tester">Signal data tester</string>
@@ -186,7 +194,14 @@
 
     <string name="title_numbereight_audiences">NumberEight Audiences</string>
 
+    <string name="title_analytics">Analytics</string>
+
     <string name="title_vast_tag">Vast Testing</string>
     <string name="vast_tag_input">Enter Vast Adserver URL</string>
     <string name="hint_signal_data">Signal data</string>
+    <string name="sticky">Sticky</string>
+    <string name="top">TOP</string>
+    <string name="bottom">BOTTOM</string>
+    <string name="position">Position</string>
+    <string name="sticky_banner">Sticky Banner</string>
 </resources>

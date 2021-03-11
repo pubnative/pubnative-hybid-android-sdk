@@ -31,7 +31,14 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(':hybid.sdk')
-    compileOnly 'com.google.android.gms:play-services-ads:19.5.0'
+
+    implementation project(':hybid.sdk.core')
+    implementation project(':hybid.sdk.fullscreen')
+    implementation project(':hybid.sdk.banner')
+    implementation project(':hybid.sdk.logger')
+    implementation project(':hybid.sdk.source.pnapi')
+
+    compileOnly 'com.google.android.gms:play-services-ads:19.7.0'
 }
 
 //--------------------------------------------------------------------------------------------------

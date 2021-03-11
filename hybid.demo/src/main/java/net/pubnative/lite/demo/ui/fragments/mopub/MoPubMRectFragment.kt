@@ -75,7 +75,7 @@ class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView
         requestManager = MRectRequestManager()
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
-        adUnitId = SettingsManager.getInstance(activity!!).getSettings().mopubMediumAdUnitId
+        adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubMediumAdUnitId
 
         loadButton.setOnClickListener {
             errorView.text = ""
@@ -84,8 +84,8 @@ class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView
             loadPNAd()
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
-        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, creativeIdView.text.toString()) }
+        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
+        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), creativeIdView.text.toString()) }
     }
 
     override fun onDestroy() {
@@ -128,6 +128,7 @@ class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView
 
     override fun onBannerFailed(banner: MoPubView?, errorCode: MoPubErrorCode?) {
         Log.d(TAG, "onBannerFailed")
+        creativeIdView.text = ""
     }
 
     override fun onBannerExpanded(banner: MoPubView?) {

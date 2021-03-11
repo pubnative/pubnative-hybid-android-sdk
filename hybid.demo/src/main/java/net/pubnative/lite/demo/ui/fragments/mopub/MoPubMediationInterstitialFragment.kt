@@ -29,9 +29,9 @@ class MoPubMediationInterstitialFragment : Fragment(), MoPubInterstitial.Interst
         errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
 
-        val adUnitId = SettingsManager.getInstance(activity!!).getSettings().mopubMediationInterstitialAdUnitId
+        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubMediationInterstitialAdUnitId
 
-        mopubInterstitial = MoPubInterstitial(activity!!, adUnitId)
+        mopubInterstitial = MoPubInterstitial(requireActivity(), adUnitId)
         mopubInterstitial.interstitialAdListener = this
 
         view.findViewById<Button>(R.id.button_load).setOnClickListener {

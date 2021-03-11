@@ -27,9 +27,9 @@ class DebugFragment: Fragment() {
         latencyView = view.findViewById(R.id.view_latency)
         responseView = view.findViewById(R.id.view_response)
 
-        requestView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, requestView.text.toString()) }
-        latencyView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, latencyView.text.toString()) }
-        responseView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, responseView.text.toString()) }
+        requestView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), requestView.text.toString()) }
+        latencyView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), latencyView.text.toString()) }
+        responseView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), responseView.text.toString()) }
     }
 
     fun cleanLogs() {

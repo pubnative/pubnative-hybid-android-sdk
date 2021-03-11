@@ -36,7 +36,7 @@ class AdmobMediationMRectFragment : Fragment() {
         loadButton = view.findViewById(R.id.button_load)
         admobMRectContainer = view.findViewById(R.id.admob_mrect_container)
 
-        val adUnitId = SettingsManager.getInstance(activity!!).getSettings().admobMediumAdUnitId
+        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().admobMediumAdUnitId
 
         admobMRect = AdView(activity)
         admobMRect.adSize = AdSize.MEDIUM_RECTANGLE
@@ -52,7 +52,7 @@ class AdmobMediationMRectFragment : Fragment() {
                     .build())
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
+        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
     }
 
     // ------------------ Admob Ad Listener ---------------------

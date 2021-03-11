@@ -30,7 +30,7 @@ class MoPubMediationBannerFragment : Fragment(), MoPubView.BannerAdListener {
         loadButton = view.findViewById(R.id.button_load)
         mopubBanner = view.findViewById(R.id.mopub_banner)
 
-        val adUnitId = SettingsManager.getInstance(activity!!).getSettings().mopubMediationBannerAdUnitId
+        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubMediationBannerAdUnitId
 
         mopubBanner.bannerAdListener = this
         mopubBanner.setAdUnitId(adUnitId)

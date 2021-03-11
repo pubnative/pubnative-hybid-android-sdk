@@ -133,8 +133,17 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginBottom="20dp"
             android:text="@string/rewarded" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_admob_native"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="20dp"
+            android:text="@string/native_ad" />
 
         <TextView
             android:layout_width="match_parent"
@@ -183,18 +192,8 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:text="@string/interstitial" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_dfp_rewarded"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
             android:layout_marginBottom="20dp"
-            android:text="@string/rewarded" />
-
+            android:text="@string/interstitial" />
 
     </LinearLayout>
 </ScrollView>

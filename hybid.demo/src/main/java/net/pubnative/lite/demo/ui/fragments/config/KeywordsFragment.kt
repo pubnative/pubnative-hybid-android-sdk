@@ -57,7 +57,7 @@ class KeywordsFragment : Fragment() {
 
         keywordInput = view.findViewById(R.id.input_keyword)
         keywordList = view.findViewById(R.id.list_keywords)
-        settingManager = SettingsManager.getInstance(context!!)
+        settingManager = SettingsManager.getInstance(requireContext())
 
         adapter = KeywordAdapter()
         val layoutManager = GridLayoutManager(activity, 3, RecyclerView.VERTICAL, false)

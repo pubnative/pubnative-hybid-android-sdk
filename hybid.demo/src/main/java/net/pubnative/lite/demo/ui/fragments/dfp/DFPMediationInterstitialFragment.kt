@@ -34,7 +34,7 @@ class DFPMediationInterstitialFragment : Fragment(){
         errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
 
-        val adUnitId = SettingsManager.getInstance(activity!!).getSettings().dfpMediationInterstitialAdUnitId
+        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().dfpMediationInterstitialAdUnitId
 
         dfpInterstitial = InterstitialAd(activity)
         dfpInterstitial.adUnitId = adUnitId
@@ -47,7 +47,7 @@ class DFPMediationInterstitialFragment : Fragment(){
                     .build())
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
+        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
     }
 
     // ---------------- Admob Ad Listener ---------------------

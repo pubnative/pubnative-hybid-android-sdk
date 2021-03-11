@@ -41,7 +41,9 @@ import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.ui.adapters.InFeedAdapter
 import net.pubnative.lite.demo.ui.listeners.InFeedAdListener
 import net.pubnative.lite.demo.util.ClipboardUtils
+import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.models.AdSize
+import net.pubnative.lite.sdk.reporting.ReportingEventBridge
 
 /**
  * Created by erosgarciaponte on 30.01.18.
@@ -99,16 +101,21 @@ class HyBidInFeedFragment : Fragment(), InFeedAdListener {
             loadPNAd()
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
-        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, creativeIdView.text.toString()) }
+        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
+        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), creativeIdView.text.toString()) }
 
-        spinnerAdapter = ArrayAdapter(activity!!, android.R.layout.simple_spinner_item, adSizes)
+        spinnerAdapter = ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, adSizes)
         adSizeSpinner.adapter = spinnerAdapter
     }
 
     fun loadPNAd() {
         val adSize = adSizes[adSizeSpinner.selectedItemPosition]
         adapter.loadWithAd(adSize)
+
+        val event = ReportingEventBridge("Standalone InFeedBanner")
+        event.setAdSize(adSize)
+
+        HyBid.getReportingController().reportEvent(event.reportingEvent)
     }
 
     // --------------- InFeedAdListener Listener --------------------
@@ -119,6 +126,7 @@ class HyBidInFeedFragment : Fragment(), InFeedAdListener {
 
     override fun onInFeedAdLoadError(error: Throwable?) {
         errorView.text = error?.message
+        creativeIdView.text = ""
         displayLogs()
     }
 

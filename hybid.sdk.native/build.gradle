@@ -1,0 +1,148 @@
+apply plugin: 'com.android.library'
+
+def project_name = project.name
+def version_name = project.version
+if (branchName != "master") {
+    version_name = "${version_name}-${branchName}.${buildNumber}"
+    project_name = "${project_name}.beta"
+}
+version = version_name
+
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+
+    implementation project(':hybid.sdk.core')
+    implementation project(':hybid.sdk.source.pnapi')
+
+    //Testing
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.robolectric:robolectric:3.8'
+    testImplementation 'org.mockito:mockito-core:2.24.0'
+    testImplementation 'com.squareup.assertj:assertj-android:1.1.1'
+    testImplementation 'com.google.truth:truth:0.36'
+}
+
+
+//--------------------------------------------------------------------------------------------------
+// MAVEN
+//--------------------------------------------------------------------------------------------------
+apply plugin: 'maven-publish'
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.rootProject.files(android.getBootClasspath().join(File.pathSeparator))
+    options.memberLevel = JavadocMemberLevel.PUBLIC
+    failOnError false
+}
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+def addDependency(dependency, dependenciesNode) { //finish with dependencies
+    if (dependency.group != null && dependency.name != null) {
+        def dependencyNode = dependenciesNode.appendNode('dependency')
+        dependencyNode.appendNode('groupId', dependency.group)
+        dependencyNode.appendNode('artifactId', dependency.name)
+        dependencyNode.appendNode('version', dependency.version)
+
+        if (dependency.excludeRules.size() > 0) {
+            def exclusions = dependencyNode.appendNode('exclusions')
+            dependency.excludeRules.each { ExcludeRule ex ->
+                def exclusion = exclusions.appendNode('exclusion')
+                exclusion.appendNode('groupId', ex.group)
+                if (ex.module == null || ex.module.isEmpty()) {
+                    exclusion.appendNode('artifactId', "*")
+                } else {
+                    exclusion.appendNode('artifactId', ex.module)
+                }
+            }
+        }
+    }
+}
+
+
+publishing {
+    publications {
+        aar(MavenPublication) {
+            groupId project.group
+            artifactId project.name
+            version version_name
+            artifact javadocJar
+            if (branchName == "master") {
+                artifact sourcesJar
+            }
+            android.libraryVariants.all { variant ->
+                if (variant.buildType.name == "debug") return
+                artifact variant.outputs[0].packageLibrary // This is the aar library
+            }
+
+            pom.withXml {
+                def dependenciesNode = asNode().appendNode('dependencies')
+
+                configurations.implementation.allDependencies.withType(ModuleDependency).each {
+                    addDependency(it, dependenciesNode)
+                }
+            }
+        }
+    }
+}
+
+//--------------------------------------------------------------------------------------------------
+// BINTRAY
+//--------------------------------------------------------------------------------------------------
+apply plugin: 'com.jfrog.bintray'
+
+bintray {
+    user = System.getenv("BINTRAY_USER")
+    key = System.getenv("BINTRAY_API_KEY")
+    publish = branchName != "master"
+    override = true
+    publications = ['aar']
+    pkg {
+        configurations = ['archives']
+        userOrg = 'pubnative'
+        repo = 'maven'
+        desc = 'HyBid SDK'
+        websiteUrl = "https://pubnative.net"
+        name = project_name
+        licenses = ['MIT']
+        labels = ['android', 'advertising', 'sdk', 'pubnative', 'hybid', 'ads', 'development']
+        version {
+            name = version_name
+            vcsTag = version_name
+            released = new Date()
+            vcsUrl = System.getenv("CIRCLE_REPOSITORY_URL")
+        }
+    }
+}

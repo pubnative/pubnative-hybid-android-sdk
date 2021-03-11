@@ -69,10 +69,10 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
         creativeIdView.visibility = View.VISIBLE
         loadButton = view.findViewById(R.id.button_load)
 
-        adUnitId = SettingsManager.getInstance(activity!!).getSettings().mopubInterstitialAdUnitId
+        adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubInterstitialAdUnitId
 
         requestManager = InterstitialRequestManager()
-        mopubInterstitial = MoPubInterstitial(activity!!, adUnitId!!)
+        mopubInterstitial = MoPubInterstitial(requireActivity(), adUnitId!!)
         mopubInterstitial.interstitialAdListener = this
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
@@ -84,8 +84,8 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
             loadPNAd()
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
-        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, creativeIdView.text.toString()) }
+        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
+        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), creativeIdView.text.toString()) }
     }
 
     override fun onDestroy() {
@@ -114,6 +114,7 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
     override fun onRequestFail(throwable: Throwable?) {
         Log.d(TAG, "onRequestFail: ", throwable)
         errorView.text = throwable?.message
+        creativeIdView.text = ""
         displayLogs()
     }
 

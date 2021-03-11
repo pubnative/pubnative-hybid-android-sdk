@@ -72,7 +72,7 @@ class DFPBannerFragment : Fragment(), RequestManager.RequestListener {
         requestManager = BannerRequestManager()
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
-        adUnitId = SettingsManager.getInstance(activity!!).getSettings().dfpBannerAdUnitId
+        adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().dfpBannerAdUnitId
 
         dfpBanner = PublisherAdView(activity)
         dfpBanner.adUnitId = adUnitId
@@ -88,7 +88,7 @@ class DFPBannerFragment : Fragment(), RequestManager.RequestListener {
             loadPNAd()
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
+        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
     }
 
     override fun onDestroy() {

@@ -15,7 +15,8 @@ import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import java.util.*
 
-class MoPubMediationNativeFragment : Fragment(), MoPubNative.MoPubNativeNetworkListener, NativeAd.MoPubNativeEventListener {
+class
+MoPubMediationNativeFragment : Fragment(), MoPubNative.MoPubNativeNetworkListener, NativeAd.MoPubNativeEventListener {
     val TAG = MoPubMediationNativeFragment::class.java.simpleName
 
     private lateinit var mopubNativeContainer: FrameLayout
@@ -32,13 +33,13 @@ class MoPubMediationNativeFragment : Fragment(), MoPubNative.MoPubNativeNetworkL
 
         // Integer values work in any range. This is intended for the list adapter but
         // it's required even for standalone native ads
-        adapterHelper = AdapterHelper(context!!, 0, 3)
+        adapterHelper = AdapterHelper(requireContext(), 0, 3)
 
         errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
         mopubNativeContainer = view.findViewById(R.id.ad_container)
 
-        val adUnitId = SettingsManager.getInstance(activity!!).getSettings().mopubMediationNativeAdUnitId
+        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubMediationNativeAdUnitId
 
         view.findViewById<Button>(R.id.button_load).setOnClickListener {
             errorView.text = ""
@@ -51,7 +52,7 @@ class MoPubMediationNativeFragment : Fragment(), MoPubNative.MoPubNativeNetworkL
                     RequestParameters.NativeAdAsset.ICON_IMAGE,
                     RequestParameters.NativeAdAsset.STAR_RATING)
 
-            mopubNative = MoPubNative(context!!, adUnitId, this)
+            mopubNative = MoPubNative(requireContext(), adUnitId, this)
             mopubNative?.registerAdRenderer(MoPubStaticNativeAdRenderer(ViewBinder.Builder(R.layout.layout_native_ad)
                     .mainImageId(R.id.ad_banner)
                     .iconImageId(R.id.ad_icon)

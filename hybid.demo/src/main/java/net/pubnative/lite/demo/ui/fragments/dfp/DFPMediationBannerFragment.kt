@@ -33,7 +33,7 @@ class DFPMediationBannerFragment : Fragment(){
         loadButton = view.findViewById(R.id.button_load)
         dfpBannerContainer = view.findViewById(R.id.dfp_banner_container)
 
-        val adUnitId = SettingsManager.getInstance(activity!!).getSettings().dfpMediationBannerAdUnitId
+        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().dfpMediationBannerAdUnitId
 
         dfpBanner = AdView(activity)
         dfpBanner.adSize = AdSize.BANNER
@@ -49,7 +49,7 @@ class DFPMediationBannerFragment : Fragment(){
                     .build())
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
+        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
     }
 
     // ------------------ Admob Ad Listener ---------------------

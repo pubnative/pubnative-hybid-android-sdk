@@ -36,7 +36,7 @@ class AdmobMediationBannerFragment : Fragment() {
         loadButton = view.findViewById(R.id.button_load)
         admobBannerContainer = view.findViewById(R.id.admob_banner_container)
 
-        val adUnitId = SettingsManager.getInstance(activity!!).getSettings().admobBannerAdUnitId
+        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().admobBannerAdUnitId
 
         admobBanner = AdView(activity)
         admobBanner.adSize = AdSize.BANNER
@@ -52,7 +52,7 @@ class AdmobMediationBannerFragment : Fragment() {
                     .build())
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
+        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
     }
 
     // ------------------ Admob Ad Listener ---------------------

@@ -34,6 +34,7 @@ import com.google.android.gms.ads.MobileAds;
 import com.ogury.cm.OguryChoiceManager;
 import com.ogury.cm.OguryCmConfig;
 
+import net.pubnative.lite.demo.managers.AnalyticsSubscriber;
 import net.pubnative.lite.demo.managers.MoPubManager;
 import net.pubnative.lite.demo.managers.SettingsManager;
 import net.pubnative.lite.demo.models.SettingsModel;
@@ -77,6 +78,7 @@ public class HyBidDemoApplication extends MultiDexApplication {
             @Override
             public void onInitialisationFinished(boolean success) {
                 // HyBid SDK has been initialised
+                HyBid.addReportingCallback(AnalyticsSubscriber.INSTANCE.getEventCallback());
             }
         });
 
@@ -88,6 +90,8 @@ public class HyBidDemoApplication extends MultiDexApplication {
         HyBid.setGender(settings.getGender());
         HyBid.setLocationTrackingEnabled(true);
         HyBid.setLocationUpdatesEnabled(true);
+
+        HyBid.setInterstitialSkipOffset(4);
 
         StringBuilder keywordsBuilder = new StringBuilder();
         String separator = ",";
@@ -115,7 +119,7 @@ public class HyBidDemoApplication extends MultiDexApplication {
             ApiManager.INSTANCE.setApiUrl(settings.getApiUrl());
         }
 
-        MoPubManager.initMoPubSdk(this, appToken);
+        MoPubManager.initMoPubSdk(this, settings.getMopubMediationBannerAdUnitId());
 
         MobileAds.initialize(this, initializationStatus -> {
         });
@@ -139,12 +143,13 @@ public class HyBidDemoApplication extends MultiDexApplication {
             model = new SettingsModel(
                     Constants.APP_TOKEN,
                     Constants.ZONE_ID_LIST,
-                    HyBid.BASE_URL,
+                    BuildConfig.BASE_URL,
                     "",
                     "",
                     new ArrayList<>(),
                     new ArrayList<>(),
                     false,
+                    true,
                     true,
                     Constants.MOPUB_MRAID_BANNER_AD_UNIT,
                     Constants.MOPUB_MRAID_MEDIUM_AD_UNIT,
@@ -170,7 +175,8 @@ public class HyBidDemoApplication extends MultiDexApplication {
                     Constants.ADMOB_MEDIUM_AD_UNIT,
                     Constants.ADMOB_LEADERBOARD_AD_UNIT,
                     Constants.ADMOB_REWARDED_AD_UNIT,
-                    Constants.ADMOB_INTERSTITIAL_AD_UNIT);
+                    Constants.ADMOB_INTERSTITIAL_AD_UNIT,
+                    Constants.ADMOB_NATIVE_AD_UNIT);
             manager.setSettings(model, true);
         }
 

@@ -32,7 +32,7 @@ class AdmobMediationInterstitialFragment : Fragment() {
         errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
 
-        val adUnitId = SettingsManager.getInstance(activity!!).getSettings().admobInterstitialAdUnitId
+        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().admobInterstitialAdUnitId
 
         admobInterstitial = InterstitialAd(activity)
         admobInterstitial.adUnitId = adUnitId
@@ -45,7 +45,7 @@ class AdmobMediationInterstitialFragment : Fragment() {
                     .build())
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
+        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
     }
 
     // ---------------- Admob Ad Listener ---------------------

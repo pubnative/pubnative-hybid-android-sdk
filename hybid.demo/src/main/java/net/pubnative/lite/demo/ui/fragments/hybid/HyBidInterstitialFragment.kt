@@ -25,9 +25,7 @@ package net.pubnative.lite.demo.ui.fragments.hybid
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -35,12 +33,16 @@ import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
+import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd
+import net.pubnative.lite.sdk.models.AdSize
+import net.pubnative.lite.sdk.reporting.ReportingEventBridge
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
+class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial), HyBidInterstitialAd.Listener {
+
     val TAG = HyBidInterstitialFragment::class.java.simpleName
 
     private var zoneId: String? = null
@@ -50,8 +52,6 @@ class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
     private lateinit var creativeIdView: TextView
     private var interstitial: HyBidInterstitialAd? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_hybid_interstitial, container, false)
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -59,18 +59,17 @@ class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
         creativeIdView = view.findViewById(R.id.view_creative_id)
         loadButton = view.findViewById(R.id.button_load)
 
-
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
         loadButton.setOnClickListener {
             errorView.text = ""
             val activity = activity as TabActivity
             activity.notifyAdCleaned()
-            loadPNAd()
+            loadInterstitialAd()
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
-        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, creativeIdView.text.toString()) }
+        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
+        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), creativeIdView.text.toString()) }
     }
 
     override fun onDestroy() {
@@ -78,10 +77,15 @@ class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
         super.onDestroy()
     }
 
-    fun loadPNAd() {
+    private fun loadInterstitialAd() {
         interstitial = HyBidInterstitialAd(activity, zoneId, this)
-        interstitial?.setSkipOffset(10)
+        interstitial?.setSkipOffset(3)
         interstitial?.load()
+
+        val event = ReportingEventBridge("Standalone Interstitial")
+        event.setAdSize(AdSize.SIZE_INTERSTITIAL)
+
+        HyBid.getReportingController().reportEvent(event.reportingEvent)
     }
 
     override fun onInterstitialLoaded() {
@@ -96,6 +100,7 @@ class HyBidInterstitialFragment : Fragment(), HyBidInterstitialAd.Listener {
     override fun onInterstitialLoadFailed(error: Throwable?) {
         Log.e(TAG, "onInterstitialLoadFailed", error)
         errorView.text = error?.message
+        creativeIdView.text = ""
         displayLogs()
     }
 

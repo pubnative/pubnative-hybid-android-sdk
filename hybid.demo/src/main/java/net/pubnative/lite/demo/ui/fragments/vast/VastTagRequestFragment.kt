@@ -38,7 +38,7 @@ class VastTagRequestFragment : Fragment(), HyBidInterstitialAd.Listener{
     }
 
     private fun pasteFromClipboard() {
-        val clipboardText = ClipboardUtils.copyFromClipboard(activity!!)
+        val clipboardText = ClipboardUtils.copyFromClipboard(requireActivity())
         if (!TextUtils.isEmpty(clipboardText)) {
             vastTagInput.setText(clipboardText)
         }

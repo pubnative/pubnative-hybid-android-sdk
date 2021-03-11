@@ -41,11 +41,11 @@ import net.pubnative.lite.sdk.utils.Logger;
 public class HyBidMediationInterstitialCustomEvent extends BaseAd implements HyBidInterstitialAd.Listener {
     private static final String TAG = HyBidMediationInterstitialCustomEvent.class.getSimpleName();
 
-    private static final String APP_TOKEN_KEY = "pn_app_token";
-    private static final String ZONE_ID_KEY = "pn_zone_id";
+    protected static final String APP_TOKEN_KEY = "pn_app_token";
+    protected static final String ZONE_ID_KEY = "pn_zone_id";
 
-    private HyBidInterstitialAd mInterstitialAd;
-    private String mZoneID = "";
+    protected HyBidInterstitialAd mInterstitialAd;
+    protected String mZoneID = "";
 
     @Override
     protected boolean checkAndInitializeSdk(@NonNull Activity launcherActivity, @NonNull AdData adData) throws Exception {

@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_banner_whole_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="net.pubnative.lite.demo.ui.fragments.hybid.HyBidBannerFragment"
-    tools:showIn="@layout/activity_tab">
+    tools:context="net.pubnative.lite.demo.ui.fragments.hybid.HyBidBannerFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -45,7 +46,12 @@
             android:id="@+id/hybid_banner"
             android:layout_width="320dp"
             android:layout_height="50dp"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/label_creative_id"

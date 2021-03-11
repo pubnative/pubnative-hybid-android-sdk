@@ -35,8 +35,10 @@ import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
+import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.models.NativeAd
-import net.pubnative.lite.sdk.nativead.HyBidNativeAdRequest
+import net.pubnative.lite.sdk.reporting.ReportingEventBridge
+import net.pubnative.lite.sdk.request.HyBidNativeAdRequest
 
 class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, NativeAd.Listener {
     val TAG = HyBidNativeFragment::class.java.simpleName
@@ -89,8 +91,8 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
             loadPNAd()
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, errorView.text.toString()) }
-        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(activity!!, creativeIdView.text.toString()) }
+        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
+        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), creativeIdView.text.toString()) }
     }
 
     override fun onDestroy() {
@@ -100,6 +102,10 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
 
     fun loadPNAd() {
         nativeAdRequest?.load(zoneId, this)
+
+        val event = ReportingEventBridge("Standalone Native")
+
+        HyBid.getReportingController().reportEvent(event.reportingEvent)
     }
 
     fun renderAd(ad: NativeAd?) {
@@ -129,6 +135,7 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
     override fun onRequestFail(throwable: Throwable?) {
         Log.e(TAG, "onAdLoadFailed", throwable)
         errorView.text = throwable?.message
+        creativeIdView.text = ""
         displayLogs()
     }
 

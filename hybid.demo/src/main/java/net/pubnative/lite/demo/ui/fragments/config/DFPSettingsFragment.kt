@@ -64,7 +64,7 @@ class DFPSettingsFragment : Fragment() {
         mediationInterstitialInput = view.findViewById(R.id.input_dfp_mediation_interstitial)
         mediationRewardedInput = view.findViewById(R.id.input_dfp_mediation_rewarded)
 
-        settingManager = SettingsManager.getInstance(context!!)
+        settingManager = SettingsManager.getInstance(requireContext())
 
         view.findViewById<Button>(R.id.button_save_dfp_settings).setOnClickListener {
             val bannerAdUnitId = bannerInput.text.toString()
