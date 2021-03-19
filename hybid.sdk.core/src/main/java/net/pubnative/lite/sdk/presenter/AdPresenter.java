@@ -39,7 +39,13 @@ public interface AdPresenter {
         void onAdError(AdPresenter adPresenter);
     }
 
+    interface ImpressionListener {
+        void onImpression();
+    }
+
     void setListener(Listener listener);
+
+    void setImpressionListener(ImpressionListener listener);
 
     Ad getAd();
 

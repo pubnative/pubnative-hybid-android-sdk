@@ -32,5 +32,5 @@ import net.pubnative.lite.demo.ui.fragments.hybid.HyBidInFeedFragment
 class HyBidInFeedBannerActivity : TabActivity() {
     override fun getAdFragment() = HyBidInFeedFragment()
 
-    override fun getActivityTitle() = getString(R.string.hybid_medium)
+    override fun getActivityTitle() = getString(R.string.hybid_banner)
 }

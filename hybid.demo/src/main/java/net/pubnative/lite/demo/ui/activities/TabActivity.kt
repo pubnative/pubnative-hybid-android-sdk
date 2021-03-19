@@ -56,7 +56,7 @@ abstract class TabActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
-        title = getActivityTitle()
+        supportActionBar?.title = getActivityTitle()
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.

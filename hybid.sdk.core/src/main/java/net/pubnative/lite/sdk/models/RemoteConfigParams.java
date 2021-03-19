@@ -16,6 +16,9 @@ public class RemoteConfigParams extends JsonModel {
     public List<String> wl_taxonomy3;
 
     @BindField
+    public RemoteConfigResolutions resolutions;
+
+    @BindField
     public Integer distance_threshold;
 
 

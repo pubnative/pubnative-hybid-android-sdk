@@ -45,6 +45,7 @@ public abstract class PresenterFactory {
         final AdPresenterDecorator bannerPresenterDecorator = new AdPresenterDecorator(adPresenter,
                 new AdTracker(ad.getBeacons(Ad.Beacon.IMPRESSION), ad.getBeacons(Ad.Beacon.CLICK)), HyBid.getReportingController(), bannerPresenterListener);
         adPresenter.setListener(bannerPresenterDecorator);
+        adPresenter.setImpressionListener(bannerPresenterDecorator);
         return bannerPresenterDecorator;
     }
 

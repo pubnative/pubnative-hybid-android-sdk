@@ -108,7 +108,6 @@ public class AdPresenterDecoratorTest {
     public void onBannerLoaded() {
         mSubject.onAdLoaded(mMockPresenter, mMockView);
 
-        verify(mMockAdTracker).trackImpression();
         verify(mMockListener).onAdLoaded(mMockPresenter, mMockView);
     }
 
@@ -118,8 +117,23 @@ public class AdPresenterDecoratorTest {
 
         mSubject.onAdLoaded(mMockPresenter, mMockView);
 
-        verify(mMockAdTracker, never()).trackImpression();
         verify(mMockListener, never()).onAdLoaded(any(AdPresenter.class), any(View.class));
+    }
+
+    @Test
+    public void onBannerImpression() {
+        mSubject.onImpression();
+
+        verify(mMockAdTracker).trackImpression();
+    }
+
+    @Test
+    public void onBannerImpression_whenDestroyed() {
+        mSubject.destroy();
+
+        mSubject.onImpression();
+
+        verify(mMockAdTracker, never()).trackImpression();
     }
 
     @Test

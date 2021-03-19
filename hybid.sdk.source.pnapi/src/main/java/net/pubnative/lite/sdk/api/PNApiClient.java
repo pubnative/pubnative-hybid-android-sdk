@@ -35,7 +35,6 @@ import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.source.pnapi.BuildConfig;
 import net.pubnative.lite.sdk.utils.AdRequestRegistry;
 import net.pubnative.lite.sdk.utils.PNApiUrlComposer;
-import net.pubnative.lite.sdk.utils.UrlDriller;
 
 import org.json.JSONObject;
 
@@ -65,7 +64,6 @@ public class PNApiClient {
 
     private final Context mContext;
     private String mApiUrl = BuildConfig.BASE_URL;
-    private boolean mUrlDrillerEnabled = false;
 
     String getApiUrl() {
         return mApiUrl;
@@ -114,33 +112,7 @@ public class PNApiClient {
     }
 
     public void trackUrl(String url, final TrackUrlListener listener) {
-        if (mUrlDrillerEnabled) {
-            UrlDriller urlDriller = new UrlDriller();
-            urlDriller.setListener(new UrlDriller.Listener() {
-                @Override
-                public void onURLDrillerStart(String url) {
-
-                }
-
-                @Override
-                public void onURLDrillerRedirect(String url) {
-
-                }
-
-                @Override
-                public void onURLDrillerFinish(String url) {
-                    sendTrackingRequest(url, listener);
-                }
-
-                @Override
-                public void onURLDrillerFail(String url, Exception exception) {
-
-                }
-            });
-            urlDriller.drill(url);
-        } else {
-            sendTrackingRequest(url, listener);
-        }
+        sendTrackingRequest(url, listener);
     }
 
     private void sendTrackingRequest(String url, final TrackUrlListener listener) {

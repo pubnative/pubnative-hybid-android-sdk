@@ -46,6 +46,7 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
     private final String[] mSupportedNativeFeatures;
 
     private AdPresenter.Listener mListener;
+    private ImpressionListener mImpressionListener;
     private MRAIDBanner mMRAIDBanner;
     private boolean mIsDestroyed;
 
@@ -65,6 +66,11 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
     @Override
     public void setListener(Listener listener) {
         mListener = listener;
+    }
+
+    @Override
+    public void setImpressionListener(ImpressionListener listener) {
+        mImpressionListener = listener;
     }
 
     @Override
@@ -116,6 +122,7 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
 
         if (mListener != null) {
             mListener.onAdLoaded(this, mraidView);
+            mImpressionListener.onImpression();
         }
     }
 

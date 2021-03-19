@@ -162,6 +162,7 @@ public class PNHttpClient {
     private static Response sendRequest(String url,
                                         Map<String, String> headers,
                                         String request) {
+
         Response result = new Response();
         HttpURLConnection urlConnection = null;
         try {
@@ -169,6 +170,7 @@ public class PNHttpClient {
             urlConnection = (HttpURLConnection) requestUrl.openConnection();
             urlConnection.setReadTimeout(READ_TIMEOUT);
             urlConnection.setConnectTimeout(CONNECT_TIMEOUT);
+            urlConnection.setInstanceFollowRedirects(true);
             urlConnection.setRequestMethod("GET"); // optional, GET already by default
 
             if (headers != null) {
@@ -248,23 +250,23 @@ public class PNHttpClient {
     }
 
     public static void makePendingRequest(final Context context,
-                                   final String url,
-                                   final Map<String, String> headers,
-                                   final String postBody) {
+                                          final String url,
+                                          final Map<String, String> headers,
+                                          final String postBody) {
         NetworkInfo networkInfo = getActiveNetworkInfo(context);
         if (networkInfo != null && networkInfo.isConnected()
                 && (networkInfo.getType() == ConnectivityManager.TYPE_WIFI || networkInfo.getType() == ConnectivityManager.TYPE_MOBILE)) {
-                    sExecutor.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            final Response response = sendRequest(url, headers, postBody);
-                            if (response.exception != null) {
-                                if (!TextUtils.isEmpty(url)) {
-                                    sPendingRequests.add(new PendingRequest(url, postBody, headers));
-                                }
-                            }
+            sExecutor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    final Response response = sendRequest(url, headers, postBody);
+                    if (response.exception != null) {
+                        if (!TextUtils.isEmpty(url)) {
+                            sPendingRequests.add(new PendingRequest(url, postBody, headers));
                         }
-                    });
+                    }
                 }
+            });
+        }
     }
 }

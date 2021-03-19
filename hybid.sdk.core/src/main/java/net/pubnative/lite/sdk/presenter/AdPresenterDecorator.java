@@ -24,7 +24,6 @@ package net.pubnative.lite.sdk.presenter;
 
 import android.view.View;
 
-import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
@@ -33,13 +32,11 @@ import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.Logger;
 
-import org.json.JSONException;
-
 /**
  * Created by erosgarciaponte on 08.01.18.
  */
 
-public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener {
+public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, AdPresenter.ImpressionListener{
     private static final String TAG = AdPresenterDecorator.class.getSimpleName();
     private final AdPresenter mAdPresenter;
     private final AdTracker mAdTrackingDelegate;
@@ -60,6 +57,11 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener {
     @Override
     public void setListener(Listener listener) {
         // We set the listener in the constructor instead
+    }
+
+    @Override
+    public void setImpressionListener(ImpressionListener listener) {
+        // Not needed in the decorator
     }
 
     @Override
@@ -105,15 +107,6 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener {
             return;
         }
 
-        if (mReportingController != null) {
-            ReportingEvent reportingEvent = new ReportingEvent();
-            reportingEvent.setEventType(Reporting.EventType.IMPRESSION);
-            reportingEvent.setTimestamp(String.valueOf(System.currentTimeMillis()));
-            reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
-            mReportingController.reportEvent(reportingEvent);
-        }
-
-        mAdTrackingDelegate.trackImpression();
         mListener.onAdLoaded(adPresenter, banner);
     }
 
@@ -152,5 +145,22 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener {
         String errorMessage = "Banner error for zone id: ";
         Logger.d(TAG, errorMessage);
         mListener.onAdError(adPresenter);
+    }
+
+    @Override
+    public void onImpression(){
+        if (mIsDestroyed) {
+            return;
+        }
+
+        if (mReportingController != null) {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.IMPRESSION);
+            reportingEvent.setTimestamp(String.valueOf(System.currentTimeMillis()));
+            reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
+            mReportingController.reportEvent(reportingEvent);
+        }
+
+        mAdTrackingDelegate.trackImpression();
     }
 }

@@ -44,6 +44,7 @@ public class VastAdPresenter implements AdPresenter {
     private final Ad mAd;
 
     private Listener mListener;
+    private ImpressionListener mImpressionListener;
     private boolean mIsDestroyed;
     private boolean mLoaded = false;
 
@@ -58,6 +59,11 @@ public class VastAdPresenter implements AdPresenter {
     @Override
     public void setListener(Listener listener) {
         mListener = listener;
+    }
+
+    @Override
+    public void setImpressionListener(ImpressionListener listener) {
+        mImpressionListener = listener;
     }
 
     @Override
@@ -173,7 +179,7 @@ public class VastAdPresenter implements AdPresenter {
 
         @Override
         public void onAdStarted() {
-
+            mImpressionListener.onImpression();
         }
     };
 }
