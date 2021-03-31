@@ -50,7 +50,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.activities.unity.StickyTopBottomBannerActivity"
+            android:name=".ui.activities.hybid.HyBidStickyBannerActivity"
             android:label="@string/hybid_banner"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
@@ -80,6 +80,11 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".ui.activities.mopub.MoPubMRectVideoActivity"
+            android:label="@string/mopub_medium_video"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".ui.activities.mopub.MoPubLeaderboardActivity"
             android:label="@string/mopub_leaderboard"
             android:screenOrientation="portrait"
@@ -87,6 +92,16 @@
         <activity
             android:name=".ui.activities.mopub.MoPubInterstitialActivity"
             android:label="@string/mopub_interstitial"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.mopub.MoPubInterstitialVideoActivity"
+            android:label="@string/mopub_interstitial_video"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.mopub.MoPubRewardedActivity"
+            android:label="@string/mopub_rewarded"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
@@ -100,6 +115,11 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".ui.activities.mopub.MoPubMediationMRectVideoActivity"
+            android:label="@string/mopub_medium"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".ui.activities.mopub.MoPubMediationLeaderboardActivity"
             android:label="@string/mopub_leaderboard"
             android:screenOrientation="portrait"
@@ -107,6 +127,11 @@
         <activity
             android:name=".ui.activities.mopub.MoPubMediationInterstitialActivity"
             android:label="@string/mopub_interstitial"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.mopub.MoPubMediationInterstitialVideoActivity"
+            android:label="@string/mopub_interstitial_video"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
@@ -170,6 +195,11 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".ui.activities.admob.AdmobMediationMRectVideoActivity"
+            android:label="@string/admob_medium"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".ui.activities.admob.AdmobMediationLeaderboardActivity"
             android:label="@string/admob_leaderboard"
             android:screenOrientation="portrait"
@@ -177,6 +207,11 @@
         <activity
             android:name=".ui.activities.admob.AdmobMediationInterstitialActivity"
             android:label="@string/admob_interstitial"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.admob.AdmobMediationInterstitialVideoActivity"
+            android:label="@string/admob_interstitial_video"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

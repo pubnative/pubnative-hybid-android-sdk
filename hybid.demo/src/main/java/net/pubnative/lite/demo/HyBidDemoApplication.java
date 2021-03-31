@@ -107,9 +107,11 @@ public class HyBidDemoApplication extends MultiDexApplication {
 
         HyBid.setKeywords(keywordString);
 
-        HyBid.getViewabilityManager().setViewabilityMeasurementEnabled(true);
+        if (HyBid.getViewabilityManager() != null) {
+            HyBid.getViewabilityManager().setViewabilityMeasurementEnabled(true);
+        }
 
-        if (!settings.getBrowserPriorities().isEmpty()) {
+        if (HyBid.getBrowserManager() != null && !settings.getBrowserPriorities().isEmpty()) {
             for (String packageName : settings.getBrowserPriorities()) {
                 HyBid.getBrowserManager().addBrowser(packageName);
             }
@@ -128,7 +130,7 @@ public class HyBidDemoApplication extends MultiDexApplication {
 
         // NumberEight SDK crashes below API level 26.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NumberEight.APIToken apiToken = NumberEight.start(Constants.NUMBEREIGHT_API_TOKEN, this, ConsentOptions.withConsentToAll());
+            NumberEight.APIToken apiToken = NumberEight.start(Constants.NUMBEREIGHT_API_TOKEN, this, ConsentOptions.withDefault());
             Audiences.startRecording(apiToken);
         }
     }
@@ -153,12 +155,17 @@ public class HyBidDemoApplication extends MultiDexApplication {
                     true,
                     Constants.MOPUB_MRAID_BANNER_AD_UNIT,
                     Constants.MOPUB_MRAID_MEDIUM_AD_UNIT,
+                    Constants.MOPUB_VAST_MEDIUM_AD_UNIT,
                     Constants.MOPUB_MRAID_LEADERBOARD_AD_UNIT,
                     Constants.MOPUB_MRAID_INTERSTITIAL_AD_UNIT,
+                    Constants.MOPUB_VAST_INTERSTITIAL_AD_UNIT,
+                    Constants.MOPUB_VAST_REWARDED_AD_UNIT,
                     Constants.MOPUB_MEDIATION_BANNER_AD_UNIT,
                     Constants.MOPUB_MEDIATION_MEDIUM_AD_UNIT,
+                    Constants.MOPUB_MEDIATION_MEDIUM_VIDEO_AD_UNIT,
                     Constants.MOPUB_MEDIATION_LEADERBOARD_AD_UNIT,
                     Constants.MOPUB_MEDIATION_INTERSTITIAL_AD_UNIT,
+                    Constants.MOPUB_MEDIATION_INTERSTITIAL_VIDEO_AD_UNIT,
                     Constants.MOPUB_MEDIATION_REWARDED_AD_UNIT,
                     Constants.MOPUB_MEDIATION_NATIVE_AD_UNIT,
                     Constants.DFP_MRAID_BANNER_AD_UNIT,
@@ -173,9 +180,11 @@ public class HyBidDemoApplication extends MultiDexApplication {
                     Constants.ADMOB_APP_ID,
                     Constants.ADMOB_BANNER_AD_UNIT,
                     Constants.ADMOB_MEDIUM_AD_UNIT,
+                    Constants.ADMOB_MEDIUM_VIDEO_AD_UNIT,
                     Constants.ADMOB_LEADERBOARD_AD_UNIT,
                     Constants.ADMOB_REWARDED_AD_UNIT,
                     Constants.ADMOB_INTERSTITIAL_AD_UNIT,
+                    Constants.ADMOB_INTERSTITIAL_VIDEO_AD_UNIT,
                     Constants.ADMOB_NATIVE_AD_UNIT);
             manager.setSettings(model, true);
         }

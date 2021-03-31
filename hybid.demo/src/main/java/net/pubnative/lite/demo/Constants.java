@@ -46,8 +46,10 @@ public class Constants {
 
     public static final String MOPUB_MEDIATION_BANNER_AD_UNIT = "38864d35877d4684af11319530993074";
     public static final String MOPUB_MEDIATION_INTERSTITIAL_AD_UNIT = "2bb6db4d69fa407a87b0c96c55d7c2b4";
+    public static final String MOPUB_MEDIATION_INTERSTITIAL_VIDEO_AD_UNIT = "f9581b6011f64ecbbbf91ff78b76af64";
     public static final String MOPUB_MEDIATION_REWARDED_AD_UNIT = "4f6a64ece43847ecbc3475219e8dd9b6";
     public static final String MOPUB_MEDIATION_MEDIUM_AD_UNIT = "0af490cac3d34256b0010fac17f26759";
+    public static final String MOPUB_MEDIATION_MEDIUM_VIDEO_AD_UNIT = "86188aee417845eaa1b6e3c960243716";
     public static final String MOPUB_MEDIATION_LEADERBOARD_AD_UNIT = "5e744edb00c344f9a92f7939fa58e970";
     public static final String MOPUB_MEDIATION_NATIVE_AD_UNIT = "2dfcd13fb5dc4e9d9bc6ab3e382ffeb7";
 
@@ -55,6 +57,9 @@ public class Constants {
     public static final String MOPUB_MRAID_INTERSTITIAL_AD_UNIT = "0bd7ea20185547f2bd29a9574bfce917";
     public static final String MOPUB_MRAID_MEDIUM_AD_UNIT = "1fafef6b872a4e10ba9fc573ca347e55";
     public static final String MOPUB_MRAID_LEADERBOARD_AD_UNIT = "24d4c45cf0a64f219ec8d9b93bef44c4";
+    public static final String MOPUB_VAST_INTERSTITIAL_AD_UNIT = "256b90d1a7294c2d97fe2f4b4bfd67c2";
+    public static final String MOPUB_VAST_REWARDED_AD_UNIT = "51dea8bc737b455e8231b89153c81757";
+    public static final String MOPUB_VAST_MEDIUM_AD_UNIT = "414518af10474aca98a9a407bb899b79";
 
     public static final String DFP_MRAID_BANNER_AD_UNIT = "/219576711/pnlite_dfp_banner";
     public static final String DFP_MRAID_INTERSTITIAL_AD_UNIT = "/219576711/pnlite_dfp_interstitial";
@@ -70,7 +75,9 @@ public class Constants {
     public static final String ADMOB_APP_ID = "ca-app-pub-9763601123242224~7761163696";
     public static final String ADMOB_BANNER_AD_UNIT = "ca-app-pub-9763601123242224/5027189140";
     public static final String ADMOB_INTERSTITIAL_AD_UNIT = "ca-app-pub-9763601123242224/6994876935";
+    public static final String ADMOB_INTERSTITIAL_VIDEO_AD_UNIT = "ca-app-pub-9763601123242224/5439389087";
     public static final String ADMOB_MEDIUM_AD_UNIT = "ca-app-pub-9763601123242224/9033705159";
+    public static final String ADMOB_MEDIUM_VIDEO_AD_UNIT = "ca-app-pub-9763601123242224/4028543995";
     public static final String ADMOB_LEADERBOARD_AD_UNIT = "ca-app-pub-9763601123242224/4902888458";
     public static final String ADMOB_REWARDED_AD_UNIT = "ca-app-pub-9763601123242224/1139038306";
     public static final String ADMOB_NATIVE_AD_UNIT = "ca-app-pub-9763601123242224/2966644429";

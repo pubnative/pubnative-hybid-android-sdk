@@ -121,7 +121,9 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
         val event = ReportingEventBridge("Standalone Banner")
         event.setAdSize(adSize)
 
-        HyBid.getReportingController().reportEvent(event.reportingEvent)
+        if (HyBid.getReportingController() != null) {
+            HyBid.getReportingController().reportEvent(event.reportingEvent)
+        }
     }
 
 

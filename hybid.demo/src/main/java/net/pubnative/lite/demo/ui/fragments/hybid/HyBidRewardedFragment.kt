@@ -67,7 +67,9 @@ class HyBidRewardedFragment : Fragment(), HyBidRewardedAd.Listener {
         val event = ReportingEventBridge("Standalone Rewarded")
         event.setAdSize(AdSize.SIZE_INTERSTITIAL)
 
-        HyBid.getReportingController().reportEvent(event.reportingEvent)
+        if (HyBid.getReportingController() != null) {
+            HyBid.getReportingController().reportEvent(event.reportingEvent)
+        }
     }
 
 

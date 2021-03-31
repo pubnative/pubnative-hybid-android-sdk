@@ -7,7 +7,7 @@ object ApiManager {
     fun getApiUrl() = HyBid.getApiClient().apiUrl
 
     fun setApiUrl(url: String) {
-        if (!TextUtils.isEmpty(url)) {
+        if (!TextUtils.isEmpty(url) && HyBid.getApiClient() != null) {
             HyBid.getApiClient().apiUrl = url
         }
     }

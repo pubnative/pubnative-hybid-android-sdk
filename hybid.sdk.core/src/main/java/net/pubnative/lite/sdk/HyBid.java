@@ -75,6 +75,11 @@ public class HyBid {
     private static String sKeywords;
     private static String sBundleId;
     private static Integer sInterstitialSkipOffset = 0;
+    private static String sIabCategory;
+    private static String sIabSubcategory;
+    private static String sAppVersion;
+    private static String sDeveloperDomain;
+    private static String sContentAgeRating;
 
     public static void initialize(String appToken,
                                   Application application) {
@@ -294,5 +299,45 @@ public class HyBid {
 
     public interface InitialisationListener {
         void onInitialisationFinished(boolean success);
+    }
+
+    public static void setIabCategory(String iabCategory){
+        sIabCategory = iabCategory;
+    }
+
+    public static String getIabCategory(){
+        return sIabCategory;
+    }
+
+    public static void setIabSubcategory(String iabSubcategory){
+        sIabSubcategory = iabSubcategory;
+    }
+
+    public static String getsIabSubcategory(){
+        return sIabSubcategory;
+    }
+
+    public static void setAppVersion(String appVersion){
+        sAppVersion = appVersion;
+    }
+
+    public static String getAppVersion(){
+        return sAppVersion;
+    }
+
+    public static void setDeveloperDomain(String developerDomain){
+        sDeveloperDomain = developerDomain;
+    }
+
+    public static String getDeveloperDomain(){
+        return sDeveloperDomain;
+    }
+
+    public static void setContentAgeRating(String contentAgeRating){
+        sContentAgeRating = contentAgeRating;
+    }
+
+    public static String getContentAgeRating(){
+        return sContentAgeRating;
     }
 }

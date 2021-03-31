@@ -27,6 +27,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
         if (getAd() != null) {
             mSkipOffset = getIntent().getIntExtra(EXTRA_SKIP_OFFSET, 0);
             mVideoAd = new VideoAd(this, getAd().getVast());
+            mVideoAd.useMobileNetworkForCaching(true);
             mVideoAd.bindView(mVideoPlayer);
             mVideoAd.setAdListener(mVideoAdListener);
             setProgressBarVisible();

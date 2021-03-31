@@ -49,31 +49,41 @@ class PNCMPFragment : Fragment() {
             } else {
                 Toast.makeText(activity, "Consent has already been answered. If you want to try again please clear your app cache", Toast.LENGTH_LONG).show()
             } */
-            val intent = HyBid.getUserDataManager().getConsentScreenIntent(activity)
-            startActivityForResult(intent, REQUEST_CONSENT)
+            if (HyBid.getUserDataManager() != null) {
+                val intent = HyBid.getUserDataManager().getConsentScreenIntent(activity)
+                startActivityForResult(intent, REQUEST_CONSENT)
+            }
         }
 
         view.findViewById<Button>(R.id.button_publisher_owned).setOnClickListener {
-            vendorListLabel.visibility = View.VISIBLE
-            vendorListView.visibility = View.VISIBLE
-            privacyPolicyLabel.visibility = View.VISIBLE
-            privacyPolicyView.visibility = View.VISIBLE
-            vendorListView.text = HyBid.getUserDataManager().vendorListLink
-            privacyPolicyView.text = HyBid.getUserDataManager().privacyPolicyLink
+            if (HyBid.getUserDataManager() != null) {
+                vendorListLabel.visibility = View.VISIBLE
+                vendorListView.visibility = View.VISIBLE
+                privacyPolicyLabel.visibility = View.VISIBLE
+                privacyPolicyView.visibility = View.VISIBLE
+                vendorListView.text = HyBid.getUserDataManager().vendorListLink
+                privacyPolicyView.text = HyBid.getUserDataManager().privacyPolicyLink
+            }
         }
 
         view.findViewById<Button>(R.id.button_accept_consent).setOnClickListener {
-            HyBid.getUserDataManager().grantConsent()
-            notifyConsentResult(true)
+            if (HyBid.getUserDataManager() != null) {
+                HyBid.getUserDataManager().grantConsent()
+                notifyConsentResult(true)
+            }
         }
 
         view.findViewById<Button>(R.id.button_deny_consent).setOnClickListener {
-            HyBid.getUserDataManager().denyConsent()
-            notifyConsentResult(false)
+            if (HyBid.getUserDataManager() != null) {
+                HyBid.getUserDataManager().denyConsent()
+                notifyConsentResult(false)
+            }
         }
 
         view.findViewById<Button>(R.id.button_can_collect_data).setOnClickListener {
-            notifyCanCollectData(HyBid.getUserDataManager().canCollectData())
+            if (HyBid.getUserDataManager() != null) {
+                notifyCanCollectData(HyBid.getUserDataManager().canCollectData())
+            }
         }
     }
 

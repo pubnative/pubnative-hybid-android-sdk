@@ -19,12 +19,13 @@ import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.sdk.HyBid
 
-class MoPubMediationRewardedFragment : Fragment(), MoPubRewardedAdListener{
+class MoPubMediationRewardedFragment : Fragment(), MoPubRewardedAdListener {
     val TAG = MoPubMediationRewardedFragment::class.java.simpleName
-    private lateinit var mopubRewardedAdListener: MoPubRewardedAdListener
     private lateinit var loadButton: Button
     private lateinit var showButton: Button
     private lateinit var errorView: TextView
+
+    private var adUnitId: String? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_mopub_rewarded, container, false)
 
@@ -36,26 +37,29 @@ class MoPubMediationRewardedFragment : Fragment(), MoPubRewardedAdListener{
         showButton = view.findViewById(R.id.button_show)
         showButton.isEnabled = false
 
-        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubMediationRewardedAdUnitId
-
-        mopubRewardedAdListener = this
-
-        MoPubRewardedAds.setRewardedAdListener(mopubRewardedAdListener)
+        MoPubRewardedAds.setRewardedAdListener(this)
 
         view.findViewById<Button>(R.id.button_load).setOnClickListener {
             errorView.text = ""
 
-            MoPubRewardedAds.loadRewardedAd(adUnitId)
+            adUnitId?.let {
+                MoPubRewardedAds.loadRewardedAd(it)
+            }
         }
 
-        view.findViewById<Button>(R.id.button_show).setOnClickListener{
-            MoPubRewardedAds.showRewardedAd(adUnitId)
+        view.findViewById<Button>(R.id.button_show).setOnClickListener {
+            adUnitId?.let {
+                MoPubRewardedAds.showRewardedAd(it)
+            }
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        MoPubManager.initMoPubSdk(requireActivity(), HyBid.getAppToken());
+        adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubMediationRewardedAdUnitId
+        adUnitId?.let {
+            MoPubManager.initMoPubSdk(requireActivity(), it)
+        }
         MoPub.onCreate(requireActivity())
     }
 

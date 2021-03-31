@@ -115,7 +115,9 @@ class HyBidInFeedFragment : Fragment(), InFeedAdListener {
         val event = ReportingEventBridge("Standalone InFeedBanner")
         event.setAdSize(adSize)
 
-        HyBid.getReportingController().reportEvent(event.reportingEvent)
+        if (HyBid.getReportingController() != null) {
+            HyBid.getReportingController().reportEvent(event.reportingEvent)
+        }
     }
 
     // --------------- InFeedAdListener Listener --------------------

@@ -26,6 +26,7 @@ import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.Reporting;
+import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.AdTracker;
@@ -38,14 +39,17 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
     private static final String TAG = RewardedPresenterDecorator.class.getSimpleName();
     private final RewardedPresenter mRewardedPresenter;
     private final AdTracker mAdTrackingDelegate;
+    private final ReportingController mReportingController;
     private final RewardedPresenter.Listener mListener;
     private boolean mIsDestroyed;
 
     public RewardedPresenterDecorator(RewardedPresenter rewardedPresenter,
                                       AdTracker adTrackingDelegate,
+                                      ReportingController reportingController,
                                       RewardedPresenter.Listener listener) {
         mRewardedPresenter = rewardedPresenter;
         mAdTrackingDelegate = adTrackingDelegate;
+        mReportingController = reportingController;
         mListener = listener;
     }
 
@@ -103,11 +107,13 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             return;
         }
 
-        ReportingEvent reportingEvent = new ReportingEvent();
-        reportingEvent.setEventType(Reporting.EventType.IMPRESSION);
-        reportingEvent.setTimestamp(System.currentTimeMillis());
-        reportingEvent.setAdFormat(Reporting.AdFormat.REWARDED);
-        HyBid.getReportingController().reportEvent(reportingEvent);
+        if (mReportingController != null) {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.IMPRESSION);
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            reportingEvent.setAdFormat(Reporting.AdFormat.REWARDED);
+            mReportingController.reportEvent(reportingEvent);
+        }
 
         mAdTrackingDelegate.trackImpression();
         mListener.onRewardedOpened(rewardedPresenter);
@@ -119,11 +125,13 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             return;
         }
 
-        ReportingEvent reportingEvent = new ReportingEvent();
-        reportingEvent.setEventType(Reporting.EventType.CLICK);
-        reportingEvent.setTimestamp(System.currentTimeMillis());
-        reportingEvent.setAdFormat(Reporting.AdFormat.REWARDED);
-        HyBid.getReportingController().reportEvent(reportingEvent);
+        if (mReportingController != null) {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.CLICK);
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            reportingEvent.setAdFormat(Reporting.AdFormat.REWARDED);
+            mReportingController.reportEvent(reportingEvent);
+        }
 
         mAdTrackingDelegate.trackClick();
         mListener.onRewardedClicked(rewardedPresenter);
@@ -144,11 +152,13 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             return;
         }
 
-        ReportingEvent reportingEvent = new ReportingEvent();
-        reportingEvent.setEventType(Reporting.EventType.VIDEO_FINISHED);
-        reportingEvent.setTimestamp(System.currentTimeMillis());
-        reportingEvent.setAdFormat(Reporting.AdFormat.REWARDED);
-        HyBid.getReportingController().reportEvent(reportingEvent);
+        if (mReportingController != null) {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.VIDEO_FINISHED);
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            reportingEvent.setAdFormat(Reporting.AdFormat.REWARDED);
+            mReportingController.reportEvent(reportingEvent);
+        }
 
         mListener.onRewardedFinished(rewardedPresenter);
     }
@@ -159,11 +169,13 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             return;
         }
 
-        ReportingEvent reportingEvent = new ReportingEvent();
-        reportingEvent.setEventType(Reporting.EventType.ERROR);
-        reportingEvent.setTimestamp(System.currentTimeMillis());
-        reportingEvent.setAdFormat(Reporting.AdFormat.REWARDED);
-        HyBid.getReportingController().reportEvent(reportingEvent);
+        if (mReportingController != null) {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.ERROR);
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            reportingEvent.setAdFormat(Reporting.AdFormat.REWARDED);
+            mReportingController.reportEvent(reportingEvent);
+        }
 
         String zoneId = getAd().getZoneId();
         String errorMessage;

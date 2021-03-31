@@ -4,7 +4,9 @@
     <string name="native_ad">"Native"</string>
     <string name="banner">Banner</string>
     <string name="interstitial">Interstitial</string>
+    <string name="interstitial_video">Interstitial Video</string>
     <string name="medium">Medium</string>
+    <string name="medium_video">Medium Video</string>
     <string name="leaderboard">Leaderboard</string>
     <string name="rewarded">Rewarded</string>
 
@@ -29,8 +31,10 @@
 
     <string name="hint_mopub_banner_ad_unit_id">Banner Ad Unit ID</string>
     <string name="hint_mopub_medium_ad_unit_id">Medium Ad Unit ID</string>
+    <string name="hint_mopub_medium_video_ad_unit_id">Medium Video Ad Unit ID</string>
     <string name="hint_mopub_leaderboard_ad_unit_id">Leaderboard Ad Unit ID</string>
     <string name="hint_mopub_interstitial_ad_unit_id">Interstitial Ad Unit ID</string>
+    <string name="hint_mopub_interstitial_video_ad_unit_id">Interstitial Video Ad Unit ID</string>
     <string name="hint_mopub_rewarded_ad_unit_id">Rewarded Ad Unit ID</string>
     <string name="hint_mopub_native_ad_unit_id">Native Ad Unit ID</string>
     <string name="save_mopub_settings">Save MoPub settings</string>
@@ -45,8 +49,10 @@
     <string name="hint_admob_app_id">App ID</string>
     <string name="hint_admob_banner_ad_unit_id">Banner Ad Unit ID</string>
     <string name="hint_admob_medium_ad_unit_id">Medium Ad Unit ID</string>
+    <string name="hint_admob_medium_video_ad_unit_id">Medium Video Ad Unit ID</string>
     <string name="hint_admob_leaderboard_ad_unit_id">Leaderboard Ad Unit ID</string>
     <string name="hint_admob_interstitial_ad_unit_id">Interstitial Ad Unit ID</string>
+    <string name="hint_admob_interstitial_video_ad_unit_id">Interstitial Video Ad Unit ID</string>
     <string name="hint_admob_native_ad_unit_id">Native Ad Unit ID</string>
     <string name="hint_admob_rewarded_ad_unit_id">Rewarded Ad Unit ID</string>
     <string name="save_admob_settings">Save Admob settings</string>
@@ -82,9 +88,11 @@
     <string name="mopub_native">MoPub Native</string>
     <string name="mopub_banner">MoPub Banner</string>
     <string name="mopub_interstitial">MoPub Interstitial</string>
+    <string name="mopub_interstitial_video">MoPub Interstitial Video</string>
     <string name="mopub_medium">MoPub Medium</string>
+    <string name="mopub_medium_video">MoPub Medium Video</string>
     <string name="mopub_leaderboard">MoPub Leaderboard</string>
-    <string name="mopub_rewarded">MoPub Rewarded Video</string>
+    <string name="mopub_rewarded">MoPub Rewarded</string>
 
     <string name="dfp_banner">DFP Banner</string>
     <string name="dfp_interstitial">DFP Interstitial</string>
@@ -95,7 +103,9 @@
     <string name="admob_native">Admob Native</string>
     <string name="admob_banner">Admob Banner</string>
     <string name="admob_interstitial">Admob Interstitial</string>
+    <string name="admob_interstitial_video">Admob Interstitial Video</string>
     <string name="admob_medium">Admob Medium</string>
+    <string name="admob_medium_video">Admob Medium Video</string>
     <string name="admob_leaderboard">Admob Leaderboard</string>
     <string name="admob_rewarded">Admob Rewarded Video</string>
 

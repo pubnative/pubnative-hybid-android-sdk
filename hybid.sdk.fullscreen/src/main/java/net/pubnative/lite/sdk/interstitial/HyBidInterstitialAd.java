@@ -74,6 +74,10 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     private boolean mReady = false;
     private int mSkipOffset = 0;
     private boolean mIsDestroyed = false;
+    private static String mScreenIabCategory;
+    private static String mScreenKeywords;
+    private static String mUserIntent;
+
 
     public HyBidInterstitialAd(Activity activity, Listener listener) {
         this((Context) activity, "", listener);

@@ -41,12 +41,17 @@ data class SettingsModel(var appToken: String,
                          var locationTracking: Boolean,
                          var mopubBannerAdUnitId: String,
                          var mopubMediumAdUnitId: String,
+                         var mopubMediumVideoAdUnitId: String,
                          var mopubLeaderboardAdUnitId: String,
                          var mopubInterstitialAdUnitId: String,
+                         var mopubInterstitialVideoAdUnitId: String,
+                         var mopubRewardedAdUnitId: String,
                          var mopubMediationBannerAdUnitId: String,
                          var mopubMediationMediumAdUnitId: String,
+                         var mopubMediationMediumVideoAdUnitId: String,
                          var mopubMediationLeaderboardAdUnitId: String,
                          var mopubMediationInterstitialAdUnitId: String,
+                         var mopubMediationInterstitialVideoAdUnitId: String,
                          var mopubMediationRewardedAdUnitId: String,
                          var mopubMediationNativeAdUnitId: String,
                          var dfpBannerAdUnitId: String,
@@ -61,9 +66,11 @@ data class SettingsModel(var appToken: String,
                          var admobAppId: String,
                          var admobBannerAdUnitId: String,
                          var admobMediumAdUnitId: String,
+                         var admobMediumVideoAdUnitId: String,
                          var admobLeaderboardAdUnitId: String,
                          var admobRewardedAdUnitId: String,
                          var admobInterstitialAdUnitId: String,
+                         var admobInterstitialVideoAdUnitId: String,
                          var admobNativeAdUnitId: String) : Parcelable {
     companion object {
         @JvmField
@@ -88,6 +95,13 @@ data class SettingsModel(var appToken: String,
             parcel.readInt() != 0,
             parcel.readInt() != 0,
             parcel.readInt() != 0,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
             parcel.readString()!!,
             parcel.readString()!!,
             parcel.readString()!!,
@@ -152,13 +166,18 @@ data class SettingsModel(var appToken: String,
 
         dest?.writeString(mopubBannerAdUnitId)
         dest?.writeString(mopubMediumAdUnitId)
+        dest?.writeString(mopubMediumVideoAdUnitId)
         dest?.writeString(mopubLeaderboardAdUnitId)
         dest?.writeString(mopubInterstitialAdUnitId)
+        dest?.writeString(mopubInterstitialVideoAdUnitId)
+        dest?.writeString(mopubRewardedAdUnitId)
 
         dest?.writeString(mopubMediationBannerAdUnitId)
         dest?.writeString(mopubMediationMediumAdUnitId)
+        dest?.writeString(mopubMediationMediumVideoAdUnitId)
         dest?.writeString(mopubMediationLeaderboardAdUnitId)
         dest?.writeString(mopubMediationInterstitialAdUnitId)
+        dest?.writeString(mopubMediationInterstitialVideoAdUnitId)
         dest?.writeString(mopubMediationRewardedAdUnitId)
         dest?.writeString(mopubMediationNativeAdUnitId)
 
@@ -176,9 +195,11 @@ data class SettingsModel(var appToken: String,
         dest?.writeString(admobAppId)
         dest?.writeString(admobBannerAdUnitId)
         dest?.writeString(admobMediumAdUnitId)
+        dest?.writeString(admobMediumVideoAdUnitId)
         dest?.writeString(admobLeaderboardAdUnitId)
         dest?.writeString(admobRewardedAdUnitId)
         dest?.writeString(admobInterstitialAdUnitId)
+        dest?.writeString(admobInterstitialVideoAdUnitId)
         dest?.writeString(admobNativeAdUnitId)
     }
 

@@ -85,7 +85,9 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
         val event = ReportingEventBridge("Standalone Interstitial")
         event.setAdSize(AdSize.SIZE_INTERSTITIAL)
 
-        HyBid.getReportingController().reportEvent(event.reportingEvent)
+        if (HyBid.getReportingController() != null) {
+            HyBid.getReportingController().reportEvent(event.reportingEvent)
+        }
     }
 
     override fun onInterstitialLoaded() {

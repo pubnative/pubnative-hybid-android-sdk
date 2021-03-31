@@ -43,6 +43,7 @@ import net.pubnative.lite.sdk.auction.Auction;
 import net.pubnative.lite.sdk.auction.HyBidAdSource;
 import net.pubnative.lite.sdk.auction.VastTagAdSource;
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
+import net.pubnative.lite.sdk.config.ConfigManager;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdResponse;
 import net.pubnative.lite.sdk.models.AdSize;
@@ -69,6 +70,9 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     private Position mPosition;
     private WindowManager mWindowManager;
     private FrameLayout mContainer;
+    private static String mScreenIabCategory;
+    private static String mScreenKeywords;
+    private static String mUserIntent;
 
     public interface Listener {
         void onAdLoaded();
@@ -134,17 +138,17 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         if (TextUtils.isEmpty(zoneId)) {
             invokeOnLoadFailed(new Exception("Invalid zone id provided"));
         } else {
-            RemoteConfigModel configModel = HyBid.getConfigManager().getConfig();
-            if (configModel != null
-                    && configModel.placement_info != null
-                    && configModel.placement_info.placements != null
-                    && !configModel.placement_info.placements.isEmpty()
-                    && configModel.placement_info.placements.get(zoneId) != null
-                    && !TextUtils.isEmpty(configModel.placement_info.placements.get(zoneId).type)
-                    && configModel.placement_info.placements.get(zoneId).type.equals("auction")
-                    && configModel.placement_info.placements.get(zoneId).ad_sources != null) {
+            ConfigManager configManager = HyBid.getConfigManager();
+            if (configManager != null && configManager.getConfig() != null
+                    && configManager.getConfig().placement_info != null
+                    && configManager.getConfig().placement_info.placements != null
+                    && !configManager.getConfig().placement_info.placements.isEmpty()
+                    && configManager.getConfig().placement_info.placements.get(zoneId) != null
+                    && !TextUtils.isEmpty(configManager.getConfig().placement_info.placements.get(zoneId).type)
+                    && configManager.getConfig().placement_info.placements.get(zoneId).type.equals("auction")
+                    && configManager.getConfig().placement_info.placements.get(zoneId).ad_sources != null) {
 
-                RemoteConfigPlacement placement = configModel.placement_info.placements.get(zoneId);
+                RemoteConfigPlacement placement = configManager.getConfig().placement_info.placements.get(zoneId);
                 long timeout = placement.timeout != null ? placement.timeout : 5000;
                 List<AdSource> adSources = new ArrayList<>();
 
@@ -466,6 +470,18 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         if (mRequestManager != null) {
             mRequestManager.setIntegrationType(isMediation ? IntegrationType.MEDIATION : IntegrationType.STANDALONE);
         }
+    }
+
+    public void setScreenIabCategory(String screenIabCategory) {
+        mScreenIabCategory = screenIabCategory;
+    }
+
+    public void setScreenKeywords(String screenKeywords){
+        mScreenKeywords = screenKeywords;
+    }
+
+    public void setUserIntent(String userIntent){
+        mUserIntent = userIntent;
     }
 
     //------------------------------ RequestManager Callbacks --------------------------------------

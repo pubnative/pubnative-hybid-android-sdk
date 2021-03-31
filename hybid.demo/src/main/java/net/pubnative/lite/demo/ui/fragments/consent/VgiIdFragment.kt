@@ -17,7 +17,7 @@ class VgiIdFragment : Fragment(){
 
     private lateinit var vgiIdView: TextView
 
-    private val mVgiIdManager : VgiIdManager = HyBid.getVgiIdManager()
+    private val mVgiIdManager : VgiIdManager? = HyBid.getVgiIdManager()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_vgi_id, container, false)
 
@@ -32,17 +32,23 @@ class VgiIdFragment : Fragment(){
     }
 
     private fun initVgiId(){
-        mVgiIdManager.init()
-        Toast.makeText(context, "VgiId Initiated", Toast.LENGTH_SHORT).show()
+        if (mVgiIdManager != null) {
+            mVgiIdManager?.init()
+            Toast.makeText(context, "VGI ID initialised", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "VGI ID not initialised", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun showVgiId(){
-        val vgiIdModel = mVgiIdManager.vgiIdModel
+        val vgiIdModel = mVgiIdManager?.vgiIdModel
 
         if (vgiIdModel != null) {
             val vgiIdModelString = vgiIdModel.toJson().toString()
             vgiIdView.text = JsonUtils.toFormattedJson(vgiIdModelString)
-            Toast.makeText(context, "VgiId retrieved", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "VGI ID retrieved", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "The VGI ID has not been initialised", Toast.LENGTH_SHORT).show()
         }
     }
 }

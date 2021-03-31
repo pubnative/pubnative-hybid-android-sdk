@@ -1,4 +1,4 @@
-package net.pubnative.lite.demo.ui.fragments.unity
+package net.pubnative.lite.demo.ui.fragments.hybid
 
 import android.os.Bundle
 import android.text.TextUtils
@@ -23,9 +23,9 @@ import net.pubnative.lite.sdk.views.PNAdView
  * Created by erosgarciaponte on 30.01.18.
  */
 
-class StickyBannerFragment : Fragment(), PNAdView.Listener, RadioGroup.OnCheckedChangeListener {
+class HyBidStickyBannerFragment : Fragment(), PNAdView.Listener, RadioGroup.OnCheckedChangeListener {
 
-    private val TAG: String = StickyBannerFragment::class.java.simpleName
+    private val TAG: String = HyBidStickyBannerFragment::class.java.simpleName
 
     private var zoneId: String? = null
 
@@ -98,7 +98,9 @@ class StickyBannerFragment : Fragment(), PNAdView.Listener, RadioGroup.OnChecked
         val event = ReportingEventBridge("Sticky Banner")
         event.setAdSize(adSize)
 
-        HyBid.getReportingController().reportEvent(event.reportingEvent)
+        if (HyBid.getReportingController() != null) {
+            HyBid.getReportingController().reportEvent(event.reportingEvent)
+        }
     }
 
 

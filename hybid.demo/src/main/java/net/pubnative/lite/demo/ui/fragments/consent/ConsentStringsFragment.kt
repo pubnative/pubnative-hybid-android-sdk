@@ -72,14 +72,16 @@ class ConsentStringsFragment : Fragment() {
     }
 
     private fun setupStrings() {
-        val gdprConsentString = HyBid.getUserDataManager().iabgdprConsentString
-        if (!TextUtils.isEmpty(gdprConsentString)) {
-            gdprConsentInput.setText(gdprConsentString)
-        }
+        if (HyBid.getUserDataManager() != null) {
+            val gdprConsentString = HyBid.getUserDataManager().iabgdprConsentString
+            if (!TextUtils.isEmpty(gdprConsentString)) {
+                gdprConsentInput.setText(gdprConsentString)
+            }
 
-        val ccpaConsentString = HyBid.getUserDataManager().iabusPrivacyString
-        if (!TextUtils.isEmpty(ccpaConsentString)) {
-            ccpaConsentInput.setText(ccpaConsentString)
+            val ccpaConsentString = HyBid.getUserDataManager().iabusPrivacyString
+            if (!TextUtils.isEmpty(ccpaConsentString)) {
+                ccpaConsentInput.setText(ccpaConsentString)
+            }
         }
     }
 }

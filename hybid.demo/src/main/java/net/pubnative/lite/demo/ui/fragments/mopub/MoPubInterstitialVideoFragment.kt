@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package net.pubnative.lite.demo.ui.fragments.hybid
+package net.pubnative.lite.demo.ui.fragments.mopub
 
 import android.os.Bundle
 import android.text.TextUtils
@@ -28,61 +28,52 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.Button
+import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.squareup.picasso.Picasso
+import com.mopub.mobileads.MoPubErrorCode
+import com.mopub.mobileads.MoPubInterstitial
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
-import net.pubnative.lite.sdk.HyBid
-import net.pubnative.lite.sdk.models.NativeAd
-import net.pubnative.lite.sdk.reporting.ReportingEventBridge
-import net.pubnative.lite.sdk.request.HyBidNativeAdRequest
+import net.pubnative.lite.sdk.api.InterstitialRequestManager
+import net.pubnative.lite.sdk.api.RequestManager
+import net.pubnative.lite.sdk.models.Ad
+import net.pubnative.lite.sdk.utils.HeaderBiddingUtils
 
-class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, NativeAd.Listener {
-    val TAG = HyBidNativeFragment::class.java.simpleName
+/**
+ * Created by erosgarciaponte on 30.01.18.
+ */
+class MoPubInterstitialVideoFragment : Fragment(R.layout.fragment_mopub_interstitial), RequestManager.RequestListener, MoPubInterstitial.InterstitialAdListener {
+    val TAG = MoPubInterstitialVideoFragment::class.java.simpleName
 
+    private lateinit var requestManager: RequestManager
+    private lateinit var mopubInterstitial: MoPubInterstitial
     private var zoneId: String? = null
-
-    private lateinit var adContainer: ViewGroup
-    private lateinit var adIcon: ImageView
-    private lateinit var adBanner: ImageView
-    private lateinit var adTitle: TextView
-    private lateinit var adDescription: TextView
-    private lateinit var adChoices: FrameLayout
-    private lateinit var adCallToAction: Button
-    private lateinit var adRating: RatingBar
+    private var adUnitId: String? = null
 
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
 
-    private var nativeAd: NativeAd? = null
-    private var nativeAdRequest: HyBidNativeAdRequest? = null
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_hybid_native, container, false)
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         errorView = view.findViewById(R.id.view_error)
+        view.findViewById<TextView>(R.id.label_creative_id).visibility = View.VISIBLE
         creativeIdView = view.findViewById(R.id.view_creative_id)
-
+        creativeIdView.visibility = View.VISIBLE
         loadButton = view.findViewById(R.id.button_load)
 
-        adContainer = view.findViewById(R.id.ad_container)
-        adIcon = view.findViewById(R.id.ad_icon)
-        adBanner = view.findViewById(R.id.ad_banner)
-        adTitle = view.findViewById(R.id.ad_title)
-        adDescription = view.findViewById(R.id.ad_description)
-        adChoices = view.findViewById(R.id.ad_choices)
-        adCallToAction = view.findViewById(R.id.ad_call_to_action)
-        adRating = view.findViewById(R.id.ad_rating)
+        adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubInterstitialVideoAdUnitId
+
+        requestManager = InterstitialRequestManager()
+        mopubInterstitial = MoPubInterstitial(requireActivity(), adUnitId!!)
+        mopubInterstitial.interstitialAdListener = this
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
-
-        nativeAdRequest = HyBidNativeAdRequest()
 
         loadButton.setOnClickListener {
             errorView.text = ""
@@ -96,38 +87,22 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
     }
 
     override fun onDestroy() {
-        nativeAd?.stopTracking()
         super.onDestroy()
+        mopubInterstitial.destroy()
     }
 
     fun loadPNAd() {
-        nativeAdRequest?.load(zoneId, this)
-
-        val event = ReportingEventBridge("Standalone Native")
-
-        if (HyBid.getReportingController() != null) {
-            HyBid.getReportingController().reportEvent(event.reportingEvent)
-        }
+        requestManager.setZoneId(zoneId)
+        requestManager.setRequestListener(this)
+        requestManager.requestAd()
     }
 
-    fun renderAd(ad: NativeAd?) {
-        nativeAd = ad
-        adTitle.text = ad?.title
-        adDescription.text = ad?.description
-        adCallToAction.text = ad?.callToActionText
-        adChoices.addView(ad?.getContentInfo(context))
+    // --------------- HyBid Request Listener --------------------
+    override fun onRequestSuccess(ad: Ad?) {
+        mopubInterstitial.setKeywords(HeaderBiddingUtils.getHeaderBiddingKeywords(ad))
+        mopubInterstitial.load()
 
-        val rating = ad?.rating?.toFloat()
-        adRating.rating = rating!!
-
-        Picasso.get().load(ad.bannerUrl).into(adBanner)
-        Picasso.get().load(ad.iconUrl).into(adIcon)
-
-        ad.startTracking(adContainer, this)
-    }
-
-    override fun onRequestSuccess(ad: NativeAd?) {
-        renderAd(ad)
+        Log.d(TAG, "onRequestSuccess")
         displayLogs()
         if (!TextUtils.isEmpty(ad?.creativeId)) {
             creativeIdView.text = ad?.creativeId
@@ -135,18 +110,32 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
     }
 
     override fun onRequestFail(throwable: Throwable?) {
-        Log.e(TAG, "onAdLoadFailed", throwable)
+        Log.d(TAG, "onRequestFail: ", throwable)
         errorView.text = throwable?.message
         creativeIdView.text = ""
         displayLogs()
     }
 
-    override fun onAdImpression(PNAPIAdModel: NativeAd?, view: View?) {
-        Log.d(TAG, "onAdImpression")
+    // ------------- MoPub Interstitial Listener ------------------
+    override fun onInterstitialLoaded(interstitial: MoPubInterstitial?) {
+        mopubInterstitial.show()
+        Log.d(TAG, "onInterstitialLoaded")
     }
 
-    override fun onAdClick(PNAPIAdModel: NativeAd?, view: View?) {
-        Log.d(TAG, "onAdClick")
+    override fun onInterstitialFailed(interstitial: MoPubInterstitial?, errorCode: MoPubErrorCode?) {
+        Log.d(TAG, "onInterstitialFailed")
+    }
+
+    override fun onInterstitialShown(interstitial: MoPubInterstitial?) {
+        Log.d(TAG, "onInterstitialShown")
+    }
+
+    override fun onInterstitialDismissed(interstitial: MoPubInterstitial?) {
+        Log.d(TAG, "onInterstitialDismissed")
+    }
+
+    override fun onInterstitialClicked(interstitial: MoPubInterstitial?) {
+        Log.d(TAG, "onInterstitialClicked")
     }
 
     private fun displayLogs() {

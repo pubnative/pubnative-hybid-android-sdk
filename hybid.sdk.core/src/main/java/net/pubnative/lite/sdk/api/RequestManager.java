@@ -53,9 +53,9 @@ public class RequestManager {
 
     private static final String TAG = RequestManager.class.getSimpleName();
     private final ConfigManager mConfigManager;
-    private final PNApiClient mApiClient;
-    private final AdCache mAdCache;
-    private final VideoAdCache mVideoCache;
+    private PNApiClient mApiClient;
+    private AdCache mAdCache;
+    private VideoAdCache mVideoCache;
     private final AdRequestFactory mAdRequestFactory;
     private final PNInitializationHelper mInitializationHelper;
     private String mZoneId;
@@ -132,6 +132,9 @@ public class RequestManager {
     }
 
     void requestAdFromApi(final AdRequest adRequest) {
+        if (mApiClient == null) {
+            mApiClient = HyBid.getApiClient();
+        }
         Logger.d(TAG, "Requesting ad for zone id: " + adRequest.zoneid);
         mApiClient.getAd(adRequest, new PNApiClient.AdRequestListener() {
             @Override
@@ -159,6 +162,12 @@ public class RequestManager {
     }
 
     private void processAd(final AdRequest adRequest, final Ad ad) {
+        if (mAdCache == null) {
+            mAdCache = HyBid.getAdCache();
+        }
+        if (mVideoCache == null) {
+            mVideoCache = HyBid.getVideoAdCache();
+        }
         ad.setZoneId(adRequest.zoneid);
         mAdCache.put(adRequest.zoneid, ad);
 

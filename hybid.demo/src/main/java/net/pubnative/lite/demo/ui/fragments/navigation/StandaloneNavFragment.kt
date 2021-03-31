@@ -14,7 +14,7 @@ import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.hybid.*
-import net.pubnative.lite.demo.ui.activities.unity.StickyTopBottomBannerActivity
+import net.pubnative.lite.demo.ui.activities.hybid.HyBidStickyBannerActivity
 import net.pubnative.lite.demo.ui.adapters.ZoneIdAdapter
 import net.pubnative.lite.demo.ui.listeners.ZoneIdClickListener
 
@@ -66,7 +66,7 @@ class StandaloneNavFragment : Fragment() {
 
         stickyButton = view.findViewById(R.id.sticky_banner)
         stickyButton.setOnClickListener {
-            val intent = Intent(activity, StickyTopBottomBannerActivity::class.java)
+            val intent = Intent(activity, HyBidStickyBannerActivity::class.java)
             intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
             startActivity(intent)
         }

@@ -29,6 +29,10 @@ import net.pubnative.lite.sdk.models.NativeAd;
 
 public class HyBidNativeAdRequest implements RequestManager.RequestListener {
 
+    private static String mScreenIabCategory;
+    private static String mScreenKeywords;
+    private static String mUserIntent;
+
     public interface RequestListener {
         void onRequestSuccess(NativeAd ad);
 
@@ -72,5 +76,17 @@ public class HyBidNativeAdRequest implements RequestManager.RequestListener {
         if (mRequestManager != null) {
             mRequestManager.setIntegrationType(isMediation ? IntegrationType.MEDIATION : IntegrationType.STANDALONE);
         }
+    }
+
+    public void setScreenIabCategory(String screenIabCategory) {
+        mScreenIabCategory = screenIabCategory;
+    }
+
+    public void setScreenKeywords(String screenKeywords){
+        mScreenKeywords = screenKeywords;
+    }
+
+    public void setUserIntent(String userIntent){
+        mUserIntent = userIntent;
     }
 }

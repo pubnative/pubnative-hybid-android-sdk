@@ -48,9 +48,9 @@ public class AdRequestFactory {
         void onRequestCreated(AdRequest adRequest);
     }
 
-    private final DeviceInfo mDeviceInfo;
-    private final HyBidLocationManager mLocationManager;
-    private final UserDataManager mUserDataManager;
+    private DeviceInfo mDeviceInfo;
+    private HyBidLocationManager mLocationManager;
+    private UserDataManager mUserDataManager;
     private IntegrationType mIntegrationType = IntegrationType.HEADER_BIDDING;
     private boolean mIsRewarded;
 
@@ -65,9 +65,18 @@ public class AdRequestFactory {
     }
 
     public void createAdRequest(final String zoneid, final AdSize adSize, final boolean isRewarded, final Callback callback) {
-        String advertisingId = mDeviceInfo.getAdvertisingId();
-        boolean limitTracking = mDeviceInfo.limitTracking();
-        Context context = mDeviceInfo.getContext();
+        if (mDeviceInfo == null) {
+            mDeviceInfo = HyBid.getDeviceInfo();
+        }
+
+        String advertisingId = null;
+        boolean limitTracking = false;
+        Context context = null;
+        if (mDeviceInfo != null) {
+            advertisingId = mDeviceInfo.getAdvertisingId();
+            limitTracking = mDeviceInfo.limitTracking();
+            context = mDeviceInfo.getContext();
+        }
         mIsRewarded = isRewarded;
         if (TextUtils.isEmpty(advertisingId) && context != null) {
             try {
@@ -92,6 +101,9 @@ public class AdRequestFactory {
     }
 
     AdRequest buildRequest(final String zoneid, AdSize adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType) {
+        if (mUserDataManager == null) {
+            mUserDataManager = HyBid.getUserDataManager();
+        }
         boolean isCCPAOptOut = mUserDataManager.isCCPAOptOut();
         AdRequest adRequest = new AdRequest();
         adRequest.zoneid = zoneid;

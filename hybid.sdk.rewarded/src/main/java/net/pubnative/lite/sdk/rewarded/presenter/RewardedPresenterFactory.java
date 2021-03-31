@@ -24,6 +24,7 @@ package net.pubnative.lite.sdk.rewarded.presenter;
 
 import android.content.Context;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.utils.AdTracker;
@@ -51,7 +52,9 @@ public class RewardedPresenterFactory {
         final RewardedPresenterDecorator rewardedPresenterDecorator =
                 new RewardedPresenterDecorator(rewardedPresenter, new AdTracker(
                         ad.getBeacons(Ad.Beacon.IMPRESSION),
-                        ad.getBeacons(Ad.Beacon.CLICK)), rewardedPresenterListener);
+                        ad.getBeacons(Ad.Beacon.CLICK)),
+                        HyBid.getReportingController(),
+                        rewardedPresenterListener);
         rewardedPresenter.setListener(rewardedPresenterDecorator);
         return rewardedPresenterDecorator;
     }

@@ -28,6 +28,11 @@ class MediationNavFragment : Fragment() {
             startActivity(intent)
         }
 
+        view.findViewById<Button>(R.id.button_mopub_medium_video).setOnClickListener {
+            val intent = Intent(activity, MoPubMediationMRectVideoActivity::class.java)
+            startActivity(intent)
+        }
+
         view.findViewById<Button>(R.id.button_mopub_leaderboard).setOnClickListener {
             val intent = Intent(activity, MoPubMediationLeaderboardActivity::class.java)
             startActivity(intent)
@@ -35,6 +40,11 @@ class MediationNavFragment : Fragment() {
 
         view.findViewById<Button>(R.id.button_mopub_interstitial).setOnClickListener {
             val intent = Intent(activity, MoPubMediationInterstitialActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_mopub_interstitial_video).setOnClickListener {
+            val intent = Intent(activity, MoPubMediationInterstitialVideoActivity::class.java)
             startActivity(intent)
         }
 
@@ -58,6 +68,11 @@ class MediationNavFragment : Fragment() {
             startActivity(intent)
         }
 
+        view.findViewById<Button>(R.id.button_admob_medium_video).setOnClickListener {
+            val intent = Intent(activity, AdmobMediationMRectVideoActivity::class.java)
+            startActivity(intent)
+        }
+
         view.findViewById<Button>(R.id.button_admob_leaderboard).setOnClickListener {
             val intent = Intent(activity, AdmobMediationLeaderboardActivity::class.java)
             startActivity(intent)
@@ -65,6 +80,11 @@ class MediationNavFragment : Fragment() {
 
         view.findViewById<Button>(R.id.button_admob_interstitial).setOnClickListener {
             val intent = Intent(activity, AdmobMediationInterstitialActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_admob_interstitial_video).setOnClickListener {
+            val intent = Intent(activity, AdmobMediationInterstitialVideoActivity::class.java)
             startActivity(intent)
         }
 
