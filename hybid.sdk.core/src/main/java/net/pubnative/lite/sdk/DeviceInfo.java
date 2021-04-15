@@ -107,6 +107,17 @@ public class DeviceInfo {
         getDeviceScreenDimensions();
     }
 
+    public DeviceInfo(Context context) {
+        mContext = context.getApplicationContext();
+        mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        getDeviceScreenDimensions();
+    }
+
+    public void initialize(Listener listener) {
+        mListener = listener;
+        fetchAdvertisingId();
+    }
+
     private void fetchAdvertisingId() {
         try {
             PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(mContext, new HyBidAdvertisingId.Listener() {

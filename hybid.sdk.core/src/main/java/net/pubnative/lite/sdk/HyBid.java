@@ -101,6 +101,7 @@ public class HyBid {
                 sLocationManager.startLocationUpdates();
             }
         }
+        sDeviceInfo = new DeviceInfo(application.getApplicationContext());
         sUserDataManager = new UserDataManager(application.getApplicationContext(), appToken);
         sConfigManager = new ConfigManager(application.getApplicationContext(), appToken);
         sAdCache = new AdCache();
@@ -110,35 +111,9 @@ public class HyBid {
         sReportingController = new ReportingController();
         sViewabilityManager = new ViewabilityManager(application, sReportingController);
         sReportingDelegate = new ReportingDelegate(application.getApplicationContext(), REPORTING_URL);
-        sDeviceInfo = new DeviceInfo(application.getApplicationContext(), new DeviceInfo.Listener() {
+        sDeviceInfo.initialize(new DeviceInfo.Listener() {
             @Override
             public void onInfoLoaded() {
-                /*sConfigManager.initialize(new ConfigManager.ConfigListener() {
-                    @Override
-                    public void onConfigFetched() {
-                        sUserDataManager.initialize(sDeviceInfo.getAdvertisingId(), new UserDataManager.UserDataInitialisationListener() {
-                            @Override
-                            public void onDataInitialised(boolean success) {
-                                if (initialisationListener != null) {
-                                    initialisationListener.onInitialisationFinished(success);
-                                }
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onConfigFetchFailed(Throwable error) {
-                        Logger.e(TAG, "Error fetching config: ", error);
-                        sUserDataManager.initialize(sDeviceInfo.getAdvertisingId(), new UserDataManager.UserDataInitialisationListener() {
-                            @Override
-                            public void onDataInitialised(boolean success) {
-                                if (initialisationListener != null) {
-                                    initialisationListener.onInitialisationFinished(success);
-                                }
-                            }
-                        });
-                    }
-                });*/
                 sUserDataManager.initialize(sDeviceInfo.getAdvertisingId(), new UserDataManager.UserDataInitialisationListener() {
                     @Override
                     public void onDataInitialised(boolean success) {
@@ -301,43 +276,43 @@ public class HyBid {
         void onInitialisationFinished(boolean success);
     }
 
-    public static void setIabCategory(String iabCategory){
+    public static void setIabCategory(String iabCategory) {
         sIabCategory = iabCategory;
     }
 
-    public static String getIabCategory(){
+    public static String getIabCategory() {
         return sIabCategory;
     }
 
-    public static void setIabSubcategory(String iabSubcategory){
+    public static void setIabSubcategory(String iabSubcategory) {
         sIabSubcategory = iabSubcategory;
     }
 
-    public static String getsIabSubcategory(){
+    public static String getsIabSubcategory() {
         return sIabSubcategory;
     }
 
-    public static void setAppVersion(String appVersion){
+    public static void setAppVersion(String appVersion) {
         sAppVersion = appVersion;
     }
 
-    public static String getAppVersion(){
+    public static String getAppVersion() {
         return sAppVersion;
     }
 
-    public static void setDeveloperDomain(String developerDomain){
+    public static void setDeveloperDomain(String developerDomain) {
         sDeveloperDomain = developerDomain;
     }
 
-    public static String getDeveloperDomain(){
+    public static String getDeveloperDomain() {
         return sDeveloperDomain;
     }
 
-    public static void setContentAgeRating(String contentAgeRating){
+    public static void setContentAgeRating(String contentAgeRating) {
         sContentAgeRating = contentAgeRating;
     }
 
-    public static String getContentAgeRating(){
+    public static String getContentAgeRating() {
         return sContentAgeRating;
     }
 }
