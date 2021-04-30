@@ -3,6 +3,7 @@ package net.pubnative.lite.sdk.vpaid;
 import android.content.Context;
 import android.view.View;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
 import net.pubnative.lite.sdk.vpaid.enums.AdFormat;
@@ -74,8 +75,7 @@ public class VideoAd extends BaseVideoAd {
                         getViewabilityAdSession().fireImpression();
                         getAdController().playAd();
 
-                        if (isPhoneMuted())
-                            getAdController().toggleMute();
+                        validateAudioState();
 
                         if (mBannerView.getVisibility() != View.VISIBLE) {
                             mBannerView.setVisibility(View.VISIBLE);
@@ -93,6 +93,23 @@ public class VideoAd extends BaseVideoAd {
                 }
             }
         });
+    }
+
+    private void validateAudioState() {
+        boolean isMuted = false;
+        switch (HyBid.getVideoAudioStatus()) {
+            case DEFAULT:
+                if (isPhoneMuted())
+                    isMuted = true;
+                break;
+            case MUTED:
+                isMuted = true;
+                break;
+        }
+
+        if (isMuted) {
+            getAdController().toggleMute();
+        }
     }
 
     /**

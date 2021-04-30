@@ -55,6 +55,7 @@ class MoPubInterstitialVideoFragment : Fragment(R.layout.fragment_mopub_intersti
     private var adUnitId: String? = null
 
     private lateinit var loadButton: Button
+    private lateinit var showButton: Button
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
 
@@ -66,6 +67,8 @@ class MoPubInterstitialVideoFragment : Fragment(R.layout.fragment_mopub_intersti
         creativeIdView = view.findViewById(R.id.view_creative_id)
         creativeIdView.visibility = View.VISIBLE
         loadButton = view.findViewById(R.id.button_load)
+        showButton = view.findViewById(R.id.button_show)
+        showButton.isEnabled = false
 
         adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubInterstitialVideoAdUnitId
 
@@ -80,6 +83,10 @@ class MoPubInterstitialVideoFragment : Fragment(R.layout.fragment_mopub_intersti
             val activity = activity as TabActivity
             activity.notifyAdCleaned()
             loadPNAd()
+        }
+
+        showButton.setOnClickListener {
+            mopubInterstitial.show()
         }
 
         errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
@@ -118,7 +125,7 @@ class MoPubInterstitialVideoFragment : Fragment(R.layout.fragment_mopub_intersti
 
     // ------------- MoPub Interstitial Listener ------------------
     override fun onInterstitialLoaded(interstitial: MoPubInterstitial?) {
-        mopubInterstitial.show()
+        showButton.isEnabled = true
         Log.d(TAG, "onInterstitialLoaded")
     }
 

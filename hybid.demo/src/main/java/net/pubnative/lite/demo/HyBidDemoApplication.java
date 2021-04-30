@@ -41,6 +41,7 @@ import net.pubnative.lite.demo.models.SettingsModel;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.api.ApiManager;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.vpaid.enums.AudioState;
 
 import java.util.ArrayList;
 
@@ -90,6 +91,8 @@ public class HyBidDemoApplication extends MultiDexApplication {
         HyBid.setGender(settings.getGender());
         HyBid.setLocationTrackingEnabled(true);
         HyBid.setLocationUpdatesEnabled(true);
+
+        HyBid.setVideoAudioStatus(AudioState.DEFAULT);
 
         HyBid.setInterstitialSkipOffset(4);
 

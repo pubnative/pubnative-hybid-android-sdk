@@ -174,11 +174,12 @@ public class VastProcessor {
                 List<MediaFile> mediaFileList = linear.getMediaFiles().getMediaFileList();
 
                 String vpaidJsUrl = getVpaidJsUrl(mediaFileList);
-                if (!TextUtils.isEmpty(vpaidJsUrl)) {
+                List<MediaFile> nonVpaidMediaFiles = filterNonVpaid(mediaFileList);
+                if (!TextUtils.isEmpty(vpaidJsUrl) && nonVpaidMediaFiles.isEmpty()) {
                     adParams.setVpaid();
                     adParams.setVpaidJsUrl(vpaidJsUrl);
                 } else {
-                    List<MediaFile> sortedVideoFilesList = sortedMediaFiles(mediaFileList, parseParams);
+                    List<MediaFile> sortedVideoFilesList = sortedMediaFiles(nonVpaidMediaFiles, parseParams);
                     List<String> videoFileUrlsList = new ArrayList<>();
                     for (MediaFile mediaFile : sortedVideoFilesList) {
                         if (mediaFile.getText() != null) {
@@ -235,8 +236,8 @@ public class VastProcessor {
         List<VerificationScriptResource> verificationScriptResources = new ArrayList<>();
         adParams.setVerificationScriptResources(verificationScriptResources);
 
-        if (adSource.getExtensions() != null) {
-            for (Extension extension : adSource.getExtensions()) {
+        if (adSource.getExtensions() != null && adSource.getExtensions().getExtensions() != null) {
+            for (Extension extension : adSource.getExtensions().getExtensions()) {
                 if (!TextUtils.isEmpty(extension.getType()) && extension.getType().equals(EXTENSION_TYPE_AD_VERIFICATION)) {
                     AdVerifications adVerifications = extension.getAdVerifications();
                     if (adVerifications != null) {
@@ -265,6 +266,16 @@ public class VastProcessor {
             }
         }
         return null;
+    }
+
+    private List<MediaFile> filterNonVpaid(List<MediaFile> mediaFileList) {
+        List<MediaFile> nonVpaidList = new ArrayList<>(mediaFileList);
+        for (MediaFile mediaFile : mediaFileList) {
+            if (mediaFile.getApiFramework() != null && mediaFile.getApiFramework().equalsIgnoreCase("VPAID")) {
+                nonVpaidList.remove(mediaFile);
+            }
+        }
+        return nonVpaidList;
     }
 
     private String parseAdParameters(Linear linear) {

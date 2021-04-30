@@ -23,6 +23,8 @@
 package net.pubnative.lite.demo.ui.fragments.hybid
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.TextUtils
 import android.util.Log
 import android.view.Gravity
@@ -41,18 +43,23 @@ import net.pubnative.lite.sdk.models.AdSize
 import net.pubnative.lite.sdk.reporting.ReportingEventBridge
 import net.pubnative.lite.sdk.views.HyBidAdView
 import net.pubnative.lite.sdk.views.PNAdView
+import java.util.*
+import kotlin.concurrent.schedule
 
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
 class HyBidBannerFragment : Fragment(), PNAdView.Listener {
-
     val TAG = HyBidBannerFragment::class.java.simpleName
 
+    private val AUTO_REFRESH_MILLIS : Long = 30 * 1000
+
     private var zoneId: String? = null
+    private val handler = Handler(Looper.getMainLooper())
 
     private lateinit var hybidBanner: HyBidAdView
+    private lateinit var autoRefreshSwitch: Switch
     private lateinit var loadButton: Button
     private lateinit var adSizeSpinner: Spinner
     private lateinit var spinnerAdapter: ArrayAdapter<AdSize>
@@ -84,16 +91,20 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
         loadButton = view.findViewById(R.id.button_load)
         hybidBanner = view.findViewById(R.id.hybid_banner)
         adSizeSpinner = view.findViewById(R.id.spinner_ad_size)
+        autoRefreshSwitch = view.findViewById(R.id.check_auto_refresh)
+
+        autoRefreshSwitch.isChecked = false
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
         hybidBanner.setAdSize(AdSize.SIZE_320x50)
 
         loadButton.setOnClickListener {
-            errorView.text = ""
             val activity = activity as TabActivity
+            handler.removeCallbacksAndMessages(null)
             activity.notifyAdCleaned()
             loadPNAd()
+            autoRefresh()
         }
 
         errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
@@ -104,6 +115,8 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
     }
 
     fun loadPNAd() {
+
+        errorView.text = ""
 
         val adSize = adSizes[adSizeSpinner.selectedItemPosition]
 
@@ -126,6 +139,21 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
         }
     }
 
+    fun autoRefresh(){
+        if (autoRefreshSwitch.isChecked){
+            handler.postDelayed({
+                loadPNAd()
+                autoRefresh()
+            }, AUTO_REFRESH_MILLIS)
+        } else {
+            handler.removeCallbacksAndMessages(null)
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        handler.removeCallbacksAndMessages(null);
+    }
 
     // --------------- PNAdView Listener --------------------
     override fun onAdLoaded() {

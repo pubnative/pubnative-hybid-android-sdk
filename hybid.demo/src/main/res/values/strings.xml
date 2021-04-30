@@ -204,7 +204,14 @@
 
     <string name="title_numbereight_audiences">NumberEight Audiences</string>
 
+    <string name="title_mediation_test_suite">Google Mediation Test Suite</string>
+    <string name="open_mediation_test_suite">Open Mediation Test Suite</string>
+
     <string name="title_analytics">Analytics</string>
+
+    <string name="check_auto_refresh">Auto Refresh Enabled (30 sec)</string>
+
+    <string name="title_bundle_id">Bundle Id</string>
 
     <string name="title_vast_tag">Vast Testing</string>
     <string name="vast_tag_input">Enter Vast Adserver URL</string>

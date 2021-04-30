@@ -23,6 +23,7 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
 
     private MRAIDBanner mView;
     private int mSkipOffset;
+    private boolean mIsSkippable = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +37,9 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
         MRAIDBanner adView = null;
         if (getAd() != null) {
             mSkipOffset = getIntent().getIntExtra(EXTRA_SKIP_OFFSET, 0);
+            if (mSkipOffset > 0) {
+                mIsSkippable = false;
+            }
 
             if (getAd().getAssetUrl(APIAsset.HTML_BANNER) != null) {
                 adView = new MRAIDBanner(this, getAd().getAssetUrl(APIAsset.HTML_BANNER), "", mSupportedNativeFeatures,
@@ -72,6 +76,13 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
         super.onDestroy();
     }
 
+    @Override
+    public void onBackPressed() {
+        if (mIsSkippable) {
+            super.onBackPressed();
+        }
+    }
+
     // ----------------------------------- MRAIDViewListener ---------------------------------------
 
     @Override
@@ -96,6 +107,7 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
 
     @Override
     public void mraidShowCloseButton() {
+        mIsSkippable = true;
         showInterstitialCloseButton();
     }
 
@@ -136,6 +148,7 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
 
     @Override
     public void onShowCloseLayout() {
+        mIsSkippable = true;
         showInterstitialCloseButton();
     }
 

@@ -11,5 +11,5 @@ public interface VastAdSource {
 
     Error getError();
 
-    List<Extension> getExtensions();
+    Extensions getExtensions();
 }

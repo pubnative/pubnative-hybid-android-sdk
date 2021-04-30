@@ -100,9 +100,37 @@ public class Utils {
         int blackLines;
         float percent = 0;
 
-        if (mVideoWidth > mVideoHeight) {
+        if (mVideoWidth == mVideoHeight) {
+            if (mResizeWidth == mResizeHeight) {
+                lp.width = mResizeWidth;
+                lp.height = mResizeHeight;
+                percent = 0.0f;
+            } else if (mResizeWidth > mResizeHeight) {
+                lp.height = mResizeHeight;
+                lp.width = (int) ((float) mVideoWidth / (float) mVideoHeight * (float) mResizeHeight);
+
+                blackLines = mResizeWidth - lp.width;
+                if (lp.width != 0) {
+                    percent = blackLines * 100 / lp.width;
+                }
+            } else {
+                lp.width = mResizeWidth;
+                lp.height = (int) ((float) mVideoHeight / (float) mVideoWidth * (float) mResizeWidth);
+
+                blackLines = mResizeHeight - lp.height;
+                if (lp.height != 0) {
+                    percent = blackLines * 100 / lp.height;
+                }
+            }
+        } else if (mVideoWidth > mVideoHeight) {
             lp.width = mResizeWidth;
             lp.height = (int) ((float) mVideoHeight / (float) mVideoWidth * (float) mResizeWidth);
+
+            if (lp.height > mResizeHeight) {
+                float factor = (float) mResizeHeight / (float) lp.height;
+                lp.height = mResizeHeight;
+                lp.width = (int)(lp.width * factor);
+            }
 
             blackLines = mResizeHeight - lp.height;
             if (lp.height != 0) {
@@ -111,6 +139,12 @@ public class Utils {
         } else {
             lp.height = mResizeHeight;
             lp.width = (int) ((float) mVideoWidth / (float) mVideoHeight * (float) mResizeHeight);
+
+            if (lp.width > mResizeWidth) {
+                float factor = (float) mResizeWidth / (float) lp.width;
+                lp.width = mResizeWidth;
+                lp.height = (int)(lp.height * factor);
+            }
 
             blackLines = mResizeWidth - lp.width;
             if (lp.width != 0) {

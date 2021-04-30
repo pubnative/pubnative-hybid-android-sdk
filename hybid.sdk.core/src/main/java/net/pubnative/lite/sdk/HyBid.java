@@ -37,6 +37,7 @@ import net.pubnative.lite.sdk.reporting.ReportingDelegate;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.viewability.ViewabilityManager;
 import net.pubnative.lite.sdk.vpaid.VideoAdCache;
+import net.pubnative.lite.sdk.vpaid.enums.AudioState;
 
 public class HyBid {
     private static final String TAG = HyBid.class.getSimpleName();
@@ -81,6 +82,8 @@ public class HyBid {
     private static String sDeveloperDomain;
     private static String sContentAgeRating;
 
+    private static AudioState sVideoAudioState = AudioState.DEFAULT;
+
     public static void initialize(String appToken,
                                   Application application) {
         initialize(appToken, application, null);
@@ -105,6 +108,7 @@ public class HyBid {
         sUserDataManager = new UserDataManager(application.getApplicationContext(), appToken);
         sConfigManager = new ConfigManager(application.getApplicationContext(), appToken);
         sAdCache = new AdCache();
+
         sVideoAdCache = new VideoAdCache();
         sBrowserManager = new BrowserManager();
         sVgiIdManager = new VgiIdManager(application.getApplicationContext());
@@ -114,6 +118,32 @@ public class HyBid {
         sDeviceInfo.initialize(new DeviceInfo.Listener() {
             @Override
             public void onInfoLoaded() {
+                /*sConfigManager.initialize(new ConfigManager.ConfigListener() {
+                    @Override
+                    public void onConfigFetched() {
+                        sUserDataManager.initialize(sDeviceInfo.getAdvertisingId(), new UserDataManager.UserDataInitialisationListener() {
+                            @Override
+                            public void onDataInitialised(boolean success) {
+                                if (initialisationListener != null) {
+                                    initialisationListener.onInitialisationFinished(success);
+                                }
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onConfigFetchFailed(Throwable error) {
+                        Logger.e(TAG, "Error fetching config: ", error);
+                        sUserDataManager.initialize(sDeviceInfo.getAdvertisingId(), new UserDataManager.UserDataInitialisationListener() {
+                            @Override
+                            public void onDataInitialised(boolean success) {
+                                if (initialisationListener != null) {
+                                    initialisationListener.onInitialisationFinished(success);
+                                }
+                            }
+                        });
+                    }
+                });*/
                 sUserDataManager.initialize(sDeviceInfo.getAdvertisingId(), new UserDataManager.UserDataInitialisationListener() {
                     @Override
                     public void onDataInitialised(boolean success) {
@@ -314,5 +344,25 @@ public class HyBid {
 
     public static String getContentAgeRating() {
         return sContentAgeRating;
+    }
+
+    /**
+     * This method used to set audio state as one of three values :
+     * MUTED
+     * ON
+     * Default
+     */
+    public static void setVideoAudioStatus(AudioState audioState) {
+        sVideoAudioState = audioState;
+    }
+
+    /**
+     * This method used to get audio state
+     * MUTED
+     * ON
+     * Default
+     */
+    public static AudioState getVideoAudioStatus() {
+        return sVideoAudioState;
     }
 }

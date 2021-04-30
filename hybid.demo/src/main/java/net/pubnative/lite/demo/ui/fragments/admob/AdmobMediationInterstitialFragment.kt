@@ -22,6 +22,7 @@ class AdmobMediationInterstitialFragment : Fragment() {
 
     private lateinit var admobInterstitial: InterstitialAd
     private lateinit var loadButton: Button
+    private lateinit var showButton: Button
     private lateinit var errorView: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_admob_interstitial, container, false)
@@ -31,6 +32,8 @@ class AdmobMediationInterstitialFragment : Fragment() {
 
         errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
+        showButton = view.findViewById(R.id.button_show)
+        showButton.isEnabled = false
 
         val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().admobInterstitialAdUnitId
 
@@ -45,6 +48,10 @@ class AdmobMediationInterstitialFragment : Fragment() {
                     .build())
         }
 
+        showButton.setOnClickListener {
+            admobInterstitial.show()
+        }
+
         errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
     }
 
@@ -54,7 +61,7 @@ class AdmobMediationInterstitialFragment : Fragment() {
             super.onAdLoaded()
             Log.d(TAG, "onAdLoaded")
             displayLogs()
-            admobInterstitial.show()
+            showButton.isEnabled = true
         }
 
         override fun onAdFailedToLoad(errorCode: Int) {

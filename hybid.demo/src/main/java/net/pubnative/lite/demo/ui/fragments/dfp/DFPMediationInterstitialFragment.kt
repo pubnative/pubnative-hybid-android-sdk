@@ -23,6 +23,7 @@ class DFPMediationInterstitialFragment : Fragment(){
 
     private lateinit var dfpInterstitial: InterstitialAd
     private lateinit var loadButton: Button
+    private lateinit var showButton: Button
     private lateinit var errorView: TextView
 
 
@@ -33,6 +34,8 @@ class DFPMediationInterstitialFragment : Fragment(){
 
         errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
+        showButton = view.findViewById(R.id.button_show)
+        showButton.isEnabled = false
 
         val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().dfpMediationInterstitialAdUnitId
 
@@ -47,6 +50,10 @@ class DFPMediationInterstitialFragment : Fragment(){
                     .build())
         }
 
+        showButton.setOnClickListener {
+            dfpInterstitial.show()
+        }
+
         errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
     }
 
@@ -56,7 +63,7 @@ class DFPMediationInterstitialFragment : Fragment(){
             super.onAdLoaded()
             Log.d(TAG, "onAdLoaded")
             displayLogs()
-            dfpInterstitial.show()
+            showButton.isEnabled = true
         }
 
         override fun onAdFailedToLoad(loadAdError: LoadAdError) {

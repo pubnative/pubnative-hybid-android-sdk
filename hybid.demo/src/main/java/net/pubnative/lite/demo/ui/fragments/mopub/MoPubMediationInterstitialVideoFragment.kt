@@ -19,6 +19,7 @@ class MoPubMediationInterstitialVideoFragment: Fragment(), MoPubInterstitial.Int
 
     private lateinit var mopubInterstitial: MoPubInterstitial
     private lateinit var loadButton: Button
+    private lateinit var showButton: Button
     private lateinit var errorView: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_mopub_interstitial_video, container, false)
@@ -28,15 +29,21 @@ class MoPubMediationInterstitialVideoFragment: Fragment(), MoPubInterstitial.Int
 
         errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
+        showButton = view.findViewById(R.id.button_show)
+        showButton.isEnabled = false
 
         val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubMediationInterstitialVideoAdUnitId
 
         mopubInterstitial = MoPubInterstitial(requireActivity(), adUnitId)
         mopubInterstitial.interstitialAdListener = this
 
-        view.findViewById<Button>(R.id.button_load).setOnClickListener {
+        loadButton.setOnClickListener {
             errorView.text = ""
             mopubInterstitial.load()
+        }
+
+        showButton.setOnClickListener {
+            mopubInterstitial.show()
         }
     }
 
@@ -47,7 +54,7 @@ class MoPubMediationInterstitialVideoFragment: Fragment(), MoPubInterstitial.Int
 
     // ------------- MoPub Interstitial Listener ------------------
     override fun onInterstitialLoaded(interstitial: MoPubInterstitial?) {
-        mopubInterstitial.show()
+        showButton.isEnabled = true
         Log.d(TAG, "onInterstitialLoaded")
         displayLogs()
     }

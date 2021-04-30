@@ -70,7 +70,13 @@ public class HyBidHeaderBiddingInterstitialCustomEvent extends BaseAd implements
             return;
         }
 
-        mInterstitialPresenter = new InterstitialPresenterFactory(context, mZoneID).createInterstitialPresenter(ad, this);
+        int skipOffset = HyBid.getInterstitialSkipOffset();
+        if (skipOffset > 0) {
+            mInterstitialPresenter = new InterstitialPresenterFactory(context, mZoneID).createInterstitialPresenter(ad, skipOffset, this);
+        } else {
+            mInterstitialPresenter = new InterstitialPresenterFactory(context, mZoneID).createInterstitialPresenter(ad, this);
+        }
+        
         if (mInterstitialPresenter == null) {
             Logger.e(TAG, "Could not create valid interstitial presenter");
             mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);

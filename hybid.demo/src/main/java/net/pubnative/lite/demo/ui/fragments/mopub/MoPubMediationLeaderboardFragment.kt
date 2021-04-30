@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.Switch
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.mopub.mobileads.MoPubErrorCode
@@ -18,6 +19,7 @@ class MoPubMediationLeaderboardFragment : Fragment(), MoPubView.BannerAdListener
     val TAG = MoPubMediationLeaderboardFragment::class.java.simpleName
 
     private lateinit var mopubLeaderboard: MoPubView
+    private lateinit var autoRefreshSwitch: Switch
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
 
@@ -29,6 +31,7 @@ class MoPubMediationLeaderboardFragment : Fragment(), MoPubView.BannerAdListener
         errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
         mopubLeaderboard = view.findViewById(R.id.mopub_leaderboard)
+        autoRefreshSwitch = view.findViewById(R.id.check_auto_refresh)
 
         val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubMediationLeaderboardAdUnitId
 
@@ -36,6 +39,12 @@ class MoPubMediationLeaderboardFragment : Fragment(), MoPubView.BannerAdListener
         mopubLeaderboard.setAdUnitId(adUnitId)
         mopubLeaderboard.adSize = MoPubView.MoPubAdSize.HEIGHT_90
         mopubLeaderboard.autorefreshEnabled = false
+
+        autoRefreshSwitch.visibility = View.VISIBLE
+        autoRefreshSwitch.isChecked = false
+        autoRefreshSwitch.setOnCheckedChangeListener { _, isChecked ->
+            mopubLeaderboard.autorefreshEnabled = isChecked
+        }
 
         view.findViewById<Button>(R.id.button_load).setOnClickListener {
             errorView.text = ""

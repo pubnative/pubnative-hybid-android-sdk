@@ -141,8 +141,7 @@ public class VastRewardedActivity extends HyBidRewardedActivity {
 
         @Override
         public void onAdDismissed() {
-            getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLOSE);
-            finish();
+            dismiss();
         }
 
         @Override

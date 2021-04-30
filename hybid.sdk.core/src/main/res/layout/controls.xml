@@ -12,15 +12,20 @@
         <TextureView
             android:id="@+id/textureView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            />
+            android:layout_height="match_parent" />
 
         <net.pubnative.lite.sdk.vpaid.widget.CountDownView
             android:id="@+id/count_down"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="5dp" />
+
+        <net.pubnative.lite.sdk.vpaid.widget.LinearCountDownView
+            android:id="@+id/linear_count_down"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|start"
-            android:layout_margin="5dp"/>
+            android:layout_gravity="bottom|start" />
 
         <ImageView
             android:id="@+id/muteView"
@@ -35,8 +40,8 @@
             android:layout_height="@dimen/skip_view_size"
             android:layout_gravity="end"
             android:scaleType="center"
-            android:visibility="gone"
-            android:src="@drawable/skip" />
+            android:src="@drawable/skip"
+            android:visibility="gone" />
 
     </FrameLayout>
 

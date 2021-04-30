@@ -17,6 +17,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
     private VideoAdView mVideoPlayer;
     private VideoAd mVideoAd;
     private int mSkipOffset;
+    private boolean mIsSkippable = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +27,9 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
 
         if (getAd() != null) {
             mSkipOffset = getIntent().getIntExtra(EXTRA_SKIP_OFFSET, 0);
+            if (mSkipOffset > 0) {
+                mIsSkippable = false;
+            }
             mVideoAd = new VideoAd(this, getAd().getVast());
             mVideoAd.useMobileNetworkForCaching(true);
             mVideoAd.bindView(mVideoPlayer);
@@ -83,6 +87,13 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        if (mIsSkippable) {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
     protected boolean shouldShowContentInfo() {
         return true;
     }
@@ -115,12 +126,13 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
         @Override
         public void onAdDidReachEnd() {
             mReady = false;
+            mIsSkippable = true;
             showInterstitialCloseButton();
         }
 
         @Override
         public void onAdDismissed() {
-            finish();
+            dismiss();
         }
 
         @Override

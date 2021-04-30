@@ -23,14 +23,13 @@
 package net.pubnative.lite.demo.ui.fragments.hybid
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.Spinner
-import android.widget.TextView
+import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -51,8 +50,12 @@ import net.pubnative.lite.sdk.reporting.ReportingEventBridge
 class HyBidInFeedFragment : Fragment(), InFeedAdListener {
     val TAG = HyBidInFeedFragment::class.java.simpleName
 
-    private var zoneId: String? = null
+    private val AUTO_REFRESH_MILLIS : Long = 30 * 1000
 
+    private var zoneId: String? = null
+    private val handler = Handler(Looper.getMainLooper())
+
+    private lateinit var autoRefreshSwitch: Switch
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
     private lateinit var adSizeSpinner: Spinner
@@ -85,6 +88,9 @@ class HyBidInFeedFragment : Fragment(), InFeedAdListener {
         loadButton = view.findViewById(R.id.button_load)
         recyclerView = view.findViewById(R.id.list)
         adSizeSpinner = view.findViewById(R.id.spinner_ad_size)
+        autoRefreshSwitch = view.findViewById(R.id.check_auto_refresh)
+
+        autoRefreshSwitch.isChecked = false
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
@@ -95,10 +101,11 @@ class HyBidInFeedFragment : Fragment(), InFeedAdListener {
         recyclerView.adapter = adapter
 
         loadButton.setOnClickListener {
-            errorView.text = ""
             val activity = activity as TabActivity
+            handler.removeCallbacksAndMessages(null)
             activity.notifyAdCleaned()
             loadPNAd()
+            autoRefresh()
         }
 
         errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
@@ -109,6 +116,8 @@ class HyBidInFeedFragment : Fragment(), InFeedAdListener {
     }
 
     fun loadPNAd() {
+        errorView.text = ""
+
         val adSize = adSizes[adSizeSpinner.selectedItemPosition]
         adapter.loadWithAd(adSize)
 
@@ -118,6 +127,22 @@ class HyBidInFeedFragment : Fragment(), InFeedAdListener {
         if (HyBid.getReportingController() != null) {
             HyBid.getReportingController().reportEvent(event.reportingEvent)
         }
+    }
+
+    fun autoRefresh(){
+        if (autoRefreshSwitch.isChecked){
+            handler.postDelayed({
+                loadPNAd()
+                autoRefresh()
+            }, AUTO_REFRESH_MILLIS)
+        } else {
+            handler.removeCallbacksAndMessages(null)
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        handler.removeCallbacksAndMessages(null);
     }
 
     // --------------- InFeedAdListener Listener --------------------

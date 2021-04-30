@@ -28,6 +28,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
@@ -48,6 +49,7 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
     private var zoneId: String? = null
 
     private lateinit var loadButton: Button
+    private lateinit var showButton: Button
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
     private var interstitial: HyBidInterstitialAd? = null
@@ -58,6 +60,8 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
         errorView = view.findViewById(R.id.view_error)
         creativeIdView = view.findViewById(R.id.view_creative_id)
         loadButton = view.findViewById(R.id.button_load)
+        showButton = view.findViewById(R.id.button_show)
+        showButton.isEnabled = false
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
@@ -66,6 +70,10 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
             val activity = activity as TabActivity
             activity.notifyAdCleaned()
             loadInterstitialAd()
+        }
+
+        showButton.setOnClickListener {
+            interstitial?.show()
         }
 
         errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
@@ -92,7 +100,7 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
 
     override fun onInterstitialLoaded() {
         Log.d(TAG, "onInterstitialLoaded")
-        interstitial?.show()
+        showButton.isEnabled = true
         displayLogs()
         if (!TextUtils.isEmpty(interstitial?.creativeId)) {
             creativeIdView.text = interstitial?.creativeId

@@ -56,6 +56,7 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
     private var adUnitId: String? = null
 
     private lateinit var loadButton: Button
+    private lateinit var showButton: Button
     private lateinit var errorView: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_dfp_interstitial, container, false)
@@ -65,6 +66,8 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
 
         errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
+        showButton = view.findViewById(R.id.button_show)
+        showButton.isEnabled = false
 
         adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().dfpInterstitialAdUnitId
 
@@ -81,6 +84,10 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
             val activity = activity as TabActivity
             activity.notifyAdCleaned()
             loadPNAd()
+        }
+
+        showButton.setOnClickListener {
+            dfpInterstitial.show()
         }
 
         errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
@@ -115,8 +122,8 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
     private val adListener = object : AdListener() {
         override fun onAdLoaded() {
             super.onAdLoaded()
+            showButton.isEnabled = true
             Log.d(TAG, "onAdLoaded")
-            dfpInterstitial.show()
         }
 
         override fun onAdFailedToLoad(errorCode: Int) {

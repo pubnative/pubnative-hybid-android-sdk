@@ -39,10 +39,10 @@ class VideoAdControllerVast implements VideoAdController {
     private List<TrackingEvent> mTrackingEventsList = new ArrayList<>();
     private MediaPlayer mMediaPlayer;
     private TimerWithPause mTimerWithPause;
+    private TimerWithPause mSkipTimerWithPause;
     private String mVideoUri;
     private String mImageUri;
     private int mSkipTimeMillis = -1;
-    private View mAdView;
 
     private boolean finishedPlaying = false;
 
@@ -75,7 +75,6 @@ class VideoAdControllerVast implements VideoAdController {
     @Override
     public void buildVideoAdView(VideoAdView bannerView) {
         mViewControllerVast.buildVideoAdView(bannerView);
-        mAdView = bannerView;
     }
 
     @Override
@@ -138,10 +137,10 @@ class VideoAdControllerVast implements VideoAdController {
             mMediaPlayer.setSurface(mViewControllerVast.getSurface());
             if (mTimerWithPause != null && mTimerWithPause.isPaused()) {
                 mMediaPlayer.seekTo((int) mTimerWithPause.timePassed());
-                mTimerWithPause.resume();
             } else {
                 createTimer(mp.getDuration());
             }
+
             muteVideo(mViewControllerVast.isMute(), false);
             mMediaPlayer.start();
         }
@@ -156,14 +155,6 @@ class VideoAdControllerVast implements VideoAdController {
             public void onTick(long millisUntilFinished) {
                 mViewControllerVast.setProgress((int) millisUntilFinished, duration);
                 int doneMillis = duration - (int) millisUntilFinished;
-
-                if (mSkipTimeMillis >= 0 && doneMillis > mSkipTimeMillis) {
-                    if (!mBaseAdInternal.isRewarded()) {
-                        mViewControllerVast.showSkipButton();
-                    }
-                    mSkipTimeMillis = -1;
-                }
-
                 List<TrackingEvent> eventsToRemove = new ArrayList<>();
                 for (TrackingEvent event : mTrackingEventsList) {
                     if (doneMillis > event.timeMillis) {
@@ -178,8 +169,23 @@ class VideoAdControllerVast implements VideoAdController {
 
             @Override
             public void onFinish() {
+                mViewControllerVast.resetProgress();
             }
         }.create();
+
+        if (mSkipTimeMillis > 0) {
+            mSkipTimerWithPause = new TimerWithPause(mSkipTimeMillis, 1, true) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    mViewControllerVast.setSkipProgress((int) millisUntilFinished, mSkipTimeMillis);
+                }
+
+                @Override
+                public void onFinish() {
+                    mViewControllerVast.endSkip();
+                }
+            }.create();
+        }
     }
 
     private void fireViewabilityTrackingEvent(String name) {
@@ -276,14 +282,15 @@ class VideoAdControllerVast implements VideoAdController {
         }
     }
 
-    private MediaPlayer.OnCompletionListener mOnCompletionListener = new MediaPlayer.OnCompletionListener() {
-        @Override
-        public void onCompletion(MediaPlayer mp) {
-            mBaseAdInternal.onAdDidReachEnd();
-            skipVideo(false);
-            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.COMPLETE);
-        }
-    };
+    private MediaPlayer.OnCompletionListener mOnCompletionListener =
+            new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    mBaseAdInternal.onAdDidReachEnd();
+                    skipVideo(false);
+                    EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.COMPLETE);
+                }
+            };
 
     private void postDelayed(Runnable action, long delayMillis) {
         mViewControllerVast.postDelayed(action, delayMillis);
@@ -309,6 +316,8 @@ class VideoAdControllerVast implements VideoAdController {
         if (mTimerWithPause != null) {
             mTimerWithPause.pause();
             mTimerWithPause = null;
+            mSkipTimerWithPause.pause();
+            mSkipTimerWithPause = null;
         }
         if (TextUtils.isEmpty(mImageUri)) {
             if (skipEvent) {

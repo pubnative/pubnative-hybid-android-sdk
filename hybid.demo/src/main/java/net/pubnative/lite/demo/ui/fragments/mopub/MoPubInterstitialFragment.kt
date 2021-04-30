@@ -55,6 +55,7 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
     private var adUnitId: String? = null
 
     private lateinit var loadButton: Button
+    private lateinit var showButton: Button
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
 
@@ -68,6 +69,8 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
         creativeIdView = view.findViewById(R.id.view_creative_id)
         creativeIdView.visibility = View.VISIBLE
         loadButton = view.findViewById(R.id.button_load)
+        showButton = view.findViewById(R.id.button_show)
+        showButton.isEnabled = false
 
         adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubInterstitialAdUnitId
 
@@ -82,6 +85,10 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
             val activity = activity as TabActivity
             activity.notifyAdCleaned()
             loadPNAd()
+        }
+
+        showButton.setOnClickListener{
+            mopubInterstitial.show()
         }
 
         errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
@@ -120,7 +127,7 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
 
     // ------------- MoPub Interstitial Listener ------------------
     override fun onInterstitialLoaded(interstitial: MoPubInterstitial?) {
-        mopubInterstitial.show()
+        showButton.isEnabled = true
         Log.d(TAG, "onInterstitialLoaded")
     }
 

@@ -20,6 +20,7 @@ import net.pubnative.lite.sdk.vpaid.VideoAdView;
 import net.pubnative.lite.sdk.vpaid.utils.ImageUtils;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
 import net.pubnative.lite.sdk.vpaid.widget.CountDownView;
+import net.pubnative.lite.sdk.vpaid.widget.LinearCountDownView;
 
 public class ViewControllerVast implements View.OnClickListener {
     private final static String LOG_TAG = ViewControllerVast.class.getSimpleName();
@@ -27,7 +28,8 @@ public class ViewControllerVast implements View.OnClickListener {
     private final VideoAdController mAdController;
 
     private VideoAdView mBannerView;
-    private CountDownView mCountdownView;
+    private CountDownView mSkipCountdownView;
+    private LinearCountDownView mLinearCountdownView;
     private View mVideoPlayerLayout;
     private ImageView mEndCardView;
     private View mControlsLayout;
@@ -69,7 +71,8 @@ public class ViewControllerVast implements View.OnClickListener {
         mControlsLayout.findViewById(R.id.closeView).setOnClickListener(this);
         mControlsLayout.findViewById(R.id.replayView).setOnClickListener(this);
 
-        mCountdownView = mControlsLayout.findViewById(R.id.count_down);
+        mSkipCountdownView = mControlsLayout.findViewById(R.id.count_down);
+        mLinearCountdownView = mControlsLayout.findViewById(R.id.linear_count_down);
         ((TextureView) mControlsLayout.findViewById(R.id.textureView))
                 .setSurfaceTextureListener(mCreateTextureListener);
 
@@ -82,6 +85,10 @@ public class ViewControllerVast implements View.OnClickListener {
         mAdController.addViewabilityFriendlyObstruction(mControlsLayout, FriendlyObstructionPurpose.VIDEO_CONTROLS, "Video controls");
 
         bannerView.addView(mControlsLayout);
+
+        if (mAdController.isRewarded()) {
+            mSkipCountdownView.setVisibility(View.GONE);
+        }
     }
 
     private VideoAdView.VisibilityListener mCreateVisibilityListener = new VideoAdView.VisibilityListener() {
@@ -96,7 +103,7 @@ public class ViewControllerVast implements View.OnClickListener {
                     }
                 }
             } catch (Exception e) {
-                Logger.e(LOG_TAG,"ViewControllerVast.createVisibilityListener: Log: " + Log.getStackTraceString(e));
+                Logger.e(LOG_TAG, "ViewControllerVast.createVisibilityListener: Log: " + Log.getStackTraceString(e));
             }
         }
     };
@@ -145,7 +152,20 @@ public class ViewControllerVast implements View.OnClickListener {
     }
 
     public void setProgress(int progress, int total) {
-        mCountdownView.setProgress(total - progress, total);
+        mLinearCountdownView.setProgress(total - progress, total);
+    }
+
+    public void setSkipProgress(int millisUntilFinished, int mSkipTimeMillis) {
+        mSkipCountdownView.setProgress(mSkipTimeMillis - millisUntilFinished, mSkipTimeMillis);
+    }
+
+    public void endSkip() {
+        mSkipCountdownView.setVisibility(View.GONE);
+        showSkipButton();
+    }
+
+    public void resetProgress() {
+        mLinearCountdownView.reset();
     }
 
     public boolean isMute() {
@@ -159,9 +179,11 @@ public class ViewControllerVast implements View.OnClickListener {
     }
 
     public void showSkipButton() {
-        if (mSkipView != null) {
-            mSkipView.setVisibility(View.VISIBLE);
-            mSkipView.setClickable(true);
+        if (!mAdController.isRewarded()) {
+            if (mSkipView != null) {
+                mSkipView.setVisibility(View.VISIBLE);
+                mSkipView.setClickable(true);
+            }
         }
     }
 
