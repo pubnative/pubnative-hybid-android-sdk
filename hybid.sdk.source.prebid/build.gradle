@@ -41,10 +41,10 @@ dependencies {
 
 
 //--------------------------------------------------------------------------------------------------
-// MAVEN
+// PUBLISHING
 //--------------------------------------------------------------------------------------------------
+apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven-publish'
-
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
     classifier = 'sources'
@@ -107,33 +107,33 @@ publishing {
             }
         }
     }
+
+    artifactoryPublish {
+        publications(publishing.publications.aar)
+    }
 }
 
-//--------------------------------------------------------------------------------------------------
-// BINTRAY
-//--------------------------------------------------------------------------------------------------
-apply plugin: 'com.jfrog.bintray'
+artifactory {
+    contextUrl = System.getenv("ARTIFACTORY_CONTEXT_URL")
+    publish {
+        repository {
+            repoKey = 'verve-gradle-release-local'
+            username = System.getenv("ARTIFACTORY_USER")
+            password = System.getenv("ARTIFACTORY_PASSWORD")
+            maven = true
+        }
 
-bintray {
-    user = System.getenv("BINTRAY_USER")
-    key = System.getenv("BINTRAY_API_KEY")
-    publish = branchName != "master"
-    override = true
-    publications = ['aar']
-    pkg {
-        configurations = ['archives']
-        userOrg = 'pubnative'
-        repo = 'maven'
-        desc = 'HyBid SDK'
-        websiteUrl = "https://pubnative.net"
-        name = project_name
-        licenses = ['MIT']
-        labels = ['android', 'advertising', 'sdk', 'pubnative', 'hybid', 'ads', 'development']
-        version {
-            name = version_name
-            vcsTag = version_name
-            released = new Date()
-            vcsUrl = System.getenv("CIRCLE_REPOSITORY_URL")
+        defaults {
+            publishArtifacts = branchName != "master"
+            publishPom = true
+        }
+    }
+    resolve {
+        repository {
+            repoKey = 'verve-gradle-release'
+            username = System.getenv("ARTIFACTORY_USER")
+            password = System.getenv("ARTIFACTORY_PASSWORD")
+            maven = true
         }
     }
 }

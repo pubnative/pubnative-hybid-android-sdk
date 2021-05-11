@@ -316,9 +316,13 @@ class VideoAdControllerVast implements VideoAdController {
         if (mTimerWithPause != null) {
             mTimerWithPause.pause();
             mTimerWithPause = null;
+        }
+
+        if (mSkipTimerWithPause != null) {
             mSkipTimerWithPause.pause();
             mSkipTimerWithPause = null;
         }
+
         if (TextUtils.isEmpty(mImageUri)) {
             if (skipEvent) {
                 closeSelf();
