@@ -2,8 +2,8 @@ package net.pubnative.lite.sdk.utils;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.shadows.ShadowLooper;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -31,8 +31,7 @@ public class PNAdvertisingIdTest {
             e.printStackTrace();
         }
 
-        Robolectric.flushForegroundThreadScheduler();
-        Robolectric.flushBackgroundThreadScheduler();
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
 
         verify(listener).onPNAdvertisingIdFinish((String) isNull(), (Boolean) isNotNull());
     }

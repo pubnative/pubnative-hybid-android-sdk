@@ -164,8 +164,10 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
     }
 
     override fun onRequestFail(throwable: Throwable?) {
-        Log.e(TAG, "onAdLoadFailed", throwable)
-        errorView.text = throwable?.message
+        throwable?.message?.let {
+            Log.e(TAG, it)
+            errorView.text = it
+        }
         creativeIdView.text = ""
         displayLogs()
     }

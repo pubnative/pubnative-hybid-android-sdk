@@ -87,13 +87,11 @@ public class UserConsentActivity extends Activity {
     private final WebViewClient webViewClient = new WebViewClient() {
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
-            showLoadProgress();
             super.onPageStarted(view, url, favicon);
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
-            hideLoadProgress();
             super.onPageFinished(view, url);
         }
 
@@ -118,21 +116,19 @@ public class UserConsentActivity extends Activity {
     };
 
     private void loadConsentPage(WebView webView) {
-        String url = HyBid.getUserDataManager().getConsentPageLink();
+        if (HyBid.isInitialized() && HyBid.getUserDataManager() != null) {
+            String url = HyBid.getUserDataManager().getConsentPageLink();
 
-        if (TextUtils.isEmpty(url)) {
-            Logger.e(TAG, "Invalid consent page URL");
+            if (TextUtils.isEmpty(url)) {
+                Logger.e(TAG, "Invalid consent page URL. Dropping call.");
+                finish();
+            } else {
+                webView.loadUrl(url);
+            }
         } else {
-            webView.loadUrl(url);
+            Logger.e(TAG, "HyBid SDK has not been initialised yet. Dropping call.");
+            finish();
         }
-    }
-
-    private void showLoadProgress() {
-
-    }
-
-    private void hideLoadProgress() {
-
     }
 
     @Override

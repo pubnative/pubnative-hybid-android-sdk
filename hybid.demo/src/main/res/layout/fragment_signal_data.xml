@@ -88,6 +88,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/interstitial" />
+
+        <RadioButton
+            android:id="@+id/radio_size_rewarded"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/rewarded" />
     </RadioGroup>
 
     <com.google.android.material.button.MaterialButton

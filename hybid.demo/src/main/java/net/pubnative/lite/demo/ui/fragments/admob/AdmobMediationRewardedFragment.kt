@@ -26,12 +26,16 @@ import net.pubnative.lite.demo.util.ClipboardUtils
 class AdmobMediationRewardedFragment : Fragment() {
     val TAG = AdmobMediationRewardedFragment::class.java.simpleName
 
-    private lateinit var admobRewarded: RewardedAd
+    private var admobRewarded: RewardedAd? = null
     private lateinit var loadButton: Button
     private lateinit var showButton: Button
     private lateinit var errorView: TextView
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_admob_rewarded, container, false)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? = inflater.inflate(R.layout.fragment_admob_rewarded, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -40,17 +44,20 @@ class AdmobMediationRewardedFragment : Fragment() {
         loadButton = view.findViewById(R.id.button_load)
         showButton = view.findViewById(R.id.button_show)
 
-        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().admobRewardedAdUnitId
+        val adUnitId =
+            SettingsManager.getInstance(requireActivity()).getSettings().admobRewardedAdUnitId
         showButton.isEnabled = false
 
         admobRewarded = RewardedAd(requireActivity(), adUnitId)
-        val adLoadCallback = object : RewardedAdLoadCallback(){
-            override fun onRewardedAdLoaded(){
+
+        val adLoadCallback = object : RewardedAdLoadCallback() {
+            override fun onRewardedAdLoaded() {
                 Log.d(TAG, "onRewardedAdLoaded")
                 displayLogs()
                 Toast.makeText(context, "Rewarded Ad Loaded", Toast.LENGTH_SHORT).show()
                 showButton.isEnabled = true
             }
+
             override fun onRewardedAdFailedToLoad(adError: LoadAdError) {
                 Log.d(TAG, "onRewardedAdFailedToLoad")
                 displayLogs()
@@ -59,18 +66,23 @@ class AdmobMediationRewardedFragment : Fragment() {
             }
         }
 
-        val rewardedAdCallback = object: RewardedAdCallback(){
+        val rewardedAdCallback = object : RewardedAdCallback() {
             override fun onRewardedAdOpened() {
                 super.onRewardedAdOpened()
                 Log.d(TAG, "onRewardedAdOpened")
             }
+
             override fun onRewardedAdClosed() {
                 super.onRewardedAdClosed()
                 Log.d(TAG, "onRewardedAdClosed")
+                showButton.isEnabled = false
+                admobRewarded = null
             }
+
             override fun onUserEarnedReward(@NonNull reward: RewardItem) {
                 Log.d(TAG, "onUserEarnedReward")
             }
+
             override fun onRewardedAdFailedToShow(adError: AdError) {
                 super.onRewardedAdFailedToShow(adError)
                 Log.d(TAG, "onRewardedAdFailedToShow")
@@ -80,17 +92,36 @@ class AdmobMediationRewardedFragment : Fragment() {
 
         loadButton.setOnClickListener {
             errorView.text = ""
-            admobRewarded.loadAd(AdRequest.Builder()
-                    .build(), adLoadCallback)
+            loadRewardedAd(adUnitId, adLoadCallback)
         }
 
-        showButton.setOnClickListener{
-            if (admobRewarded.isLoaded) {
-                admobRewarded.show(requireActivity(), rewardedAdCallback)
-            }
+        showButton.setOnClickListener {
+            showRewardedAd(rewardedAdCallback)
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
+        errorView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                errorView.text.toString()
+            )
+        }
+    }
+
+    private fun loadRewardedAd(
+        adUnitId: String,
+        adLoadCallback: RewardedAdLoadCallback
+    ) {
+        admobRewarded = RewardedAd(requireActivity(), adUnitId)
+        admobRewarded?.loadAd(
+            AdRequest.Builder()
+                .build(), adLoadCallback
+        )
+    }
+
+    private fun showRewardedAd(rewardedAdCallback: RewardedAdCallback) {
+        if (admobRewarded != null && admobRewarded!!.isLoaded) {
+            admobRewarded?.show(requireActivity(), rewardedAdCallback)
+        }
     }
 
     private fun displayLogs() {
@@ -99,7 +130,4 @@ class AdmobMediationRewardedFragment : Fragment() {
             activity.notifyAdUpdated()
         }
     }
-
-
-
 }

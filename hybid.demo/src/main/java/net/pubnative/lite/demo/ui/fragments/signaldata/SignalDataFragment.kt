@@ -2,21 +2,22 @@ package net.pubnative.lite.demo.ui.fragments.signaldata
 
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.adapters.SignalDataAdapter
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd
+import net.pubnative.lite.sdk.rewarded.HyBidRewardedAd
 import net.pubnative.lite.sdk.utils.Logger
 
-class SignalDataFragment : Fragment() {
+class SignalDataFragment : Fragment(R.layout.fragment_signal_data) {
+
     private val TAG = SignalDataFragment::class.java.simpleName
 
     private lateinit var signalDataInput: EditText
@@ -28,7 +29,8 @@ class SignalDataFragment : Fragment() {
 
     private var interstitial: HyBidInterstitialAd? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_signal_data, container, false)
+    private var rewarded: HyBidRewardedAd? = null
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -57,13 +59,15 @@ class SignalDataFragment : Fragment() {
 
     override fun onDestroy() {
         interstitial?.destroy()
+        rewarded?.destroy()
         super.onDestroy()
     }
 
     private fun updateListVisibility() {
         if (selectedSize == R.id.radio_size_banner
-                || selectedSize == R.id.radio_size_medium
-                || selectedSize == R.id.radio_size_leaderboard) {
+            || selectedSize == R.id.radio_size_medium
+            || selectedSize == R.id.radio_size_leaderboard
+        ) {
             signalDataList.visibility = View.VISIBLE
         } else {
             signalDataList.visibility = View.GONE
@@ -78,12 +82,14 @@ class SignalDataFragment : Fragment() {
     }
 
     private fun loadSignalData() {
-        val signalData = signalDataInput.text.toString()
+        var signalData = signalDataInput.text.toString()
         if (TextUtils.isEmpty(signalData)) {
             Toast.makeText(activity, "Please input some signal data", Toast.LENGTH_SHORT).show()
         } else {
             if (selectedSize == R.id.radio_size_interstitial) {
                 loadInterstitial(signalData)
+            } else if (selectedSize == R.id.radio_size_rewarded) {
+                loadRewarded(signalData)
             } else {
                 adapter.refreshWithSignalData(signalData, selectedSize)
             }
@@ -118,5 +124,39 @@ class SignalDataFragment : Fragment() {
 
         interstitial = HyBidInterstitialAd(requireActivity(), interstitialListener)
         interstitial?.prepareAd(signalData)
+    }
+
+    private fun loadRewarded(signalData: String) {
+        rewarded?.destroy()
+
+        val rewardedListener = object : HyBidRewardedAd.Listener {
+            override fun onRewardedLoaded() {
+                Logger.d(TAG, "onRewardedLoaded")
+                rewarded?.show()
+            }
+
+            override fun onRewardedLoadFailed(error: Throwable?) {
+                Logger.d(TAG, "onRewardedLoadFailed")
+            }
+
+            override fun onRewardedOpened() {
+                Logger.d(TAG, "onRewardedOpened")
+            }
+
+            override fun onRewardedClosed() {
+                Logger.d(TAG, "onRewardedClosed")
+            }
+
+            override fun onRewardedClick() {
+                Logger.d(TAG, "onRewardedClick")
+            }
+
+            override fun onReward() {
+                Logger.d(TAG, "onReward")
+            }
+        }
+
+        rewarded = HyBidRewardedAd(requireActivity(), rewardedListener)
+        rewarded?.prepareAd(signalData)
     }
 }

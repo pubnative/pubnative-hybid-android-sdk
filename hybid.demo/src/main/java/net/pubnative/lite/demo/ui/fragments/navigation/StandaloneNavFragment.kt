@@ -2,9 +2,7 @@ package net.pubnative.lite.demo.ui.fragments.navigation
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -18,7 +16,7 @@ import net.pubnative.lite.demo.ui.activities.hybid.HyBidStickyBannerActivity
 import net.pubnative.lite.demo.ui.adapters.ZoneIdAdapter
 import net.pubnative.lite.demo.ui.listeners.ZoneIdClickListener
 
-class StandaloneNavFragment : Fragment() {
+class StandaloneNavFragment : Fragment(R.layout.fragment_nav_standalone) {
 
     private lateinit var bannerButton: Button
     private lateinit var stickyButton: Button
@@ -38,8 +36,6 @@ class StandaloneNavFragment : Fragment() {
         super.onCreate(savedInstanceState)
         settingsManager = SettingsManager.getInstance(requireActivity())
     }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_nav_standalone, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -93,7 +89,7 @@ class StandaloneNavFragment : Fragment() {
         }
 
         rewardedButton = view.findViewById(R.id.button_rewarded)
-        rewardedButton.setOnClickListener{
+        rewardedButton.setOnClickListener {
             val intent = Intent(activity, HyBidRewardedActivity::class.java)
             intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
             startActivity(intent)

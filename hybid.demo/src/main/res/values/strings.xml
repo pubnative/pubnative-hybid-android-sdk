@@ -2,6 +2,7 @@
     <string name="app_name">HyBid demo</string>
 
     <string name="native_ad">"Native"</string>
+    <string name="native_ad_recycler">"Native - RecyclerView"</string>
     <string name="banner">Banner</string>
     <string name="interstitial">Interstitial</string>
     <string name="interstitial_video">Interstitial Video</string>
@@ -86,6 +87,7 @@
     <string name="hybid_rewarded">HyBid Rewarded</string>
 
     <string name="mopub_native">MoPub Native</string>
+    <string name="mopub_native_recycler">MoPub Native - RecyclerView</string>
     <string name="mopub_banner">MoPub Banner</string>
     <string name="mopub_interstitial">MoPub Interstitial</string>
     <string name="mopub_interstitial_video">MoPub Interstitial Video</string>
@@ -221,4 +223,5 @@
     <string name="bottom">BOTTOM</string>
     <string name="position">Position</string>
     <string name="sticky_banner">Sticky Banner</string>
+    <string name="zone_id_input">Zone Id</string>
 </resources>

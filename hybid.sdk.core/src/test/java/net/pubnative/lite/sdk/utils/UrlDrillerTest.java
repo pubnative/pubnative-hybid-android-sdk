@@ -5,6 +5,7 @@ import android.os.Handler;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.shadows.ShadowLooper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -33,6 +34,8 @@ public class UrlDrillerTest {
         driller.setListener(drillerListener);
         driller.invokeRedirect("");
 
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
         verify(drillerListener, times(1)).onURLDrillerRedirect(anyString());
     }
 
@@ -46,6 +49,8 @@ public class UrlDrillerTest {
         driller.setListener(drillerListener);
         driller.invokeFinish("");
 
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
         verify(drillerListener, times(1)).onURLDrillerFinish(anyString());
     }
 
@@ -58,6 +63,8 @@ public class UrlDrillerTest {
         driller.mHandler = new Handler();
         driller.setListener(drillerListener);
         driller.invokeFail("", mock(Exception.class));
+
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
 
         verify(drillerListener, times(1)).onURLDrillerFail(anyString(), any(Exception.class));
     }
@@ -84,6 +91,8 @@ public class UrlDrillerTest {
         driller.setListener(drillerListener);
         driller.invokeStart("");
 
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
         verify(drillerListener, times(1)).onURLDrillerStart(anyString());
     }
 
@@ -97,6 +106,8 @@ public class UrlDrillerTest {
         driller.setListener(drillerListener);
         driller.drill("");
 
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
         verify(drillerListener, times(1)).onURLDrillerFail(anyString(), any(IllegalArgumentException.class));
     }
 
@@ -109,6 +120,8 @@ public class UrlDrillerTest {
         driller.mHandler = new Handler();
         driller.setListener(drillerListener);
         driller.drill(null);
+
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
 
         verify(drillerListener, times(1)).onURLDrillerFail(anyString(), any(IllegalArgumentException.class));
     }

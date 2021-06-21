@@ -2,6 +2,8 @@ package net.pubnative.lite.sdk.views;
 
 import android.app.Activity;
 
+import net.pubnative.lite.sdk.HyBid;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +22,7 @@ public class HyBidBannerAdViewTest {
     private Activity activity;
 
     @Mock
-    private PNAdView.Listener listener;
+    private HyBidAdView.Listener listener;
 
     @Before
     public void setUp() throws Exception {

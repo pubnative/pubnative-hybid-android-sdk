@@ -101,8 +101,10 @@ class HyBidRewardedFragment : Fragment(), HyBidRewardedAd.Listener {
 
     override fun onRewardedLoadFailed(error: Throwable?) {
         showButton.isEnabled = false
-        Log.e(TAG, "onRewardedLoadFailed", error)
-        errorView.text = error?.message
+        error?.message?.let {
+            Log.e(TAG, it)
+            errorView.text = it
+        }
         creativeIdView.text = ""
         displayLogs()
     }

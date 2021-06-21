@@ -25,8 +25,10 @@ package net.pubnative.lite.sdk.interstitial;
 import android.app.Activity;
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
 import net.pubnative.lite.sdk.AdCache;
+import net.pubnative.lite.sdk.ErrorMessages;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.api.InterstitialRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
@@ -39,6 +41,7 @@ import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.MarkupUtils;
+import net.pubnative.lite.sdk.utils.SignalDataProcessor;
 import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
@@ -67,9 +70,10 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     private InterstitialPresenter mPresenter;
     private final Listener mListener;
     private final Context mContext;
-    private final String mZoneId;
+    private String mZoneId;
     private final AdCache mAdCache;
     private final VideoAdCache mVideoCache;
+    private SignalDataProcessor mSignalDataProcessor;
     private Ad mAd;
     private boolean mReady = false;
     private int mSkipOffset = 0;
@@ -88,6 +92,9 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     }
 
     public HyBidInterstitialAd(Context context, String zoneId, Listener listener) {
+        if (!HyBid.isInitialized()) {
+            Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before creating a HyBidInterstitialAd");
+        }
         mRequestManager = new InterstitialRequestManager();
         mContext = context;
         mZoneId = zoneId;
@@ -101,8 +108,10 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     }
 
     public void load() {
-        if (TextUtils.isEmpty(mZoneId)) {
-            invokeOnLoadFailed(new Exception("Invalid zone id provided"));
+        if (!HyBid.isInitialized()) {
+            invokeOnLoadFailed(new Exception(ErrorMessages.NOT_INITIALISED));
+        } else if (TextUtils.isEmpty(mZoneId)) {
+            invokeOnLoadFailed(new Exception(ErrorMessages.INVALID_ZONE_ID));
         } else {
             cleanup();
             mRequestManager.setZoneId(mZoneId);
@@ -140,6 +149,11 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
             mPresenter.destroy();
             mPresenter = null;
         }
+
+        if (mSignalDataProcessor != null) {
+            mSignalDataProcessor.destroy();
+            mSignalDataProcessor = null;
+        }
     }
 
     public String getImpressionId() {
@@ -165,112 +179,61 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         if (mPresenter != null) {
             mPresenter.load();
         } else {
-            invokeOnLoadFailed(new Exception("The server has returned an unsupported ad asset"));
-        }
-    }
-
-    private void processAdValue(String response) {
-        AdResponse apiResponseModel = null;
-        Exception parseException = null;
-        try {
-            apiResponseModel = new AdResponse(new JSONObject(response));
-        } catch (Exception exception) {
-            parseException = exception;
-        } catch (Error error) {
-            parseException = new Exception("Response cannot be parsed", error);
-        }
-        if (parseException != null) {
-            invokeOnLoadFailed(parseException);
-        } else if (apiResponseModel == null) {
-            invokeOnLoadFailed(new Exception("PNApiClient - Parse error"));
-        } else if (AdResponse.Status.OK.equals(apiResponseModel.status)) {
-            // STATUS 'OK'
-            if (apiResponseModel.ads != null && !apiResponseModel.ads.isEmpty()) {
-                mAd = apiResponseModel.ads.get(0);
-                final String zoneId;
-                switch (mAd.assetgroupid) {
-                    case ApiAssetGroupType.VAST_INTERSTITIAL: {
-                        zoneId = "4";
-                        VideoAdProcessor videoAdProcessor = new VideoAdProcessor();
-                        videoAdProcessor.process(mContext, mAd.getVast(), null, new VideoAdProcessor.Listener() {
-                            @Override
-                            public void onCacheSuccess(AdParams adParams, String videoFilePath, String endCardFilePath) {
-                                if (mIsDestroyed) {
-                                    return;
-                                }
-
-                                VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardFilePath);
-                                mAdCache.put(zoneId, mAd);
-                                mVideoCache.put(zoneId, adCacheItem);
-                                mPresenter = new InterstitialPresenterFactory(mContext, zoneId).createInterstitialPresenter(mAd, HyBidInterstitialAd.this);
-                                if (mPresenter != null) {
-                                    mPresenter.load();
-                                } else {
-                                    invokeOnLoadFailed(new Exception("The server has returned an unsupported ad asset"));
-                                }
-                            }
-
-                            @Override
-                            public void onCacheError(Throwable error) {
-                                if (mIsDestroyed) {
-                                    return;
-                                }
-
-                                Logger.w(TAG, error.getMessage());
-                                invokeOnLoadFailed(new Exception(error));
-                            }
-                        });
-                        break;
-                    }
-                    default: {
-                        zoneId = "3";
-                        mAdCache.put(zoneId, mAd);
-                        mPresenter = new InterstitialPresenterFactory(mContext, zoneId).createInterstitialPresenter(mAd, this);
-                        if (mPresenter != null) {
-                            mPresenter.load();
-                        } else {
-                            invokeOnLoadFailed(new Exception("The server has returned an unsupported ad asset"));
-                        }
-                    }
-                }
-            } else {
-                invokeOnLoadFailed(new Exception("HyBid - No fill"));
-            }
-        } else {
-            // STATUS 'ERROR'
-            invokeOnLoadFailed(new Exception("HyBid - Server error: " + apiResponseModel.error_message));
+            invokeOnLoadFailed(new Exception(ErrorMessages.UNSUPPORTED_ASSET));
         }
     }
 
     public void prepareAd(final String adValue) {
         if (!TextUtils.isEmpty(adValue)) {
-            processAdValue(adValue);
+            mSignalDataProcessor = new SignalDataProcessor();
+            mSignalDataProcessor.processSignalData(adValue, new SignalDataProcessor.Listener() {
+                @Override
+                public void onProcessed(Ad ad) {
+                    if (ad != null) {
+                        prepareAd(ad);
+                    }
+                }
+
+                @Override
+                public void onError(Exception error) {
+                    invokeOnLoadFailed(error);
+                }
+            });
         } else {
-            invokeOnLoadFailed(new Exception("The server has returned an invalid ad asset"));
+            invokeOnLoadFailed(new Exception(ErrorMessages.INVALID_SIGNAL_DATA));
         }
     }
 
     public void prepareAd(Ad ad) {
         if (ad != null) {
             mAd = ad;
+            if (!mAd.getZoneId().equalsIgnoreCase(mZoneId)) {
+                mZoneId = mAd.getZoneId();
+            }
             mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, this);
             if (mPresenter != null) {
                 mPresenter.load();
             } else {
-                invokeOnLoadFailed(new Exception("The server has returned an unsupported ad asset"));
+                invokeOnLoadFailed(new Exception(ErrorMessages.UNSUPPORTED_ASSET));
             }
         } else {
-            invokeOnLoadFailed(new Exception("The provided ad is invalid."));
+            invokeOnLoadFailed(new Exception(ErrorMessages.INVALID_AD));
         }
     }
 
     public void prepareCustomMarkup(final String adValue) {
+        prepareCustomMarkup("", adValue);
+    }
+
+    public void prepareCustomMarkup(final String zoneId, final String adValue) {
         if (!TextUtils.isEmpty(adValue)) {
-            final String zoneId;
+            mZoneId = zoneId;
             final int assetGroupId;
             final Ad.AdType type;
             if (MarkupUtils.isVastXml(adValue)) {
-                zoneId = "4";
+                if (TextUtils.isEmpty(mZoneId)) {
+                    mZoneId = "4";
+                }
                 assetGroupId = 15;
                 type = Ad.AdType.VIDEO;
                 VideoAdProcessor videoAdProcessor = new VideoAdProcessor();
@@ -283,13 +246,13 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
 
                         VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardFilePath);
                         mAd = new Ad(assetGroupId, adValue, type);
-                        mAdCache.put(zoneId, mAd);
-                        mVideoCache.put(zoneId, adCacheItem);
-                        mPresenter = new InterstitialPresenterFactory(mContext, zoneId).createInterstitialPresenter(mAd, HyBidInterstitialAd.this);
+                        mAdCache.put(mZoneId, mAd);
+                        mVideoCache.put(mZoneId, adCacheItem);
+                        mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, HyBidInterstitialAd.this);
                         if (mPresenter != null) {
                             mPresenter.load();
                         } else {
-                            invokeOnLoadFailed(new Exception("The server has returned an unsupported ad asset"));
+                            invokeOnLoadFailed(new Exception(ErrorMessages.UNSUPPORTED_ASSET));
                         }
                     }
 
@@ -304,24 +267,30 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
                     }
                 });
             } else {
-                zoneId = "3";
+                if (TextUtils.isEmpty(mZoneId)) {
+                    mZoneId = "3";
+                }
                 assetGroupId = 21;
                 type = Ad.AdType.HTML;
                 mAd = new Ad(assetGroupId, adValue, type);
-                mAdCache.put(zoneId, mAd);
-                mPresenter = new InterstitialPresenterFactory(mContext, zoneId).createInterstitialPresenter(mAd, this);
+                mAdCache.put(mZoneId, mAd);
+                mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, this);
                 if (mPresenter != null) {
                     mPresenter.load();
                 } else {
-                    invokeOnLoadFailed(new Exception("The server has returned an unsupported ad asset"));
+                    invokeOnLoadFailed(new Exception(ErrorMessages.UNSUPPORTED_ASSET));
                 }
             }
         } else {
-            invokeOnLoadFailed(new Exception("The server has returned an invalid ad asset"));
+            invokeOnLoadFailed(new Exception(ErrorMessages.INVALID_ASSET));
         }
     }
 
     public void prepareVideoTag(final String adValue) {
+        prepareVideoTag("", adValue);
+    }
+
+    public void prepareVideoTag(final String zoneId, final String adValue) {
 
         String url = VastUrlUtils.formatURL(adValue);
 
@@ -329,14 +298,14 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
             @Override
             public void onSuccess(String response) {
                 if (!TextUtils.isEmpty(response)) {
-                    prepareCustomMarkup(response);
+                    prepareCustomMarkup(zoneId, response);
                 }
             }
 
             @Override
             public void onFailure(Throwable error) {
                 Logger.e(TAG, "Request failed: " + error.toString());
-                invokeOnLoadFailed(new Exception("The server has returned an invalid ad asset"));
+                invokeOnLoadFailed(new Exception(ErrorMessages.INVALID_ASSET));
             }
         });
     }
@@ -349,7 +318,13 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     }
 
     protected void invokeOnLoadFailed(Exception exception) {
-        Logger.e(TAG, exception.getMessage());
+        if (exception != null && !TextUtils.isEmpty(exception.getMessage())) {
+            if (exception.getMessage().contains(ErrorMessages.NO_FILL)) {
+                Logger.w(TAG, exception.getMessage());
+            } else {
+                Logger.e(TAG, exception.getMessage());
+            }
+        }
         if (mListener != null) {
             mListener.onInterstitialLoadFailed(exception);
         }
@@ -383,7 +358,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     @Override
     public void onRequestSuccess(Ad ad) {
         if (ad == null) {
-            invokeOnLoadFailed(new Exception("Server returned null ad"));
+            invokeOnLoadFailed(new Exception(ErrorMessages.NULL_AD));
         } else {
             mAd = ad;
             renderAd();
@@ -404,7 +379,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
 
     @Override
     public void onInterstitialError(InterstitialPresenter interstitialPresenter) {
-        invokeOnLoadFailed(new Exception("An error has occurred while rendering the interstitial"));
+        invokeOnLoadFailed(new Exception(ErrorMessages.ERROR_RENDERING_INTERSTITIAL));
     }
 
     @Override

@@ -25,17 +25,31 @@ package net.pubnative.lite.sdk.rewarded;
 import android.app.Activity;
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
 import net.pubnative.lite.sdk.AdCache;
+import net.pubnative.lite.sdk.ErrorMessages;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.api.RewardedRequestManager;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.AdResponse;
+import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.models.IntegrationType;
+import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.rewarded.presenter.RewardedPresenter;
 import net.pubnative.lite.sdk.rewarded.presenter.RewardedPresenterFactory;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.SignalDataProcessor;
+import net.pubnative.lite.sdk.utils.MarkupUtils;
 import net.pubnative.lite.sdk.vpaid.VideoAdCache;
+import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
+import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
+import net.pubnative.lite.sdk.vpaid.response.AdParams;
+import net.pubnative.lite.sdk.vpaid.vast.VastUrlUtils;
+
+import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
 
 public class HyBidRewardedAd implements RequestManager.RequestListener, RewardedPresenter.Listener {
     private static final String TAG = HyBidRewardedAd.class.getSimpleName();
@@ -54,14 +68,15 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
         void onReward();
     }
 
+    private final AdCache mAdCache;
+    private final VideoAdCache mVideoCache;
     private RequestManager mRequestManager;
     private RewardedPresenter mPresenter;
     private final Listener mListener;
     private final Context mContext;
-    private final String mZoneId;
-    private final AdCache mAdCache;
-    private final VideoAdCache mVideoCache;
+    private String mZoneId;
     private Ad mAd;
+    private SignalDataProcessor mSignalDataProcessor;
     private boolean mReady = false;
     private boolean mIsDestroyed = false;
 
@@ -74,19 +89,23 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     }
 
     public HyBidRewardedAd(Context context, String zoneId, Listener listener) {
+        if (!HyBid.isInitialized()) {
+            Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before creating a HyBidRewardedAd");
+        }
         mRequestManager = new RewardedRequestManager();
         mContext = context;
         mZoneId = zoneId;
         mListener = listener;
         mAdCache = HyBid.getAdCache();
         mVideoCache = HyBid.getVideoAdCache();
-
         mRequestManager.setIntegrationType(IntegrationType.STANDALONE);
     }
 
     public void load() {
-        if (TextUtils.isEmpty(mZoneId)) {
-            invokeOnLoadFailed(new Exception("Invalid zone id provided"));
+        if (!HyBid.isInitialized()) {
+            invokeOnLoadFailed(new Exception(ErrorMessages.NOT_INITIALISED));
+        } else if (TextUtils.isEmpty(mZoneId)) {
+            invokeOnLoadFailed(new Exception(ErrorMessages.INVALID_ZONE_ID));
         } else {
             cleanup();
             mRequestManager.setZoneId(mZoneId);
@@ -122,6 +141,11 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
             mPresenter.destroy();
             mPresenter = null;
         }
+
+        if (mSignalDataProcessor != null) {
+            mSignalDataProcessor.destroy();
+            mSignalDataProcessor = null;
+        }
     }
 
     public String getImpressionId() {
@@ -141,7 +165,122 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
         if (mPresenter != null) {
             mPresenter.load();
         } else {
-            invokeOnLoadFailed(new Exception("The server has returned an unsupported ad asset"));
+            invokeOnLoadFailed(new Exception(ErrorMessages.UNSUPPORTED_ASSET));
+        }
+    }
+
+    public void prepareAd(final String adValue) {
+        if (!TextUtils.isEmpty(adValue)) {
+            mSignalDataProcessor = new SignalDataProcessor();
+            mSignalDataProcessor.processSignalData(adValue, new SignalDataProcessor.Listener() {
+                @Override
+                public void onProcessed(Ad ad) {
+                    if (ad != null) {
+                        prepareAd(ad);
+                    }
+                }
+
+                @Override
+                public void onError(Exception error) {
+                    invokeOnLoadFailed(error);
+                }
+            });
+        } else {
+            invokeOnLoadFailed(new Exception(ErrorMessages.INVALID_SIGNAL_DATA));
+        }
+    }
+
+    public void prepareAd(Ad ad) {
+        if (ad != null) {
+            mAd = ad;
+            if (!mAd.getZoneId().equalsIgnoreCase(mZoneId)) {
+                mZoneId = mAd.getZoneId();
+            }
+            mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, this);
+            if (mPresenter != null) {
+                mPresenter.load();
+            } else {
+                invokeOnLoadFailed(new Exception(ErrorMessages.UNSUPPORTED_ASSET));
+            }
+        } else {
+            invokeOnLoadFailed(new Exception(ErrorMessages.INVALID_AD));
+        }
+    }
+
+    public void prepareVideoTag(final String adValue) {
+        prepareVideoTag("", adValue);
+    }
+
+    public void prepareVideoTag(final String zoneId, final String adValue) {
+
+        String url = VastUrlUtils.formatURL(adValue);
+
+        PNHttpClient.makeRequest(mContext, url, null, null, new PNHttpClient.Listener() {
+            @Override
+            public void onSuccess(String response) {
+                if (!TextUtils.isEmpty(response)) {
+                    prepareCustomMarkup(zoneId, response);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Logger.e(TAG, "Request failed: " + error.toString());
+                invokeOnLoadFailed(new Exception(ErrorMessages.INVALID_ASSET));
+            }
+        });
+    }
+
+    public void prepareCustomMarkup(final String adValue) {
+        prepareCustomMarkup("", adValue);
+    }
+
+    public void prepareCustomMarkup(final String zoneId, final String adValue) {
+        if (!TextUtils.isEmpty(adValue)) {
+            mZoneId = zoneId;
+            final int assetGroupId;
+            final Ad.AdType type;
+            if (MarkupUtils.isVastXml(adValue)) {
+                if (TextUtils.isEmpty(mZoneId)) {
+                    mZoneId = "4";
+                }
+                assetGroupId = 15;
+                type = Ad.AdType.VIDEO;
+                VideoAdProcessor videoAdProcessor = new VideoAdProcessor();
+                videoAdProcessor.process(mContext, adValue, null, new VideoAdProcessor.Listener() {
+                    @Override
+                    public void onCacheSuccess(AdParams adParams, String videoFilePath, String endCardFilePath) {
+                        if (mIsDestroyed) {
+                            return;
+                        }
+
+                        VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardFilePath);
+                        mAd = new Ad(assetGroupId, adValue, type);
+                        mAdCache.put(mZoneId, mAd);
+                        mVideoCache.put(mZoneId, adCacheItem);
+                        mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, HyBidRewardedAd.this);
+                        if (mPresenter != null) {
+                            mPresenter.load();
+                        } else {
+                            invokeOnLoadFailed(new Exception(ErrorMessages.UNSUPPORTED_ASSET));
+                        }
+                    }
+
+                    @Override
+                    public void onCacheError(Throwable error) {
+                        if (mIsDestroyed) {
+                            return;
+                        }
+
+                        Logger.w(TAG, "onCacheError", error);
+                        invokeOnLoadFailed(new Exception(error));
+                    }
+                });
+            } else {
+                invokeOnLoadFailed(new Exception(ErrorMessages.INVALID_ASSET));
+            }
+        } else {
+            invokeOnLoadFailed(new Exception(ErrorMessages.INVALID_ASSET));
         }
     }
 
@@ -152,7 +291,14 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     }
 
     protected void invokeOnLoadFailed(Exception exception) {
-        Logger.e(TAG, exception.getMessage());
+        if (exception != null && !TextUtils.isEmpty(exception.getMessage())) {
+            if (exception.getMessage().contains(ErrorMessages.NO_FILL)) {
+                Logger.w(TAG, exception.getMessage());
+            } else {
+                Logger.e(TAG, exception.getMessage());
+            }
+        }
+
         if (mListener != null) {
             mListener.onRewardedLoadFailed(exception);
         }
@@ -192,7 +338,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     @Override
     public void onRequestSuccess(Ad ad) {
         if (ad == null) {
-            invokeOnLoadFailed(new Exception("Server returned null ad"));
+            invokeOnLoadFailed(new Exception(ErrorMessages.NULL_AD));
         } else {
             mAd = ad;
             renderAd();
@@ -213,7 +359,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
 
     @Override
     public void onRewardedError(RewardedPresenter rewardedPresenter) {
-        invokeOnLoadFailed(new Exception("An error has occurred while rendering the rewarded ad"));
+        invokeOnLoadFailed(new Exception(ErrorMessages.ERROR_RENDERING_REWARDED));
     }
 
     @Override

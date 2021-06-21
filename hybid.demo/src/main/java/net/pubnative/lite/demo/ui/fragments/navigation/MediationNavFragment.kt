@@ -2,9 +2,7 @@ package net.pubnative.lite.demo.ui.fragments.navigation
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
@@ -12,8 +10,7 @@ import net.pubnative.lite.demo.ui.activities.admob.*
 import net.pubnative.lite.demo.ui.activities.dfp.*
 import net.pubnative.lite.demo.ui.activities.mopub.*
 
-class MediationNavFragment : Fragment() {
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_nav_mediation, container, false)
+class MediationNavFragment : Fragment(R.layout.fragment_nav_mediation) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -55,6 +52,11 @@ class MediationNavFragment : Fragment() {
 
         view.findViewById<Button>(R.id.button_mopub_native).setOnClickListener {
             val intent = Intent(activity, MoPubMediationNativeActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_mopub_recycler_view_native).setOnClickListener {
+            val intent = Intent(activity, MoPubMediationNativeRecyclerViewActivity::class.java)
             startActivity(intent)
         }
 

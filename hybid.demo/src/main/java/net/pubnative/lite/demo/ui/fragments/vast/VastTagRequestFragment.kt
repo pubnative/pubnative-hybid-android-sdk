@@ -2,31 +2,36 @@ package net.pubnative.lite.demo.ui.fragments.vast
 
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd
+import net.pubnative.lite.sdk.rewarded.HyBidRewardedAd
 import net.pubnative.lite.sdk.utils.Logger
 
-class VastTagRequestFragment : Fragment(), HyBidInterstitialAd.Listener{
+class VastTagRequestFragment : Fragment(R.layout.fragment_vast_tag), HyBidInterstitialAd.Listener,
+    HyBidRewardedAd.Listener {
+
     private val TAG = VastTagRequestFragment::class.java.simpleName
 
     private lateinit var vastTagInput: EditText
+    private lateinit var zoneIdInput: EditText
     private lateinit var adSizeGroup: RadioGroup
 
-    private lateinit var mInterstitial : HyBidInterstitialAd
+    private lateinit var mInterstitial: HyBidInterstitialAd
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_vast_tag, container, false)
+    private lateinit var mRewarded: HyBidRewardedAd
+
+    private var mVast: VAST = VAST.INTERSTITIAL
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         adSizeGroup = view.findViewById(R.id.group_vast_ad_size)
         vastTagInput = view.findViewById(R.id.input_vast_tag)
+        zoneIdInput = view.findViewById(R.id.input_zone_id)
 
         view.findViewById<ImageButton>(R.id.button_vast_paste_clipboard).setOnClickListener {
             pasteFromClipboard()
@@ -34,6 +39,18 @@ class VastTagRequestFragment : Fragment(), HyBidInterstitialAd.Listener{
 
         view.findViewById<Button>(R.id.button_vast_load).setOnClickListener {
             loadVastTag()
+        }
+
+        adSizeGroup.setOnCheckedChangeListener { _, checkedId ->
+            when (checkedId) {
+                R.id.radio_vast_size_interstitial -> {
+                    mVast = VAST.INTERSTITIAL
+                }
+
+                R.id.radio_vast_size_rewarded -> {
+                    mVast = VAST.REWARDED
+                }
+            }
         }
     }
 
@@ -44,19 +61,41 @@ class VastTagRequestFragment : Fragment(), HyBidInterstitialAd.Listener{
         }
     }
 
-    private fun loadVastTag(){
+    private fun loadVastTag() {
         val vastUrl = vastTagInput.text.toString()
+        val zoneId = zoneIdInput.text.toString()
 
-        if (TextUtils.isEmpty(vastUrl)){
-            Toast.makeText(activity, "Please input some vast adserver URL", Toast.LENGTH_SHORT).show()
-        } else {
-            loadVastTagDirectly(vastUrl)
+        when {
+            TextUtils.isEmpty(vastUrl) -> {
+                Toast.makeText(activity, "Please input some vast adserver URL", Toast.LENGTH_SHORT)
+                    .show()
+            }
+            TextUtils.isEmpty(zoneId) -> {
+                Toast.makeText(activity, "Please input zone id", Toast.LENGTH_SHORT)
+                    .show()
+            }
+            else -> {
+                when (mVast) {
+                    VAST.INTERSTITIAL -> {
+                        loadInterstitialVastTagDirectly(vastUrl, zoneId)
+                    }
+
+                    VAST.REWARDED -> {
+                        loadRewardedVastTagDirectly(vastUrl, zoneId)
+                    }
+                }
+            }
         }
     }
 
-    private fun loadVastTagDirectly(url: String){
+    private fun loadInterstitialVastTagDirectly(url: String, zoneId: String) {
         mInterstitial = HyBidInterstitialAd(activity, this)
-        mInterstitial.prepareVideoTag(url)
+        mInterstitial.prepareVideoTag(zoneId, url)
+    }
+
+    private fun loadRewardedVastTagDirectly(url: String, zoneId: String) {
+        mRewarded = HyBidRewardedAd(activity, this)
+        mRewarded.prepareVideoTag(zoneId, url)
     }
 
     // Interstitial listeners
@@ -79,5 +118,34 @@ class VastTagRequestFragment : Fragment(), HyBidInterstitialAd.Listener{
 
     override fun onInterstitialClick() {
         Logger.d(TAG, "onInterstitialAdClick")
+    }
+
+    enum class VAST {
+        INTERSTITIAL, REWARDED
+    }
+
+    override fun onRewardedLoaded() {
+        Logger.d(TAG, "onRewardedLoaded")
+        mRewarded.show()
+    }
+
+    override fun onRewardedLoadFailed(error: Throwable?) {
+        Logger.d(TAG, "onRewardedLoadFailed")
+    }
+
+    override fun onRewardedOpened() {
+        Logger.d(TAG, "onRewardedOpened")
+    }
+
+    override fun onRewardedClosed() {
+        Logger.d(TAG, "onRewardedClosed")
+    }
+
+    override fun onRewardedClick() {
+        Logger.d(TAG, "onRewardedClick")
+    }
+
+    override fun onReward() {
+        Logger.d(TAG, "onReward")
     }
 }

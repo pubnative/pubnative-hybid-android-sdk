@@ -25,6 +25,7 @@ package net.pubnative.lite.sdk;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
+import android.util.Log;
 
 import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEventCallback;
@@ -75,6 +76,7 @@ public class HyBid {
     private static String sGender;
     private static String sKeywords;
     private static String sBundleId;
+    private static Boolean isCloseVideoAfterFinish = false;
     private static Integer sInterstitialSkipOffset = 0;
     private static String sIabCategory;
     private static String sIabSubcategory;
@@ -162,6 +164,9 @@ public class HyBid {
     }
 
     public static String getAppToken() {
+        if(!isInitialized()){
+            Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before using getAppToken()");
+        }
         return sAppToken;
     }
 
@@ -174,42 +179,72 @@ public class HyBid {
     }
 
     public static PNApiClient getApiClient() {
+        if(!isInitialized()){
+            Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before using getApiClient()");
+        }
         return sApiClient;
     }
 
     public static DeviceInfo getDeviceInfo() {
+        if(!isInitialized()){
+            Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before using getDeviceInfo()");
+        }
         return sDeviceInfo;
     }
 
     public static UserDataManager getUserDataManager() {
+        if(!isInitialized()){
+            Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before using getUserDataManager()");
+        }
         return sUserDataManager;
     }
 
     public static ConfigManager getConfigManager() {
+        if(!isInitialized()){
+            Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before using getConfigManager()");
+        }
         return sConfigManager;
     }
 
     public static ViewabilityManager getViewabilityManager() {
+        if(!isInitialized()){
+            Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before using getViewabilityManager()");
+        }
         return sViewabilityManager;
     }
 
     public static VgiIdManager getVgiIdManager() {
+        if(!isInitialized()){
+            Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before using getVgiIdManager()");
+        }
         return sVgiIdManager;
     }
 
     public static HyBidLocationManager getLocationManager() {
+        if(!isInitialized()){
+            Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before using getLocationManager()");
+        }
         return sLocationManager;
     }
 
     public static AdCache getAdCache() {
+        if(!isInitialized()){
+            Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before using getAdCache()");
+        }
         return sAdCache;
     }
 
     public synchronized static VideoAdCache getVideoAdCache() {
+        if(!isInitialized()){
+            Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before using getVideoAdCache()");
+        }
         return sVideoAdCache;
     }
 
     public static BrowserManager getBrowserManager() {
+        if(!isInitialized()){
+            Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before using getBrowserManager()");
+        }
         return sBrowserManager;
     }
 
@@ -296,6 +331,14 @@ public class HyBid {
     public static void setInterstitialSkipOffset(Integer seconds) {
         if (seconds >= 0)
             sInterstitialSkipOffset = seconds;
+    }
+
+    public static void setCloseVideoAfterFinish(Boolean isClosing) {
+        isCloseVideoAfterFinish = isClosing;
+    }
+
+    public static Boolean getCloseVideoAfterFinish() {
+        return isCloseVideoAfterFinish;
     }
 
     public static Integer getInterstitialSkipOffset() {

@@ -37,11 +37,13 @@ abstract class BaseVideoAdInternal {
     private SimpleTimer mPrepareTimer;
     private String mVastData;
 
+    private Boolean isInterstitial = false;
+
     private VideoAdCacheItem mCacheItem;
 
     private HyBidViewabilityNativeVideoAdSession mViewabilityAdSession;
 
-    BaseVideoAdInternal(Context context, String data) {
+    BaseVideoAdInternal(Context context, String data, Boolean isInterstitial) {
         if (context == null || TextUtils.isEmpty(data)) {
             throw new IllegalArgumentException("Wrong parameters");
         }
@@ -49,6 +51,7 @@ abstract class BaseVideoAdInternal {
         mContext = context;
         mVastData = data;
         mAssetsLoader = new AssetsLoader();
+        this.isInterstitial = isInterstitial;
         Utils.init(context);
 
         mViewabilityAdSession = new HyBidViewabilityNativeVideoAdSession(HyBid.getViewabilityManager());
@@ -86,6 +89,10 @@ abstract class BaseVideoAdInternal {
 
     boolean isRewarded() {
         return mIsRewarded;
+    }
+
+    public Boolean isInterstitial() {
+        return isInterstitial;
     }
 
     void setRewarded(boolean isRewarded) {

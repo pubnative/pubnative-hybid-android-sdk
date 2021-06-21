@@ -165,8 +165,10 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
     }
 
     override fun onAdLoadFailed(error: Throwable?) {
-        Log.e(TAG, "onAdLoadFailed", error)
-        errorView.text = error?.message
+        error?.message?.let {
+            Log.e(TAG, it)
+            errorView.text = it
+        }
         displayLogs()
         creativeIdView.text = ""
     }

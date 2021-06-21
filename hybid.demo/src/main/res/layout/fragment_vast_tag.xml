@@ -43,6 +43,28 @@
         </com.google.android.material.textfield.TextInputLayout>
     </RelativeLayout>
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp">
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/input_zone_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:hint="@string/zone_id_input"
+                android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </RelativeLayout>
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -70,6 +92,12 @@
             android:layout_height="32dp"
             android:text="@string/interstitial"
             android:checked="true"/>
+
+        <RadioButton
+            android:id="@+id/radio_vast_size_rewarded"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="@string/rewarded" />
     </RadioGroup>
 
     <com.google.android.material.button.MaterialButton

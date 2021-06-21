@@ -18,8 +18,8 @@ public class VideoAd extends BaseVideoAd {
 
     private volatile VideoAdView mBannerView;
 
-    public VideoAd(Context context, String data) {
-        super(context, data);
+    public VideoAd(Context context, String data, Boolean isInterstitial) {
+        super(context, data, isInterstitial);
     }
 
     @Override

@@ -87,7 +87,7 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
 
     private fun loadInterstitialAd() {
         interstitial = HyBidInterstitialAd(activity, zoneId, this)
-        interstitial?.setSkipOffset(3)
+        interstitial?.setSkipOffset(10)
         interstitial?.load()
 
         val event = ReportingEventBridge("Standalone Interstitial")
@@ -108,8 +108,10 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
     }
 
     override fun onInterstitialLoadFailed(error: Throwable?) {
-        Log.e(TAG, "onInterstitialLoadFailed", error)
-        errorView.text = error?.message
+        error?.message?.let {
+            Log.e(TAG, it)
+            errorView.text = it
+        }
         creativeIdView.text = ""
         displayLogs()
     }

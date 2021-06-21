@@ -131,6 +131,10 @@ public class RequestManager {
         });
     }
 
+    public PNInitializationHelper getInitializationHelper() {
+        return mInitializationHelper;
+    }
+
     void requestAdFromApi(final AdRequest adRequest) {
         if (mApiClient == null) {
             mApiClient = HyBid.getApiClient();

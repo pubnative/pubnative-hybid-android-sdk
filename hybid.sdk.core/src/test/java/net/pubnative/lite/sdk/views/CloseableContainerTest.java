@@ -135,9 +135,6 @@ public class CloseableContainerTest {
 
         subject.onTouchEvent(closeRegionUp);
         Assert.assertTrue(subject.isClosePressed());
-
-        Robolectric.getForegroundThreadScheduler().advanceToLastPostedRunnable();
-        Assert.assertFalse(subject.isClosePressed());
     }
 
     @Test

@@ -15,15 +15,13 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 
-class MoPubMediationMRectFragment : Fragment(), MoPubView.BannerAdListener {
+class MoPubMediationMRectFragment : Fragment(R.layout.fragment_mopub_mrect), MoPubView.BannerAdListener {
     val TAG = MoPubMediationMRectFragment::class.java.simpleName
 
     private lateinit var mopubMedium: MoPubView
     private lateinit var autoRefreshSwitch: Switch
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_mopub_mrect, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

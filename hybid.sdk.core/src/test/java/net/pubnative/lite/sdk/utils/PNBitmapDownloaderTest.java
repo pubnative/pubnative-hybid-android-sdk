@@ -6,8 +6,8 @@ import android.os.Environment;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.shadows.ShadowLooper;
 
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
@@ -36,6 +36,8 @@ public class PNBitmapDownloaderTest {
         PNBitmapDownloader.DownloadListener listener = spy(PNBitmapDownloader.DownloadListener.class);
         downloader.download(emptyUrl, listener);
 
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
         verify(listener).onDownloadFailed(eq(emptyUrl), any(Exception.class));
     }
 
@@ -45,6 +47,8 @@ public class PNBitmapDownloaderTest {
         PNBitmapDownloader downloader = new PNBitmapDownloader();
         PNBitmapDownloader.DownloadListener listener = spy(PNBitmapDownloader.DownloadListener.class);
         downloader.download(wrongUrl, listener);
+
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
 
         verify(listener).onDownloadFailed(eq(wrongUrl), any(Exception.class));
     }
@@ -65,8 +69,7 @@ public class PNBitmapDownloaderTest {
             e.printStackTrace();
         }
 
-        Robolectric.flushForegroundThreadScheduler();
-        Robolectric.flushBackgroundThreadScheduler();
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
 
         verify(listener).onDownloadFinish(eq(url), any(Bitmap.class));
     }

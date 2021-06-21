@@ -26,6 +26,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.TextUtils
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -152,7 +153,10 @@ class HyBidInFeedFragment : Fragment(), InFeedAdListener {
     }
 
     override fun onInFeedAdLoadError(error: Throwable?) {
-        errorView.text = error?.message
+        error?.message?.let {
+            Log.e(TAG, it)
+            errorView.text = it
+        }
         creativeIdView.text = ""
         displayLogs()
     }

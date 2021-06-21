@@ -33,15 +33,11 @@ class HyBidBannerViewHolder(itemView: View, val adListener: InFeedAdListener) : 
     }
 
     override fun onAdLoaded() {
-        Log.d(TAG, "onAdLoaded")
-
         adListener.onInFeedAdLoaded()
         adListener.onInFeedAdCreativeId(adView.creativeId)
     }
 
     override fun onAdLoadFailed(error: Throwable?) {
-        Log.e(TAG, "onAdLoadFailed", error)
-
         adListener.onInFeedAdLoadError(error)
     }
 

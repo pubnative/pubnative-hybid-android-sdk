@@ -44,6 +44,7 @@ class VideoAdControllerVast implements VideoAdController {
     private String mImageUri;
     private int mSkipTimeMillis = -1;
 
+    private boolean videoStarted = false;
     private boolean finishedPlaying = false;
 
     private HyBidViewabilityNativeVideoAdSession mViewabilityAdSession;
@@ -83,8 +84,26 @@ class VideoAdControllerVast implements VideoAdController {
             @Override
             public void run() {
                 try {
-                    startMediaPlayer();
-
+                    if (!videoStarted && !finishedPlaying) {
+                        videoStarted = true;
+                        startMediaPlayer();
+                        if (mTimerWithPause != null) {
+                            mTimerWithPause.create();
+                        }
+                        if (mSkipTimerWithPause != null) {
+                            mSkipTimerWithPause.create();
+                        }
+                    } else {
+                        if (mMediaPlayer != null) {
+                            mMediaPlayer.start();
+                        }
+                        if (mTimerWithPause != null && mTimerWithPause.isPaused()) {
+                            mTimerWithPause.resume();
+                        }
+                        if (mSkipTimerWithPause != null && mSkipTimerWithPause.isPaused()) {
+                            mSkipTimerWithPause.resume();
+                        }
+                    }
                 } catch (IllegalStateException e) {
                     Logger.e(LOG_TAG, "mediaPlayer IllegalStateException: " + e.getMessage());
                     tryReInitMediaPlayer();
@@ -333,6 +352,16 @@ class VideoAdControllerVast implements VideoAdController {
         if (skipEvent) {
             EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.SKIP);
         }
+
+        postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (mBaseAdInternal.isInterstitial()) {
+                    if (finishedPlaying && mImageUri == null && HyBid.getCloseVideoAfterFinish())
+                        closeSelf();
+                }
+            }
+        }, DELAY_UNTIL_EXECUTE);
     }
 
     @Override
@@ -436,6 +465,11 @@ class VideoAdControllerVast implements VideoAdController {
             if (mTimerWithPause != null) {
                 mTimerWithPause.pause();
             }
+
+            if (mSkipTimerWithPause != null) {
+                mSkipTimerWithPause.pause();
+            }
+
             EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.PAUSE);
             getViewabilityAdSession().firePause();
         }
@@ -443,6 +477,7 @@ class VideoAdControllerVast implements VideoAdController {
 
     @Override
     public void resume() {
+        //TODO handle properly as video resume
         if (mMediaPlayer != null && !mMediaPlayer.isPlaying() && mViewControllerVast.isEndCard()) {
             playAd();
             EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.RESUME);

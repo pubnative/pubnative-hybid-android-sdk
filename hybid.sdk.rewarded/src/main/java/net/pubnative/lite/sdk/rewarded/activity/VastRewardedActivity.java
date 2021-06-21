@@ -45,7 +45,7 @@ public class VastRewardedActivity extends HyBidRewardedActivity {
         super.onCreate(savedInstanceState);
 
         if (getAd() != null) {
-            mVideoAd = new VideoAd(this, getAd().getVast());
+            mVideoAd = new VideoAd(this, getAd().getVast(), false);
             mVideoAd.setRewarded(true);
             mVideoAd.bindView(mVideoPlayer);
             mVideoAd.setAdListener(mVideoAdListener);

@@ -28,6 +28,7 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.webkit.WebView;
 
+import net.pubnative.lite.sdk.ErrorMessages;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdResponse;
@@ -81,7 +82,11 @@ public class PNApiClient {
 
     public void getAd(AdRequest request, final AdRequestListener listener) {
         final String url = getAdRequestURL(request);
-        if (url == null) {
+        getAd(url, listener);
+    }
+
+    public void getAd(final String url, final AdRequestListener listener) {
+        if (TextUtils.isEmpty(url)) {
             if (listener != null) {
                 listener.onFailure(new Exception("PNApiClient - Error: invalid request URL"));
             }
@@ -178,22 +183,22 @@ public class PNApiClient {
         } catch (Exception exception) {
             parseException = exception;
         } catch (Error error) {
-            parseException = new Exception("Response cannot be parsed", error);
+            parseException = new Exception(ErrorMessages.PARSER_ERROR, error);
         }
         if (parseException != null) {
             listener.onFailure(parseException);
         } else if (apiResponseModel == null) {
-            listener.onFailure(new Exception("PNApiClient - Parse error"));
+            listener.onFailure(new Exception(ErrorMessages.PARSER_ERROR));
         } else if (AdResponse.Status.OK.equals(apiResponseModel.status)) {
             // STATUS 'OK'
             if (apiResponseModel.ads != null && !apiResponseModel.ads.isEmpty()) {
                 listener.onSuccess(apiResponseModel.ads.get(0));
             } else {
-                listener.onFailure(new Exception("HyBid - No fill"));
+                listener.onFailure(new Exception(ErrorMessages.NO_FILL));
             }
         } else {
             // STATUS 'ERROR'
-            listener.onFailure(new Exception("HyBid - Server error: " + apiResponseModel.error_message));
+            listener.onFailure(new Exception(ErrorMessages.SERVER_ERROR_PREFIX + apiResponseModel.error_message));
         }
     }
 

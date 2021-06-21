@@ -92,7 +92,7 @@ public class Constants {
     public static final String OGURY_KEY = "OGY-7B028F43E33F";
 
     public static final String NUMBEREIGHT_API_TOKEN = "T954C5VJTIAXAGMUVPDU0TZMGEV2";
-
+    
     public final class IntentParams {
         public static final String ZONE_ID = "zone_id";
     }

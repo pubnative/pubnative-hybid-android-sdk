@@ -92,9 +92,11 @@ public class HyBidDemoApplication extends MultiDexApplication {
         HyBid.setLocationTrackingEnabled(true);
         HyBid.setLocationUpdatesEnabled(true);
 
+        HyBid.setCloseVideoAfterFinish(false);
+
         HyBid.setVideoAudioStatus(AudioState.DEFAULT);
 
-        HyBid.setInterstitialSkipOffset(4);
+        HyBid.setInterstitialSkipOffset(10);
 
         StringBuilder keywordsBuilder = new StringBuilder();
         String separator = ",";

@@ -39,11 +39,11 @@ dependencies {
     implementation project(':hybid.sdk.source.pnapi')
 
     //Testing
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'org.robolectric:robolectric:3.8'
-    testImplementation 'org.mockito:mockito-core:2.24.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.robolectric:robolectric:4.5.1'
+    testImplementation 'org.mockito:mockito-core:2.28.2'
     testImplementation 'com.squareup.assertj:assertj-android:1.1.1'
     testImplementation 'com.google.truth:truth:0.36'
 }

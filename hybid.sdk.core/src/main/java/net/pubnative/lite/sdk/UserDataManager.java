@@ -86,18 +86,22 @@ public class UserDataManager {
         determineUserZone(initialisationListener);
     }
 
+    @Deprecated
     public String getConsentPageLink() {
         return "https://cdn.pubnative.net/static/consent/consent.html";
     }
 
+    @Deprecated
     public String getPrivacyPolicyLink() {
         return "https://pubnative.net/privacy-notice/";
     }
 
+    @Deprecated
     public String getVendorListLink() {
         return "https://pubnative.net/monetization-partners/";
     }
 
+    @Deprecated
     public boolean shouldAskConsent() {
         return gdprApplies() && !askedForGDPRConsent();
     }
@@ -288,11 +292,13 @@ public class UserDataManager {
         return askedForConsent;
     }
 
+    @Deprecated
     public void showConsentRequestScreen(Context context) {
         Intent intent = getConsentScreenIntent(context);
         context.startActivity(intent);
     }
 
+    @Deprecated
     public Intent getConsentScreenIntent(Context context) {
         return new Intent(context, UserConsentActivity.class);
     }
@@ -311,33 +317,35 @@ public class UserDataManager {
     private final SharedPreferences.OnSharedPreferenceChangeListener mAppPrefsListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            switch (key) {
-                case KEY_GDPR_PUBLIC_CONSENT: {
-                    String consentString = sharedPreferences.getString(KEY_GDPR_PUBLIC_CONSENT, null);
-                    if (!TextUtils.isEmpty(consentString)) {
-                        setIABGDPRConsentString(consentString);
-                    } else {
-                        removeIABGDPRConsentString();
+            if (!TextUtils.isEmpty(key)) {
+                switch (key) {
+                    case KEY_GDPR_PUBLIC_CONSENT: {
+                        String consentString = sharedPreferences.getString(KEY_GDPR_PUBLIC_CONSENT, null);
+                        if (!TextUtils.isEmpty(consentString)) {
+                            setIABGDPRConsentString(consentString);
+                        } else {
+                            removeIABGDPRConsentString();
+                        }
+                        break;
                     }
-                    break;
-                }
-                case KEY_GDPR_TCF_2_PUBLIC_CONSENT: {
-                    String consentString = sharedPreferences.getString(KEY_GDPR_TCF_2_PUBLIC_CONSENT, null);
-                    if (!TextUtils.isEmpty(consentString)) {
-                        setIABGDPRConsentString(consentString);
-                    } else {
-                        removeIABGDPRConsentString();
+                    case KEY_GDPR_TCF_2_PUBLIC_CONSENT: {
+                        String consentString = sharedPreferences.getString(KEY_GDPR_TCF_2_PUBLIC_CONSENT, null);
+                        if (!TextUtils.isEmpty(consentString)) {
+                            setIABGDPRConsentString(consentString);
+                        } else {
+                            removeIABGDPRConsentString();
+                        }
+                        break;
                     }
-                    break;
-                }
-                case KEY_CCPA_PUBLIC_CONSENT: {
-                    String consentString = sharedPreferences.getString(KEY_CCPA_PUBLIC_CONSENT, null);
-                    if (!TextUtils.isEmpty(consentString)) {
-                        setIABUSPrivacyString(consentString);
-                    } else {
-                        removeIABUSPrivacyString();
+                    case KEY_CCPA_PUBLIC_CONSENT: {
+                        String consentString = sharedPreferences.getString(KEY_CCPA_PUBLIC_CONSENT, null);
+                        if (!TextUtils.isEmpty(consentString)) {
+                            setIABUSPrivacyString(consentString);
+                        } else {
+                            removeIABUSPrivacyString();
+                        }
+                        break;
                     }
-                    break;
                 }
             }
         }

@@ -145,6 +145,11 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".ui.activities.mopub.MoPubMediationNativeRecyclerViewActivity"
+            android:label="@string/mopub_native_recycler"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".ui.activities.dfp.DFPBannerActivity"
             android:label="@string/dfp_banner"
             android:screenOrientation="portrait"
