@@ -55,4 +55,8 @@ public interface VideoAdController {
     boolean adFinishedPlaying();
 
     boolean isRewarded();
+
+    boolean isVideoVisible();
+
+    void setVideoVisible(boolean isVisible);
 }

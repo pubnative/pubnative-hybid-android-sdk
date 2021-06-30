@@ -42,16 +42,19 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
     private final AdTracker mAdTrackingDelegate;
     private final ReportingController mReportingController;
     private final AdPresenter.Listener mListener;
+    private final ImpressionListener mImpressionListener;
     private boolean mIsDestroyed;
 
     public AdPresenterDecorator(AdPresenter adPresenter,
                                 AdTracker adTrackingDelegate,
                                 ReportingController reportingController,
-                                AdPresenter.Listener listener) {
+                                AdPresenter.Listener listener,
+                                AdPresenter.ImpressionListener impressionListener) {
         mAdPresenter = adPresenter;
         mAdTrackingDelegate = adTrackingDelegate;
         mReportingController = reportingController;
         mListener = listener;
+        mImpressionListener = impressionListener;
     }
 
     @Override
@@ -61,7 +64,7 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
 
     @Override
     public void setImpressionListener(ImpressionListener listener) {
-        // Not needed in the decorator
+        // We set the listener in the constructor instead
     }
 
     @Override
@@ -162,5 +165,8 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
         }
 
         mAdTrackingDelegate.trackImpression();
+        if (mImpressionListener != null) {
+            mImpressionListener.onImpression();
+        }
     }
 }

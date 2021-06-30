@@ -15,15 +15,14 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 
-class MoPubMediationBannerFragment : Fragment(), MoPubView.BannerAdListener {
+class MoPubMediationBannerFragment : Fragment(R.layout.fragment_mopub_banner),
+    MoPubView.BannerAdListener {
     val TAG = MoPubMediationBannerFragment::class.java.simpleName
 
     private lateinit var mopubBanner: MoPubView
     private lateinit var autoRefreshSwitch: Switch
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_mopub_banner, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -33,7 +32,8 @@ class MoPubMediationBannerFragment : Fragment(), MoPubView.BannerAdListener {
         mopubBanner = view.findViewById(R.id.mopub_banner)
         autoRefreshSwitch = view.findViewById(R.id.check_auto_refresh)
 
-        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubMediationBannerAdUnitId
+        val adUnitId = SettingsManager.getInstance(requireActivity())
+            .getSettings().mopubMediationBannerAdUnitId
 
         mopubBanner.bannerAdListener = this
         mopubBanner.setAdUnitId(adUnitId)

@@ -77,7 +77,7 @@ public class VastAdPresenter implements AdPresenter {
             return;
         }
 
-        mVideoAd = new VideoAd(mContext, mAd.getVast(), false);
+        mVideoAd = new VideoAd(mContext, mAd.getVast(), false, false);
         mVideoPlayer = new VideoAdView(mContext);
         mVideoAd.bindView(mVideoPlayer);
         mVideoAd.setAdListener(mVideoAdListener);

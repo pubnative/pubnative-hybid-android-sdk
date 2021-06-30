@@ -32,8 +32,17 @@ import net.pubnative.lite.sdk.models.AdRequest;
  */
 
 public final class PNApiUrlComposer {
+
+    public static String getUrlQuery(String baseUrl, AdRequest adRequest) {
+        Uri uri = buildUri(baseUrl, adRequest);
+        return uri.getQuery();
+    }
+
     public static String buildUrl(String baseUrl, AdRequest adRequest) {
-        // Base URL
+        return buildUri(baseUrl, adRequest).toString();
+    }
+
+    private static Uri buildUri(String baseUrl, AdRequest adRequest) {
         Uri.Builder uriBuilder = Uri.parse(baseUrl).buildUpon();
         uriBuilder.appendPath("api");
         uriBuilder.appendPath("v3");
@@ -176,6 +185,6 @@ public final class PNApiUrlComposer {
             uriBuilder.appendQueryParameter("userconsent", adRequest.userconsent);
         }
 
-        return uriBuilder.build().toString();
+        return uriBuilder.build();
     }
 }

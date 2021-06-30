@@ -37,13 +37,18 @@ public abstract class PresenterFactory {
 
     public AdPresenter createPresenter(Ad ad,
                                        AdPresenter.Listener bannerPresenterListener) {
+        return createPresenter(ad, bannerPresenterListener, null);
+    }
+
+    public AdPresenter createPresenter(Ad ad,
+                                       AdPresenter.Listener bannerPresenterListener, AdPresenter.ImpressionListener impressionListener) {
         final AdPresenter adPresenter = fromCreativeType(ad.assetgroupid, ad);
         if (adPresenter == null) {
             return null;
         }
 
         final AdPresenterDecorator bannerPresenterDecorator = new AdPresenterDecorator(adPresenter,
-                new AdTracker(ad.getBeacons(Ad.Beacon.IMPRESSION), ad.getBeacons(Ad.Beacon.CLICK)), HyBid.getReportingController(), bannerPresenterListener);
+                new AdTracker(ad.getBeacons(Ad.Beacon.IMPRESSION), ad.getBeacons(Ad.Beacon.CLICK)), HyBid.getReportingController(), bannerPresenterListener, impressionListener);
         adPresenter.setListener(bannerPresenterDecorator);
         adPresenter.setImpressionListener(bannerPresenterDecorator);
         return bannerPresenterDecorator;

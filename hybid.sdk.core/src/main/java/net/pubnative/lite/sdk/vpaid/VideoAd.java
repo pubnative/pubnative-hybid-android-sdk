@@ -18,8 +18,8 @@ public class VideoAd extends BaseVideoAd {
 
     private volatile VideoAdView mBannerView;
 
-    public VideoAd(Context context, String data, Boolean isInterstitial) {
-        super(context, data, isInterstitial);
+    public VideoAd(Context context, String data, boolean isInterstitial, boolean isFullscreen) {
+        super(context, data, isInterstitial, isFullscreen);
     }
 
     @Override
@@ -71,16 +71,15 @@ public class VideoAd extends BaseVideoAd {
                                     obstruction.getPurpose(),
                                     obstruction.getReason());
                         }
-                        getViewabilityAdSession().fireLoaded();
-                        getViewabilityAdSession().fireImpression();
+
+                        getAdController().setVideoVisible(mBannerView.getVisibility() == View.VISIBLE);
                         getAdController().playAd();
 
                         validateAudioState();
 
-                        if (mBannerView.getVisibility() != View.VISIBLE) {
+                        /*if (mBannerView.getVisibility() != View.VISIBLE) {
                             mBannerView.setVisibility(View.VISIBLE);
-                        }
-                        onBannerShow();
+                        }*/
                     } else {
                         Logger.e(LOG_TAG, "getAdController() is null and can not set attributes to banner view ");
                         if (getAdListener() != null) {
@@ -109,16 +108,6 @@ public class VideoAd extends BaseVideoAd {
 
         if (isMuted) {
             getAdController().toggleMute();
-        }
-    }
-
-    /**
-     * Triggered when the banner ad appears on the screen
-     */
-    private void onBannerShow() {
-        Logger.d(LOG_TAG, "Ad appeared on screen");
-        if (getAdListener() != null) {
-            getAdListener().onAdStarted();
         }
     }
 

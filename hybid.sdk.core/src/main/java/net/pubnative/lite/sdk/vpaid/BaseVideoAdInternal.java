@@ -38,12 +38,13 @@ abstract class BaseVideoAdInternal {
     private String mVastData;
 
     private Boolean isInterstitial = false;
+    private boolean isFullscreen = false;
 
     private VideoAdCacheItem mCacheItem;
 
     private HyBidViewabilityNativeVideoAdSession mViewabilityAdSession;
 
-    BaseVideoAdInternal(Context context, String data, Boolean isInterstitial) {
+    BaseVideoAdInternal(Context context, String data, boolean isInterstitial, boolean isFullscreen) {
         if (context == null || TextUtils.isEmpty(data)) {
             throw new IllegalArgumentException("Wrong parameters");
         }
@@ -52,6 +53,7 @@ abstract class BaseVideoAdInternal {
         mVastData = data;
         mAssetsLoader = new AssetsLoader();
         this.isInterstitial = isInterstitial;
+        this.isFullscreen = isFullscreen;
         Utils.init(context);
 
         mViewabilityAdSession = new HyBidViewabilityNativeVideoAdSession(HyBid.getViewabilityManager());
@@ -244,7 +246,7 @@ abstract class BaseVideoAdInternal {
         if (adParams.isVpaid()) {
             mAdController = new VideoAdControllerVpaid(this, adParams, getAdSpotDimensions(), vastFileContent, getViewabilityAdSession());
         } else {
-            mAdController = new VideoAdControllerVast(this, adParams, getViewabilityAdSession());
+            mAdController = new VideoAdControllerVast(this, adParams, getViewabilityAdSession(), isFullscreen);
         }
         if (mCacheItem != null) {
             prepareAdController(mCacheItem.getVideoFilePath(), mCacheItem.getEndCardFilePath());
@@ -350,6 +352,7 @@ abstract class BaseVideoAdInternal {
         mIsReady = true;
         mAdState = AdState.NONE;
         stopFetcherTimer();
+        getViewabilityAdSession().fireLoaded();
         if (mVideoAdListener != null) {
             mVideoAdListener.onAdLoadSuccess();
         } else {

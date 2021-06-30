@@ -30,7 +30,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
             if (mSkipOffset > 0) {
                 mIsSkippable = false;
             }
-            mVideoAd = new VideoAd(this, getAd().getVast(), true);
+            mVideoAd = new VideoAd(this, getAd().getVast(), true, true);
             mVideoAd.useMobileNetworkForCaching(true);
             mVideoAd.bindView(mVideoPlayer);
             mVideoAd.setAdListener(mVideoAdListener);

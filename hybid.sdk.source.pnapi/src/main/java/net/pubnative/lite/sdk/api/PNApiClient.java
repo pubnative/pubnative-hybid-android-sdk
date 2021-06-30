@@ -66,7 +66,7 @@ public class PNApiClient {
     private final Context mContext;
     private String mApiUrl = BuildConfig.BASE_URL;
 
-    String getApiUrl() {
+    public String getApiUrl() {
         return mApiUrl;
     }
 
@@ -145,18 +145,24 @@ public class PNApiClient {
                 listener.onFailure(new Exception("Empty JS tracking beacon"));
             }
         } else {
-            WebView webView = new WebView(mContext);
-            webView.getSettings().setJavaScriptEnabled(true);
+            try {
+                WebView webView = new WebView(mContext);
+                webView.getSettings().setJavaScriptEnabled(true);
 
-            String processedJS = processJS(js);
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-                webView.loadUrl("javascript:" + processedJS);
-            } else {
-                webView.evaluateJavascript(processedJS, null);
-            }
+                String processedJS = processJS(js);
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+                    webView.loadUrl("javascript:" + processedJS);
+                } else {
+                    webView.evaluateJavascript(processedJS, null);
+                }
 
-            if (listener != null) {
-                listener.onSuccess();
+                if (listener != null) {
+                    listener.onSuccess();
+                }
+            } catch (RuntimeException exception) {
+                if (listener != null) {
+                    listener.onFailure(new Exception("Error tracking JS beacon. No webview to evaluate JS."));
+                }
             }
         }
     }

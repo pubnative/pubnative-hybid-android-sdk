@@ -27,6 +27,7 @@ import android.location.Location;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.DeviceInfo;
+import net.pubnative.lite.sdk.DisplayManager;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.core.BuildConfig;
@@ -51,17 +52,19 @@ public class AdRequestFactory {
     private DeviceInfo mDeviceInfo;
     private HyBidLocationManager mLocationManager;
     private UserDataManager mUserDataManager;
+    private final DisplayManager mDisplayManager;
     private IntegrationType mIntegrationType = IntegrationType.HEADER_BIDDING;
     private boolean mIsRewarded;
 
     public AdRequestFactory() {
-        this(HyBid.getDeviceInfo(), HyBid.getLocationManager(), HyBid.getUserDataManager());
+        this(HyBid.getDeviceInfo(), HyBid.getLocationManager(), HyBid.getUserDataManager(), new DisplayManager());
     }
 
-    AdRequestFactory(DeviceInfo deviceInfo, HyBidLocationManager locationManager, UserDataManager userDataManager) {
+    AdRequestFactory(DeviceInfo deviceInfo, HyBidLocationManager locationManager, UserDataManager userDataManager, DisplayManager displayManager) {
         mDeviceInfo = deviceInfo;
         mLocationManager = locationManager;
         mUserDataManager = userDataManager;
+        mDisplayManager = displayManager;
     }
 
     public void createAdRequest(final String zoneid, final AdSize adSize, final boolean isRewarded, final Callback callback) {
@@ -100,7 +103,7 @@ public class AdRequestFactory {
         }
     }
 
-    AdRequest buildRequest(final String zoneid, AdSize adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType) {
+    public AdRequest buildRequest(final String zoneid, AdSize adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType) {
         if (mUserDataManager == null) {
             mUserDataManager = HyBid.getUserDataManager();
         }
@@ -163,9 +166,8 @@ public class AdRequestFactory {
 
         adRequest.mf = getDefaultMetaFields();
 
-        adRequest.displaymanager = "HyBid";
-        adRequest.displaymanagerver = String.format(Locale.ENGLISH, "%s_%s_%s",
-                "sdkandroid", integrationType.getCode(), BuildConfig.SDK_VERSION);
+        adRequest.displaymanager = mDisplayManager.getDisplayManager();
+        adRequest.displaymanagerver = mDisplayManager.getDisplayManagerVersion(integrationType);
 
         if (mLocationManager != null) {
             Location location = mLocationManager.getUserLocation();

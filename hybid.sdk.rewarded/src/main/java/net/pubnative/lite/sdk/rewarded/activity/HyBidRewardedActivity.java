@@ -24,6 +24,7 @@ package net.pubnative.lite.sdk.rewarded.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -56,6 +57,7 @@ public abstract class HyBidRewardedActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();

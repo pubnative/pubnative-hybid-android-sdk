@@ -329,113 +329,124 @@ public class MRAIDView extends RelativeLayout {
 
         webView = createWebView();
 
-        currentWebView = webView;
-        String processedHtml = MRAIDHtmlProcessor.processRawHtml(data);
-        MRAIDLog.d("hz-m loading mraid " + processedHtml);
+        if (webView == null) {
+            if (listener != null) {
+                listener.mraidViewError(this);
+            }
+        } else {
+            currentWebView = webView;
+            String processedHtml = MRAIDHtmlProcessor.processRawHtml(data);
+            MRAIDLog.d("hz-m loading mraid " + processedHtml);
 
-        webView.loadDataWithBaseURL(this.baseUrl, processedHtml, "text/html", "UTF-8", null);
+            webView.loadDataWithBaseURL(this.baseUrl, processedHtml, "text/html", "UTF-8", null);
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private WebView createWebView() {
-        PNWebView wv = new PNWebView(context) {
+        PNWebView wv;
+        try {
+            wv = new PNWebView(context) {
 
-            private static final String TAG = "MRAIDView-WebView";
+                private static final String TAG = "MRAIDView-WebView";
 
-            @Override
-            protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-                super.onLayout(changed, left, top, right, bottom);
-                onLayoutWebView(this, changed, left, top, right, bottom);
-            }
+                @Override
+                protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+                    super.onLayout(changed, left, top, right, bottom);
+                    onLayoutWebView(this, changed, left, top, right, bottom);
+                }
 
-            @Override
-            public void onConfigurationChanged(Configuration newConfig) {
-                super.onConfigurationChanged(newConfig);
-                MRAIDLog.d(TAG, "onConfigurationChanged " + (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT ? "portrait" : "landscape"));
-                if (isInterstitial) {
-                    WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-                    if (windowManager != null) {
-                        windowManager.getDefaultDisplay().getMetrics(displayMetrics);
+                @Override
+                public void onConfigurationChanged(Configuration newConfig) {
+                    super.onConfigurationChanged(newConfig);
+                    MRAIDLog.d(TAG, "onConfigurationChanged " + (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT ? "portrait" : "landscape"));
+                    if (isInterstitial) {
+                        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+                        if (windowManager != null) {
+                            windowManager.getDefaultDisplay().getMetrics(displayMetrics);
+                        }
                     }
                 }
-            }
 
-            @Override
-            protected void onVisibilityChanged(View changedView, int visibility) {
-                super.onVisibilityChanged(changedView, visibility);
-                MRAIDLog.d(TAG, "onVisibilityChanged " + getVisibilityString(visibility));
-                if (isInterstitial) {
-                    setViewable(visibility);
+                @Override
+                protected void onVisibilityChanged(View changedView, int visibility) {
+                    super.onVisibilityChanged(changedView, visibility);
+                    MRAIDLog.d(TAG, "onVisibilityChanged " + getVisibilityString(visibility));
+                    if (isInterstitial) {
+                        setViewable(visibility);
+                    }
                 }
-            }
 
-            @Override
-            protected void onWindowVisibilityChanged(int visibility) {
-                super.onWindowVisibilityChanged(visibility);
-                int actualVisibility = getVisibility();
-                MRAIDLog.d(TAG, "onWindowVisibilityChanged " + getVisibilityString(visibility) +
-                        " (actual " + getVisibilityString(actualVisibility) + ')');
-                if (isInterstitial) {
-                    setViewable(actualVisibility);
+                @Override
+                protected void onWindowVisibilityChanged(int visibility) {
+                    super.onWindowVisibilityChanged(visibility);
+                    int actualVisibility = getVisibility();
+                    MRAIDLog.d(TAG, "onWindowVisibilityChanged " + getVisibilityString(visibility) +
+                            " (actual " + getVisibilityString(actualVisibility) + ')');
+                    if (isInterstitial) {
+                        setViewable(actualVisibility);
+                    }
+                    if (visibility != View.VISIBLE) {
+                        // FIXME: is called when view is removed and WebView is destroyed already
+                        //pauseWebView(this);
+                    }
                 }
-                if (visibility != View.VISIBLE) {
-                    // FIXME: is called when view is removed and WebView is destroyed already
-                    //pauseWebView(this);
+
+                @Override
+                public boolean performClick() {
+                    return super.performClick();
                 }
-            }
+            };
 
-            @Override
-            public boolean performClick() {
-                return super.performClick();
-            }
-        };
+            // changes behavior of view when bigger than window or something?
+            wv.setScrollContainer(false);
 
-        // changes behavior of view when bigger than window or something?
-        wv.setScrollContainer(false);
+            // disable the scroll bars (still allows dragging scroll but hides bars)
+            wv.setVerticalScrollBarEnabled(false);
+            wv.setHorizontalScrollBarEnabled(false);
 
-        // disable the scroll bars (still allows dragging scroll but hides bars)
-        wv.setVerticalScrollBarEnabled(false);
-        wv.setHorizontalScrollBarEnabled(false);
+            // make sure those scroll bars are gone
+            wv.setScrollBarStyle(View.SCROLLBARS_OUTSIDE_OVERLAY);
 
-        // make sure those scroll bars are gone
-        wv.setScrollBarStyle(View.SCROLLBARS_OUTSIDE_OVERLAY);
-
-        // i think we want to be able to focus but i dont know?
+            // i think we want to be able to focus but i dont know?
 //        wv.setFocusableInTouchMode(true);
 
-        // manually delegate view focus?
-        wv.setOnTouchListener(new OnTouchListener() {
-            @SuppressLint("ClickableViewAccessibility")
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                wasTouched = true;
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                    case MotionEvent.ACTION_UP:
-                        if (!v.hasFocus()) {
-                            v.requestFocus();
-                        }
-                        break;
+            // manually delegate view focus?
+            wv.setOnTouchListener(new OnTouchListener() {
+                @SuppressLint("ClickableViewAccessibility")
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    wasTouched = true;
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                        case MotionEvent.ACTION_UP:
+                            if (!v.hasFocus()) {
+                                v.requestFocus();
+                            }
+                            break;
+                    }
+                    return false;
                 }
-                return false;
+            });
+
+
+            wv.getSettings().setJavaScriptEnabled(true);
+            wv.getSettings().setDomStorageEnabled(true);
+            wv.getSettings().setAllowContentAccess(false);
+
+            wv.enablePlugins(true);
+
+            // no zooming!
+            wv.getSettings().setSupportZoom(false);
+
+            wv.setWebChromeClient(mraidWebChromeClient);
+            wv.setWebViewClient(mraidWebViewClient);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                wv.getSettings().setMediaPlaybackRequiresUserGesture(false);
             }
-        });
-
-
-        wv.getSettings().setJavaScriptEnabled(true);
-        wv.getSettings().setDomStorageEnabled(true);
-        wv.getSettings().setAllowContentAccess(false);
-
-        wv.enablePlugins(true);
-
-        // no zooming!
-        wv.getSettings().setSupportZoom(false);
-
-        wv.setWebChromeClient(mraidWebChromeClient);
-        wv.setWebViewClient(mraidWebViewClient);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            wv.getSettings().setMediaPlaybackRequiresUserGesture(false);
+        } catch (RuntimeException exception) {
+            wv = null;
         }
 
         return wv;

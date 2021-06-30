@@ -127,6 +127,17 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
     }
 
     @Override
+    public void mraidViewError(MRAIDView mraidView) {
+        if (mIsDestroyed) {
+            return;
+        }
+
+        if (mListener != null) {
+            mListener.onAdError(this);
+        }
+    }
+
+    @Override
     public void mraidViewExpand(MRAIDView mraidView) {
         if (mIsDestroyed) {
             return;

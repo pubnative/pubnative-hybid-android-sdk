@@ -43,7 +43,7 @@ class InFeedAdapter(val zoneId: String, val adListener: InFeedAdListener) : Recy
     override fun getItemCount() = list.count()
 
     override fun getItemViewType(position: Int): Int {
-        if (position == 2) {
+        if (position == 7) {
             return TYPE_MRECT
         }
 

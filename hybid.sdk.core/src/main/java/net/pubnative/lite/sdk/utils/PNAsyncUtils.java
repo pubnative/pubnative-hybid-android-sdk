@@ -8,14 +8,15 @@ import java.util.concurrent.Executor;
 
 public class PNAsyncUtils {
     private static final String TAG = PNAsyncUtils.class.getSimpleName();
-    private static Executor sExecutor;
-    private static Handler sUiThreadHandler;
+    private static final Executor sExecutor;
+    private static final Handler sUiThreadHandler;
 
     static {
         sExecutor = AsyncTask.THREAD_POOL_EXECUTOR;
         sUiThreadHandler = new Handler(Looper.getMainLooper());
     }
 
+    @SafeVarargs
     public static <P> void safeExecuteOnExecutor(final AsyncTask<P, ?, ?> asyncTask, final P... params) {
         if (asyncTask != null) {
             if (Looper.getMainLooper() == Looper.myLooper()) {

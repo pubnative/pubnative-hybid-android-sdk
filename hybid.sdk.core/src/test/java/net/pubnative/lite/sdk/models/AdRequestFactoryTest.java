@@ -3,6 +3,7 @@ package net.pubnative.lite.sdk.models;
 import android.location.Location;
 
 import net.pubnative.lite.sdk.DeviceInfo;
+import net.pubnative.lite.sdk.DisplayManager;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.core.BuildConfig;
@@ -35,11 +36,11 @@ public class AdRequestFactoryTest {
     private HyBidLocationManager mLocationManager;
     @Mock
     private UserDataManager mMockUserDataManager;
+    @Mock
+    private DisplayManager mMockDisplayManager;
 
     @InjectMocks
     private AdRequestFactory mSubject;
-
-    private List<String> mMockSupportedFrameworks = Arrays.asList("5","7");
 
     @Before
     public void setup() {
@@ -60,6 +61,9 @@ public class AdRequestFactoryTest {
         when(mLocationManager.getUserLocation()).thenReturn(mockLocation);
 
         when(mMockUserDataManager.isCCPAOptOut()).thenReturn(false);
+        when(mMockDisplayManager.getDisplayManagerVersion(IntegrationType.HEADER_BIDDING)).thenReturn(String.format(Locale.ENGLISH, "%s_%s_%s",
+                "sdkandroid", "hb", BuildConfig.SDK_VERSION));
+        when(mMockDisplayManager.getDisplayManager()).thenReturn("HyBid");
     }
 
     @Test

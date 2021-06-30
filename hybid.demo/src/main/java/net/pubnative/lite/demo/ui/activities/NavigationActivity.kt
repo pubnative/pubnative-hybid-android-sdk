@@ -40,7 +40,7 @@ class NavigationActivity : AppCompatActivity() {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when (requestCode) {
             PERMISSION_REQUEST -> {
-                if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.isNotEmpty() && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(this, "Location permission denied. You can change this on the app settings.", Toast.LENGTH_SHORT).show()
                 }
             }

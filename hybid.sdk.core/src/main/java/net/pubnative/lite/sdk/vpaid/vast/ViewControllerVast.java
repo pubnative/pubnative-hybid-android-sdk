@@ -97,8 +97,10 @@ public class ViewControllerVast implements View.OnClickListener {
             try {
                 if (!mAdController.adFinishedPlaying()) {
                     if (visibility == View.VISIBLE) {
+                        mAdController.setVideoVisible(true);
                         mAdController.resume();
                     } else {
+                        mAdController.setVideoVisible(false);
                         mAdController.pause();
                     }
                 }

@@ -50,10 +50,10 @@ import kotlin.concurrent.schedule
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class HyBidBannerFragment : Fragment(), PNAdView.Listener {
+class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.Listener {
     val TAG = HyBidBannerFragment::class.java.simpleName
 
-    private val AUTO_REFRESH_MILLIS : Long = 30 * 1000
+    private val AUTO_REFRESH_MILLIS: Long = 30 * 1000
 
     private var zoneId: String? = null
     private val handler = Handler(Looper.getMainLooper())
@@ -67,21 +67,19 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
     private lateinit var creativeIdView: TextView
 
     private val adSizes = arrayOf(
-            AdSize.SIZE_320x50,
-            AdSize.SIZE_160x600,
-            AdSize.SIZE_250x250,
-            AdSize.SIZE_300x50,
-            AdSize.SIZE_300x250,
-            AdSize.SIZE_300x600,
-            AdSize.SIZE_320x100,
-            AdSize.SIZE_320x480,
-            AdSize.SIZE_480x320,
-            AdSize.SIZE_728x90,
-            AdSize.SIZE_768x1024,
-            AdSize.SIZE_1024x768)
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-            inflater.inflate(R.layout.fragment_hybid_banner, container, false)
+        AdSize.SIZE_320x50,
+        AdSize.SIZE_160x600,
+        AdSize.SIZE_250x250,
+        AdSize.SIZE_300x50,
+        AdSize.SIZE_300x250,
+        AdSize.SIZE_300x600,
+        AdSize.SIZE_320x100,
+        AdSize.SIZE_320x480,
+        AdSize.SIZE_480x320,
+        AdSize.SIZE_728x90,
+        AdSize.SIZE_768x1024,
+        AdSize.SIZE_1024x768
+    )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -107,10 +105,21 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
             autoRefresh()
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
-        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), creativeIdView.text.toString()) }
+        errorView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                errorView.text.toString()
+            )
+        }
+        creativeIdView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                creativeIdView.text.toString()
+            )
+        }
 
-        spinnerAdapter = ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, adSizes)
+        spinnerAdapter =
+            ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, adSizes)
         adSizeSpinner.adapter = spinnerAdapter
     }
 
@@ -123,8 +132,9 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
         hybidBanner.setAdSize(adSize)
 
         val layoutParams = LinearLayout.LayoutParams(
-                convertDpToPx(requireContext(), adSize.width.toFloat()),
-                convertDpToPx(requireContext(), adSize.height.toFloat()))
+            convertDpToPx(requireContext(), adSize.width.toFloat()),
+            convertDpToPx(requireContext(), adSize.height.toFloat())
+        )
         layoutParams.gravity = Gravity.CENTER_HORIZONTAL
 
         hybidBanner.layoutParams = layoutParams
@@ -139,8 +149,8 @@ class HyBidBannerFragment : Fragment(), PNAdView.Listener {
         }
     }
 
-    fun autoRefresh(){
-        if (autoRefreshSwitch.isChecked){
+    fun autoRefresh() {
+        if (autoRefreshSwitch.isChecked) {
             handler.postDelayed({
                 loadPNAd()
                 autoRefresh()

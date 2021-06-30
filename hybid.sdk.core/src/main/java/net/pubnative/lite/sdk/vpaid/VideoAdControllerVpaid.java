@@ -61,6 +61,7 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
     private boolean mIsStarted;
     private String mVastFileContent;
 
+    private boolean mIsVisible = false;
     private boolean mFinishedPlaying = false;
 
     private HyBidViewabilityNativeVideoAdSession mViewabilityAdSession;
@@ -383,5 +384,15 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
     @Override
     public List<HyBidViewabilityFriendlyObstruction> getViewabilityFriendlyObstructions() {
         return mViewabilityFriendlyObstructions;
+    }
+
+    @Override
+    public boolean isVideoVisible() {
+        return mIsVisible;
+    }
+
+    @Override
+    public void setVideoVisible(boolean isVisible) {
+        this.mIsVisible = isVisible;
     }
 }

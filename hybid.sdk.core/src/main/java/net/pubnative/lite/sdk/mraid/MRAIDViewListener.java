@@ -33,6 +33,8 @@ public interface MRAIDViewListener {
 
     void mraidViewLoaded(MRAIDView mraidView);
 
+    void mraidViewError(MRAIDView mraidView);
+
     void mraidViewExpand(MRAIDView mraidView);
 
     void mraidViewClose(MRAIDView mraidView);

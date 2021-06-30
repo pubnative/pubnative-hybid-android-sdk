@@ -285,8 +285,8 @@
             android:windowSoftInputMode="stateHidden" />
 
         <activity
-            android:name=".ui.activities.consent.PNCMPActivity"
-            android:label="@string/title_pn_cmp"
+            android:name=".ui.activities.CustomSDKDataActivity"
+            android:label="@string/custom_sdk_data"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden" />

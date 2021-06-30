@@ -94,7 +94,7 @@ public class HyBidDemoApplication extends MultiDexApplication {
 
         HyBid.setCloseVideoAfterFinish(false);
 
-        HyBid.setVideoAudioStatus(AudioState.DEFAULT);
+        HyBid.setVideoAudioStatus(AudioState.MUTED);
 
         HyBid.setInterstitialSkipOffset(10);
 

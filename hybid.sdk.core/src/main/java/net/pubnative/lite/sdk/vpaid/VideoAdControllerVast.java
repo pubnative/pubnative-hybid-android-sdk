@@ -45,17 +45,22 @@ class VideoAdControllerVast implements VideoAdController {
     private int mSkipTimeMillis = -1;
 
     private boolean videoStarted = false;
+    private boolean videoVisible = false;
     private boolean finishedPlaying = false;
 
     private HyBidViewabilityNativeVideoAdSession mViewabilityAdSession;
     private List<HyBidViewabilityFriendlyObstruction> mViewabilityFriendlyObstructions;
 
-    VideoAdControllerVast(BaseVideoAdInternal baseAd, AdParams adParams, HyBidViewabilityNativeVideoAdSession viewabilityAdSession) {
+    VideoAdControllerVast(BaseVideoAdInternal baseAd, AdParams adParams, HyBidViewabilityNativeVideoAdSession viewabilityAdSession, boolean isFullscreen) {
         mBaseAdInternal = baseAd;
         mAdParams = adParams;
         mViewabilityAdSession = viewabilityAdSession;
         mViewabilityFriendlyObstructions = new ArrayList<>();
         mViewControllerVast = new ViewControllerVast(this);
+
+        if (isFullscreen) {
+            this.videoVisible = true;
+        }
     }
 
     @Override
@@ -80,39 +85,41 @@ class VideoAdControllerVast implements VideoAdController {
 
     @Override
     public void playAd() {
-        postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (!videoStarted && !finishedPlaying) {
-                        videoStarted = true;
-                        startMediaPlayer();
-                        if (mTimerWithPause != null) {
-                            mTimerWithPause.create();
+        if (isVideoVisible()) {
+            postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (!videoStarted && !finishedPlaying) {
+                            videoStarted = true;
+                            startMediaPlayer();
+                            if (mTimerWithPause != null) {
+                                mTimerWithPause.create();
+                            }
+                            if (mSkipTimerWithPause != null) {
+                                mSkipTimerWithPause.create();
+                            }
+                        } else {
+                            if (mMediaPlayer != null) {
+                                mMediaPlayer.start();
+                            }
+                            if (mTimerWithPause != null && mTimerWithPause.isPaused()) {
+                                mTimerWithPause.resume();
+                            }
+                            if (mSkipTimerWithPause != null && mSkipTimerWithPause.isPaused()) {
+                                mSkipTimerWithPause.resume();
+                            }
                         }
-                        if (mSkipTimerWithPause != null) {
-                            mSkipTimerWithPause.create();
-                        }
-                    } else {
-                        if (mMediaPlayer != null) {
-                            mMediaPlayer.start();
-                        }
-                        if (mTimerWithPause != null && mTimerWithPause.isPaused()) {
-                            mTimerWithPause.resume();
-                        }
-                        if (mSkipTimerWithPause != null && mSkipTimerWithPause.isPaused()) {
-                            mSkipTimerWithPause.resume();
-                        }
+                    } catch (IllegalStateException e) {
+                        Logger.e(LOG_TAG, "mediaPlayer IllegalStateException: " + e.getMessage());
+                        tryReInitMediaPlayer();
+                    } catch (IOException e) {
+                        Logger.e(LOG_TAG, "mediaPlayer IOException: " + e.getMessage());
+                        closeSelf();
                     }
-                } catch (IllegalStateException e) {
-                    Logger.e(LOG_TAG, "mediaPlayer IllegalStateException: " + e.getMessage());
-                    tryReInitMediaPlayer();
-                } catch (IOException e) {
-                    Logger.e(LOG_TAG, "mediaPlayer IOException: " + e.getMessage());
-                    closeSelf();
                 }
-            }
-        }, DELAY_UNTIL_EXECUTE);
+            }, DELAY_UNTIL_EXECUTE);
+        }
     }
 
     private void tryReInitMediaPlayer() {
@@ -158,6 +165,11 @@ class VideoAdControllerVast implements VideoAdController {
                 mMediaPlayer.seekTo((int) mTimerWithPause.timePassed());
             } else {
                 createTimer(mp.getDuration());
+                getViewabilityAdSession().fireImpression();
+                Logger.d(LOG_TAG, "Ad appeared on screen");
+                if (mBaseAdInternal != null && mBaseAdInternal.getAdListener() != null) {
+                    mBaseAdInternal.getAdListener().onAdStarted();
+                }
             }
 
             muteVideo(mViewControllerVast.isMute(), false);
@@ -477,7 +489,6 @@ class VideoAdControllerVast implements VideoAdController {
 
     @Override
     public void resume() {
-        //TODO handle properly as video resume
         if (mMediaPlayer != null && !mMediaPlayer.isPlaying() && mViewControllerVast.isEndCard()) {
             playAd();
             EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.RESUME);
@@ -514,5 +525,15 @@ class VideoAdControllerVast implements VideoAdController {
     @Override
     public List<HyBidViewabilityFriendlyObstruction> getViewabilityFriendlyObstructions() {
         return mViewabilityFriendlyObstructions;
+    }
+
+    @Override
+    public boolean isVideoVisible() {
+        return videoVisible;
+    }
+
+    @Override
+    public void setVideoVisible(boolean videoVisible) {
+        this.videoVisible = videoVisible;
     }
 }

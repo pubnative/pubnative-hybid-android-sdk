@@ -67,7 +67,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 
-public class HyBidAdView extends RelativeLayout implements RequestManager.RequestListener, AdPresenter.Listener, Auction.Listener {
+public class HyBidAdView extends RelativeLayout implements RequestManager.RequestListener, AdPresenter.Listener, AdPresenter.ImpressionListener, Auction.Listener {
 
     private static final String TAG = HyBidAdView.class.getSimpleName();
     private Position mPosition;
@@ -302,7 +302,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
 
     protected AdPresenter createPresenter() {
         return new BannerPresenterFactory(getContext())
-                .createPresenter(mAd, this);
+                .createPresenter(mAd, this, this);
     }
 
     public void renderAd() {
@@ -463,7 +463,9 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
 
     protected void setupAdView(View view) {
         if (mPosition == null) {
-            RelativeLayout.LayoutParams adLayoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            int width = (int) ViewUtils.convertDpToPixel(mRequestManager.getAdSize().getWidth(), getContext());
+            int height = (int) ViewUtils.convertDpToPixel(mRequestManager.getAdSize().getHeight(), getContext());
+            RelativeLayout.LayoutParams adLayoutParams = new RelativeLayout.LayoutParams(width, height);
             adLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
 
             addView(view, adLayoutParams);
@@ -473,7 +475,6 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
             }
 
             startTracking();
-            invokeOnImpression();
         } else {
             show(view, mPosition);
         }
@@ -548,6 +549,11 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     public enum Position {
         TOP,
         BOTTOM
+    }
+
+    @Override
+    public void onImpression() {
+        invokeOnImpression();
     }
 
     public void setPosition(Position position) {

@@ -28,7 +28,6 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         hideInterstitialCloseButton();
     }
 
@@ -91,6 +90,12 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
     }
 
     @Override
+    public void mraidViewError(MRAIDView mraidView) {
+        getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.ERROR);
+        dismiss();
+    }
+
+    @Override
     public void mraidViewExpand(MRAIDView mraidView) {
 
     }
@@ -101,7 +106,8 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
     }
 
     @Override
-    public boolean mraidViewResize(MRAIDView mraidView, int width, int height, int offsetX, int offsetY) {
+    public boolean mraidViewResize(MRAIDView mraidView, int width, int height, int offsetX,
+                                   int offsetY) {
         return true;
     }
 

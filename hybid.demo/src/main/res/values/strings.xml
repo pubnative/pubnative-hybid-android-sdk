@@ -224,4 +224,6 @@
     <string name="position">Position</string>
     <string name="sticky_banner">Sticky Banner</string>
     <string name="zone_id_input">Zone Id</string>
+
+    <string name="custom_sdk_data">Custom SDK Data</string>
 </resources>
