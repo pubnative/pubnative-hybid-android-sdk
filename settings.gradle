@@ -16,7 +16,4 @@ include ':hybid.demo',
         ':hybid.sdk.source.pnapi',
         ':hybid.sdk.source.prebid',
         ':hybid.sdk.voyager',
-        ':hybid.sdk.logger',
-        ':appmonet.hybid',
-        ':appmonet.adapters.mopub',
-        ':appmonet.adapters.gam'
+        ':hybid.sdk.logger'

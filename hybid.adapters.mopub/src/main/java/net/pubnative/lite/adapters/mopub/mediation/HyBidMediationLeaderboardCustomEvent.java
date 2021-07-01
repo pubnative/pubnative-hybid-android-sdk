@@ -22,8 +22,6 @@
 //
 package net.pubnative.lite.adapters.mopub.mediation;
 
-import com.mopub.mobileads.AdData;
-
 import net.pubnative.lite.sdk.models.AdSize;
 
 public class HyBidMediationLeaderboardCustomEvent extends HyBidMediationBannerCustomEvent {
@@ -32,7 +30,7 @@ public class HyBidMediationLeaderboardCustomEvent extends HyBidMediationBannerCu
      */
 
     @Override
-    protected AdSize getAdSize(AdData adData) {
+    protected AdSize getAdSize() {
         return AdSize.SIZE_728x90;
     }
 }

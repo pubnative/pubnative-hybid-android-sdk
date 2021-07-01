@@ -100,11 +100,6 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.activities.mopub.MoPubRewardedActivity"
-            android:label="@string/mopub_rewarded"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
             android:name=".ui.activities.mopub.MoPubMediationBannerActivity"
             android:label="@string/mopub_banner"
             android:screenOrientation="portrait"

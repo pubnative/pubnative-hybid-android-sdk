@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 def project_name = project.name
 def version_name = project.version
-if (branchName != "master") {
+if (branchName != "compatibility/v0.11.5") {
     version_name = "${version_name}-${branchName}.${buildNumber}"
     project_name = "${project_name}.beta"
 }
@@ -109,7 +109,7 @@ publishing {
             artifactId project.name
             version version_name
             artifact javadocJar
-            if (branchName == "master") {
+            if (branchName == "compatibility/v0.11.5") {
                 artifact sourcesJar
             }
             android.libraryVariants.all { variant ->
@@ -143,7 +143,7 @@ artifactory {
         }
 
         defaults {
-            publishArtifacts = branchName != "master"
+            publishArtifacts = branchName != "compatibility/v0.11.5"
             publishPom = true
         }
     }

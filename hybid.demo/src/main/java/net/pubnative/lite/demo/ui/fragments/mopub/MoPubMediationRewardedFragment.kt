@@ -10,16 +10,14 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.mopub.common.MoPub
 import com.mopub.common.MoPubReward
-import com.mopub.mobileads.MoPubErrorCode
-import com.mopub.mobileads.MoPubRewardedAdListener
-import com.mopub.mobileads.MoPubRewardedAds
+import com.mopub.mobileads.*
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.MoPubManager
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.sdk.HyBid
 
-class MoPubMediationRewardedFragment : Fragment(), MoPubRewardedAdListener {
+class MoPubMediationRewardedFragment : Fragment(), MoPubRewardedVideoListener {
     val TAG = MoPubMediationRewardedFragment::class.java.simpleName
     private lateinit var loadButton: Button
     private lateinit var showButton: Button
@@ -37,19 +35,21 @@ class MoPubMediationRewardedFragment : Fragment(), MoPubRewardedAdListener {
         showButton = view.findViewById(R.id.button_show)
         showButton.isEnabled = false
 
-        MoPubRewardedAds.setRewardedAdListener(this)
+        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubMediationRewardedAdUnitId
+
+        MoPubRewardedVideos.setRewardedVideoListener(this)
 
         view.findViewById<Button>(R.id.button_load).setOnClickListener {
             errorView.text = ""
 
             adUnitId?.let {
-                MoPubRewardedAds.loadRewardedAd(it)
+                MoPubRewardedVideos.loadRewardedVideo(adUnitId)
             }
         }
 
         view.findViewById<Button>(R.id.button_show).setOnClickListener {
             adUnitId?.let {
-                MoPubRewardedAds.showRewardedAd(it)
+                MoPubRewardedVideos.showRewardedVideo(adUnitId)
             }
         }
     }
@@ -86,35 +86,35 @@ class MoPubMediationRewardedFragment : Fragment(), MoPubRewardedAdListener {
 
     // ------------- MoPub Rewarded Listener ------------------
 
-    override fun onRewardedAdLoadSuccess(adUnitId: String) {
+    override fun onRewardedVideoLoadSuccess(adUnitId: String) {
         Log.d(TAG, "onRewardedVideoLoadSuccess")
         displayLogs()
         showButton.isEnabled = true
     }
 
-    override fun onRewardedAdLoadFailure(adUnitId: String, errorCode: MoPubErrorCode) {
+    override fun onRewardedVideoLoadFailure(adUnitId: String, errorCode: MoPubErrorCode) {
         Log.d(TAG, "onRewardedVideoLoadFailure")
         displayLogs()
         errorView.text = errorCode.toString()
     }
 
-    override fun onRewardedAdStarted(adUnitId: String) {
+    override fun onRewardedVideoStarted(adUnitId: String) {
         Log.d(TAG, "onRewardedVideoStarted")
     }
 
-    override fun onRewardedAdShowError(adUnitId: String, errorCode: MoPubErrorCode) {
+    override fun onRewardedVideoPlaybackError(adUnitId: String, errorCode: MoPubErrorCode) {
         Log.d(TAG, "onRewardedVideoPlaybackError")
     }
 
-    override fun onRewardedAdClicked(adUnitId: String) {
+    override fun onRewardedVideoClicked(adUnitId: String) {
         Log.d(TAG, "onRewardedVideoClicked")
     }
 
-    override fun onRewardedAdClosed(adUnitId: String) {
+    override fun onRewardedVideoClosed(adUnitId: String) {
         Log.d(TAG, "onRewardedVideoClosed")
     }
 
-    override fun onRewardedAdCompleted(adUnitIds: Set<String?>, reward: MoPubReward) {
+    override fun onRewardedVideoCompleted(adUnitIds: MutableSet<String>, reward: MoPubReward) {
         Log.d(TAG, "onRewardedVideoCompleted")
     }
 

@@ -27,7 +27,6 @@ class PrebidNavFragment : Fragment(R.layout.fragment_nav_prebid) {
     private lateinit var mopubLeaderboardButton: Button
     private lateinit var mopubInterstitialButton: Button
     private lateinit var mopubInterstitialVideoButton: Button
-    private lateinit var mopubRewardedButton: Button
     private lateinit var dfpBannerButton: Button
     private lateinit var dfpMediumButton: Button
     private lateinit var dfpLeaderboardButton: Button
@@ -103,13 +102,6 @@ class PrebidNavFragment : Fragment(R.layout.fragment_nav_prebid) {
             startActivity(intent)
         }
 
-        mopubRewardedButton = view.findViewById(R.id.button_mopub_rewarded)
-        mopubRewardedButton.setOnClickListener {
-            val intent = Intent(activity, MoPubRewardedActivity::class.java)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
-            startActivity(intent)
-        }
-
         dfpBannerButton = view.findViewById(R.id.button_dfp_banner)
         dfpBannerButton.setOnClickListener {
             val intent = Intent(activity, DFPBannerActivity::class.java)
@@ -161,7 +153,6 @@ class PrebidNavFragment : Fragment(R.layout.fragment_nav_prebid) {
         mopubLeaderboardButton.isEnabled = true
         mopubInterstitialButton.isEnabled = true
         mopubInterstitialVideoButton.isEnabled = true
-        mopubRewardedButton.isEnabled = true
         dfpBannerButton.isEnabled = true
         dfpMediumButton.isEnabled = true
         dfpLeaderboardButton.isEnabled = true
@@ -177,7 +168,6 @@ class PrebidNavFragment : Fragment(R.layout.fragment_nav_prebid) {
         mopubLeaderboardButton.isEnabled = false
         mopubInterstitialButton.isEnabled = false
         mopubInterstitialVideoButton.isEnabled = false
-        mopubRewardedButton.isEnabled = false
         dfpBannerButton.isEnabled = false
         dfpMediumButton.isEnabled = false
         dfpLeaderboardButton.isEnabled = false
