@@ -28,9 +28,7 @@ import android.os.Looper
 import android.text.TextUtils
 import android.util.Log
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.Constants
@@ -38,14 +36,11 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.demo.util.convertDpToPx
-import net.pubnative.lite.sdk.HyBid
+import net.pubnative.lite.sdk.HyBidError
 import net.pubnative.lite.sdk.models.AdSize
 import net.pubnative.lite.sdk.reporting.ReportingEventBridge
 import net.pubnative.lite.sdk.views.HyBidAdView
 import net.pubnative.lite.sdk.views.PNAdView
-import java.util.*
-import kotlin.concurrent.schedule
-
 
 /**
  * Created by erosgarciaponte on 30.01.18.
@@ -63,6 +58,7 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
     private lateinit var loadButton: Button
     private lateinit var adSizeSpinner: Spinner
     private lateinit var spinnerAdapter: ArrayAdapter<AdSize>
+    private lateinit var errorCodeView: TextView
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
 
@@ -85,6 +81,7 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
         super.onViewCreated(view, savedInstanceState)
 
         errorView = view.findViewById(R.id.view_error)
+        errorCodeView = view.findViewById(R.id.view_error_code)
         creativeIdView = view.findViewById(R.id.view_creative_id)
         loadButton = view.findViewById(R.id.button_load)
         hybidBanner = view.findViewById(R.id.hybid_banner)
@@ -143,10 +140,6 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
 
         val event = ReportingEventBridge("Standalone Banner")
         event.setAdSize(adSize)
-
-        if (HyBid.getReportingController() != null) {
-            HyBid.getReportingController().reportEvent(event.reportingEvent)
-        }
     }
 
     fun autoRefresh() {
@@ -175,9 +168,13 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
     }
 
     override fun onAdLoadFailed(error: Throwable?) {
-        error?.message?.let {
-            Log.e(TAG, it)
-            errorView.text = it
+        if (error != null && error is HyBidError) {
+            Log.e(TAG, error.message ?: " - ")
+            errorCodeView.text = error.errorCode.code.toString()
+            errorView.text = error.message ?: " - "
+        } else {
+            errorCodeView.text = " - "
+            errorView.text = " - "
         }
         displayLogs()
         creativeIdView.text = ""

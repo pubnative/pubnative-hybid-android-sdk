@@ -10,11 +10,20 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
+        <Button
+            android:id="@+id/button_event_report"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/sdk_event_report" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
             android:fontFamily="@font/roboto"
             android:text="@string/request_url"

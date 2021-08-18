@@ -18,13 +18,9 @@ public class ViewabilityManager {
     private static String VIEWABILITY_JS_SERVICE_CONTENT;
 
     private static Partner mPubNativePartner = null;
-    private final ReportingController reportingController;
-
     private boolean mShouldMeasureViewability = true;
 
-    public ViewabilityManager(final Application application, ReportingController reportingController) {
-        this.reportingController = reportingController;
-
+    public ViewabilityManager(final Application application) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
@@ -71,9 +67,5 @@ public class ViewabilityManager {
 
     public String getServiceJs() {
         return VIEWABILITY_JS_SERVICE_CONTENT;
-    }
-
-    public ReportingController getReportingController() {
-        return reportingController;
     }
 }

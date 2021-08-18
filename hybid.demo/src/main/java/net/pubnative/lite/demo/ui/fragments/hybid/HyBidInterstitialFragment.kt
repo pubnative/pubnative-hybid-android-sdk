@@ -28,21 +28,19 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
-import net.pubnative.lite.sdk.HyBid
+import net.pubnative.lite.sdk.HyBidError
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd
-import net.pubnative.lite.sdk.models.AdSize
-import net.pubnative.lite.sdk.reporting.ReportingEventBridge
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial), HyBidInterstitialAd.Listener {
+class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial),
+    HyBidInterstitialAd.Listener {
 
     val TAG = HyBidInterstitialFragment::class.java.simpleName
 
@@ -50,6 +48,7 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
 
     private lateinit var loadButton: Button
     private lateinit var showButton: Button
+    private lateinit var errorCodeView: TextView
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
     private var interstitial: HyBidInterstitialAd? = null
@@ -58,6 +57,7 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
         super.onViewCreated(view, savedInstanceState)
 
         errorView = view.findViewById(R.id.view_error)
+        errorCodeView = view.findViewById(R.id.view_error_code)
         creativeIdView = view.findViewById(R.id.view_creative_id)
         loadButton = view.findViewById(R.id.button_load)
         showButton = view.findViewById(R.id.button_show)
@@ -76,8 +76,18 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
             interstitial?.show()
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
-        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), creativeIdView.text.toString()) }
+        errorView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                errorView.text.toString()
+            )
+        }
+        creativeIdView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                creativeIdView.text.toString()
+            )
+        }
     }
 
     override fun onDestroy() {
@@ -89,13 +99,6 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
         interstitial = HyBidInterstitialAd(activity, zoneId, this)
         interstitial?.setSkipOffset(10)
         interstitial?.load()
-
-        val event = ReportingEventBridge("Standalone Interstitial")
-        event.setAdSize(AdSize.SIZE_INTERSTITIAL)
-
-        if (HyBid.getReportingController() != null) {
-            HyBid.getReportingController().reportEvent(event.reportingEvent)
-        }
     }
 
     override fun onInterstitialLoaded() {
@@ -108,12 +111,17 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
     }
 
     override fun onInterstitialLoadFailed(error: Throwable?) {
-        error?.message?.let {
-            Log.e(TAG, it)
-            errorView.text = it
+        showButton.isEnabled = false
+        if (error != null && error is HyBidError) {
+            Log.e(TAG, error.message ?: " - ")
+            errorCodeView.text = error.errorCode.code.toString()
+            errorView.text = error.message ?: " - "
+        } else {
+            errorCodeView.text = " - "
+            errorView.text = " - "
         }
-        creativeIdView.text = ""
         displayLogs()
+        creativeIdView.text = ""
     }
 
     override fun onInterstitialImpression() {

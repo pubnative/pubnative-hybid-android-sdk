@@ -180,7 +180,7 @@ public class CloseableContainer extends FrameLayout {
     @Override
     public boolean onInterceptTouchEvent(final MotionEvent event) {
         // Start intercepting touch events only when we see a down event
-        if (event.getAction() != MotionEvent.ACTION_DOWN) {
+        if (event.getAction() != MotionEvent.ACTION_DOWN || !mCloseDrawable.isVisible()) {
             return false;
         }
 

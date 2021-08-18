@@ -5,11 +5,10 @@ import net.pubnative.lite.sdk.vpaid.xml.Tag;
 import java.util.List;
 
 public class Creatives {
-
     @Tag("Creative")
-    private List<Creative> creativeList;
+    private List<Creative> creatives;
 
-    public List<Creative> getCreativeList() {
-        return creativeList;
+    public List<Creative> getCreatives() {
+        return creatives;
     }
 }

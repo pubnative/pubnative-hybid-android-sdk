@@ -28,11 +28,7 @@ public class ConfigRequest {
         String url = ConfigEndpoints.getConfigUrl();
 
         try {
-            Map<String, String> headers = new HashMap<>();
-            headers.put("Content-Type", "application/json");
-            headers.put("Authorization", String.format(Locale.ENGLISH, "Bearer %s", appToken));
-
-            PNHttpClient.makeRequest(context, url, headers, null, new PNHttpClient.Listener() {
+            PNHttpClient.makeRequest(context, url, null, null, new PNHttpClient.Listener() {
                 @Override
                 public void onSuccess(String response) {
                     if (listener != null) {

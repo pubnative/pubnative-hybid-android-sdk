@@ -7,7 +7,7 @@ import java.util.List;
 
 public class Wrapper implements VastAdSource {
     @Attribute
-    private boolean followAdditonalWrappers;
+    private boolean followAdditionalWrappers;
 
     @Attribute
     private boolean allowMultipleAds;
@@ -15,26 +15,38 @@ public class Wrapper implements VastAdSource {
     @Attribute
     private boolean fallbackOnNoAd;
 
+    @Tag("Impression")
+    private List<Impression> impressions;
+
     @Tag
     private VASTAdTagURI vastAdTagURI;
 
     @Tag
     private AdSystem adSystem;
 
-    @Tag("Impression")
-    private List<Impression> impressionList;
+    @Tag
+    private Pricing pricing;
+
+    @Tag("Error")
+    private List<Error> errors;
 
     @Tag
-    private Creatives creatives;
+    private ViewableImpression viewableImpression;
 
     @Tag
-    private Error error;
+    private AdVerifications adVerifications;
 
     @Tag
     private Extensions extensions;
 
-    public boolean isFollowAdditonalWrappers() {
-        return followAdditonalWrappers;
+    @Tag
+    private Creatives creatives;
+
+    @Tag("BlockedAdCategories")
+    private List<BlockedAdCategories> blockedAdCategories;
+
+    public boolean isFollowAdditionalWrappers() {
+        return followAdditionalWrappers;
     }
 
     public boolean isAllowMultipleAds() {
@@ -43,6 +55,11 @@ public class Wrapper implements VastAdSource {
 
     public boolean isFallbackOnNoAd() {
         return fallbackOnNoAd;
+    }
+
+    @Override
+    public List<Impression> getImpressions() {
+        return impressions;
     }
 
     public VASTAdTagURI getVastAdTagURI() {
@@ -55,8 +72,28 @@ public class Wrapper implements VastAdSource {
     }
 
     @Override
-    public List<Impression> getImpressionList() {
-        return impressionList;
+    public Pricing getPricing() {
+        return pricing;
+    }
+
+    @Override
+    public List<Error> getErrors() {
+        return errors;
+    }
+
+    @Override
+    public ViewableImpression getViewableImpression() {
+        return viewableImpression;
+    }
+
+    @Override
+    public AdVerifications getAdVerifications() {
+        return adVerifications;
+    }
+
+    @Override
+    public Extensions getExtensions() {
+        return extensions;
     }
 
     @Override
@@ -64,13 +101,17 @@ public class Wrapper implements VastAdSource {
         return creatives;
     }
 
-    @Override
-    public Error getError() {
-        return error;
+    public List<BlockedAdCategories> getBlockedAdCategories() {
+        return blockedAdCategories;
     }
 
     @Override
-    public Extensions getExtensions() {
-        return extensions;
+    public AdServingId getAdServingId() {
+        return null;
+    }
+
+    @Override
+    public List<Category> getCategories() {
+        return null;
     }
 }

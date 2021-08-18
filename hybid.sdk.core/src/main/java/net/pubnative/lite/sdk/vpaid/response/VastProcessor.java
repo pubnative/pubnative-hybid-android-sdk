@@ -10,6 +10,7 @@ import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.enums.VastError;
 import net.pubnative.lite.sdk.vpaid.helpers.ErrorLog;
+import net.pubnative.lite.sdk.vpaid.models.vast.Ad;
 import net.pubnative.lite.sdk.vpaid.models.vast.AdVerifications;
 import net.pubnative.lite.sdk.vpaid.models.vast.ClickThrough;
 import net.pubnative.lite.sdk.vpaid.models.vast.ClickTracking;
@@ -17,11 +18,14 @@ import net.pubnative.lite.sdk.vpaid.models.vast.Companion;
 import net.pubnative.lite.sdk.vpaid.models.vast.CompanionClickThrough;
 import net.pubnative.lite.sdk.vpaid.models.vast.CompanionClickTracking;
 import net.pubnative.lite.sdk.vpaid.models.vast.Creative;
+import net.pubnative.lite.sdk.vpaid.models.vast.Error;
 import net.pubnative.lite.sdk.vpaid.models.vast.Extension;
 import net.pubnative.lite.sdk.vpaid.models.vast.Impression;
 import net.pubnative.lite.sdk.vpaid.models.vast.InLine;
+import net.pubnative.lite.sdk.vpaid.models.vast.JavaScriptResource;
 import net.pubnative.lite.sdk.vpaid.models.vast.Linear;
 import net.pubnative.lite.sdk.vpaid.models.vast.MediaFile;
+import net.pubnative.lite.sdk.vpaid.models.vast.StaticResource;
 import net.pubnative.lite.sdk.vpaid.models.vast.Tracking;
 import net.pubnative.lite.sdk.vpaid.models.vast.Vast;
 import net.pubnative.lite.sdk.vpaid.models.vast.VastAdSource;
@@ -64,20 +68,33 @@ public class VastProcessor {
             Vast vast = XmlParser.parse(response, Vast.class);
             if ((vast.getStatus() == null
                     || vast.getStatus().getText().equalsIgnoreCase("NO_AD"))
-                    && vast.getAd() == null) {
-                PlayerInfo info = new PlayerInfo("No ads found");
-                info.setNoAdsFound();
-                listener.onParseError(info);
+                    && (vast.getAds() == null || vast.getAds().isEmpty())
+                    && (vast.getErrors() != null && !vast.getErrors().isEmpty())) {
+                if (vast.getErrors() != null) {
+                    List<String> errorLogs = new ArrayList<>();
+                    for (Error error : vast.getErrors()) {
+                        if (!TextUtils.isEmpty(error.getText())) {
+                            errorLogs.add(error.getText().trim());
+                        }
+                    }
+                    ErrorLog.initErrorLog(errorLogs);
+                    ErrorLog.postError(mContext, VastError.XML_PARSING);
+                }
+                if (listener != null) {
+                    PlayerInfo info = new PlayerInfo("No ads found");
+                    info.setNoAdsFound();
+                    listener.onParseError(info);
+                }
             } else {
-                adParams.setId(vast.getAd().getId());
-                InLine inLine = vast.getAd().getInLine();
-                Wrapper wrapper = vast.getAd().getWrapper();
+                Ad ad = vast.getAds().get(0);
+                adParams.setId(ad.getId());
+                InLine inLine = ad.getInLine();
+                Wrapper wrapper = ad.getWrapper();
 
                 if (inLine != null) {
-                    fillAdParams(mContext, inLine, adParams, mParseParams);
-                    listener.onParseSuccess(adParams, response);
+                    fillAdParams(mContext, inLine, adParams, mParseParams, response, listener);
                 } else if (wrapper != null) {
-                    fillAdParams(mContext, wrapper, adParams, mParseParams);
+                    fillAdParams(mContext, wrapper, adParams, mParseParams, response, listener);
 
                     if (unwrapAttempt < UNWRAP_DEPTH) {
                         String adTagUri = wrapper.getVastAdTagURI().getText();
@@ -90,43 +107,129 @@ public class VastProcessor {
 
                             @Override
                             public void onFailure(Throwable error) {
-                                ErrorLog.postError(mContext, VastError.XML_PARSING);
-                                Logger.e(LOG_TAG, "Parse VAST failed: " , error);
-                                PlayerInfo info = new PlayerInfo("Parse VAST response failed " +error.getMessage());
-                                listener.onParseError(info);
+                                ErrorLog.postError(mContext, VastError.WRAPPER);
+                                Logger.e(LOG_TAG, "Parse VAST failed: ", error);
+                                if (listener != null) {
+                                    PlayerInfo info = new PlayerInfo("Parse VAST response failed " + error.getMessage());
+                                    listener.onParseError(info);
+                                }
                             }
                         });
 
                         unwrapAttempt++;
                     } else {
-                        PlayerInfo info = new PlayerInfo("Vast processor reached wrapper limit (5)");
+                        ErrorLog.postError(mContext, VastError.WRAPPER_LIMIT);
+                        Logger.e(LOG_TAG, "Parse VAST failed: Vast processor reached wrapper limit (5)");
+                        if (listener != null) {
+                            PlayerInfo info = new PlayerInfo("Vast processor reached wrapper limit (5)");
+                            listener.onParseError(info);
+                        }
+                    }
+                } else {
+                    ErrorLog.postError(mContext, VastError.XML_PARSING);
+                    Logger.e(LOG_TAG, "Parse VAST failed: No ad source was received");
+                    if (listener != null) {
+                        PlayerInfo info = new PlayerInfo("No VAST ad source was received");
                         listener.onParseError(info);
                     }
                 }
             }
         } catch (Exception e) {
             ErrorLog.postError(mContext, VastError.XML_PARSING);
-            Logger.e(LOG_TAG, "Parse VAST failed: ", e );
-            PlayerInfo info = new PlayerInfo("Parse VAST response failed"+ e.getMessage());
-            listener.onParseError(info);
+            Logger.e(LOG_TAG, "Parse VAST failed: ", e);
+            if (listener != null) {
+                PlayerInfo info = new PlayerInfo("Parse VAST response failed" + e.getMessage());
+                listener.onParseError(info);
+            }
         }
     }
 
-    private void fillAdParams(Context context, VastAdSource adSource, AdParams adParams, AdSpotDimensions parseParams) {
-        if (adSource.getError() != null && adSource.getError().getText() != null) {
-            ErrorLog.initErrorLog(adSource.getError().getText().trim());
+    private void fillAdParams(Context context, VastAdSource adSource, AdParams adParams, AdSpotDimensions parseParams, String response, Listener listener) {
+        if (adSource.getErrors() != null && !adSource.getErrors().isEmpty()) {
+            List<String> errorLogs = new ArrayList<>();
+            for (Error error : adSource.getErrors()) {
+                if (!TextUtils.isEmpty(error.getText())) {
+                    errorLogs.add(error.getText().trim());
+                }
+            }
+            ErrorLog.initErrorLog(errorLogs);
         }
 
         List<String> impressions = new ArrayList<>();
-        if (adSource.getImpressionList() != null) {
-            for (Impression impression : adSource.getImpressionList()) {
-                impressions.add(impression.getText());
+        if (adSource.getImpressions() != null) {
+            for (Impression impression : adSource.getImpressions()) {
+                if (!TextUtils.isEmpty(impression.getText())) {
+                    impressions.add(impression.getText());
+                }
             }
         }
         adParams.setImpressions(impressions);
 
-        if (adSource.getCreatives() != null && adSource.getCreatives().getCreativeList() != null) {
-            List<Creative> creativeList = adSource.getCreatives().getCreativeList();
+        if (adSource.getCategories() != null) {
+            adParams.addAdCategories(adSource.getCategories());
+        }
+
+        if (adSource.getAdServingId() != null && !TextUtils.isEmpty(adSource.getAdServingId().getText())) {
+            adParams.addAdServingId(adSource.getAdServingId());
+        }
+
+        List<VerificationScriptResource> verificationScriptResources = new ArrayList<>();
+
+        //Support for ad verification in the Inline Extensions (pre-VAST 4)
+        if (adSource.getExtensions() != null && adSource.getExtensions().getExtensions() != null) {
+            for (Extension extension : adSource.getExtensions().getExtensions()) {
+                if (!TextUtils.isEmpty(extension.getType()) && extension.getType().equals(EXTENSION_TYPE_AD_VERIFICATION)) {
+                    AdVerifications adVerifications = extension.getAdVerifications();
+                    if (adVerifications != null) {
+                        for (Verification verification : adVerifications.getVerificationList()) {
+                            try {
+                                if (verification.getJavaScriptResources() != null) {
+                                    for (JavaScriptResource javaScriptResource : verification.getJavaScriptResources()) {
+                                        if (!TextUtils.isEmpty(javaScriptResource.getText())) {
+                                            final URL url = new URL(javaScriptResource.getText().trim());
+                                            final String vendorKey = verification.getVendor();
+                                            final String params = verification.getVerificationParameters().getText();
+                                            VerificationScriptResource resource = VerificationScriptResource.
+                                                    createVerificationScriptResourceWithParameters(vendorKey, url, params);
+                                            verificationScriptResources.add(resource);
+                                        }
+                                    }
+                                }
+                            } catch (Exception exception) {
+                                Logger.e(LOG_TAG, exception.getMessage());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        AdVerifications adVerifications = adSource.getAdVerifications();
+        if (adVerifications != null) {
+            for (Verification verification : adVerifications.getVerificationList()) {
+                try {
+                    if (verification.getJavaScriptResources() != null) {
+                        for (JavaScriptResource javaScriptResource : verification.getJavaScriptResources()) {
+                            if (!TextUtils.isEmpty(javaScriptResource.getText())) {
+                                final URL url = new URL(javaScriptResource.getText().trim());
+                                final String vendorKey = verification.getVendor();
+                                final String params = verification.getVerificationParameters().getText();
+                                VerificationScriptResource resource = VerificationScriptResource.
+                                        createVerificationScriptResourceWithParameters(vendorKey, url, params);
+                                verificationScriptResources.add(resource);
+                            }
+                        }
+                    }
+                } catch (Exception exception) {
+                    Logger.e(LOG_TAG, exception.getMessage());
+                }
+            }
+        }
+
+        adParams.addVerificationScriptResources(verificationScriptResources);
+
+        if (adSource.getCreatives() != null && adSource.getCreatives().getCreatives() != null) {
+            List<Creative> creativeList = adSource.getCreatives().getCreatives();
 
             Linear linear = null;
             for (Creative creative : creativeList) {
@@ -136,124 +239,129 @@ public class VastProcessor {
                 }
             }
 
-            adParams.setSkipTime(linear.getSkipoffset());
-
-            if (linear.getTrackingEvents() != null) {
-                adParams.addEvents(linear.getTrackingEvents().getTrackingList());
-            }
-
-            String durationText;
-            if (linear.getDuration() != null) {
-                durationText = linear.getDuration().getText();
-            } else {
-                durationText = "00:00:10";
-            }
-            int duration = Utils.parseDuration(durationText);
-            adParams.setDuration(duration);
-
-            String adParameters = parseAdParameters(linear);
-            adParams.setAdParams(adParameters);
-
-            if (linear.getVideoClicks() != null) {
-                ClickThrough clickThrough = linear.getVideoClicks().getClickThrough();
-                if (clickThrough != null) {
-                    adParams.setVideoRedirectUrl(clickThrough.getText());
+            if (linear != null) {
+                if (!TextUtils.isEmpty(linear.getSkipOffset())) {
+                    adParams.setSkipTime(linear.getSkipOffset());
                 }
 
-                List<ClickTracking> trackingList = linear.getVideoClicks().getClickTrackingList();
-                List<String> clickEvents = new ArrayList<>();
-                if (trackingList != null) {
-                    for (ClickTracking tracking : trackingList) {
-                        clickEvents.add(tracking.getText());
-                    }
+                if (linear.getTrackingEvents() != null) {
+                    adParams.addEvents(linear.getTrackingEvents().getTrackingList());
                 }
-                adParams.setVideoClicks(clickEvents);
-            }
 
-            if (linear.getMediaFiles() != null) {
-                List<MediaFile> mediaFileList = linear.getMediaFiles().getMediaFileList();
-
-                String vpaidJsUrl = getVpaidJsUrl(mediaFileList);
-                List<MediaFile> nonVpaidMediaFiles = filterNonVpaid(mediaFileList);
-                if (!TextUtils.isEmpty(vpaidJsUrl) && nonVpaidMediaFiles.isEmpty()) {
-                    adParams.setVpaid();
-                    adParams.setVpaidJsUrl(vpaidJsUrl);
+                String durationText;
+                if (linear.getDuration() != null) {
+                    durationText = linear.getDuration().getText();
                 } else {
-                    List<MediaFile> sortedVideoFilesList = sortedMediaFiles(nonVpaidMediaFiles, parseParams);
-                    List<String> videoFileUrlsList = new ArrayList<>();
-                    for (MediaFile mediaFile : sortedVideoFilesList) {
-                        if (mediaFile.getText() != null) {
-                            videoFileUrlsList.add(mediaFile.getText().trim());
-                        }
-                    }
-                    adParams.setVideoFileUrlsList(videoFileUrlsList);
-                    if (videoFileUrlsList.isEmpty()) {
-                        ErrorLog.postError(context, VastError.MEDIA_FILE_NO_SUPPORTED_TYPE);
-                    }
+                    durationText = "00:00:10";
+                }
+                int duration = Utils.parseDuration(durationText);
+                adParams.setDuration(duration);
+
+                if (linear.getAdParameters() != null && !TextUtils.isEmpty(linear.getAdParameters().getText())) {
+                    adParams.setAdParams(linear.getAdParameters().getText().trim());
                 }
 
-                try {
-                    List<Companion> companionList = getSortedCompanions(creativeList);
-                    List<String> endCardUrlList = new ArrayList<>();
-                    for (Companion companion : companionList) {
-                        if (companion.getStaticResource() != null && companion.getStaticResource().getText() != null && !TextUtils.isEmpty(companion.getStaticResource().getText())) {
-                            endCardUrlList.add(companion.getStaticResource().getText().trim());
+                if (linear.getVideoClicks() != null) {
+                    ClickThrough clickThrough = linear.getVideoClicks().getClickThrough();
+                    if (clickThrough != null) {
+                        adParams.setVideoRedirectUrl(clickThrough.getText());
+                    }
+
+                    List<ClickTracking> trackingList = linear.getVideoClicks().getClickTrackingList();
+                    List<String> clickEvents = new ArrayList<>();
+                    if (trackingList != null) {
+                        for (ClickTracking tracking : trackingList) {
+                            clickEvents.add(tracking.getText());
                         }
                     }
-                    adParams.setEndCardUrlList(endCardUrlList);
-
-                    if (!companionList.isEmpty()) {
-                        Companion companion = companionList.get(0);
-                        CompanionClickThrough clickThrough = companion.getCompanionClickThrough();
-                        if (clickThrough != null && clickThrough.getText() != null) {
-                            String redirectUrl = clickThrough.getText().trim();
-                            adParams.setEndCardRedirectUrl(redirectUrl);
-                        }
-
-                        if (companion.getCompanionClickTracking() != null) {
-                            List<String> clickEvents = new ArrayList<>();
-                            for (CompanionClickTracking tracking : companion.getCompanionClickTracking()) {
-                                clickEvents.add(tracking.getText());
-                            }
-                            adParams.setEndCardClicks(clickEvents);
-                        }
-
-                        if (companion.getTrackingEvents() != null) {
-                            List<String> events = new ArrayList<>();
-                            for (Tracking tracking : companion.getTrackingEvents().getTrackingList()) {
-                                events.add(tracking.getText());
-                            }
-                            adParams.setCompanionCreativeViewEvents(events);
-                        }
-                    }
-                } catch (Exception e) {
-                    // Do nothing, companion is optional
-                    Logger.e(LOG_TAG, e.getMessage());
+                    adParams.setVideoClicks(clickEvents);
                 }
-            }
-        }
 
-        List<VerificationScriptResource> verificationScriptResources = new ArrayList<>();
-        adParams.setVerificationScriptResources(verificationScriptResources);
+                if (linear.getMediaFiles() != null
+                        && linear.getMediaFiles().getMediaFiles() != null
+                        && !linear.getMediaFiles().getMediaFiles().isEmpty()) {
+                    List<MediaFile> mediaFileList = linear.getMediaFiles().getMediaFiles();
 
-        if (adSource.getExtensions() != null && adSource.getExtensions().getExtensions() != null) {
-            for (Extension extension : adSource.getExtensions().getExtensions()) {
-                if (!TextUtils.isEmpty(extension.getType()) && extension.getType().equals(EXTENSION_TYPE_AD_VERIFICATION)) {
-                    AdVerifications adVerifications = extension.getAdVerifications();
-                    if (adVerifications != null) {
-                        for (Verification verification : adVerifications.getVerificationList()) {
-                            try {
-                                final URL url = new URL(verification.getJavaScriptResource().getText());
-                                final String vendorKey = verification.getVendor();
-                                final String params = verification.getVerificationParameters().getText();
-                                VerificationScriptResource resource = VerificationScriptResource.
-                                        createVerificationScriptResourceWithParameters(vendorKey, url, params);
-                                verificationScriptResources.add(resource);
-                            } catch (Exception exception) {
-                                Logger.e(LOG_TAG, exception.getMessage());
+                    String vpaidJsUrl = getVpaidJsUrl(mediaFileList);
+                    List<MediaFile> nonVpaidMediaFiles = filterNonVpaid(mediaFileList);
+                    if (!TextUtils.isEmpty(vpaidJsUrl) && nonVpaidMediaFiles.isEmpty()) {
+                        adParams.setVpaid();
+                        adParams.setVpaidJsUrl(vpaidJsUrl);
+                    } else {
+                        List<MediaFile> sortedVideoFilesList = sortedMediaFiles(nonVpaidMediaFiles, parseParams);
+                        List<String> videoFileUrlsList = new ArrayList<>();
+                        for (MediaFile mediaFile : sortedVideoFilesList) {
+                            if (mediaFile.getText() != null) {
+                                videoFileUrlsList.add(mediaFile.getText().trim());
                             }
                         }
+                        adParams.setVideoFileUrlsList(videoFileUrlsList);
+                        if (videoFileUrlsList.isEmpty()) {
+                            ErrorLog.postError(context, VastError.MEDIA_FILE_NO_SUPPORTED_TYPE);
+                        }
                     }
+
+                    try {
+                        List<Companion> companionList = getSortedCompanions(creativeList);
+                        List<String> endCardUrlList = new ArrayList<>();
+                        for (Companion companion : companionList) {
+                            if (companion.getStaticResources() != null && !companion.getStaticResources().isEmpty()) {
+                                for (StaticResource staticResource : companion.getStaticResources()) {
+                                    if (!TextUtils.isEmpty(staticResource.getText())) {
+                                        endCardUrlList.add(staticResource.getText().trim());
+                                    }
+                                }
+                            }
+                        }
+                        adParams.setEndCardUrlList(endCardUrlList);
+
+                        if (!companionList.isEmpty()) {
+                            Companion companion = companionList.get(0);
+                            CompanionClickThrough clickThrough = companion.getCompanionClickThrough();
+                            if (clickThrough != null && !TextUtils.isEmpty(clickThrough.getText())) {
+                                String redirectUrl = clickThrough.getText().trim();
+                                adParams.setEndCardRedirectUrl(redirectUrl);
+                            }
+
+                            if (companion.getCompanionClickTrackingList() != null) {
+                                List<String> clickEvents = new ArrayList<>();
+                                for (CompanionClickTracking tracking : companion.getCompanionClickTrackingList()) {
+                                    clickEvents.add(tracking.getText());
+                                }
+                                adParams.setEndCardClicks(clickEvents);
+                            }
+
+                            if (companion.getTrackingEvents() != null
+                                    && companion.getTrackingEvents().getTrackingList() != null) {
+                                List<String> events = new ArrayList<>();
+                                for (Tracking tracking : companion.getTrackingEvents().getTrackingList()) {
+                                    events.add(tracking.getText());
+                                }
+                                adParams.setCompanionCreativeViewEvents(events);
+                            }
+                        }
+                    } catch (Exception e) {
+                        // Do nothing, companion is optional
+                        Logger.e(LOG_TAG, e.getMessage());
+                    }
+
+                    if (listener != null) {
+                        listener.onParseSuccess(adParams, response);
+                    }
+                } else {
+                    ErrorLog.postError(mContext, VastError.LINEAR);
+                    Logger.e(LOG_TAG, "Parse VAST failed: No Media Files in Linear Ad");
+                    if (listener != null) {
+                        PlayerInfo info = new PlayerInfo("Parse VAST response failed. No Media Files in Linear Ad");
+                        listener.onParseError(info);
+                    }
+                }
+            } else {
+                ErrorLog.postError(mContext, VastError.LINEAR);
+                Logger.e(LOG_TAG, "Parse VAST failed: No Linear Ad received");
+                if (listener != null) {
+                    PlayerInfo info = new PlayerInfo("Parse VAST response failed. No Linear Ad received");
+                    listener.onParseError(info);
                 }
             }
         }
@@ -261,7 +369,8 @@ public class VastProcessor {
 
     private String getVpaidJsUrl(List<MediaFile> mediaFileList) {
         for (MediaFile mediaFile : mediaFileList) {
-            if (mediaFile.getText() != null && mediaFile.getApiFramework() != null && mediaFile.getApiFramework().equalsIgnoreCase("VPAID")) {
+            if (mediaFile.getText() != null && mediaFile.getApiFramework() != null
+                    && mediaFile.getApiFramework().equalsIgnoreCase("VPAID")) {
                 return mediaFile.getText().trim();
             }
         }
@@ -271,7 +380,8 @@ public class VastProcessor {
     private List<MediaFile> filterNonVpaid(List<MediaFile> mediaFileList) {
         List<MediaFile> nonVpaidList = new ArrayList<>(mediaFileList);
         for (MediaFile mediaFile : mediaFileList) {
-            if (mediaFile.getApiFramework() != null && mediaFile.getApiFramework().equalsIgnoreCase("VPAID")) {
+            if (mediaFile.getApiFramework() != null
+                    && mediaFile.getApiFramework().equalsIgnoreCase("VPAID")) {
                 nonVpaidList.remove(mediaFile);
             }
         }
@@ -282,15 +392,15 @@ public class VastProcessor {
         try {
             return linear.getAdParameters().getText().trim();
         } catch (Exception e) {
-            return null;
+            return "";
         }
     }
 
     private static List<Companion> getSortedCompanions(List<Creative> creativeList) {
         for (Creative creative : creativeList) {
             if (creative.getCompanionAds() != null &&
-                    creative.getCompanionAds().getCompanionList() != null) {
-                return creative.getCompanionAds().getCompanionList();
+                    creative.getCompanionAds().getCompanions() != null) {
+                return creative.getCompanionAds().getCompanions();
             }
         }
         return new ArrayList<>();

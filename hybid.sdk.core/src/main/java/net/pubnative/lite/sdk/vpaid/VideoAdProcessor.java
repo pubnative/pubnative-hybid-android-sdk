@@ -4,6 +4,9 @@ import android.content.Context;
 import android.util.DisplayMetrics;
 import android.view.View;
 
+import net.pubnative.lite.sdk.HyBidError;
+import net.pubnative.lite.sdk.HyBidErrorCode;
+import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.helpers.AssetsLoader;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.AdSpotDimensions;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
@@ -11,8 +14,10 @@ import net.pubnative.lite.sdk.vpaid.response.VastProcessor;
 
 public class VideoAdProcessor {
     private static final String TAG = VideoAdProcessor.class.getSimpleName();
+
     public interface Listener {
         void onCacheSuccess(AdParams adParams, String videoFilePath, String endCardFilePath);
+
         void onCacheError(Throwable error);
     }
 
@@ -27,7 +32,8 @@ public class VideoAdProcessor {
             @Override
             public void onParseError(PlayerInfo message) {
                 if (listener != null) {
-                    listener.onCacheError(new Exception(message.getMessage()));
+                    Logger.e(TAG, message.getMessage());
+                    listener.onCacheError(new HyBidError(HyBidErrorCode.VAST_PLAYER_ERROR, message.getMessage()));
                 }
             }
         });
@@ -46,7 +52,8 @@ public class VideoAdProcessor {
             @Override
             public void onError(PlayerInfo info) {
                 if (listener != null) {
-                    listener.onCacheError(new Exception(info.getMessage()));
+                    Logger.e(TAG, info.getMessage());
+                    listener.onCacheError(new HyBidError(HyBidErrorCode.VAST_PLAYER_ERROR, info.getMessage()));
                 }
             }
         });

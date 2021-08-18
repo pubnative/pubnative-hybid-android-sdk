@@ -22,12 +22,16 @@
 //
 package net.pubnative.lite.sdk.request;
 
+import net.pubnative.lite.sdk.HyBidError;
+import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.NativeAd;
+import net.pubnative.lite.sdk.utils.Logger;
 
 public class HyBidNativeAdRequest implements RequestManager.RequestListener {
+    private static final String TAG = HyBidNativeAdRequest.class.getSimpleName();
 
     private static String mScreenIabCategory;
     private static String mScreenKeywords;
@@ -61,6 +65,14 @@ public class HyBidNativeAdRequest implements RequestManager.RequestListener {
 
     @Override
     public void onRequestFail(Throwable throwable) {
+        if (throwable instanceof HyBidError) {
+            HyBidError hyBidError = (HyBidError) throwable;
+            if (hyBidError.getErrorCode() == HyBidErrorCode.NO_FILL) {
+                Logger.w(TAG, throwable.getMessage());
+            } else {
+                Logger.e(TAG, throwable.getMessage());
+            }
+        }
         if (mListener != null) {
             mListener.onRequestFail(throwable);
         }
@@ -82,11 +94,11 @@ public class HyBidNativeAdRequest implements RequestManager.RequestListener {
         mScreenIabCategory = screenIabCategory;
     }
 
-    public void setScreenKeywords(String screenKeywords){
+    public void setScreenKeywords(String screenKeywords) {
         mScreenKeywords = screenKeywords;
     }
 
-    public void setUserIntent(String userIntent){
+    public void setUserIntent(String userIntent) {
         mUserIntent = userIntent;
     }
 }

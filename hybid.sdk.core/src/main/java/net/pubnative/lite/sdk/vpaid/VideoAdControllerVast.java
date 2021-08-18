@@ -1,8 +1,12 @@
 package net.pubnative.lite.sdk.vpaid;
 
 import android.content.Context;
+import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.text.TextUtils;
+import android.view.Surface;
+import android.view.TextureView;
 import android.view.View;
 
 import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
@@ -36,7 +40,7 @@ class VideoAdControllerVast implements VideoAdController {
     private final AdParams mAdParams;
     private final BaseVideoAdInternal mBaseAdInternal;
 
-    private List<TrackingEvent> mTrackingEventsList = new ArrayList<>();
+    private final List<TrackingEvent> mTrackingEventsList = new ArrayList<>();
     private MediaPlayer mMediaPlayer;
     private TimerWithPause mTimerWithPause;
     private TimerWithPause mSkipTimerWithPause;
@@ -48,8 +52,9 @@ class VideoAdControllerVast implements VideoAdController {
     private boolean videoVisible = false;
     private boolean finishedPlaying = false;
 
-    private HyBidViewabilityNativeVideoAdSession mViewabilityAdSession;
-    private List<HyBidViewabilityFriendlyObstruction> mViewabilityFriendlyObstructions;
+    private final HyBidViewabilityNativeVideoAdSession mViewabilityAdSession;
+    private final List<HyBidViewabilityFriendlyObstruction> mViewabilityFriendlyObstructions;
+    private Boolean isAndroid6VersionDevice = false;
 
     VideoAdControllerVast(BaseVideoAdInternal baseAd, AdParams adParams, HyBidViewabilityNativeVideoAdSession viewabilityAdSession, boolean isFullscreen) {
         mBaseAdInternal = baseAd;
@@ -57,7 +62,9 @@ class VideoAdControllerVast implements VideoAdController {
         mViewabilityAdSession = viewabilityAdSession;
         mViewabilityFriendlyObstructions = new ArrayList<>();
         mViewControllerVast = new ViewControllerVast(this);
-
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
+            isAndroid6VersionDevice = true;
+        }
         if (isFullscreen) {
             this.videoVisible = true;
         }
@@ -317,6 +324,9 @@ class VideoAdControllerVast implements VideoAdController {
             new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
+                    if (mBaseAdInternal.isInterstitial()) {
+                        mViewControllerVast.hideSkipButton();
+                    }
                     mBaseAdInternal.onAdDidReachEnd();
                     skipVideo(false);
                     EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.COMPLETE);
@@ -432,8 +442,9 @@ class VideoAdControllerVast implements VideoAdController {
         } else {
             url = trackEndCardClicks();
 
+            String videoClickUrl = trackVideoClicks();
             if (url == null) {
-                url = trackVideoClicks();
+                url = videoClickUrl;
             }
         }
 
@@ -454,6 +465,7 @@ class VideoAdControllerVast implements VideoAdController {
 
     public void closeSelf() {
         EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.CLOSE);
+        EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.CLOSE_LINEAR);
         mBaseAdInternal.dismiss();
     }
 
@@ -466,6 +478,9 @@ class VideoAdControllerVast implements VideoAdController {
     public void destroy() {
         if (mMediaPlayer != null) {
             mMediaPlayer.release();
+        }
+        if (!videoStarted) {
+            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.NOT_USED);
         }
         mViewControllerVast.destroy();
     }
@@ -489,6 +504,38 @@ class VideoAdControllerVast implements VideoAdController {
 
     @Override
     public void resume() {
+        if (isAndroid6VersionDevice && mMediaPlayer != null) {
+            mViewControllerVast.getTexture()
+                    .setSurfaceTextureListener(mCreateTextureListener);
+        } else {
+            resumeAd();
+        }
+    }
+
+    private final TextureView.SurfaceTextureListener mCreateTextureListener = new TextureView.SurfaceTextureListener() {
+        @Override
+        public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+            Surface asd = new Surface(surface);
+            mMediaPlayer.setSurface(asd);
+            resumeAd();
+        }
+
+        @Override
+        public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+        }
+
+        @Override
+        public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+            return false;
+        }
+
+        @Override
+
+        public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+        }
+    };
+
+    private void resumeAd() {
         if (mMediaPlayer != null && !mMediaPlayer.isPlaying() && mViewControllerVast.isEndCard()) {
             playAd();
             EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.RESUME);

@@ -34,6 +34,7 @@ class StandaloneNavFragment : Fragment(R.layout.fragment_nav_standalone) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        retainInstance = true
         settingsManager = SettingsManager.getInstance(requireActivity())
     }
 

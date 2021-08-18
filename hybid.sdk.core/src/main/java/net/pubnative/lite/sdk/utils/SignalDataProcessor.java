@@ -3,8 +3,9 @@ package net.pubnative.lite.sdk.utils;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.AdCache;
-import net.pubnative.lite.sdk.ErrorMessages;
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.HyBidError;
+import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
@@ -22,7 +23,7 @@ public class SignalDataProcessor {
     public interface Listener {
         void onProcessed(Ad ad);
 
-        void onError(Exception error);
+        void onError(Throwable error);
     }
 
     private final PNApiClient mApiClient;
@@ -72,18 +73,18 @@ public class SignalDataProcessor {
                     });
                 } else {
                     if (mListener != null) {
-                        mListener.onError(new Exception(ErrorMessages.INTERNAL_ERROR));
+                        mListener.onError(new HyBidError(HyBidErrorCode.INTERNAL_ERROR));
                     }
                 }
             } else {
                 if (mListener != null) {
-                    mListener.onError(new Exception(ErrorMessages.INVALID_ZONE_ID));
+                    mListener.onError(new HyBidError(HyBidErrorCode.INVALID_ZONE_ID));
                 }
             }
         } catch (Exception e) {
             Logger.e(TAG, e.getMessage());
             if (mListener != null) {
-                mListener.onError(new Exception(ErrorMessages.INVALID_SIGNAL_DATA));
+                mListener.onError(new HyBidError(HyBidErrorCode.INVALID_SIGNAL_DATA));
             }
         }
     }
@@ -118,7 +119,7 @@ public class SignalDataProcessor {
 
                         Logger.w(TAG, error.getMessage());
                         if (mListener != null) {
-                            mListener.onError(new Exception(error));
+                            mListener.onError(error);
                         }
                     }
                 });

@@ -44,22 +44,22 @@ public class Constants {
     public static final String MRAID_320x100_ZONE_ID = "28";
     public static final String MRAID_480x320_ZONE_ID = "29";
 
-    public static final String MOPUB_MEDIATION_BANNER_AD_UNIT = "38864d35877d4684af11319530993074";
-    public static final String MOPUB_MEDIATION_INTERSTITIAL_AD_UNIT = "2bb6db4d69fa407a87b0c96c55d7c2b4";
-    public static final String MOPUB_MEDIATION_INTERSTITIAL_VIDEO_AD_UNIT = "f9581b6011f64ecbbbf91ff78b76af64";
-    public static final String MOPUB_MEDIATION_REWARDED_AD_UNIT = "4f6a64ece43847ecbc3475219e8dd9b6";
-    public static final String MOPUB_MEDIATION_MEDIUM_AD_UNIT = "0af490cac3d34256b0010fac17f26759";
-    public static final String MOPUB_MEDIATION_MEDIUM_VIDEO_AD_UNIT = "86188aee417845eaa1b6e3c960243716";
-    public static final String MOPUB_MEDIATION_LEADERBOARD_AD_UNIT = "5e744edb00c344f9a92f7939fa58e970";
-    public static final String MOPUB_MEDIATION_NATIVE_AD_UNIT = "2dfcd13fb5dc4e9d9bc6ab3e382ffeb7";
+    public static final String MOPUB_MEDIATION_BANNER_AD_UNIT = "13cb0efc7b8b4b169424bccb0a4dd349";
+    public static final String MOPUB_MEDIATION_INTERSTITIAL_AD_UNIT = "ccdec09fb29846f98cf57cea8287a606";
+    public static final String MOPUB_MEDIATION_INTERSTITIAL_VIDEO_AD_UNIT = "0a39b233f7774d0e9538b7b832bc35e8";
+    public static final String MOPUB_MEDIATION_REWARDED_AD_UNIT = "a45aa28eb92042349d83bcc61d3b768d";
+    public static final String MOPUB_MEDIATION_MEDIUM_AD_UNIT = "5ffde0dbca0240079b4dd5f2b181fe05";
+    public static final String MOPUB_MEDIATION_MEDIUM_VIDEO_AD_UNIT = "59f8d32ddcbd47baa325ca7ebb0687c3";
+    public static final String MOPUB_MEDIATION_LEADERBOARD_AD_UNIT = "a3908796fb804430a78270e147a08fcd";
+    public static final String MOPUB_MEDIATION_NATIVE_AD_UNIT = "0a7d2b88d636448a937ee65084e38a3e";
 
-    public static final String MOPUB_MRAID_BANNER_AD_UNIT = "b8b82260e1b84a9ba361e03c21ce4caf";
-    public static final String MOPUB_MRAID_INTERSTITIAL_AD_UNIT = "0bd7ea20185547f2bd29a9574bfce917";
-    public static final String MOPUB_MRAID_MEDIUM_AD_UNIT = "1fafef6b872a4e10ba9fc573ca347e55";
-    public static final String MOPUB_MRAID_LEADERBOARD_AD_UNIT = "24d4c45cf0a64f219ec8d9b93bef44c4";
-    public static final String MOPUB_VAST_INTERSTITIAL_AD_UNIT = "256b90d1a7294c2d97fe2f4b4bfd67c2";
-    public static final String MOPUB_VAST_REWARDED_AD_UNIT = "51dea8bc737b455e8231b89153c81757";
-    public static final String MOPUB_VAST_MEDIUM_AD_UNIT = "414518af10474aca98a9a407bb899b79";
+    public static final String MOPUB_MRAID_BANNER_AD_UNIT = "94ef2036a5f4453b8eb096627359cffe";
+    public static final String MOPUB_MRAID_INTERSTITIAL_AD_UNIT = "af448ecf8c1546ecbcf329992fb7e868";
+    public static final String MOPUB_MRAID_MEDIUM_AD_UNIT = "91736fc87a9a45ad908053899a8e28db";
+    public static final String MOPUB_MRAID_LEADERBOARD_AD_UNIT = "4966aa487537480babe4929a8d5570d9";
+    public static final String MOPUB_VAST_INTERSTITIAL_AD_UNIT = "ab174d4c566e45d1ba86e7b8f61b22dc";
+    public static final String MOPUB_VAST_REWARDED_AD_UNIT = "64f6df919cd149a68776ce0dc2136225";
+    public static final String MOPUB_VAST_MEDIUM_AD_UNIT = "2711179d4dec4ef9a9750fbd0884ffd1";
 
     public static final String DFP_MRAID_BANNER_AD_UNIT = "/219576711/pnlite_dfp_banner";
     public static final String DFP_MRAID_INTERSTITIAL_AD_UNIT = "/219576711/pnlite_dfp_interstitial";
@@ -92,7 +92,7 @@ public class Constants {
     public static final String OGURY_KEY = "OGY-7B028F43E33F";
 
     public static final String NUMBEREIGHT_API_TOKEN = "T954C5VJTIAXAGMUVPDU0TZMGEV2";
-    
+
     public final class IntentParams {
         public static final String ZONE_ID = "zone_id";
     }

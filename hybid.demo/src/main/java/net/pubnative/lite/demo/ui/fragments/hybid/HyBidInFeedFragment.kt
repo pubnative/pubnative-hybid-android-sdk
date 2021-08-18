@@ -41,14 +41,13 @@ import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.ui.adapters.InFeedAdapter
 import net.pubnative.lite.demo.ui.listeners.InFeedAdListener
 import net.pubnative.lite.demo.util.ClipboardUtils
-import net.pubnative.lite.sdk.HyBid
+import net.pubnative.lite.sdk.HyBidError
 import net.pubnative.lite.sdk.models.AdSize
-import net.pubnative.lite.sdk.reporting.ReportingEventBridge
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class HyBidInFeedFragment : Fragment(), InFeedAdListener {
+class HyBidInFeedFragment : Fragment(R.layout.fragment_hybid_infeed_banner), InFeedAdListener {
     val TAG = HyBidInFeedFragment::class.java.simpleName
 
     private val AUTO_REFRESH_MILLIS : Long = 30 * 1000
@@ -58,6 +57,7 @@ class HyBidInFeedFragment : Fragment(), InFeedAdListener {
 
     private lateinit var autoRefreshSwitch: Switch
     private lateinit var loadButton: Button
+    private lateinit var errorCodeView: TextView
     private lateinit var errorView: TextView
     private lateinit var adSizeSpinner: Spinner
     private lateinit var spinnerAdapter: ArrayAdapter<AdSize>
@@ -79,12 +79,11 @@ class HyBidInFeedFragment : Fragment(), InFeedAdListener {
             AdSize.SIZE_768x1024,
             AdSize.SIZE_1024x768)
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_hybid_infeed_banner, container, false)
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         errorView = view.findViewById(R.id.view_error)
+        errorCodeView = view.findViewById(R.id.view_error_code)
         creativeIdView = view.findViewById(R.id.view_creative_id)
         loadButton = view.findViewById(R.id.button_load)
         recyclerView = view.findViewById(R.id.list)
@@ -121,13 +120,6 @@ class HyBidInFeedFragment : Fragment(), InFeedAdListener {
 
         val adSize = adSizes[adSizeSpinner.selectedItemPosition]
         adapter.loadWithAd(adSize)
-
-        val event = ReportingEventBridge("Standalone InFeedBanner")
-        event.setAdSize(adSize)
-
-        if (HyBid.getReportingController() != null) {
-            HyBid.getReportingController().reportEvent(event.reportingEvent)
-        }
     }
 
     fun autoRefresh(){
@@ -153,12 +145,16 @@ class HyBidInFeedFragment : Fragment(), InFeedAdListener {
     }
 
     override fun onInFeedAdLoadError(error: Throwable?) {
-        error?.message?.let {
-            Log.e(TAG, it)
-            errorView.text = it
+        if (error != null && error is HyBidError) {
+            Log.e(TAG, error.message ?: " - ")
+            errorCodeView.text = error.errorCode.code.toString()
+            errorView.text = error.message ?: " - "
+        } else {
+            errorCodeView.text = " - "
+            errorView.text = " - "
         }
-        creativeIdView.text = ""
         displayLogs()
+        creativeIdView.text = ""
     }
 
     override fun onInFeedAdCreativeId(creativeId: String?) {

@@ -37,12 +37,11 @@ import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
-import net.pubnative.lite.sdk.HyBid
+import net.pubnative.lite.sdk.HyBidError
 import net.pubnative.lite.sdk.models.NativeAd
-import net.pubnative.lite.sdk.reporting.ReportingEventBridge
 import net.pubnative.lite.sdk.request.HyBidNativeAdRequest
 
-class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, NativeAd.Listener {
+class HyBidNativeFragment : Fragment(R.layout.fragment_hybid_native), HyBidNativeAdRequest.RequestListener, NativeAd.Listener {
     val TAG = HyBidNativeFragment::class.java.simpleName
 
     private val AUTO_REFRESH_MILLIS : Long = 30 * 1000
@@ -61,18 +60,18 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
 
     private lateinit var autoRefreshSwitch: Switch
     private lateinit var loadButton: Button
+    private lateinit var errorCodeView: TextView
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
 
     private var nativeAd: NativeAd? = null
     private var nativeAdRequest: HyBidNativeAdRequest? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_hybid_native, container, false)
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         errorView = view.findViewById(R.id.view_error)
+        errorCodeView = view.findViewById(R.id.view_error_code)
         creativeIdView = view.findViewById(R.id.view_creative_id)
 
         loadButton = view.findViewById(R.id.button_load)
@@ -113,12 +112,6 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
         errorView.text = ""
 
         nativeAdRequest?.load(zoneId, this)
-
-        val event = ReportingEventBridge("Standalone Native")
-
-        if (HyBid.getReportingController() != null) {
-            HyBid.getReportingController().reportEvent(event.reportingEvent)
-        }
     }
 
     fun renderAd(ad: NativeAd?) {
@@ -164,12 +157,16 @@ class HyBidNativeFragment : Fragment(), HyBidNativeAdRequest.RequestListener, Na
     }
 
     override fun onRequestFail(throwable: Throwable?) {
-        throwable?.message?.let {
-            Log.e(TAG, it)
-            errorView.text = it
+        if (throwable != null && throwable is HyBidError) {
+            Log.e(TAG, throwable.message ?: " - ")
+            errorCodeView.text = throwable.errorCode.code.toString()
+            errorView.text = throwable.message ?: " - "
+        } else {
+            errorCodeView.text = " - "
+            errorView.text = " - "
         }
-        creativeIdView.text = ""
         displayLogs()
+        creativeIdView.text = ""
     }
 
     override fun onAdImpression(PNAPIAdModel: NativeAd?, view: View?) {

@@ -30,13 +30,13 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
-import net.pubnative.lite.sdk.ErrorMessages;
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.HyBidError;
+import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.auction.AdSource;
@@ -47,11 +47,9 @@ import net.pubnative.lite.sdk.auction.VastTagAdSource;
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
 import net.pubnative.lite.sdk.config.ConfigManager;
 import net.pubnative.lite.sdk.models.Ad;
-import net.pubnative.lite.sdk.models.AdResponse;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.RemoteConfigAdSource;
-import net.pubnative.lite.sdk.models.RemoteConfigModel;
 import net.pubnative.lite.sdk.models.RemoteConfigPlacement;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
@@ -60,8 +58,6 @@ import net.pubnative.lite.sdk.utils.MarkupUtils;
 import net.pubnative.lite.sdk.utils.SignalDataProcessor;
 import net.pubnative.lite.sdk.utils.ViewUtils;
 import net.pubnative.lite.sdk.vpaid.vast.VastUrlUtils;
-
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -144,7 +140,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         if (HyBid.isInitialized()) {
             cleanup();
             if (TextUtils.isEmpty(zoneId)) {
-                invokeOnLoadFailed(new Exception(ErrorMessages.INVALID_ZONE_ID));
+                invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ZONE_ID));
             } else {
                 ConfigManager configManager = HyBid.getConfigManager();
                 if (configManager != null && configManager.getConfig() != null
@@ -178,7 +174,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
                     }
 
                     mAuctionResponses.clear();
-                    mAuction = new Auction(getContext(), adSources, timeout, HyBid.getReportingController(), this, mAdFormat);
+                    mAuction = new Auction(adSources, timeout, HyBid.getReportingController(), this, mAdFormat);
                     mAuction.runAuction();
                 } else {
                     mRequestManager.setZoneId(zoneId);
@@ -188,7 +184,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
             }
         } else {
             Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before attempting a request");
-            invokeOnLoadFailed(new Exception(ErrorMessages.NOT_INITIALISED));
+            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NOT_INITIALISED));
         }
     }
 
@@ -311,7 +307,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         if (mPresenter != null) {
             mPresenter.load();
         } else {
-            invokeOnLoadFailed(new Exception(ErrorMessages.UNSUPPORTED_ASSET));
+            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.UNSUPPORTED_ASSET));
         }
     }
 
@@ -322,7 +318,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
             mAd = ad;
             renderAd();
         } else {
-            invokeOnLoadFailed(new Exception(ErrorMessages.INVALID_AD));
+            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_AD));
         }
     }
 
@@ -340,17 +336,17 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
                         mAd = ad;
                         renderAd();
                     } else {
-                        invokeOnLoadFailed(new Exception(ErrorMessages.NULL_AD));
+                        invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NULL_AD));
                     }
                 }
 
                 @Override
-                public void onError(Exception error) {
+                public void onError(Throwable error) {
                     invokeOnLoadFailed(error);
                 }
             });
         } else {
-            invokeOnLoadFailed(new Exception(ErrorMessages.INVALID_SIGNAL_DATA));
+            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_SIGNAL_DATA));
         }
     }
 
@@ -368,7 +364,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
                     @Override
                     public void onFailure(Throwable error) {
                         Logger.e(TAG, "Request failed: " + error.toString());
-                        invokeOnLoadFailed(new Exception(ErrorMessages.INVALID_ASSET));
+                        invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ASSET));
                     }
                 });
     }
@@ -405,7 +401,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
             mAd = new Ad(assetGroup, adValue, type);
             renderFromCustomAd();
         } else {
-            invokeOnLoadFailed(new Exception(ErrorMessages.INVALID_ASSET));
+            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ASSET));
         }
     }
 
@@ -414,7 +410,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         if (mPresenter != null) {
             mPresenter.load();
         } else {
-            invokeOnLoadFailed(new Exception(ErrorMessages.UNSUPPORTED_ASSET));
+            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.UNSUPPORTED_ASSET));
         }
     }
 
@@ -436,9 +432,10 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         }
     }
 
-    protected void invokeOnLoadFailed(Exception exception) {
-        if (exception != null && !TextUtils.isEmpty(exception.getMessage())) {
-            if (exception.getMessage().contains(ErrorMessages.NO_FILL)) {
+    protected void invokeOnLoadFailed(Throwable exception) {
+        if (exception instanceof HyBidError) {
+            HyBidError hyBidError = (HyBidError) exception;
+            if (hyBidError.getErrorCode() == HyBidErrorCode.NO_FILL) {
                 Logger.w(getLogTag(), exception.getMessage());
             } else {
                 Logger.e(getLogTag(), exception.getMessage());
@@ -498,11 +495,20 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         mUserIntent = userIntent;
     }
 
+    public enum Position {
+        TOP,
+        BOTTOM
+    }
+
+    public void setPosition(Position position) {
+        this.mPosition = position;
+    }
+
     //------------------------------ RequestManager Callbacks --------------------------------------
     @Override
     public void onRequestSuccess(Ad ad) {
         if (ad == null) {
-            invokeOnLoadFailed(new Exception(ErrorMessages.NULL_AD));
+            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NULL_AD));
         } else {
             mAd = ad;
             if (autoShowOnLoad) {
@@ -515,14 +521,14 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
 
     @Override
     public void onRequestFail(Throwable throwable) {
-        invokeOnLoadFailed(new Exception(throwable));
+        invokeOnLoadFailed(throwable);
     }
 
     //----------------------------- AdPresenter Callbacks --------------------------------------
     @Override
     public void onAdLoaded(AdPresenter adPresenter, View banner) {
         if (banner == null) {
-            invokeOnLoadFailed(new Exception(ErrorMessages.ERROR_RENDERING_BANNER));
+            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.ERROR_RENDERING_BANNER));
         } else {
             setupAdView(banner);
         }
@@ -537,7 +543,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
                 mAuction.reportAuctionNextItem(mAuctionResponses.peek());
             }
         } else {
-            invokeOnLoadFailed(new Exception(ErrorMessages.ERROR_RENDERING_BANNER));
+            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.ERROR_RENDERING_BANNER));
         }
     }
 
@@ -546,27 +552,17 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         invokeOnClick();
     }
 
-    public enum Position {
-        TOP,
-        BOTTOM
-    }
-
     @Override
     public void onImpression() {
         invokeOnImpression();
     }
-
-    public void setPosition(Position position) {
-        this.mPosition = position;
-    }
-
 
     //------------------------------ Auction Callbacks --------------------------------------
 
     @Override
     public void onAuctionSuccess(PriorityQueue<Ad> auctionResult) {
         if (auctionResult == null || auctionResult.isEmpty()) {
-            invokeOnLoadFailed(new Exception(ErrorMessages.AUCTION_NO_AD));
+            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.AUCTION_NO_AD));
         } else {
             mAuctionResponses.addAll(auctionResult);
             mAd = mAuctionResponses.poll();
@@ -580,6 +576,6 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
 
     @Override
     public void onAuctionFailure(Throwable error) {
-        invokeOnLoadFailed(new Exception(error));
+        invokeOnLoadFailed(error);
     }
 }

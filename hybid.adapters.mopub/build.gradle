@@ -39,7 +39,7 @@ dependencies {
     implementation project(':hybid.sdk.logger')
     implementation project(':hybid.sdk.source.pnapi')
     
-    compileOnly('com.mopub:mopub-sdk:5.16.0@aar') {
+    compileOnly('com.mopub:mopub-sdk:5.18.0@aar') {
         transitive = true
     }
 }

@@ -36,6 +36,7 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
     implementation project(':hybid.sdk.core')
+    implementation project(':hybid.sdk.logger')
     implementation project(':hybid.sdk.source.pnapi')
 
     //Testing

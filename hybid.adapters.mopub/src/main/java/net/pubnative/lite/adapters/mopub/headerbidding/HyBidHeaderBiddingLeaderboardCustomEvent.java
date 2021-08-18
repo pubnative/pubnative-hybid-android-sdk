@@ -41,7 +41,7 @@ import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 
-public class HyBidHeaderBiddingLeaderboardCustomEvent extends BaseAd implements AdPresenter.Listener {
+public class HyBidHeaderBiddingLeaderboardCustomEvent extends BaseAd implements AdPresenter.Listener, AdPresenter.ImpressionListener {
     private static final String TAG = HyBidHeaderBiddingBannerCustomEvent.class.getSimpleName();
 
     private static final String ZONE_ID_KEY = "pn_zone_id";
@@ -72,7 +72,7 @@ public class HyBidHeaderBiddingLeaderboardCustomEvent extends BaseAd implements 
             return;
         }
 
-        mLeaderboardPresenter = new LeaderboardPresenterFactory(context).createPresenter(ad, this);
+        mLeaderboardPresenter = new LeaderboardPresenterFactory(context).createPresenter(ad, this, this);
         if (mLeaderboardPresenter == null) {
             Logger.e(TAG, "Could not create valid leaderboard presenter");
             mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
@@ -114,19 +114,33 @@ public class HyBidHeaderBiddingLeaderboardCustomEvent extends BaseAd implements 
     public void onAdLoaded(AdPresenter adPresenter, View banner) {
         mAdView = banner;
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_SUCCESS, TAG);
-        mLoadListener.onAdLoaded();
         mLeaderboardPresenter.startTracking();
+        if (mLoadListener != null) {
+            mLoadListener.onAdLoaded();
+        }
     }
 
     @Override
     public void onAdError(AdPresenter adPresenter) {
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_FAILED, TAG);
-        mLoadListener.onAdLoadFailed(MoPubErrorCode.INTERNAL_ERROR);
+        if (mLoadListener != null) {
+            mLoadListener.onAdLoadFailed(MoPubErrorCode.INTERNAL_ERROR);
+        }
     }
 
     @Override
     public void onAdClicked(AdPresenter adPresenter) {
         MoPubLog.log(MoPubLog.AdapterLogEvent.CLICKED, TAG);
-        mInteractionListener.onAdClicked();
+        if (mLoadListener != null) {
+            mInteractionListener.onAdClicked();
+        }
+    }
+
+    @Override
+    public void onImpression() {
+        MoPubLog.log(MoPubLog.AdapterLogEvent.SHOW_SUCCESS, TAG);
+        if (mInteractionListener != null) {
+            mInteractionListener.onAdShown();
+        }
     }
 }

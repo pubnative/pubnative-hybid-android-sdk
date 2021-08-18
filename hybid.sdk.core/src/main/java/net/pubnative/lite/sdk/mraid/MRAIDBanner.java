@@ -44,8 +44,14 @@ public class MRAIDBanner extends MRAIDView {
             ViewGroup contentInfo
     ) {
         super(context, baseUrl, data, supportedNativeFeatures, viewListener, nativeFeatureListener, contentInfo, false);
-        webView.setBackgroundColor(Color.TRANSPARENT);
-        addView(webView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        if (webView != null) {
+            webView.setBackgroundColor(Color.TRANSPARENT);
+            addView(webView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        } else {
+            if (viewListener != null) {
+                viewListener.mraidViewError(this);
+            }
+        }
     }
 
 

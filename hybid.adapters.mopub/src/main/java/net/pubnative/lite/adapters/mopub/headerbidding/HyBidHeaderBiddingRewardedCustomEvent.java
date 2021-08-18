@@ -93,13 +93,17 @@ public class HyBidHeaderBiddingRewardedCustomEvent extends BaseAd implements Rew
     @Override
     public void onRewardedLoaded(RewardedPresenter rewardedPresenter) {
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_SUCCESS, TAG);
-        mLoadListener.onAdLoaded();
+        if (mLoadListener != null) {
+            mLoadListener.onAdLoaded();
+        }
     }
 
     @Override
     public void onRewardedError(RewardedPresenter rewardedPresenter) {
         MoPubLog.log(MoPubLog.AdapterLogEvent.DID_DISAPPEAR, TAG);
-        mLoadListener.onAdLoadFailed(MoPubErrorCode.INTERNAL_ERROR);
+        if (mLoadListener != null) {
+            mLoadListener.onAdLoadFailed(MoPubErrorCode.INTERNAL_ERROR);
+        }
     }
 
     @Override

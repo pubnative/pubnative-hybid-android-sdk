@@ -6,15 +6,20 @@ import net.pubnative.lite.sdk.vpaid.xml.Tag;
 import java.util.List;
 
 public class Companion {
-
-    @Attribute
-    private String id;
-
     @Attribute
     private int width;
 
     @Attribute
     private int height;
+
+    @Attribute
+    private String id;
+
+    @Attribute
+    private int assetWidth;
+
+    @Attribute
+    private int assetHeight;
 
     @Attribute
     private int expandedWidth;
@@ -25,21 +30,38 @@ public class Companion {
     @Attribute
     private String apiFramework;
 
-    @Tag
-    private StaticResource staticResource;
+    @Attribute
+    private String adSlotId;
+
+    @Attribute
+    private String pxratio;
+
+    @Attribute
+    private String renderingMode;
+
+    @Tag("StaticResource")
+    private List<StaticResource> staticResources;
+
+    @Tag("IFrameResource")
+    private List<IFrameResource> iFrameResources;
+
+    @Tag("HTMLResource")
+    private List<HTMLResource> htmlResources;
 
     @Tag
-    private TrackingEvents trackingEvents;
+    private AdParameters adParameters;
+
+    @Tag
+    private AltText altText;
 
     @Tag
     private CompanionClickThrough companionClickThrough;
 
-    @Tag
-    private List<CompanionClickTracking> companionClickTracking;
+    @Tag("CompanionClickTracking")
+    private List<CompanionClickTracking> companionClickTrackingList;
 
-    public String getId() {
-        return id;
-    }
+    @Tag
+    private TrackingEvents trackingEvents;
 
     public int getWidth() {
         return width;
@@ -47,6 +69,18 @@ public class Companion {
 
     public int getHeight() {
         return height;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public int getAssetWidth() {
+        return assetWidth;
+    }
+
+    public int getAssetHeight() {
+        return assetHeight;
     }
 
     public int getExpandedWidth() {
@@ -61,19 +95,47 @@ public class Companion {
         return apiFramework;
     }
 
-    public StaticResource getStaticResource() {
-        return staticResource;
+    public String getAdSlotId() {
+        return adSlotId;
     }
 
-    public TrackingEvents getTrackingEvents() {
-        return trackingEvents;
+    public String getPxratio() {
+        return pxratio;
+    }
+
+    public String getRenderingMode() {
+        return renderingMode;
+    }
+
+    public List<StaticResource> getStaticResources() {
+        return staticResources;
+    }
+
+    public List<IFrameResource> getiFrameResources() {
+        return iFrameResources;
+    }
+
+    public List<HTMLResource> getHtmlResources() {
+        return htmlResources;
+    }
+
+    public AdParameters getAdParameters() {
+        return adParameters;
+    }
+
+    public AltText getAltText() {
+        return altText;
     }
 
     public CompanionClickThrough getCompanionClickThrough() {
         return companionClickThrough;
     }
 
-    public List<CompanionClickTracking> getCompanionClickTracking() {
-        return companionClickTracking;
+    public List<CompanionClickTracking> getCompanionClickTrackingList() {
+        return companionClickTrackingList;
+    }
+
+    public TrackingEvents getTrackingEvents() {
+        return trackingEvents;
     }
 }

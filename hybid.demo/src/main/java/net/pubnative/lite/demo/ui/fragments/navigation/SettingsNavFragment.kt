@@ -10,7 +10,6 @@ import net.pubnative.lite.demo.BuildConfig
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.CustomSDKDataActivity
 import net.pubnative.lite.demo.ui.activities.admob.MediationTestSuiteActivity
-import net.pubnative.lite.demo.ui.activities.analytics.AnalyticsActivity
 import net.pubnative.lite.demo.ui.activities.audiences.NumberEightAudiencesActivity
 import net.pubnative.lite.demo.ui.activities.config.AdmobSettingsActivity
 import net.pubnative.lite.demo.ui.activities.config.DFPSettingsActivity
@@ -72,11 +71,6 @@ class SettingsNavFragment : Fragment(R.layout.fragment_nav_settings) {
             }
         } else {
             view.findViewById<TextView>(R.id.button_numbereight_audiences).setVisibility(View.GONE)
-        }
-
-        view.findViewById<TextView>(R.id.button_analytics).setOnClickListener {
-            val intent = Intent(activity, AnalyticsActivity::class.java)
-            startActivity(intent)
         }
 
         view.findViewById<TextView>(R.id.button_mediation_test_suite).setOnClickListener {

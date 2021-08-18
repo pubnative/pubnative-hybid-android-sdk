@@ -1,13 +1,8 @@
-repositories {
-    mavenCentral()
-    maven {
-        url 'http://repo.numbereight.me/artifactory/gradle-release-local'
-    }
-}
-
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'com.google.firebase.appdistribution'
+apply plugin: 'com.google.firebase.firebase-perf'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 30
@@ -72,12 +67,12 @@ dependencies {
     implementation project(':hybid.sdk.logger')
     implementation project(':hybid.sdk.source.pnapi')
 
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation 'com.google.android.material:material:1.3.0'
+    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
+    implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.multidex:multidex:2.0.1'
 
-    implementation('com.mopub:mopub-sdk:5.16.0@aar') {
+    implementation('com.mopub:mopub-sdk:5.18.0@aar') {
         transitive = true
     }
 
@@ -90,13 +85,17 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
-    implementation 'co.ogury:ogury-sdk:4.7.7'
-    implementation 'com.google.android.ump:user-messaging-platform:1.0.0'
+    implementation 'co.ogury:ogury-sdk:5.0.9'
+    implementation 'com.google.android.ump:user-messaging-platform:2.0.0'
 
-    implementation 'ai.numbereight.sdk:audiences:1.1.+'
-    implementation('ai.numbereight.sdk:nesdk:1.1.+@aar') {
+    implementation 'ai.numbereight.sdk:audiences:2.3.4'
+    implementation('ai.numbereight.sdk:nesdk:2.3.4@aar') {
         transitive = true
     }
+
+    implementation platform('com.google.firebase:firebase-bom:28.2.0')
+    implementation 'com.google.firebase:firebase-perf'
+
 
     testImplementation 'com.google.truth:truth:0.36'
 }

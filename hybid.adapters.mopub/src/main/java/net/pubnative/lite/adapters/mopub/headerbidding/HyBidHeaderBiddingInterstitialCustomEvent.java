@@ -76,7 +76,7 @@ public class HyBidHeaderBiddingInterstitialCustomEvent extends BaseAd implements
         } else {
             mInterstitialPresenter = new InterstitialPresenterFactory(context, mZoneID).createInterstitialPresenter(ad, this);
         }
-        
+
         if (mInterstitialPresenter == null) {
             Logger.e(TAG, "Could not create valid interstitial presenter");
             mLoadListener.onAdLoadFailed(MoPubErrorCode.ADAPTER_CONFIGURATION_ERROR);
@@ -119,30 +119,40 @@ public class HyBidHeaderBiddingInterstitialCustomEvent extends BaseAd implements
     @Override
     public void onInterstitialLoaded(InterstitialPresenter interstitialPresenter) {
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_SUCCESS, TAG);
-        mLoadListener.onAdLoaded();
+        if (mLoadListener != null) {
+            mLoadListener.onAdLoaded();
+        }
     }
 
     @Override
     public void onInterstitialError(InterstitialPresenter interstitialPresenter) {
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_FAILED, TAG);
-        mLoadListener.onAdLoadFailed(MoPubErrorCode.INTERNAL_ERROR);
+        if (mLoadListener != null) {
+            mLoadListener.onAdLoadFailed(MoPubErrorCode.INTERNAL_ERROR);
+        }
     }
 
     @Override
     public void onInterstitialShown(InterstitialPresenter interstitialPresenter) {
         MoPubLog.log(MoPubLog.AdapterLogEvent.SHOW_SUCCESS, TAG);
-        mInteractionListener.onAdShown();
+        if (mInteractionListener != null) {
+            mInteractionListener.onAdShown();
+        }
     }
 
     @Override
     public void onInterstitialClicked(InterstitialPresenter interstitialPresenter) {
         MoPubLog.log(MoPubLog.AdapterLogEvent.CLICKED, TAG);
-        mInteractionListener.onAdClicked();
+        if (mInteractionListener != null) {
+            mInteractionListener.onAdClicked();
+        }
     }
 
     @Override
     public void onInterstitialDismissed(InterstitialPresenter interstitialPresenter) {
         MoPubLog.log(MoPubLog.AdapterLogEvent.DID_DISAPPEAR, TAG);
-        mInteractionListener.onAdDismissed();
+        if (mInteractionListener != null) {
+            mInteractionListener.onAdDismissed();
+        }
     }
 }

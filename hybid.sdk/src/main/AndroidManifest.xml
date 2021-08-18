@@ -5,8 +5,12 @@
 
     <application>
         <activity android:name=".consent.UserConsentActivity" />
-        <activity android:name=".interstitial.activity.MraidInterstitialActivity" />
-        <activity android:name=".interstitial.activity.VastInterstitialActivity" />
+        <activity
+            android:name=".interstitial.activity.MraidInterstitialActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name=".interstitial.activity.VastInterstitialActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity android:name=".rewarded.activity.VastRewardedActivity" />
     </application>
 </manifest>

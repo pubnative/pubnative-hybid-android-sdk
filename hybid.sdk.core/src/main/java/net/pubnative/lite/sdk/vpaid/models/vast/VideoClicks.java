@@ -6,11 +6,14 @@ import java.util.List;
 
 public class VideoClicks {
 
-    @Tag("ClickThrough")
+    @Tag
     private ClickThrough clickThrough;
 
     @Tag("ClickTracking")
     private List<ClickTracking> clickTrackingList;
+
+    @Tag("CustomClick")
+    private List<CustomClick> customClickList;
 
     public List<ClickTracking> getClickTrackingList() {
         return clickTrackingList;
@@ -18,5 +21,9 @@ public class VideoClicks {
 
     public ClickThrough getClickThrough() {
         return clickThrough;
+    }
+
+    public List<CustomClick> getCustomClickList() {
+        return customClickList;
     }
 }

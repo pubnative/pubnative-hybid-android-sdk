@@ -8,6 +8,15 @@ public class Ad {
     @Attribute
     private String id;
 
+    @Attribute
+    private int sequence;
+
+    @Attribute
+    private boolean conditionalAd;
+
+    @Attribute
+    private String adType;
+
     @Tag
     private InLine inLine;
 
@@ -16,6 +25,18 @@ public class Ad {
 
     public String getId() {
         return id;
+    }
+
+    public int getSequence() {
+        return sequence;
+    }
+
+    public boolean getConditionalAd() {
+        return conditionalAd;
+    }
+
+    public String getAdType() {
+        return adType;
     }
 
     public InLine getInLine() {

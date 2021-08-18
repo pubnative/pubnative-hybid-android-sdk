@@ -5,11 +5,21 @@ import java.util.List;
 public interface VastAdSource {
     AdSystem getAdSystem();
 
-    List<Impression> getImpressionList();
+    List<Impression> getImpressions();
 
     Creatives getCreatives();
 
-    Error getError();
+    List<Error> getErrors();
+
+    Pricing getPricing();
 
     Extensions getExtensions();
+
+    ViewableImpression getViewableImpression();
+
+    AdVerifications getAdVerifications();
+
+    List<Category> getCategories();
+
+    AdServingId getAdServingId();
 }

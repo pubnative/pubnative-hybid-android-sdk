@@ -23,7 +23,7 @@ public class VastTagAdSource implements AdSource {
 
     @Override
     public void fetchAd(final Listener listener) {
-        if (mConfig != null && TextUtils.isEmpty(mConfig.getVastTagUrl())) {
+        if (mConfig != null && !TextUtils.isEmpty(mConfig.getVastTagUrl())) {
             PNHttpClient.makeRequest(mContext, processTagUrl(mConfig.getVastTagUrl()),
                     null, null, false,
                     new PNHttpClient.Listener() {

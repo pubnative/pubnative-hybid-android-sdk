@@ -4,9 +4,17 @@ import net.pubnative.lite.sdk.vpaid.xml.Attribute;
 import net.pubnative.lite.sdk.vpaid.xml.Tag;
 
 public class Linear {
+    @Attribute
+    private String skipoffset;
 
     @Tag
     private Duration duration;
+
+    @Tag
+    private MediaFiles mediaFiles;
+
+    @Tag
+    private AdParameters adParameters;
 
     @Tag
     private TrackingEvents trackingEvents;
@@ -15,24 +23,14 @@ public class Linear {
     private VideoClicks videoClicks;
 
     @Tag
-    private MediaFiles mediaFiles;
+    private Icons icons;
 
-    @Tag
-    private AdParameters adParameters;
-
-    @Attribute
-    private String skipoffset;
+    public String getSkipOffset() {
+        return skipoffset;
+    }
 
     public Duration getDuration() {
         return duration;
-    }
-
-    public TrackingEvents getTrackingEvents() {
-        return trackingEvents;
-    }
-
-    public VideoClicks getVideoClicks() {
-        return videoClicks;
     }
 
     public MediaFiles getMediaFiles() {
@@ -43,7 +41,15 @@ public class Linear {
         return adParameters;
     }
 
-    public String getSkipoffset() {
-        return skipoffset;
+    public TrackingEvents getTrackingEvents() {
+        return trackingEvents;
+    }
+
+    public VideoClicks getVideoClicks() {
+        return videoClicks;
+    }
+
+    public Icons getIcons() {
+        return icons;
     }
 }

@@ -48,10 +48,6 @@ public class HyBidViewabilityWebAdSession extends HyBidViewabilityAdSession {
             createAdEvents();
             mAdSession.start();
 
-            ReportingEvent reportingEvent = new ReportingEvent();
-            reportingEvent.setEventType(Reporting.EventType.VIDEO_AD_SESSION_STARTED);
-            viewabilityManager.getReportingController().reportEvent(reportingEvent);
-
         } catch (IllegalArgumentException e) {
             Logger.e("", e.getMessage());
         } catch (NullPointerException exception) {

@@ -50,6 +50,7 @@ public class VastAdPresenter implements AdPresenter {
 
     private VideoAdView mVideoPlayer;
     private VideoAd mVideoAd;
+    private View mContentInfo;
 
     public VastAdPresenter(Context context, Ad ad) {
         mContext = context;
@@ -120,10 +121,9 @@ public class VastAdPresenter implements AdPresenter {
 
         container.addView(mVideoPlayer, layoutParams);
 
-        View contentInfo = getAd().getContentInfoContainer(mContext);
-        if (contentInfo != null) {
-
-            container.addView(contentInfo);
+        mContentInfo = getAd().getContentInfoContainer(mContext);
+        if (mContentInfo != null) {
+            container.addView(mContentInfo);
         }
 
         return container;
@@ -169,7 +169,9 @@ public class VastAdPresenter implements AdPresenter {
 
         @Override
         public void onAdDismissed() {
-
+            if (mContentInfo != null) {
+                mContentInfo.setVisibility(View.GONE);
+            }
         }
 
         @Override

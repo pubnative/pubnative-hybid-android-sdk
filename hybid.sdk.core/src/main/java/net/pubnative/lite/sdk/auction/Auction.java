@@ -1,9 +1,10 @@
 package net.pubnative.lite.sdk.auction;
 
-import android.content.Context;
 import android.os.CountDownTimer;
 import android.text.TextUtils;
 
+import net.pubnative.lite.sdk.HyBidError;
+import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
@@ -33,21 +34,19 @@ public class Auction {
         READY, AWAITING_RESPONSES, PROCESSING_RESULTS, DONE
     }
 
-    private final Context mContext;
     private final ReportingController mReportingController;
     private final Listener mListener;
     private final CountDownTimer mTimer;
-    private List<AdSource> mAuctionAdSources;
-    private List<Ad> mAdResponses;
+    private final List<AdSource> mAuctionAdSources;
+    private final List<Ad> mAdResponses;
     private int mMissingResponses;
     private AuctionState mAuctionState;
-    private String mAdFormat;
+    private final String mAdFormat;
     private AdSize mAdSize;
-    private List<String> mFillList;
-    private List<String> mNoFillList;
+    private final List<String> mFillList;
+    private final List<String> mNoFillList;
 
-    public Auction(Context context, List<AdSource> adSources, long timeoutInMillis, ReportingController reportingController, Listener listener, String adFormat) {
-        this.mContext = context;
+    public Auction(List<AdSource> adSources, long timeoutInMillis, ReportingController reportingController, Listener listener, String adFormat) {
         this.mReportingController = reportingController;
         this.mListener = listener;
         this.mAuctionAdSources = new ArrayList<>(adSources.size());
@@ -124,7 +123,7 @@ public class Auction {
 
         if (!mAdResponses.isEmpty()) {
             PriorityQueue<Ad> adQueue = new PriorityQueue<>(mAdResponses);
-            if (mListener !=  null) {
+            if (mListener != null) {
                 mAuctionState = AuctionState.DONE;
                 reportAuctionFinished(adQueue.peek());
                 mListener.onAuctionSuccess(adQueue);
@@ -133,7 +132,7 @@ public class Auction {
             if (mListener != null) {
                 mAuctionState = AuctionState.DONE;
                 reportAuctionFinished();
-                mListener.onAuctionFailure(new Exception("The auction concluded without any winning bid."));
+                mListener.onAuctionFailure(new HyBidError(HyBidErrorCode.AUCTION_NO_AD));
             }
         }
     }
@@ -147,7 +146,7 @@ public class Auction {
             JSONObject participants = new JSONObject();
             for (AdSource adSource : mAuctionAdSources) {
                 participants.put(adSource.getName(), adSource.getECPM());
-                if (TextUtils.isEmpty(event.getAdSize())){
+                if (TextUtils.isEmpty(event.getAdSize())) {
                     mAdSize = adSource.getAdSize();
                     event.setAdSize(mAdSize.toString());
                 }
@@ -171,7 +170,7 @@ public class Auction {
         event.setTimestamp(getTimestampString());
         event.setCustomString(Reporting.Key.EVENT_TYPE, Reporting.EventType.AUCTION_FINISHED);
         event.setAdFormat(mAdFormat);
-        if (mAdSize != null){
+        if (mAdSize != null) {
             event.setAdSize(mAdSize.toString());
         }
         event.setCustomJSONArray(Reporting.EventType.FILL, new JSONArray(mFillList));
@@ -189,7 +188,7 @@ public class Auction {
     public void reportAuctionNextItem(Ad nextAdSource) {
         ReportingEvent event = new ReportingEvent();
         event.setAdFormat(mAdFormat);
-        if (mAdSize != null){
+        if (mAdSize != null) {
             event.setAdSize(mAdSize.toString());
         }
         event.setTimestamp(getTimestampString());
@@ -198,7 +197,7 @@ public class Auction {
         event.setCustomString(Reporting.EventType.NEXT_AD_SOURCE, nextAdSourceName);
     }
 
-    private String getTimestampString(){
+    private String getTimestampString() {
         Long timestamp = System.currentTimeMillis();
         return String.valueOf(timestamp);
     }

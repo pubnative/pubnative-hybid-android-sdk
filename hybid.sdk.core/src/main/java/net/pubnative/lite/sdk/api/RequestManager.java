@@ -24,6 +24,9 @@ package net.pubnative.lite.sdk.api;
 
 import net.pubnative.lite.sdk.AdCache;
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.analytics.Reporting;
+import net.pubnative.lite.sdk.analytics.ReportingController;
+import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.config.ConfigManager;
 import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.models.Ad;
@@ -33,8 +36,10 @@ import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.utils.CheckUtils;
+import net.pubnative.lite.sdk.utils.HeaderBiddingUtils;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNInitializationHelper;
+import net.pubnative.lite.sdk.utils.PrebidUtils;
 import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
@@ -57,6 +62,7 @@ public class RequestManager {
     private AdCache mAdCache;
     private VideoAdCache mVideoCache;
     private final AdRequestFactory mAdRequestFactory;
+    private final ReportingController mReportingController;
     private final PNInitializationHelper mInitializationHelper;
     private String mZoneId;
     private RequestListener mRequestListener;
@@ -65,7 +71,7 @@ public class RequestManager {
     private boolean mIsRewarded = false;
 
     public RequestManager() {
-        this(HyBid.getApiClient(), HyBid.getAdCache(), HyBid.getVideoAdCache(), HyBid.getConfigManager(), new AdRequestFactory(), new PNInitializationHelper());
+        this(HyBid.getApiClient(), HyBid.getAdCache(), HyBid.getVideoAdCache(), HyBid.getConfigManager(), new AdRequestFactory(), HyBid.getReportingController(), new PNInitializationHelper());
     }
 
     RequestManager(PNApiClient apiClient,
@@ -73,10 +79,12 @@ public class RequestManager {
                    VideoAdCache videoCache,
                    ConfigManager configManager,
                    AdRequestFactory adRequestFactory,
+                   ReportingController reportingController,
                    PNInitializationHelper initializationHelper) {
         mApiClient = apiClient;
         mAdCache = adCache;
         mVideoCache = videoCache;
+        mReportingController = reportingController;
         mAdRequestFactory = adRequestFactory;
         mInitializationHelper = initializationHelper;
         mAdSize = AdSize.SIZE_320x50;
@@ -119,7 +127,7 @@ public class RequestManager {
             return;
         }
 
-        if(mConfigManager != null) {
+        if (mConfigManager != null) {
             mConfigManager.refreshConfig();
         }
 
@@ -140,6 +148,7 @@ public class RequestManager {
             mApiClient = HyBid.getApiClient();
         }
         Logger.d(TAG, "Requesting ad for zone id: " + adRequest.zoneid);
+        reportAdRequest(adRequest);
         mApiClient.getAd(adRequest, new PNApiClient.AdRequestListener() {
             @Override
             public void onSuccess(Ad ad) {
@@ -148,6 +157,7 @@ public class RequestManager {
                 }
 
                 Logger.d(TAG, "Received ad response for zone id: " + adRequest.zoneid);
+                reportAdResponse(adRequest, ad);
                 processAd(adRequest, ad);
             }
 
@@ -215,6 +225,45 @@ public class RequestManager {
         }
     }
 
+    private void reportAdRequest(AdRequest adRequest) {
+        if (mReportingController != null) {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.REQUEST);
+            reportingEvent.setTimestamp(String.valueOf(System.currentTimeMillis()));
+            if (getAdSize() != null) {
+                reportingEvent.setAdSize(getAdSize().toString());
+            }
+            reportingEvent.setPlacementId(adRequest.zoneid);
+            mReportingController.reportEvent(reportingEvent);
+        }
+    }
+
+    private void reportAdResponse(AdRequest adRequest, Ad adResponse) {
+        if (mReportingController != null) {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.RESPONSE);
+            reportingEvent.setTimestamp(String.valueOf(System.currentTimeMillis()));
+            if (getAdSize() != null) {
+                reportingEvent.setAdSize(getAdSize().toString());
+            }
+            reportingEvent.setPlacementId(adRequest.zoneid);
+            reportingEvent.setCustomString(Reporting.Key.BID_PRICE,
+                    HeaderBiddingUtils.getBidFromPoints(
+                            adResponse.getECPM(), PrebidUtils.KeywordMode.THREE_DECIMALS));
+            switch (adResponse.assetgroupid) {
+                case ApiAssetGroupType.VAST_INTERSTITIAL:
+                case ApiAssetGroupType.VAST_MRECT: {
+                    reportingEvent.setCreativeType(Reporting.CreativeType.VIDEO);
+                    break;
+                }
+                default: {
+                    reportingEvent.setCreativeType(Reporting.CreativeType.STANDARD);
+                }
+            }
+            mReportingController.reportEvent(reportingEvent);
+        }
+    }
+
     public void setIntegrationType(IntegrationType integrationType) {
         if (mAdRequestFactory != null) {
             mAdRequestFactory.setIntegrationType(integrationType);
@@ -230,7 +279,7 @@ public class RequestManager {
         return mAdSize;
     }
 
-    public boolean isRewarded(){
+    public boolean isRewarded() {
         return mIsRewarded;
     }
 }

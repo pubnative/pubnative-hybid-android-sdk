@@ -220,6 +220,7 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
         if (!mIsStarted) {
             return;
         }
+        postEvent(EventConstants.CLOSE_LINEAR);
         postEvent(EventConstants.CLOSE);
         skipVideo();
     }

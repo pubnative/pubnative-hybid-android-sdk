@@ -189,6 +189,10 @@ public class ViewControllerVast implements View.OnClickListener {
         }
     }
 
+    public void hideSkipButton() {
+        mSkipView.setVisibility(View.GONE);
+    }
+
     public boolean isEndCard() {
         return mEndCardLayout != null && mEndCardLayout.getVisibility() != View.VISIBLE;
     }
@@ -240,5 +244,9 @@ public class ViewControllerVast implements View.OnClickListener {
         } else {
             mMuteView.setImageResource(R.drawable.unmute);
         }
+    }
+
+    public TextureView getTexture() {
+        return mControlsLayout.findViewById(R.id.textureView);
     }
 }

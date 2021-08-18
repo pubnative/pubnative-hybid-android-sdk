@@ -1,5 +1,6 @@
 package net.pubnative.lite.sdk.interstitial.activity;
 
+import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
 
@@ -18,7 +19,8 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
             MRAIDNativeFeature.INLINE_VIDEO,
             MRAIDNativeFeature.SMS,
             MRAIDNativeFeature.STORE_PICTURE,
-            MRAIDNativeFeature.TEL
+            MRAIDNativeFeature.TEL,
+            MRAIDNativeFeature.LOCATION
     };
 
     private MRAIDBanner mView;

@@ -1,24 +1,36 @@
 package net.pubnative.lite.demo.ui.fragments
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.managers.SettingsManager
+import net.pubnative.lite.demo.ui.adapters.ReportingEventAdapter
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.demo.util.JsonUtils
+import net.pubnative.lite.sdk.HyBid
+import net.pubnative.lite.sdk.analytics.ReportingEvent
+import net.pubnative.lite.sdk.analytics.ReportingEventCallback
 import net.pubnative.lite.sdk.utils.AdRequestRegistry
 
-class DebugFragment: Fragment() {
+class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback {
 
     private lateinit var requestView: TextView
     private lateinit var latencyView: TextView
     private lateinit var responseView: TextView
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_debug, container, false)
+    private val eventList = mutableListOf<ReportingEvent>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -27,27 +39,96 @@ class DebugFragment: Fragment() {
         latencyView = view.findViewById(R.id.view_latency)
         responseView = view.findViewById(R.id.view_response)
 
-        requestView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), requestView.text.toString()) }
-        latencyView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), latencyView.text.toString()) }
-        responseView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), responseView.text.toString()) }
+        requestView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                requestView.text.toString()
+            )
+        }
+        latencyView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                latencyView.text.toString()
+            )
+        }
+        responseView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                responseView.text.toString()
+            )
+        }
+
+        view.findViewById<Button>(R.id.button_event_report).setOnClickListener {
+            displayEventReport()
+        }
+
+        HyBid.getReportingController().addCallback(this)
+    }
+
+    override fun onDestroy() {
+        HyBid.getReportingController().removeCallback(this)
+        super.onDestroy()
+    }
+
+    override fun onEvent(event: ReportingEvent?) {
+        if (event != null) {
+            eventList.add(event)
+        }
     }
 
     fun cleanLogs() {
-        requestView.text = ""
-        latencyView.text = ""
-        responseView.text = ""
+        if (requestView != null) {
+            requestView.text = ""
+        }
+        if (latencyView != null) {
+            latencyView.text = ""
+        }
+        if (responseView != null) {
+            responseView.text = ""
+        }
     }
 
     fun updateLogs() {
         val registryItem = AdRequestRegistry.getInstance().lastAdRequest
         if (registryItem != null) {
-            requestView.text = registryItem.url
-            latencyView.text = registryItem.latency.toString()
+            if (requestView != null) {
+                requestView.text = registryItem.url
+            }
+            if (latencyView != null) {
+                latencyView.text = registryItem.latency.toString()
+            }
 
             if (!TextUtils.isEmpty(registryItem.response)) {
-                responseView.text = JsonUtils.toFormattedJson(registryItem.response)
+                if (responseView != null) {
+                    responseView.text = JsonUtils.toFormattedJson(registryItem.response)
+                }
             }
         }
         AdRequestRegistry.getInstance().setLastAdRequest("", "", 0)
+    }
+
+    private fun displayEventReport() {
+        val builder = AlertDialog.Builder(requireActivity())
+        val view = LayoutInflater.from(requireActivity())
+            .inflate(R.layout.dialog_placement_events, null, false)
+        val recyclerView = view.findViewById<RecyclerView>(R.id.list_events)
+        recyclerView.apply {
+            setHasFixedSize(true)
+            layoutManager = LinearLayoutManager(requireActivity(), RecyclerView.VERTICAL, false)
+            addItemDecoration(
+                DividerItemDecoration(
+                    requireActivity(),
+                    DividerItemDecoration.VERTICAL
+                )
+            )
+            itemAnimator = DefaultItemAnimator()
+            adapter = ReportingEventAdapter(eventList)
+
+        }
+        builder.setTitle(R.string.sdk_event_report)
+        builder.setView(view)
+        builder.setPositiveButton(R.string.action_dismiss) { dialog, _ -> dialog?.dismiss() }
+        val dialog = builder.create()
+        dialog.show()
     }
 }

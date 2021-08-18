@@ -1,5 +1,6 @@
 package net.pubnative.lite.sdk.analytics;
 
+import android.os.Bundle;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.utils.Logger;
@@ -7,6 +8,8 @@ import net.pubnative.lite.sdk.utils.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Iterator;
 
 public class ReportingEvent {
 
@@ -100,6 +103,25 @@ public class ReportingEvent {
         }
     }
 
+    public void setCreativeType(String creativeType) {
+        try {
+            if (!TextUtils.isEmpty(creativeType)) {
+                eventObject.put(Reporting.Key.CREATIVE_TYPE, creativeType);
+            }
+        } catch (JSONException e) {
+            Logger.e(TAG, e.getMessage());
+        }
+    }
+
+    public String getCreativeType() {
+        try {
+            return eventObject.getString(Reporting.Key.CREATIVE_TYPE);
+        } catch (JSONException e) {
+            Logger.e(TAG, e.getMessage());
+            return null;
+        }
+    }
+
     public void setTimestamp(long date) {
         String timestamp = String.valueOf(date);
         try {
@@ -185,6 +207,23 @@ public class ReportingEvent {
         }
     }
 
+    public void setPlacementId(String placementId) {
+        try {
+            eventObject.put(Reporting.Key.PLACEMENT_ID, placementId);
+        } catch (JSONException e) {
+            Logger.e(TAG, e.getMessage());
+        }
+    }
+
+    public String getPlacementId() {
+        try {
+            return eventObject.getString(Reporting.Key.PLACEMENT_ID);
+        } catch (JSONException e) {
+            Logger.e(TAG, e.getMessage());
+            return null;
+        }
+    }
+
     public void setCustomString(String key, String value) {
         try {
             if (!TextUtils.isEmpty(value)) {
@@ -219,7 +258,7 @@ public class ReportingEvent {
         }
     }
 
-    public void setCustomJSONObject(String key, JSONObject jsonObject){
+    public void setCustomJSONObject(String key, JSONObject jsonObject) {
         try {
             eventObject.put(key, jsonObject);
         } catch (JSONException e) {
@@ -227,11 +266,25 @@ public class ReportingEvent {
         }
     }
 
-    public void setCustomJSONArray(String key, JSONArray jsonArray){
+    public void setCustomJSONArray(String key, JSONArray jsonArray) {
         try {
             eventObject.put(key, jsonArray);
         } catch (JSONException e) {
             Logger.e(TAG, e.getMessage());
         }
+    }
+
+    public Bundle getEventData() {
+        Bundle bundle = new Bundle();
+        Iterator<String> iterator = eventObject.keys();
+        while (iterator.hasNext()) {
+            String key = iterator.next();
+            try {
+                bundle.putString(key, eventObject.getString(key));
+            } catch (JSONException ignored) {
+
+            }
+        }
+        return bundle;
     }
 }

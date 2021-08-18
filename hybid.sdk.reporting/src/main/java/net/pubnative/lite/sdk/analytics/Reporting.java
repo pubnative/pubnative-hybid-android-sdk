@@ -1,19 +1,23 @@
 package net.pubnative.lite.sdk.analytics;
 
 public class Reporting {
-    public final class Key {
+    public static final class Key {
         public static final String CATEGORY_ID = "category_id";
         public static final String CAMPAIGN_ID = "campaign_id";
         public static final String CREATIVE_ID = "creative_id";
+        public static final String PLACEMENT_ID = "placement_id";
         public static final String EVENT_TYPE = "event_type";
         public static final String CREATIVE_TYPE = "creative_type";
         public static final String AD_FORMAT = "ad_format";
         public static final String AD_SIZE = "ad_size";
         public static final String TIMESTAMP = "timestamp";
+        public static final String BID_PRICE = "bid_price";
         public static final String PARTICIPANTS = "participants";
     }
 
-    public final class EventType {
+    public static final class EventType {
+        public static final String REQUEST = "request";
+        public static final String RESPONSE = "response";
         public static final String IMPRESSION = "impression";
         public static final String ERROR = "error";
         public static final String CLICK = "click";
@@ -53,12 +57,12 @@ public class Reporting {
         public static final String VIDEO_AD_SESSION_STOPPED = "session_stopped";
     }
 
-    public final class CreativeType {
+    public static final class CreativeType {
         public static final String STANDARD = "standard";
         public static final String VIDEO = "video";
     }
 
-    public final class AdFormat {
+    public static final class AdFormat {
         public static final String NATIVE = "native";
         public static final String BANNER = "banner";
         public static final String FULLSCREEN = "fullscreen";

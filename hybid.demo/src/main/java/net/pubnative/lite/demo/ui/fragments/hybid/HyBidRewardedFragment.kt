@@ -13,28 +13,26 @@ import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
-import net.pubnative.lite.sdk.HyBid
-import net.pubnative.lite.sdk.models.AdSize
-import net.pubnative.lite.sdk.reporting.ReportingEventBridge
+import net.pubnative.lite.sdk.HyBidError
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedAd
 
-class HyBidRewardedFragment : Fragment(), HyBidRewardedAd.Listener {
+class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidRewardedAd.Listener {
     val TAG = HyBidRewardedFragment::class.java.simpleName
 
     private var zoneId: String? = null
 
     private lateinit var loadButton: Button
     private lateinit var showButton: Button
+    private lateinit var errorCodeView: TextView
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
     private var rewardedAd: HyBidRewardedAd? = null
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_hybid_rewarded, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         errorView = view.findViewById(R.id.view_error)
+        errorCodeView = view.findViewById(R.id.view_error_code)
         creativeIdView = view.findViewById(R.id.view_creative_id)
         loadButton = view.findViewById(R.id.button_load)
         showButton = view.findViewById(R.id.button_show)
@@ -51,7 +49,6 @@ class HyBidRewardedFragment : Fragment(), HyBidRewardedAd.Listener {
 
         showButton.setOnClickListener {
             rewardedAd?.show()
-            displayLogs()
             showButton.isEnabled = false
         }
 
@@ -63,13 +60,6 @@ class HyBidRewardedFragment : Fragment(), HyBidRewardedAd.Listener {
     private fun loadPNRewardedAd() {
         rewardedAd = HyBidRewardedAd(activity, zoneId, this)
         rewardedAd?.load()
-
-        val event = ReportingEventBridge("Standalone Rewarded")
-        event.setAdSize(AdSize.SIZE_INTERSTITIAL)
-
-        if (HyBid.getReportingController() != null) {
-            HyBid.getReportingController().reportEvent(event.reportingEvent)
-        }
     }
 
 
@@ -82,6 +72,7 @@ class HyBidRewardedFragment : Fragment(), HyBidRewardedAd.Listener {
     override fun onRewardedLoaded() {
         Log.d(TAG, "onRewardedLoaded")
         showButton.isEnabled = true
+        displayLogs()
         if (!TextUtils.isEmpty(rewardedAd?.creativeId)) {
             creativeIdView.text = rewardedAd?.creativeId
         }
@@ -101,12 +92,16 @@ class HyBidRewardedFragment : Fragment(), HyBidRewardedAd.Listener {
 
     override fun onRewardedLoadFailed(error: Throwable?) {
         showButton.isEnabled = false
-        error?.message?.let {
-            Log.e(TAG, it)
-            errorView.text = it
+        if (error != null && error is HyBidError) {
+            Log.e(TAG, error.message ?: " - ")
+            errorCodeView.text = error.errorCode.code.toString()
+            errorView.text = error.message ?: " - "
+        } else {
+            errorCodeView.text = " - "
+            errorView.text = " - "
         }
-        creativeIdView.text = ""
         displayLogs()
+        creativeIdView.text = ""
     }
 
 

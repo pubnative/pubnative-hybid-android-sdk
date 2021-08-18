@@ -24,7 +24,7 @@ public class HyBidAdSource implements AdSource, RequestManager.RequestListener {
 
     @Override
     public void fetchAd(Listener listener) {
-        if (mConfig != null && TextUtils.isEmpty(mConfig.getZoneId())) {
+        if (mConfig != null && !TextUtils.isEmpty(mConfig.getZoneId())) {
             mListener = listener;
 
             RequestManager requestManager;

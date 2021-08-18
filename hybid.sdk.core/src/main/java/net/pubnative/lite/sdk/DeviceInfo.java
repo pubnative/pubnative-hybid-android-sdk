@@ -140,6 +140,9 @@ public class DeviceInfo {
             }));
         } catch (Exception exception) {
             Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
+            if (mListener != null) {
+                mListener.onInfoLoaded();
+            }
         }
     }
 

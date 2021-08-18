@@ -28,7 +28,8 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.webkit.WebView;
 
-import net.pubnative.lite.sdk.ErrorMessages;
+import net.pubnative.lite.sdk.HyBidError;
+import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdResponse;
@@ -88,7 +89,7 @@ public class PNApiClient {
     public void getAd(final String url, final AdRequestListener listener) {
         if (TextUtils.isEmpty(url)) {
             if (listener != null) {
-                listener.onFailure(new Exception("PNApiClient - Error: invalid request URL"));
+                listener.onFailure(new HyBidError(HyBidErrorCode.INVALID_URL));
             }
         } else {
             final long initTime = System.currentTimeMillis();
@@ -105,7 +106,7 @@ public class PNApiClient {
                     registerAdRequest(url, error.getMessage(), initTime);
 
                     if (listener != null) {
-                        listener.onFailure(error);
+                        listener.onFailure(new HyBidError(HyBidErrorCode.SERVER_ERROR_PREFIX, error));
                     }
                 }
             });
@@ -132,7 +133,7 @@ public class PNApiClient {
             @Override
             public void onFailure(Throwable error) {
                 if (listener != null) {
-                    listener.onFailure(error);
+                    listener.onFailure(new HyBidError(HyBidErrorCode.ERROR_TRACKING_URL, error));
                 }
             }
         });
@@ -142,7 +143,7 @@ public class PNApiClient {
     public void trackJS(String js, final TrackJSListener listener) {
         if (TextUtils.isEmpty(js)) {
             if (listener != null) {
-                listener.onFailure(new Exception("Empty JS tracking beacon"));
+                listener.onFailure(new HyBidError(HyBidErrorCode.ERROR_TRACKING_JS, "Empty JS tracking beacon"));
             }
         } else {
             try {
@@ -161,7 +162,7 @@ public class PNApiClient {
                 }
             } catch (RuntimeException exception) {
                 if (listener != null) {
-                    listener.onFailure(new Exception("Error tracking JS beacon. No webview to evaluate JS."));
+                    listener.onFailure(new HyBidError(HyBidErrorCode.ERROR_TRACKING_JS, "Error tracking JS beacon. No webview to evaluate JS."));
                 }
             }
         }
@@ -189,22 +190,22 @@ public class PNApiClient {
         } catch (Exception exception) {
             parseException = exception;
         } catch (Error error) {
-            parseException = new Exception(ErrorMessages.PARSER_ERROR, error);
+            parseException = new HyBidError(HyBidErrorCode.PARSER_ERROR, error);
         }
         if (parseException != null) {
-            listener.onFailure(parseException);
+            listener.onFailure(new HyBidError(HyBidErrorCode.PARSER_ERROR, parseException));
         } else if (apiResponseModel == null) {
-            listener.onFailure(new Exception(ErrorMessages.PARSER_ERROR));
+            listener.onFailure(new HyBidError(HyBidErrorCode.PARSER_ERROR));
         } else if (AdResponse.Status.OK.equals(apiResponseModel.status)) {
             // STATUS 'OK'
             if (apiResponseModel.ads != null && !apiResponseModel.ads.isEmpty()) {
                 listener.onSuccess(apiResponseModel.ads.get(0));
             } else {
-                listener.onFailure(new Exception(ErrorMessages.NO_FILL));
+                listener.onFailure(new HyBidError(HyBidErrorCode.NO_FILL));
             }
         } else {
             // STATUS 'ERROR'
-            listener.onFailure(new Exception(ErrorMessages.SERVER_ERROR_PREFIX + apiResponseModel.error_message));
+            listener.onFailure(new HyBidError(HyBidErrorCode.SERVER_ERROR_PREFIX, new Exception(apiResponseModel.error_message)));
         }
     }
 

@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "786277539067",
+    "firebase_url": "https://hybid-demo.firebaseio.com",
+    "project_id": "hybid-demo",
+    "storage_bucket": "hybid-demo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:786277539067:android:6bb4032ad6f571ab",
+        "android_client_info": {
+          "package_name": "net.pubnative.lite.demo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "786277539067-ddpfepgn7p37or9mogc50a6159q9t1jl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "net.pubnative.lite.demo",
+            "certificate_hash": "fd2809de7f63cbf16d3d704d4522c4741acd7516"
+          }
+        },
+        {
+          "client_id": "786277539067-th6acsnbqcmp1p2oeo32lfac5o3aruog.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2Xm9LB_Hxi-7UeAWVpzj7m7VFp2It9w0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "786277539067-th6acsnbqcmp1p2oeo32lfac5o3aruog.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "786277539067-2dhj24hhch5p0ao1mb323e4hhdrd3ed4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.pubnative.HyBid.demo"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -32,4 +32,6 @@ public final class MRAIDNativeFeature {
     public final static String STORE_PICTURE = "storePicture";
     public final static String SMS = "sms";
     public final static String TEL = "tel";
+    public final static String VPAID = "vpaid";
+    public final static String LOCATION = "location";
 }

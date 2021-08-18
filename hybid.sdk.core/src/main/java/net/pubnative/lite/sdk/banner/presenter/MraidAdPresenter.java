@@ -59,7 +59,8 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
                 MRAIDNativeFeature.INLINE_VIDEO,
                 MRAIDNativeFeature.SMS,
                 MRAIDNativeFeature.STORE_PICTURE,
-                MRAIDNativeFeature.TEL
+                MRAIDNativeFeature.TEL,
+                MRAIDNativeFeature.LOCATION
         };
     }
 

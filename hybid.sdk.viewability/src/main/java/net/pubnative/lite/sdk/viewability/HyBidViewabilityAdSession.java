@@ -63,11 +63,6 @@ public abstract class HyBidViewabilityAdSession {
         if (mAdEvents != null) {
             try {
                 mAdEvents.loaded();
-
-                ReportingEvent reportingEvent = new ReportingEvent();
-                reportingEvent.setEventType(Reporting.EventType.VIDEO_AD_SESSION_LOADED);
-                viewabilityManager.getReportingController().reportEvent(reportingEvent);
-
             } catch (IllegalArgumentException | IllegalStateException e) {
                 e.printStackTrace();
             }
@@ -81,11 +76,6 @@ public abstract class HyBidViewabilityAdSession {
         if (mAdEvents != null) {
             try {
                 mAdEvents.impressionOccurred();
-
-                ReportingEvent reportingEvent = new ReportingEvent();
-                reportingEvent.setEventType(Reporting.EventType.IMPRESSION);
-                viewabilityManager.getReportingController().reportEvent(reportingEvent);
-
             } catch (IllegalArgumentException | IllegalStateException e) {
                 e.printStackTrace();
             }
@@ -99,10 +89,6 @@ public abstract class HyBidViewabilityAdSession {
         if (mAdSession != null) {
             mAdSession.finish();
             mAdSession = null;
-
-            ReportingEvent reportingEvent = new ReportingEvent();
-            reportingEvent.setEventType(Reporting.EventType.VIDEO_AD_SESSION_STOPPED);
-            viewabilityManager.getReportingController().reportEvent(reportingEvent);
         }
     }
 

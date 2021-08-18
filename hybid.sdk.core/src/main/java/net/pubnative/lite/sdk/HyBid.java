@@ -100,7 +100,7 @@ public class HyBid {
      * This method must be called to initialize the SDK before request ads.
      */
     public static void initialize(String appToken,
-                                  Application application, final InitialisationListener initialisationListener) {
+                                  final Application application, final InitialisationListener initialisationListener) {
 
         sAppToken = appToken;
         sBundleId = application.getPackageName();
@@ -120,19 +120,21 @@ public class HyBid {
         sBrowserManager = new BrowserManager();
         sVgiIdManager = new VgiIdManager(application.getApplicationContext());
         sReportingController = new ReportingController();
-        sViewabilityManager = new ViewabilityManager(application, sReportingController);
+        sViewabilityManager = new ViewabilityManager(application);
         sReportingDelegate = new ReportingDelegate(application.getApplicationContext(), REPORTING_URL);
         sDeviceInfo.initialize(new DeviceInfo.Listener() {
             @Override
             public void onInfoLoaded() {
-                /*sConfigManager.initialize(new ConfigManager.ConfigListener() {
+                sConfigManager.initialize(new ConfigManager.ConfigListener() {
                     @Override
                     public void onConfigFetched() {
                         sUserDataManager.initialize(sDeviceInfo.getAdvertisingId(), new UserDataManager.UserDataInitialisationListener() {
                             @Override
                             public void onDataInitialised(boolean success) {
                                 if (initialisationListener != null) {
-                                    initialisationListener.onInitialisationFinished(success);
+                                    // todo : Change the way the listener works once old consent is deprecated
+                                    DiagnosticsManager.printDiagnosticsLog(application, DiagnosticsManager.Event.INITIALISATION);
+                                    initialisationListener.onInitialisationFinished(true);
                                 }
                             }
                         });
@@ -140,24 +142,16 @@ public class HyBid {
 
                     @Override
                     public void onConfigFetchFailed(Throwable error) {
-                        Logger.e(TAG, "Error fetching config: ", error);
+                        Logger.d(TAG, "Error fetching config: ", error);
                         sUserDataManager.initialize(sDeviceInfo.getAdvertisingId(), new UserDataManager.UserDataInitialisationListener() {
                             @Override
                             public void onDataInitialised(boolean success) {
                                 if (initialisationListener != null) {
-                                    initialisationListener.onInitialisationFinished(success);
+                                    DiagnosticsManager.printDiagnosticsLog(application, DiagnosticsManager.Event.INITIALISATION);
+                                    initialisationListener.onInitialisationFinished(true);
                                 }
                             }
                         });
-                    }
-                });*/
-                sUserDataManager.initialize(sDeviceInfo.getAdvertisingId(), new UserDataManager.UserDataInitialisationListener() {
-                    @Override
-                    public void onDataInitialised(boolean success) {
-                        if (initialisationListener != null) {
-                            // todo : Change the way the listener works once old consent is deprecated
-                            initialisationListener.onInitialisationFinished(true);
-                        }
                     }
                 });
             }

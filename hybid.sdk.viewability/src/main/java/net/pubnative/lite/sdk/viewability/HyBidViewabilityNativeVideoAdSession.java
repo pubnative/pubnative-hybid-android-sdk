@@ -58,11 +58,6 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
             createAdEvents();
             createMediaEvents();
             mAdSession.start();
-
-            ReportingEvent reportingEvent = new ReportingEvent();
-            reportingEvent.setEventType(Reporting.EventType.VIDEO_AD_SESSION_STARTED);
-            viewabilityManager.getReportingController().reportEvent(reportingEvent);
-
         } catch (Exception exception) {
             Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
         }
@@ -88,11 +83,6 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
             if (mAdEvents != null) {
                 mAdEvents.loaded(vastProperties);
             }
-
-            ReportingEvent reportingEvent = new ReportingEvent();
-            reportingEvent.setEventType(Reporting.EventType.VIDEO_AD_SESSION_LOADED);
-            viewabilityManager.getReportingController().reportEvent(reportingEvent);
-
         } catch (Exception exception) {
             Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
         }
@@ -106,10 +96,6 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
             if (mMediaEvents != null && !startFired) {
                 mMediaEvents.start(duration, mute ? 0 : 1);
                 startFired = true;
-
-                ReportingEvent reportingEvent = new ReportingEvent();
-                reportingEvent.setEventType(Reporting.EventType.VIDEO_AD_SESSION_STARTED);
-                viewabilityManager.getReportingController().reportEvent(reportingEvent);
             }
         } catch (Exception exception) {
             Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
@@ -124,11 +110,6 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
             if (mMediaEvents != null && !firstQuartileFired) {
                 mMediaEvents.firstQuartile();
                 firstQuartileFired = true;
-
-                ReportingEvent reportingEvent = new ReportingEvent();
-                reportingEvent.setEventType(Reporting.EventType.VIDEO_AD_FIRST_QUARTILE);
-                viewabilityManager.getReportingController().reportEvent(reportingEvent);
-
             }
         } catch (Exception exception) {
             Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
@@ -143,11 +124,6 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
             if (mMediaEvents != null && !midpointFired) {
                 mMediaEvents.midpoint();
                 midpointFired = true;
-
-                ReportingEvent reportingEvent = new ReportingEvent();
-                reportingEvent.setEventType(Reporting.EventType.VIDEO_AD_MIDPOINT);
-                viewabilityManager.getReportingController().reportEvent(reportingEvent);
-
             }
         } catch (Exception exception) {
             Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
@@ -162,11 +138,6 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
             if (mMediaEvents != null && !thirdQuartileFired) {
                 mMediaEvents.thirdQuartile();
                 thirdQuartileFired = true;
-
-                ReportingEvent reportingEvent = new ReportingEvent();
-                reportingEvent.setEventType(Reporting.EventType.VIDEO_AD_THIRD_QUARTILE);
-                viewabilityManager.getReportingController().reportEvent(reportingEvent);
-
             }
         } catch (Exception exception) {
             Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
@@ -181,11 +152,6 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
             if (mMediaEvents != null && !completeFired) {
                 mMediaEvents.complete();
                 completeFired = true;
-
-                ReportingEvent reportingEvent = new ReportingEvent();
-                reportingEvent.setEventType(Reporting.EventType.VIDEO_AD_COMPLETE);
-                viewabilityManager.getReportingController().reportEvent(reportingEvent);
-
             }
         } catch (Exception exception) {
             Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
@@ -199,11 +165,6 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
 
             if (mMediaEvents != null) {
                 mMediaEvents.pause();
-
-                ReportingEvent reportingEvent = new ReportingEvent();
-                reportingEvent.setEventType(Reporting.EventType.VIDEO_AD_PAUSE);
-                viewabilityManager.getReportingController().reportEvent(reportingEvent);
-
             }
         } catch (Exception exception) {
             Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
@@ -217,11 +178,6 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
 
             if (mMediaEvents != null) {
                 mMediaEvents.resume();
-
-                ReportingEvent reportingEvent = new ReportingEvent();
-                reportingEvent.setEventType(Reporting.EventType.VIDEO_AD_RESUME);
-                viewabilityManager.getReportingController().reportEvent(reportingEvent);
-
             }
         } catch (Exception exception) {
             Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
@@ -238,11 +194,6 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
 
             if (mMediaEvents != null) {
                 mMediaEvents.bufferStart();
-
-                ReportingEvent reportingEvent = new ReportingEvent();
-                reportingEvent.setEventType(Reporting.EventType.VIDEO_AD_BUFFER_START);
-                viewabilityManager.getReportingController().reportEvent(reportingEvent);
-
             }
         } catch (Exception exception) {
             Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
@@ -259,11 +210,6 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
 
             if (mMediaEvents != null) {
                 mMediaEvents.bufferFinish();
-
-                ReportingEvent reportingEvent = new ReportingEvent();
-                reportingEvent.setEventType(Reporting.EventType.VIDEO_AD_BUFFER_FINISH);
-                viewabilityManager.getReportingController().reportEvent(reportingEvent);
-
             }
         } catch (Exception exception) {
             Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
@@ -277,11 +223,6 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
 
             if (mMediaEvents != null && !completeFired) {
                 mMediaEvents.volumeChange(mute ? 0 : 1);
-
-                ReportingEvent reportingEvent = new ReportingEvent();
-                reportingEvent.setEventType(Reporting.EventType.VIDEO_AD_VOLUME_CHANGE);
-                viewabilityManager.getReportingController().reportEvent(reportingEvent);
-
             }
         } catch (Exception exception) {
             Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
@@ -298,11 +239,6 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
 
             if (mMediaEvents != null) {
                 mMediaEvents.skipped();
-
-                ReportingEvent reportingEvent = new ReportingEvent();
-                reportingEvent.setEventType(Reporting.EventType.VIDEO_AD_SKIPPED);
-                viewabilityManager.getReportingController().reportEvent(reportingEvent);
-
             }
         } catch (Exception exception) {
             Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
@@ -316,11 +252,6 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
 
             if (mMediaEvents != null) {
                 mMediaEvents.adUserInteraction(InteractionType.CLICK);
-
-                ReportingEvent reportingEvent = new ReportingEvent();
-                reportingEvent.setEventType(Reporting.EventType.VIDEO_AD_CLICKED);
-                viewabilityManager.getReportingController().reportEvent(reportingEvent);
-
             }
         } catch (Exception exception) {
             Logger.e(TAG, "OM SDK Ad Session - Exception", exception);

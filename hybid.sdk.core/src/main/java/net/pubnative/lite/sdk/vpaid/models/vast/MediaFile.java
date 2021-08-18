@@ -5,9 +5,6 @@ import net.pubnative.lite.sdk.vpaid.xml.Text;
 
 public class MediaFile {
 
-    @Attribute
-    private String id;
-
     /**
      * streaming, progressive
      */
@@ -18,13 +15,25 @@ public class MediaFile {
     private String type;
 
     @Attribute
-    private int bitrate;
-
-    @Attribute
     private int width;
 
     @Attribute
     private int height;
+
+    @Attribute
+    private String codec;
+
+    @Attribute
+    private String id;
+
+    @Attribute
+    private int bitrate;
+
+    @Attribute
+    private int minBitrate;
+
+    @Attribute
+    private int maxBitrate;
 
     @Attribute
     private boolean scalable;
@@ -35,12 +44,14 @@ public class MediaFile {
     @Attribute
     private String apiFramework;
 
+    @Attribute
+    private long fileSize;
+
+    @Attribute
+    private String mediaType;
+
     @Text
     private String text;
-
-    public String getId() {
-        return id;
-    }
 
     public String getDelivery() {
         return delivery;
@@ -50,16 +61,32 @@ public class MediaFile {
         return type;
     }
 
-    public int getBitrate() {
-        return bitrate;
-    }
-
     public int getWidth() {
         return width;
     }
 
     public int getHeight() {
         return height;
+    }
+
+    public String getCodec() {
+        return codec;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public int getBitrate() {
+        return bitrate;
+    }
+
+    public int getMinBitrate() {
+        return minBitrate;
+    }
+
+    public int getMaxBitrate() {
+        return maxBitrate;
     }
 
     public boolean isScalable() {
@@ -72,6 +99,14 @@ public class MediaFile {
 
     public String getApiFramework() {
         return apiFramework;
+    }
+
+    public long getFileSize() {
+        return fileSize;
+    }
+
+    public String getMediaType() {
+        return mediaType;
     }
 
     public String getText() {

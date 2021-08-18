@@ -34,11 +34,13 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
+import android.location.Location;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.DisplayMetrics;
@@ -73,16 +75,21 @@ import android.widget.RelativeLayout;
 import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.mraid.internal.MRAIDHtmlProcessor;
 import net.pubnative.lite.sdk.mraid.internal.MRAIDLog;
 import net.pubnative.lite.sdk.mraid.internal.MRAIDNativeFeatureManager;
 import net.pubnative.lite.sdk.mraid.internal.MRAIDParser;
 import net.pubnative.lite.sdk.mraid.properties.MRAIDOrientationProperties;
 import net.pubnative.lite.sdk.mraid.properties.MRAIDResizeProperties;
+import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityWebAdSession;
 import net.pubnative.lite.sdk.views.PNWebView;
 import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -515,7 +522,6 @@ public class MRAIDView extends RelativeLayout {
         Map<String, String> commandMap = parser.parseCommandUrl(commandUrl);
 
         String command = commandMap.get("command");
-
 
         try {
             if (Arrays.asList(COMMANDS_WITH_NO_PARAM).contains(command)) {
@@ -1370,6 +1376,35 @@ public class MRAIDView extends RelativeLayout {
         injectJavaScript("mraid.setSupports(mraid.SUPPORTED_FEATURES.SMS, " + nativeFeatureManager.isSmsSupported() + ");");
         injectJavaScript("mraid.setSupports(mraid.SUPPORTED_FEATURES.STOREPICTURE, " + nativeFeatureManager.isStorePictureSupported() + ");");
         injectJavaScript("mraid.setSupports(mraid.SUPPORTED_FEATURES.TEL, " + nativeFeatureManager.isTelSupported() + ");");
+        injectJavaScript("mraid.setSupports(mraid.SUPPORTED_FEATURES.LOCATION, " + nativeFeatureManager.isLocationSupported() + ");");
+    }
+
+    private void setEnvironmentVariables() {
+        //TODO fill ENV variables for MRAID 3.0
+    }
+
+    private void setLocation() {
+        if (nativeFeatureManager.isLocationSupported()) {
+            HyBidLocationManager locationManager = HyBid.getLocationManager();
+            if (locationManager != null && locationManager.getUserLocation() != null) {
+                Location location = locationManager.getUserLocation();
+                JSONObject locationJson = new JSONObject();
+                try {
+                    locationJson.put("lat", location.getLatitude());
+                    locationJson.put("lon", location.getLatitude());
+                    locationJson.put("type", 1); //GPS
+                    locationJson.put("accuracy", location.getAccuracy());
+                    long elapsedNanos = SystemClock.elapsedRealtimeNanos() - location.getElapsedRealtimeNanos();
+                    locationJson.put("lastfix", elapsedNanos / 1000000000L);
+                    injectJavaScript("mraid.setLocation(" + locationJson.toString() + ");");
+                } catch (JSONException exception) {
+                    Logger.e(MRAID_LOG_TAG, "Error passing location to MRAID interface");
+                    injectJavaScript("mraid.setLocation(-1);");
+                }
+            } else {
+                injectJavaScript("mraid.setLocation(-1);");
+            }
+        }
     }
 
     private void pauseWebView(WebView webView) {
@@ -1474,7 +1509,9 @@ public class MRAIDView extends RelativeLayout {
             if (state == STATE_LOADING) {
                 isPageFinished = true;
                 injectJavaScript("mraid.setPlacementType('" + (isInterstitial ? "interstitial" : "inline") + "');");
+                setEnvironmentVariables();
                 setSupportedServices();
+                setLocation();
                 if (isLaidOut) {
                     initSkipTime();
                     setScreenSize();
@@ -1524,6 +1561,8 @@ public class MRAIDView extends RelativeLayout {
                     public void run() {
                         injectJavaScript("mraid.setPlacementType('" + (isInterstitial ? "interstitial" : "inline") + "');");
                         setSupportedServices();
+                        setEnvironmentVariables();
+                        setLocation();
                         setScreenSize();
                         setDefaultPosition();
                         MRAIDLog.d(MRAID_LOG_TAG, "calling fireStateChangeEvent 2");

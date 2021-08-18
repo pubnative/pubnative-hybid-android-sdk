@@ -26,6 +26,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeature;
 
 import java.util.ArrayList;
@@ -84,5 +85,15 @@ public class MRAIDNativeFeatureManager {
 
     public ArrayList<String> getSupportedNativeFeatures() {
         return supportedNativeFeatures;
+    }
+
+    public boolean isLocationSupported() {
+        boolean retval =
+                supportedNativeFeatures.contains(MRAIDNativeFeature.LOCATION)
+                        && HyBid.isLocationTrackingEnabled()
+                        && ((PackageManager.PERMISSION_GRANTED == context.checkCallingOrSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+                        || (PackageManager.PERMISSION_GRANTED == context.checkCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION))));
+        MRAIDLog.d(TAG, "isLocationSupported " + retval);
+        return retval;
     }
 }

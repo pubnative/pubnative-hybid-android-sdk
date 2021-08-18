@@ -28,13 +28,12 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import net.pubnative.lite.sdk.AdCache;
-import net.pubnative.lite.sdk.ErrorMessages;
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.HyBidError;
+import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.api.RewardedRequestManager;
 import net.pubnative.lite.sdk.models.Ad;
-import net.pubnative.lite.sdk.models.AdResponse;
-import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.rewarded.presenter.RewardedPresenter;
@@ -47,9 +46,6 @@ import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.vast.VastUrlUtils;
-
-import org.jetbrains.annotations.NotNull;
-import org.json.JSONObject;
 
 public class HyBidRewardedAd implements RequestManager.RequestListener, RewardedPresenter.Listener {
     private static final String TAG = HyBidRewardedAd.class.getSimpleName();
@@ -103,9 +99,9 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
 
     public void load() {
         if (!HyBid.isInitialized()) {
-            invokeOnLoadFailed(new Exception(ErrorMessages.NOT_INITIALISED));
+            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NOT_INITIALISED));
         } else if (TextUtils.isEmpty(mZoneId)) {
-            invokeOnLoadFailed(new Exception(ErrorMessages.INVALID_ZONE_ID));
+            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ZONE_ID));
         } else {
             cleanup();
             mRequestManager.setZoneId(mZoneId);
@@ -165,7 +161,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
         if (mPresenter != null) {
             mPresenter.load();
         } else {
-            invokeOnLoadFailed(new Exception(ErrorMessages.UNSUPPORTED_ASSET));
+            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.UNSUPPORTED_ASSET));
         }
     }
 
@@ -181,12 +177,12 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
                 }
 
                 @Override
-                public void onError(Exception error) {
+                public void onError(Throwable error) {
                     invokeOnLoadFailed(error);
                 }
             });
         } else {
-            invokeOnLoadFailed(new Exception(ErrorMessages.INVALID_SIGNAL_DATA));
+            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_SIGNAL_DATA));
         }
     }
 
@@ -200,10 +196,10 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
             if (mPresenter != null) {
                 mPresenter.load();
             } else {
-                invokeOnLoadFailed(new Exception(ErrorMessages.UNSUPPORTED_ASSET));
+                invokeOnLoadFailed(new HyBidError(HyBidErrorCode.UNSUPPORTED_ASSET));
             }
         } else {
-            invokeOnLoadFailed(new Exception(ErrorMessages.INVALID_AD));
+            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_AD));
         }
     }
 
@@ -226,7 +222,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
             @Override
             public void onFailure(Throwable error) {
                 Logger.e(TAG, "Request failed: " + error.toString());
-                invokeOnLoadFailed(new Exception(ErrorMessages.INVALID_ASSET));
+                invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ASSET));
             }
         });
     }
@@ -262,7 +258,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
                         if (mPresenter != null) {
                             mPresenter.load();
                         } else {
-                            invokeOnLoadFailed(new Exception(ErrorMessages.UNSUPPORTED_ASSET));
+                            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.UNSUPPORTED_ASSET));
                         }
                     }
 
@@ -273,14 +269,14 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
                         }
 
                         Logger.w(TAG, "onCacheError", error);
-                        invokeOnLoadFailed(new Exception(error));
+                        invokeOnLoadFailed(error);
                     }
                 });
             } else {
-                invokeOnLoadFailed(new Exception(ErrorMessages.INVALID_ASSET));
+                invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ASSET));
             }
         } else {
-            invokeOnLoadFailed(new Exception(ErrorMessages.INVALID_ASSET));
+            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ASSET));
         }
     }
 
@@ -290,15 +286,15 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
         }
     }
 
-    protected void invokeOnLoadFailed(Exception exception) {
-        if (exception != null && !TextUtils.isEmpty(exception.getMessage())) {
-            if (exception.getMessage().contains(ErrorMessages.NO_FILL)) {
+    protected void invokeOnLoadFailed(Throwable exception) {
+        if (exception instanceof HyBidError) {
+            HyBidError hyBidError = (HyBidError) exception;
+            if (hyBidError.getErrorCode() == HyBidErrorCode.NO_FILL) {
                 Logger.w(TAG, exception.getMessage());
             } else {
                 Logger.e(TAG, exception.getMessage());
             }
         }
-
         if (mListener != null) {
             mListener.onRewardedLoadFailed(exception);
         }
@@ -338,7 +334,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     @Override
     public void onRequestSuccess(Ad ad) {
         if (ad == null) {
-            invokeOnLoadFailed(new Exception(ErrorMessages.NULL_AD));
+            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NULL_AD));
         } else {
             mAd = ad;
             renderAd();
@@ -347,7 +343,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
 
     @Override
     public void onRequestFail(Throwable throwable) {
-        invokeOnLoadFailed(new Exception(throwable));
+        invokeOnLoadFailed(throwable);
     }
 
     //------------------------- RewardedVideoPresenter Callbacks -----------------------------------
@@ -359,7 +355,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
 
     @Override
     public void onRewardedError(RewardedPresenter rewardedPresenter) {
-        invokeOnLoadFailed(new Exception(ErrorMessages.ERROR_RENDERING_REWARDED));
+        invokeOnLoadFailed(new HyBidError(HyBidErrorCode.ERROR_RENDERING_REWARDED));
     }
 
     @Override

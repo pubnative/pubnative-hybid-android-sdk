@@ -4,7 +4,6 @@ import net.pubnative.lite.sdk.vpaid.xml.Attribute;
 import net.pubnative.lite.sdk.vpaid.xml.Tag;
 
 public class Extension {
-
     @Attribute
     private String type;
 

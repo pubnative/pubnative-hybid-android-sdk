@@ -176,11 +176,15 @@
 
     <string name="creative_id">Creative ID:</string>
     <string name="impression_id">Impression ID:</string>
+    <string name="error_code">Error code:</string>
     <string name="error">Error:</string>
     <string name="banner_ad_size">Ad Size:</string>
     <string name="request_url">PubNative request url:</string>
     <string name="response">PubNative response:</string>
     <string name="latency">PubNative latency (milliseconds):</string>
+    <string name="sdk_event_report">SDK event report</string>
+    <string name="action_dismiss">Dismiss</string>
+    <string name="event_details">Event details</string>
 
     <string name="nav_standalone">Standalone</string>
     <string name="nav_pre_bid">Pre-Bid</string>

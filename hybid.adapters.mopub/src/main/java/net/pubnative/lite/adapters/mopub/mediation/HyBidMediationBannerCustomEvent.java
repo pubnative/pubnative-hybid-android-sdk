@@ -122,18 +122,25 @@ public class HyBidMediationBannerCustomEvent extends BaseAd implements HyBidAdVi
     @Override
     public void onAdLoaded() {
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_SUCCESS, TAG);
-        mLoadListener.onAdLoaded();
+        if (mLoadListener != null) {
+            mLoadListener.onAdLoaded();
+        }
     }
 
     @Override
     public void onAdLoadFailed(Throwable error) {
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_FAILED, TAG);
-        mLoadListener.onAdLoadFailed(MoPubErrorCode.NETWORK_NO_FILL);
+        if (mLoadListener != null) {
+            mLoadListener.onAdLoadFailed(MoPubErrorCode.NETWORK_NO_FILL);
+        }
     }
 
     @Override
     public void onAdImpression() {
         MoPubLog.log(MoPubLog.AdapterLogEvent.SHOW_SUCCESS, TAG);
+        if (mInteractionListener != null) {
+            mInteractionListener.onAdImpression();
+        }
     }
 
     @Override

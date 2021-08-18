@@ -2,6 +2,8 @@ package net.pubnative.lite.sdk.vpaid.response;
 
 import com.iab.omid.library.pubnativenet.adsession.VerificationScriptResource;
 
+import net.pubnative.lite.sdk.vpaid.models.vast.AdServingId;
+import net.pubnative.lite.sdk.vpaid.models.vast.Category;
 import net.pubnative.lite.sdk.vpaid.models.vast.Tracking;
 
 import java.util.ArrayList;
@@ -27,8 +29,9 @@ public class AdParams {
     private List<String> videoClicks = new ArrayList<>();
     private List<String> endCardClicks = new ArrayList<>();
     private final List<Tracking> events = new ArrayList<>();
-
-    List<VerificationScriptResource> verificationScriptResources = new ArrayList<>();
+    private final List<AdServingId> adServingIds = new ArrayList<>();
+    private final List<Category> adCategories = new ArrayList<>();
+    private final List<VerificationScriptResource> verificationScriptResources = new ArrayList<>();
 
 
     public int getDuration() {
@@ -100,8 +103,7 @@ public class AdParams {
     }
 
     public void addEvents(List<Tracking> events) {
-        if (this.events != null && events != null)
-        {
+        if (this.events != null && events != null) {
             this.events.addAll(events);
         }
     }
@@ -166,7 +168,29 @@ public class AdParams {
         return verificationScriptResources;
     }
 
-    public void setVerificationScriptResources(List<VerificationScriptResource> verificationScriptResources) {
-        this.verificationScriptResources = verificationScriptResources;
+    public void addVerificationScriptResources(List<VerificationScriptResource> verificationScriptResources) {
+        if (verificationScriptResources != null) {
+            this.verificationScriptResources.addAll(verificationScriptResources);
+        }
+    }
+
+    public void addAdServingId(AdServingId adServingId) {
+        if (adServingId != null) {
+            this.adServingIds.add(adServingId);
+        }
+    }
+
+    public List<AdServingId> getAdServingIds() {
+        return adServingIds;
+    }
+
+    public void addAdCategories(List<Category> adCategories) {
+        if (adCategories != null) {
+            this.adCategories.addAll(adCategories);
+        }
+    }
+
+    public List<Category> getAdCategories() {
+        return adCategories;
     }
 }

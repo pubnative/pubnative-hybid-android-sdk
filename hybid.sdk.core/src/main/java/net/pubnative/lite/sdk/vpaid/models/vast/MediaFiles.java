@@ -7,9 +7,30 @@ import java.util.List;
 public class MediaFiles {
 
     @Tag("MediaFile")
-    private List<MediaFile> mediaFileList;
+    private List<MediaFile> mediaFiles;
 
-    public List<MediaFile> getMediaFileList() {
-        return mediaFileList;
+    @Tag("Mezzanine")
+    private List<Mezzanine> mezzanines;
+
+    @Tag("InteractiveCreativeFile")
+    private List<InteractiveCreativeFile> interactiveCreativeFiles;
+
+    @Tag
+    private ClosedCaptionFiles closedCaptionFiles;
+
+    public List<MediaFile> getMediaFiles() {
+        return mediaFiles;
+    }
+
+    public List<Mezzanine> getMezzanines() {
+        return mezzanines;
+    }
+
+    public List<InteractiveCreativeFile> getInteractiveCreativeFiles() {
+        return interactiveCreativeFiles;
+    }
+
+    public ClosedCaptionFiles getClosedCaptionFiles() {
+        return closedCaptionFiles;
     }
 }

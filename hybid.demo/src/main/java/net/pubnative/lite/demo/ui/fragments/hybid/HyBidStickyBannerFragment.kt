@@ -12,18 +12,16 @@ import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
-import net.pubnative.lite.sdk.HyBid
+import net.pubnative.lite.sdk.HyBidError
 import net.pubnative.lite.sdk.models.AdSize
-import net.pubnative.lite.sdk.reporting.ReportingEventBridge
 import net.pubnative.lite.sdk.views.HyBidAdView
 import net.pubnative.lite.sdk.views.PNAdView
-
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
 
-class HyBidStickyBannerFragment : Fragment(), PNAdView.Listener, RadioGroup.OnCheckedChangeListener {
+class HyBidStickyBannerFragment : Fragment(R.layout.fragment_sticky_top_bottom), PNAdView.Listener, RadioGroup.OnCheckedChangeListener {
 
     private val TAG: String = HyBidStickyBannerFragment::class.java.simpleName
 
@@ -36,6 +34,7 @@ class HyBidStickyBannerFragment : Fragment(), PNAdView.Listener, RadioGroup.OnCh
     private lateinit var adSizeSpinner: Spinner
     private lateinit var spinnerAdapter: ArrayAdapter<AdSize>
     private lateinit var errorView: TextView
+    private lateinit var errorCodeView: TextView
     private lateinit var creativeIdView: TextView
 
     private lateinit var radioPosition: RadioGroup
@@ -54,13 +53,11 @@ class HyBidStickyBannerFragment : Fragment(), PNAdView.Listener, RadioGroup.OnCh
             AdSize.SIZE_768x1024,
             AdSize.SIZE_1024x768)
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-            inflater.inflate(R.layout.fragment_sticky_top_bottom, container, false)
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         errorView = view.findViewById(R.id.view_error)
+        errorCodeView = view.findViewById(R.id.view_error_code)
         creativeIdView = view.findViewById(R.id.view_creative_id)
         loadButton = view.findViewById(R.id.button_load)
         hybidBanner = HyBidAdView(activity)
@@ -94,13 +91,6 @@ class HyBidStickyBannerFragment : Fragment(), PNAdView.Listener, RadioGroup.OnCh
         hybidBanner.setAdSize(adSize)
 
         hybidBanner.load(zoneId, mPosition, this)
-
-        val event = ReportingEventBridge("Sticky Banner")
-        event.setAdSize(adSize)
-
-        if (HyBid.getReportingController() != null) {
-            HyBid.getReportingController().reportEvent(event.reportingEvent)
-        }
     }
 
 
@@ -111,12 +101,14 @@ class HyBidStickyBannerFragment : Fragment(), PNAdView.Listener, RadioGroup.OnCh
     }
 
     override fun onAdLoadFailed(error: Throwable?) {
-        error?.message?.let {
-            Log.e(TAG, it)
-            errorView.text = it
+        if (error != null && error is HyBidError) {
+            Log.e(TAG, error.message ?: " - ")
+            errorCodeView.text = error.errorCode.code.toString()
+            errorView.text = error.message ?: " - "
+        } else {
+            errorCodeView.text = " - "
+            errorView.text = " - "
         }
-        displayLogs()
-        creativeIdView.text = ""
     }
 
     override fun onAdImpression() {
