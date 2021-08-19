@@ -92,9 +92,12 @@ public class VastProcessor {
                 Wrapper wrapper = ad.getWrapper();
 
                 if (inLine != null) {
-                    fillAdParams(mContext, inLine, adParams, mParseParams, response, listener);
+                    fillAdParams(mContext, inLine, adParams, mParseParams, response);
+                    if (listener != null) {
+                        listener.onParseSuccess(adParams, response);
+                    }
                 } else if (wrapper != null) {
-                    fillAdParams(mContext, wrapper, adParams, mParseParams, response, listener);
+                    fillAdParams(mContext, wrapper, adParams, mParseParams, response);
 
                     if (unwrapAttempt < UNWRAP_DEPTH) {
                         String adTagUri = wrapper.getVastAdTagURI().getText();
@@ -144,7 +147,7 @@ public class VastProcessor {
         }
     }
 
-    private void fillAdParams(Context context, VastAdSource adSource, AdParams adParams, AdSpotDimensions parseParams, String response, Listener listener) {
+    private void fillAdParams(Context context, VastAdSource adSource, AdParams adParams, AdSpotDimensions parseParams, String response) {
         if (adSource.getErrors() != null && !adSource.getErrors().isEmpty()) {
             List<String> errorLogs = new ArrayList<>();
             for (Error error : adSource.getErrors()) {
@@ -344,24 +347,6 @@ public class VastProcessor {
                         // Do nothing, companion is optional
                         Logger.e(LOG_TAG, e.getMessage());
                     }
-
-                    if (listener != null) {
-                        listener.onParseSuccess(adParams, response);
-                    }
-                } else {
-                    ErrorLog.postError(mContext, VastError.LINEAR);
-                    Logger.e(LOG_TAG, "Parse VAST failed: No Media Files in Linear Ad");
-                    if (listener != null) {
-                        PlayerInfo info = new PlayerInfo("Parse VAST response failed. No Media Files in Linear Ad");
-                        listener.onParseError(info);
-                    }
-                }
-            } else {
-                ErrorLog.postError(mContext, VastError.LINEAR);
-                Logger.e(LOG_TAG, "Parse VAST failed: No Linear Ad received");
-                if (listener != null) {
-                    PlayerInfo info = new PlayerInfo("Parse VAST response failed. No Linear Ad received");
-                    listener.onParseError(info);
                 }
             }
         }

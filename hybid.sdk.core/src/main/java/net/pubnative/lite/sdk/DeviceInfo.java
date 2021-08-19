@@ -124,14 +124,11 @@ public class DeviceInfo {
                 @Override
                 public void onHyBidAdvertisingIdFinish(String advertisingId, Boolean limitTracking) {
                     mLimitTracking = limitTracking;
-                    if (TextUtils.isEmpty(advertisingId)) {
-                        mAdvertisingId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
-                    } else {
+                    if (!TextUtils.isEmpty(advertisingId)) {
                         mAdvertisingId = advertisingId;
+                        mAdvertisingIdMd5 = PNCrypto.md5(mAdvertisingId);
+                        mAdvertisingIdSha1 = PNCrypto.sha1(mAdvertisingId);
                     }
-
-                    mAdvertisingIdMd5 = PNCrypto.md5(mAdvertisingId);
-                    mAdvertisingIdSha1 = PNCrypto.sha1(mAdvertisingId);
 
                     if (mListener != null) {
                         mListener.onInfoLoaded();

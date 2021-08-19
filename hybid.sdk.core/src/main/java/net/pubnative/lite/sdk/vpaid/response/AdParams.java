@@ -87,7 +87,9 @@ public class AdParams {
     }
 
     public void setImpressions(List<String> impressions) {
-        this.impressions.addAll(impressions);
+        if (impressions != null) {
+            this.impressions.addAll(impressions);
+        }
     }
 
     public List<String> getCompanionCreativeViewEvents() {
@@ -95,7 +97,9 @@ public class AdParams {
     }
 
     public void setCompanionCreativeViewEvents(List<String> companionCreativeViewEvents) {
-        this.companionCreativeViewEvents.addAll(companionCreativeViewEvents);
+        if (companionCreativeViewEvents != null) {
+            this.companionCreativeViewEvents.addAll(companionCreativeViewEvents);
+        }
     }
 
     public List<Tracking> getEvents() {
@@ -103,7 +107,7 @@ public class AdParams {
     }
 
     public void addEvents(List<Tracking> events) {
-        if (this.events != null && events != null) {
+        if (events != null) {
             this.events.addAll(events);
         }
     }
@@ -113,7 +117,9 @@ public class AdParams {
     }
 
     public void setVideoClicks(List<String> videoClicks) {
-        this.videoClicks = videoClicks;
+        if (videoClicks != null) {
+            this.videoClicks.addAll(videoClicks);
+        }
     }
 
     public List<String> getEndCardClicks() {
@@ -121,7 +127,9 @@ public class AdParams {
     }
 
     public void setEndCardClicks(List<String> endCardClicks) {
-        this.endCardClicks = endCardClicks;
+        if (endCardClicks != null) {
+            this.endCardClicks.addAll(endCardClicks);
+        }
     }
 
     public String getVideoRedirectUrl() {
@@ -137,7 +145,9 @@ public class AdParams {
     }
 
     public void setVideoFileUrlsList(List<String> videoFileUrlsList) {
-        this.videoFileUrlsList = videoFileUrlsList;
+        if (videoFileUrlsList != null) {
+            this.videoFileUrlsList.addAll(videoFileUrlsList);
+        }
     }
 
     public List<String> getEndCardUrlList() {
@@ -145,7 +155,9 @@ public class AdParams {
     }
 
     public void setEndCardUrlList(List<String> endCardUrlList) {
-        this.endCardUrlList = endCardUrlList;
+        if (endCardUrlList != null) {
+            this.endCardUrlList.addAll(endCardUrlList);
+        }
     }
 
     public String getSkipTime() {
