@@ -190,18 +190,22 @@ public class VastProcessor {
             for (Extension extension : adSource.getExtensions().getExtensions()) {
                 if (!TextUtils.isEmpty(extension.getType()) && extension.getType().equals(EXTENSION_TYPE_AD_VERIFICATION)) {
                     AdVerifications adVerifications = extension.getAdVerifications();
-                    if (adVerifications != null) {
+                    if (adVerifications != null && adVerifications.getVerificationList() != null) {
                         for (Verification verification : adVerifications.getVerificationList()) {
                             try {
                                 if (verification.getJavaScriptResources() != null) {
                                     for (JavaScriptResource javaScriptResource : verification.getJavaScriptResources()) {
                                         if (!TextUtils.isEmpty(javaScriptResource.getText())) {
                                             final URL url = new URL(javaScriptResource.getText().trim());
-                                            final String vendorKey = verification.getVendor();
-                                            final String params = verification.getVerificationParameters().getText();
-                                            VerificationScriptResource resource = VerificationScriptResource.
-                                                    createVerificationScriptResourceWithParameters(vendorKey, url, params);
-                                            verificationScriptResources.add(resource);
+                                            if (!TextUtils.isEmpty(verification.getVendor())
+                                                    && verification.getVerificationParameters() != null
+                                                    && !TextUtils.isEmpty(verification.getVerificationParameters().getText())) {
+                                                final String vendorKey = verification.getVendor();
+                                                final String params = verification.getVerificationParameters().getText();
+                                                VerificationScriptResource resource = VerificationScriptResource.
+                                                        createVerificationScriptResourceWithParameters(vendorKey, url, params);
+                                                verificationScriptResources.add(resource);
+                                            }
                                         }
                                     }
                                 }
@@ -215,18 +219,22 @@ public class VastProcessor {
         }
 
         AdVerifications adVerifications = adSource.getAdVerifications();
-        if (adVerifications != null) {
+        if (adVerifications != null && adVerifications.getVerificationList() != null) {
             for (Verification verification : adVerifications.getVerificationList()) {
                 try {
                     if (verification.getJavaScriptResources() != null) {
                         for (JavaScriptResource javaScriptResource : verification.getJavaScriptResources()) {
                             if (!TextUtils.isEmpty(javaScriptResource.getText())) {
                                 final URL url = new URL(javaScriptResource.getText().trim());
-                                final String vendorKey = verification.getVendor();
-                                final String params = verification.getVerificationParameters().getText();
-                                VerificationScriptResource resource = VerificationScriptResource.
-                                        createVerificationScriptResourceWithParameters(vendorKey, url, params);
-                                verificationScriptResources.add(resource);
+                                if (!TextUtils.isEmpty(verification.getVendor())
+                                        && verification.getVerificationParameters() != null
+                                        && !TextUtils.isEmpty(verification.getVerificationParameters().getText())) {
+                                    final String vendorKey = verification.getVendor();
+                                    final String params = verification.getVerificationParameters().getText();
+                                    VerificationScriptResource resource = VerificationScriptResource.
+                                            createVerificationScriptResourceWithParameters(vendorKey, url, params);
+                                    verificationScriptResources.add(resource);
+                                }
                             }
                         }
                     }

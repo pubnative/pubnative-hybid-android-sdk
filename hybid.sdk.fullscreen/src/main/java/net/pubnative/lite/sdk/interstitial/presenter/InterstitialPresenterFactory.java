@@ -47,7 +47,7 @@ public class InterstitialPresenterFactory {
     public InterstitialPresenter createInterstitialPresenter(
             Ad ad,
             InterstitialPresenter.Listener interstitialPresenterListener) {
-        return createInterstitialPresenter(ad, 0, interstitialPresenterListener);
+        return createInterstitialPresenter(ad, -1, interstitialPresenterListener);
     }
 
     public InterstitialPresenter createInterstitialPresenter(

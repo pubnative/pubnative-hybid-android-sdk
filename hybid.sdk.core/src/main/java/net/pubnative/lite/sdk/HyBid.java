@@ -82,7 +82,7 @@ public class HyBid {
     private static String sKeywords;
     private static String sBundleId;
     private static Boolean isCloseVideoAfterFinish = false;
-    private static Integer sInterstitialSkipOffset = 0;
+    private static Integer sInterstitialSkipOffset = -1;
     private static String sIabCategory;
     private static String sIabSubcategory;
     private static String sAppVersion;

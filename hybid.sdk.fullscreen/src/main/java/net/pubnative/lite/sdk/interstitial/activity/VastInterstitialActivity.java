@@ -27,8 +27,8 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
         hideInterstitialCloseButton();
 
         if (getAd() != null) {
-            mSkipOffset = getIntent().getIntExtra(EXTRA_SKIP_OFFSET, 0);
-            if (mSkipOffset > 0) {
+            mSkipOffset = getIntent().getIntExtra(EXTRA_SKIP_OFFSET, -1);
+            if (mSkipOffset != 0) {
                 mIsSkippable = false;
             }
             mVideoAd = new VideoAd(this, getAd().getVast(), true, true);

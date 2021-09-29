@@ -83,7 +83,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     private Ad mAd;
     private JSONObject mPlacementParams;
     private boolean mReady = false;
-    private int mSkipOffset = 0;
+    private int mSkipOffset = -1;
     private boolean mIsDestroyed = false;
     private long mInitialLoadTime = -1;
     private long mInitialRenderTime = -1;
