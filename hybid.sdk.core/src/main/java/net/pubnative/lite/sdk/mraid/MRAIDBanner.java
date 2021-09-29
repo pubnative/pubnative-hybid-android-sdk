@@ -68,6 +68,7 @@ public class MRAIDBanner extends MRAIDView {
         super.close();
     }
 
+    @Deprecated
     @Override
     protected void expand(String url) {
         // The only time it is valid to call expand on a banner ad is
@@ -95,6 +96,7 @@ public class MRAIDBanner extends MRAIDView {
             if (isViewable) {
                 fireViewableChangeEvent();
             }
+            fireExposureChangeEvent();
         }
     }
 }

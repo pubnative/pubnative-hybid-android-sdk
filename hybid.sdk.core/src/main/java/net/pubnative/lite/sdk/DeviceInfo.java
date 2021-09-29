@@ -30,6 +30,7 @@ import android.net.ConnectivityManager;
 import android.os.Build;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.webkit.WebView;
 
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.Logger;
@@ -86,6 +87,7 @@ public class DeviceInfo {
 
     private static final String TAG = DeviceInfo.class.getSimpleName();
     private final Context mContext;
+    private String mUserAgent;
     private String mAdvertisingId;
     private String mAdvertisingIdMd5;
     private String mAdvertisingIdSha1;
@@ -116,6 +118,7 @@ public class DeviceInfo {
     public void initialize(Listener listener) {
         mListener = listener;
         fetchAdvertisingId();
+        fetchUserAgent();
     }
 
     private void fetchAdvertisingId() {
@@ -140,6 +143,14 @@ public class DeviceInfo {
             if (mListener != null) {
                 mListener.onInfoLoaded();
             }
+        }
+    }
+
+    public void fetchUserAgent(){
+        try {
+            mUserAgent = new WebView(mContext).getSettings().getUserAgentString();
+        } catch (RuntimeException runtimeException){
+            Logger.e(TAG, runtimeException.getMessage());
         }
     }
 
@@ -226,5 +237,9 @@ public class DeviceInfo {
 
     public String getSoundSetting() {
         return soundSetting;
+    }
+
+    public String getUserAgent(){
+        return mUserAgent;
     }
 }

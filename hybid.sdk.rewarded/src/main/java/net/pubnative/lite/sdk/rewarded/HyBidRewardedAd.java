@@ -28,6 +28,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import net.pubnative.lite.sdk.AdCache;
+import net.pubnative.lite.sdk.DiagnosticConstants;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
@@ -41,11 +42,17 @@ import net.pubnative.lite.sdk.rewarded.presenter.RewardedPresenterFactory;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.SignalDataProcessor;
 import net.pubnative.lite.sdk.utils.MarkupUtils;
+import net.pubnative.lite.sdk.utils.json.JsonOperations;
 import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.vast.VastUrlUtils;
+
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class HyBidRewardedAd implements RequestManager.RequestListener, RewardedPresenter.Listener {
     private static final String TAG = HyBidRewardedAd.class.getSimpleName();
@@ -73,8 +80,11 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     private String mZoneId;
     private Ad mAd;
     private SignalDataProcessor mSignalDataProcessor;
+    private JSONObject mPlacementParams;
     private boolean mReady = false;
     private boolean mIsDestroyed = false;
+    private long mInitialLoadTime = -1;
+    private long mInitialRenderTime = -1;
 
     public HyBidRewardedAd(Activity activity, Listener listener) {
         this((Context) activity, "", listener);
@@ -94,16 +104,21 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
         mListener = listener;
         mAdCache = HyBid.getAdCache();
         mVideoCache = HyBid.getVideoAdCache();
+        mPlacementParams = new JSONObject();
         mRequestManager.setIntegrationType(IntegrationType.STANDALONE);
+        JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_ZONE_ID, mZoneId);
     }
 
     public void load() {
         if (!HyBid.isInitialized()) {
+            mInitialLoadTime = System.currentTimeMillis();
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NOT_INITIALISED));
         } else if (TextUtils.isEmpty(mZoneId)) {
+            mInitialLoadTime = System.currentTimeMillis();
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ZONE_ID));
         } else {
             cleanup();
+            mInitialLoadTime = System.currentTimeMillis();
             mRequestManager.setZoneId(mZoneId);
             mRequestManager.setRequestListener(this);
             mRequestManager.requestAd();
@@ -112,6 +127,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
 
     public void show() {
         if (mPresenter != null && mReady) {
+            mInitialRenderTime = System.currentTimeMillis();
             mPresenter.show();
         } else {
             Logger.e(TAG, "Can't display ad. Rewarded ad not ready.");
@@ -133,6 +149,9 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
 
     private void cleanup() {
         mReady = false;
+        mPlacementParams = new JSONObject();
+        mInitialLoadTime = -1;
+        mInitialRenderTime = -1;
         if (mPresenter != null) {
             mPresenter.destroy();
             mPresenter = null;
@@ -154,6 +173,24 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
 
     public Integer getBidPoints() {
         return mAd != null ? mAd.getECPM() : 0;
+    }
+
+    public JSONObject getPlacementParams() {
+        JSONObject finalParams = new JSONObject();
+        JsonOperations.mergeJsonObjects(finalParams, mPlacementParams);
+        if (mRequestManager != null) {
+            JSONObject requestManagerParams = mRequestManager.getPlacementParams();
+            if (requestManagerParams != null) {
+                JsonOperations.mergeJsonObjects(finalParams, requestManagerParams);
+            }
+        }
+        if (mPresenter != null) {
+            JSONObject adPresenterParams = mPresenter.getPlacementParams();
+            if (adPresenterParams != null) {
+                JsonOperations.mergeJsonObjects(finalParams, adPresenterParams);
+            }
+        }
+        return finalParams;
     }
 
     private void renderAd() {
@@ -191,6 +228,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
             mAd = ad;
             if (!mAd.getZoneId().equalsIgnoreCase(mZoneId)) {
                 mZoneId = mAd.getZoneId();
+                JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_ZONE_ID, mZoneId);
             }
             mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, this);
             if (mPresenter != null) {
@@ -211,7 +249,13 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
 
         String url = VastUrlUtils.formatURL(adValue);
 
-        PNHttpClient.makeRequest(mContext, url, null, null, new PNHttpClient.Listener() {
+        Map<String, String> headers = new HashMap<>();
+        String userAgent = HyBid.getDeviceInfo().getUserAgent();
+        if (!TextUtils.isEmpty(userAgent)){
+            headers.put("User-Agent", userAgent);
+        }
+
+        PNHttpClient.makeRequest(mContext, url, headers, null, new PNHttpClient.Listener() {
             @Override
             public void onSuccess(String response) {
                 if (!TextUtils.isEmpty(response)) {
@@ -239,6 +283,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
             if (MarkupUtils.isVastXml(adValue)) {
                 if (TextUtils.isEmpty(mZoneId)) {
                     mZoneId = "4";
+                    JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_ZONE_ID, mZoneId);
                 }
                 assetGroupId = 15;
                 type = Ad.AdType.VIDEO;
@@ -281,12 +326,20 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     }
 
     protected void invokeOnLoadFinished() {
+        if (mInitialLoadTime != -1) {
+            JsonOperations.putJsonLong(mPlacementParams, DiagnosticConstants.KEY_TIME_TO_LOAD,
+                    System.currentTimeMillis() - mInitialLoadTime);
+        }
         if (mListener != null) {
             mListener.onRewardedLoaded();
         }
     }
 
     protected void invokeOnLoadFailed(Throwable exception) {
+        if (mInitialLoadTime != -1) {
+            JsonOperations.putJsonLong(mPlacementParams, DiagnosticConstants.KEY_TIME_TO_LOAD_FAILED,
+                    System.currentTimeMillis() - mInitialLoadTime);
+        }
         if (exception instanceof HyBidError) {
             HyBidError hyBidError = (HyBidError) exception;
             if (hyBidError.getErrorCode() == HyBidErrorCode.NO_FILL) {
@@ -360,6 +413,10 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
 
     @Override
     public void onRewardedOpened(RewardedPresenter rewardedPresenter) {
+        if (mInitialRenderTime != -1) {
+            JsonOperations.putJsonLong(mPlacementParams, DiagnosticConstants.KEY_RENDER_TIME,
+                    System.currentTimeMillis() - mInitialRenderTime);
+        }
         invokeOnOpened();
     }
 

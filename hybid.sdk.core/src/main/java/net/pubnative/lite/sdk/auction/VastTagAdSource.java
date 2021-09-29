@@ -3,11 +3,15 @@ package net.pubnative.lite.sdk.auction;
 import android.content.Context;
 import android.text.TextUtils;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.vast.VastUrlUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class VastTagAdSource implements AdSource {
     private static final String TAG = VastTagAdSource.class.getSimpleName();
@@ -24,8 +28,14 @@ public class VastTagAdSource implements AdSource {
     @Override
     public void fetchAd(final Listener listener) {
         if (mConfig != null && !TextUtils.isEmpty(mConfig.getVastTagUrl())) {
+            Map<String, String> headers = new HashMap<>();
+            String userAgent = HyBid.getDeviceInfo().getUserAgent();
+            if (!TextUtils.isEmpty(userAgent)){
+                headers.put("User-Agent", userAgent);
+            }
+
             PNHttpClient.makeRequest(mContext, processTagUrl(mConfig.getVastTagUrl()),
-                    null, null, false,
+                    headers, null, false,
                     new PNHttpClient.Listener() {
                         @Override
                         public void onSuccess(String response) {

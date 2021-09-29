@@ -32,8 +32,11 @@ import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
+import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.UrlHandler;
+
+import org.json.JSONObject;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
@@ -75,6 +78,11 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
     }
 
     @Override
+    public void setVideoListener(VideoListener listener) {
+        //Do nothing. No need for video listener in the MRAID presenter
+    }
+
+    @Override
     public Ad getAd() {
         return mAd;
     }
@@ -113,6 +121,11 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
         if (mMRAIDBanner != null) {
             mMRAIDBanner.stopAdSession();
         }
+    }
+
+    @Override
+    public JSONObject getPlacementParams() {
+        return null;
     }
 
     @Override

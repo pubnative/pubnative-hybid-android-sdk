@@ -30,6 +30,8 @@ import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
 import net.pubnative.lite.sdk.rewarded.activity.VastRewardedActivity;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 
+import org.json.JSONObject;
+
 public class VastRewardedPresenter implements RewardedPresenter, HyBidRewardedBroadcastReceiver.Listener {
     private final Context mContext;
     private final Ad mAd;
@@ -104,6 +106,11 @@ public class VastRewardedPresenter implements RewardedPresenter, HyBidRewardedBr
         mListener = null;
         mIsDestroyed = true;
         mReady = false;
+    }
+
+    @Override
+    public JSONObject getPlacementParams() {
+        return null;
     }
 
     //------------------------- Rewarded Broadcast Receiver Callbacks ------------------------------

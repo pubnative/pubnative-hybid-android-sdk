@@ -34,6 +34,8 @@ public interface VideoAdController {
 
     List<HyBidViewabilityFriendlyObstruction> getViewabilityFriendlyObstructions();
 
+    int getProgress();
+
     void toggleMute();
 
     void setVolume(boolean mute);

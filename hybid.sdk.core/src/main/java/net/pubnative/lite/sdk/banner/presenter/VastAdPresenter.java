@@ -32,6 +32,7 @@ import android.widget.RelativeLayout;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
+import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.VideoAd;
@@ -39,12 +40,15 @@ import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdListener;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
 
+import org.json.JSONObject;
+
 public class VastAdPresenter implements AdPresenter {
     private final Context mContext;
     private final Ad mAd;
 
     private Listener mListener;
     private ImpressionListener mImpressionListener;
+    private VideoListener mVideoListener;
     private boolean mIsDestroyed;
     private boolean mLoaded = false;
 
@@ -65,6 +69,11 @@ public class VastAdPresenter implements AdPresenter {
     @Override
     public void setImpressionListener(ImpressionListener listener) {
         mImpressionListener = listener;
+    }
+
+    @Override
+    public void setVideoListener(VideoListener listener) {
+        mVideoListener = listener;
     }
 
     @Override
@@ -110,6 +119,11 @@ public class VastAdPresenter implements AdPresenter {
     @Override
     public void stopTracking() {
         mVideoAd.dismiss();
+    }
+
+    @Override
+    public JSONObject getPlacementParams() {
+        return null;
     }
 
     private View buildView() {
@@ -164,24 +178,34 @@ public class VastAdPresenter implements AdPresenter {
 
         @Override
         public void onAdDidReachEnd() {
-
-        }
-
-        @Override
-        public void onAdDismissed() {
-            if (mContentInfo != null) {
-                mContentInfo.setVisibility(View.GONE);
+            if (mVideoListener != null) {
+                mVideoListener.onVideoFinished();
             }
         }
 
         @Override
-        public void onAdExpired() {
+        public void onAdDismissed() {
+            onAdDismissed(-1);
+        }
 
+        @Override
+        public void onAdDismissed(int progressPercentage) {
+            if (mContentInfo != null) {
+                mContentInfo.setVisibility(View.GONE);
+            }
+            if (mVideoListener != null) {
+                mVideoListener.onVideoDismissed(progressPercentage);
+            }
         }
 
         @Override
         public void onAdStarted() {
-            mImpressionListener.onImpression();
+            if (mImpressionListener != null) {
+                mImpressionListener.onImpression();
+            }
+            if (mVideoListener != null) {
+                mVideoListener.onVideoStarted();
+            }
         }
     };
 }

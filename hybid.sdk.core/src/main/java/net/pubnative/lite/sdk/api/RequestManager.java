@@ -28,7 +28,7 @@ import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.config.ConfigManager;
-import net.pubnative.lite.sdk.api.PNApiClient;
+import net.pubnative.lite.sdk.DiagnosticConstants;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdRequestFactory;
@@ -40,10 +40,13 @@ import net.pubnative.lite.sdk.utils.HeaderBiddingUtils;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNInitializationHelper;
 import net.pubnative.lite.sdk.utils.PrebidUtils;
+import net.pubnative.lite.sdk.utils.json.JsonOperations;
 import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
+
+import org.json.JSONObject;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
@@ -68,6 +71,7 @@ public class RequestManager {
     private RequestListener mRequestListener;
     private boolean mIsDestroyed;
     private AdSize mAdSize;
+    private JSONObject mPlacementParams;
     private boolean mIsRewarded = false;
 
     public RequestManager() {
@@ -87,7 +91,10 @@ public class RequestManager {
         mReportingController = reportingController;
         mAdRequestFactory = adRequestFactory;
         mInitializationHelper = initializationHelper;
+        mPlacementParams = new JSONObject();
         mAdSize = AdSize.SIZE_320x50;
+        JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_AD_SIZE, mAdSize.toString());
+        JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_INTEGRATION_TYPE, IntegrationType.HEADER_BIDDING.getCode());
         mConfigManager = configManager;
     }
 
@@ -101,6 +108,11 @@ public class RequestManager {
 
     public void setAdSize(AdSize adSize) {
         mAdSize = adSize;
+        if (adSize != null) {
+            JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_AD_SIZE, adSize.toString());
+        } else {
+            JsonOperations.removeJsonValue(mPlacementParams, DiagnosticConstants.KEY_AD_SIZE);
+        }
     }
 
     public void requestAd() {
@@ -127,9 +139,10 @@ public class RequestManager {
             return;
         }
 
-        if (mConfigManager != null) {
+        //Disable refresh until we have a proper mechanism to handle apps with no config.
+        /*if (mConfigManager != null) {
             mConfigManager.refreshConfig();
-        }
+        }*/
 
         mAdRequestFactory.createAdRequest(mZoneId, getAdSize(), isRewarded(), new AdRequestFactory.Callback() {
             @Override
@@ -267,6 +280,7 @@ public class RequestManager {
     public void setIntegrationType(IntegrationType integrationType) {
         if (mAdRequestFactory != null) {
             mAdRequestFactory.setIntegrationType(integrationType);
+            JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_INTEGRATION_TYPE, integrationType.getCode());
         }
     }
 
@@ -281,5 +295,17 @@ public class RequestManager {
 
     public boolean isRewarded() {
         return mIsRewarded;
+    }
+
+    public JSONObject getPlacementParams() {
+        JSONObject finalParams = new JSONObject();
+        JsonOperations.mergeJsonObjects(finalParams, mPlacementParams);
+        if (mApiClient != null) {
+            JSONObject apiClientParams = mApiClient.getPlacementParams();
+            if (apiClientParams != null) {
+                JsonOperations.mergeJsonObjects(finalParams, apiClientParams);
+            }
+        }
+        return finalParams;
     }
 }

@@ -30,12 +30,15 @@ import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.DisplayManager;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.UserDataManager;
+import net.pubnative.lite.sdk.config.ConfigManager;
 import net.pubnative.lite.sdk.core.BuildConfig;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNAsyncUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -52,18 +55,20 @@ public class AdRequestFactory {
     private DeviceInfo mDeviceInfo;
     private HyBidLocationManager mLocationManager;
     private UserDataManager mUserDataManager;
+    private ConfigManager mConfigManager;
     private final DisplayManager mDisplayManager;
     private IntegrationType mIntegrationType = IntegrationType.HEADER_BIDDING;
     private boolean mIsRewarded;
 
     public AdRequestFactory() {
-        this(HyBid.getDeviceInfo(), HyBid.getLocationManager(), HyBid.getUserDataManager(), new DisplayManager());
+        this(HyBid.getDeviceInfo(), HyBid.getLocationManager(), HyBid.getUserDataManager(), HyBid.getConfigManager(), new DisplayManager());
     }
 
-    AdRequestFactory(DeviceInfo deviceInfo, HyBidLocationManager locationManager, UserDataManager userDataManager, DisplayManager displayManager) {
+    AdRequestFactory(DeviceInfo deviceInfo, HyBidLocationManager locationManager, UserDataManager userDataManager, ConfigManager configManager, DisplayManager displayManager) {
         mDeviceInfo = deviceInfo;
         mLocationManager = locationManager;
         mUserDataManager = userDataManager;
+        mConfigManager = configManager;
         mDisplayManager = displayManager;
     }
 
@@ -166,6 +171,16 @@ public class AdRequestFactory {
 
         adRequest.mf = getDefaultMetaFields();
 
+        String protocols = getSupportedProtocols();
+        if (!TextUtils.isEmpty(protocols)) {
+            adRequest.protocol = protocols;
+        }
+
+        String apis = getSupportedApis();
+        if (!TextUtils.isEmpty(apis)) {
+            adRequest.api = apis;
+        }
+
         adRequest.displaymanager = mDisplayManager.getDisplayManager();
         adRequest.displaymanagerver = mDisplayManager.getDisplayManagerVersion(integrationType);
 
@@ -217,5 +232,67 @@ public class AdRequestFactory {
                 APIAsset.RATING,
                 APIAsset.DESCRIPTION};
         return TextUtils.join(",", assetFields);
+    }
+
+    private String getSupportedProtocols() {
+        List<String> supportedProtocols = new ArrayList<>();
+        supportedProtocols.add(Protocol.VAST_1_0);
+        supportedProtocols.add(Protocol.VAST_2_0);
+        supportedProtocols.add(Protocol.VAST_3_0);
+        supportedProtocols.add(Protocol.VAST_1_0_WRAPPER);
+        supportedProtocols.add(Protocol.VAST_2_0_WRAPPER);
+        supportedProtocols.add(Protocol.VAST_3_0_WRAPPER);
+        supportedProtocols.add(Protocol.VAST_4_0);
+        supportedProtocols.add(Protocol.VAST_4_0_WRAPPER);
+        supportedProtocols.add(Protocol.VAST_4_1);
+        supportedProtocols.add(Protocol.VAST_4_1_WRAPPER);
+        supportedProtocols.add(Protocol.VAST_4_2);
+        supportedProtocols.add(Protocol.VAST_4_2_WRAPPER);
+
+        List<String> configProtocols = new ArrayList<>();
+        if (mConfigManager != null
+                && mConfigManager.getConfig() != null
+                && mConfigManager.getConfig().app_config != null
+                && mConfigManager.getConfig().app_config.enabled_protocols != null) {
+            List<String> protocols = mConfigManager.getConfig().app_config.enabled_protocols;
+
+            for (String protocol : protocols) {
+                //Check if the protocol is supported by the SDK version
+                if (supportedProtocols.contains(protocol)) {
+                    configProtocols.add(protocol);
+                }
+            }
+
+            return TextUtils.join(",", configProtocols.toArray(new String[0]));
+        } else {
+            return TextUtils.join(",", supportedProtocols.toArray(new String[0]));
+        }
+    }
+
+    private String getSupportedApis() {
+        List<String> supportedApis = new ArrayList<>();
+        supportedApis.add(Api.MRAID_1);
+        supportedApis.add(Api.MRAID_2);
+        supportedApis.add(Api.MRAID_3);
+        supportedApis.add(Api.OMID_1);
+
+        List<String> configApis = new ArrayList<>();
+        if (mConfigManager != null
+                && mConfigManager.getConfig() != null
+                && mConfigManager.getConfig().app_config != null
+                && mConfigManager.getConfig().app_config.enabled_apis != null) {
+            List<String> apis = mConfigManager.getConfig().app_config.enabled_apis;
+
+            for (String api : apis) {
+                //Check if the protocol is supported by the SDK version
+                if (supportedApis.contains(api)) {
+                    configApis.add(api);
+                }
+            }
+
+            return TextUtils.join(",", configApis.toArray(new String[0]));
+        } else {
+            return TextUtils.join(",", supportedApis.toArray(new String[0]));
+        }
     }
 }

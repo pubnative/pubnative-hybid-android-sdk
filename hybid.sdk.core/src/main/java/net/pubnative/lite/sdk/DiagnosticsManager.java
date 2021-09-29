@@ -8,8 +8,12 @@ import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.utils.Logger;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Map;
 
 public class DiagnosticsManager {
     private static final String TAG = DiagnosticsManager.class.getSimpleName();
@@ -107,6 +111,27 @@ public class DiagnosticsManager {
         logBuilder.append("\n-----------------------------------------------------------------");
 
         return logBuilder.toString();
+    }
+
+    public static String generatePlacementDiagnosticsLog(Context context, JSONObject placementParams) {
+        StringBuilder logBuilder = new StringBuilder();
+
+        logBuilder.append("\nHyBid Placement Diagnostics Log:\n\n");
+        if (placementParams != null && placementParams.length() != 0) {
+            try {
+                logBuilder.append(placementParams.toString(2));
+                logBuilder.append("\n-----------------------------------------------------------------");
+            } catch (JSONException jsonException) {
+                Logger.e(TAG, "Error parsing placement params: ", jsonException);
+                logBuilder.append("Placement data could not be loaded");
+                logBuilder.append("\n-----------------------------------------------------------------");
+            }
+        }
+        return logBuilder.toString();
+    }
+
+    public static void printPlacementDiagnosticsLog(Context context, JSONObject placementParams) {
+        Logger.d(TAG, generatePlacementDiagnosticsLog(context, placementParams));
     }
 
     private static String getAvailableFormats() {

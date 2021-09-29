@@ -34,9 +34,11 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
+import net.pubnative.lite.sdk.DiagnosticConstants;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
+import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.auction.AdSource;
@@ -57,13 +59,18 @@ import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.MarkupUtils;
 import net.pubnative.lite.sdk.utils.SignalDataProcessor;
 import net.pubnative.lite.sdk.utils.ViewUtils;
+import net.pubnative.lite.sdk.utils.json.JsonOperations;
 import net.pubnative.lite.sdk.vpaid.vast.VastUrlUtils;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 
-public class HyBidAdView extends RelativeLayout implements RequestManager.RequestListener, AdPresenter.Listener, AdPresenter.ImpressionListener, Auction.Listener {
+public class HyBidAdView extends RelativeLayout implements RequestManager.RequestListener, AdPresenter.Listener, AdPresenter.ImpressionListener, VideoListener, Auction.Listener {
 
     private static final String TAG = HyBidAdView.class.getSimpleName();
     private Position mPosition;
@@ -85,6 +92,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
 
     private RequestManager mRequestManager;
     protected HyBidAdView.Listener mListener;
+    protected VideoListener mVideoListener;
     private AdPresenter mPresenter;
     protected Ad mAd;
 
@@ -93,6 +101,9 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     private static String mAdFormat = Reporting.AdFormat.BANNER;
     private Auction mAuction;
     private SignalDataProcessor mSignalDataProcessor;
+    private JSONObject mPlacementParams;
+    private long mInitialLoadTime = -1;
+    private long mInitialRenderTime = -1;
 
     public HyBidAdView(Context context) {
         super(context);
@@ -121,6 +132,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         }
         mRequestManager = requestManager;
         mRequestManager.setIntegrationType(IntegrationType.STANDALONE);
+        mPlacementParams = new JSONObject();
         mAuctionResponses = new PriorityQueue<>();
     }
 
@@ -129,8 +141,6 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     }
 
     public void load(String zoneId, Position position, HyBidAdView.Listener listener) {
-        cleanup();
-        mListener = listener;
         mPosition = position;
         load(zoneId, listener);
     }
@@ -139,9 +149,11 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         mListener = listener;
         if (HyBid.isInitialized()) {
             cleanup();
+            mInitialLoadTime = System.currentTimeMillis();
             if (TextUtils.isEmpty(zoneId)) {
                 invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ZONE_ID));
             } else {
+                JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_ZONE_ID, zoneId);
                 ConfigManager configManager = HyBid.getConfigManager();
                 if (configManager != null && configManager.getConfig() != null
                         && configManager.getConfig().placement_info != null
@@ -183,6 +195,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
                 }
             }
         } else {
+            mInitialLoadTime = System.currentTimeMillis();
             Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before attempting a request");
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NOT_INITIALISED));
         }
@@ -193,7 +206,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     }
 
     public void show(View view, Position position) {
-
+        JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_AD_POSITION, position.name());
         if (mWindowManager == null) {
             mWindowManager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
             WindowManager.LayoutParams localLayoutParams = new WindowManager.LayoutParams();
@@ -225,12 +238,16 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
             mWindowManager.addView(mContainer, localLayoutParams);
         }
 
-
         if (autoShowOnLoad) {
             invokeOnLoadFinished();
         }
 
         startTracking();
+
+        if (mInitialRenderTime != -1) {
+            JsonOperations.putJsonLong(mPlacementParams, DiagnosticConstants.KEY_RENDER_TIME,
+                    System.currentTimeMillis() - mInitialRenderTime);
+        }
 
         invokeOnImpression();
     }
@@ -250,6 +267,9 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         removeAllViews();
 
         mAd = null;
+        mPlacementParams = new JSONObject();
+        mInitialLoadTime = -1;
+        mInitialRenderTime = -1;
 
         if (mPresenter != null) {
             mPresenter.destroy();
@@ -280,6 +300,24 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         return mAd != null ? mAd.getECPM() : 0;
     }
 
+    public JSONObject getPlacementParams() {
+        JSONObject finalParams = new JSONObject();
+        JsonOperations.mergeJsonObjects(finalParams, mPlacementParams);
+        if (mRequestManager != null) {
+            JSONObject requestManagerParams = mRequestManager.getPlacementParams();
+            if (requestManagerParams != null) {
+                JsonOperations.mergeJsonObjects(finalParams, requestManagerParams);
+            }
+        }
+        if (mPresenter != null) {
+            JSONObject adPresenterParams = mPresenter.getPlacementParams();
+            if (adPresenterParams != null) {
+                JsonOperations.mergeJsonObjects(finalParams, adPresenterParams);
+            }
+        }
+        return finalParams;
+    }
+
     public boolean isAutoShowOnLoad() {
         return autoShowOnLoad;
     }
@@ -297,6 +335,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     }
 
     protected AdPresenter createPresenter() {
+        mInitialRenderTime = System.currentTimeMillis();
         return new BannerPresenterFactory(getContext())
                 .createPresenter(mAd, this, this);
     }
@@ -305,6 +344,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         //Banner
         mPresenter = createPresenter();
         if (mPresenter != null) {
+            mPresenter.setVideoListener(this);
             mPresenter.load();
         } else {
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.UNSUPPORTED_ASSET));
@@ -352,7 +392,14 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
 
     public void renderVideoTag(final String adValue, final Listener listener) {
         String url = VastUrlUtils.formatURL(adValue);
-        PNHttpClient.makeRequest(getContext(), url, null,
+
+        Map<String, String> headers = new HashMap<>();
+        String userAgent = HyBid.getDeviceInfo().getUserAgent();
+        if (!TextUtils.isEmpty(userAgent)) {
+            headers.put("User-Agent", userAgent);
+        }
+
+        PNHttpClient.makeRequest(getContext(), url, headers,
                 null, new PNHttpClient.Listener() {
                     @Override
                     public void onSuccess(String response) {
@@ -408,6 +455,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     protected void renderFromCustomAd() {
         mPresenter = createPresenter();
         if (mPresenter != null) {
+            mPresenter.setVideoListener(this);
             mPresenter.load();
         } else {
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.UNSUPPORTED_ASSET));
@@ -427,12 +475,20 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     }
 
     protected void invokeOnLoadFinished() {
+        if (mInitialLoadTime != -1) {
+            JsonOperations.putJsonLong(mPlacementParams, DiagnosticConstants.KEY_TIME_TO_LOAD,
+                    System.currentTimeMillis() - mInitialLoadTime);
+        }
         if (mListener != null) {
             mListener.onAdLoaded();
         }
     }
 
     protected void invokeOnLoadFailed(Throwable exception) {
+        if (mInitialLoadTime != -1) {
+            JsonOperations.putJsonLong(mPlacementParams, DiagnosticConstants.KEY_TIME_TO_LOAD_FAILED,
+                    System.currentTimeMillis() - mInitialLoadTime);
+        }
         if (exception instanceof HyBidError) {
             HyBidError hyBidError = (HyBidError) exception;
             if (hyBidError.getErrorCode() == HyBidErrorCode.NO_FILL) {
@@ -472,6 +528,10 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
             }
 
             startTracking();
+            if (mInitialRenderTime != -1) {
+                JsonOperations.putJsonLong(mPlacementParams, DiagnosticConstants.KEY_RENDER_TIME,
+                        System.currentTimeMillis() - mInitialRenderTime);
+            }
         } else {
             show(view, mPosition);
         }
@@ -502,6 +562,10 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
 
     public void setPosition(Position position) {
         this.mPosition = position;
+    }
+
+    public void setVideoListener(VideoListener videoListener) {
+        mVideoListener = videoListener;
     }
 
     //------------------------------ RequestManager Callbacks --------------------------------------
@@ -577,5 +641,34 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     @Override
     public void onAuctionFailure(Throwable error) {
         invokeOnLoadFailed(error);
+    }
+
+    //------------------------------ Video Callbacks --------------------------------------
+    @Override
+    public void onVideoError(int progressPercentage) {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoError(progressPercentage);
+        }
+    }
+
+    @Override
+    public void onVideoStarted() {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoStarted();
+        }
+    }
+
+    @Override
+    public void onVideoDismissed(int progressPercentage) {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoDismissed(progressPercentage);
+        }
+    }
+
+    @Override
+    public void onVideoFinished() {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoFinished();
+        }
     }
 }

@@ -24,6 +24,8 @@ package net.pubnative.lite.sdk.rewarded.presenter;
 
 import net.pubnative.lite.sdk.models.Ad;
 
+import org.json.JSONObject;
+
 public interface RewardedPresenter {
     interface Listener {
         void onRewardedLoaded(RewardedPresenter rewardedPresenter);
@@ -50,4 +52,6 @@ public interface RewardedPresenter {
     boolean isReady();
 
     void destroy();
+
+    JSONObject getPlacementParams();
 }

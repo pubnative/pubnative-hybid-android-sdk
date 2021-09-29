@@ -24,9 +24,14 @@ package net.pubnative.lite.sdk.utils;
 
 import android.text.TextUtils;
 
+import net.pubnative.lite.sdk.DiagnosticConstants;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.models.AdData;
+import net.pubnative.lite.sdk.utils.json.JsonOperations;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.List;
 
@@ -56,6 +61,7 @@ public class AdTracker {
     private final PNApiClient mApiClient;
     private final List<AdData> mImpressionUrls;
     private final List<AdData> mClickUrls;
+    private JSONObject mPlacementParams;
     private boolean mImpressionTracked;
     private boolean mClickTracked;
 
@@ -73,6 +79,7 @@ public class AdTracker {
         mApiClient = apiClient;
         mImpressionUrls = impressionUrls;
         mClickUrls = clickUrls;
+        mPlacementParams = new JSONObject();
 
         mTrackUrlListener = new PNApiClient.TrackUrlListener() {
             @Override
@@ -99,8 +106,8 @@ public class AdTracker {
         };
     }
 
-    public void setTrackUrlListener(PNApiClient.TrackUrlListener listener) {
-        this.mTrackUrlListener = listener;
+    public void setTrackUrlListener(PNApiClient.TrackUrlListener trackUrlListener) {
+        this.mTrackUrlListener = trackUrlListener;
     }
 
     public void trackImpression() {
@@ -123,17 +130,32 @@ public class AdTracker {
 
     private void trackUrls(List<AdData> urls, Type type) {
         if (urls != null) {
+            JSONArray beaconsArray = new JSONArray();
             for (final AdData url : urls) {
                 if (!TextUtils.isEmpty(url.getURL())) {
                     Logger.d(TAG, "Tracking " + type.toString() + " url: " + url.getURL());
+                    JsonOperations.putJsonString(beaconsArray, url.getURL());
                     mApiClient.trackUrl(url.getURL(), mTrackUrlListener);
                 }
 
                 if (!TextUtils.isEmpty(url.getJS())) {
                     Logger.d(TAG, "Tracking " + type.toString() + " js: " + url.getJS());
+                    JsonOperations.putJsonString(beaconsArray, url.getJS());
                     mApiClient.trackJS(url.getJS(), mTrackJSListener);
                 }
             }
+            switch (type) {
+                case CLICK:
+                    JsonOperations.putJsonArray(mPlacementParams, DiagnosticConstants.KEY_FIRED_CLICK_BEACONS, beaconsArray);
+                    break;
+                case IMPRESSION:
+                    JsonOperations.putJsonArray(mPlacementParams, DiagnosticConstants.KEY_FIRED_IMPRESSION_BEACONS, beaconsArray);
+                    break;
+            }
         }
+    }
+
+    public JSONObject getPlacementParams() {
+        return mPlacementParams;
     }
 }

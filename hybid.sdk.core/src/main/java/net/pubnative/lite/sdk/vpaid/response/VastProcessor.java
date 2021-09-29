@@ -5,6 +5,7 @@ import android.text.TextUtils;
 
 import com.iab.omid.library.pubnativenet.adsession.VerificationScriptResource;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
@@ -39,7 +40,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class VastProcessor {
     private static final String LOG_TAG = VastProcessor.class.getSimpleName();
@@ -66,10 +69,8 @@ public class VastProcessor {
     public void parseResponse(String response, final Listener listener) {
         try {
             Vast vast = XmlParser.parse(response, Vast.class);
-            if ((vast.getStatus() == null
-                    || vast.getStatus().getText().equalsIgnoreCase("NO_AD"))
-                    && (vast.getAds() == null || vast.getAds().isEmpty())
-                    && (vast.getErrors() != null && !vast.getErrors().isEmpty())) {
+            if ((vast.getAds() == null || vast.getAds().isEmpty())
+                    || (vast.getErrors() != null && !vast.getErrors().isEmpty())) {
                 if (vast.getErrors() != null) {
                     List<String> errorLogs = new ArrayList<>();
                     for (Error error : vast.getErrors()) {
@@ -102,7 +103,13 @@ public class VastProcessor {
                     if (unwrapAttempt < UNWRAP_DEPTH) {
                         String adTagUri = wrapper.getVastAdTagURI().getText();
 
-                        PNHttpClient.makeRequest(mContext, adTagUri, null, null, new PNHttpClient.Listener() {
+                        Map<String, String> headers = new HashMap<>();
+                        String userAgent = HyBid.getDeviceInfo().getUserAgent();
+                        if (!TextUtils.isEmpty(userAgent)) {
+                            headers.put("User-Agent", userAgent);
+                        }
+
+                        PNHttpClient.makeRequest(mContext, adTagUri, headers, null, new PNHttpClient.Listener() {
                             @Override
                             public void onSuccess(String response) {
                                 parseResponse(response, listener);

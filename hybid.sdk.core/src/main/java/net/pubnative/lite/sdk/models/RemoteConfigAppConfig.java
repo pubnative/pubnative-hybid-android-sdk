@@ -5,6 +5,8 @@ import net.pubnative.lite.sdk.utils.json.JsonModel;
 
 import org.json.JSONObject;
 
+import java.util.List;
+
 public class RemoteConfigAppConfig extends JsonModel {
 
     @BindField
@@ -13,13 +15,18 @@ public class RemoteConfigAppConfig extends JsonModel {
     @BindField
     public String api;
 
+    @BindField
+    public List<String> enabled_apis;
 
-    public RemoteConfigAppConfig(){
+    @BindField
+    public List<String> enabled_protocols;
+
+
+    public RemoteConfigAppConfig() {
 
     }
 
-    public RemoteConfigAppConfig(JSONObject jsonObject) throws Exception{
+    public RemoteConfigAppConfig(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
     }
-
 }

@@ -2,6 +2,7 @@ package net.pubnative.lite.sdk.interstitial;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 
 import net.pubnative.lite.sdk.utils.PNLocalBroadcastManager;
 
@@ -23,8 +24,17 @@ public class HyBidInterstitialBroadcastSender {
     }
 
     public void sendBroadcast(HyBidInterstitialBroadcastReceiver.Action action) {
+        sendBroadcast(action, null);
+    }
+
+    public void sendBroadcast(HyBidInterstitialBroadcastReceiver.Action action, Bundle extras) {
         final Intent intent = new Intent(action.getId());
         intent.putExtra(HyBidInterstitialBroadcastReceiver.BROADCAST_ID, mBroadcastId);
+
+        if (extras != null && !extras.isEmpty()) {
+            intent.putExtras(extras);
+        }
+
         mLocalBroadcastManager.sendBroadcast(intent);
     }
 }

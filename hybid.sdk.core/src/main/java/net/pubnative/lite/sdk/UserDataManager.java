@@ -26,23 +26,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.text.TextUtils;
 
-import net.pubnative.lite.sdk.consent.CheckConsentRequest;
 import net.pubnative.lite.sdk.consent.UserConsentActivity;
-import net.pubnative.lite.sdk.consent.UserConsentRequest;
-import net.pubnative.lite.sdk.location.GeoIpRequest;
-import net.pubnative.lite.sdk.consent.models.UserConsentRequestModel;
-import net.pubnative.lite.sdk.consent.models.UserConsentResponseModel;
-import net.pubnative.lite.sdk.consent.models.UserConsentResponseStatus;
-import net.pubnative.lite.sdk.utils.CountryUtils;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNAsyncUtils;
-import net.pubnative.lite.sdk.utils.PNCrypto;
-
-import java.util.Locale;
 
 public class UserDataManager {
     private static final String TAG = UserDataManager.class.getSimpleName();
@@ -53,6 +42,7 @@ public class UserDataManager {
     private static final String KEY_CCPA_PUBLIC_CONSENT = "IABUSPrivacy_String";
     private static final String KEY_GDPR_PUBLIC_CONSENT = "IABConsent_ConsentString";
     private static final String KEY_GDPR_TCF_2_PUBLIC_CONSENT = "IABTCF_TCString";
+    private static final String KEY_GDPR_APPLIES = "IABTCF_gdprApplies";
     private static final String KEY_SUBJECT_TO_GDPR_PUBLIC = "IABConsent_SubjectToGDPR";
     private static final String KEY_CMP_PRESENT_PUBLIC = "IABConsent_CMPPresent";
     private static final String KEY_CCPA_CONSENT = "ccpa_consent";
@@ -62,28 +52,15 @@ public class UserDataManager {
     private static final int CONSENT_STATE_ACCEPTED = 1;
     private static final int CONSENT_STATE_DENIED = 0;
 
-    interface UserDataInitialisationListener {
-        void onDataInitialised(boolean success);
-    }
-
     private final Context mContext;
-    private final String mAppToken;
-    private String mAdvertisingId;
     private final SharedPreferences mPreferences;
     private final SharedPreferences mAppPreferences;
-    private boolean inGDPRZone = false;
 
-    public UserDataManager(Context context, String appToken) {
+    public UserDataManager(Context context) {
         mContext = context.getApplicationContext();
-        mAppToken = appToken;
         mPreferences = mContext.getSharedPreferences(PREFERENCES_CONSENT, Context.MODE_PRIVATE);
         mAppPreferences = PreferenceManager.getDefaultSharedPreferences(mContext.getApplicationContext());
         mAppPreferences.registerOnSharedPreferenceChangeListener(mAppPrefsListener);
-    }
-
-    public void initialize(String advertisingId, UserDataInitialisationListener initialisationListener) {
-        mAdvertisingId = advertisingId;
-        determineUserZone(initialisationListener);
     }
 
     @Deprecated
@@ -190,92 +167,11 @@ public class UserDataManager {
 
     private void notifyConsentGiven(String advertisingId, final boolean given) {
         setConsentState(given ? CONSENT_STATE_ACCEPTED : CONSENT_STATE_DENIED);
-        UserConsentRequestModel requestModel = new UserConsentRequestModel(
-                advertisingId,
-                DEVICE_ID_TYPE, given);
-
-        UserConsentRequest request = new UserConsentRequest();
-        request.doRequest(mContext, HyBid.getAppToken(), requestModel, new UserConsentRequest.UserConsentListener() {
-            @Override
-            public void onSuccess(UserConsentResponseModel model) {
-                if (model.getStatus().equals(UserConsentResponseStatus.OK)) {
-                    Logger.d(TAG, String.format(Locale.ENGLISH, "%s user consent has been notified", given ? "Positive" : "Negative"));
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable error) {
-                Logger.e(TAG, error.getMessage());
-            }
-        });
     }
-
-    private void determineUserZone(final UserDataInitialisationListener listener) {
-        GeoIpRequest request = new GeoIpRequest();
-        request.fetchGeoIp(mContext, new GeoIpRequest.GeoIpRequestListener() {
-            @Override
-            public void onSuccess(String countryCode) {
-                if (TextUtils.isEmpty(countryCode)) {
-                    Logger.w(TAG, "No country code was obtained. The default value will be used, therefore no user data consent will be required.");
-                    if (listener != null) {
-                        listener.onDataInitialised(false);
-                    }
-                } else {
-                    inGDPRZone = CountryUtils.isGDPRCountry(countryCode);
-
-                    if (inGDPRZone && !askedForGDPRConsent()) {
-                        checkConsentGiven(listener);
-                    } else {
-                        if (listener != null) {
-                            listener.onDataInitialised(true);
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable exception) {
-                Logger.e(TAG, exception.getMessage());
-                if (listener != null) {
-                    listener.onDataInitialised(false);
-                }
-            }
-        });
-    }
-
-    private void checkConsentGiven(final UserDataInitialisationListener listener) {
-        CheckConsentRequest checkRequest = new CheckConsentRequest();
-        checkRequest.checkConsent(mContext, HyBid.getAppToken(), HyBid.getDeviceInfo().getAdvertisingId(), new CheckConsentRequest.CheckConsentListener() {
-            @Override
-            public void onSuccess(UserConsentResponseModel model) {
-                if (model.getStatus().equals(UserConsentResponseStatus.OK)) {
-                    if (model.getConsent() != null) {
-                        if (model.getConsent().isConsented()) {
-                            setConsentState(CONSENT_STATE_ACCEPTED);
-                        } else {
-                            setConsentState(CONSENT_STATE_DENIED);
-                        }
-                    }
-
-                    if (listener != null) {
-                        listener.onDataInitialised(true);
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable error) {
-                Logger.e(TAG, error.getMessage());
-                if (listener != null) {
-                    listener.onDataInitialised(false);
-                }
-            }
-        });
-    }
-
 
     public boolean gdprApplies() {
-        return inGDPRZone;
+        int gdprApplies = mAppPreferences.getInt(KEY_GDPR_APPLIES, 0);
+        return gdprApplies == 1;
     }
 
     private boolean askedForGDPRConsent() {

@@ -26,6 +26,9 @@ public abstract class VideoAdListener {
     public void onAdDismissed() {
     }
 
+    public void onAdDismissed(int progressPercentage) {
+    }
+
     /**
      * Triggered when the user taps the AdSpot and the AdSpot is about to perform extra actions
      * Those actions may lead to displaying a modal browser or leaving your application.
@@ -56,5 +59,4 @@ public abstract class VideoAdListener {
      */
     public void onLeaveApp() {
     }
-
 }

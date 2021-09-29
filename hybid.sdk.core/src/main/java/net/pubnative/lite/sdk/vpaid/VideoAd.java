@@ -119,7 +119,7 @@ public class VideoAd extends BaseVideoAd {
         setReady();
         setAdState(AdState.NONE);
         if (getAdListener() != null) {
-            getAdListener().onAdDismissed();
+            getAdListener().onAdDismissed(getAdController().getProgress());
         }
     }
 

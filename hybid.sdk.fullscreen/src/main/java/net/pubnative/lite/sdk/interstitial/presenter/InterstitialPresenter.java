@@ -22,7 +22,10 @@
 //
 package net.pubnative.lite.sdk.interstitial.presenter;
 
+import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.models.Ad;
+
+import org.json.JSONObject;
 
 /**
  * Created by erosgarciaponte on 09.01.18.
@@ -43,6 +46,8 @@ public interface InterstitialPresenter {
 
     void setListener(Listener listener);
 
+    void setVideoListener(VideoListener listener);
+
     Ad getAd();
 
     void load();
@@ -52,4 +57,6 @@ public interface InterstitialPresenter {
     boolean isReady();
 
     void destroy();
+
+    JSONObject getPlacementParams();
 }

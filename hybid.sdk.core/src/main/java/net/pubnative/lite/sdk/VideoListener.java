@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 PubNative GmbH
+// Copyright (c) 2021 PubNative GmbH
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,36 +20,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package net.pubnative.lite.sdk.consent;
+package net.pubnative.lite.sdk;
 
-import android.net.Uri;
+public interface VideoListener {
+    void onVideoError(int progressPercentage);
 
-public class PNConsentEndpoints {
-    private static final String SCHEME = "https";
-    private static final String AUTHORITY = "backend.pubnative.net";
-    private static final String CONSENT_PATH = "consent";
-    private static final String API_VERSION = "v1";
+    void onVideoStarted();
 
-    private static final String PARAM_DEVICE_ID = "did";
+    void onVideoDismissed(int progressPercentage);
 
-    public static String getCheckConsentUrl(String deviceId) {
-        return new Uri.Builder()
-                .scheme(SCHEME)
-                .authority(AUTHORITY)
-                .appendPath(CONSENT_PATH)
-                .appendPath(API_VERSION)
-                .appendQueryParameter(PARAM_DEVICE_ID, deviceId)
-                .build()
-                .toString();
-    }
-
-    public static String getConsentUrl() {
-        return new Uri.Builder()
-                .scheme(SCHEME)
-                .authority(AUTHORITY)
-                .appendPath(CONSENT_PATH)
-                .appendPath(API_VERSION)
-                .build()
-                .toString();
-    }
+    void onVideoFinished();
 }

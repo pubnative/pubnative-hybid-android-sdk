@@ -24,12 +24,16 @@ package net.pubnative.lite.sdk.interstitial.presenter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 
+import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.interstitial.activity.HyBidInterstitialActivity;
 import net.pubnative.lite.sdk.interstitial.activity.VastInterstitialActivity;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.CheckUtils;
+
+import org.json.JSONObject;
 
 public class VastInterstitialPresenter implements InterstitialPresenter, HyBidInterstitialBroadcastReceiver.Listener {
     private final Context mContext;
@@ -39,6 +43,7 @@ public class VastInterstitialPresenter implements InterstitialPresenter, HyBidIn
     private final HyBidInterstitialBroadcastReceiver mBroadcastReceiver;
 
     private InterstitialPresenter.Listener mListener;
+    private VideoListener mVideoListener;
     private boolean mIsDestroyed;
     private boolean mReady = false;
 
@@ -58,6 +63,11 @@ public class VastInterstitialPresenter implements InterstitialPresenter, HyBidIn
     @Override
     public void setListener(Listener listener) {
         mListener = listener;
+    }
+
+    @Override
+    public void setVideoListener(VideoListener listener) {
+        mVideoListener = listener;
     }
 
     @Override
@@ -110,9 +120,14 @@ public class VastInterstitialPresenter implements InterstitialPresenter, HyBidIn
         mReady = false;
     }
 
+    @Override
+    public JSONObject getPlacementParams() {
+        return null;
+    }
+
     //----------------------- Interstitial Broadcast Receiver Callbacks ----------------------------
     @Override
-    public void onReceivedAction(HyBidInterstitialBroadcastReceiver.Action action) {
-        mBroadcastReceiver.handleAction(action, this, mListener);
+    public void onReceivedAction(HyBidInterstitialBroadcastReceiver.Action action, Bundle extras) {
+        mBroadcastReceiver.handleAction(action, extras, this, mListener, mVideoListener);
     }
 }

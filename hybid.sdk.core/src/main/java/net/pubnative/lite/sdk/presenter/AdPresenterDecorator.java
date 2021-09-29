@@ -24,6 +24,7 @@ package net.pubnative.lite.sdk.presenter;
 
 import android.view.View;
 
+import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
@@ -31,18 +32,22 @@ import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.json.JsonOperations;
+
+import org.json.JSONObject;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
  */
 
-public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, AdPresenter.ImpressionListener{
+public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, AdPresenter.ImpressionListener, VideoListener {
     private static final String TAG = AdPresenterDecorator.class.getSimpleName();
     private final AdPresenter mAdPresenter;
     private final AdTracker mAdTrackingDelegate;
     private final ReportingController mReportingController;
     private final AdPresenter.Listener mListener;
     private final ImpressionListener mImpressionListener;
+    private VideoListener mVideoListener;
     private boolean mIsDestroyed;
 
     public AdPresenterDecorator(AdPresenter adPresenter,
@@ -65,6 +70,11 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
     @Override
     public void setImpressionListener(ImpressionListener listener) {
         // We set the listener in the constructor instead
+    }
+
+    @Override
+    public void setVideoListener(VideoListener listener) {
+        mVideoListener = listener;
     }
 
     @Override
@@ -102,6 +112,24 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
         }
 
         mAdPresenter.stopTracking();
+    }
+
+    @Override
+    public JSONObject getPlacementParams() {
+        JSONObject finalParams = new JSONObject();
+        if (mAdPresenter != null) {
+            JSONObject presenterParams = mAdPresenter.getPlacementParams();
+            if (presenterParams != null) {
+                JsonOperations.mergeJsonObjects(finalParams, presenterParams);
+            }
+        }
+        if (mAdTrackingDelegate != null) {
+            JSONObject adTrackedParams = mAdTrackingDelegate.getPlacementParams();
+            if (adTrackedParams != null) {
+                JsonOperations.mergeJsonObjects(finalParams, adTrackedParams);
+            }
+        }
+        return finalParams;
     }
 
     @Override
@@ -151,7 +179,7 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
     }
 
     @Override
-    public void onImpression(){
+    public void onImpression() {
         if (mIsDestroyed) {
             return;
         }
@@ -167,6 +195,34 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
         mAdTrackingDelegate.trackImpression();
         if (mImpressionListener != null) {
             mImpressionListener.onImpression();
+        }
+    }
+
+    @Override
+    public void onVideoError(int progressPercentage) {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoDismissed(progressPercentage);
+        }
+    }
+
+    @Override
+    public void onVideoStarted() {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoStarted();
+        }
+    }
+
+    @Override
+    public void onVideoDismissed(int progressPercentage) {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoDismissed(progressPercentage);
+        }
+    }
+
+    @Override
+    public void onVideoFinished() {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoFinished();
         }
     }
 }

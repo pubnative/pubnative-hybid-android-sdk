@@ -4,9 +4,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.consent.*
+import net.pubnative.lite.sdk.HyBid
 
 class ConsentNavFragment : Fragment(R.layout.fragment_nav_consent) {
 
@@ -36,6 +38,15 @@ class ConsentNavFragment : Fragment(R.layout.fragment_nav_consent) {
         view.findViewById<TextView>(R.id.button_mopub_cmp).setOnClickListener {
             val intent = Intent(activity, MoPubCMPActivity::class.java)
             startActivity(intent)
+        }
+
+        view.findViewById<TextView>(R.id.button_gdpr_applies).setOnClickListener {
+            val gdprApplies = HyBid.getUserDataManager().gdprApplies()
+            if (gdprApplies) {
+                Toast.makeText(activity, "GDPR does apply", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(activity, "GDPR does NOT apply", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

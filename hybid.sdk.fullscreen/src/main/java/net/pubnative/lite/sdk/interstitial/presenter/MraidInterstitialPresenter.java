@@ -24,12 +24,16 @@ package net.pubnative.lite.sdk.interstitial.presenter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 
+import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.interstitial.activity.HyBidInterstitialActivity;
 import net.pubnative.lite.sdk.interstitial.activity.MraidInterstitialActivity;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.CheckUtils;
+
+import org.json.JSONObject;
 
 /**
  * Created by erosgarciaponte on 09.01.18.
@@ -62,6 +66,11 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, HyBidI
     @Override
     public void setListener(Listener listener) {
         mListener = listener;
+    }
+
+    @Override
+    public void setVideoListener(VideoListener listener) {
+        //Do nothing. Video listener is not needed for MRAID
     }
 
     @Override
@@ -115,9 +124,14 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, HyBidI
         mReady = false;
     }
 
+    @Override
+    public JSONObject getPlacementParams() {
+        return null;
+    }
+
     //----------------------- Interstitial Broadcast Receiver Callbacks ----------------------------
     @Override
-    public void onReceivedAction(HyBidInterstitialBroadcastReceiver.Action action) {
-        mBroadcastReceiver.handleAction(action, this, mListener);
+    public void onReceivedAction(HyBidInterstitialBroadcastReceiver.Action action, Bundle extras) {
+        mBroadcastReceiver.handleAction(action, extras, this, mListener);
     }
 }

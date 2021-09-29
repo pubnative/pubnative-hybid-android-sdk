@@ -28,6 +28,7 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.webkit.WebView;
 
+import net.pubnative.lite.sdk.DiagnosticConstants;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.models.Ad;
@@ -37,8 +38,13 @@ import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.source.pnapi.BuildConfig;
 import net.pubnative.lite.sdk.utils.AdRequestRegistry;
 import net.pubnative.lite.sdk.utils.PNApiUrlComposer;
+import net.pubnative.lite.sdk.utils.json.JsonOperations;
 
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by erosgarciaponte on 17.01.18.
@@ -66,6 +72,8 @@ public class PNApiClient {
 
     private final Context mContext;
     private String mApiUrl = BuildConfig.BASE_URL;
+    private JSONObject mPlacementParams;
+    private String mUserAgent;
 
     public String getApiUrl() {
         return mApiUrl;
@@ -79,6 +87,11 @@ public class PNApiClient {
 
     public PNApiClient(Context context) {
         this.mContext = context;
+        try {
+            mUserAgent = new WebView(mContext).getSettings().getUserAgentString();
+        } catch (RuntimeException ignored){
+
+        }
     }
 
     public void getAd(AdRequest request, final AdRequestListener listener) {
@@ -87,6 +100,7 @@ public class PNApiClient {
     }
 
     public void getAd(final String url, final AdRequestListener listener) {
+        mPlacementParams = new JSONObject();
         if (TextUtils.isEmpty(url)) {
             if (listener != null) {
                 listener.onFailure(new HyBidError(HyBidErrorCode.INVALID_URL));
@@ -94,7 +108,12 @@ public class PNApiClient {
         } else {
             final long initTime = System.currentTimeMillis();
 
-            PNHttpClient.makeRequest(mContext, url, null, null, new PNHttpClient.Listener() {
+            Map<String, String> headers = new HashMap<>();
+            if (!TextUtils.isEmpty(mUserAgent)){
+                headers.put("User-Agent", mUserAgent);
+            }
+
+            PNHttpClient.makeRequest(mContext, url, headers, null, new PNHttpClient.Listener() {
                 @Override
                 public void onSuccess(String response) {
                     registerAdRequest(url, response, initTime);
@@ -122,7 +141,12 @@ public class PNApiClient {
     }
 
     private void sendTrackingRequest(String url, final TrackUrlListener listener) {
-        PNHttpClient.makeRequest(mContext, url, null, null, false, true, new PNHttpClient.Listener() {
+        Map<String, String> headers = new HashMap<>();
+        if (!TextUtils.isEmpty(mUserAgent)){
+            headers.put("User-Agent", mUserAgent);
+        }
+
+        PNHttpClient.makeRequest(mContext, url, headers, null, false, true, new PNHttpClient.Listener() {
             @Override
             public void onSuccess(String response) {
                 if (listener != null) {
@@ -210,6 +234,16 @@ public class PNApiClient {
     }
 
     private void registerAdRequest(String url, String response, long initTime) {
-        AdRequestRegistry.getInstance().setLastAdRequest(url, response, System.currentTimeMillis() - initTime);
+        long responseTime = System.currentTimeMillis() - initTime;
+
+        JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_AD_REQUEST, url);
+        JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_AD_RESPONSE, response);
+        JsonOperations.putJsonLong(mPlacementParams, DiagnosticConstants.KEY_RESPONSE_TIME, responseTime);
+
+        AdRequestRegistry.getInstance().setLastAdRequest(url, response, responseTime);
+    }
+
+    public JSONObject getPlacementParams() {
+        return mPlacementParams;
     }
 }

@@ -21,6 +21,7 @@ import net.pubnative.lite.sdk.vpaid.enums.EventConstants;
 import net.pubnative.lite.sdk.vpaid.enums.VastError;
 import net.pubnative.lite.sdk.vpaid.helpers.ErrorLog;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
+import net.pubnative.lite.sdk.vpaid.macros.MacroHelper;
 import net.pubnative.lite.sdk.vpaid.models.vast.Tracking;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.AdSpotDimensions;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.CreativeParams;
@@ -52,6 +53,7 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
     private final AdParams mAdParams;
     private final BaseVideoAdInternal mBaseAdInternal;
     private final ViewControllerVpaid mViewControllerVpaid;
+    private final MacroHelper mMacroHelper;
 
     private OnPreparedListener mOnPreparedListener;
     private String mEndCardFilePath;
@@ -79,6 +81,7 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
         mViewabilityFriendlyObstructions = new ArrayList<>();
         mVpaidBridge = new VpaidBridgeImpl(this, createCreativeParams());
         mViewControllerVpaid = new ViewControllerVpaid(this);
+        mMacroHelper = new MacroHelper();
     }
 
     //region VideoAdController methods
@@ -240,7 +243,7 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
     @Override
     public void openUrl(String url) {
         for (String trackUrl : mAdParams.getVideoClicks()) {
-            EventTracker.post(mBaseAdInternal.getContext(), trackUrl);
+            EventTracker.post(mBaseAdInternal.getContext(), trackUrl, mMacroHelper);
         }
         if (TextUtils.isEmpty(url)) {
             url = mAdParams.getVideoRedirectUrl();
@@ -275,7 +278,7 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
                 }
                 int sendEventTime = mAdParams.getDuration() - value;
                 if (Utils.parseDuration(tracking.getOffset()) == sendEventTime) {
-                    EventTracker.post(mBaseAdInternal.getContext(), event.url);
+                    EventTracker.post(mBaseAdInternal.getContext(), event.url, mMacroHelper);
                 }
             }
         }
@@ -283,7 +286,7 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
 
     @Override
     public void postEvent(String eventType) {
-        EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), eventType);
+        EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), eventType, mMacroHelper);
     }
     //endregion
 
@@ -350,7 +353,7 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
     @Override
     public void onAdImpression() {
         for (String url : mAdParams.getImpressions()) {
-            EventTracker.post(mBaseAdInternal.getContext(), url);
+            EventTracker.post(mBaseAdInternal.getContext(), url, mMacroHelper);
             Logger.d(LOG_TAG, "mAdParams.getImpressions() " + url);
         }
     }
@@ -390,6 +393,11 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
     @Override
     public boolean isVideoVisible() {
         return mIsVisible;
+    }
+
+    @Override
+    public int getProgress() {
+        return -1;
     }
 
     @Override

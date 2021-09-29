@@ -5,6 +5,7 @@ import android.view.View;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
+import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastSender;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.VideoAd;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
@@ -89,6 +90,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
     @Override
     public void onBackPressed() {
         if (mIsSkippable) {
+            dismissVideo(100);
             super.onBackPressed();
         }
     }
@@ -113,7 +115,10 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
         @Override
         public void onAdLoadFail(PlayerInfo info) {
             setProgressBarInvisible();
+            Bundle extras = new Bundle();
+            extras.putInt(HyBidInterstitialBroadcastReceiver.VIDEO_PROGRESS, 0);
             getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.ERROR);
+            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_ERROR, extras);
             getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
             finish();
         }
@@ -128,21 +133,29 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
             mReady = false;
             mIsSkippable = true;
             showInterstitialCloseButton();
+            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_FINISH);
         }
 
         @Override
         public void onAdDismissed() {
+            onAdDismissed(-1);
+        }
+
+        @Override
+        public void onAdDismissed(int progressPercentage) {
+            dismissVideo(mIsSkippable ? 100 : progressPercentage);
             dismiss();
         }
 
         @Override
-        public void onAdExpired() {
-
-        }
-
-        @Override
         public void onAdStarted() {
-
+            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_START);
         }
     };
+
+    private void dismissVideo(int progressPercentage) {
+        Bundle extras = new Bundle();
+        extras.putInt(HyBidInterstitialBroadcastReceiver.VIDEO_PROGRESS, progressPercentage);
+        getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_DISMISS, extras);
+    }
 }

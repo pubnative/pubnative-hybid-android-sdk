@@ -27,13 +27,16 @@ import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.util.Log;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.TrackingUrlModel;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 
 import org.json.JSONArray;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TrackingManager {
     private static final String TAG = TrackingManager.class.getSimpleName();
@@ -89,7 +92,13 @@ public class TrackingManager {
                     sIsTracking = false;
                     trackNextItem(context);
                 } else {
-                    PNHttpClient.makeRequest(context, model.url, null, null, new PNHttpClient.Listener() {
+                    Map<String, String> headers = new HashMap<>();
+                    String userAgent = HyBid.getDeviceInfo().getUserAgent();
+                    if (!TextUtils.isEmpty(userAgent)){
+                        headers.put("User-Agent", userAgent);
+                    }
+
+                    PNHttpClient.makeRequest(context, model.url, headers, null, new PNHttpClient.Listener() {
                         @Override
                         public void onSuccess(String response) {
                             sIsTracking = false;

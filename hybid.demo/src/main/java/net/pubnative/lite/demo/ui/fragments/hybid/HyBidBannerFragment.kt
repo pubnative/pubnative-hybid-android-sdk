@@ -36,16 +36,20 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.demo.util.convertDpToPx
+import net.pubnative.lite.sdk.DiagnosticsManager
+import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.HyBidError
+import net.pubnative.lite.sdk.VideoListener
 import net.pubnative.lite.sdk.models.AdSize
 import net.pubnative.lite.sdk.reporting.ReportingEventBridge
 import net.pubnative.lite.sdk.views.HyBidAdView
 import net.pubnative.lite.sdk.views.PNAdView
+import java.util.*
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.Listener {
+class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.Listener, VideoListener {
     val TAG = HyBidBannerFragment::class.java.simpleName
 
     private val AUTO_REFRESH_MILLIS: Long = 30 * 1000
@@ -92,6 +96,8 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
+        //Optional to track progress of video ads
+        hybidBanner.setVideoListener(this)
         hybidBanner.setAdSize(AdSize.SIZE_320x50)
 
         loadButton.setOnClickListener {
@@ -182,10 +188,28 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
 
     override fun onAdImpression() {
         Log.d(TAG, "onAdImpression")
+        DiagnosticsManager.printPlacementDiagnosticsLog(requireContext(), hybidBanner.placementParams)
     }
 
     override fun onAdClick() {
         Log.d(TAG, "onAdClick")
+    }
+
+    // --------------- HyBid Video Listener --------------------
+    override fun onVideoError(progressPercentage: Int) {
+        Log.d(TAG, String.format(Locale.ENGLISH,"onVideoError progress: %d", progressPercentage))
+    }
+
+    override fun onVideoStarted() {
+        Log.d(TAG, "onVideoStarted")
+    }
+
+    override fun onVideoDismissed(progressPercentage: Int) {
+        Log.d(TAG, String.format(Locale.ENGLISH,"onVideoDismissed progress: %d", progressPercentage))
+    }
+
+    override fun onVideoFinished() {
+        Log.d(TAG, "onVideoFinished")
     }
 
     private fun displayLogs() {

@@ -24,7 +24,10 @@ package net.pubnative.lite.sdk.presenter;
 
 import android.view.View;
 
+import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.models.Ad;
+
+import org.json.JSONObject;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
@@ -47,6 +50,8 @@ public interface AdPresenter {
 
     void setImpressionListener(ImpressionListener listener);
 
+    void setVideoListener(VideoListener listener);
+
     Ad getAd();
 
     void load();
@@ -56,4 +61,6 @@ public interface AdPresenter {
     void startTracking();
 
     void stopTracking();
+
+    JSONObject getPlacementParams();
 }

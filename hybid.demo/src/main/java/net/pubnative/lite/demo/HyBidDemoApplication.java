@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import ai.numbereight.audiences.Audiences;
 import ai.numbereight.sdk.ConsentOptions;
 import ai.numbereight.sdk.NumberEight;
+import ai.numbereight.sdk.common.Log;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
@@ -58,7 +59,11 @@ public class HyBidDemoApplication extends MultiDexApplication {
     public void onCreate() {
         super.onCreate();
 
-        initSettings();
+        try {
+            initSettings();
+        } catch (Exception exception) {
+            Log.d("Exception", exception.toString());
+        }
     }
 
     @Override

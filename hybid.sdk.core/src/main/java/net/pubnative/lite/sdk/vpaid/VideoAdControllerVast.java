@@ -21,6 +21,7 @@ import net.pubnative.lite.sdk.vpaid.enums.VastError;
 import net.pubnative.lite.sdk.vpaid.helpers.ErrorLog;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
 import net.pubnative.lite.sdk.vpaid.helpers.TimerWithPause;
+import net.pubnative.lite.sdk.vpaid.macros.MacroHelper;
 import net.pubnative.lite.sdk.vpaid.models.vast.Tracking;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.TrackingEvent;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
@@ -39,6 +40,7 @@ class VideoAdControllerVast implements VideoAdController {
     private final ViewControllerVast mViewControllerVast;
     private final AdParams mAdParams;
     private final BaseVideoAdInternal mBaseAdInternal;
+    private final MacroHelper mMacroHelper;
 
     private final List<TrackingEvent> mTrackingEventsList = new ArrayList<>();
     private MediaPlayer mMediaPlayer;
@@ -47,6 +49,8 @@ class VideoAdControllerVast implements VideoAdController {
     private String mVideoUri;
     private String mImageUri;
     private int mSkipTimeMillis = -1;
+    private int mDuration = -1;
+    private int mDoneMillis = -1;
 
     private boolean videoStarted = false;
     private boolean videoVisible = false;
@@ -62,6 +66,7 @@ class VideoAdControllerVast implements VideoAdController {
         mViewabilityAdSession = viewabilityAdSession;
         mViewabilityFriendlyObstructions = new ArrayList<>();
         mViewControllerVast = new ViewControllerVast(this);
+        mMacroHelper = new MacroHelper();
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
             isAndroid6VersionDevice = true;
         }
@@ -186,17 +191,19 @@ class VideoAdControllerVast implements VideoAdController {
 
 
     private void createTimer(final int duration) {
+        mDuration = duration;
+        mDoneMillis = -1;
         initSkipTime(duration);
         createProgressPoints(duration);
         mTimerWithPause = new TimerWithPause(duration, 10, true) {
             @Override
             public void onTick(long millisUntilFinished) {
                 mViewControllerVast.setProgress((int) millisUntilFinished, duration);
-                int doneMillis = duration - (int) millisUntilFinished;
+                mDoneMillis = duration - (int) millisUntilFinished;
                 List<TrackingEvent> eventsToRemove = new ArrayList<>();
                 for (TrackingEvent event : mTrackingEventsList) {
-                    if (doneMillis > event.timeMillis) {
-                        EventTracker.post(mBaseAdInternal.getContext(), event.url);
+                    if (mDoneMillis > event.timeMillis) {
+                        EventTracker.post(mBaseAdInternal.getContext(), event.url, mMacroHelper);
                         fireViewabilityTrackingEvent(event.name);
                         eventsToRemove.add(event);
                     }
@@ -329,7 +336,7 @@ class VideoAdControllerVast implements VideoAdController {
                     }
                     mBaseAdInternal.onAdDidReachEnd();
                     skipVideo(false);
-                    EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.COMPLETE);
+                    EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.COMPLETE, mMacroHelper);
                 }
             };
 
@@ -372,7 +379,7 @@ class VideoAdControllerVast implements VideoAdController {
             mViewControllerVast.showEndCard(mImageUri);
         }
         if (skipEvent) {
-            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.SKIP);
+            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.SKIP, mMacroHelper);
         }
 
         postDelayed(new Runnable() {
@@ -404,13 +411,13 @@ class VideoAdControllerVast implements VideoAdController {
         if (mute) {
             mMediaPlayer.setVolume(0f, 0f);
             if (postEvent) {
-                EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.MUTE);
+                EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.MUTE, mMacroHelper);
             }
         } else {
             float systemVolume = Utils.getSystemVolume();
             mMediaPlayer.setVolume(systemVolume, systemVolume);
             if (postEvent) {
-                EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.UNMUTE);
+                EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.UNMUTE, mMacroHelper);
             }
         }
     }
@@ -419,7 +426,7 @@ class VideoAdControllerVast implements VideoAdController {
         String clickUrl = mAdParams.getVideoRedirectUrl();
 
         for (String trackUrl : mAdParams.getVideoClicks()) {
-            EventTracker.post(mBaseAdInternal.getContext(), trackUrl);
+            EventTracker.post(mBaseAdInternal.getContext(), trackUrl, mMacroHelper);
         }
 
         return clickUrl;
@@ -429,7 +436,7 @@ class VideoAdControllerVast implements VideoAdController {
         String clickUrl = mAdParams.getEndCardRedirectUrl();
 
         for (String trackUrl : mAdParams.getEndCardClicks()) {
-            EventTracker.post(mBaseAdInternal.getContext(), trackUrl);
+            EventTracker.post(mBaseAdInternal.getContext(), trackUrl, mMacroHelper);
         }
 
         return clickUrl;
@@ -464,8 +471,8 @@ class VideoAdControllerVast implements VideoAdController {
     }
 
     public void closeSelf() {
-        EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.CLOSE);
-        EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.CLOSE_LINEAR);
+        EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.CLOSE, mMacroHelper);
+        EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.CLOSE_LINEAR, mMacroHelper);
         mBaseAdInternal.dismiss();
     }
 
@@ -480,8 +487,21 @@ class VideoAdControllerVast implements VideoAdController {
             mMediaPlayer.release();
         }
         if (!videoStarted) {
-            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.NOT_USED);
+            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.NOT_USED, mMacroHelper);
         }
+
+        finishedPlaying = true;
+
+        if (mTimerWithPause != null) {
+            mTimerWithPause.pause();
+            mTimerWithPause = null;
+        }
+
+        if (mSkipTimerWithPause != null) {
+            mSkipTimerWithPause.pause();
+            mSkipTimerWithPause = null;
+        }
+
         mViewControllerVast.destroy();
     }
 
@@ -497,7 +517,7 @@ class VideoAdControllerVast implements VideoAdController {
                 mSkipTimerWithPause.pause();
             }
 
-            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.PAUSE);
+            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.PAUSE, mMacroHelper);
             getViewabilityAdSession().firePause();
         }
     }
@@ -538,7 +558,7 @@ class VideoAdControllerVast implements VideoAdController {
     private void resumeAd() {
         if (mMediaPlayer != null && !mMediaPlayer.isPlaying() && mViewControllerVast.isEndCard()) {
             playAd();
-            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.RESUME);
+            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.RESUME, mMacroHelper);
             getViewabilityAdSession().fireResume();
         }
     }
@@ -577,6 +597,14 @@ class VideoAdControllerVast implements VideoAdController {
     @Override
     public boolean isVideoVisible() {
         return videoVisible;
+    }
+
+    @Override
+    public int getProgress() {
+        if (mDoneMillis == -1 || mDuration == -1) {
+            return -1;
+        }
+        return (mDoneMillis * 100) / mDuration;
     }
 
     @Override

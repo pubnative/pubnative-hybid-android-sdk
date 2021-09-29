@@ -7,10 +7,15 @@
         <activity android:name=".consent.UserConsentActivity" />
         <activity
             android:name=".interstitial.activity.MraidInterstitialActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
+            android:configChanges="keyboardHidden|screenSize"
+            android:screenOrientation="behind"/>
         <activity
             android:name=".interstitial.activity.VastInterstitialActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity android:name=".rewarded.activity.VastRewardedActivity" />
+            android:configChanges="keyboardHidden|screenSize"
+            android:screenOrientation="behind"/>
+        <activity
+            android:name=".rewarded.activity.VastRewardedActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="behind"/>
     </application>
 </manifest>

@@ -1,8 +1,10 @@
 package net.pubnative.lite.sdk.reporting;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 
 import org.json.JSONObject;
@@ -27,6 +29,10 @@ public class ReportingDelegate {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
         headers.put("Authorization", getAuthString());
+        String userAgent = HyBid.getDeviceInfo().getUserAgent();
+        if (!TextUtils.isEmpty(userAgent)){
+            headers.put("User-Agent", userAgent);
+        }
 
         PNHttpClient.makeRequest(mContext, mReportingUrl, headers, body.toString(), new PNHttpClient.Listener() {
             @Override

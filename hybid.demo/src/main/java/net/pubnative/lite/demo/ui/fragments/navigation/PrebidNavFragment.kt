@@ -137,6 +137,7 @@ class PrebidNavFragment : Fragment(R.layout.fragment_nav_prebid) {
             intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
             startActivity(intent)
         }
+        disableZones()
     }
 
     override fun onResume() {

@@ -67,6 +67,7 @@ public class InterstitialPresenterFactory {
                         HyBid.getReportingController(),
                         interstitialPresenterListener);
         interstitialPresenter.setListener(interstitialPresenterDecorator);
+        interstitialPresenter.setVideoListener(interstitialPresenterDecorator);
         return interstitialPresenterDecorator;
     }
 

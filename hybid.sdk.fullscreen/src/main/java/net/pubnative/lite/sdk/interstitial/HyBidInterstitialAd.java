@@ -28,9 +28,11 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import net.pubnative.lite.sdk.AdCache;
+import net.pubnative.lite.sdk.DiagnosticConstants;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
+import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.api.InterstitialRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenter;
@@ -41,14 +43,20 @@ import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.MarkupUtils;
 import net.pubnative.lite.sdk.utils.SignalDataProcessor;
+import net.pubnative.lite.sdk.utils.json.JsonOperations;
 import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.vast.VastUrlUtils;
 
+import org.json.JSONObject;
 
-public class HyBidInterstitialAd implements RequestManager.RequestListener, InterstitialPresenter.Listener {
+import java.util.HashMap;
+import java.util.Map;
+
+
+public class HyBidInterstitialAd implements RequestManager.RequestListener, InterstitialPresenter.Listener, VideoListener {
     private static final String TAG = HyBidInterstitialAd.class.getSimpleName();
 
     public interface Listener {
@@ -66,15 +74,19 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     private RequestManager mRequestManager;
     private InterstitialPresenter mPresenter;
     private final Listener mListener;
+    private VideoListener mVideoListener;
     private final Context mContext;
     private String mZoneId;
     private final AdCache mAdCache;
     private final VideoAdCache mVideoCache;
     private SignalDataProcessor mSignalDataProcessor;
     private Ad mAd;
+    private JSONObject mPlacementParams;
     private boolean mReady = false;
     private int mSkipOffset = 0;
     private boolean mIsDestroyed = false;
+    private long mInitialLoadTime = -1;
+    private long mInitialRenderTime = -1;
     private static String mScreenIabCategory;
     private static String mScreenKeywords;
     private static String mUserIntent;
@@ -98,7 +110,8 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         mListener = listener;
         mAdCache = HyBid.getAdCache();
         mVideoCache = HyBid.getVideoAdCache();
-
+        mPlacementParams = new JSONObject();
+        JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_ZONE_ID, mZoneId);
         mSkipOffset = HyBid.getInterstitialSkipOffset();
 
         mRequestManager.setIntegrationType(IntegrationType.STANDALONE);
@@ -106,11 +119,14 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
 
     public void load() {
         if (!HyBid.isInitialized()) {
+            mInitialLoadTime = System.currentTimeMillis();
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NOT_INITIALISED));
         } else if (TextUtils.isEmpty(mZoneId)) {
+            mInitialLoadTime = System.currentTimeMillis();
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ZONE_ID));
         } else {
             cleanup();
+            mInitialLoadTime = System.currentTimeMillis();
             mRequestManager.setZoneId(mZoneId);
             mRequestManager.setRequestListener(this);
             mRequestManager.requestAd();
@@ -119,6 +135,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
 
     public boolean show() {
         if (mPresenter != null && mReady) {
+            mInitialRenderTime = System.currentTimeMillis();
             mPresenter.show();
             return true;
         } else {
@@ -142,6 +159,9 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
 
     private void cleanup() {
         mReady = false;
+        mPlacementParams = new JSONObject();
+        mInitialLoadTime = -1;
+        mInitialRenderTime = -1;
         if (mPresenter != null) {
             mPresenter.destroy();
             mPresenter = null;
@@ -171,9 +191,28 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         }
     }
 
+    public JSONObject getPlacementParams() {
+        JSONObject finalParams = new JSONObject();
+        JsonOperations.mergeJsonObjects(finalParams, mPlacementParams);
+        if (mRequestManager != null) {
+            JSONObject requestManagerParams = mRequestManager.getPlacementParams();
+            if (requestManagerParams != null) {
+                JsonOperations.mergeJsonObjects(finalParams, requestManagerParams);
+            }
+        }
+        if (mPresenter != null) {
+            JSONObject adPresenterParams = mPresenter.getPlacementParams();
+            if (adPresenterParams != null) {
+                JsonOperations.mergeJsonObjects(finalParams, adPresenterParams);
+            }
+        }
+        return finalParams;
+    }
+
     private void renderAd() {
         mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mSkipOffset, this);
         if (mPresenter != null) {
+            mPresenter.setVideoListener(this);
             mPresenter.load();
         } else {
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.UNSUPPORTED_ASSET));
@@ -206,9 +245,11 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
             mAd = ad;
             if (!mAd.getZoneId().equalsIgnoreCase(mZoneId)) {
                 mZoneId = mAd.getZoneId();
+                JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_ZONE_ID, mZoneId);
             }
             mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, this);
             if (mPresenter != null) {
+                mPresenter.setVideoListener(this);
                 mPresenter.load();
             } else {
                 invokeOnLoadFailed(new HyBidError(HyBidErrorCode.UNSUPPORTED_ASSET));
@@ -245,8 +286,9 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
                         mAd = new Ad(assetGroupId, adValue, type);
                         mAdCache.put(mZoneId, mAd);
                         mVideoCache.put(mZoneId, adCacheItem);
-                        mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, HyBidInterstitialAd.this);
+                        mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mSkipOffset, HyBidInterstitialAd.this);
                         if (mPresenter != null) {
+                            mPresenter.setVideoListener(HyBidInterstitialAd.this);
                             mPresenter.load();
                         } else {
                             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.UNSUPPORTED_ASSET));
@@ -273,11 +315,13 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
                 mAdCache.put(mZoneId, mAd);
                 mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, this);
                 if (mPresenter != null) {
+                    mPresenter.setVideoListener(this);
                     mPresenter.load();
                 } else {
                     invokeOnLoadFailed(new HyBidError(HyBidErrorCode.UNSUPPORTED_ASSET));
                 }
             }
+            JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_ZONE_ID, mZoneId);
         } else {
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ASSET));
         }
@@ -291,7 +335,13 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
 
         String url = VastUrlUtils.formatURL(adValue);
 
-        PNHttpClient.makeRequest(mContext, url, null, null, new PNHttpClient.Listener() {
+        Map<String, String> headers = new HashMap<>();
+        String userAgent = HyBid.getDeviceInfo().getUserAgent();
+        if (!TextUtils.isEmpty(userAgent)) {
+            headers.put("User-Agent", userAgent);
+        }
+
+        PNHttpClient.makeRequest(mContext, url, headers, null, new PNHttpClient.Listener() {
             @Override
             public void onSuccess(String response) {
                 if (!TextUtils.isEmpty(response)) {
@@ -309,12 +359,20 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
 
 
     protected void invokeOnLoadFinished() {
+        if (mInitialLoadTime != -1) {
+            JsonOperations.putJsonLong(mPlacementParams, DiagnosticConstants.KEY_TIME_TO_LOAD,
+                    System.currentTimeMillis() - mInitialLoadTime);
+        }
         if (mListener != null) {
             mListener.onInterstitialLoaded();
         }
     }
 
     protected void invokeOnLoadFailed(Throwable exception) {
+        if (mInitialLoadTime != -1) {
+            JsonOperations.putJsonLong(mPlacementParams, DiagnosticConstants.KEY_TIME_TO_LOAD_FAILED,
+                    System.currentTimeMillis() - mInitialLoadTime);
+        }
         if (exception instanceof HyBidError) {
             HyBidError hyBidError = (HyBidError) exception;
             if (hyBidError.getErrorCode() == HyBidErrorCode.NO_FILL) {
@@ -344,6 +402,10 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         if (mListener != null) {
             mListener.onInterstitialDismissed();
         }
+    }
+
+    public void setVideoListener(VideoListener videoListener) {
+        this.mVideoListener = videoListener;
     }
 
     public void setMediation(boolean isMediation) {
@@ -382,6 +444,10 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
 
     @Override
     public void onInterstitialShown(InterstitialPresenter interstitialPresenter) {
+        if (mInitialRenderTime != -1) {
+            JsonOperations.putJsonLong(mPlacementParams, DiagnosticConstants.KEY_RENDER_TIME,
+                    System.currentTimeMillis() - mInitialRenderTime);
+        }
         invokeOnImpression();
     }
 
@@ -393,5 +459,34 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     @Override
     public void onInterstitialDismissed(InterstitialPresenter interstitialPresenter) {
         invokeOnDismissed();
+    }
+
+    //-------------------------------- VideoListener Callbacks -------------------------------------
+    @Override
+    public void onVideoError(int progressPercentage) {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoError(progressPercentage);
+        }
+    }
+
+    @Override
+    public void onVideoStarted() {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoStarted();
+        }
+    }
+
+    @Override
+    public void onVideoDismissed(int progressPercentage) {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoDismissed(progressPercentage);
+        }
+    }
+
+    @Override
+    public void onVideoFinished() {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoFinished();
+        }
     }
 }

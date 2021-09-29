@@ -137,6 +137,7 @@
     <string name="title_consent_strings">Consent Strings</string>
     <string name="title_vgi_id">VGI ID</string>
     <string name="title_mopub_cmp">MoPub CMP</string>
+    <string name="title_gdpr_applies">GDPR Applies</string>
     <string name="title_iab_v2_consent_string">TCF 2.0 Consent String:</string>
     <string name="title_iab_v1_consent_string">TCF 1.0 Consent String:</string>
     <string name="title_purpose">Purposes:</string>

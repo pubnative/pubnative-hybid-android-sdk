@@ -57,7 +57,6 @@ public abstract class HyBidRewardedActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();

@@ -23,6 +23,7 @@
 package net.pubnative.lite.sdk.interstitial.presenter;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
@@ -30,19 +31,22 @@ import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.json.JsonOperations;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by erosgarciaponte on 09.01.18.
  */
 
-public class InterstitialPresenterDecorator implements InterstitialPresenter, InterstitialPresenter.Listener {
+public class InterstitialPresenterDecorator implements InterstitialPresenter, InterstitialPresenter.Listener, VideoListener {
     private static final String TAG = InterstitialPresenterDecorator.class.getSimpleName();
     private final InterstitialPresenter mInterstitialPresenter;
     private final AdTracker mAdTrackingDelegate;
     private final ReportingController mReportingController;
     private final InterstitialPresenter.Listener mListener;
+    private VideoListener mVideoListener;
     private boolean mIsDestroyed;
 
     public InterstitialPresenterDecorator(InterstitialPresenter interstitialPresenter,
@@ -58,6 +62,11 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
     @Override
     public void setListener(InterstitialPresenter.Listener listener) {
         // We set the listener in the constructor instead
+    }
+
+    @Override
+    public void setVideoListener(VideoListener listener) {
+        mVideoListener = listener;
     }
 
     @Override
@@ -92,6 +101,24 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
     public void destroy() {
         mInterstitialPresenter.destroy();
         mIsDestroyed = true;
+    }
+
+    @Override
+    public JSONObject getPlacementParams() {
+        JSONObject finalParams = new JSONObject();
+        if (mInterstitialPresenter != null) {
+            JSONObject presenterParams = mInterstitialPresenter.getPlacementParams();
+            if (presenterParams != null) {
+                JsonOperations.mergeJsonObjects(finalParams, presenterParams);
+            }
+        }
+        if (mAdTrackingDelegate != null) {
+            JSONObject adTrackedParams = mAdTrackingDelegate.getPlacementParams();
+            if (adTrackedParams != null) {
+                JsonOperations.mergeJsonObjects(finalParams, adTrackedParams);
+            }
+        }
+        return finalParams;
     }
 
     @Override
@@ -174,5 +201,33 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
         String errorMessage = "Interstitial error for zone id: ";
         Logger.d(TAG, errorMessage);
         mListener.onInterstitialError(interstitialPresenter);
+    }
+
+    @Override
+    public void onVideoError(int progressPercentage) {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoError(progressPercentage);
+        }
+    }
+
+    @Override
+    public void onVideoStarted() {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoStarted();
+        }
+    }
+
+    @Override
+    public void onVideoDismissed(int progressPercentage) {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoDismissed(progressPercentage);
+        }
+    }
+
+    @Override
+    public void onVideoFinished() {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoFinished();
+        }
     }
 }

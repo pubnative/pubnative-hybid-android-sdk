@@ -6,6 +6,7 @@ import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.DisplayManager;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.UserDataManager;
+import net.pubnative.lite.sdk.config.ConfigManager;
 import net.pubnative.lite.sdk.core.BuildConfig;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.utils.PNCrypto;
@@ -36,6 +37,8 @@ public class AdRequestFactoryTest {
     private HyBidLocationManager mLocationManager;
     @Mock
     private UserDataManager mMockUserDataManager;
+    @Mock
+    private ConfigManager mMockConfigManager;
     @Mock
     private DisplayManager mMockDisplayManager;
 
@@ -85,6 +88,8 @@ public class AdRequestFactoryTest {
         Assert.assertEquals("12.126543", request.latitude);
         Assert.assertEquals("15.151534", request.longitude);
         Assert.assertEquals("points,revenuemodel,contentinfo,creativeid", request.mf);
+        Assert.assertEquals("1,2,3,4,5,6,7,8,11,12,13,14", request.protocol);
+        Assert.assertEquals("3,5,6,7", request.api);
         Assert.assertEquals("HyBid", request.displaymanager);
         Assert.assertEquals("1920", request.deviceWidth);
         Assert.assertEquals("1080", request.deviceHeight);

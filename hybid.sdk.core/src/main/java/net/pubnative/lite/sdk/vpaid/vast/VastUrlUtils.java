@@ -45,7 +45,7 @@ public class VastUrlUtils {
                 dnt,
                 latitude,
                 longitude,
-                "",
+                HyBid.getDeviceInfo().getUserAgent(),
                 HyBid.getDeviceInfo().getDeviceWidth(),
                 HyBid.getDeviceInfo().getDeviceHeight(),
                 gdpr,

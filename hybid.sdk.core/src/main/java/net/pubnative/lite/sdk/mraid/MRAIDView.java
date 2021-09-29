@@ -74,7 +74,9 @@ import android.widget.RelativeLayout;
 
 import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
 
+import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.core.BuildConfig;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.mraid.internal.MRAIDHtmlProcessor;
 import net.pubnative.lite.sdk.mraid.internal.MRAIDLog;
@@ -124,6 +126,8 @@ public class MRAIDView extends RelativeLayout {
     public @interface MRAIDState {
     }
 
+    private static final String MRAID_VERSION = "3.0";
+
     // nothing is displayed, ad is currently loading assets or making other requests
     public static final int STATE_LOADING = 0;
 
@@ -158,7 +162,7 @@ public class MRAIDView extends RelativeLayout {
 
     private static final String[] COMMANDS_WITH_MAP = {
             "setOrientationProperties",
-            "setResizeProperties",
+            "setResizeProperties"
     };
 
     // UI elements
@@ -604,8 +608,18 @@ public class MRAIDView extends RelativeLayout {
         }
     }
 
+    @JavascriptMRAIDCallback
+    protected void unload() {
+        MRAIDLog.d(MRAID_LOG_TAG + "-JS callback", "unload");
+        MRAIDLog.d("hz-m unload wv: " + webView);
+        if (listener != null) {
+            listener.mraidViewError(this);
+        }
+    }
+
     // Expand an ad from banner to fullscreen
     // Note: This method is also used to present an interstitial ad.
+    @Deprecated
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @JavascriptMRAIDCallback
     protected void expand(String url) {
@@ -831,25 +845,14 @@ public class MRAIDView extends RelativeLayout {
         }
     }
 
+    @Deprecated
     @JavascriptMRAIDCallback
     private void useCustomClose(String useCustomCloseString) {
         MRAIDLog.d(MRAID_LOG_TAG + "-JS callback", "useCustomClose " + useCustomCloseString);
         boolean useCustomClose = Boolean.parseBoolean(useCustomCloseString);
         if (this.useCustomClose != useCustomClose) {
             this.useCustomClose = useCustomClose;
-            if (useCustomClose) {
-                if (closeLayoutListener != null) {
-                    closeLayoutListener.onRemoveCloseLayout();
-                } else {
-                    removeDefaultCloseButton();
-                }
-            } else {
-                if (closeLayoutListener != null) {
-                    closeLayoutListener.onShowCloseLayout();
-                } else {
-                    showDefaultCloseButton();
-                }
-            }
+            // Do nothing. We won't support disabling the native close button
         }
     }
 
@@ -1326,6 +1329,28 @@ public class MRAIDView extends RelativeLayout {
         injectJavaScript("mraid.fireViewableChangeEvent(" + isViewable + ");");
     }
 
+    protected void fireExposureChangeEvent() {
+
+        //TODO: We should validate it later in terms of exposure
+
+        double exposure = 0.0;
+        if (isViewable)
+            exposure = 100.0;
+
+        MRAIDLog.d(MRAID_LOG_TAG, "fireExposureChangeEvent");
+        JSONObject jsonVisibleRectangle = new JSONObject();
+        try {
+            jsonVisibleRectangle.put("x", getX());
+            jsonVisibleRectangle.put("y", getY());
+            jsonVisibleRectangle.put("width", getWidth() * exposure / 100);
+            jsonVisibleRectangle.put("height", getHeight() * exposure / 100);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        injectJavaScript("mraid.fireExposureChangeEvent(" + exposure + "," + jsonVisibleRectangle.toString() + "," + "null" + ");");
+    }
+
+
     private int px2dip(int pixels) {
         if (displayMetrics != null) {
             return pixels * DisplayMetrics.DENSITY_DEFAULT / displayMetrics.densityDpi;
@@ -1380,7 +1405,22 @@ public class MRAIDView extends RelativeLayout {
     }
 
     private void setEnvironmentVariables() {
-        //TODO fill ENV variables for MRAID 3.0
+        DeviceInfo deviceInfo = HyBid.getDeviceInfo();
+
+        if (getContext() != null
+                && getContext().getApplicationContext() != null
+                && !TextUtils.isEmpty(getContext().getApplicationContext().getPackageName())) {
+            injectJavaScript("mraid.setAppId(\"" + getContext().getApplicationContext().getPackageName() + "\");");
+        }
+        injectJavaScript("mraid.setSdkVersion(\"" + BuildConfig.SDK_VERSION + "\");");
+        injectJavaScript("mraid.setCoppa(" + HyBid.isCoppaEnabled() + ");");
+
+        if (deviceInfo != null) {
+            if (!deviceInfo.limitTracking() && !TextUtils.isEmpty(deviceInfo.getAdvertisingId())) {
+                injectJavaScript("mraid.setIfa(\"" + deviceInfo.getAdvertisingId() + "\");");
+            }
+            injectJavaScript("mraid.setLimitAdTracking(" + deviceInfo.limitTracking() + ");");
+        }
     }
 
     private void setLocation() {
@@ -1391,7 +1431,7 @@ public class MRAIDView extends RelativeLayout {
                 JSONObject locationJson = new JSONObject();
                 try {
                     locationJson.put("lat", location.getLatitude());
-                    locationJson.put("lon", location.getLatitude());
+                    locationJson.put("lon", location.getLongitude());
                     locationJson.put("type", 1); //GPS
                     locationJson.put("accuracy", location.getAccuracy());
                     long elapsedNanos = SystemClock.elapsedRealtimeNanos() - location.getElapsedRealtimeNanos();
@@ -1404,6 +1444,8 @@ public class MRAIDView extends RelativeLayout {
             } else {
                 injectJavaScript("mraid.setLocation(-1);");
             }
+        } else {
+            injectJavaScript("mraid.setLocation(-1);");
         }
     }
 
@@ -1571,6 +1613,7 @@ public class MRAIDView extends RelativeLayout {
                         if (isViewable) {
                             fireViewableChangeEvent();
                         }
+                        fireExposureChangeEvent();
                     }
                 });
             }
@@ -1749,6 +1792,7 @@ public class MRAIDView extends RelativeLayout {
             isViewable = isCurrentlyViewable;
             if (isPageFinished && isLaidOut) {
                 fireViewableChangeEvent();
+                fireExposureChangeEvent();
             }
         }
     }
@@ -1830,6 +1874,7 @@ public class MRAIDView extends RelativeLayout {
                 if (isViewable) {
                     fireViewableChangeEvent();
                 }
+                fireExposureChangeEvent();
             }
             if (listener != null) {
                 listener.mraidViewExpand(this);

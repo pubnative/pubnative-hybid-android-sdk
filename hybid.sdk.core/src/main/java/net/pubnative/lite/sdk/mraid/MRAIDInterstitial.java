@@ -58,6 +58,7 @@ public class MRAIDInterstitial extends MRAIDView {
         super.close();
     }
 
+    @Deprecated
     @Override
     protected void expand(String url) {
         // only expand interstitials from loading state

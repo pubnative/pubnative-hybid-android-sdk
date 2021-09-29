@@ -185,6 +185,14 @@ public final class PNApiUrlComposer {
             uriBuilder.appendQueryParameter("userconsent", adRequest.userconsent);
         }
 
+        if (!TextUtils.isEmpty(adRequest.protocol)) {
+            uriBuilder.appendQueryParameter("protocol", adRequest.protocol);
+        }
+
+        if (!TextUtils.isEmpty(adRequest.api)) {
+            uriBuilder.appendQueryParameter("api", adRequest.api);
+        }
+
         return uriBuilder.build();
     }
 }

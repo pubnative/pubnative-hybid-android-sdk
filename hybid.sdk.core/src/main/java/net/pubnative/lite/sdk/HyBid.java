@@ -112,7 +112,7 @@ public class HyBid {
             }
         }
         sDeviceInfo = new DeviceInfo(application.getApplicationContext());
-        sUserDataManager = new UserDataManager(application.getApplicationContext(), appToken);
+        sUserDataManager = new UserDataManager(application.getApplicationContext());
         sConfigManager = new ConfigManager(application.getApplicationContext(), appToken);
         sAdCache = new AdCache();
 
@@ -125,33 +125,20 @@ public class HyBid {
         sDeviceInfo.initialize(new DeviceInfo.Listener() {
             @Override
             public void onInfoLoaded() {
+                DiagnosticsManager.printDiagnosticsLog(application, DiagnosticsManager.Event.INITIALISATION);
+                if (initialisationListener != null) {
+                    initialisationListener.onInitialisationFinished(true);
+                }
+
                 sConfigManager.initialize(new ConfigManager.ConfigListener() {
                     @Override
                     public void onConfigFetched() {
-                        sUserDataManager.initialize(sDeviceInfo.getAdvertisingId(), new UserDataManager.UserDataInitialisationListener() {
-                            @Override
-                            public void onDataInitialised(boolean success) {
-                                if (initialisationListener != null) {
-                                    // todo : Change the way the listener works once old consent is deprecated
-                                    DiagnosticsManager.printDiagnosticsLog(application, DiagnosticsManager.Event.INITIALISATION);
-                                    initialisationListener.onInitialisationFinished(true);
-                                }
-                            }
-                        });
+                        // The fetched config will be optionally used during the ad request
                     }
 
                     @Override
                     public void onConfigFetchFailed(Throwable error) {
                         Logger.d(TAG, "Error fetching config: ", error);
-                        sUserDataManager.initialize(sDeviceInfo.getAdvertisingId(), new UserDataManager.UserDataInitialisationListener() {
-                            @Override
-                            public void onDataInitialised(boolean success) {
-                                if (initialisationListener != null) {
-                                    DiagnosticsManager.printDiagnosticsLog(application, DiagnosticsManager.Event.INITIALISATION);
-                                    initialisationListener.onInitialisationFinished(true);
-                                }
-                            }
-                        });
                     }
                 });
             }

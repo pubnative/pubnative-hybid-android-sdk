@@ -32,8 +32,10 @@ import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.json.JsonOperations;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPresenter.Listener {
     private static final String TAG = RewardedPresenterDecorator.class.getSimpleName();
@@ -90,6 +92,24 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
     public void destroy() {
         mRewardedPresenter.destroy();
         mIsDestroyed = true;
+    }
+
+    @Override
+    public JSONObject getPlacementParams() {
+        JSONObject finalParams = new JSONObject();
+        if (mRewardedPresenter != null) {
+            JSONObject presenterParams = mRewardedPresenter.getPlacementParams();
+            if (presenterParams != null) {
+                JsonOperations.mergeJsonObjects(finalParams, presenterParams);
+            }
+        }
+        if (mAdTrackingDelegate != null) {
+            JSONObject adTrackedParams = mAdTrackingDelegate.getPlacementParams();
+            if (adTrackedParams != null) {
+                JsonOperations.mergeJsonObjects(finalParams, adTrackedParams);
+            }
+        }
+        return finalParams;
     }
 
     @Override

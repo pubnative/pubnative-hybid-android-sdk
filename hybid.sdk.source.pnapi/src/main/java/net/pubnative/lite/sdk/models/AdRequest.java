@@ -61,4 +61,6 @@ public class AdRequest {
     public String usprivacy;
     public String userconsent;
     public String rv;
+    public String protocol;
+    public String api;
 }
