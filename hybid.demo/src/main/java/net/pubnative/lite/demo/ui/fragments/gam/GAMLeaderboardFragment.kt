@@ -1,4 +1,4 @@
-package net.pubnative.lite.demo.ui.fragments.dfp
+package net.pubnative.lite.demo.ui.fragments.gam
 
 import android.os.Bundle
 import android.util.Log
@@ -11,8 +11,9 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdSize
-import com.google.android.gms.ads.doubleclick.PublisherAdRequest
-import com.google.android.gms.ads.doubleclick.PublisherAdView
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.admanager.AdManagerAdRequest
+import com.google.android.gms.ads.admanager.AdManagerAdView
 import net.pubnative.lite.adapters.dfp.HyBidGAMBidUtils
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
@@ -22,40 +23,39 @@ import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.api.LeaderboardRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
-import net.pubnative.lite.sdk.utils.HeaderBiddingUtils
 
-class DFPLeaderboardFragment : Fragment(), RequestManager.RequestListener {
-    val TAG = DFPBannerFragment::class.java.simpleName
+class GAMLeaderboardFragment : Fragment(R.layout.fragment_dfp_leaderboard),
+    RequestManager.RequestListener {
+    val TAG = GAMBannerFragment::class.java.simpleName
 
     private lateinit var requestManager: RequestManager
     private var zoneId: String? = null
     private var adUnitId: String? = null
 
-    private lateinit var dfpLeaderboard: PublisherAdView
-    private lateinit var dfpLeaderboardContainer: FrameLayout
+    private lateinit var gamLeaderboard: AdManagerAdView
+    private lateinit var gamLeaderboardContainer: FrameLayout
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_dfp_leaderboard, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
-        dfpLeaderboardContainer = view.findViewById(R.id.dfp_leaderboard_container)
+        gamLeaderboardContainer = view.findViewById(R.id.dfp_leaderboard_container)
 
         requestManager = LeaderboardRequestManager()
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
-        adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().dfpLeaderboardAdUnitId
+        adUnitId =
+            SettingsManager.getInstance(requireActivity()).getSettings().dfpLeaderboardAdUnitId
 
-        dfpLeaderboard = PublisherAdView(activity)
-        dfpLeaderboard.adUnitId = adUnitId
-        dfpLeaderboard.setAdSizes(AdSize.LEADERBOARD)
-        dfpLeaderboard.adListener = adListener
+        gamLeaderboard = AdManagerAdView(requireActivity())
+        gamLeaderboard.adUnitId = adUnitId!!
+        gamLeaderboard.setAdSizes(AdSize.LEADERBOARD)
+        gamLeaderboard.adListener = adListener
 
-        dfpLeaderboardContainer.addView(dfpLeaderboard)
+        gamLeaderboardContainer.addView(gamLeaderboard)
 
         loadButton.setOnClickListener {
             errorView.text = ""
@@ -64,12 +64,17 @@ class DFPLeaderboardFragment : Fragment(), RequestManager.RequestListener {
             loadPNAd()
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
+        errorView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                errorView.text.toString()
+            )
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        dfpLeaderboard.destroy()
+        gamLeaderboard.destroy()
     }
 
     fun loadPNAd() {
@@ -80,13 +85,10 @@ class DFPLeaderboardFragment : Fragment(), RequestManager.RequestListener {
 
     // --------------- HyBid Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
-        val builder = PublisherAdRequest.Builder()
-
-        HyBidGAMBidUtils.addBids(ad,builder)
-
+        val builder = AdManagerAdRequest.Builder()
+        HyBidGAMBidUtils.addBids(ad, builder)
         val adRequest = builder.build()
-
-        dfpLeaderboard.loadAd(adRequest)
+        gamLeaderboard.loadAd(adRequest)
 
         Log.d(TAG, "onRequestSuccess")
         displayLogs()
@@ -105,8 +107,8 @@ class DFPLeaderboardFragment : Fragment(), RequestManager.RequestListener {
             Log.d(TAG, "onAdLoaded")
         }
 
-        override fun onAdFailedToLoad(errorCode: Int) {
-            super.onAdFailedToLoad(errorCode)
+        override fun onAdFailedToLoad(error: LoadAdError) {
+            super.onAdFailedToLoad(error)
             Log.d(TAG, "onAdFailedToLoad")
         }
 
@@ -123,11 +125,6 @@ class DFPLeaderboardFragment : Fragment(), RequestManager.RequestListener {
         override fun onAdOpened() {
             super.onAdOpened()
             Log.d(TAG, "onAdOpened")
-        }
-
-        override fun onAdLeftApplication() {
-            super.onAdLeftApplication()
-            Log.d(TAG, "onAdLeftApplication")
         }
 
         override fun onAdClosed() {

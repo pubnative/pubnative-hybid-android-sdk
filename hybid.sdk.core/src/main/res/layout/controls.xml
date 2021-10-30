@@ -45,6 +45,23 @@
 
     </FrameLayout>
 
+    <TextView
+        android:id="@+id/openURL"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:background="@drawable/open_url_background"
+        android:clickable="true"
+        android:textSize="16sp"
+        android:focusable="true"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:text="@string/learn_more"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF" />
+
     <include layout="@layout/end_card" />
 
 </FrameLayout>

@@ -22,6 +22,8 @@
 //
 package net.pubnative.lite.sdk.api;
 
+import android.text.TextUtils;
+
 import net.pubnative.lite.sdk.AdCache;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.Reporting;
@@ -46,12 +48,14 @@ import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.List;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
  */
-
 public class RequestManager {
     public interface RequestListener {
         void onRequestSuccess(Ad ad);
@@ -71,8 +75,13 @@ public class RequestManager {
     private RequestListener mRequestListener;
     private boolean mIsDestroyed;
     private AdSize mAdSize;
-    private JSONObject mPlacementParams;
-    private boolean mIsRewarded = false;
+    private final JSONObject mPlacementParams;
+    private final boolean mIsRewarded = false;
+    private boolean mAutoCacheOnLoad = true;
+
+    JSONObject jsonCacheParams;
+    private Long mRequestTimeMilliseconds = 0L;
+    private Long mCacheTimeMilliseconds = 0L;
 
     public RequestManager() {
         this(HyBid.getApiClient(), HyBid.getAdCache(), HyBid.getVideoAdCache(), HyBid.getConfigManager(), new AdRequestFactory(), HyBid.getReportingController(), new PNInitializationHelper());
@@ -96,6 +105,13 @@ public class RequestManager {
         JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_AD_SIZE, mAdSize.toString());
         JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_INTEGRATION_TYPE, IntegrationType.HEADER_BIDDING.getCode());
         mConfigManager = configManager;
+
+        jsonCacheParams = new JSONObject();
+        try {
+            jsonCacheParams.put(Reporting.Key.APP_TOKEN, HyBid.getAppToken());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setRequestListener(RequestListener requestListener) {
@@ -148,6 +164,14 @@ public class RequestManager {
             @Override
             public void onRequestCreated(AdRequest adRequest) {
                 requestAdFromApi(adRequest);
+                if (adRequest != null) {
+                    try {
+                        jsonCacheParams.put(Reporting.Key.AD_REQUEST, adRequest.toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
             }
         });
     }
@@ -160,6 +184,13 @@ public class RequestManager {
         if (mApiClient == null) {
             mApiClient = HyBid.getApiClient();
         }
+
+        try {
+            jsonCacheParams.put(Reporting.Key.TIMESTAMP, String.valueOf(System.currentTimeMillis()));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         Logger.d(TAG, "Requesting ad for zone id: " + adRequest.zoneid);
         reportAdRequest(adRequest);
         mApiClient.getAd(adRequest, new PNApiClient.AdRequestListener() {
@@ -201,33 +232,13 @@ public class RequestManager {
         switch (ad.assetgroupid) {
             case ApiAssetGroupType.VAST_INTERSTITIAL:
             case ApiAssetGroupType.VAST_MRECT: {
-                VideoAdProcessor videoAdProcessor = new VideoAdProcessor();
-                videoAdProcessor.process(mApiClient.getContext(), ad.getVast(), null, new VideoAdProcessor.Listener() {
-                    @Override
-                    public void onCacheSuccess(AdParams adParams, String videoFilePath, String endCardFilePath) {
-                        if (mIsDestroyed) {
-                            return;
-                        }
-
-                        VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardFilePath);
-                        mVideoCache.put(adRequest.zoneid, adCacheItem);
-                        if (mRequestListener != null) {
-                            mRequestListener.onRequestSuccess(ad);
-                        }
+                if (mAutoCacheOnLoad) {
+                    cacheAd(ad);
+                } else {
+                    if (mRequestListener != null) {
+                        mRequestListener.onRequestSuccess(ad);
                     }
-
-                    @Override
-                    public void onCacheError(Throwable error) {
-                        if (mIsDestroyed) {
-                            return;
-                        }
-
-                        Logger.w(TAG, error.getMessage());
-                        if (mRequestListener != null) {
-                            mRequestListener.onRequestFail(error);
-                        }
-                    }
-                });
+                }
                 break;
             }
             default: {
@@ -238,13 +249,79 @@ public class RequestManager {
         }
     }
 
+    public void cacheAd(final Ad ad) {
+        if (ad != null && !TextUtils.isEmpty(ad.getVast())) {
+            try {
+                jsonCacheParams.put(Reporting.Key.AD_TYPE, "VAST");
+                jsonCacheParams.put(Reporting.Key.VAST, ad.getVast());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            mRequestTimeMilliseconds = System.currentTimeMillis();
+            VideoAdProcessor videoAdProcessor = new VideoAdProcessor();
+            videoAdProcessor.process(mApiClient.getContext(), ad.getVast(), null, new VideoAdProcessor.Listener() {
+                @Override
+                public void onCacheSuccess(AdParams adParams, String videoFilePath, String endCardFilePath, List<String> omidVendors) {
+                    if (mIsDestroyed) {
+                        return;
+                    }
+                    mCacheTimeMilliseconds = System.currentTimeMillis();
+
+                    if (omidVendors != null && !omidVendors.isEmpty()) {
+                        JsonOperations.putStringArray(mPlacementParams, DiagnosticConstants.KEY_OM_VENDORS, omidVendors);
+                    }
+
+                    try {
+                        jsonCacheParams.put(Reporting.Key.CACHE_TIME, String.valueOf(mCacheTimeMilliseconds - mRequestTimeMilliseconds));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    reportAdCache();
+
+                    VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardFilePath);
+                    mVideoCache.put(ad.getZoneId(), adCacheItem);
+                    if (mAutoCacheOnLoad && mRequestListener != null) {
+                        mRequestListener.onRequestSuccess(ad);
+                    }
+                }
+
+                @Override
+                public void onCacheError(Throwable error) {
+                    if (mIsDestroyed) {
+                        return;
+                    }
+
+                    Logger.w(TAG, error.getMessage());
+                    if (!mAutoCacheOnLoad && mRequestListener != null) {
+                        mRequestListener.onRequestFail(error);
+                    }
+                }
+            });
+        }
+    }
+
+    private void reportAdCache() {
+        if (mReportingController != null) {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.CACHE);
+            JsonOperations.mergeJsonObjects(jsonCacheParams, getPlacementParams());
+            reportingEvent.mergeJSONObject(jsonCacheParams);
+            mReportingController.reportEvent(reportingEvent);
+        }
+    }
+
     private void reportAdRequest(AdRequest adRequest) {
         if (mReportingController != null) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.REQUEST);
             reportingEvent.setTimestamp(String.valueOf(System.currentTimeMillis()));
+
+            String adSize = null;
             if (getAdSize() != null) {
-                reportingEvent.setAdSize(getAdSize().toString());
+                adSize = getAdSize().toString();
+                reportingEvent.setAdSize(adSize);
             }
             reportingEvent.setPlacementId(adRequest.zoneid);
             mReportingController.reportEvent(reportingEvent);
@@ -256,8 +333,10 @@ public class RequestManager {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.RESPONSE);
             reportingEvent.setTimestamp(String.valueOf(System.currentTimeMillis()));
+            String adSize = null;
             if (getAdSize() != null) {
-                reportingEvent.setAdSize(getAdSize().toString());
+                adSize = getAdSize().toString();
+                reportingEvent.setAdSize(adSize);
             }
             reportingEvent.setPlacementId(adRequest.zoneid);
             reportingEvent.setCustomString(Reporting.Key.BID_PRICE,
@@ -297,9 +376,25 @@ public class RequestManager {
         return mIsRewarded;
     }
 
+    public boolean isAutoCacheOnLoad() {
+        return mAutoCacheOnLoad;
+    }
+
+    public void setAutoCacheOnLoad(boolean autoCacheOnLoad) {
+        this.mAutoCacheOnLoad = autoCacheOnLoad;
+    }
+
     public JSONObject getPlacementParams() {
         JSONObject finalParams = new JSONObject();
         JsonOperations.mergeJsonObjects(finalParams, mPlacementParams);
+        if (getAdSize() != null) {
+            JsonOperations.putJsonString(finalParams, DiagnosticConstants.KEY_AD_SIZE, getAdSize().toString());
+        }
+        if (HyBid.isViewabilityMeasurementActivated() && HyBid.getViewabilityManager() != null) {
+            JsonOperations.putJsonBoolean(finalParams, DiagnosticConstants.KEY_OM_ENABLED, true);
+        } else {
+            JsonOperations.putJsonBoolean(finalParams, DiagnosticConstants.KEY_OM_ENABLED, false);
+        }
         if (mApiClient != null) {
             JSONObject apiClientParams = mApiClient.getPlacementParams();
             if (apiClientParams != null) {

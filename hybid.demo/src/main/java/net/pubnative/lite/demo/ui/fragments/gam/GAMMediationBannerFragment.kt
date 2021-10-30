@@ -1,4 +1,4 @@
-package net.pubnative.lite.demo.ui.fragments.dfp
+package net.pubnative.lite.demo.ui.fragments.gam
 
 import android.os.Bundle
 import android.util.Log
@@ -10,46 +10,51 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.google.android.gms.ads.*
+import com.google.android.gms.ads.admanager.AdManagerAdView
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
-import net.pubnative.lite.demo.util.AdmobErrorParser
 import net.pubnative.lite.demo.util.ClipboardUtils
 
-class DFPMediationBannerFragment : Fragment(){
-    val TAG = DFPMediationBannerFragment::class.java.simpleName
+class GAMMediationBannerFragment : Fragment(R.layout.fragment_dfp_banner) {
+    val TAG = GAMMediationBannerFragment::class.java.simpleName
 
-    private lateinit var dfpBanner: AdView
-    private lateinit var dfpBannerContainer: FrameLayout
+    private lateinit var gamBanner: AdManagerAdView
+    private lateinit var gamBannerContainer: FrameLayout
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_dfp_banner, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
-        dfpBannerContainer = view.findViewById(R.id.dfp_banner_container)
+        gamBannerContainer = view.findViewById(R.id.dfp_banner_container)
 
-        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().dfpMediationBannerAdUnitId
+        val adUnitId =
+            SettingsManager.getInstance(requireActivity()).getSettings().dfpMediationBannerAdUnitId
 
-        dfpBanner = AdView(activity)
-        dfpBanner.adSize = AdSize.BANNER
-        dfpBanner.adUnitId = adUnitId
-        dfpBanner.adListener = adListener
+        gamBanner = AdManagerAdView(requireActivity())
+        gamBanner.adSize = AdSize.BANNER
+        gamBanner.adUnitId = adUnitId
+        gamBanner.adListener = adListener
 
-        dfpBannerContainer.addView(dfpBanner)
+        gamBannerContainer.addView(gamBanner)
 
         loadButton.setOnClickListener {
             errorView.text = ""
-            dfpBanner.loadAd(AdRequest.Builder()
-                    .addTestDevice("9CD3F3CADFC5127409B07C5F802273E7")
-                    .build())
+            gamBanner.loadAd(
+                AdRequest.Builder()
+                    .build()
+            )
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
+        errorView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                errorView.text.toString()
+            )
+        }
     }
 
     // ------------------ Admob Ad Listener ---------------------
@@ -63,7 +68,7 @@ class DFPMediationBannerFragment : Fragment(){
         override fun onAdFailedToLoad(loadAdError: LoadAdError) {
             super.onAdFailedToLoad(loadAdError)
             displayLogs()
-            errorView.text = AdmobErrorParser.getErrorMessage(loadAdError.code)
+            errorView.text = loadAdError.message
             Log.d(TAG, "onAdFailedToLoad")
         }
 
@@ -77,9 +82,9 @@ class DFPMediationBannerFragment : Fragment(){
             Log.d(TAG, "onAdOpened")
         }
 
-        override fun onAdLeftApplication() {
-            super.onAdLeftApplication()
-            Log.d(TAG, "onAdLeftApplication")
+        override fun onAdImpression() {
+            super.onAdImpression()
+            Log.d(TAG, "onAdImpression")
         }
 
         override fun onAdClosed() {

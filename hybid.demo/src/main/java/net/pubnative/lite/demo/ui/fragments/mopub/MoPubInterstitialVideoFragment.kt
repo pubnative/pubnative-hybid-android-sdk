@@ -29,6 +29,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.mopub.mobileads.MoPubErrorCode
@@ -53,11 +54,16 @@ class MoPubInterstitialVideoFragment : Fragment(R.layout.fragment_mopub_intersti
     private lateinit var mopubInterstitial: MoPubInterstitial
     private var zoneId: String? = null
     private var adUnitId: String? = null
+    private var ad: Ad? = null
 
     private lateinit var loadButton: Button
+    private lateinit var prepareButton: Button
     private lateinit var showButton: Button
+    private lateinit var cachingCheckbox: CheckBox
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
+
+    private var cachingEnabled: Boolean = true
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -67,7 +73,11 @@ class MoPubInterstitialVideoFragment : Fragment(R.layout.fragment_mopub_intersti
         creativeIdView = view.findViewById(R.id.view_creative_id)
         creativeIdView.visibility = View.VISIBLE
         loadButton = view.findViewById(R.id.button_load)
+        prepareButton = view.findViewById(R.id.button_prepare)
         showButton = view.findViewById(R.id.button_show)
+        cachingCheckbox = view.findViewById(R.id.check_caching)
+        cachingCheckbox.visibility = View.VISIBLE
+        prepareButton.isEnabled = false
         showButton.isEnabled = false
 
         adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubInterstitialVideoAdUnitId
@@ -85,8 +95,19 @@ class MoPubInterstitialVideoFragment : Fragment(R.layout.fragment_mopub_intersti
             loadPNAd()
         }
 
+        prepareButton.setOnClickListener {
+            ad?.let { ad ->
+                requestManager.cacheAd(ad)
+            }
+        }
+
         showButton.setOnClickListener {
             mopubInterstitial.show()
+        }
+
+        cachingCheckbox.setOnCheckedChangeListener { _, isChecked ->
+            cachingEnabled = isChecked
+            prepareButton.visibility = if (isChecked) View.GONE else View.VISIBLE
         }
 
         errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
@@ -101,11 +122,13 @@ class MoPubInterstitialVideoFragment : Fragment(R.layout.fragment_mopub_intersti
     fun loadPNAd() {
         requestManager.setZoneId(zoneId)
         requestManager.setRequestListener(this)
+        requestManager.isAutoCacheOnLoad = cachingEnabled
         requestManager.requestAd()
     }
 
     // --------------- HyBid Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
+        this.ad = ad
         mopubInterstitial.setKeywords(HeaderBiddingUtils.getHeaderBiddingKeywords(ad))
         mopubInterstitial.load()
 
@@ -118,6 +141,7 @@ class MoPubInterstitialVideoFragment : Fragment(R.layout.fragment_mopub_intersti
 
     override fun onRequestFail(throwable: Throwable?) {
         Log.d(TAG, "onRequestFail: ", throwable)
+        ad = null
         errorView.text = throwable?.message
         creativeIdView.text = ""
         displayLogs()
@@ -126,10 +150,13 @@ class MoPubInterstitialVideoFragment : Fragment(R.layout.fragment_mopub_intersti
     // ------------- MoPub Interstitial Listener ------------------
     override fun onInterstitialLoaded(interstitial: MoPubInterstitial?) {
         showButton.isEnabled = true
+        prepareButton.isEnabled = !cachingEnabled
         Log.d(TAG, "onInterstitialLoaded")
     }
 
     override fun onInterstitialFailed(interstitial: MoPubInterstitial?, errorCode: MoPubErrorCode?) {
+        prepareButton.isEnabled = false
+        showButton.isEnabled = false
         Log.d(TAG, "onInterstitialFailed")
     }
 
@@ -139,6 +166,8 @@ class MoPubInterstitialVideoFragment : Fragment(R.layout.fragment_mopub_intersti
 
     override fun onInterstitialDismissed(interstitial: MoPubInterstitial?) {
         Log.d(TAG, "onInterstitialDismissed")
+        prepareButton.isEnabled = false
+        showButton.isEnabled = false
     }
 
     override fun onInterstitialClicked(interstitial: MoPubInterstitial?) {

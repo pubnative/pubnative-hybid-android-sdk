@@ -8,11 +8,14 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
 
+import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.InterstitialActionBehaviour;
 import net.pubnative.lite.sdk.core.R;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.VideoAdController;
@@ -39,6 +42,8 @@ public class ViewControllerVast implements View.OnClickListener {
     private View mSkipView;
     private ImageView mMuteView;
 
+    private InterstitialActionBehaviour interstitialClickBehaviour;
+
     public ViewControllerVast(VideoAdController adController) {
         mAdController = adController;
     }
@@ -50,17 +55,20 @@ public class ViewControllerVast implements View.OnClickListener {
         bannerView.removeAllViews();
 
         mControlsLayout = LayoutInflater.from(context).inflate(R.layout.controls, bannerView, false);
-        mControlsLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mAdController.isRewarded() && !mAdController.adFinishedPlaying()) {
-                    // Define pause/resume behaviour
-                } else {
-                    mAdController.getViewabilityAdSession().fireClick();
-                    mAdController.openUrl(null);
+
+        interstitialClickBehaviour = HyBid.getInterstitialClickBehaviour();
+
+        if (interstitialClickBehaviour == InterstitialActionBehaviour.HB_CREATIVE) {
+            mControlsLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    validateOpenURLClicked();
                 }
-            }
-        });
+            });
+            mControlsLayout.findViewById(R.id.openURL).setVisibility(View.GONE);
+        } else {
+            mControlsLayout.findViewById(R.id.openURL).setVisibility(View.VISIBLE);
+        }
 
         mVideoPlayerLayout = mControlsLayout.findViewById(R.id.videoPlayerLayout);
 
@@ -70,6 +78,7 @@ public class ViewControllerVast implements View.OnClickListener {
 
         mControlsLayout.findViewById(R.id.closeView).setOnClickListener(this);
         mControlsLayout.findViewById(R.id.replayView).setOnClickListener(this);
+        mControlsLayout.findViewById(R.id.openURL).setOnClickListener(this);
 
         mSkipCountdownView = mControlsLayout.findViewById(R.id.count_down);
         mLinearCountdownView = mControlsLayout.findViewById(R.id.linear_count_down);
@@ -88,6 +97,15 @@ public class ViewControllerVast implements View.OnClickListener {
 
         if (mAdController.isRewarded()) {
             mSkipCountdownView.setVisibility(View.GONE);
+        }
+    }
+
+    private void validateOpenURLClicked() {
+        if (mAdController.isRewarded() && !mAdController.adFinishedPlaying() && interstitialClickBehaviour == InterstitialActionBehaviour.HB_CREATIVE) {
+            // Define pause/resume behaviour
+        } else {
+            mAdController.getViewabilityAdSession().fireClick();
+            mAdController.openUrl(null);
         }
     }
 
@@ -219,6 +237,8 @@ public class ViewControllerVast implements View.OnClickListener {
             muteVideo();
         } else if (v.getId() == R.id.replayView) {
             replayVideo();
+        } else if (v.getId() == R.id.openURL) {
+            validateOpenURLClicked();
         }
     }
 

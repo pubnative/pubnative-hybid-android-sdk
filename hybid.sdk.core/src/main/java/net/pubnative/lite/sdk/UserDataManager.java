@@ -61,6 +61,7 @@ public class UserDataManager {
         mPreferences = mContext.getSharedPreferences(PREFERENCES_CONSENT, Context.MODE_PRIVATE);
         mAppPreferences = PreferenceManager.getDefaultSharedPreferences(mContext.getApplicationContext());
         mAppPreferences.registerOnSharedPreferenceChangeListener(mAppPrefsListener);
+        updatePublicConsent(mAppPreferences);
     }
 
     @Deprecated
@@ -210,13 +211,43 @@ public class UserDataManager {
         }
     }
 
+    private String getPublicTCFConsent(SharedPreferences sharedPreferences) {
+        return sharedPreferences.getString(KEY_GDPR_PUBLIC_CONSENT, "");
+    }
+
+    private String getPublicTCF2Consent(SharedPreferences sharedPreferences) {
+        return sharedPreferences.getString(KEY_GDPR_TCF_2_PUBLIC_CONSENT, "");
+    }
+
+    private String getPublicCCPAConsent(SharedPreferences sharedPreferences) {
+        return sharedPreferences.getString(KEY_CCPA_PUBLIC_CONSENT, "");
+    }
+
+    private void updatePublicConsent(SharedPreferences publicPrefs) {
+        if (publicPrefs != null) {
+            String tcf2Consent = getPublicTCF2Consent(publicPrefs);
+            String tcf1Consent = getPublicTCFConsent(publicPrefs);
+            String ccpaConsent = getPublicCCPAConsent(publicPrefs);
+
+            if (!TextUtils.isEmpty(tcf2Consent)) {
+                setIABGDPRConsentString(tcf2Consent);
+            } else if (!TextUtils.isEmpty(tcf1Consent)) {
+                setIABGDPRConsentString(tcf1Consent);
+            }
+
+            if (!TextUtils.isEmpty(ccpaConsent)) {
+                setIABUSPrivacyString(ccpaConsent);
+            }
+        }
+    }
+
     private final SharedPreferences.OnSharedPreferenceChangeListener mAppPrefsListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if (!TextUtils.isEmpty(key)) {
                 switch (key) {
                     case KEY_GDPR_PUBLIC_CONSENT: {
-                        String consentString = sharedPreferences.getString(KEY_GDPR_PUBLIC_CONSENT, null);
+                        String consentString = getPublicTCFConsent(sharedPreferences);
                         if (!TextUtils.isEmpty(consentString)) {
                             setIABGDPRConsentString(consentString);
                         } else {
@@ -225,7 +256,7 @@ public class UserDataManager {
                         break;
                     }
                     case KEY_GDPR_TCF_2_PUBLIC_CONSENT: {
-                        String consentString = sharedPreferences.getString(KEY_GDPR_TCF_2_PUBLIC_CONSENT, null);
+                        String consentString = getPublicTCF2Consent(sharedPreferences);
                         if (!TextUtils.isEmpty(consentString)) {
                             setIABGDPRConsentString(consentString);
                         } else {
@@ -234,7 +265,7 @@ public class UserDataManager {
                         break;
                     }
                     case KEY_CCPA_PUBLIC_CONSENT: {
-                        String consentString = sharedPreferences.getString(KEY_CCPA_PUBLIC_CONSENT, null);
+                        String consentString = getPublicCCPAConsent(sharedPreferences);
                         if (!TextUtils.isEmpty(consentString)) {
                             setIABUSPrivacyString(consentString);
                         } else {
@@ -250,15 +281,24 @@ public class UserDataManager {
     //------------------------------------------- CCPA ---------------------------------------------
 
     public void setIABUSPrivacyString(String IABUSPrivacyString) {
-        mPreferences.edit().putString(KEY_CCPA_CONSENT, IABUSPrivacyString).apply();
+        if (mPreferences != null) {
+            mPreferences.edit().putString(KEY_CCPA_CONSENT, IABUSPrivacyString).apply();
+        }
     }
 
     public String getIABUSPrivacyString() {
-        return mPreferences.getString(KEY_CCPA_CONSENT, null);
+        if (mPreferences != null) {
+            return mPreferences.getString(KEY_CCPA_CONSENT, null);
+        } else {
+            return null;
+        }
+
     }
 
     public void removeIABUSPrivacyString() {
-        mPreferences.edit().remove(KEY_CCPA_CONSENT).apply();
+        if (mPreferences != null) {
+            mPreferences.edit().remove(KEY_CCPA_CONSENT).apply();
+        }
     }
 
     public boolean isCCPAOptOut() {
@@ -278,21 +318,29 @@ public class UserDataManager {
     //------------------------------------------- GDPR ---------------------------------------------
 
     public void setIABGDPRConsentString(String gdprConsentString) {
-        mPreferences.edit().putString(KEY_GDPR_CONSENT, gdprConsentString).apply();
+        if (mPreferences != null) {
+            mPreferences.edit().putString(KEY_GDPR_CONSENT, gdprConsentString).apply();
+        }
     }
 
     public String getIABGDPRConsentString() {
-        String consentString = mPreferences.getString(KEY_GDPR_CONSENT, null);
-        if (TextUtils.isEmpty(consentString)) {
-            consentString = mAppPreferences.getString(KEY_GDPR_TCF_2_PUBLIC_CONSENT, null);
+        if (mPreferences != null) {
+            String consentString = mPreferences.getString(KEY_GDPR_CONSENT, null);
             if (TextUtils.isEmpty(consentString)) {
-                consentString = mAppPreferences.getString(KEY_GDPR_PUBLIC_CONSENT, null);
+                consentString = mAppPreferences.getString(KEY_GDPR_TCF_2_PUBLIC_CONSENT, null);
+                if (TextUtils.isEmpty(consentString)) {
+                    consentString = mAppPreferences.getString(KEY_GDPR_PUBLIC_CONSENT, null);
+                }
             }
+            return consentString;
+        } else {
+            return null;
         }
-        return consentString;
     }
 
     public void removeIABGDPRConsentString() {
-        mPreferences.edit().remove(KEY_GDPR_CONSENT).apply();
+        if (mPreferences != null) {
+            mPreferences.edit().remove(KEY_GDPR_CONSENT).apply();
+        }
     }
 }

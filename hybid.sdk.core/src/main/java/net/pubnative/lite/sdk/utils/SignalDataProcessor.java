@@ -17,6 +17,8 @@ import net.pubnative.lite.sdk.vpaid.response.AdParams;
 
 import org.json.JSONObject;
 
+import java.util.List;
+
 public class SignalDataProcessor {
     private static final String TAG = SignalDataProcessor.class.getSimpleName();
 
@@ -99,7 +101,7 @@ public class SignalDataProcessor {
                 VideoAdProcessor videoAdProcessor = new VideoAdProcessor();
                 videoAdProcessor.process(mApiClient.getContext(), ad.getVast(), null, new VideoAdProcessor.Listener() {
                     @Override
-                    public void onCacheSuccess(AdParams adParams, String videoFilePath, String endCardFilePath) {
+                    public void onCacheSuccess(AdParams adParams, String videoFilePath, String endCardFilePath, List<String> omidVendors) {
                         if (mIsDestroyed) {
                             return;
                         }

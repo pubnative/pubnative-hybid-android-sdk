@@ -20,19 +20,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package net.pubnative.lite.demo.ui.fragments.dfp
+package net.pubnative.lite.demo.ui.fragments.gam
 
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.google.android.gms.ads.AdListener
-import com.google.android.gms.ads.doubleclick.PublisherAdRequest
-import com.google.android.gms.ads.doubleclick.PublisherInterstitialAd
+import com.google.android.gms.ads.AdError
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.admanager.AdManagerAdRequest
+import com.google.android.gms.ads.admanager.AdManagerInterstitialAd
+import com.google.android.gms.ads.admanager.AdManagerInterstitialAdLoadCallback
 import net.pubnative.lite.adapters.dfp.HyBidGAMBidUtils
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
@@ -42,24 +43,22 @@ import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.api.InterstitialRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
-import net.pubnative.lite.sdk.utils.HeaderBiddingUtils
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
-    val TAG = DFPInterstitialFragment::class.java.simpleName
+class GAMInterstitialFragment : Fragment(R.layout.fragment_dfp_interstitial),
+    RequestManager.RequestListener {
+    val TAG = GAMInterstitialFragment::class.java.simpleName
 
     private lateinit var requestManager: RequestManager
-    private lateinit var dfpInterstitial: PublisherInterstitialAd
+    private var gamInterstitial: AdManagerInterstitialAd? = null
     private var zoneId: String? = null
     private var adUnitId: String? = null
 
     private lateinit var loadButton: Button
     private lateinit var showButton: Button
     private lateinit var errorView: TextView
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_dfp_interstitial, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -69,13 +68,9 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
         showButton = view.findViewById(R.id.button_show)
         showButton.isEnabled = false
 
-        adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().dfpInterstitialAdUnitId
-
+        adUnitId =
+            SettingsManager.getInstance(requireActivity()).getSettings().dfpInterstitialAdUnitId
         requestManager = InterstitialRequestManager()
-
-        dfpInterstitial = PublisherInterstitialAd(activity)
-        dfpInterstitial.adUnitId = adUnitId
-        dfpInterstitial.adListener = adListener
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
@@ -87,10 +82,15 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
         }
 
         showButton.setOnClickListener {
-            dfpInterstitial.show()
+            gamInterstitial?.show(requireActivity())
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
+        errorView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                errorView.text.toString()
+            )
+        }
     }
 
     fun loadPNAd() {
@@ -101,12 +101,11 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
 
     // --------------- HyBid Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
-        val builder = PublisherAdRequest.Builder()
-
+        val builder = AdManagerAdRequest.Builder()
         HyBidGAMBidUtils.addBids(ad, builder)
-
         val adRequest = builder.build()
-        dfpInterstitial.loadAd(adRequest)
+
+        AdManagerInterstitialAd.load(requireActivity(), adUnitId, adRequest, adLoadCallback)
 
         Log.d(TAG, "onRequestSuccess")
         displayLogs()
@@ -118,17 +117,32 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
         displayLogs()
     }
 
-    // ---------------- DFP Ad Listener ---------------------
-    private val adListener = object : AdListener() {
-        override fun onAdLoaded() {
-            super.onAdLoaded()
+    // ---------------- AdManagerInterstitialAdLoadCallback ---------------------
+    private val adLoadCallback = object : AdManagerInterstitialAdLoadCallback() {
+        override fun onAdLoaded(ad: AdManagerInterstitialAd) {
+            super.onAdLoaded(ad)
+            gamInterstitial = ad
             showButton.isEnabled = true
             Log.d(TAG, "onAdLoaded")
         }
 
-        override fun onAdFailedToLoad(errorCode: Int) {
-            super.onAdFailedToLoad(errorCode)
+        override fun onAdFailedToLoad(error: LoadAdError) {
+            super.onAdFailedToLoad(error)
+            gamInterstitial = null
             Log.d(TAG, "onAdFailedToLoad")
+        }
+    }
+
+    // ---------------- FullScreenContentCallback ---------------------
+    private val fullscreenContentCallback = object : FullScreenContentCallback() {
+        override fun onAdShowedFullScreenContent() {
+            super.onAdShowedFullScreenContent()
+            Log.d(TAG, "onAdShowedFullScreenContent")
+        }
+
+        override fun onAdFailedToShowFullScreenContent(error: AdError) {
+            super.onAdFailedToShowFullScreenContent(error)
+            Log.d(TAG, "onAdFailedToShowFullScreenContent")
         }
 
         override fun onAdImpression() {
@@ -141,19 +155,9 @@ class DFPInterstitialFragment : Fragment(), RequestManager.RequestListener {
             Log.d(TAG, "onAdClicked")
         }
 
-        override fun onAdOpened() {
-            super.onAdOpened()
-            Log.d(TAG, "onAdOpened")
-        }
-
-        override fun onAdLeftApplication() {
-            super.onAdLeftApplication()
-            Log.d(TAG, "onAdLeftApplication")
-        }
-
-        override fun onAdClosed() {
-            super.onAdClosed()
-            Log.d(TAG, "onAdClosed")
+        override fun onAdDismissedFullScreenContent() {
+            super.onAdDismissedFullScreenContent()
+            Log.d(TAG, "onAdDismissedFullScreenContent")
         }
     }
 

@@ -87,17 +87,33 @@ public class HyBidLocationManager implements LocationListener {
      * Triggers a location update request and sets a timeout of 10 seconds to obtain the location
      */
     public void startLocationUpdates() {
+        Handler mainHandler = new Handler(Looper.getMainLooper());
         if (hasFinePermission()) {
             if (hasGPSProvider()) {
-                mManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+                mainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, HyBidLocationManager.this);
+                    }
+                });
             }
             if (hasNetworkProvider()) {
-                mManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+                mainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, HyBidLocationManager.this);
+                    }
+                });
             }
         } else if (hasCoarsePermission()) {
-            mManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+            mainHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, HyBidLocationManager.this);
+                }
+            });
         }
-        new Handler(Looper.myLooper()).postDelayed(mStopUpdatesRunnable, LOCATION_UPDATE_TIMEOUT);
+        mainHandler.postDelayed(mStopUpdatesRunnable, LOCATION_UPDATE_TIMEOUT);
     }
 
     public void stopLocationUpdates() {

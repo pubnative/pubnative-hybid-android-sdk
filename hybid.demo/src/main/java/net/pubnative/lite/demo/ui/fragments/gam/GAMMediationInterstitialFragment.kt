@@ -1,40 +1,27 @@
-package net.pubnative.lite.demo.ui.fragments.admob
+package net.pubnative.lite.demo.ui.fragments.gam
 
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.google.android.gms.ads.AdError
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.FullScreenContentCallback
-import com.google.android.gms.ads.LoadAdError
-import com.google.android.gms.ads.OnUserEarnedRewardListener
-import com.google.android.gms.ads.rewarded.RewardItem
-import com.google.android.gms.ads.rewarded.RewardedAd
-import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import com.google.android.gms.ads.*
+import com.google.android.gms.ads.admanager.AdManagerAdRequest
+import com.google.android.gms.ads.admanager.AdManagerInterstitialAd
+import com.google.android.gms.ads.admanager.AdManagerInterstitialAdLoadCallback
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
 
-class AdmobMediationRewardedFragment : Fragment() {
-    val TAG = AdmobMediationRewardedFragment::class.java.simpleName
+class GAMMediationInterstitialFragment : Fragment(R.layout.fragment_dfp_interstitial) {
+    val TAG = GAMMediationInterstitialFragment::class.java.simpleName
 
-    private var admobRewarded: RewardedAd? = null
+    private var gamInterstitial: AdManagerInterstitialAd? = null
     private lateinit var loadButton: Button
     private lateinit var showButton: Button
     private lateinit var errorView: TextView
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_admob_rewarded, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -42,18 +29,19 @@ class AdmobMediationRewardedFragment : Fragment() {
         errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
         showButton = view.findViewById(R.id.button_show)
-
-        val adUnitId =
-            SettingsManager.getInstance(requireActivity()).getSettings().admobRewardedAdUnitId
         showButton.isEnabled = false
+
+        val adUnitId = SettingsManager.getInstance(requireActivity())
+            .getSettings().dfpMediationInterstitialAdUnitId
 
         loadButton.setOnClickListener {
             errorView.text = ""
-            loadRewardedAd(adUnitId, adLoadCallback)
+            val adRequest = AdManagerAdRequest.Builder().build()
+            AdManagerInterstitialAd.load(requireActivity(), adUnitId, adRequest, adLoadCallback)
         }
 
         showButton.setOnClickListener {
-            showRewardedAd()
+            gamInterstitial?.show(requireActivity())
         }
 
         errorView.setOnClickListener {
@@ -64,44 +52,26 @@ class AdmobMediationRewardedFragment : Fragment() {
         }
     }
 
-    private fun loadRewardedAd(
-        adUnitId: String,
-        adLoadCallback: RewardedAdLoadCallback
-    ) {
-        val adRequest = AdRequest.Builder().build()
-        RewardedAd.load(requireActivity(), adUnitId, adRequest, adLoadCallback)
-    }
-
-    private fun showRewardedAd() {
-        admobRewarded?.show(requireActivity(), object : OnUserEarnedRewardListener {
-            override fun onUserEarnedReward(reward: RewardItem) {
-                Log.d(TAG, "onUserEarnedReward")
-            }
-        })
-    }
-
-    private val adLoadCallback = object : RewardedAdLoadCallback() {
-        override fun onAdLoaded(ad: RewardedAd) {
+    // ---------------- AdManagerInterstitialAdLoadCallback ---------------------
+    private val adLoadCallback = object : AdManagerInterstitialAdLoadCallback() {
+        override fun onAdLoaded(ad: AdManagerInterstitialAd) {
             super.onAdLoaded(ad)
-            admobRewarded = ad
-            admobRewarded?.fullScreenContentCallback = fullscreenContentCallback
+            gamInterstitial = ad
             Log.d(TAG, "onAdLoaded")
             displayLogs()
-            Toast.makeText(context, "Rewarded Ad Loaded", Toast.LENGTH_SHORT).show()
             showButton.isEnabled = true
         }
 
         override fun onAdFailedToLoad(error: LoadAdError) {
             super.onAdFailedToLoad(error)
-            admobRewarded?.fullScreenContentCallback = null
-            admobRewarded = null
-            Log.d(TAG, "onRewardedAdFailedToLoad")
+            gamInterstitial = null
             displayLogs()
-            Toast.makeText(context, "Rewarded Ad Failed to Load", Toast.LENGTH_SHORT).show()
             errorView.text = error.message
+            Log.d(TAG, "onAdFailedToLoad")
         }
     }
 
+    // ---------------- FullScreenContentCallback ---------------------
     private val fullscreenContentCallback = object : FullScreenContentCallback() {
         override fun onAdShowedFullScreenContent() {
             super.onAdShowedFullScreenContent()
@@ -111,7 +81,6 @@ class AdmobMediationRewardedFragment : Fragment() {
         override fun onAdFailedToShowFullScreenContent(error: AdError) {
             super.onAdFailedToShowFullScreenContent(error)
             Log.d(TAG, "onAdFailedToShowFullScreenContent")
-            errorView.text = error.message
         }
 
         override fun onAdImpression() {
@@ -127,8 +96,6 @@ class AdmobMediationRewardedFragment : Fragment() {
         override fun onAdDismissedFullScreenContent() {
             super.onAdDismissedFullScreenContent()
             Log.d(TAG, "onAdDismissedFullScreenContent")
-            showButton.isEnabled = false
-            admobRewarded = null
         }
     }
 
@@ -138,4 +105,5 @@ class AdmobMediationRewardedFragment : Fragment() {
             activity.notifyAdUpdated()
         }
     }
+
 }

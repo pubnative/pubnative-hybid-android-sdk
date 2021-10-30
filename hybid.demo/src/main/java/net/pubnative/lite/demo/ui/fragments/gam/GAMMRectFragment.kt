@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-package net.pubnative.lite.demo.ui.fragments.dfp
+package net.pubnative.lite.demo.ui.fragments.gam
 
 import android.os.Bundle
 import android.util.Log
@@ -33,14 +33,16 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdSize
-import com.google.android.gms.ads.doubleclick.PublisherAdRequest
-import com.google.android.gms.ads.doubleclick.PublisherAdView
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.admanager.AdManagerAdRequest
+import com.google.android.gms.ads.admanager.AdManagerAdView
+import net.pubnative.lite.adapters.dfp.HyBidGAMBidUtils
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
-import net.pubnative.lite.sdk.api.BannerRequestManager
+import net.pubnative.lite.sdk.api.MRectRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
 import net.pubnative.lite.sdk.utils.HeaderBiddingUtils
@@ -48,38 +50,35 @@ import net.pubnative.lite.sdk.utils.HeaderBiddingUtils
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class DFPBannerFragment : Fragment(), RequestManager.RequestListener {
-    val TAG = DFPBannerFragment::class.java.simpleName
+class GAMMRectFragment : Fragment(R.layout.fragment_dfp_mrect), RequestManager.RequestListener {
+    val TAG = GAMMRectFragment::class.java.simpleName
 
     private lateinit var requestManager: RequestManager
     private var zoneId: String? = null
     private var adUnitId: String? = null
 
-    private lateinit var dfpBanner: PublisherAdView
-    private lateinit var dfpBannerContainer: FrameLayout
+    private lateinit var gamMRect: AdManagerAdView
+    private lateinit var gamMRectContainer: FrameLayout
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_dfp_banner, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
-        dfpBannerContainer = view.findViewById(R.id.dfp_banner_container)
+        gamMRectContainer = view.findViewById(R.id.dfp_mrect_container)
 
-        requestManager = BannerRequestManager()
+        requestManager = MRectRequestManager()
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
-        adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().dfpBannerAdUnitId
+        adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().dfpMediumAdUnitId
 
-        dfpBanner = PublisherAdView(activity)
-        dfpBanner.adUnitId = adUnitId
-        dfpBanner.setAdSizes(AdSize.BANNER)
-        dfpBanner.adListener = adListener
+        gamMRect = AdManagerAdView(requireActivity())
+        gamMRect.adUnitId = adUnitId!!
+        gamMRect.setAdSizes(AdSize.MEDIUM_RECTANGLE)
 
-        dfpBannerContainer.addView(dfpBanner)
+        gamMRectContainer.addView(gamMRect)
 
         loadButton.setOnClickListener {
             errorView.text = ""
@@ -88,12 +87,17 @@ class DFPBannerFragment : Fragment(), RequestManager.RequestListener {
             loadPNAd()
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
+        errorView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                errorView.text.toString()
+            )
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        dfpBanner.destroy()
+        gamMRect.destroy()
     }
 
     fun loadPNAd() {
@@ -104,21 +108,10 @@ class DFPBannerFragment : Fragment(), RequestManager.RequestListener {
 
     // --------------- HyBid Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
-        val builder = PublisherAdRequest.Builder()
-
-        val keywordSet = HeaderBiddingUtils.getHeaderBiddingKeywordsSet(ad)
-        for (key in keywordSet) {
-            builder.addKeyword(key)
-        }
-
-        val keywordBundle = HeaderBiddingUtils.getHeaderBiddingKeywordsBundle(ad)
-        for (key in keywordBundle.keySet()) {
-            builder.addCustomTargeting(key, keywordBundle.getString(key))
-        }
-
+        val builder = AdManagerAdRequest.Builder()
+        HyBidGAMBidUtils.addBids(ad, builder)
         val adRequest = builder.build()
-
-        dfpBanner.loadAd(adRequest)
+        gamMRect.loadAd(adRequest)
 
         Log.d(TAG, "onRequestSuccess")
         displayLogs()
@@ -137,8 +130,8 @@ class DFPBannerFragment : Fragment(), RequestManager.RequestListener {
             Log.d(TAG, "onAdLoaded")
         }
 
-        override fun onAdFailedToLoad(errorCode: Int) {
-            super.onAdFailedToLoad(errorCode)
+        override fun onAdFailedToLoad(error: LoadAdError) {
+            super.onAdFailedToLoad(error)
             Log.d(TAG, "onAdFailedToLoad")
         }
 
@@ -155,11 +148,6 @@ class DFPBannerFragment : Fragment(), RequestManager.RequestListener {
         override fun onAdOpened() {
             super.onAdOpened()
             Log.d(TAG, "onAdOpened")
-        }
-
-        override fun onAdLeftApplication() {
-            super.onAdLeftApplication()
-            Log.d(TAG, "onAdLeftApplication")
         }
 
         override fun onAdClosed() {

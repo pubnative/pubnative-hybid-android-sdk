@@ -28,6 +28,8 @@ import android.content.res.Configuration;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.webkit.WebView;
@@ -98,17 +100,6 @@ public class DeviceInfo {
     private String deviceWidth;
     private String soundSetting;
 
-    public DeviceInfo(Context context, Listener listener) {
-        mContext = context.getApplicationContext();
-        mListener = listener;
-
-        mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        fetchAdvertisingId();
-
-        getDeviceScreenDimensions();
-    }
-
     public DeviceInfo(Context context) {
         mContext = context.getApplicationContext();
         mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -147,11 +138,17 @@ public class DeviceInfo {
     }
 
     public void fetchUserAgent(){
-        try {
-            mUserAgent = new WebView(mContext).getSettings().getUserAgentString();
-        } catch (RuntimeException runtimeException){
-            Logger.e(TAG, runtimeException.getMessage());
-        }
+        Handler mainHandler = new Handler(Looper.getMainLooper());
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mUserAgent = new WebView(mContext).getSettings().getUserAgentString();
+                } catch (RuntimeException runtimeException){
+                    Logger.e(TAG, runtimeException.getMessage());
+                }
+            }
+        });
     }
 
     public void getDeviceScreenDimensions(){

@@ -1,11 +1,17 @@
 package net.pubnative.lite.sdk.interstitial.activity;
 
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.HyBidError;
+import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastSender;
+import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.VideoAd;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
@@ -13,6 +19,7 @@ import net.pubnative.lite.sdk.vpaid.VideoAdListener;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
 
 public class VastInterstitialActivity extends HyBidInterstitialActivity {
+    private static final String TAG = VastInterstitialActivity.class.getSimpleName();
     private boolean mReady = false;
 
     private VideoAdView mVideoPlayer;
@@ -22,33 +29,52 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            }
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            }
+        }
+      
         super.onCreate(savedInstanceState);
 
-        hideInterstitialCloseButton();
+        try {
+            hideInterstitialCloseButton();
 
-        if (getAd() != null) {
-            mSkipOffset = getIntent().getIntExtra(EXTRA_SKIP_OFFSET, -1);
-            if (mSkipOffset != 0) {
-                mIsSkippable = false;
-            }
-            mVideoAd = new VideoAd(this, getAd().getVast(), true, true);
-            mVideoAd.useMobileNetworkForCaching(true);
-            mVideoAd.bindView(mVideoPlayer);
-            mVideoAd.setAdListener(mVideoAdListener);
-            setProgressBarVisible();
+            if (getAd() != null) {
+                mSkipOffset = getIntent().getIntExtra(EXTRA_SKIP_OFFSET, -1);
+                mIsSkippable = mSkipOffset == 0;
+                mVideoAd = new VideoAd(this, getAd().getVast(), true, true);
+                mVideoAd.useMobileNetworkForCaching(true);
+                mVideoAd.bindView(mVideoPlayer);
+                mVideoAd.setAdListener(mVideoAdListener);
+                setProgressBarVisible();
 
-            VideoAdCacheItem adCacheItem = HyBid.getVideoAdCache().remove(getZoneId());
-            if (adCacheItem != null) {
-                adCacheItem.getAdParams().setPublisherSkipSeconds(mSkipOffset);
-                mVideoAd.setVideoCacheItem(adCacheItem);
-            }
-
-            mVideoPlayer.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mVideoAd.load();
+                VideoAdCacheItem adCacheItem = HyBid.getVideoAdCache().remove(getZoneId());
+                if (adCacheItem != null) {
+                    if (adCacheItem.getAdParams() != null) {
+                        adCacheItem.getAdParams().setPublisherSkipSeconds(mSkipOffset);
+                    }
+                    mVideoAd.setVideoCacheItem(adCacheItem);
                 }
-            }, 1000);
+
+                mVideoPlayer.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mVideoAd.load();
+                    }
+                }, 1000);
+            }
+        } catch (Exception exception) {
+            Logger.e(TAG, exception.getMessage());
+            Bundle extras = new Bundle();
+            extras.putInt(HyBidInterstitialBroadcastReceiver.VIDEO_PROGRESS, 0);
+            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.ERROR);
+            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_ERROR, extras);
+            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
+            finish();
         }
     }
 

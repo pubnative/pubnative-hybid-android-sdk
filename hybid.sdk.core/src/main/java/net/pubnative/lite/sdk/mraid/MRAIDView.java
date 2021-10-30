@@ -419,9 +419,6 @@ public class MRAIDView extends RelativeLayout {
             // make sure those scroll bars are gone
             wv.setScrollBarStyle(View.SCROLLBARS_OUTSIDE_OVERLAY);
 
-            // i think we want to be able to focus but i dont know?
-//        wv.setFocusableInTouchMode(true);
-
             // manually delegate view focus?
             wv.setOnTouchListener(new OnTouchListener() {
                 @SuppressLint("ClickableViewAccessibility")
@@ -2042,7 +2039,7 @@ public class MRAIDView extends RelativeLayout {
     }
 
     private void initSkipTime() {
-        int globalSkipMilliseconds = HyBid.getInterstitialSkipOffset() * 1000;
+        int globalSkipMilliseconds = HyBid.getHtmlInterstitialSkipOffset() * 1000;
 
         if (this.mSkipTimeMillis <= 0 && globalSkipMilliseconds > 0)
             mSkipTimeMillis = globalSkipMilliseconds;

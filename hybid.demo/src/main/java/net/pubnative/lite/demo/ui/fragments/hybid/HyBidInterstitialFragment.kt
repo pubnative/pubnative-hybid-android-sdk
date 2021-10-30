@@ -27,6 +27,7 @@ import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.Constants
@@ -50,11 +51,14 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
     private var zoneId: String? = null
 
     private lateinit var loadButton: Button
+    private lateinit var prepareButton: Button
     private lateinit var showButton: Button
+    private lateinit var cachingCheckbox: CheckBox
     private lateinit var errorCodeView: TextView
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
     private var interstitial: HyBidInterstitialAd? = null
+    private var cachingEnabled: Boolean = true
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -63,7 +67,10 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
         errorCodeView = view.findViewById(R.id.view_error_code)
         creativeIdView = view.findViewById(R.id.view_creative_id)
         loadButton = view.findViewById(R.id.button_load)
+        prepareButton = view.findViewById(R.id.button_prepare)
+        cachingCheckbox = view.findViewById(R.id.check_caching)
         showButton = view.findViewById(R.id.button_show)
+        prepareButton.isEnabled = false
         showButton.isEnabled = false
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
@@ -75,8 +82,17 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
             loadInterstitialAd()
         }
 
+        prepareButton.setOnClickListener {
+            interstitial?.prepare()
+        }
+
         showButton.setOnClickListener {
             interstitial?.show()
+        }
+
+        cachingCheckbox.setOnCheckedChangeListener { _, isChecked ->
+            cachingEnabled = isChecked
+            prepareButton.visibility = if (isChecked) View.GONE else View.VISIBLE
         }
 
         errorView.setOnClickListener {
@@ -85,6 +101,7 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
                 errorView.text.toString()
             )
         }
+
         creativeIdView.setOnClickListener {
             ClipboardUtils.copyToClipboard(
                 requireActivity(),
@@ -100,7 +117,9 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
 
     private fun loadInterstitialAd() {
         interstitial = HyBidInterstitialAd(activity, zoneId, this)
-        interstitial?.setSkipOffset(10)
+        interstitial?.setHtmlSkipOffset(4)
+        interstitial?.setVideoSkipOffset(10)
+        interstitial?.isAutoCacheOnLoad = cachingEnabled
         //Optional to track video events
         interstitial?.setVideoListener(this)
         interstitial?.load()
@@ -108,6 +127,7 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
 
     override fun onInterstitialLoaded() {
         Log.d(TAG, "onInterstitialLoaded")
+        prepareButton.isEnabled = !cachingEnabled
         showButton.isEnabled = true
         displayLogs()
         if (!TextUtils.isEmpty(interstitial?.creativeId)) {
@@ -116,6 +136,7 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
     }
 
     override fun onInterstitialLoadFailed(error: Throwable?) {
+        prepareButton.isEnabled = false
         showButton.isEnabled = false
         if (error != null && error is HyBidError) {
             Log.e(TAG, error.message ?: " - ")
@@ -131,11 +152,17 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
 
     override fun onInterstitialImpression() {
         Log.d(TAG, "onInterstitialImpression")
-        DiagnosticsManager.printPlacementDiagnosticsLog(requireContext(), interstitial?.placementParams)
+        DiagnosticsManager.printPlacementDiagnosticsLog(
+            requireContext(),
+            interstitial?.placementParams
+        )
     }
 
     override fun onInterstitialDismissed() {
         Log.d(TAG, "onInterstitialDismissed")
+        interstitial = null
+        prepareButton.isEnabled = false
+        showButton.isEnabled = false
     }
 
     override fun onInterstitialClick() {
@@ -143,7 +170,7 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
     }
 
     override fun onVideoError(progressPercentage: Int) {
-        Log.d(TAG, String.format(Locale.ENGLISH,"onVideoError progress: %d", progressPercentage))
+        Log.d(TAG, String.format(Locale.ENGLISH, "onVideoError progress: %d", progressPercentage))
     }
 
     override fun onVideoStarted() {
@@ -151,7 +178,10 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
     }
 
     override fun onVideoDismissed(progressPercentage: Int) {
-        Log.d(TAG, String.format(Locale.ENGLISH,"onVideoDismissed progress: %d", progressPercentage))
+        Log.d(
+            TAG,
+            String.format(Locale.ENGLISH, "onVideoDismissed progress: %d", progressPercentage)
+        )
     }
 
     override fun onVideoFinished() {

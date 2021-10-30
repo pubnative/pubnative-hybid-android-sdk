@@ -110,7 +110,9 @@ class MoPubSettingsFragment : Fragment(R.layout.fragment_mopub_settings) {
             settingManager.setMoPubMediationRewardedAdUnitId(mediationRewardedAdUnitId)
             settingManager.setMoPubMediationNativeAdUnitId(mediationNativeAdUnitId)
 
-            MoPubManager.initMoPubSdk(activity, bannerAdUnitId) {
+            val appToken = settingManager.getSettings().appToken
+
+            MoPubManager.initMoPubSdk(activity, bannerAdUnitId, appToken) {
                 Toast.makeText(activity, "MoPub settings saved successfully.", Toast.LENGTH_SHORT).show()
                 activity?.finish()
             }

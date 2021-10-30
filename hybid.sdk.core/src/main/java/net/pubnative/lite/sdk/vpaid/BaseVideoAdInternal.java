@@ -6,6 +6,8 @@ import android.os.Looper;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.HyBidError;
+import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeVideoAdSession;
 import net.pubnative.lite.sdk.vpaid.enums.AdState;
@@ -44,9 +46,9 @@ abstract class BaseVideoAdInternal {
 
     private HyBidViewabilityNativeVideoAdSession mViewabilityAdSession;
 
-    BaseVideoAdInternal(Context context, String data, boolean isInterstitial, boolean isFullscreen) {
+    BaseVideoAdInternal(Context context, String data, boolean isInterstitial, boolean isFullscreen) throws Exception {
         if (context == null || TextUtils.isEmpty(data)) {
-            throw new IllegalArgumentException("Wrong parameters");
+            throw new HyBidError(HyBidErrorCode.VAST_PLAYER_ERROR);
         }
         mAdState = AdState.NONE;
         mContext = context;

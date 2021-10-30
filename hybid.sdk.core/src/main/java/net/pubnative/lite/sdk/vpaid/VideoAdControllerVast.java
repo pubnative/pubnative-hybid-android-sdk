@@ -2,9 +2,12 @@ package net.pubnative.lite.sdk.vpaid;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Build;
+import android.os.Handler;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
@@ -153,39 +156,53 @@ class VideoAdControllerVast implements VideoAdController {
             mMediaPlayer.release();
         }
         mMediaPlayer = new MediaPlayer();
-        mMediaPlayer.setDataSource(mVideoUri);
-        mMediaPlayer.setOnPreparedListener(mOnPreparedListener);
-        mMediaPlayer.setOnCompletionListener(mOnCompletionListener);
-        mMediaPlayer.setOnErrorListener(mOnErrorListener);
-        mMediaPlayer.prepareAsync();
+        try {
+            mMediaPlayer.setDataSource(mVideoUri);
+            mMediaPlayer.setOnPreparedListener(mOnPreparedListener);
+            mMediaPlayer.setOnCompletionListener(mOnCompletionListener);
+            mMediaPlayer.setOnErrorListener(mOnErrorListener);
+            mMediaPlayer.setLooping(false);
+            mMediaPlayer.prepareAsync();
+        } catch (IOException e) {
+            Logger.e(LOG_TAG, "startMediaPlayer: " + e.getMessage());
+            mBaseAdInternal.onAdLoadFailInternal(new PlayerInfo("Error loading media file"));
+        }
     }
 
-    private MediaPlayer.OnErrorListener mOnErrorListener = new MediaPlayer.OnErrorListener() {
+    private final MediaPlayer.OnErrorListener mOnErrorListener = new MediaPlayer.OnErrorListener() {
         @Override
         public boolean onError(MediaPlayer mp, int what, int extra) {
+            //1 : MediaPlayer.MEDIA_ERROR_UNKNOWN
+            //True if the method handled the error, false if it didn't. Returning false, or not having an OnErrorListener at all, will cause the OnCompletionListener to be called.
             ErrorLog.postError(mBaseAdInternal.getContext(), VastError.MEDIA_FILE_UNSUPPORTED);
-            return false;
+            mBaseAdInternal.onAdLoadFailInternal(new PlayerInfo("Error loading media file"));
+            return true;
         }
     };
 
-    private MediaPlayer.OnPreparedListener mOnPreparedListener = new MediaPlayer.OnPreparedListener() {
+    private final MediaPlayer.OnPreparedListener mOnPreparedListener = new MediaPlayer.OnPreparedListener() {
         @Override
-        public void onPrepared(MediaPlayer mp) {
-            mViewControllerVast.adjustLayoutParams(mp.getVideoWidth(), mp.getVideoHeight());
-            mMediaPlayer.setSurface(mViewControllerVast.getSurface());
-            if (mTimerWithPause != null && mTimerWithPause.isPaused()) {
-                mMediaPlayer.seekTo((int) mTimerWithPause.timePassed());
-            } else {
-                createTimer(mp.getDuration());
-                getViewabilityAdSession().fireImpression();
-                Logger.d(LOG_TAG, "Ad appeared on screen");
-                if (mBaseAdInternal != null && mBaseAdInternal.getAdListener() != null) {
-                    mBaseAdInternal.getAdListener().onAdStarted();
-                }
-            }
+        public void onPrepared(final MediaPlayer mp) {
+            postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mViewControllerVast.adjustLayoutParams(mp.getVideoWidth(), mp.getVideoHeight());
+                    mMediaPlayer.setSurface(mViewControllerVast.getSurface());
+                    if (mTimerWithPause != null && mTimerWithPause.isPaused()) {
+                        mMediaPlayer.seekTo((int) mTimerWithPause.timePassed());
+                    } else {
+                        createTimer(mp.getDuration());
+                        getViewabilityAdSession().fireImpression();
+                        Logger.d(LOG_TAG, "Ad appeared on screen");
+                        if (mBaseAdInternal != null && mBaseAdInternal.getAdListener() != null) {
+                            mBaseAdInternal.getAdListener().onAdStarted();
+                        }
+                    }
 
-            muteVideo(mViewControllerVast.isMute(), false);
-            mMediaPlayer.start();
+                    muteVideo(mViewControllerVast.isMute(), false);
+                    mMediaPlayer.start();
+                }
+            }, DELAY_UNTIL_EXECUTE);
         }
     };
 
@@ -259,7 +276,7 @@ class VideoAdControllerVast implements VideoAdController {
             mSkipTimeMillis = publisherSkipMilliseconds;
         }
 
-        int globalSkipMilliseconds = HyBid.getInterstitialSkipOffset() * 1000;
+        int globalSkipMilliseconds = HyBid.getVideoInterstitialSkipOffset() * 1000;
 
         if (globalSkipMilliseconds > 0 && mSkipTimeMillis <= 0) {
             mSkipTimeMillis = globalSkipMilliseconds;

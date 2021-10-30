@@ -24,13 +24,13 @@ package net.pubnative.lite.demo.ui.activities.dfp
 
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
-import net.pubnative.lite.demo.ui.fragments.dfp.DFPBannerFragment
+import net.pubnative.lite.demo.ui.fragments.gam.GAMBannerFragment
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
 class DFPBannerActivity : TabActivity() {
-    override fun getAdFragment() = DFPBannerFragment()
+    override fun getAdFragment() = GAMBannerFragment()
 
     override fun getActivityTitle() = getString(R.string.dfp_banner)
 }

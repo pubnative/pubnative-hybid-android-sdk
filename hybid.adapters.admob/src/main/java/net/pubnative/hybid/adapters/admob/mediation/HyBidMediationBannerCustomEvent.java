@@ -126,6 +126,7 @@ public class HyBidMediationBannerCustomEvent implements CustomEventBanner, HyBid
     public void onAdClick() {
         if (mBannerListener != null) {
             mBannerListener.onAdClicked();
+            mBannerListener.onAdOpened();
             mBannerListener.onAdLeftApplication();
         }
     }

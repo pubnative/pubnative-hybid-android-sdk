@@ -25,6 +25,8 @@ package net.pubnative.lite.sdk.api;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.webkit.WebView;
 
@@ -40,7 +42,6 @@ import net.pubnative.lite.sdk.utils.AdRequestRegistry;
 import net.pubnative.lite.sdk.utils.PNApiUrlComposer;
 import net.pubnative.lite.sdk.utils.json.JsonOperations;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -87,11 +88,16 @@ public class PNApiClient {
 
     public PNApiClient(Context context) {
         this.mContext = context;
-        try {
-            mUserAgent = new WebView(mContext).getSettings().getUserAgentString();
-        } catch (RuntimeException ignored){
-
-        }
+        Handler mainHandler = new Handler(Looper.getMainLooper());
+        mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mUserAgent = new WebView(mContext).getSettings().getUserAgentString();
+                } catch (RuntimeException ignored) {
+                }
+            }
+        });
     }
 
     public void getAd(AdRequest request, final AdRequestListener listener) {
@@ -109,7 +115,7 @@ public class PNApiClient {
             final long initTime = System.currentTimeMillis();
 
             Map<String, String> headers = new HashMap<>();
-            if (!TextUtils.isEmpty(mUserAgent)){
+            if (!TextUtils.isEmpty(mUserAgent)) {
                 headers.put("User-Agent", mUserAgent);
             }
 
@@ -142,7 +148,7 @@ public class PNApiClient {
 
     private void sendTrackingRequest(String url, final TrackUrlListener listener) {
         Map<String, String> headers = new HashMap<>();
-        if (!TextUtils.isEmpty(mUserAgent)){
+        if (!TextUtils.isEmpty(mUserAgent)) {
             headers.put("User-Agent", mUserAgent);
         }
 

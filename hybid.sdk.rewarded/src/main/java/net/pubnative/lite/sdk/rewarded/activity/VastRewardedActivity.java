@@ -22,11 +22,15 @@
 //
 package net.pubnative.lite.sdk.rewarded.activity;
 
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
+import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.VideoAd;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
@@ -34,6 +38,7 @@ import net.pubnative.lite.sdk.vpaid.VideoAdListener;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
 
 public class VastRewardedActivity extends HyBidRewardedActivity {
+    private static final String TAG = VastRewardedActivity.class.getSimpleName();
     private boolean mReady = false;
     private boolean mFinished = false;
 
@@ -42,26 +47,40 @@ public class VastRewardedActivity extends HyBidRewardedActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            }
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            }
+        }
         super.onCreate(savedInstanceState);
 
-        if (getAd() != null) {
-            mVideoAd = new VideoAd(this, getAd().getVast(), false, true);
-            mVideoAd.setRewarded(true);
-            mVideoAd.bindView(mVideoPlayer);
-            mVideoAd.setAdListener(mVideoAdListener);
-            setProgressBarVisible();
+        try {
+            if (getAd() != null) {
+                mVideoAd = new VideoAd(this, getAd().getVast(), false, true);
+                mVideoAd.setRewarded(true);
+                mVideoAd.bindView(mVideoPlayer);
+                mVideoAd.setAdListener(mVideoAdListener);
+                setProgressBarVisible();
 
-            VideoAdCacheItem adCacheItem = HyBid.getVideoAdCache().remove(getZoneId());
-            if (adCacheItem != null) {
-                mVideoAd.setVideoCacheItem(adCacheItem);
-            }
-
-            mVideoPlayer.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mVideoAd.load();
+                VideoAdCacheItem adCacheItem = HyBid.getVideoAdCache().remove(getZoneId());
+                if (adCacheItem != null) {
+                    mVideoAd.setVideoCacheItem(adCacheItem);
                 }
-            }, 1000);
+
+                mVideoPlayer.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mVideoAd.load();
+                    }
+                }, 1000);
+            }
+        } catch (Exception exception) {
+            Logger.e(TAG, exception.getMessage());
+            getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.ERROR);
+            finish();
         }
     }
 

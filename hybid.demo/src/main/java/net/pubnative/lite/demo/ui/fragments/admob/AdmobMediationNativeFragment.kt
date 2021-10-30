@@ -13,14 +13,13 @@ import androidx.fragment.app.Fragment
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdLoader
 import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.formats.MediaView
-import com.google.android.gms.ads.formats.NativeAdOptions
-import com.google.android.gms.ads.formats.UnifiedNativeAd
-import com.google.android.gms.ads.formats.UnifiedNativeAdView
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.nativead.NativeAd
+import com.google.android.gms.ads.nativead.NativeAdOptions
+import com.google.android.gms.ads.nativead.NativeAdView
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
-import net.pubnative.lite.demo.util.AdmobErrorParser
 
 class AdmobMediationNativeFragment : Fragment() {
     val TAG = AdmobMediationNativeFragment::class.java.simpleName
@@ -29,7 +28,7 @@ class AdmobMediationNativeFragment : Fragment() {
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
 
-    private var admobNative: UnifiedNativeAd? = null
+    private var admobNative: NativeAd? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_admob_native, container, false)
 
@@ -47,7 +46,7 @@ class AdmobMediationNativeFragment : Fragment() {
             admobNative?.destroy()
 
             val adLoader = AdLoader.Builder(requireContext(), adUnitId)
-                    .forUnifiedNativeAd {
+                    .forNativeAd {
                         if (isDetached) {
                             it.destroy()
                         } else {
@@ -71,7 +70,7 @@ class AdmobMediationNativeFragment : Fragment() {
         admobNative?.let {
             admobNativeContainer.removeAllViews()
             val adView = LayoutInflater.from(requireContext())
-                    .inflate(R.layout.layout_admob_native_ad, admobNativeContainer, false) as UnifiedNativeAdView
+                    .inflate(R.layout.layout_admob_native_ad, admobNativeContainer, false) as NativeAdView
             val adIcon = adView.findViewById<ImageView>(R.id.ad_icon)
             val adTitle = adView.findViewById<TextView>(R.id.ad_title)
             val adBanner = adView.findViewById<ImageView>(R.id.ad_banner)
@@ -112,10 +111,10 @@ class AdmobMediationNativeFragment : Fragment() {
             Log.d(TAG, "onAdLoaded")
         }
 
-        override fun onAdFailedToLoad(errorCode: Int) {
-            super.onAdFailedToLoad(errorCode)
+        override fun onAdFailedToLoad(error: LoadAdError) {
+            super.onAdFailedToLoad(error)
             displayLogs()
-            errorView.text = AdmobErrorParser.getErrorMessage(errorCode)
+            errorView.text = error.message
             Log.d(TAG, "onAdFailedToLoad")
         }
 
@@ -137,11 +136,6 @@ class AdmobMediationNativeFragment : Fragment() {
         override fun onAdClosed() {
             super.onAdClosed()
             Log.d(TAG, "onAdClosed")
-        }
-
-        override fun onAdLeftApplication() {
-            super.onAdLeftApplication()
-            Log.d(TAG, "onAdLeftApplication")
         }
     }
 

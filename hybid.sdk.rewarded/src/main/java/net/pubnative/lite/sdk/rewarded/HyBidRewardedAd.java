@@ -32,6 +32,8 @@ import net.pubnative.lite.sdk.DiagnosticConstants;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
+import net.pubnative.lite.sdk.analytics.Reporting;
+import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.api.RewardedRequestManager;
 import net.pubnative.lite.sdk.models.Ad;
@@ -52,6 +54,7 @@ import net.pubnative.lite.sdk.vpaid.vast.VastUrlUtils;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class HyBidRewardedAd implements RequestManager.RequestListener, RewardedPresenter.Listener {
@@ -106,10 +109,25 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
         mVideoCache = HyBid.getVideoAdCache();
         mPlacementParams = new JSONObject();
         mRequestManager.setIntegrationType(IntegrationType.STANDALONE);
-        JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_ZONE_ID, mZoneId);
+
+        addReportingKey(DiagnosticConstants.KEY_ZONE_ID, mZoneId);
+
     }
 
     public void load() {
+
+        //Timestamp
+        addReportingKey(Reporting.Key.TIMESTAMP, String.valueOf(System.currentTimeMillis()));
+        if (HyBid.getAppToken() != null)
+            //AppToken
+            addReportingKey(Reporting.Key.APP_TOKEN, HyBid.getAppToken());
+        //Ad Type
+        addReportingKey(Reporting.Key.AD_TYPE, Reporting.Key.REWARDED);
+        //Ad Size
+        addReportingKey(Reporting.Key.AD_SIZE, mRequestManager.getAdSize().toString());
+        //Integration Type
+        addReportingKey(Reporting.Key.INTEGRATION_TYPE, IntegrationType.STANDALONE);
+
         if (!HyBid.isInitialized()) {
             mInitialLoadTime = System.currentTimeMillis();
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NOT_INITIALISED));
@@ -202,6 +220,12 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
         }
     }
 
+    public void prepare() {
+        if (mRequestManager != null && mAd != null) {
+            mRequestManager.cacheAd(mAd);
+        }
+    }
+
     public void prepareAd(final String adValue) {
         if (!TextUtils.isEmpty(adValue)) {
             mSignalDataProcessor = new SignalDataProcessor();
@@ -251,7 +275,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
 
         Map<String, String> headers = new HashMap<>();
         String userAgent = HyBid.getDeviceInfo().getUserAgent();
-        if (!TextUtils.isEmpty(userAgent)){
+        if (!TextUtils.isEmpty(userAgent)) {
             headers.put("User-Agent", userAgent);
         }
 
@@ -290,9 +314,13 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
                 VideoAdProcessor videoAdProcessor = new VideoAdProcessor();
                 videoAdProcessor.process(mContext, adValue, null, new VideoAdProcessor.Listener() {
                     @Override
-                    public void onCacheSuccess(AdParams adParams, String videoFilePath, String endCardFilePath) {
+                    public void onCacheSuccess(AdParams adParams, String videoFilePath, String endCardFilePath, List<String> omidVendors) {
                         if (mIsDestroyed) {
                             return;
+                        }
+
+                        if (omidVendors != null && !omidVendors.isEmpty()) {
+                            JsonOperations.putStringArray(mPlacementParams, DiagnosticConstants.KEY_OM_VENDORS, omidVendors);
                         }
 
                         VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardFilePath);
@@ -326,20 +354,44 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     }
 
     protected void invokeOnLoadFinished() {
+        long loadTime = -1;
         if (mInitialLoadTime != -1) {
+            loadTime = System.currentTimeMillis() - mInitialLoadTime;
             JsonOperations.putJsonLong(mPlacementParams, DiagnosticConstants.KEY_TIME_TO_LOAD,
-                    System.currentTimeMillis() - mInitialLoadTime);
+                    loadTime);
         }
+
+        if (HyBid.getReportingController() != null) {
+            ReportingEvent loadEvent = new ReportingEvent();
+            loadEvent.setEventType(Reporting.EventType.LOAD);
+            loadEvent.setAdFormat(Reporting.AdFormat.REWARDED);
+            loadEvent.setCustomInteger(DiagnosticConstants.KEY_TIME_TO_LOAD, loadTime);
+            loadEvent.mergeJSONObject(getPlacementParams());
+            HyBid.getReportingController().reportEvent(loadEvent);
+        }
+
         if (mListener != null) {
             mListener.onRewardedLoaded();
         }
     }
 
     protected void invokeOnLoadFailed(Throwable exception) {
+        long loadTime = -1;
         if (mInitialLoadTime != -1) {
+            loadTime = System.currentTimeMillis() - mInitialLoadTime;
             JsonOperations.putJsonLong(mPlacementParams, DiagnosticConstants.KEY_TIME_TO_LOAD_FAILED,
-                    System.currentTimeMillis() - mInitialLoadTime);
+                    loadTime);
         }
+
+        if (HyBid.getReportingController() != null) {
+            ReportingEvent loadFailEvent = new ReportingEvent();
+            loadFailEvent.setEventType(Reporting.EventType.LOAD_FAIL);
+            loadFailEvent.setAdFormat(Reporting.AdFormat.REWARDED);
+            loadFailEvent.setCustomInteger(DiagnosticConstants.KEY_TIME_TO_LOAD, loadTime);
+            loadFailEvent.mergeJSONObject(getPlacementParams());
+            HyBid.getReportingController().reportEvent(loadFailEvent);
+        }
+
         if (exception instanceof HyBidError) {
             HyBidError hyBidError = (HyBidError) exception;
             if (hyBidError.getErrorCode() == HyBidErrorCode.NO_FILL) {
@@ -383,6 +435,20 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
         }
     }
 
+    public boolean isAutoCacheOnLoad() {
+        if (mRequestManager != null) {
+            return mRequestManager.isAutoCacheOnLoad();
+        } else {
+            return true;
+        }
+    }
+
+    public void setAutoCacheOnLoad(boolean autoCacheOnLoad) {
+        if (mRequestManager != null) {
+            this.mRequestManager.setAutoCacheOnLoad(autoCacheOnLoad);
+        }
+    }
+
     //------------------------------ RequestManager Callbacks --------------------------------------
     @Override
     public void onRequestSuccess(Ad ad) {
@@ -414,10 +480,11 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     @Override
     public void onRewardedOpened(RewardedPresenter rewardedPresenter) {
         if (mInitialRenderTime != -1) {
-            JsonOperations.putJsonLong(mPlacementParams, DiagnosticConstants.KEY_RENDER_TIME,
+            addReportingKey(DiagnosticConstants.KEY_RENDER_TIME,
                     System.currentTimeMillis() - mInitialRenderTime);
         }
         invokeOnOpened();
+        reportAdRender(Reporting.AdFormat.REWARDED, getPlacementParams());
     }
 
     @Override
@@ -433,5 +500,27 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     @Override
     public void onRewardedClicked(RewardedPresenter rewardedPresenter) {
         invokeOnClick();
+    }
+
+    private void addReportingKey(String key, Object value) {
+        if (mPlacementParams != null) {
+            if (value instanceof Long)
+                JsonOperations.putJsonLong(mPlacementParams, key, (Long) value);
+            else if (value instanceof Integer)
+                JsonOperations.putJsonValue(mPlacementParams, key, (Integer) value);
+            else if (value instanceof Double)
+                JsonOperations.putJsonValue(mPlacementParams, key, (Double) value);
+            else
+                JsonOperations.putJsonString(mPlacementParams, key, value.toString());
+        }
+    }
+
+    public void reportAdRender(String adFormat, JSONObject placementParams) {
+        ReportingEvent event = new ReportingEvent();
+        event.setEventType(Reporting.EventType.RENDER);
+        event.setAdFormat(adFormat);
+        event.mergeJSONObject(placementParams);
+        if (HyBid.getReportingController() != null)
+            HyBid.getReportingController().reportEvent(event);
     }
 }

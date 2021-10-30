@@ -40,6 +40,7 @@ import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.analytics.Reporting;
+import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.auction.AdSource;
 import net.pubnative.lite.sdk.auction.AdSourceConfig;
@@ -48,8 +49,10 @@ import net.pubnative.lite.sdk.auction.HyBidAdSource;
 import net.pubnative.lite.sdk.auction.VastTagAdSource;
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
 import net.pubnative.lite.sdk.config.ConfigManager;
+import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdSize;
+import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.RemoteConfigAdSource;
 import net.pubnative.lite.sdk.models.RemoteConfigPlacement;
@@ -97,13 +100,14 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     protected Ad mAd;
 
     protected PriorityQueue<Ad> mAuctionResponses;
-    private boolean autoShowOnLoad = true;
-    private static String mAdFormat = Reporting.AdFormat.BANNER;
+    private boolean mAutoShowOnLoad = true;
+    private final static String mAdFormat = Reporting.AdFormat.BANNER;
     private Auction mAuction;
     private SignalDataProcessor mSignalDataProcessor;
     private JSONObject mPlacementParams;
     private long mInitialLoadTime = -1;
     private long mInitialRenderTime = -1;
+    private String mIntegrationType = IntegrationType.STANDALONE.getCode();
 
     public HyBidAdView(Context context) {
         super(context);
@@ -153,7 +157,8 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
             if (TextUtils.isEmpty(zoneId)) {
                 invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ZONE_ID));
             } else {
-                JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_ZONE_ID, zoneId);
+                addReportingKey(DiagnosticConstants.KEY_ZONE_ID, zoneId);
+
                 ConfigManager configManager = HyBid.getConfigManager();
                 if (configManager != null && configManager.getConfig() != null
                         && configManager.getConfig().placement_info != null
@@ -201,12 +206,31 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         }
     }
 
+    public void prepare() {
+        if (mRequestManager != null && mAd != null) {
+            mRequestManager.cacheAd(mAd);
+        }
+    }
+
     public void show() {
         renderAd();
     }
 
     public void show(View view, Position position) {
-        JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_AD_POSITION, position.name());
+
+        //Timestamp
+        addReportingKey(Reporting.Key.TIMESTAMP, String.valueOf(System.currentTimeMillis()));
+        if (HyBid.getAppToken() != null)
+            //AppToken
+            addReportingKey(Reporting.Key.APP_TOKEN, HyBid.getAppToken());
+        if (mRequestManager.getAdSize() != null)
+            //Ad Size
+            addReportingKey(Reporting.Key.AD_SIZE, mRequestManager.getAdSize().toString());
+        //Integration Type
+        addReportingKey(Reporting.Key.INTEGRATION_TYPE, mIntegrationType);
+
+        addReportingKey(DiagnosticConstants.KEY_AD_POSITION, position.name());
+
         if (mWindowManager == null) {
             mWindowManager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
             WindowManager.LayoutParams localLayoutParams = new WindowManager.LayoutParams();
@@ -238,14 +262,14 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
             mWindowManager.addView(mContainer, localLayoutParams);
         }
 
-        if (autoShowOnLoad) {
+        if (mAutoShowOnLoad) {
             invokeOnLoadFinished();
         }
 
         startTracking();
 
         if (mInitialRenderTime != -1) {
-            JsonOperations.putJsonLong(mPlacementParams, DiagnosticConstants.KEY_RENDER_TIME,
+            addReportingKey(DiagnosticConstants.KEY_RENDER_TIME,
                     System.currentTimeMillis() - mInitialRenderTime);
         }
 
@@ -319,11 +343,25 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     }
 
     public boolean isAutoShowOnLoad() {
-        return autoShowOnLoad;
+        return mAutoShowOnLoad;
     }
 
     public void setAutoShowOnLoad(boolean autoShowOnLoad) {
-        this.autoShowOnLoad = autoShowOnLoad;
+        this.mAutoShowOnLoad = autoShowOnLoad;
+    }
+
+    public boolean isAutoCacheOnLoad() {
+        if (mRequestManager != null) {
+            return mRequestManager.isAutoCacheOnLoad();
+        } else {
+            return true;
+        }
+    }
+
+    public void setAutoCacheOnLoad(boolean autoCacheOnLoad) {
+        if (mRequestManager != null) {
+            this.mRequestManager.setAutoCacheOnLoad(autoCacheOnLoad);
+        }
     }
 
     protected String getLogTag() {
@@ -348,6 +386,24 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
             mPresenter.load();
         } else {
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.UNSUPPORTED_ASSET));
+
+            if (HyBid.getReportingController() != null) {
+                ReportingEvent renderErrorEvent = new ReportingEvent();
+                renderErrorEvent.setAppToken(HyBid.getAppToken());
+                renderErrorEvent.setEventType(Reporting.EventType.RENDER_ERROR);
+                renderErrorEvent.setErrorCode(HyBidErrorCode.UNSUPPORTED_ASSET.getCode());
+                renderErrorEvent.setErrorMessage(HyBidErrorCode.UNSUPPORTED_ASSET.getMessage());
+                renderErrorEvent.setTimestamp(System.currentTimeMillis());
+                renderErrorEvent.setZoneId(mAd.getZoneId());
+                renderErrorEvent.setAdFormat(mAdFormat);
+                renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
+                renderErrorEvent.setIntegrationType(mIntegrationType);
+                renderErrorEvent.mergeJSONObject(getPlacementParams());
+
+                getAdTypeAndCreative(renderErrorEvent);
+
+                HyBid.getReportingController().reportEvent(renderErrorEvent);
+            }
         }
     }
 
@@ -359,6 +415,24 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
             renderAd();
         } else {
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_AD));
+
+            if (HyBid.getReportingController() != null) {
+                ReportingEvent renderErrorEvent = new ReportingEvent();
+                renderErrorEvent.setAppToken(HyBid.getAppToken());
+                renderErrorEvent.setEventType(Reporting.EventType.RENDER_ERROR);
+                renderErrorEvent.setErrorCode(HyBidErrorCode.INVALID_AD.getCode());
+                renderErrorEvent.setErrorMessage(HyBidErrorCode.INVALID_AD.getMessage());
+                renderErrorEvent.setTimestamp(System.currentTimeMillis());
+                renderErrorEvent.setZoneId(mAd.getZoneId());
+                renderErrorEvent.setAdFormat(mAdFormat);
+                renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
+                renderErrorEvent.setIntegrationType(mIntegrationType);
+                renderErrorEvent.mergeJSONObject(getPlacementParams());
+
+                getAdTypeAndCreative(renderErrorEvent);
+
+                HyBid.getReportingController().reportEvent(renderErrorEvent);
+            }
         }
     }
 
@@ -377,6 +451,24 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
                         renderAd();
                     } else {
                         invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NULL_AD));
+
+                        if (HyBid.getReportingController() != null) {
+                            ReportingEvent renderErrorEvent = new ReportingEvent();
+                            renderErrorEvent.setAppToken(HyBid.getAppToken());
+                            renderErrorEvent.setEventType(Reporting.EventType.RENDER_ERROR);
+                            renderErrorEvent.setErrorCode(HyBidErrorCode.NULL_AD.getCode());
+                            renderErrorEvent.setErrorMessage(HyBidErrorCode.NULL_AD.getMessage());
+                            renderErrorEvent.setTimestamp(System.currentTimeMillis());
+                            renderErrorEvent.setZoneId(mAd.getZoneId());
+                            renderErrorEvent.setAdFormat(mAdFormat);
+                            renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
+                            renderErrorEvent.setIntegrationType(mIntegrationType);
+                            renderErrorEvent.mergeJSONObject(getPlacementParams());
+
+                            getAdTypeAndCreative(renderErrorEvent);
+
+                            HyBid.getReportingController().reportEvent(renderErrorEvent);
+                        }
                     }
                 }
 
@@ -387,6 +479,24 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
             });
         } else {
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_SIGNAL_DATA));
+
+            if (HyBid.getReportingController() != null) {
+                ReportingEvent renderErrorEvent = new ReportingEvent();
+                renderErrorEvent.setAppToken(HyBid.getAppToken());
+                renderErrorEvent.setEventType(Reporting.EventType.RENDER_ERROR);
+                renderErrorEvent.setErrorCode(HyBidErrorCode.INVALID_SIGNAL_DATA.getCode());
+                renderErrorEvent.setErrorMessage(HyBidErrorCode.INVALID_SIGNAL_DATA.getMessage());
+                renderErrorEvent.setTimestamp(System.currentTimeMillis());
+                renderErrorEvent.setZoneId(mAd.getZoneId());
+                renderErrorEvent.setAdFormat(mAdFormat);
+                renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
+                renderErrorEvent.setIntegrationType(mIntegrationType);
+                renderErrorEvent.mergeJSONObject(getPlacementParams());
+
+                getAdTypeAndCreative(renderErrorEvent);
+
+                HyBid.getReportingController().reportEvent(renderErrorEvent);
+            }
         }
     }
 
@@ -475,20 +585,43 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     }
 
     protected void invokeOnLoadFinished() {
+        long loadTime = -1;
         if (mInitialLoadTime != -1) {
-            JsonOperations.putJsonLong(mPlacementParams, DiagnosticConstants.KEY_TIME_TO_LOAD,
-                    System.currentTimeMillis() - mInitialLoadTime);
+            loadTime = System.currentTimeMillis() - mInitialLoadTime;
+            addReportingKey(DiagnosticConstants.KEY_TIME_TO_LOAD, loadTime);
         }
+
+        if (HyBid.getReportingController() != null) {
+            ReportingEvent loadEvent = new ReportingEvent();
+            loadEvent.setEventType(Reporting.EventType.LOAD);
+            loadEvent.setAdFormat(Reporting.AdFormat.BANNER);
+            loadEvent.setCustomInteger(DiagnosticConstants.KEY_TIME_TO_LOAD, loadTime);
+            loadEvent.mergeJSONObject(getPlacementParams());
+            HyBid.getReportingController().reportEvent(loadEvent);
+        }
+
         if (mListener != null) {
             mListener.onAdLoaded();
         }
     }
 
     protected void invokeOnLoadFailed(Throwable exception) {
+        long loadTime = -1;
         if (mInitialLoadTime != -1) {
-            JsonOperations.putJsonLong(mPlacementParams, DiagnosticConstants.KEY_TIME_TO_LOAD_FAILED,
-                    System.currentTimeMillis() - mInitialLoadTime);
+            loadTime = System.currentTimeMillis() - mInitialLoadTime;
+            addReportingKey(DiagnosticConstants.KEY_TIME_TO_LOAD_FAILED,
+                    loadTime);
         }
+
+        if (HyBid.getReportingController() != null) {
+            ReportingEvent loadFailEvent = new ReportingEvent();
+            loadFailEvent.setEventType(Reporting.EventType.LOAD_FAIL);
+            loadFailEvent.setAdFormat(Reporting.AdFormat.BANNER);
+            loadFailEvent.setCustomInteger(DiagnosticConstants.KEY_TIME_TO_LOAD, loadTime);
+            loadFailEvent.mergeJSONObject(getPlacementParams());
+            HyBid.getReportingController().reportEvent(loadFailEvent);
+        }
+
         if (exception instanceof HyBidError) {
             HyBidError hyBidError = (HyBidError) exception;
             if (hyBidError.getErrorCode() == HyBidErrorCode.NO_FILL) {
@@ -523,13 +656,13 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
 
             addView(view, adLayoutParams);
 
-            if (autoShowOnLoad) {
+            if (mAutoShowOnLoad) {
                 invokeOnLoadFinished();
             }
 
             startTracking();
             if (mInitialRenderTime != -1) {
-                JsonOperations.putJsonLong(mPlacementParams, DiagnosticConstants.KEY_RENDER_TIME,
+                addReportingKey(DiagnosticConstants.KEY_RENDER_TIME,
                         System.currentTimeMillis() - mInitialRenderTime);
             }
         } else {
@@ -540,6 +673,26 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     public void setMediation(boolean isMediation) {
         if (mRequestManager != null) {
             mRequestManager.setIntegrationType(isMediation ? IntegrationType.MEDIATION : IntegrationType.STANDALONE);
+            if (isMediation) {
+                mIntegrationType = IntegrationType.MEDIATION.getCode();
+            } else {
+                mIntegrationType = IntegrationType.STANDALONE.getCode();
+            }
+        }
+    }
+
+    private void getAdTypeAndCreative(ReportingEvent reportingEvent) {
+        switch (mAd.assetgroupid) {
+            case ApiAssetGroupType.VAST_INTERSTITIAL:
+            case ApiAssetGroupType.VAST_MRECT: {
+                reportingEvent.setAdType("VAST");
+                reportingEvent.setCreative(mAd.getVast());
+            }
+
+            default: {
+                reportingEvent.setAdType("HTML");
+                reportingEvent.setCreative(mAd.getAssetHtml(APIAsset.HTML_BANNER));
+            }
         }
     }
 
@@ -575,7 +728,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NULL_AD));
         } else {
             mAd = ad;
-            if (autoShowOnLoad) {
+            if (mAutoShowOnLoad) {
                 renderAd();
             } else {
                 invokeOnLoadFinished();
@@ -619,6 +772,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     @Override
     public void onImpression() {
         invokeOnImpression();
+        reportAdRender(mAdFormat, getPlacementParams());
     }
 
     //------------------------------ Auction Callbacks --------------------------------------
@@ -630,7 +784,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         } else {
             mAuctionResponses.addAll(auctionResult);
             mAd = mAuctionResponses.poll();
-            if (autoShowOnLoad) {
+            if (mAutoShowOnLoad) {
                 renderAd();
             } else {
                 invokeOnLoadFinished();
@@ -670,5 +824,27 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         if (mVideoListener != null) {
             mVideoListener.onVideoFinished();
         }
+    }
+
+    private void addReportingKey(String key, Object value) {
+        if (mPlacementParams != null) {
+            if (value instanceof Long)
+                JsonOperations.putJsonLong(mPlacementParams, key, (Long) value);
+            else if (value instanceof Integer)
+                JsonOperations.putJsonValue(mPlacementParams, key, (Integer) value);
+            else if (value instanceof Double)
+                JsonOperations.putJsonValue(mPlacementParams, key, (Double) value);
+            else
+                JsonOperations.putJsonString(mPlacementParams, key, value.toString());
+        }
+    }
+
+    public void reportAdRender(String adFormat, JSONObject placementParams) {
+        ReportingEvent event = new ReportingEvent();
+        event.setEventType(Reporting.EventType.RENDER);
+        event.setAdFormat(adFormat);
+        event.mergeJSONObject(placementParams);
+        if (HyBid.getReportingController() != null)
+            HyBid.getReportingController().reportEvent(event);
     }
 }

@@ -70,9 +70,10 @@ public class HyBidHeaderBiddingInterstitialCustomEvent extends BaseAd implements
             return;
         }
 
-        int skipOffset = HyBid.getInterstitialSkipOffset();
-        if (skipOffset > 0) {
-            mInterstitialPresenter = new InterstitialPresenterFactory(context, mZoneID).createInterstitialPresenter(ad, skipOffset, this);
+        int htmlSkipOffset = HyBid.getHtmlInterstitialSkipOffset();
+        int videoSkipOffset = HyBid.getVideoInterstitialSkipOffset();
+        if (htmlSkipOffset > 0 || videoSkipOffset > 0) {
+            mInterstitialPresenter = new InterstitialPresenterFactory(context, mZoneID).createInterstitialPresenter(ad, htmlSkipOffset, videoSkipOffset, this);
         } else {
             mInterstitialPresenter = new InterstitialPresenterFactory(context, mZoneID).createInterstitialPresenter(ad, this);
         }

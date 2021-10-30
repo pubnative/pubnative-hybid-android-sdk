@@ -18,7 +18,7 @@ public class VideoAd extends BaseVideoAd {
 
     private volatile VideoAdView mBannerView;
 
-    public VideoAd(Context context, String data, boolean isInterstitial, boolean isFullscreen) {
+    public VideoAd(Context context, String data, boolean isInterstitial, boolean isFullscreen) throws Exception {
         super(context, data, isInterstitial, isFullscreen);
     }
 
@@ -98,11 +98,13 @@ public class VideoAd extends BaseVideoAd {
         boolean isMuted = false;
         switch (HyBid.getVideoAudioStatus()) {
             case DEFAULT:
-                if (isPhoneMuted())
-                    isMuted = true;
-                break;
             case MUTED:
                 isMuted = true;
+                break;
+            case ON:
+                if (isPhoneMuted()) {
+                    isMuted = true;
+                }
                 break;
         }
 

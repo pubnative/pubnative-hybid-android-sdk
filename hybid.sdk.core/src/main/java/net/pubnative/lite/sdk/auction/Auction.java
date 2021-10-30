@@ -3,6 +3,7 @@ package net.pubnative.lite.sdk.auction;
 import android.os.CountDownTimer;
 import android.text.TextUtils;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.analytics.Reporting;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 public class Auction {
+
     private static final String TAG = Auction.class.getSimpleName();
 
     public interface Listener {

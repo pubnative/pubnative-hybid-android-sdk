@@ -47,15 +47,16 @@ public class InterstitialPresenterFactory {
     public InterstitialPresenter createInterstitialPresenter(
             Ad ad,
             InterstitialPresenter.Listener interstitialPresenterListener) {
-        return createInterstitialPresenter(ad, -1, interstitialPresenterListener);
+        return createInterstitialPresenter(ad, -1, -1, interstitialPresenterListener);
     }
 
     public InterstitialPresenter createInterstitialPresenter(
             Ad ad,
-            int skipOffset,
+            int htmlSkipOffset,
+            int videoSkipOffset,
             InterstitialPresenter.Listener interstitialPresenterListener) {
 
-        final InterstitialPresenter interstitialPresenter = fromCreativeType(ad.assetgroupid, ad, skipOffset);
+        final InterstitialPresenter interstitialPresenter = fromCreativeType(ad.assetgroupid, ad, htmlSkipOffset, videoSkipOffset);
         if (interstitialPresenter == null) {
             return null;
         }
@@ -71,17 +72,17 @@ public class InterstitialPresenterFactory {
         return interstitialPresenterDecorator;
     }
 
-    InterstitialPresenter fromCreativeType(int assetGroupId, Ad ad, int skipOffset) {
+    InterstitialPresenter fromCreativeType(int assetGroupId, Ad ad, int htmlSkipOffset, int videoSkipOffset) {
         switch (assetGroupId) {
             case ApiAssetGroupType.MRAID_300x600:
             case ApiAssetGroupType.MRAID_320x480:
             case ApiAssetGroupType.MRAID_480x320:
             case ApiAssetGroupType.MRAID_1024x768:
             case ApiAssetGroupType.MRAID_768x1024: {
-                return new MraidInterstitialPresenter(mContext, ad, mZoneId, skipOffset);
+                return new MraidInterstitialPresenter(mContext, ad, mZoneId, htmlSkipOffset);
             }
             case ApiAssetGroupType.VAST_INTERSTITIAL: {
-                return new VastInterstitialPresenter(mContext, ad, mZoneId, skipOffset);
+                return new VastInterstitialPresenter(mContext, ad, mZoneId, videoSkipOffset);
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for interstitial ad format.");

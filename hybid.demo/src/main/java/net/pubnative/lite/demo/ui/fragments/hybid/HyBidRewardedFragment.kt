@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.Constants
@@ -23,11 +24,14 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
     private var zoneId: String? = null
 
     private lateinit var loadButton: Button
+    private lateinit var prepareButton: Button
     private lateinit var showButton: Button
+    private lateinit var cachingCheckbox: CheckBox
     private lateinit var errorCodeView: TextView
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
     private var rewardedAd: HyBidRewardedAd? = null
+    private var cachingEnabled: Boolean = true
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -36,8 +40,11 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
         errorCodeView = view.findViewById(R.id.view_error_code)
         creativeIdView = view.findViewById(R.id.view_creative_id)
         loadButton = view.findViewById(R.id.button_load)
+        prepareButton = view.findViewById(R.id.button_prepare)
         showButton = view.findViewById(R.id.button_show)
-
+        cachingCheckbox = view.findViewById(R.id.check_caching)
+        prepareButton.isEnabled = false
+        showButton.isEnabled = false
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
@@ -48,30 +55,46 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
             loadPNRewardedAd()
         }
 
-        showButton.setOnClickListener {
-            rewardedAd?.show()
-            showButton.isEnabled = false
+        prepareButton.setOnClickListener {
+            rewardedAd?.prepare()
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
-        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), creativeIdView.text.toString()) }
+        showButton.setOnClickListener {
+            rewardedAd?.show()
+        }
+
+        cachingCheckbox.setOnCheckedChangeListener { _, isChecked ->
+            cachingEnabled = isChecked
+            prepareButton.visibility = if (isChecked) View.GONE else View.VISIBLE
+        }
+
+        errorView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                errorView.text.toString()
+            )
+        }
+        creativeIdView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                creativeIdView.text.toString()
+            )
+        }
     }
 
 
     private fun loadPNRewardedAd() {
         rewardedAd = HyBidRewardedAd(activity, zoneId, this)
+        rewardedAd?.isAutoCacheOnLoad = cachingEnabled
         rewardedAd?.load()
     }
 
 
     // -------------- Listeners ---------------
 
-    override fun onReward() {
-        Log.d(TAG, "onReward")
-    }
-
     override fun onRewardedLoaded() {
         Log.d(TAG, "onRewardedLoaded")
+        prepareButton.isEnabled = !cachingEnabled
         showButton.isEnabled = true
         displayLogs()
         if (!TextUtils.isEmpty(rewardedAd?.creativeId)) {
@@ -79,20 +102,8 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
         }
     }
 
-    override fun onRewardedOpened() {
-        Log.d(TAG, "onRewardedOpened")
-        DiagnosticsManager.printPlacementDiagnosticsLog(requireContext(), rewardedAd?.placementParams)
-    }
-
-    override fun onRewardedClosed() {
-        Log.d(TAG, "onRewardedClosed")
-    }
-
-    override fun onRewardedClick() {
-        Log.d(TAG, "onRewardedClick")
-    }
-
     override fun onRewardedLoadFailed(error: Throwable?) {
+        prepareButton.isEnabled = false
         showButton.isEnabled = false
         if (error != null && error is HyBidError) {
             Log.e(TAG, error.message ?: " - ")
@@ -106,6 +117,28 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
         creativeIdView.text = ""
     }
 
+    override fun onRewardedOpened() {
+        Log.d(TAG, "onRewardedOpened")
+        DiagnosticsManager.printPlacementDiagnosticsLog(
+            requireContext(),
+            rewardedAd?.placementParams
+        )
+    }
+
+    override fun onRewardedClosed() {
+        Log.d(TAG, "onRewardedClosed")
+        rewardedAd = null
+        prepareButton.isEnabled = false
+        showButton.isEnabled = false
+    }
+
+    override fun onRewardedClick() {
+        Log.d(TAG, "onRewardedClick")
+    }
+
+    override fun onReward() {
+        Log.d(TAG, "onReward")
+    }
 
     private fun displayLogs() {
         if (activity != null) {

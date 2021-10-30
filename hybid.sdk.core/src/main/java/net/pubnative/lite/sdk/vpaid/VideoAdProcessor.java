@@ -1,8 +1,11 @@
 package net.pubnative.lite.sdk.vpaid;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.View;
+
+import com.iab.omid.library.pubnativenet.adsession.VerificationScriptResource;
 
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
@@ -12,11 +15,14 @@ import net.pubnative.lite.sdk.vpaid.models.vpaid.AdSpotDimensions;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.response.VastProcessor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class VideoAdProcessor {
     private static final String TAG = VideoAdProcessor.class.getSimpleName();
 
     public interface Listener {
-        void onCacheSuccess(AdParams adParams, String videoFilePath, String endCardFilePath);
+        void onCacheSuccess(AdParams adParams, String videoFilePath, String endCardFilePath, List<String> omidVendors);
 
         void onCacheError(Throwable error);
     }
@@ -45,7 +51,7 @@ public class VideoAdProcessor {
             @Override
             public void onAssetsLoaded(String videoFilePath, String endCardFilePath) {
                 if (listener != null) {
-                    listener.onCacheSuccess(adParams, videoFilePath, endCardFilePath);
+                    listener.onCacheSuccess(adParams, videoFilePath, endCardFilePath, getOmidVendors(adParams));
                 }
             }
 
@@ -66,5 +72,19 @@ public class VideoAdProcessor {
             DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
             return new AdSpotDimensions(displayMetrics.widthPixels, displayMetrics.heightPixels);
         }
+    }
+
+    private List<String> getOmidVendors(AdParams adParams) {
+        List<String> vendors = new ArrayList<>();
+        if (adParams != null
+                && adParams.getVerificationScriptResources() != null
+                && !adParams.getVerificationScriptResources().isEmpty()) {
+            for (VerificationScriptResource verification : adParams.getVerificationScriptResources()) {
+                if (!TextUtils.isEmpty(verification.getVendorKey())) {
+                    vendors.add(verification.getVendorKey());
+                }
+            }
+        }
+        return vendors;
     }
 }

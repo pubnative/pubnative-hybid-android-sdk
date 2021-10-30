@@ -1,6 +1,9 @@
 package net.pubnative.lite.sdk.interstitial.activity;
 
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 
@@ -29,6 +32,14 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            }
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            }
+        }
         super.onCreate(savedInstanceState);
         hideInterstitialCloseButton();
     }
@@ -54,7 +65,7 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
                 adView.setCloseLayoutListener(this);
             }
 
-            if (mSkipOffset > 0) {
+            if (mSkipOffset > 0 && adView != null) {
                 adView.setSkipOffset(mSkipOffset);
             }
         }

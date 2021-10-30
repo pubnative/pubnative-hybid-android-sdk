@@ -123,6 +123,7 @@ public class HyBidDFPBannerCustomEvent implements CustomEventBanner, AdPresenter
     public void onAdClicked(AdPresenter adPresenter) {
         if (mBannerListener != null) {
             mBannerListener.onAdClicked();
+            mBannerListener.onAdOpened();
             mBannerListener.onAdLeftApplication();
         }
     }

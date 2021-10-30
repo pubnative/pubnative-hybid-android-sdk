@@ -29,6 +29,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -50,7 +51,8 @@ import net.pubnative.lite.sdk.utils.HeaderBiddingUtils
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class MoPubRewardedFragment : Fragment(R.layout.fragment_mopub_rewarded), RequestManager.RequestListener, MoPubRewardedAdListener {
+class MoPubRewardedFragment : Fragment(R.layout.fragment_mopub_rewarded),
+    RequestManager.RequestListener, MoPubRewardedAdListener {
 
     val TAG = MoPubRewardedFragment::class.java.simpleName
 
@@ -58,11 +60,16 @@ class MoPubRewardedFragment : Fragment(R.layout.fragment_mopub_rewarded), Reques
 
     private var zoneId: String? = null
     private var adUnitId: String? = null
+    private var ad: Ad? = null
 
     private lateinit var loadButton: Button
+    private lateinit var prepareButton: Button
     private lateinit var showButton: Button
+    private lateinit var cachingCheckbox: CheckBox
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
+
+    private var cachingEnabled: Boolean = true
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -72,7 +79,12 @@ class MoPubRewardedFragment : Fragment(R.layout.fragment_mopub_rewarded), Reques
         creativeIdView = view.findViewById(R.id.view_creative_id)
         creativeIdView.visibility = View.VISIBLE
         loadButton = view.findViewById(R.id.button_load)
+        prepareButton = view.findViewById(R.id.button_prepare)
         showButton = view.findViewById(R.id.button_show)
+        cachingCheckbox = view.findViewById(R.id.check_caching)
+        cachingCheckbox.visibility = View.VISIBLE
+        prepareButton.isEnabled = false
+        showButton.isEnabled = false
 
         requestManager = RewardedRequestManager()
 
@@ -88,14 +100,35 @@ class MoPubRewardedFragment : Fragment(R.layout.fragment_mopub_rewarded), Reques
             loadPNAd()
         }
 
+        prepareButton.setOnClickListener {
+            ad?.let { ad ->
+                requestManager.cacheAd(ad)
+            }
+        }
+
         showButton.setOnClickListener {
             adUnitId?.let {
                 MoPubRewardedAds.showRewardedAd(it)
             }
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
-        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), creativeIdView.text.toString()) }
+        cachingCheckbox.setOnCheckedChangeListener { _, isChecked ->
+            cachingEnabled = isChecked
+            prepareButton.visibility = if (isChecked) View.GONE else View.VISIBLE
+        }
+
+        errorView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                errorView.text.toString()
+            )
+        }
+        creativeIdView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                creativeIdView.text.toString()
+            )
+        }
 
         showButton.isEnabled = false
     }
@@ -103,6 +136,7 @@ class MoPubRewardedFragment : Fragment(R.layout.fragment_mopub_rewarded), Reques
     fun loadPNAd() {
         requestManager.setZoneId(zoneId)
         requestManager.setRequestListener(this)
+        requestManager.isAutoCacheOnLoad = cachingEnabled
         requestManager.requestAd()
     }
 
@@ -115,9 +149,16 @@ class MoPubRewardedFragment : Fragment(R.layout.fragment_mopub_rewarded), Reques
 
     // --------------- HyBid Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
+        this.ad = ad
         adUnitId?.let {
-            MoPubRewardedAds.loadRewardedAd(it,
-                    MoPubRewardedAdManager.RequestParameters(HeaderBiddingUtils.getHeaderBiddingKeywords(ad)))
+            MoPubRewardedAds.loadRewardedAd(
+                it,
+                MoPubRewardedAdManager.RequestParameters(
+                    HeaderBiddingUtils.getHeaderBiddingKeywords(
+                        ad
+                    )
+                )
+            )
         }
 
         Log.d(TAG, "onRequestSuccess")
@@ -129,6 +170,7 @@ class MoPubRewardedFragment : Fragment(R.layout.fragment_mopub_rewarded), Reques
 
     override fun onRequestFail(throwable: Throwable?) {
         Log.d(TAG, "onRequestFail: ", throwable)
+        ad = null
         errorView.text = throwable?.message
         creativeIdView.text = ""
         displayLogs()
@@ -138,9 +180,12 @@ class MoPubRewardedFragment : Fragment(R.layout.fragment_mopub_rewarded), Reques
     override fun onRewardedAdLoadSuccess(adUnitId: String) {
         Log.d(TAG, "onRewardedAdLoadSuccess")
         showButton.isEnabled = true
+        prepareButton.isEnabled = !cachingEnabled
     }
 
     override fun onRewardedAdLoadFailure(adUnitId: String, errorCode: MoPubErrorCode) {
+        prepareButton.isEnabled = false
+        showButton.isEnabled = false
         Log.d(TAG, "onRewardedAdLoadFailure")
     }
 
@@ -158,17 +203,23 @@ class MoPubRewardedFragment : Fragment(R.layout.fragment_mopub_rewarded), Reques
 
     override fun onRewardedAdClosed(adUnitId: String) {
         Log.d(TAG, "onRewardedAdClosed")
+        prepareButton.isEnabled = false
+        showButton.isEnabled = false
     }
 
     override fun onRewardedAdCompleted(adUnitIds: Set<String?>, reward: MoPubReward) {
         Log.d(TAG, "onRewardedAdCompleted")
+        prepareButton.isEnabled = false
+        showButton.isEnabled = false
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubRewardedAdUnitId
-        adUnitId?.let {
-            MoPubManager.initMoPubSdk(requireActivity(), it)
+        adUnitId =
+            SettingsManager.getInstance(requireActivity()).getSettings().mopubRewardedAdUnitId
+        val appToken = SettingsManager.getInstance(requireActivity()).getSettings().appToken
+        if (adUnitId != null && appToken != null) {
+            MoPubManager.initMoPubSdk(requireActivity(), adUnitId, appToken)
         }
         MoPub.onCreate(requireActivity())
     }

@@ -27,7 +27,11 @@ class MoPubMediationRewardedFragment : Fragment(), MoPubRewardedAdListener {
 
     private var adUnitId: String? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_mopub_rewarded, container, false)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? = inflater.inflate(R.layout.fragment_mopub_rewarded, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -56,9 +60,11 @@ class MoPubMediationRewardedFragment : Fragment(), MoPubRewardedAdListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubMediationRewardedAdUnitId
-        adUnitId?.let {
-            MoPubManager.initMoPubSdk(requireActivity(), it)
+        adUnitId = SettingsManager.getInstance(requireActivity())
+            .getSettings().mopubMediationRewardedAdUnitId
+        val appToken = SettingsManager.getInstance(requireActivity()).getSettings().appToken
+        if (adUnitId != null && appToken != null) {
+            MoPubManager.initMoPubSdk(requireActivity(), adUnitId, appToken)
         }
         MoPub.onCreate(requireActivity())
     }

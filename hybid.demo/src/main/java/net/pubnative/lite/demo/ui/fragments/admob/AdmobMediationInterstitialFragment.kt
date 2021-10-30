@@ -8,19 +8,18 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.google.android.gms.ads.AdListener
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.InterstitialAd
+import com.google.android.gms.ads.*
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
-import net.pubnative.lite.demo.util.AdmobErrorParser
 import net.pubnative.lite.demo.util.ClipboardUtils
 
 class AdmobMediationInterstitialFragment : Fragment() {
     val TAG = AdmobMediationInterstitialFragment::class.java.simpleName
 
-    private lateinit var admobInterstitial: InterstitialAd
+    private var admobInterstitial: InterstitialAd? = null
     private lateinit var loadButton: Button
     private lateinit var showButton: Button
     private lateinit var errorView: TextView
@@ -37,58 +36,63 @@ class AdmobMediationInterstitialFragment : Fragment() {
 
         val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().admobInterstitialAdUnitId
 
-        admobInterstitial = InterstitialAd(activity)
-        admobInterstitial.adUnitId = adUnitId
-        admobInterstitial.adListener = adListener
-
         loadButton.setOnClickListener {
             errorView.text = ""
-            admobInterstitial.loadAd(AdRequest.Builder()
-                    .addTestDevice("9CD3F3CADFC5127409B07C5F802273E7")
-                    .build())
+            val adRequest = AdRequest.Builder().build()
+            InterstitialAd.load(requireActivity(), adUnitId, adRequest, adLoadCallback)
         }
 
         showButton.setOnClickListener {
-            admobInterstitial.show()
+            admobInterstitial?.show(requireActivity())
         }
 
         errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
     }
 
-    // ---------------- Admob Ad Listener ---------------------
-    private val adListener = object : AdListener() {
-        override fun onAdLoaded() {
-            super.onAdLoaded()
+    // ---------------- Admob Interstitial Ad Load Callback ---------------------
+    private val adLoadCallback = object : InterstitialAdLoadCallback() {
+        override fun onAdLoaded(ad: InterstitialAd) {
+            super.onAdLoaded(ad)
+            admobInterstitial = ad
+            admobInterstitial?.fullScreenContentCallback = fullScreenContentCallback
             Log.d(TAG, "onAdLoaded")
             displayLogs()
             showButton.isEnabled = true
         }
 
-        override fun onAdFailedToLoad(errorCode: Int) {
-            super.onAdFailedToLoad(errorCode)
+        override fun onAdFailedToLoad(error: LoadAdError) {
+            super.onAdFailedToLoad(error)
             Log.d(TAG, "onAdFailedToLoad")
             displayLogs()
-            errorView.text = AdmobErrorParser.getErrorMessage(errorCode)
+            errorView.text = error.message
+        }
+    }
+
+    // ---------------- Admob Full Screen Content Callback ---------------------
+    private val fullScreenContentCallback = object : FullScreenContentCallback() {
+        override fun onAdFailedToShowFullScreenContent(error: AdError) {
+            super.onAdFailedToShowFullScreenContent(error)
+            Log.d(TAG, "onAdFailedToShowFullScreenContent")
+        }
+
+        override fun onAdShowedFullScreenContent() {
+            super.onAdShowedFullScreenContent()
+            Log.d(TAG, "onAdShowedFullScreenContent")
+        }
+
+        override fun onAdDismissedFullScreenContent() {
+            super.onAdDismissedFullScreenContent()
+            Log.d(TAG, "onAdDismissedFullScreenContent")
+        }
+
+        override fun onAdImpression() {
+            super.onAdImpression()
+            Log.d(TAG, "onAdImpression")
         }
 
         override fun onAdClicked() {
             super.onAdClicked()
             Log.d(TAG, "onAdClicked")
-        }
-
-        override fun onAdOpened() {
-            super.onAdOpened()
-            Log.d(TAG, "onAdOpened")
-        }
-
-        override fun onAdLeftApplication() {
-            super.onAdLeftApplication()
-            Log.d(TAG, "onAdLeftApplication")
-        }
-
-        override fun onAdClosed() {
-            super.onAdClosed()
-            Log.d(TAG, "onAdClosed")
         }
     }
 

@@ -38,6 +38,7 @@ import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdRequestFactory;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.IntegrationType;
+import net.pubnative.lite.sdk.reporting.EventLoggingDelegate;
 import net.pubnative.lite.sdk.reporting.ReportingDelegate;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNApiUrlComposer;
@@ -52,6 +53,8 @@ public class HyBid {
     public static final String OM_PARTNER_NAME = BuildConfig.OMIDPN;
     public static final String HYBID_VERSION = BuildConfig.SDK_VERSION;
     private static final String REPORTING_URL = "https://rta-analytics.pubnative.io/event";
+
+    private static final String EVENT_LOGGING_URL = "https://api.pubnative.net/log";
 
     private static String sAppToken;
     @SuppressLint("StaticFieldLeak")
@@ -82,14 +85,21 @@ public class HyBid {
     private static String sKeywords;
     private static String sBundleId;
     private static Boolean isCloseVideoAfterFinish = false;
-    private static Integer sInterstitialSkipOffset = -1;
+    private static Integer sHtmlInterstitialSkipOffset = -1;
+    private static Integer sVideoInterstitialSkipOffset = -1;
     private static String sIabCategory;
     private static String sIabSubcategory;
     private static String sAppVersion;
     private static String sDeveloperDomain;
     private static String sContentAgeRating;
 
+    private static InterstitialActionBehaviour sInterstitialActionBehaviour =
+            InterstitialActionBehaviour.HB_CREATIVE;
+
+
     private static AudioState sVideoAudioState = AudioState.DEFAULT;
+
+    private static boolean sEventLoggingEndpointEnabled = false;
 
     public static void initialize(String appToken,
                                   Application application) {
@@ -259,6 +269,14 @@ public class HyBid {
         return sTestMode;
     }
 
+    public static void setInterstitialClickBehaviour(InterstitialActionBehaviour interstitialActionBehaviour) {
+        sInterstitialActionBehaviour = interstitialActionBehaviour;
+    }
+
+    public static InterstitialActionBehaviour getInterstitialClickBehaviour() {
+        return sInterstitialActionBehaviour;
+    }
+
     public static void setLocationUpdatesEnabled(boolean isEnabled) {
         sLocationUpdatesEnabled = isEnabled;
     }
@@ -315,9 +333,34 @@ public class HyBid {
         return sReportingController.removeCallback(callback);
     }
 
+    /**
+     * @deprecated
+     * This method is not recommended. Use instead setHtmlInterstitialSkipOffset or
+     * setVideoInterstitialSkipOffset to define the offset per ad type
+     * @param seconds amount of seconds until the interstitial ad can be dismissed
+     */
+    @Deprecated
     public static void setInterstitialSkipOffset(Integer seconds) {
+        setHtmlInterstitialSkipOffset(seconds);
+        setVideoInterstitialSkipOffset(seconds);
+    }
+
+    public static void setHtmlInterstitialSkipOffset(Integer seconds) {
         if (seconds >= 0)
-            sInterstitialSkipOffset = seconds;
+            sHtmlInterstitialSkipOffset = seconds;
+    }
+
+    public static void setVideoInterstitialSkipOffset(Integer seconds) {
+        if (seconds >= 0)
+            sVideoInterstitialSkipOffset = seconds;
+    }
+
+    public static Integer getHtmlInterstitialSkipOffset() {
+        return sHtmlInterstitialSkipOffset;
+    }
+
+    public static Integer getVideoInterstitialSkipOffset() {
+        return sVideoInterstitialSkipOffset;
     }
 
     public static void setCloseVideoAfterFinish(Boolean isClosing) {
@@ -326,10 +369,6 @@ public class HyBid {
 
     public static Boolean getCloseVideoAfterFinish() {
         return isCloseVideoAfterFinish;
-    }
-
-    public static Integer getInterstitialSkipOffset() {
-        return sInterstitialSkipOffset;
     }
 
     public interface InitialisationListener {

@@ -34,6 +34,7 @@ import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.utils.CheckUtils;
+import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.VideoAd;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
@@ -43,6 +44,7 @@ import net.pubnative.lite.sdk.vpaid.VideoAdView;
 import org.json.JSONObject;
 
 public class VastAdPresenter implements AdPresenter {
+    private static final String TAG = VastAdPresenter.class.getSimpleName();
     private final Context mContext;
     private final Ad mAd;
 
@@ -87,19 +89,30 @@ public class VastAdPresenter implements AdPresenter {
             return;
         }
 
-        mVideoAd = new VideoAd(mContext, mAd.getVast(), false, false);
-        mVideoPlayer = new VideoAdView(mContext);
-        mVideoAd.bindView(mVideoPlayer);
-        mVideoAd.setAdListener(mVideoAdListener);
+        try {
+            mVideoAd = new VideoAd(mContext, mAd.getVast(), false, false);
+            mVideoPlayer = new VideoAdView(mContext);
+            mVideoAd.bindView(mVideoPlayer);
+            mVideoAd.setAdListener(mVideoAdListener);
 
-        if (!TextUtils.isEmpty(getAd().getZoneId())) {
-            VideoAdCacheItem adCacheItem = HyBid.getVideoAdCache().remove(getAd().getZoneId());
-            if (adCacheItem != null) {
-                mVideoAd.setVideoCacheItem(adCacheItem);
+            if (!TextUtils.isEmpty(getAd().getZoneId())) {
+                VideoAdCacheItem adCacheItem = HyBid.getVideoAdCache().remove(getAd().getZoneId());
+                if (adCacheItem != null) {
+                    mVideoAd.setVideoCacheItem(adCacheItem);
+                }
+            }
+
+            mVideoAd.load();
+        } catch (Exception exception) {
+            Logger.e(TAG, exception.getMessage());
+            if (mListener != null) {
+                mListener.onAdError(this);
+            }
+
+            if (mVideoListener != null) {
+                mVideoListener.onVideoError(0);
             }
         }
-
-        mVideoAd.load();
     }
 
     @Override

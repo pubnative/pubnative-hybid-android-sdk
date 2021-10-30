@@ -1,11 +1,9 @@
 package net.pubnative.lite.demo.ui.fragments
 
-import android.content.DialogInterface
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
@@ -15,7 +13,6 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
-import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.adapters.ReportingEventAdapter
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.demo.util.JsonUtils
@@ -26,7 +23,7 @@ import net.pubnative.lite.sdk.utils.AdRequestRegistry
 
 class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback {
 
-    private lateinit var requestView: TextView
+    private var requestView: TextView? = null
     private lateinit var latencyView: TextView
     private lateinit var responseView: TextView
 
@@ -39,10 +36,10 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
         latencyView = view.findViewById(R.id.view_latency)
         responseView = view.findViewById(R.id.view_response)
 
-        requestView.setOnClickListener {
+        requestView?.setOnClickListener {
             ClipboardUtils.copyToClipboard(
                 requireActivity(),
-                requestView.text.toString()
+                requestView?.text.toString()
             )
         }
         latencyView.setOnClickListener {
@@ -62,7 +59,9 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
             displayEventReport()
         }
 
-        HyBid.getReportingController().addCallback(this)
+        HyBid.getReportingController()?.apply {
+            addCallback(this@DebugFragment)
+        }
     }
 
     override fun onDestroy() {
@@ -78,12 +77,12 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
 
     fun cleanLogs() {
         if (requestView != null) {
-            requestView.text = ""
+            requestView?.text = ""
         }
-        if (latencyView != null) {
+        if (isLatencyViewInitializedNotNull()) {
             latencyView.text = ""
         }
-        if (responseView != null) {
+        if (isResponseViewInitializedNotNull()) {
             responseView.text = ""
         }
     }
@@ -92,14 +91,14 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
         val registryItem = AdRequestRegistry.getInstance().lastAdRequest
         if (registryItem != null) {
             if (requestView != null) {
-                requestView.text = registryItem.url
+                requestView?.text = registryItem.url
             }
-            if (latencyView != null) {
+            if (isLatencyViewInitializedNotNull()) {
                 latencyView.text = registryItem.latency.toString()
             }
 
             if (!TextUtils.isEmpty(registryItem.response)) {
-                if (responseView != null) {
+                if (isResponseViewInitializedNotNull()) {
                     responseView.text = JsonUtils.toFormattedJson(registryItem.response)
                 }
             }
@@ -130,5 +129,13 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
         builder.setPositiveButton(R.string.action_dismiss) { dialog, _ -> dialog?.dismiss() }
         val dialog = builder.create()
         dialog.show()
+    }
+
+    private fun isLatencyViewInitializedNotNull(): Boolean {
+        return this::latencyView.isInitialized && latencyView != null
+    }
+
+    private fun isResponseViewInitializedNotNull(): Boolean {
+        return this::responseView.isInitialized && responseView != null
     }
 }

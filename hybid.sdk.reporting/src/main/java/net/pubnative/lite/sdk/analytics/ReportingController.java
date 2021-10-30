@@ -1,5 +1,7 @@
 package net.pubnative.lite.sdk.analytics;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +15,7 @@ public class ReportingController {
     }
 
     public void addCallback(ReportingEventCallback callback) {
-        if(callback != null && !mListeners.contains(callback)) {
+        if (callback != null && !mListeners.contains(callback)) {
             mListeners.add(callback);
         }
     }
@@ -34,7 +36,7 @@ public class ReportingController {
 
     public void reportEvent(ReportingEvent event) {
         for (ReportingEventCallback callback : mListeners) {
-            if (callback !=  null) {
+            if (callback != null) {
                 callback.onEvent(event);
             }
         }

@@ -20,208 +20,137 @@ public class ReportingEvent {
         eventObject = new JSONObject();
     }
 
-    public ReportingEvent(String adFormat) {
-        eventObject = new JSONObject();
-
-        try {
-            if (!TextUtils.isEmpty(adFormat)) {
-                eventObject.put(Reporting.Key.AD_FORMAT, adFormat);
-            }
-        } catch (JSONException e) {
-            Logger.e(TAG, e.getMessage());
-        }
-    }
-
-    public ReportingEvent(String adFormat, String adSize) {
-        eventObject = new JSONObject();
-
-        try {
-            if (!TextUtils.isEmpty(adFormat)) {
-                eventObject.put(Reporting.Key.AD_FORMAT, adFormat);
-            }
-
-            this.eventObject.put(Reporting.Key.AD_SIZE, adSize);
-        } catch (JSONException e) {
-            Logger.e(TAG, e.getMessage());
-        }
-    }
-
     public void setCategoryId(String categoryId) {
-        try {
-            if (!TextUtils.isEmpty(categoryId)) {
-                eventObject.put(Reporting.Key.CATEGORY_ID, categoryId);
-            }
-        } catch (JSONException e) {
-            Logger.e(TAG, e.getMessage());
-        }
+        setCustomString(Reporting.Key.CATEGORY_ID, categoryId);
     }
 
     public String getCategoryId() {
-        try {
-            return eventObject.getString(Reporting.Key.CATEGORY_ID);
-        } catch (JSONException e) {
-            Logger.e(TAG, e.getMessage());
-            return null;
-        }
+        return getCustomString(Reporting.Key.CATEGORY_ID);
     }
 
     public void setCampaignId(String campaignId) {
-        try {
-            if (!TextUtils.isEmpty(campaignId)) {
-                eventObject.put(Reporting.Key.CAMPAIGN_ID, campaignId);
-            }
-        } catch (JSONException e) {
-            Logger.e(TAG, e.getMessage());
-        }
+        setCustomString(Reporting.Key.CAMPAIGN_ID, campaignId);
     }
 
     public String getCampaignId() {
-        try {
-            return eventObject.getString(Reporting.Key.CAMPAIGN_ID);
-        } catch (JSONException e) {
-            Logger.e(TAG, e.getMessage());
-            return null;
-        }
+        return getCustomString(Reporting.Key.CAMPAIGN_ID);
     }
 
     public void setCreativeId(String creativeId) {
-        try {
-            if (!TextUtils.isEmpty(creativeId)) {
-                eventObject.put(Reporting.Key.CREATIVE_ID, creativeId);
-            }
-        } catch (JSONException e) {
-            Logger.e(TAG, e.getMessage());
-        }
+        setCustomString(Reporting.Key.CREATIVE_ID, creativeId);
     }
 
     public String getCreativeId() {
-        try {
-            return eventObject.getString(Reporting.Key.CREATIVE_ID);
-        } catch (JSONException e) {
-            Logger.e(TAG, e.getMessage());
-            return null;
-        }
+        return getCustomString(Reporting.Key.CREATIVE_ID);
     }
 
     public void setCreativeType(String creativeType) {
-        try {
-            if (!TextUtils.isEmpty(creativeType)) {
-                eventObject.put(Reporting.Key.CREATIVE_TYPE, creativeType);
-            }
-        } catch (JSONException e) {
-            Logger.e(TAG, e.getMessage());
-        }
+        setCustomString(Reporting.Key.CREATIVE_TYPE, creativeType);
     }
 
     public String getCreativeType() {
-        try {
-            return eventObject.getString(Reporting.Key.CREATIVE_TYPE);
-        } catch (JSONException e) {
-            Logger.e(TAG, e.getMessage());
-            return null;
-        }
+        return getCustomString(Reporting.Key.CREATIVE_TYPE);
+    }
+
+    public void setCreative(String creative) {
+        setCustomString(Reporting.Key.CREATIVE, creative);
+    }
+
+    public String getCreative(){
+        return getCustomString(Reporting.Key.CREATIVE);
     }
 
     public void setTimestamp(long date) {
-        String timestamp = String.valueOf(date);
-        try {
-            if (!TextUtils.isEmpty(timestamp)) {
-                eventObject.put(Reporting.Key.TIMESTAMP, timestamp);
-            }
-        } catch (JSONException e) {
-            Logger.e(TAG, e.getMessage());
-        }
+        setCustomString(Reporting.Key.TIMESTAMP, String.valueOf(date));
     }
 
     public void setTimestamp(String timestamp) {
-        try {
-            if (!TextUtils.isEmpty(timestamp)) {
-                eventObject.put(Reporting.Key.TIMESTAMP, timestamp);
-            }
-        } catch (JSONException e) {
-            Logger.e(TAG, e.getMessage());
-        }
+        setCustomString(Reporting.Key.TIMESTAMP, timestamp);
     }
 
     public String getTimestamp() {
-        try {
-            return eventObject.getString(Reporting.Key.TIMESTAMP);
-        } catch (JSONException e) {
-            Logger.e(TAG, e.getMessage());
-            return null;
-        }
+        return getCustomString(Reporting.Key.TIMESTAMP);
     }
 
     public void setEventType(String eventType) {
-        try {
-            if (!TextUtils.isEmpty(eventType)) {
-                eventObject.put(Reporting.Key.EVENT_TYPE, eventType);
-            }
-        } catch (JSONException e) {
-            Logger.e(TAG, e.getMessage());
-        }
+        setCustomString(Reporting.Key.EVENT_TYPE, eventType);
     }
 
     public String getEventType() {
-        try {
-            return eventObject.getString(Reporting.Key.EVENT_TYPE);
-        } catch (JSONException e) {
-            Logger.e(TAG, e.getMessage());
-            return null;
-        }
+        return getCustomString(Reporting.Key.EVENT_TYPE);
+    }
+
+    public void setErrorCode(int errorCode){
+        setCustomInteger(Reporting.Key.ERROR_CODE, errorCode);
+    }
+
+    public long getErrorCode(){
+        return getCustomInteger(Reporting.Key.ERROR_CODE);
+    }
+
+    public void setErrorMessage(String errorMessage){
+        setCustomString(Reporting.Key.ERROR_MESSAGE, errorMessage);
+    }
+
+    public String getErrorMessage(){
+        return getCustomString(Reporting.Key.ERROR_MESSAGE);
     }
 
     public void setAdFormat(String adFormat) {
-        try {
-            if (!TextUtils.isEmpty(adFormat)) {
-                eventObject.put(Reporting.Key.AD_FORMAT, adFormat);
-            }
-        } catch (JSONException e) {
-            Logger.e(TAG, e.getMessage());
-        }
+        setCustomString(Reporting.Key.AD_FORMAT, adFormat);
     }
 
     public String getAdFormat() {
-        try {
-            return eventObject.getString(Reporting.Key.AD_FORMAT);
-        } catch (JSONException e) {
-            Logger.e(TAG, e.getMessage());
-            return null;
-        }
+        return getCustomString(Reporting.Key.AD_FORMAT);
     }
 
     public void setAdSize(String adSize) {
-        try {
-            eventObject.put(Reporting.Key.AD_SIZE, adSize);
-        } catch (JSONException e) {
-            Logger.e(TAG, e.getMessage());
-        }
+        setCustomString(Reporting.Key.AD_SIZE, adSize);
     }
 
     public String getAdSize() {
-        try {
-            return eventObject.getString(Reporting.Key.AD_SIZE);
-        } catch (JSONException e) {
-            Logger.e(TAG, e.getMessage());
-            return null;
-        }
+        return getCustomString(Reporting.Key.AD_SIZE);
+    }
+
+    public void setZoneId(String zoneId){
+        setCustomString(Reporting.Key.ZONE_ID, zoneId);
+    }
+
+    public String getZoneId(){
+        return getCustomString(Reporting.Key.ZONE_ID);
+    }
+
+    public void setAdType(String adType){
+        setCustomString(Reporting.Key.AD_TYPE, adType);
+    }
+
+    public String getAdType(){
+        return getCustomString(Reporting.Key.AD_TYPE);
+    }
+
+    public void setAppToken(String appToken) {
+        setCustomString(Reporting.Key.APP_TOKEN, appToken);
+    }
+
+    public String getAppToken(String appToken) {
+        return getCustomString(Reporting.Key.APP_TOKEN);
     }
 
     public void setPlacementId(String placementId) {
-        try {
-            eventObject.put(Reporting.Key.PLACEMENT_ID, placementId);
-        } catch (JSONException e) {
-            Logger.e(TAG, e.getMessage());
-        }
+        setCustomString(Reporting.Key.PLACEMENT_ID, placementId);
     }
 
     public String getPlacementId() {
-        try {
-            return eventObject.getString(Reporting.Key.PLACEMENT_ID);
-        } catch (JSONException e) {
-            Logger.e(TAG, e.getMessage());
-            return null;
-        }
+        return getCustomString(Reporting.Key.PLACEMENT_ID);
+    }
+
+
+    public void setIntegrationType(String integrationType){
+        setCustomString(Reporting.Key.INTEGRATION_TYPE, integrationType);
+    }
+
+    public String getIntegrationType(){
+        return getCustomString(Reporting.Key.INTEGRATION_TYPE);
     }
 
     public void setCustomString(String key, String value) {
@@ -234,11 +163,29 @@ public class ReportingEvent {
         }
     }
 
+    public String getCustomString(String key) {
+        try {
+            return eventObject.getString(key);
+        } catch (JSONException e) {
+            Logger.e(TAG, e.getMessage());
+            return null;
+        }
+    }
+
     public void setCustomInteger(String key, long value) {
         try {
             eventObject.put(key, value);
         } catch (JSONException e) {
             Logger.e(TAG, e.getMessage());
+        }
+    }
+
+    public Long getCustomInteger(String key) {
+        try {
+            return eventObject.getLong(key);
+        } catch (JSONException e) {
+            Logger.e(TAG, e.getMessage());
+            return null;
         }
     }
 
@@ -250,11 +197,29 @@ public class ReportingEvent {
         }
     }
 
+    public Double getCustomDecimal(String key) {
+        try {
+            return eventObject.getDouble(key);
+        } catch (JSONException e) {
+            Logger.e(TAG, e.getMessage());
+            return null;
+        }
+    }
+
     public void setCustomBoolean(String key, boolean value) {
         try {
             eventObject.put(key, value);
         } catch (JSONException e) {
             Logger.e(TAG, e.getMessage());
+        }
+    }
+
+    public Boolean getCustomBoolean(String key) {
+        try {
+            return eventObject.getBoolean(key);
+        } catch (JSONException e) {
+            Logger.e(TAG, e.getMessage());
+            return null;
         }
     }
 
@@ -266,11 +231,46 @@ public class ReportingEvent {
         }
     }
 
+    public JSONObject getCustomJSONObject(String key) {
+        try {
+            return eventObject.getJSONObject(key);
+        } catch (JSONException e) {
+            Logger.e(TAG, e.getMessage());
+            return null;
+        }
+    }
+
+    public void mergeJSONObject(JSONObject source) {
+        if (source == null || source.length() == 0) {
+            return;
+        }
+
+        JSONArray names = source.names();
+        try {
+            if (names != null) {
+                for (int i = 0; i < names.length(); i++) {
+                    String name = names.getString(i);
+                    eventObject.put(name, source.get(name));
+                }
+            }
+        } catch (JSONException ignored) {
+        }
+    }
+
     public void setCustomJSONArray(String key, JSONArray jsonArray) {
         try {
             eventObject.put(key, jsonArray);
         } catch (JSONException e) {
             Logger.e(TAG, e.getMessage());
+        }
+    }
+
+    public JSONArray getCustomJSONArray(String key) {
+        try {
+            return eventObject.getJSONArray(key);
+        } catch (JSONException e) {
+            Logger.e(TAG, e.getMessage());
+            return null;
         }
     }
 

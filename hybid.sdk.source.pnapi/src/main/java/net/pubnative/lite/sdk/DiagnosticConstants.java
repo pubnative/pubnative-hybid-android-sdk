@@ -5,6 +5,8 @@ public class DiagnosticConstants {
     public static final String KEY_AD_REQUEST = "ad_request";
     public static final String KEY_AD_RESPONSE = "ad_response";
     public static final String KEY_AD_SIZE = "ad_size";
+    public static final String KEY_OM_ENABLED = "om_enabled";
+    public static final String KEY_OM_VENDORS = "om_vendors";
     public static final String KEY_INTEGRATION_TYPE = "integration_type";
     public static final String KEY_AD_POSITION = "ad_position";
     public static final String KEY_RESPONSE_TIME = "response_time";

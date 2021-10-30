@@ -4,6 +4,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.List;
+
 public class JsonOperations {
 
     public static void putJsonString(JSONObject jsonObject, String key, String value) {
@@ -25,6 +27,48 @@ public class JsonOperations {
         if (jsonObject != null) {
             try {
                 jsonObject.put(key, value);
+            } catch (JSONException ignored) {
+            }
+        }
+    }
+
+    public static void putJsonBoolean(JSONObject jsonObject, String key, boolean value) {
+        if (jsonObject != null) {
+            try {
+                jsonObject.put(key, value);
+            } catch (JSONException ignored) {
+            }
+        }
+    }
+
+    public static void putJsonValue(JSONObject jsonObject, String key, Integer value) {
+        if (jsonObject != null) {
+            try {
+                jsonObject.put(key, value);
+            } catch (JSONException ignored) {
+            }
+        }
+    }
+
+    public static void putJsonValue(JSONObject jsonObject, String key, Double value) {
+        if (jsonObject != null) {
+            try {
+                jsonObject.put(key, value);
+            } catch (JSONException ignored) {
+            }
+        }
+    }
+
+    public static void putStringArray(JSONObject jsonObject, String key, List<String> values) {
+        if (jsonObject != null) {
+            try {
+                if (values != null && !values.isEmpty()) {
+                    JSONArray stringArray = new JSONArray();
+                    for (String value: values) {
+                        stringArray.put(value);
+                    }
+                    jsonObject.put(key, stringArray);
+                }
             } catch (JSONException ignored) {
             }
         }
@@ -52,9 +96,11 @@ public class JsonOperations {
 
         JSONArray names = source.names();
         try {
-            for (int i = 0; i < names.length(); i++) {
-                String name = names.getString(i);
-                target.put(name, source.get(name));
+            if (names != null) {
+                for (int i = 0; i < names.length(); i++) {
+                    String name = names.getString(i);
+                    target.put(name, source.get(name));
+                }
             }
         } catch (JSONException ignored) {
         }

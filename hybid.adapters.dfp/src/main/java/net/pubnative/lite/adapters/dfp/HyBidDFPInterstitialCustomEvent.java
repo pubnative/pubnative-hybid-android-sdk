@@ -73,7 +73,14 @@ public class HyBidDFPInterstitialCustomEvent implements CustomEventInterstitial,
             return;
         }
 
-        mPresenter = new InterstitialPresenterFactory(context, zoneIdKey).createInterstitialPresenter(ad, this);
+        int htmlSkipOffset = HyBid.getHtmlInterstitialSkipOffset();
+        int videoSkipOffset = HyBid.getVideoInterstitialSkipOffset();
+        if (htmlSkipOffset > 0 || videoSkipOffset > 0) {
+            mPresenter = new InterstitialPresenterFactory(context, zoneIdKey).createInterstitialPresenter(ad, htmlSkipOffset, videoSkipOffset, this);
+        } else {
+            mPresenter = new InterstitialPresenterFactory(context, zoneIdKey).createInterstitialPresenter(ad, this);
+        }
+
         if (mPresenter == null) {
             Logger.e(TAG, "Could not create valid interstitial presenter");
             mInterstitialListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NETWORK_ERROR);
@@ -133,6 +140,7 @@ public class HyBidDFPInterstitialCustomEvent implements CustomEventInterstitial,
     public void onInterstitialClicked(InterstitialPresenter interstitialPresenter) {
         if (mInterstitialListener != null) {
             mInterstitialListener.onAdClicked();
+            mInterstitialListener.onAdOpened();
             mInterstitialListener.onAdLeftApplication();
         }
     }

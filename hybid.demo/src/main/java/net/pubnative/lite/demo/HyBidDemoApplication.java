@@ -39,6 +39,7 @@ import net.pubnative.lite.demo.managers.MoPubManager;
 import net.pubnative.lite.demo.managers.SettingsManager;
 import net.pubnative.lite.demo.models.SettingsModel;
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.InterstitialActionBehaviour;
 import net.pubnative.lite.sdk.api.ApiManager;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.enums.AudioState;
@@ -80,13 +81,15 @@ public class HyBidDemoApplication extends MultiDexApplication {
 
         String appToken = settings.getAppToken();
 
-        HyBid.initialize(appToken, this, new HyBid.InitialisationListener() {
+        MoPubManager.initMoPubSdk(this, settings.getMopubMediationBannerAdUnitId(), appToken);
+
+        /*HyBid.initialize(appToken, this, new HyBid.InitialisationListener() {
             @Override
             public void onInitialisationFinished(boolean success) {
                 // HyBid SDK has been initialised
                 HyBid.addReportingCallback(AnalyticsSubscriber.INSTANCE.getEventCallback());
             }
-        });
+        });*/
 
         HyBid.setLogLevel(Logger.Level.debug);
 
@@ -99,9 +102,10 @@ public class HyBidDemoApplication extends MultiDexApplication {
 
         HyBid.setCloseVideoAfterFinish(false);
 
-        HyBid.setVideoAudioStatus(AudioState.MUTED);
+        HyBid.setHtmlInterstitialSkipOffset(2);
+        HyBid.setVideoInterstitialSkipOffset(8);
 
-        HyBid.setInterstitialSkipOffset(10);
+        HyBid.setInterstitialClickBehaviour(InterstitialActionBehaviour.HB_CREATIVE);
 
         StringBuilder keywordsBuilder = new StringBuilder();
         String separator = ",";
@@ -130,8 +134,6 @@ public class HyBidDemoApplication extends MultiDexApplication {
         if (!TextUtils.isEmpty(settings.getApiUrl())) {
             ApiManager.INSTANCE.setApiUrl(settings.getApiUrl());
         }
-
-        MoPubManager.initMoPubSdk(this, settings.getMopubMediationBannerAdUnitId());
 
         MobileAds.initialize(this, initializationStatus -> {
         });

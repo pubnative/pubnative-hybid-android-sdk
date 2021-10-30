@@ -33,7 +33,6 @@ import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.json.JsonOperations;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -143,7 +142,6 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             reportingEvent.setAdFormat(Reporting.AdFormat.FULLSCREEN);
             mReportingController.reportEvent(reportingEvent);
         }
-
 
         mAdTrackingDelegate.trackImpression();
         mListener.onInterstitialShown(interstitialPresenter);

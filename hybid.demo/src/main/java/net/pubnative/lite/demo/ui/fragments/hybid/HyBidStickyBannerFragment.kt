@@ -20,7 +20,6 @@ import net.pubnative.lite.sdk.views.PNAdView
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-
 class HyBidStickyBannerFragment : Fragment(R.layout.fragment_sticky_top_bottom), PNAdView.Listener, RadioGroup.OnCheckedChangeListener {
 
     private val TAG: String = HyBidStickyBannerFragment::class.java.simpleName

@@ -150,7 +150,7 @@ public class VgiIdManager {
         List<IdLocation> locations = new ArrayList<>();
         IdLocation location = new IdLocation();
 
-        if (locationManager != null) {
+        if (locationManager != null && locationManager.getUserLocation() != null) {
             Location loc = locationManager.getUserLocation();
 
             location.lat = String.valueOf(loc.getLatitude());

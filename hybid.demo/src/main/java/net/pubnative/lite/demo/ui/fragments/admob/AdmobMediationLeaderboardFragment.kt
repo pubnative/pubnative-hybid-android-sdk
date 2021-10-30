@@ -9,14 +9,10 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.google.android.gms.ads.AdListener
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdSize
-import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.*
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
-import net.pubnative.lite.demo.util.AdmobErrorParser
 import net.pubnative.lite.demo.util.ClipboardUtils
 
 class AdmobMediationLeaderboardFragment : Fragment() {
@@ -48,7 +44,6 @@ class AdmobMediationLeaderboardFragment : Fragment() {
         loadButton.setOnClickListener {
             errorView.text = ""
             admobLeaderboard.loadAd(AdRequest.Builder()
-                    .addTestDevice("9CD3F3CADFC5127409B07C5F802273E7")
                     .build())
         }
 
@@ -63,10 +58,10 @@ class AdmobMediationLeaderboardFragment : Fragment() {
             Log.d(TAG, "onAdLoaded")
         }
 
-        override fun onAdFailedToLoad(errorCode: Int) {
-            super.onAdFailedToLoad(errorCode)
+        override fun onAdFailedToLoad(error: LoadAdError) {
+            super.onAdFailedToLoad(error)
             displayLogs()
-            errorView.text = AdmobErrorParser.getErrorMessage(errorCode)
+            errorView.text = error.message
             Log.d(TAG, "onAdFailedToLoad")
         }
 
@@ -80,9 +75,9 @@ class AdmobMediationLeaderboardFragment : Fragment() {
             Log.d(TAG, "onAdOpened")
         }
 
-        override fun onAdLeftApplication() {
-            super.onAdLeftApplication()
-            Log.d(TAG, "onAdLeftApplication")
+        override fun onAdImpression() {
+            super.onAdImpression()
+            Log.d(TAG, "onAdImpression")
         }
 
         override fun onAdClosed() {

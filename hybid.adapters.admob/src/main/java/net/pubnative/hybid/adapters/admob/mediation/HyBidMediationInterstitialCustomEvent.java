@@ -124,6 +124,7 @@ public class HyBidMediationInterstitialCustomEvent implements CustomEventInterst
     public void onInterstitialClick() {
         if (mInterstitialListener != null) {
             mInterstitialListener.onAdClicked();
+            mInterstitialListener.onAdOpened();
             mInterstitialListener.onAdLeftApplication();
         }
     }

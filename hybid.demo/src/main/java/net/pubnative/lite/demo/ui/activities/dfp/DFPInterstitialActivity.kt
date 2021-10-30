@@ -24,13 +24,13 @@ package net.pubnative.lite.demo.ui.activities.dfp
 
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
-import net.pubnative.lite.demo.ui.fragments.dfp.DFPInterstitialFragment
+import net.pubnative.lite.demo.ui.fragments.gam.GAMInterstitialFragment
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
 class DFPInterstitialActivity : TabActivity() {
-    override fun getAdFragment() = DFPInterstitialFragment()
+    override fun getAdFragment() = GAMInterstitialFragment()
 
     override fun getActivityTitle() = getString(R.string.dfp_interstitial)
 }
