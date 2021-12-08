@@ -8,7 +8,9 @@ import android.widget.FrameLayout
 import android.widget.RelativeLayout
 import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.sdk.models.AdSize
 import net.pubnative.lite.sdk.utils.Logger
+import net.pubnative.lite.sdk.views.HyBidAdView
 import net.pubnative.lite.sdk.views.HyBidLeaderboardAdView
 import net.pubnative.lite.sdk.views.PNAdView
 
@@ -20,7 +22,7 @@ class SignalDataLeaderboardViewHolder(itemView: View) : RecyclerView.ViewHolder(
             val container = itemView.findViewById<FrameLayout>(R.id.leaderboard_container)
             container.removeAllViews()
 
-            val leaderboard = HyBidLeaderboardAdView(itemView.context)
+            val leaderboard = HyBidAdView(itemView.context, AdSize.SIZE_728x90)
 
             val adLayoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             adLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)

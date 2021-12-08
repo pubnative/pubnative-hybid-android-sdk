@@ -38,7 +38,6 @@ import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdRequestFactory;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.IntegrationType;
-import net.pubnative.lite.sdk.reporting.EventLoggingDelegate;
 import net.pubnative.lite.sdk.reporting.ReportingDelegate;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNApiUrlComposer;
@@ -52,9 +51,6 @@ public class HyBid {
     public static final String OMSDK_VERSION = BuildConfig.OMIDPV;
     public static final String OM_PARTNER_NAME = BuildConfig.OMIDPN;
     public static final String HYBID_VERSION = BuildConfig.SDK_VERSION;
-    private static final String REPORTING_URL = "https://rta-analytics.pubnative.io/event";
-
-    private static final String EVENT_LOGGING_URL = "https://api.pubnative.net/log";
 
     private static String sAppToken;
     @SuppressLint("StaticFieldLeak")
@@ -73,7 +69,6 @@ public class HyBid {
     private static AdCache sAdCache;
     private static VideoAdCache sVideoAdCache;
     private static BrowserManager sBrowserManager;
-    private static ReportingDelegate sReportingDelegate;
     private static VgiIdManager sVgiIdManager;
     private static boolean sInitialized;
     private static boolean sCoppaEnabled = false;
@@ -99,7 +94,7 @@ public class HyBid {
 
     private static AudioState sVideoAudioState = AudioState.DEFAULT;
 
-    private static boolean sEventLoggingEndpointEnabled = false;
+    private static final boolean sEventLoggingEndpointEnabled = false;
 
     public static void initialize(String appToken,
                                   Application application) {
@@ -131,7 +126,8 @@ public class HyBid {
         sVgiIdManager = new VgiIdManager(application.getApplicationContext());
         sReportingController = new ReportingController();
         sViewabilityManager = new ViewabilityManager(application);
-        sReportingDelegate = new ReportingDelegate(application.getApplicationContext(), REPORTING_URL);
+        ReportingDelegate sReportingDelegate = new ReportingDelegate(application.getApplicationContext(),
+                sReportingController, sConfigManager, appToken);
         sDeviceInfo.initialize(new DeviceInfo.Listener() {
             @Override
             public void onInfoLoaded() {
@@ -334,10 +330,9 @@ public class HyBid {
     }
 
     /**
-     * @deprecated
-     * This method is not recommended. Use instead setHtmlInterstitialSkipOffset or
-     * setVideoInterstitialSkipOffset to define the offset per ad type
      * @param seconds amount of seconds until the interstitial ad can be dismissed
+     * @deprecated This method is not recommended. Use instead setHtmlInterstitialSkipOffset or
+     * setVideoInterstitialSkipOffset to define the offset per ad type
      */
     @Deprecated
     public static void setInterstitialSkipOffset(Integer seconds) {

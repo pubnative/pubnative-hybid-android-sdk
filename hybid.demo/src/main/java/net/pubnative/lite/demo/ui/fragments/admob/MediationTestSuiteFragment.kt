@@ -13,14 +13,12 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.sdk.HyBid
 
 
-class MediationTestSuiteFragment : Fragment(){
+class MediationTestSuiteFragment : Fragment(R.layout.fragment_mediation_test_suite) {
     val TAG = MediationTestSuiteFragment::class.java.simpleName
 
     private lateinit var appIdText: EditText
     private lateinit var bundleIdText: EditText
     private lateinit var openMediationTestSuiteButton: Button
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_mediation_test_suite, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -29,7 +27,10 @@ class MediationTestSuiteFragment : Fragment(){
         bundleIdText = view.findViewById(R.id.input_bundle_id)
         openMediationTestSuiteButton = view.findViewById(R.id.button_open_mediation_test_suite)
 
-        val app = requireContext().packageManager.getApplicationInfo(requireContext().packageName, PackageManager.GET_META_DATA)
+        val app = requireContext().packageManager.getApplicationInfo(
+            requireContext().packageName,
+            PackageManager.GET_META_DATA
+        )
         val bundle = app.metaData
         val admobAppId = bundle.getString("com.google.android.gms.ads.APPLICATION_ID")
 

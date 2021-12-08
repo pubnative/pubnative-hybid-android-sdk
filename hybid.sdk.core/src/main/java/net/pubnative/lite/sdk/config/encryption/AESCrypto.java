@@ -28,7 +28,7 @@ public final class AESCrypto {
     private static final byte[] ivBytes = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
     //togglable log option (please turn off in live!)
-    public static boolean DEBUG_LOG_ENABLED = false;
+    public static final boolean DEBUG_LOG_ENABLED = false;
 
 
     /**

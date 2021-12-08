@@ -1,8 +1,8 @@
 package net.pubnative.lite.sdk.interstitial.activity;
 
+import android.annotation.SuppressLint;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -17,7 +17,7 @@ import net.pubnative.lite.sdk.mraid.MRAIDViewCloseLayoutListener;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 
 public class MraidInterstitialActivity extends HyBidInterstitialActivity implements MRAIDViewListener, MRAIDNativeFeatureListener, MRAIDViewCloseLayoutListener {
-    private String[] mSupportedNativeFeatures = new String[]{
+    private final String[] mSupportedNativeFeatures = new String[]{
             MRAIDNativeFeature.CALENDAR,
             MRAIDNativeFeature.INLINE_VIDEO,
             MRAIDNativeFeature.SMS,
@@ -27,9 +27,9 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
     };
 
     private MRAIDBanner mView;
-    private int mSkipOffset;
     private boolean mIsSkippable = true;
 
+    @SuppressLint("SourceLockedOrientationActivity")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
@@ -48,7 +48,7 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
     public View getAdView() {
         MRAIDBanner adView = null;
         if (getAd() != null) {
-            mSkipOffset = getIntent().getIntExtra(EXTRA_SKIP_OFFSET, 0);
+            int mSkipOffset = getIntent().getIntExtra(EXTRA_SKIP_OFFSET, 0);
             if (mSkipOffset > 0) {
                 mIsSkippable = false;
             }

@@ -88,9 +88,9 @@ public class PNCrypto {
                 // Create Hex String
                 StringBuilder hexString = new StringBuilder();
                 for (byte b : messageDigest) {
-                    String h = Integer.toHexString(0xFF & b);
+                    StringBuilder h = new StringBuilder(Integer.toHexString(0xFF & b));
                     while (h.length() < 2) {
-                        h = "0" + h;
+                        h.insert(0, "0");
                     }
                     hexString.append(h);
                 }

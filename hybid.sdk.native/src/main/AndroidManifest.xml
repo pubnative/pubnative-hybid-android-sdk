@@ -1,3 +1,1 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="net.pubnative.lite.sdk.nativeads">
-</manifest>
+<manifest package="net.pubnative.lite.sdk.nativeads" />

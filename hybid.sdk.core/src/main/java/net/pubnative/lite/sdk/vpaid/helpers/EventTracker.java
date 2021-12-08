@@ -2,6 +2,7 @@ package net.pubnative.lite.sdk.vpaid.helpers;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.network.PNHttpClient;
@@ -16,27 +17,32 @@ import java.util.Set;
 
 public class EventTracker {
 
-    private static Set<String> sUsedEvents = new HashSet<>();
+    private static final Set<String> sUsedEvents = new HashSet<>();
 
     private EventTracker() {
+
     }
 
-    public static void postEventByType(Context context, List<Tracking> events, String eventType, MacroHelper macroHelper) {
+    public static synchronized void postEventByType(Context context, List<Tracking> events, String eventType, MacroHelper macroHelper, boolean ignoreIfExist) {
         if (events == null) {
             return;
         }
+
         for (Tracking event : events) {
             if (event.getEvent().equalsIgnoreCase(eventType)) {
-                post(context, event.getText(), macroHelper);
+                post(context, event.getText(), macroHelper, ignoreIfExist);
             }
         }
     }
 
-    public static synchronized void post(Context context, final String url, MacroHelper macroHelper) {
-        if (sUsedEvents.contains(url)) {
+    public static synchronized void post(Context context, final String url, MacroHelper macroHelper, boolean ignoreIfExist) {
+
+        if (ignoreIfExist && sUsedEvents.contains(url)) {
             return;
-        } else {
-            sUsedEvents.add(url);
+        }
+
+        if (TextUtils.isEmpty(url)) {
+            return;
         }
 
         String processedUrl = url;
@@ -46,25 +52,27 @@ public class EventTracker {
 
         Map<String, String> headers = new HashMap<>();
         String userAgent = HyBid.getDeviceInfo().getUserAgent();
-        if (!TextUtils.isEmpty(userAgent)){
+        if (!TextUtils.isEmpty(userAgent)) {
             headers.put("User-Agent", userAgent);
         }
 
         PNHttpClient.makeRequest(context, processedUrl, headers, null, false, new PNHttpClient.Listener() {
             @Override
             public void onSuccess(String response) {
-
+                Log.d("onSuccess", response);
             }
 
             @Override
             public void onFailure(Throwable error) {
-
+                Log.d("onFailure", error.toString());
             }
         });
+
+        sUsedEvents.add(url);
+
     }
 
     public static void clear() {
         sUsedEvents.clear();
     }
-
 }

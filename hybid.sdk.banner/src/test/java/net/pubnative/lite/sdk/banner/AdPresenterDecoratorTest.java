@@ -37,7 +37,6 @@ public class AdPresenterDecoratorTest {
     private ReportingController mReportingController;
     @Mock
     private AdPresenter.Listener mMockListener;
-    private Ad mTestAd;
 
     @InjectMocks
     private AdPresenterDecorator mSubject;
@@ -45,7 +44,7 @@ public class AdPresenterDecoratorTest {
     @Before
     public void setup() {
         initMocks(this);
-        mTestAd = TestUtil.createTestBannerAd();
+        Ad mTestAd = TestUtil.createTestBannerAd();
         when(mMockPresenter.getAd()).thenReturn(mTestAd);
     }
 

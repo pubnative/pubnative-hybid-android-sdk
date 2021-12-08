@@ -19,8 +19,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.robolectric.RobolectricTestRunner;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 
 import static org.mockito.Mockito.when;

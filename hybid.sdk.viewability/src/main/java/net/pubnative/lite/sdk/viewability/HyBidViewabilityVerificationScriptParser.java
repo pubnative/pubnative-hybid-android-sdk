@@ -45,17 +45,20 @@ public class HyBidViewabilityVerificationScriptParser {
             srcStringMatcher.find(0);
             String src = srcStringMatcher.group(1);
 
+            if (!TextUtils.isEmpty(src)) {
+                String[] verificationScriptResource = src.split(KEY_HASH, 2);
+                URL url = new URL(verificationScriptResource[0]);
+                String params = verificationScriptResource[1];
 
-            String[] verificationScriptResource = src.split(KEY_HASH, 2);
-            URL url = new URL(verificationScriptResource[0]);
-            String params = verificationScriptResource[1];
-
-            Matcher vkStringMatcher = PATTERN_VENDORKEY_VALUE.matcher(params);
-            vkStringMatcher.find(0);
-            String vendorKey = vkStringMatcher.group(1);
-            omidverificationScriptResource =
-                    VerificationScriptResource.createVerificationScriptResourceWithParameters(vendorKey,
-                            url, params);
+                Matcher vkStringMatcher = PATTERN_VENDORKEY_VALUE.matcher(params);
+                vkStringMatcher.find(0);
+                String vendorKey = vkStringMatcher.group(1);
+                omidverificationScriptResource =
+                        VerificationScriptResource.createVerificationScriptResourceWithParameters(vendorKey,
+                                url, params);
+            } else {
+                omidverificationScriptResource = null;
+            }
 
         } catch (Exception e) {
             Logger.d(TAG, " Exception: " + e.getMessage());

@@ -139,7 +139,7 @@ public final class PNLocalBroadcastManager {
                 String action = filter.getAction(i);
                 ArrayList<ReceiverRecord> entries = mActions.get(action);
                 if (entries == null) {
-                    entries = new ArrayList<ReceiverRecord>(1);
+                    entries = new ArrayList<>(1);
                     mActions.put(action, entries);
                 }
                 entries.add(entry);
@@ -233,7 +233,7 @@ public final class PNLocalBroadcastManager {
                         if (debug) Log.v(TAG, "  Filter matched!  match=0x" +
                                 Integer.toHexString(match));
                         if (receivers == null) {
-                            receivers = new ArrayList<ReceiverRecord>();
+                            receivers = new ArrayList<>();
                         }
                         receivers.add(receiver);
                         receiver.broadcasting = true;

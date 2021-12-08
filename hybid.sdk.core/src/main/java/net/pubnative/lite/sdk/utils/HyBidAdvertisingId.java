@@ -40,8 +40,8 @@ public class HyBidAdvertisingId extends AsyncTask<Void, Void, AdvertisingInfo> {
         void onHyBidAdvertisingIdFinish(String advertisingId, Boolean limitTracking);
     }
 
-    private WeakReference<Context> mContextRef;
-    private Listener mListener;
+    private final WeakReference<Context> mContextRef;
+    private final Listener mListener;
 
     public HyBidAdvertisingId(Context context, Listener listener) {
         mContextRef = new WeakReference<>(context);

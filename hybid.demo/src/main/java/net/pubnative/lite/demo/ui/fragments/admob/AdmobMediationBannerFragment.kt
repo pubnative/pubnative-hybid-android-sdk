@@ -15,15 +15,13 @@ import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
 
-class AdmobMediationBannerFragment : Fragment() {
+class AdmobMediationBannerFragment : Fragment(R.layout.fragment_admob_banner) {
     val TAG = AdmobMediationBannerFragment::class.java.simpleName
 
     private lateinit var admobBanner: AdView
     private lateinit var admobBannerContainer: FrameLayout
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_admob_banner, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -32,9 +30,10 @@ class AdmobMediationBannerFragment : Fragment() {
         loadButton = view.findViewById(R.id.button_load)
         admobBannerContainer = view.findViewById(R.id.admob_banner_container)
 
-        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().admobBannerAdUnitId
+        val adUnitId =
+            SettingsManager.getInstance(requireActivity()).getSettings().admobBannerAdUnitId
 
-        admobBanner = AdView(activity)
+        admobBanner = AdView(requireActivity())
         admobBanner.adSize = AdSize.BANNER
         admobBanner.adUnitId = adUnitId
         admobBanner.adListener = adListener
@@ -43,11 +42,18 @@ class AdmobMediationBannerFragment : Fragment() {
 
         loadButton.setOnClickListener {
             errorView.text = ""
-            admobBanner.loadAd(AdRequest.Builder()
-                    .build())
+            admobBanner.loadAd(
+                AdRequest.Builder()
+                    .build()
+            )
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
+        errorView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                errorView.text.toString()
+            )
+        }
     }
 
     // ------------------ Admob Ad Listener ---------------------

@@ -77,7 +77,7 @@ public class MRAIDParser {
             return null;
         }
 
-        Map<String, String> commandMap = new HashMap<String, String>();
+        Map<String, String> commandMap = new HashMap<>();
         commandMap.put("command", command);
         commandMap.putAll(params);
         return commandMap;

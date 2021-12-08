@@ -6,9 +6,9 @@ public enum IntegrationType {
     MEDIATION("m"),
     STANDALONE("s");
 
-    private String code;
+    private final String code;
 
-    private IntegrationType(String code) {
+    IntegrationType(String code) {
         this.code = code;
     }
 

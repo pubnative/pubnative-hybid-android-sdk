@@ -28,11 +28,11 @@ public class AdRequestRegistry {
         return mLastAdRequest;
     }
 
-    public final class RequestItem {
-        private String mUrl;
-        private String mPostParams;
-        private String mResponse;
-        private long mLatency;
+    public static final class RequestItem {
+        private final String mUrl;
+        private final String mPostParams;
+        private final String mResponse;
+        private final long mLatency;
 
         public RequestItem(String url, String response, long latency) {
             this(url, null, response, latency);

@@ -85,7 +85,7 @@ public class HyBidMediationRewardedVideoCustomEvent extends BaseAd implements Hy
     }
 
 
-    //--------------------------------- PNRewardedAd Callbacks -------------------------------------
+    //-------------------------------- HyBidRewardedAd Callbacks -----------------------------------
     @Override
     public void onRewardedLoaded() {
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_SUCCESS, TAG);

@@ -27,7 +27,6 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
-import net.pubnative.lite.sdk.AdCache;
 import net.pubnative.lite.sdk.DiagnosticConstants;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
@@ -41,12 +40,12 @@ import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenter;
 import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenterFactory;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.IntegrationType;
+import net.pubnative.lite.sdk.models.RemoteConfigFeature;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.MarkupUtils;
 import net.pubnative.lite.sdk.utils.SignalDataProcessor;
 import net.pubnative.lite.sdk.utils.json.JsonOperations;
-import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
@@ -80,14 +79,12 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     private VideoListener mVideoListener;
     private final Context mContext;
     private String mZoneId;
-    private final AdCache mAdCache;
-    private final VideoAdCache mVideoCache;
     private SignalDataProcessor mSignalDataProcessor;
     private Ad mAd;
     private JSONObject mPlacementParams;
     private boolean mReady = false;
-    private int mHtmlSkipOffset = -1;
-    private int mVideoSkipOffset = -1;
+    private int mHtmlSkipOffset;
+    private int mVideoSkipOffset;
     private boolean mIsDestroyed = false;
     private long mInitialLoadTime = -1;
     private long mInitialRenderTime = -1;
@@ -112,8 +109,6 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         mContext = context;
         mZoneId = zoneId;
         mListener = listener;
-        mAdCache = HyBid.getAdCache();
-        mVideoCache = HyBid.getVideoAdCache();
         mPlacementParams = new JSONObject();
 
         //Zone Id
@@ -126,32 +121,36 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     }
 
     public void load() {
-
-        //Timestamp
-        addReportingKey(Reporting.Key.TIMESTAMP, String.valueOf(System.currentTimeMillis()));
-        if (HyBid.getAppToken() != null)
-            //AppToken
-            addReportingKey(Reporting.Key.APP_TOKEN, HyBid.getAppToken());
-        //Ad Type
-        addReportingKey(Reporting.Key.AD_TYPE, Reporting.Key.INTERSTITIAL);
-        if (mRequestManager.getAdSize() != null)
-            //Ad Size
-            addReportingKey(Reporting.Key.AD_SIZE, mRequestManager.getAdSize().toString());
-        //Integration Type
-        addReportingKey(Reporting.Key.INTEGRATION_TYPE, IntegrationType.STANDALONE);
-
-        if (!HyBid.isInitialized()) {
-            mInitialLoadTime = System.currentTimeMillis();
-            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NOT_INITIALISED));
-        } else if (TextUtils.isEmpty(mZoneId)) {
-            mInitialLoadTime = System.currentTimeMillis();
-            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ZONE_ID));
+        if (HyBid.getConfigManager() != null
+                && !HyBid.getConfigManager().getFeatureResolver().isAdFormatEnabled(RemoteConfigFeature.AdFormat.INTERSTITIAL)) {
+            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.DISABLED_FORMAT));
         } else {
-            cleanup();
-            mInitialLoadTime = System.currentTimeMillis();
-            mRequestManager.setZoneId(mZoneId);
-            mRequestManager.setRequestListener(this);
-            mRequestManager.requestAd();
+            //Timestamp
+            addReportingKey(Reporting.Key.TIMESTAMP, String.valueOf(System.currentTimeMillis()));
+            if (HyBid.getAppToken() != null)
+                //AppToken
+                addReportingKey(Reporting.Key.APP_TOKEN, HyBid.getAppToken());
+            //Ad Type
+            addReportingKey(Reporting.Key.AD_TYPE, Reporting.Key.INTERSTITIAL);
+            if (mRequestManager.getAdSize() != null)
+                //Ad Size
+                addReportingKey(Reporting.Key.AD_SIZE, mRequestManager.getAdSize().toString());
+            //Integration Type
+            addReportingKey(Reporting.Key.INTEGRATION_TYPE, IntegrationType.STANDALONE);
+
+            if (!HyBid.isInitialized()) {
+                mInitialLoadTime = System.currentTimeMillis();
+                invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NOT_INITIALISED));
+            } else if (TextUtils.isEmpty(mZoneId)) {
+                mInitialLoadTime = System.currentTimeMillis();
+                invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ZONE_ID));
+            } else {
+                cleanup();
+                mInitialLoadTime = System.currentTimeMillis();
+                mRequestManager.setZoneId(mZoneId);
+                mRequestManager.setRequestListener(this);
+                mRequestManager.requestAd();
+            }
         }
     }
 
@@ -208,10 +207,9 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     }
 
     /**
-     * @deprecated
-     * This method is not recommended. Use instead setHtmlSkipOffset or
-     * setVideoSkipOffset to define the offset per ad type
      * @param seconds amount of seconds until the interstitial ad can be dismissed
+     * @deprecated This method is not recommended. Use instead setHtmlSkipOffset or
+     * setVideoSkipOffset to define the offset per ad type
      */
     @Deprecated
     public void setSkipOffset(int seconds) {
@@ -334,8 +332,8 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
 
                         VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardFilePath);
                         mAd = new Ad(assetGroupId, adValue, type);
-                        mAdCache.put(mZoneId, mAd);
-                        mVideoCache.put(mZoneId, adCacheItem);
+                        HyBid.getAdCache().put(mZoneId, mAd);
+                        HyBid.getVideoAdCache().put(mZoneId, adCacheItem);
                         mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, HyBidInterstitialAd.this);
                         if (mPresenter != null) {
                             mPresenter.setVideoListener(HyBidInterstitialAd.this);
@@ -362,7 +360,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
                 assetGroupId = 21;
                 type = Ad.AdType.HTML;
                 mAd = new Ad(assetGroupId, adValue, type);
-                mAdCache.put(mZoneId, mAd);
+                HyBid.getAdCache().put(mZoneId, mAd);
                 mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, this);
                 if (mPresenter != null) {
                     mPresenter.setVideoListener(this);
@@ -536,9 +534,8 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
             addReportingKey(DiagnosticConstants.KEY_RENDER_TIME,
                     System.currentTimeMillis() - mInitialRenderTime);
         }
-        invokeOnImpression();
-
         reportAdRender(Reporting.AdFormat.FULLSCREEN, getPlacementParams());
+        invokeOnImpression();
     }
 
     @Override

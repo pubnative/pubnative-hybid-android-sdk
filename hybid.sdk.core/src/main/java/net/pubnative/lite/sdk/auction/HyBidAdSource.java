@@ -11,13 +11,11 @@ import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.IntegrationType;
 
 public class HyBidAdSource implements AdSource, RequestManager.RequestListener {
-    private final Context mContext;
     private final AdSourceConfig mConfig;
     private final AdSize mAdSize;
     private Listener mListener;
 
     public HyBidAdSource(Context context, AdSourceConfig config, AdSize adSize) {
-        this.mContext = context;
         this.mConfig = config;
         this.mAdSize = adSize;
     }

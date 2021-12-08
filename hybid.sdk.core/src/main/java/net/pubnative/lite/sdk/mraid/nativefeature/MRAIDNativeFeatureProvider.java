@@ -133,14 +133,17 @@ public class MRAIDNativeFeatureProvider {
                 for (String pattern : patterns) {
                     try {
                         SimpleDateFormat sdf = new SimpleDateFormat(pattern, Locale.US);
-                        if (i == 0) {
-                            startTime = sdf.parse(dateStrings[i]).getTime();
-                        } else {
-                            endTime = sdf.parse(dateStrings[i]).getTime();
+                        Date date = sdf.parse(dateStrings[i]);
+                        if (date != null) {
+                            if (i == 0) {
+                                startTime = date.getTime();
+                            } else {
+                                endTime = date.getTime();
+                            }
                         }
+
                         break;
-                    } catch (ParseException e) {
-                        continue;
+                    } catch (ParseException ignored) {
                     }
                 }
             }
@@ -157,12 +160,6 @@ public class MRAIDNativeFeatureProvider {
             if (endTime > 0) {
                 intent.putExtra(EXTRA_EVENT_END_TIME, endTime);
             }
-
-            /*
-            if (wholeDay) {
-				intent.putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, wholeDay);
-			}
-             */
 
             context.startActivity(intent);
         } catch (JSONException e) {
@@ -262,12 +259,10 @@ public class MRAIDNativeFeatureProvider {
             storageDir = new File(
                     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
                     "Image");
-            if (storageDir != null) {
-                if (!storageDir.mkdirs()) {
-                    if (!storageDir.exists()) {
-                        MRAIDLog.i(TAG, "Failed to create camera directory");
-                        return null;
-                    }
+            if (!storageDir.mkdirs()) {
+                if (!storageDir.exists()) {
+                    MRAIDLog.i(TAG, "Failed to create camera directory");
+                    return null;
                 }
             }
         } else {

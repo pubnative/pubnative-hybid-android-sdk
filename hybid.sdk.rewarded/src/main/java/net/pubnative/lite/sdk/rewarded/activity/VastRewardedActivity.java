@@ -22,6 +22,7 @@
 //
 package net.pubnative.lite.sdk.rewarded.activity;
 
+import android.annotation.SuppressLint;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -29,6 +30,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
@@ -37,7 +39,7 @@ import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdListener;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
 
-public class VastRewardedActivity extends HyBidRewardedActivity {
+public class VastRewardedActivity extends HyBidRewardedActivity implements AdPresenter.ImpressionListener {
     private static final String TAG = VastRewardedActivity.class.getSimpleName();
     private boolean mReady = false;
     private boolean mFinished = false;
@@ -45,6 +47,7 @@ public class VastRewardedActivity extends HyBidRewardedActivity {
     private VideoAdView mVideoPlayer;
     private VideoAd mVideoAd;
 
+    @SuppressLint("SourceLockedOrientationActivity")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
@@ -59,7 +62,7 @@ public class VastRewardedActivity extends HyBidRewardedActivity {
 
         try {
             if (getAd() != null) {
-                mVideoAd = new VideoAd(this, getAd().getVast(), false, true);
+                mVideoAd = new VideoAd(this, getAd().getVast(), false, true, this);
                 mVideoAd.setRewarded(true);
                 mVideoAd.bindView(mVideoPlayer);
                 mVideoAd.setAdListener(mVideoAdListener);
@@ -134,7 +137,6 @@ public class VastRewardedActivity extends HyBidRewardedActivity {
 
                 setProgressBarInvisible();
                 mVideoAd.show();
-                getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.OPEN);
             }
         }
 
@@ -173,4 +175,9 @@ public class VastRewardedActivity extends HyBidRewardedActivity {
 
         }
     };
+
+    @Override
+    public void onImpression() {
+        getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.OPEN);
+    }
 }

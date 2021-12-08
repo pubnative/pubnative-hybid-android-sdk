@@ -18,16 +18,19 @@ public class FileUtils {
         }
         int amountOfCachedFiles = 0;
         File[] files = parentDir.listFiles();
-        for (File file : files) {
-            if (!file.isDirectory()) {
-                long creationTime = file.lastModified();
-                long currentTime = System.currentTimeMillis();
-                if ((creationTime + VpaidConstants.CACHED_VIDEO_LIFE_TIME < currentTime) ||
-                        (file.length() == 0)) {
-                    file.delete();
-                    Logger.d(LOG_TAG, "Deleted cached file: " + file.getAbsolutePath());
-                } else {
-                    amountOfCachedFiles++;
+        if (files != null && files.length > 0) {
+            for (File file : files) {
+                if (!file.isDirectory()) {
+                    long creationTime = file.lastModified();
+                    long currentTime = System.currentTimeMillis();
+                    if ((creationTime + VpaidConstants.CACHED_VIDEO_LIFE_TIME < currentTime) ||
+                            (file.length() == 0)) {
+                        //noinspection ResultOfMethodCallIgnored
+                        file.delete();
+                        Logger.d(LOG_TAG, "Deleted cached file: " + file.getAbsolutePath());
+                    } else {
+                        amountOfCachedFiles++;
+                    }
                 }
             }
         }
@@ -54,11 +57,13 @@ public class FileUtils {
         }
         File[] files = parentDir.listFiles();
         int deletedFilesCounter = 0;
-        for (File file : files) {
-            if (!file.isDirectory()) {
-                //noinspection ResultOfMethodCallIgnored
-                file.delete();
-                deletedFilesCounter++;
+        if (files != null && files.length > 0) {
+            for (File file : files) {
+                if (!file.isDirectory()) {
+                    //noinspection ResultOfMethodCallIgnored
+                    file.delete();
+                    deletedFilesCounter++;
+                }
             }
         }
         Logger.d(LOG_TAG, "Deleted " + deletedFilesCounter + " file(s)");

@@ -5,7 +5,7 @@ import android.text.TextUtils;
 @SuppressWarnings("unused")
 public class PlayerInfo {
 
-    private String mMessage;
+    private final String mMessage;
     private boolean mNoAdsFound;
 
     public PlayerInfo(String message) {

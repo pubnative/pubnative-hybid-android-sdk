@@ -2,6 +2,7 @@ package net.pubnative.lite.sdk.vpaid;
 
 import android.content.Context;
 
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.enums.AdState;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
@@ -14,8 +15,8 @@ abstract class BaseVideoAd extends BaseVideoAdInternal {
 
     private static final String LOG_TAG = BaseVideoAd.class.getSimpleName();
 
-    BaseVideoAd(Context context, String appKey, boolean isInterstitial, boolean isFullscreen) throws Exception {
-        super(context, appKey, isInterstitial, isFullscreen);
+    BaseVideoAd(Context context, String appKey, boolean isInterstitial, boolean isFullscreen, AdPresenter.ImpressionListener impressionListener) throws Exception {
+        super(context, appKey, isInterstitial, isFullscreen, impressionListener);
     }
 
     public boolean isRewarded() {
@@ -131,7 +132,7 @@ abstract class BaseVideoAd extends BaseVideoAdInternal {
                     return;
                 }
 
-                if (Utils.isOnline()) {
+                if (Utils.isOnline(getContext())) {
                     proceedLoad();
                 } else {
                     onAdLoadFailInternal(new PlayerInfo("No connection"));

@@ -35,8 +35,8 @@ public class FileLoader {
     }
 
     private static class FileHeaders {
-        String eTag;
-        int fileLength;
+        final String eTag;
+        final int fileLength;
 
         FileHeaders(String eTag, int fileLength) {
             this.eTag = eTag;

@@ -61,12 +61,12 @@ public class AdTracker {
     private final PNApiClient mApiClient;
     private final List<AdData> mImpressionUrls;
     private final List<AdData> mClickUrls;
-    private JSONObject mPlacementParams;
+    private final JSONObject mPlacementParams;
     private boolean mImpressionTracked;
     private boolean mClickTracked;
 
     private PNApiClient.TrackUrlListener mTrackUrlListener;
-    private PNApiClient.TrackJSListener mTrackJSListener;
+    private final PNApiClient.TrackJSListener mTrackJSListener;
 
     public AdTracker(List<AdData> impressionUrls,
                      List<AdData> clickUrls) {

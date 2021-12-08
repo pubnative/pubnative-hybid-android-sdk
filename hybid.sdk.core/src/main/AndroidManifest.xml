@@ -1,3 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.pubnative.lite.sdk.core">
+
+    <application>
+        <receiver android:name="net.pubnative.lite.sdk.receiver.VolumeChangedActionReceiver"
+            android:exported="true">
+        </receiver>
+    </application>
 </manifest>

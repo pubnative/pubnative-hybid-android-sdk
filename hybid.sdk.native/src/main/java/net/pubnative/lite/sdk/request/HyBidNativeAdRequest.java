@@ -22,12 +22,14 @@
 //
 package net.pubnative.lite.sdk.request;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.NativeAd;
+import net.pubnative.lite.sdk.models.RemoteConfigFeature;
 import net.pubnative.lite.sdk.utils.Logger;
 
 public class HyBidNativeAdRequest implements RequestManager.RequestListener {
@@ -44,7 +46,7 @@ public class HyBidNativeAdRequest implements RequestManager.RequestListener {
     }
 
     private RequestListener mListener;
-    private RequestManager mRequestManager;
+    private final RequestManager mRequestManager;
 
     public HyBidNativeAdRequest() {
         this.mRequestManager = new NativeRequestManager();
@@ -53,9 +55,16 @@ public class HyBidNativeAdRequest implements RequestManager.RequestListener {
     }
 
     public void load(String zoneId, RequestListener listener) {
-        mListener = listener;
-        mRequestManager.setZoneId(zoneId);
-        mRequestManager.requestAd();
+        if (HyBid.getConfigManager() != null
+                && !HyBid.getConfigManager().getFeatureResolver().isAdFormatEnabled(RemoteConfigFeature.AdFormat.NATIVE)) {
+            if (mListener != null) {
+                mListener.onRequestFail(new HyBidError(HyBidErrorCode.DISABLED_FORMAT));
+            }
+        } else {
+            mListener = listener;
+            mRequestManager.setZoneId(zoneId);
+            mRequestManager.requestAd();
+        }
     }
 
     @Override

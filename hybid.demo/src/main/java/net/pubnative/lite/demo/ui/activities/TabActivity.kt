@@ -99,6 +99,10 @@ abstract class TabActivity : AppCompatActivity() {
         debugFragment.cleanLogs()
     }
 
+    fun cacheEventList() {
+        debugFragment.cacheEventList()
+    }
+
     fun notifyAdUpdated() {
         debugFragment.updateLogs()
     }

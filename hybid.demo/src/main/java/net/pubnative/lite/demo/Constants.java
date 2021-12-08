@@ -82,6 +82,11 @@ public class Constants {
     public static final String ADMOB_REWARDED_AD_UNIT = "ca-app-pub-9763601123242224/1139038306";
     public static final String ADMOB_NATIVE_AD_UNIT = "ca-app-pub-9763601123242224/2966644429";
 
+    public static final String IRONSOURCE_APP_KEY = "120ac03ad";
+    public static final String IRONSOURCE_BANNER_AD_UNIT = "HyBid_Banner";
+    public static final String IRONSOURCE_INTERSTITIAL_AD_UNIT = "HyBid_Interstitial";
+    public static final String IRONSOURCE_REWARDED_AD_UNIT = "HyBid_Rewarded";
+
     public static final String APP_TOKEN = "dde3c298b47648459f8ada4a982fa92d";
     public static final List<String> ZONE_ID_LIST = Arrays.asList(NATIVE_ZONE_ID, MRAID_320x50_ZONE_ID,
             MRAID_300x250_ZONE_ID, INTERSTITIAL_MRAID_ZONE_ID, MEDIUM_VIDEO_ZONE_ID,
@@ -93,7 +98,7 @@ public class Constants {
 
     public static final String NUMBEREIGHT_API_TOKEN = "T954C5VJTIAXAGMUVPDU0TZMGEV2";
 
-    public final class IntentParams {
+    public static final class IntentParams {
         public static final String ZONE_ID = "zone_id";
     }
 }

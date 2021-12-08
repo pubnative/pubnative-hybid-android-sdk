@@ -9,11 +9,7 @@ import com.iab.omid.library.pubnativenet.adsession.CreativeType;
 import com.iab.omid.library.pubnativenet.adsession.ImpressionType;
 import com.iab.omid.library.pubnativenet.adsession.Owner;
 
-import net.pubnative.lite.sdk.analytics.Reporting;
-import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.utils.Logger;
-
-import org.json.JSONException;
 
 public class HyBidViewabilityNativeAdSession extends HyBidViewabilityAdSession {
     private static final String TAG = HyBidViewabilityNativeAdSession.class.getSimpleName();

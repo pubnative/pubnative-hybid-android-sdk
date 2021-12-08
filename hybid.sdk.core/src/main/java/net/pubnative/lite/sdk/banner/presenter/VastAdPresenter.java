@@ -90,7 +90,7 @@ public class VastAdPresenter implements AdPresenter {
         }
 
         try {
-            mVideoAd = new VideoAd(mContext, mAd.getVast(), false, false);
+            mVideoAd = new VideoAd(mContext, mAd.getVast(), false, false, mImpressionListener);
             mVideoPlayer = new VideoAdView(mContext);
             mVideoAd.bindView(mVideoPlayer);
             mVideoAd.setAdListener(mVideoAdListener);
@@ -213,9 +213,6 @@ public class VastAdPresenter implements AdPresenter {
 
         @Override
         public void onAdStarted() {
-            if (mImpressionListener != null) {
-                mImpressionListener.onImpression();
-            }
             if (mVideoListener != null) {
                 mVideoListener.onVideoStarted();
             }

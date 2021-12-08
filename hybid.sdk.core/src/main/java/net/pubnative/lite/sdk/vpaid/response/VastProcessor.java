@@ -425,11 +425,25 @@ public class VastProcessor {
         return new Comparator<MediaFile>() {
             @Override
             public int compare(MediaFile mediaFile1, MediaFile mediaFile2) {
-                int delta1 = Math.abs(adSpotDimensions.getWidth() - mediaFile1.getWidth()) +
-                        Math.abs(adSpotDimensions.getHeight() - mediaFile1.getHeight());
-                int delta2 = Math.abs(adSpotDimensions.getWidth() - mediaFile2.getWidth()) +
-                        Math.abs(adSpotDimensions.getHeight() - mediaFile2.getHeight());
-                return (delta1 < delta2) ? -1 : ((delta1 == delta2) ? 0 : 1);
+                int width1 = 0;
+                int height1 = 0;
+                int width2 = 0;
+                int height2 = 0;
+
+                try {
+                    width1 = Integer.parseInt(mediaFile1.getWidth());
+                    height1 = Integer.parseInt(mediaFile1.getHeight());
+                    width2 = Integer.parseInt(mediaFile2.getWidth());
+                    height2 = Integer.parseInt(mediaFile2.getHeight());
+                } catch (RuntimeException e) {
+                    Logger.w(LOG_TAG, e.getMessage());
+                }
+
+                int delta1 = Math.abs(adSpotDimensions.getWidth() - width1) +
+                        Math.abs(adSpotDimensions.getHeight() - height1);
+                int delta2 = Math.abs(adSpotDimensions.getWidth() - width2) +
+                        Math.abs(adSpotDimensions.getHeight() - height2);
+                return Integer.compare(delta1, delta2);
             }
         };
     }

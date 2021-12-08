@@ -1,5 +1,7 @@
 package net.pubnative.lite.sdk.vpaid.macros;
 
+import android.text.TextUtils;
+
 public class MacroHelper {
     private final GenericMacros genericMacros;
     private final AdBreakMacros adBreakMacros;
@@ -30,6 +32,10 @@ public class MacroHelper {
     }
 
     public String processUrl(String url, String errorCode) {
+        if (TextUtils.isEmpty(url)) {
+            return url;
+        }
+
         String finalUrl = url;
         finalUrl = genericMacros.processUrl(finalUrl);
         finalUrl = adBreakMacros.processUrl(finalUrl);

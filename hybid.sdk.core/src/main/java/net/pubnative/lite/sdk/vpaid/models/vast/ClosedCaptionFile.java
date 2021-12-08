@@ -1,27 +1,29 @@
 package net.pubnative.lite.sdk.vpaid.models.vast;
 
+import android.text.TextUtils;
+
 import net.pubnative.lite.sdk.vpaid.xml.Attribute;
 import net.pubnative.lite.sdk.vpaid.xml.Text;
 
 public class ClosedCaptionFile {
     @Attribute
-    private boolean type;
+    private String type;
 
     @Attribute
-    private boolean language;
+    private String language;
 
     @Text
     private String text;
 
-    public boolean isType() {
+    public String isType() {
         return type;
     }
 
-    public boolean isLanguage() {
+    public String isLanguage() {
         return language;
     }
 
     public String getText() {
-        return text;
+        return TextUtils.isEmpty(text) ? "" : text.trim();
     }
 }

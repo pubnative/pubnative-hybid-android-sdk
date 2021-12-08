@@ -1,5 +1,7 @@
 package net.pubnative.lite.sdk.vpaid.models.vast;
 
+import android.text.TextUtils;
+
 import net.pubnative.lite.sdk.vpaid.xml.Attribute;
 import net.pubnative.lite.sdk.vpaid.xml.Text;
 
@@ -15,7 +17,7 @@ public class AdParameters {
     }
 
     public String getText() {
-        return text;
+        return TextUtils.isEmpty(text) ? "" : text.trim();
     }
 
 }

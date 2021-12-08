@@ -2,8 +2,6 @@ package net.pubnative.lite.sdk.views;
 
 import android.app.Activity;
 
-import net.pubnative.lite.sdk.HyBid;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

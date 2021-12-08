@@ -169,7 +169,7 @@ public class PNApiClient {
         });
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint({"SetJavaScriptEnabled", "ObsoleteSdkInt"})
     public void trackJS(String js, final TrackJSListener listener) {
         if (TextUtils.isEmpty(js)) {
             if (listener != null) {

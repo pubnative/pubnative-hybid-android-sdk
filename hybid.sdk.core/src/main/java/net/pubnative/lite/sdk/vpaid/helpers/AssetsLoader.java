@@ -46,32 +46,36 @@ public class AssetsLoader {
     }
 
     private void loadVideoAndEndCard() {
-        mVideoLoader = new FileLoader(mAdParams.getVideoFileUrlsList().get(videoFileIndex), mContext, new FileLoader.Callback() {
-            @Override
-            public void onFileLoaded(String filePath) {
-                Logger.d(LOG_TAG, "onFullVideoLoaded");
-                mVideoFilePath = filePath;
-                loadEndCard();
-            }
-
-            @Override
-            public void onError(PlayerInfo info) {
-                Logger.e(LOG_TAG, "Load video fail:" + info.getMessage());
-                videoFileIndex++;
-                if (videoFileIndex < mAdParams.getVideoFileUrlsList().size()) {
-                    loadVideoAndEndCard();
-                } else {
-                    mListener.onError(info);
+        if (mAdParams.getVideoFileUrlsList() == null || mAdParams.getVideoFileUrlsList().isEmpty()) {
+            mListener.onError(new PlayerInfo("No video file found"));
+        } else {
+            mVideoLoader = new FileLoader(mAdParams.getVideoFileUrlsList().get(videoFileIndex), mContext, new FileLoader.Callback() {
+                @Override
+                public void onFileLoaded(String filePath) {
+                    Logger.d(LOG_TAG, "onFullVideoLoaded");
+                    mVideoFilePath = filePath;
+                    loadEndCard();
                 }
-            }
 
-            @Override
-            public void onProgress(double progress) {
-                String percent = String.format(Locale.US, "Loaded: %.2f%%", progress * 100);
-                Logger.d(LOG_TAG, percent);
-            }
-        });
-        mVideoLoader.start();
+                @Override
+                public void onError(PlayerInfo info) {
+                    Logger.e(LOG_TAG, "Load video fail:" + info.getMessage());
+                    videoFileIndex++;
+                    if (videoFileIndex < mAdParams.getVideoFileUrlsList().size()) {
+                        loadVideoAndEndCard();
+                    } else {
+                        mListener.onError(info);
+                    }
+                }
+
+                @Override
+                public void onProgress(double progress) {
+                    String percent = String.format(Locale.US, "Loaded: %.2f%%", progress * 100);
+                    Logger.d(LOG_TAG, percent);
+                }
+            });
+            mVideoLoader.start();
+        }
     }
 
     private void loadEndCard() {

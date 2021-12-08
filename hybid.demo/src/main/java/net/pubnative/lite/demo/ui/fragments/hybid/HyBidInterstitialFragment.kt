@@ -87,11 +87,15 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
         }
 
         showButton.setOnClickListener {
+            val activity = activity as TabActivity
+            activity.cacheEventList()
             interstitial?.show()
         }
 
         cachingCheckbox.setOnCheckedChangeListener { _, isChecked ->
             cachingEnabled = isChecked
+            val activity = activity as TabActivity
+            activity.cacheEventList()
             prepareButton.visibility = if (isChecked) View.GONE else View.VISIBLE
         }
 

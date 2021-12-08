@@ -27,6 +27,7 @@ import android.content.Context;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
+import net.pubnative.lite.sdk.models.RemoteConfigFeature;
 import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.Logger;
 
@@ -60,14 +61,13 @@ public class RewardedPresenterFactory {
     }
 
     RewardedPresenter fromCreativeType(int assetGroupId, Ad ad) {
-        switch (assetGroupId) {
-            case ApiAssetGroupType.VAST_INTERSTITIAL: {
-                return new VastRewardedPresenter(mContext, ad, mZoneId);
-            }
-            default: {
-                Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for rewarded ad format.");
-                return null;
-            }
+        if (assetGroupId == ApiAssetGroupType.VAST_INTERSTITIAL) {
+            return HyBid.getConfigManager() != null
+                    && !HyBid.getConfigManager().getFeatureResolver()
+                    .isRenderingSupported(RemoteConfigFeature.Rendering.VAST) ?
+                    null : new VastRewardedPresenter(mContext, ad, mZoneId);
         }
+        Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for rewarded ad format.");
+        return null;
     }
 }

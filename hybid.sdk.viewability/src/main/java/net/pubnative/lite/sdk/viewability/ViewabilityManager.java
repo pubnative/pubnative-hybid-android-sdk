@@ -9,8 +9,6 @@ import android.util.Base64;
 import com.iab.omid.library.pubnativenet.Omid;
 import com.iab.omid.library.pubnativenet.adsession.Partner;
 
-import net.pubnative.lite.sdk.analytics.ReportingController;
-
 public class ViewabilityManager {
 
     private static final String TAG = ViewabilityManager.class.getSimpleName();

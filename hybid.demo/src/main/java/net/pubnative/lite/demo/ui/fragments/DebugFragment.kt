@@ -17,6 +17,7 @@ import net.pubnative.lite.demo.ui.adapters.ReportingEventAdapter
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.demo.util.JsonUtils
 import net.pubnative.lite.sdk.HyBid
+import net.pubnative.lite.sdk.analytics.Reporting
 import net.pubnative.lite.sdk.analytics.ReportingEvent
 import net.pubnative.lite.sdk.analytics.ReportingEventCallback
 import net.pubnative.lite.sdk.utils.AdRequestRegistry
@@ -27,7 +28,7 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
     private lateinit var latencyView: TextView
     private lateinit var responseView: TextView
 
-    private val eventList = mutableListOf<ReportingEvent>()
+    private var eventList = mutableListOf<ReportingEvent>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -62,20 +63,36 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
         HyBid.getReportingController()?.apply {
             addCallback(this@DebugFragment)
         }
+
+        savedInstanceState?.let {
+            val requestViewText = it.getString("requestViewText", "")
+            val latencyViewText = it.getString("latencyViewText", "")
+            val responseViewText = it.getString("responseViewText", "")
+
+            requestView?.text = requestViewText
+            latencyView.text = latencyViewText
+            responseView.text = responseViewText
+
+            eventList = HyBid.getReportingController().adEventList
+        }
     }
 
-    override fun onDestroy() {
+    override fun onDestroyView() {
         HyBid.getReportingController().removeCallback(this)
-        super.onDestroy()
+        super.onDestroyView()
     }
 
     override fun onEvent(event: ReportingEvent?) {
         if (event != null) {
+            if (event.eventType != null && event.eventType.equals(Reporting.EventType.REQUEST))
+                clearEventList()
             eventList.add(event)
         }
     }
 
     fun cleanLogs() {
+        clearEventList()
+
         if (requestView != null) {
             requestView?.text = ""
         }
@@ -85,6 +102,17 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
         if (isResponseViewInitializedNotNull()) {
             responseView.text = ""
         }
+    }
+
+    private fun clearEventList() {
+        if (eventList.isNotEmpty()) {
+            eventList.clear()
+            HyBid.getReportingController().clearAdEventList()
+        }
+    }
+
+    fun cacheEventList() {
+        HyBid.getReportingController().cacheAdEventList(eventList)
     }
 
     fun updateLogs() {
@@ -137,5 +165,14 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
 
     private fun isResponseViewInitializedNotNull(): Boolean {
         return this::responseView.isInitialized && responseView != null
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("requestViewText", requestView?.text.toString())
+        outState.putString("latencyViewText", latencyView?.text.toString())
+        outState.putString("responseViewText", responseView?.text.toString())
+
+        HyBid.getReportingController().cacheAdEventList(eventList)
     }
 }

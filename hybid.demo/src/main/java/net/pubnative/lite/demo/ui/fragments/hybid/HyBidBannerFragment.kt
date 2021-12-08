@@ -37,11 +37,9 @@ import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.demo.util.convertDpToPx
 import net.pubnative.lite.sdk.DiagnosticsManager
-import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.HyBidError
 import net.pubnative.lite.sdk.VideoListener
 import net.pubnative.lite.sdk.models.AdSize
-import net.pubnative.lite.sdk.reporting.ReportingEventBridge
 import net.pubnative.lite.sdk.views.HyBidAdView
 import net.pubnative.lite.sdk.views.PNAdView
 import java.util.*
@@ -143,9 +141,6 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
         hybidBanner.layoutParams = layoutParams
 
         hybidBanner.load(zoneId, this)
-
-        val event = ReportingEventBridge("Standalone Banner")
-        event.setAdSize(adSize)
     }
 
     fun autoRefresh() {

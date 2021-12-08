@@ -56,7 +56,7 @@ public class ReportingEvent {
         setCustomString(Reporting.Key.CREATIVE, creative);
     }
 
-    public String getCreative(){
+    public String getCreative() {
         return getCustomString(Reporting.Key.CREATIVE);
     }
 
@@ -80,19 +80,19 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.EVENT_TYPE);
     }
 
-    public void setErrorCode(int errorCode){
+    public void setErrorCode(int errorCode) {
         setCustomInteger(Reporting.Key.ERROR_CODE, errorCode);
     }
 
-    public long getErrorCode(){
+    public long getErrorCode() {
         return getCustomInteger(Reporting.Key.ERROR_CODE);
     }
 
-    public void setErrorMessage(String errorMessage){
+    public void setErrorMessage(String errorMessage) {
         setCustomString(Reporting.Key.ERROR_MESSAGE, errorMessage);
     }
 
-    public String getErrorMessage(){
+    public String getErrorMessage() {
         return getCustomString(Reporting.Key.ERROR_MESSAGE);
     }
 
@@ -112,19 +112,19 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.AD_SIZE);
     }
 
-    public void setZoneId(String zoneId){
+    public void setZoneId(String zoneId) {
         setCustomString(Reporting.Key.ZONE_ID, zoneId);
     }
 
-    public String getZoneId(){
+    public String getZoneId() {
         return getCustomString(Reporting.Key.ZONE_ID);
     }
 
-    public void setAdType(String adType){
+    public void setAdType(String adType) {
         setCustomString(Reporting.Key.AD_TYPE, adType);
     }
 
-    public String getAdType(){
+    public String getAdType() {
         return getCustomString(Reporting.Key.AD_TYPE);
     }
 
@@ -145,12 +145,20 @@ public class ReportingEvent {
     }
 
 
-    public void setIntegrationType(String integrationType){
+    public void setIntegrationType(String integrationType) {
         setCustomString(Reporting.Key.INTEGRATION_TYPE, integrationType);
     }
 
-    public String getIntegrationType(){
+    public String getIntegrationType() {
         return getCustomString(Reporting.Key.INTEGRATION_TYPE);
+    }
+
+    public void setVast(String vast) {
+        setCustomString(Reporting.Key.VAST, vast);
+    }
+
+    public String getVast() {
+        return getCustomString(Reporting.Key.VAST);
     }
 
     public void setCustomString(String key, String value) {
@@ -286,5 +294,9 @@ public class ReportingEvent {
             }
         }
         return bundle;
+    }
+
+    public JSONObject getEventObject() {
+        return eventObject;
     }
 }

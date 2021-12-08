@@ -21,6 +21,8 @@ public class RemoteConfigAppConfig extends JsonModel {
     @BindField
     public List<String> enabled_protocols;
 
+    @BindField
+    public RemoteConfigAppFeatures features;
 
     public RemoteConfigAppConfig() {
 

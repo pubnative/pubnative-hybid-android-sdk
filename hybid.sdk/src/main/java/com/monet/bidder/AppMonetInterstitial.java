@@ -1,7 +1,6 @@
 package com.monet.bidder;
 
 import android.content.Context;
-import android.text.TextUtils;
 import android.webkit.ValueCallback;
 
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd;

@@ -109,7 +109,7 @@ public class PNAdvertisingIdClient {
     /**
      * Ad Info data class with the results
      */
-    public class AdInfo {
+    public static class AdInfo {
 
         private final String mAdvertisingId;
         private final boolean mLimitAdTrackingEnabled;
@@ -137,10 +137,10 @@ public class PNAdvertisingIdClient {
     /**
      * Advertising Service Connection
      */
-    protected class AdvertisingConnection implements ServiceConnection {
+    protected static class AdvertisingConnection implements ServiceConnection {
 
         boolean retrieved = false;
-        private final LinkedBlockingQueue<IBinder> queue = new LinkedBlockingQueue<IBinder>(1);
+        private final LinkedBlockingQueue<IBinder> queue = new LinkedBlockingQueue<>(1);
 
         public void onServiceConnected(ComponentName name, IBinder service) {
 
@@ -167,9 +167,9 @@ public class PNAdvertisingIdClient {
     /**
      * Advertising IInterface to get the ID
      */
-    protected class AdvertisingInterface implements IInterface {
+    protected static class AdvertisingInterface implements IInterface {
 
-        private IBinder binder;
+        private final IBinder binder;
 
         public AdvertisingInterface(IBinder pBinder) {
 

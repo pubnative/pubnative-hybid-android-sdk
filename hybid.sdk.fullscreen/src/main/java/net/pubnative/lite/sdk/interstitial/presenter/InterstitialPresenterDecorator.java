@@ -22,7 +22,8 @@
 //
 package net.pubnative.lite.sdk.interstitial.presenter;
 
-import net.pubnative.lite.sdk.HyBid;
+import android.text.TextUtils;
+
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
@@ -193,6 +194,9 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             reportingEvent.setEventType(Reporting.EventType.ERROR);
             reportingEvent.setTimestamp(System.currentTimeMillis());
             reportingEvent.setAdFormat(Reporting.AdFormat.FULLSCREEN);
+            if (getAd() != null && !TextUtils.isEmpty(getAd().getVast())) {
+                reportingEvent.setVast(getAd().getVast());
+            }
             mReportingController.reportEvent(reportingEvent);
         }
 

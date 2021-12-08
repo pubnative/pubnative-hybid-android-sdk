@@ -11,10 +11,7 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.CustomSDKDataActivity
 import net.pubnative.lite.demo.ui.activities.admob.MediationTestSuiteActivity
 import net.pubnative.lite.demo.ui.activities.audiences.NumberEightAudiencesActivity
-import net.pubnative.lite.demo.ui.activities.config.AdmobSettingsActivity
-import net.pubnative.lite.demo.ui.activities.config.DFPSettingsActivity
-import net.pubnative.lite.demo.ui.activities.config.HyBidSettingsActivity
-import net.pubnative.lite.demo.ui.activities.config.MoPubSettingsActivity
+import net.pubnative.lite.demo.ui.activities.config.*
 import net.pubnative.lite.demo.ui.activities.markup.MarkupActivity
 import net.pubnative.lite.demo.ui.activities.signaldata.SignalDataActivity
 import net.pubnative.lite.demo.ui.activities.vast.VastTagRequestActivity
@@ -45,6 +42,11 @@ class SettingsNavFragment : Fragment(R.layout.fragment_nav_settings) {
 
         view.findViewById<TextView>(R.id.button_dfp_settings).setOnClickListener {
             val intent = Intent(activity, DFPSettingsActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<TextView>(R.id.button_ironsource_settings).setOnClickListener {
+            val intent = Intent(activity, IronSourceSettingsActivity::class.java)
             startActivity(intent)
         }
 

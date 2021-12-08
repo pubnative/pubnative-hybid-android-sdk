@@ -37,7 +37,7 @@ public class Logger {
         error(5),
         none(6);
 
-        private int mValue;
+        private final int mValue;
 
         Level(int value) {
             mValue = value;

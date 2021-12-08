@@ -38,8 +38,8 @@ import java.util.ArrayList;
 public class MRAIDNativeFeatureManager {
     private final static String TAG = MRAIDNativeFeatureManager.class.getSimpleName();
 
-    private Context context;
-    private ArrayList<String> supportedNativeFeatures;
+    private final Context context;
+    private final ArrayList<String> supportedNativeFeatures;
 
     public MRAIDNativeFeatureManager(Context context, ArrayList<String> supportedNativeFeatures) {
         this.context = context;

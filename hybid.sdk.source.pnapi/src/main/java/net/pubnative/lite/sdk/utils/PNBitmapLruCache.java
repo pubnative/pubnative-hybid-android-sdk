@@ -31,11 +31,11 @@ public class PNBitmapLruCache {
     private static final int BYTES_IN_KILOBYTES = 1024;
     private static final int MAX_MEMORY_SIZE = 30 * 1024 * 1024; // 30MB
 
-    private static LruCache<String, Bitmap> mMemoryCache;
+    private static final LruCache<String, Bitmap> mMemoryCache;
 
     static {
         final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / BYTES_IN_KILOBYTES);
-        final int cacheSize = maxMemory <= MAX_MEMORY_SIZE ? maxMemory : MAX_MEMORY_SIZE;
+        final int cacheSize = Math.min(maxMemory, MAX_MEMORY_SIZE);
 
         mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
             @Override

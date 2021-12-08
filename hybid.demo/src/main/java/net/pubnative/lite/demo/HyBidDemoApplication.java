@@ -31,6 +31,7 @@ import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
 
 import com.google.android.gms.ads.MobileAds;
+import com.ironsource.mediationsdk.IronSource;
 import com.ogury.cm.OguryChoiceManager;
 import com.ogury.cm.OguryCmConfig;
 
@@ -197,7 +198,11 @@ public class HyBidDemoApplication extends MultiDexApplication {
                     Constants.ADMOB_REWARDED_AD_UNIT,
                     Constants.ADMOB_INTERSTITIAL_AD_UNIT,
                     Constants.ADMOB_INTERSTITIAL_VIDEO_AD_UNIT,
-                    Constants.ADMOB_NATIVE_AD_UNIT);
+                    Constants.ADMOB_NATIVE_AD_UNIT,
+                    Constants.IRONSOURCE_APP_KEY,
+                    Constants.IRONSOURCE_BANNER_AD_UNIT,
+                    Constants.IRONSOURCE_INTERSTITIAL_AD_UNIT,
+                    Constants.IRONSOURCE_REWARDED_AD_UNIT);
             manager.setSettings(model, true);
         }
 

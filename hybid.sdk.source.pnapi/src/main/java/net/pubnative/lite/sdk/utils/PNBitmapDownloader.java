@@ -46,7 +46,7 @@ public class PNBitmapDownloader {
     private int mHeight;
     private int mWidth;
 
-    private Runnable downloadTask = new Runnable() {
+    private final Runnable downloadTask = new Runnable() {
         HttpURLConnection connection = null;
 
         @Override
@@ -80,7 +80,7 @@ public class PNBitmapDownloader {
         }
     };
 
-    private Runnable loadFromFileSystemTask = new Runnable() {
+    private final Runnable loadFromFileSystemTask = new Runnable() {
         @Override
         public void run() {
             try {

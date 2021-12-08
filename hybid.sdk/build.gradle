@@ -13,7 +13,6 @@ version = version_name
 // ANDROID
 //==================================================================================================
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 30
@@ -105,7 +104,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
-def addDependency(dependency, dependenciesNode) { //finish with dependencies
+static def addDependency(dependency, dependenciesNode) { //finish with dependencies
     if (dependency.group != null && dependency.name != null) {
         def dependencyNode = dependenciesNode.appendNode('dependency')
         dependencyNode.appendNode('groupId', dependency.group)

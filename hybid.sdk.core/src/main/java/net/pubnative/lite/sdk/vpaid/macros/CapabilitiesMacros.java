@@ -31,35 +31,29 @@ public class CapabilitiesMacros {
 
     CapabilitiesMacros(ViewabilityManager viewabilityManager) {
         // All VAST versions
-        StringBuilder vastVersions = new StringBuilder();
-        vastVersions.append(Protocol.VAST_1_0).append(',');
-        vastVersions.append(Protocol.VAST_2_0).append(',');
-        vastVersions.append(Protocol.VAST_3_0).append(',');
-        vastVersions.append(Protocol.VAST_1_0_WRAPPER).append(',');
-        vastVersions.append(Protocol.VAST_2_0_WRAPPER).append(',');
-        vastVersions.append(Protocol.VAST_3_0_WRAPPER).append(',');
-        vastVersions.append(Protocol.VAST_4_0).append(',');
-        vastVersions.append(Protocol.VAST_4_0_WRAPPER).append(',');
-        vastVersions.append(Protocol.VAST_4_1).append(',');
-        vastVersions.append(Protocol.VAST_4_1_WRAPPER).append(',');
-        vastVersions.append(Protocol.VAST_4_2).append(',');
-        vastVersions.append(Protocol.VAST_4_2_WRAPPER);
-        mSupportedVastVersions = vastVersions.toString();
+        mSupportedVastVersions = Protocol.VAST_1_0 + ',' +
+                Protocol.VAST_2_0 + ',' +
+                Protocol.VAST_3_0 + ',' +
+                Protocol.VAST_1_0_WRAPPER + ',' +
+                Protocol.VAST_2_0_WRAPPER + ',' +
+                Protocol.VAST_3_0_WRAPPER + ',' +
+                Protocol.VAST_4_0 + ',' +
+                Protocol.VAST_4_0_WRAPPER + ',' +
+                Protocol.VAST_4_1 + ',' +
+                Protocol.VAST_4_1_WRAPPER + ',' +
+                Protocol.VAST_4_2 + ',' +
+                Protocol.VAST_4_2_WRAPPER;
 
         //Supported API frameworks
-        StringBuilder apiFrameworks = new StringBuilder();
-        apiFrameworks.append(Api.MRAID_1).append(',');
-        apiFrameworks.append(Api.MRAID_2).append(',');
-        apiFrameworks.append(Api.MRAID_3).append(',');  //MRAID 3.0
-        apiFrameworks.append(Api.OMID_1).append(',');  //OMID
-        mSupportedApiFrameworks = apiFrameworks.toString();
+        mSupportedApiFrameworks = Api.MRAID_1 + ',' +
+                Api.MRAID_2 + ',' +
+                Api.MRAID_3 + ',' +  //MRAID 3.0
+                Api.OMID_1 + ',';
 
-        StringBuilder capabilities = new StringBuilder();
-        vastVersions.append("skip").append(',');
-        vastVersions.append("mute").append(',');
-        vastVersions.append("autoplay").append(',');
-        vastVersions.append("mautoplay");
-        mPlayerCapabilities = capabilities.toString();
+        mPlayerCapabilities = "skip" + ',' +
+                "mute" + ',' +
+                "autoplay" + ',' +
+                "mautoplay";
 
         if (viewabilityManager != null && viewabilityManager.getPartner() != null) {
             Partner partner = viewabilityManager.getPartner();

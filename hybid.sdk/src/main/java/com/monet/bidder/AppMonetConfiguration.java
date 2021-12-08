@@ -1,8 +1,8 @@
 package com.monet.bidder;
 
 public class AppMonetConfiguration {
-    String applicationId;
-    boolean disableBannerListener;
+    final String applicationId;
+    final boolean disableBannerListener;
 
     private AppMonetConfiguration(Builder builder) {
         this.applicationId = builder.applicationId;

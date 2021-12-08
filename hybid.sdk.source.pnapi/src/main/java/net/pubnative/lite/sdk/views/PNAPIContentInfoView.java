@@ -48,7 +48,7 @@ public class PNAPIContentInfoView extends RelativeLayout implements View.OnClick
 
     private Handler mHandler;
 
-    private Runnable mCloseTask = new Runnable() {
+    private final Runnable mCloseTask = new Runnable() {
         @Override
         public void run() {
             closeLayout();

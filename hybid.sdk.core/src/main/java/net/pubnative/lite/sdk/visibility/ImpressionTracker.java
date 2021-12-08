@@ -40,19 +40,18 @@ public class ImpressionTracker {
     private static final double DEFAULT_MIN_VISIBLE_PERCENT = 0.5;
 
     protected WeakReference<Listener> mImpressionListener = null;
-    protected List<View> mTrackingViews = new ArrayList<View>();
-    protected HashMap<View, Long> mVisibleViews = new HashMap<View, Long>();
+    protected final List<View> mTrackingViews = new ArrayList<>();
+    protected final HashMap<View, Long> mVisibleViews = new HashMap<>();
     protected Handler mHandler = new Handler(Looper.getMainLooper());
-    protected Runnable mImpressionRunnable = new ImpressionRunnable();
+    protected final Runnable mImpressionRunnable = new ImpressionRunnable();
     protected VisibilityTracker mVisibilityTracker = null;
+
     protected VisibilityTracker.Listener mVisibilityListener = new VisibilityTracker.Listener() {
         @Override
         public void onVisibilityCheck(List<View> visibleViews, List<View> invisibleViews) {
-
-            if (mImpressionListener == null && mImpressionListener.get() == null) {
+            if (mImpressionListener == null || mImpressionListener.get() == null) {
                 clear();
             } else {
-
                 for (View visibleView : visibleViews) {
 
                     if (mVisibleViews.containsKey(visibleView)) {
@@ -110,7 +109,7 @@ public class ImpressionTracker {
      * @param listener valid listener for callbacks
      */
     public void setListener(Listener listener) {
-        mImpressionListener = new WeakReference<Listener>(listener);
+        mImpressionListener = new WeakReference<>(listener);
     }
 
     /**
@@ -189,10 +188,10 @@ public class ImpressionTracker {
 
     protected class ImpressionRunnable implements Runnable {
 
-        private List<View> mRemovedViews;
+        private final List<View> mRemovedViews;
 
         ImpressionRunnable() {
-            mRemovedViews = new ArrayList<View>();
+            mRemovedViews = new ArrayList<>();
         }
 
         @Override

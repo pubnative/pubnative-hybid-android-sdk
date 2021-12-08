@@ -189,19 +189,19 @@ public class VpaidBridgeImpl implements VpaidBridge {
     @JavascriptInterface
     public void vpaidAdPaused() {
         Logger.d(LOG_TAG, "JS: vpaidAdPaused");
-        mBridge.postEvent(EventConstants.PAUSE);
+        mBridge.postEvent(EventConstants.PAUSE, false);
     }
 
     @JavascriptInterface
     public void vpaidAdVideoStart() {
         Logger.d(LOG_TAG, "JS: vpaidAdVideoStart");
-        mBridge.postEvent(EventConstants.START);
+        mBridge.postEvent(EventConstants.START, true);
     }
 
     @JavascriptInterface
     public void vpaidAdPlaying() {
         Logger.d(LOG_TAG, "JS: vpaidAdPlaying");
-        mBridge.postEvent(EventConstants.RESUME);
+        mBridge.postEvent(EventConstants.RESUME, false);
     }
 
     @JavascriptInterface
@@ -213,19 +213,19 @@ public class VpaidBridgeImpl implements VpaidBridge {
 
     @JavascriptInterface
     public void vpaidAdVideoFirstQuartile() {
-        mBridge.postEvent(EventConstants.FIRST_QUARTILE);
+        mBridge.postEvent(EventConstants.FIRST_QUARTILE, true);
     }
 
     @JavascriptInterface
     public void vpaidAdVideoMidpoint() {
         Logger.d(LOG_TAG, "JS: vpaidAdVideoMidpoint");
-        mBridge.postEvent(EventConstants.MIDPOINT);
+        mBridge.postEvent(EventConstants.MIDPOINT, true);
     }
 
     @JavascriptInterface
     public void vpaidAdVideoThirdQuartile() {
         Logger.d(LOG_TAG, "JS: vpaidAdVideoThirdQuartile");
-        mBridge.postEvent(EventConstants.THIRD_QUARTILE);
+        mBridge.postEvent(EventConstants.THIRD_QUARTILE, true);
     }
 
     @JavascriptInterface
@@ -243,9 +243,9 @@ public class VpaidBridgeImpl implements VpaidBridge {
     public void getAdRemainingTimeResult(int value) {
         Logger.d(LOG_TAG, "JS: getAdRemainingTimeResult: " + value);
         if (value == 0) {
-            mBridge.postEvent(EventConstants.COMPLETE);
+            mBridge.postEvent(EventConstants.COMPLETE, true);
         } else {
-            mBridge.postEvent(EventConstants.PROGRESS, value);
+            mBridge.postEvent(EventConstants.PROGRESS, value, false);
         }
     }
 

@@ -4,7 +4,7 @@ public final class VpaidConstants {
 
     public static final String FILE_FOLDER = "PNVpaidAds";
 
-    public static long CACHED_VIDEO_LIFE_TIME = 1000 * 60 * 60 * 32; //32 hours
+    public static final long CACHED_VIDEO_LIFE_TIME = 1000 * 60 * 60 * 32; //32 hours
     static final int DEFAULT_EXPIRED_TIME = 1000 * 60 * 10; //10 minutes
     static final long FETCH_TIMEOUT = 1000 * 60 * 3; //3 minutes
     static final long PREPARE_PLAYER_TIMEOUT = 1000 * 15; //10 sec

@@ -4,7 +4,7 @@ import android.os.CountDownTimer;
 
 public class SimpleTimer extends CountDownTimer {
 
-    private Listener mListener;
+    private final Listener mListener;
 
     public interface Listener {
         void onFinish();

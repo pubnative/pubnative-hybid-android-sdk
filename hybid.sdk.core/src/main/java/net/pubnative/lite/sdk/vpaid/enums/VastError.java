@@ -40,7 +40,7 @@ public enum VastError {
     VPAID(901),
     INTERACTIVE_CREATIVE(902);
 
-    private int value;
+    private final int value;
 
     VastError(int value) {
         this.value = value;

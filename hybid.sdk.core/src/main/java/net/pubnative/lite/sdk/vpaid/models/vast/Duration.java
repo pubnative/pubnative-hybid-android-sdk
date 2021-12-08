@@ -11,7 +11,7 @@ public class Duration {
 
     public String getText() {
         if (!TextUtils.isEmpty(text)){
-            return text;
+            return text.trim();
         } else {
             return "00:00:10";
         }

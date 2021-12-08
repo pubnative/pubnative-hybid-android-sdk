@@ -24,7 +24,6 @@ package net.pubnative.lite.sdk.rewarded.presenter;
 
 import android.text.TextUtils;
 
-import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
@@ -34,7 +33,6 @@ import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.json.JsonOperations;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPresenter.Listener {
@@ -194,6 +192,9 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             reportingEvent.setEventType(Reporting.EventType.ERROR);
             reportingEvent.setTimestamp(System.currentTimeMillis());
             reportingEvent.setAdFormat(Reporting.AdFormat.REWARDED);
+            if (getAd() != null && !TextUtils.isEmpty(getAd().getVast())) {
+                reportingEvent.setVast(getAd().getVast());
+            }
             mReportingController.reportEvent(reportingEvent);
         }
 

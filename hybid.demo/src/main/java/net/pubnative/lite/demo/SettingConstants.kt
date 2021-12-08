@@ -75,3 +75,8 @@ const val SETTINGS_KEY_ADMOB_REWARDED_AD_UNIT_ID = "admob_rewarded_ad_unit_id"
 const val SETTINGS_KEY_ADMOB_INTERSTITIAL_AD_UNIT_ID = "admob_interstitial_ad_unit_id"
 const val SETTINGS_KEY_ADMOB_INTERSTITIAL_VIDEO_AD_UNIT_ID = "admob_interstitial_video_ad_unit_id"
 const val SETTINGS_KEY_ADMOB_NATIVE_AD_UNIT_ID = "admob_native_ad_unit_id"
+
+const val SETTINGS_KEY_IRONSOURCE_APP_KEY = "ironsource_app_key"
+const val SETTINGS_KEY_IRONSOURCE_BANNER_AD_UNIT_ID = "ironsource_banner_ad_unit_id"
+const val SETTINGS_KEY_IRONSOURCE_INTERSTITIAL_AD_UNIT_ID = "ironsource_interstitial_ad_unit_id"
+const val SETTINGS_KEY_IRONSOURCE_REWARDED_AD_UNIT_ID = "ironsource_rewarded_ad_unit_id"

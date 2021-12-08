@@ -1,5 +1,6 @@
 package net.pubnative.lite.sdk.vpaid.helpers;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -7,7 +8,7 @@ import android.net.NetworkInfo;
 import net.pubnative.lite.sdk.vpaid.enums.ConnectionType;
 
 public class RequestParametersProvider {
-
+    @SuppressLint("MissingPermission")
     static int getConnectionType(Context context) {
         if (context == null) {
             return ConnectionType.UNKNOWN;

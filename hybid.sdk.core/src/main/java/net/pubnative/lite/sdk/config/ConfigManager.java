@@ -100,4 +100,8 @@ public class ConfigManager {
         editor.putLong(KEY_CONFIG_TIMESTAMP, configTimestamp);
         editor.apply();
     }
+
+    public FeatureResolver getFeatureResolver() {
+        return new FeatureResolver(mConfigModel);
+    }
 }

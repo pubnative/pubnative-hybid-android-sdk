@@ -22,9 +22,9 @@
 //
 package net.pubnative.lite.sdk.presenter;
 
+import android.text.TextUtils;
 import android.view.View;
 
-import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
@@ -171,6 +171,9 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
             reportingEvent.setEventType(Reporting.EventType.ERROR);
             reportingEvent.setTimestamp(String.valueOf(System.currentTimeMillis()));
             reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
+            if (getAd() != null && !TextUtils.isEmpty(getAd().getVast())) {
+                reportingEvent.setVast(getAd().getVast());
+            }
             mReportingController.reportEvent(reportingEvent);
         }
 

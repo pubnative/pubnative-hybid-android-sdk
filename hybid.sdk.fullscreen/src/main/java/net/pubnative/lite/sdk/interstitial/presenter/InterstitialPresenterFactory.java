@@ -27,6 +27,7 @@ import android.content.Context;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
+import net.pubnative.lite.sdk.models.RemoteConfigFeature;
 import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.Logger;
 
@@ -79,10 +80,16 @@ public class InterstitialPresenterFactory {
             case ApiAssetGroupType.MRAID_480x320:
             case ApiAssetGroupType.MRAID_1024x768:
             case ApiAssetGroupType.MRAID_768x1024: {
-                return new MraidInterstitialPresenter(mContext, ad, mZoneId, htmlSkipOffset);
+                return HyBid.getConfigManager() != null
+                        && !HyBid.getConfigManager().getFeatureResolver()
+                        .isRenderingSupported(RemoteConfigFeature.Rendering.MRAID) ?
+                        null : new MraidInterstitialPresenter(mContext, ad, mZoneId, htmlSkipOffset);
             }
             case ApiAssetGroupType.VAST_INTERSTITIAL: {
-                return new VastInterstitialPresenter(mContext, ad, mZoneId, videoSkipOffset);
+                return HyBid.getConfigManager() != null
+                        && !HyBid.getConfigManager().getFeatureResolver()
+                        .isRenderingSupported(RemoteConfigFeature.Rendering.VAST) ?
+                        null : new VastInterstitialPresenter(mContext, ad, mZoneId, videoSkipOffset);
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for interstitial ad format.");

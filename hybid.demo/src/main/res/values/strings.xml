@@ -19,6 +19,7 @@
     <string name="mopub_settings">MoPub Settings</string>
     <string name="dfp_settings">DFP Settings</string>
     <string name="admob_settings">Admob Settings</string>
+    <string name="ironsource_settings">IronSource Settings</string>
 
     <string name="load">Load</string>
     <string name="prepare">Prepare</string>
@@ -31,6 +32,7 @@
     <string name="mopub">MoPub</string>
     <string name="dfp">DFP</string>
     <string name="admob">Admob</string>
+    <string name="ironsource">IronSource</string>
 
     <string name="hint_mopub_banner_ad_unit_id">Banner Ad Unit ID</string>
     <string name="hint_mopub_medium_ad_unit_id">Medium Ad Unit ID</string>
@@ -59,6 +61,12 @@
     <string name="hint_admob_native_ad_unit_id">Native Ad Unit ID</string>
     <string name="hint_admob_rewarded_ad_unit_id">Rewarded Ad Unit ID</string>
     <string name="save_admob_settings">Save Admob settings</string>
+
+    <string name="hint_ironsource_app_key">App key</string>
+    <string name="hint_ironsource_banner_ad_unit_id">Banner Ad Unit ID</string>
+    <string name="hint_ironsource_interstitial_ad_unit_id">Interstitial Ad Unit ID</string>
+    <string name="hint_ironsource_rewarded_ad_unit_id">Rewarded Ad Unit ID</string>
+    <string name="save_ironsouce_settings">Save IronSource settings</string>
 
     <string name="hint_pn_apptoken">App token</string>
     <string name="hint_pn_age">Age</string>
@@ -112,6 +120,10 @@
     <string name="admob_medium_video">Admob Medium Video</string>
     <string name="admob_leaderboard">Admob Leaderboard</string>
     <string name="admob_rewarded">Admob Rewarded Video</string>
+
+    <string name="ironsource_banner">IronSource Banner</string>
+    <string name="ironsource_interstitial">IronSource Interstitial</string>
+    <string name="ironsource_rewarded">IronSource Rewarded Video</string>
 
     <string name="pn_owned_consent">PN Owned</string>
     <string name="pn_accept_consent">Accept consent</string>

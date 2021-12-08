@@ -9,10 +9,10 @@ public class Ad {
     private String id;
 
     @Attribute
-    private int sequence;
+    private String sequence;
 
     @Attribute
-    private boolean conditionalAd;
+    private String conditionalAd;
 
     @Attribute
     private String adType;
@@ -27,11 +27,11 @@ public class Ad {
         return id;
     }
 
-    public int getSequence() {
+    public String getSequence() {
         return sequence;
     }
 
-    public boolean getConditionalAd() {
+    public String getConditionalAd() {
         return conditionalAd;
     }
 

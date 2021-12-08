@@ -6,18 +6,18 @@ public class VASTtag {
 
     private final String vastTagURL;
 
-    String ad_id;
-    String bundle;
-    String connection;
-    String dnt;
-    String lat;
-    String lon;
-    String user_agent;
-    String width;
-    String height;
-    String gdpr;
-    String gdpr_consent;
-    String us_privacy;
+    final String ad_id;
+    final String bundle;
+    final String connection;
+    final String dnt;
+    final String lat;
+    final String lon;
+    final String user_agent;
+    final String width;
+    final String height;
+    final String gdpr;
+    final String gdpr_consent;
+    final String us_privacy;
 
     private String formatted_url;
 

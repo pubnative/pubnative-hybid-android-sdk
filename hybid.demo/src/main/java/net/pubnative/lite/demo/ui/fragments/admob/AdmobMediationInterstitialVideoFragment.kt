@@ -16,7 +16,8 @@ import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
 
-class AdmobMediationInterstitialVideoFragment : Fragment() {
+class AdmobMediationInterstitialVideoFragment :
+    Fragment(R.layout.fragment_admob_interstitial_video) {
 
     val TAG = AdmobMediationInterstitialVideoFragment::class.java.simpleName
 
@@ -24,8 +25,6 @@ class AdmobMediationInterstitialVideoFragment : Fragment() {
     private lateinit var loadButton: Button
     private lateinit var showButton: Button
     private lateinit var errorView: TextView
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_admob_interstitial_video, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -35,7 +34,8 @@ class AdmobMediationInterstitialVideoFragment : Fragment() {
         showButton = view.findViewById(R.id.button_show)
         showButton.isEnabled = false
 
-        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().admobInterstitialVideoAdUnitId
+        val adUnitId = SettingsManager.getInstance(requireActivity())
+            .getSettings().admobInterstitialVideoAdUnitId
 
         loadButton.setOnClickListener {
             errorView.text = ""
@@ -47,7 +47,12 @@ class AdmobMediationInterstitialVideoFragment : Fragment() {
             admobInterstitial?.show(requireActivity())
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
+        errorView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                errorView.text.toString()
+            )
+        }
     }
 
     // ---------------- Admob Interstitial Ad Load Callback ---------------------
@@ -66,6 +71,7 @@ class AdmobMediationInterstitialVideoFragment : Fragment() {
             Log.d(TAG, "onAdFailedToLoad")
             displayLogs()
             errorView.text = error.message
+            showButton.isEnabled = false
         }
     }
 
@@ -84,6 +90,7 @@ class AdmobMediationInterstitialVideoFragment : Fragment() {
         override fun onAdDismissedFullScreenContent() {
             super.onAdDismissedFullScreenContent()
             Log.d(TAG, "onAdDismissedFullScreenContent")
+            showButton.isEnabled = false
         }
 
         override fun onAdImpression() {

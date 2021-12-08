@@ -21,10 +21,12 @@ public enum HyBidErrorCode {
     ERROR_TRACKING_JS(18, "Error reporting JS tracker"),
     INVALID_URL(19, "PNApiClient - Error: invalid request URL"),
     INTERNAL_ERROR(20, "An internal error has occurred in the HyBid SDK"),
-    UNKNOWN_ERROR(21, "An unknown error has occurred in the HyBid SDK");
+    UNKNOWN_ERROR(21, "An unknown error has occurred in the HyBid SDK"),
+    DISABLED_FORMAT(22, "The requested ad format has been disabled"),
+    DISABLED_RENDERING_ENGINE(23, "The requested rendering engine has been disabled");
 
-    private int code;
-    private String message;
+    private final int code;
+    private final String message;
 
     HyBidErrorCode(int code, String message) {
         this.code = code;

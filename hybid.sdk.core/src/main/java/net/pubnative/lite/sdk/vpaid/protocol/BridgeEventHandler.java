@@ -18,9 +18,9 @@ public interface BridgeEventHandler {
 
     void trackError(String message);
 
-    void postEvent(String eventType);
+    void postEvent(String eventType, boolean ignoreIfExist);
 
-    void postEvent(String eventType, int value);
+    void postEvent(String eventType, int value, boolean ignoreIfExist);
 
     void onDurationChanged();
 

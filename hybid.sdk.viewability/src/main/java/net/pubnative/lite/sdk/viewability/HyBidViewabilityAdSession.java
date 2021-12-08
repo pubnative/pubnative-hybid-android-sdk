@@ -9,20 +9,15 @@ import com.iab.omid.library.pubnativenet.adsession.AdSession;
 import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
 import com.iab.omid.library.pubnativenet.adsession.VerificationScriptResource;
 
-import net.pubnative.lite.sdk.analytics.Reporting;
-import net.pubnative.lite.sdk.analytics.ReportingEvent;
-
-import org.json.JSONException;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class HyBidViewabilityAdSession {
     protected AdSession mAdSession;
     protected AdEvents mAdEvents;
-    protected List<VerificationScriptResource> mVerificationScriptResources = new ArrayList<>();
+    protected final List<VerificationScriptResource> mVerificationScriptResources = new ArrayList<>();
 
-    ViewabilityManager viewabilityManager;
+    final ViewabilityManager viewabilityManager;
 
     public HyBidViewabilityAdSession(ViewabilityManager viewabilityManager) {
         this.viewabilityManager = viewabilityManager;
@@ -50,10 +45,7 @@ public abstract class HyBidViewabilityAdSession {
     }
 
     public boolean isVerificationResourcesPresent() {
-        if (mVerificationScriptResources != null && !mVerificationScriptResources.isEmpty()) {
-            return true;
-        }
-        return false;
+        return mVerificationScriptResources != null && !mVerificationScriptResources.isEmpty();
     }
 
     public void fireLoaded() {

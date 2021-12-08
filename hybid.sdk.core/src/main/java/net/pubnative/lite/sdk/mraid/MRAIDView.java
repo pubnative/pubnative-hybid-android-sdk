@@ -106,6 +106,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -119,7 +120,6 @@ public class MRAIDView extends RelativeLayout {
     // used to differentiate logging
     private static final String MRAID_LOG_TAG = MRAIDView.class.getSimpleName();
     private Integer mSkipTimeMillis = -1;
-    private SimpleTimer mExpirationTimer;
 
     // used to define state of the MRAID advertisement
     @Retention(RetentionPolicy.SOURCE)
@@ -168,7 +168,7 @@ public class MRAIDView extends RelativeLayout {
     // UI elements
 
     // main WebView stores ad in default state
-    protected WebView webView;
+    protected final WebView webView;
 
     // some ads have a second part that loads independently?
     private WebView webViewPart2;
@@ -176,7 +176,7 @@ public class MRAIDView extends RelativeLayout {
     // reference to the webview currently being presented to the user
     private WebView currentWebView;
 
-    private ViewGroup contentInfo;
+    private final ViewGroup contentInfo;
 
     private final MRAIDWebChromeClient mraidWebChromeClient;
     private final MRAIDWebViewClient mraidWebViewClient;
@@ -203,8 +203,8 @@ public class MRAIDView extends RelativeLayout {
     private boolean contentInfoAdded = false;
     private boolean webViewLoaded = false;
 
-    private HyBidViewabilityWebAdSession mViewabilityAdSession;
-    private List<HyBidViewabilityFriendlyObstruction> mViewabilityFriendlyObstructions;
+    private final HyBidViewabilityWebAdSession mViewabilityAdSession;
+    private final List<HyBidViewabilityFriendlyObstruction> mViewabilityFriendlyObstructions;
 
     private final boolean isInterstitial;
 
@@ -229,7 +229,7 @@ public class MRAIDView extends RelativeLayout {
     private final MRAIDNativeFeatureManager nativeFeatureManager;
 
     // listeners
-    protected MRAIDViewListener listener;
+    protected final MRAIDViewListener listener;
     private final MRAIDNativeFeatureListener nativeFeatureListener;
     private MRAIDViewCloseLayoutListener closeLayoutListener;
 
@@ -244,8 +244,8 @@ public class MRAIDView extends RelativeLayout {
         public int height;
     }
 
-    private Size maxSize;
-    private Size screenSize;
+    private final Size maxSize;
+    private final Size screenSize;
     // state to help set positions and sizes
     protected boolean isPageFinished;
     protected boolean isLaidOut;
@@ -271,7 +271,7 @@ public class MRAIDView extends RelativeLayout {
     // into webViewPart2 (2nd part of 2-part expanded ad).
     private String mraidJs;
 
-    protected Handler handler;
+    protected final Handler handler;
 
     public MRAIDView(
             Context context,
@@ -902,7 +902,7 @@ public class MRAIDView extends RelativeLayout {
 
     private String getStringFromFileUrl(String fileURL) {
 
-        StringBuffer mLine = new StringBuffer();
+        StringBuilder mLine = new StringBuilder();
         String[] urlElements = fileURL.split("/");
         if (urlElements[3].equals("android_asset")) {
             try {
@@ -1263,7 +1263,7 @@ public class MRAIDView extends RelativeLayout {
      * These methods provide the means for JavaScript code to talk to native
      * code.
      **************************************************************************/
-    private int injections = 0;
+    private final int injections = 0;
 
     private void injectMraidJs(final WebView wv) {
         if (TextUtils.isEmpty(mraidJs)) {
@@ -1280,7 +1280,7 @@ public class MRAIDView extends RelativeLayout {
             byte[] mraidjsBytes = Base64.decode(str, Base64.DEFAULT);
             mraidJs = new String(mraidjsBytes);
         }
-        return new ByteArrayInputStream(mraidJs.getBytes(Charset.forName("UTF-8")));
+        return new ByteArrayInputStream(mraidJs.getBytes(StandardCharsets.UTF_8));
     }
 
     private void injectJavaScript(String js) {
@@ -1685,7 +1685,6 @@ public class MRAIDView extends RelativeLayout {
             MRAIDLog.d(MRAID_LOG_TAG, "shouldOverrideUrlLoading: " + url);
             if (url.startsWith("mraid://")) {
                 parseCommandUrl(url);
-                return true;
             } else {
                 // Fix for Verve custom creatives
                 if (isVerveCustomExpand(url)) {
@@ -1697,8 +1696,8 @@ public class MRAIDView extends RelativeLayout {
                         e.printStackTrace();
                     }
                 }
-                return true;
             }
+            return true;
         }
 
         @Override
@@ -1733,11 +1732,7 @@ public class MRAIDView extends RelativeLayout {
             return false;
         }
 
-        if (url.contains("tags-prod.vrvm.com") && url.contains("type=expandable")) {
-            return true;
-        }
-
-        return false;
+        return url.contains("tags-prod.vrvm.com") && url.contains("type=expandable");
     }
 
     /**************************************************************************
@@ -2047,7 +2042,7 @@ public class MRAIDView extends RelativeLayout {
 
     private void startSkipTimer() {
         if (mSkipTimeMillis > 0) {
-            mExpirationTimer = new SimpleTimer(mSkipTimeMillis, new SimpleTimer.Listener() {
+            SimpleTimer mExpirationTimer = new SimpleTimer(mSkipTimeMillis, new SimpleTimer.Listener() {
                 @Override
                 public void onFinish() {
                     listener.mraidShowCloseButton();

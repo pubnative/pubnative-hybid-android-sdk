@@ -8,9 +8,11 @@ import android.widget.FrameLayout
 import android.widget.RelativeLayout
 import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.sdk.models.AdSize
 import net.pubnative.lite.sdk.mraid.*
 import net.pubnative.lite.sdk.utils.Logger
 import net.pubnative.lite.sdk.utils.UrlHandler
+import net.pubnative.lite.sdk.views.HyBidAdView
 import net.pubnative.lite.sdk.views.HyBidMRectAdView
 import net.pubnative.lite.sdk.views.PNAdView
 
@@ -22,7 +24,7 @@ class SignalDataMRectViewHolder(itemView: View) : RecyclerView.ViewHolder(itemVi
             val container = itemView.findViewById<FrameLayout>(R.id.mrect_container)
             container.removeAllViews()
 
-            val mRect = HyBidMRectAdView(itemView.context)
+            val mRect = HyBidAdView(itemView.context, AdSize.SIZE_300x250)
 
             val adLayoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             adLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)

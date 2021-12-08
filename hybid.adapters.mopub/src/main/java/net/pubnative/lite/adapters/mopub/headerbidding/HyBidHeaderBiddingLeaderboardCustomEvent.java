@@ -131,7 +131,7 @@ public class HyBidHeaderBiddingLeaderboardCustomEvent extends BaseAd implements 
     @Override
     public void onAdClicked(AdPresenter adPresenter) {
         MoPubLog.log(MoPubLog.AdapterLogEvent.CLICKED, TAG);
-        if (mLoadListener != null) {
+        if (mInteractionListener != null) {
             mInteractionListener.onAdClicked();
         }
     }

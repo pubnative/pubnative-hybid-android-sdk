@@ -13,7 +13,6 @@ import org.json.JSONObject;
 
 import java.util.Calendar;
 import java.util.Locale;
-import java.util.Map;
 
 public class DiagnosticsManager {
     private static final String TAG = DiagnosticsManager.class.getSimpleName();

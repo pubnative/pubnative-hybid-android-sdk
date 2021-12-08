@@ -9,6 +9,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:layout_centerVertical="true"
+        android:contentDescription="@string/content_info_icon"
         android:paddingTop="2dp"
         android:paddingBottom="2dp"
         android:src="@null" />

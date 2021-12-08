@@ -35,8 +35,7 @@ public class VgiIdManager {
 
     private final Context mContext;
     private final SharedPreferences mPreferences;
-    private IdModel mIdModel;
-    private String mAppToken;
+    private final String mAppToken;
 
     public VgiIdManager(Context context) {
         mContext = context.getApplicationContext();
@@ -49,7 +48,7 @@ public class VgiIdManager {
         DeviceInfo deviceInfo = HyBid.getDeviceInfo();
         HyBidLocationManager locationManager = HyBid.getLocationManager();
 
-        mIdModel = new IdModel();
+        IdModel mIdModel = new IdModel();
 
         mIdModel.apps = getApps(userDataManager, deviceInfo);
         mIdModel.device = getDevice(deviceInfo);
@@ -67,7 +66,11 @@ public class VgiIdManager {
             try {
                 String decryptedVgiIdString = PNCrypto.decryptString(vgiId, mAppToken);
 
-                vgiIdJson = new JSONObject(decryptedVgiIdString);
+                if (decryptedVgiIdString != null) {
+                    vgiIdJson = new JSONObject(decryptedVgiIdString);
+                } else {
+                    vgiIdJson = new JSONObject();
+                }
                 vgiIdModel = new IdModel(vgiIdJson);
             } catch (Exception e) {
                 Logger.e(TAG, e.getMessage());
@@ -121,11 +124,9 @@ public class VgiIdManager {
         IdBattery idBattery = new IdBattery();
         Long batteryCapacity = getBatteryCapacity(mContext);
         if (batteryCapacity != -1) {
-            String capacityString = String.valueOf(batteryCapacity);
-            idBattery.capacity = capacityString;
+            idBattery.capacity = String.valueOf(batteryCapacity);
         }
-        Boolean batteryCharging = isBatteryCharging(mContext);
-        idBattery.charging = batteryCharging;
+        idBattery.charging = isBatteryCharging(mContext);
 
         idDevice.os = idOs;
         idDevice.manufacture = Build.MANUFACTURER;
@@ -178,7 +179,7 @@ public class VgiIdManager {
                 if (chargeCounter == Integer.MIN_VALUE || capacity == Integer.MIN_VALUE)
                     return -1;
 
-                return (chargeCounter / capacity) * 100;
+                return (chargeCounter / capacity) * 100L;
             }
         }
         return -1;

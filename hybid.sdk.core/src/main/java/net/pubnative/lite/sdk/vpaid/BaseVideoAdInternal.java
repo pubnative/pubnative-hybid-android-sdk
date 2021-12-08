@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeVideoAdSession;
 import net.pubnative.lite.sdk.vpaid.enums.AdState;
@@ -18,7 +19,6 @@ import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.AdSpotDimensions;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.response.VastProcessor;
-import net.pubnative.lite.sdk.vpaid.utils.Utils;
 
 abstract class BaseVideoAdInternal {
 
@@ -37,16 +37,18 @@ abstract class BaseVideoAdInternal {
     private VideoAdController mAdController;
     private SimpleTimer mFetcherTimer;
     private SimpleTimer mPrepareTimer;
-    private String mVastData;
+    private final String mVastData;
 
-    private Boolean isInterstitial = false;
-    private boolean isFullscreen = false;
+    private final boolean isInterstitial;
+    private final boolean isFullscreen;
 
     private VideoAdCacheItem mCacheItem;
 
-    private HyBidViewabilityNativeVideoAdSession mViewabilityAdSession;
+    private final HyBidViewabilityNativeVideoAdSession mViewabilityAdSession;
 
-    BaseVideoAdInternal(Context context, String data, boolean isInterstitial, boolean isFullscreen) throws Exception {
+    AdPresenter.ImpressionListener mImpressionListener;
+
+    BaseVideoAdInternal(Context context, String data, boolean isInterstitial, boolean isFullscreen, AdPresenter.ImpressionListener impressionListener) throws Exception {
         if (context == null || TextUtils.isEmpty(data)) {
             throw new HyBidError(HyBidErrorCode.VAST_PLAYER_ERROR);
         }
@@ -56,9 +58,9 @@ abstract class BaseVideoAdInternal {
         mAssetsLoader = new AssetsLoader();
         this.isInterstitial = isInterstitial;
         this.isFullscreen = isFullscreen;
-        Utils.init(context);
 
         mViewabilityAdSession = new HyBidViewabilityNativeVideoAdSession(HyBid.getViewabilityManager());
+        this.mImpressionListener = impressionListener;
     }
 
     abstract void dismiss();
@@ -248,7 +250,7 @@ abstract class BaseVideoAdInternal {
         if (adParams.isVpaid()) {
             mAdController = new VideoAdControllerVpaid(this, adParams, getAdSpotDimensions(), vastFileContent, getViewabilityAdSession());
         } else {
-            mAdController = new VideoAdControllerVast(this, adParams, getViewabilityAdSession(), isFullscreen);
+            mAdController = new VideoAdControllerVast(this, adParams, getViewabilityAdSession(), isFullscreen, this.mImpressionListener);
         }
         if (mCacheItem != null) {
             prepareAdController(mCacheItem.getVideoFilePath(), mCacheItem.getEndCardFilePath());

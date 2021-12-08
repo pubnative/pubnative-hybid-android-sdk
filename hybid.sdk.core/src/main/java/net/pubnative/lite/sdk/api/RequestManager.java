@@ -26,17 +26,21 @@ import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.AdCache;
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.HyBidError;
+import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.config.ConfigManager;
 import net.pubnative.lite.sdk.DiagnosticConstants;
+import net.pubnative.lite.sdk.config.FeatureResolver;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdRequestFactory;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.models.IntegrationType;
+import net.pubnative.lite.sdk.models.RemoteConfigFeature;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.HeaderBiddingUtils;
 import net.pubnative.lite.sdk.utils.Logger;
@@ -76,15 +80,20 @@ public class RequestManager {
     private boolean mIsDestroyed;
     private AdSize mAdSize;
     private final JSONObject mPlacementParams;
-    private final boolean mIsRewarded = false;
     private boolean mAutoCacheOnLoad = true;
+    private boolean mCacheStarted = false;
+    private boolean mCacheFinished = false;
 
-    JSONObject jsonCacheParams;
+    final JSONObject jsonCacheParams;
     private Long mRequestTimeMilliseconds = 0L;
     private Long mCacheTimeMilliseconds = 0L;
 
     public RequestManager() {
-        this(HyBid.getApiClient(), HyBid.getAdCache(), HyBid.getVideoAdCache(), HyBid.getConfigManager(), new AdRequestFactory(), HyBid.getReportingController(), new PNInitializationHelper());
+        this(null);
+    }
+
+    public RequestManager(AdSize adSize) {
+        this(HyBid.getApiClient(), HyBid.getAdCache(), HyBid.getVideoAdCache(), HyBid.getConfigManager(), new AdRequestFactory(), HyBid.getReportingController(), adSize, new PNInitializationHelper());
     }
 
     RequestManager(PNApiClient apiClient,
@@ -93,6 +102,7 @@ public class RequestManager {
                    ConfigManager configManager,
                    AdRequestFactory adRequestFactory,
                    ReportingController reportingController,
+                   AdSize adSize,
                    PNInitializationHelper initializationHelper) {
         mApiClient = apiClient;
         mAdCache = adCache;
@@ -101,7 +111,11 @@ public class RequestManager {
         mAdRequestFactory = adRequestFactory;
         mInitializationHelper = initializationHelper;
         mPlacementParams = new JSONObject();
-        mAdSize = AdSize.SIZE_320x50;
+        if (adSize == null) {
+            mAdSize = AdSize.SIZE_320x50;
+        } else {
+            mAdSize = adSize;
+        }
         JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_AD_SIZE, mAdSize.toString());
         JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_INTEGRATION_TYPE, IntegrationType.HEADER_BIDDING.getCode());
         mConfigManager = configManager;
@@ -155,29 +169,50 @@ public class RequestManager {
             return;
         }
 
-        //Disable refresh until we have a proper mechanism to handle apps with no config.
-        /*if (mConfigManager != null) {
-            mConfigManager.refreshConfig();
-        }*/
-
-        mAdRequestFactory.createAdRequest(mZoneId, getAdSize(), isRewarded(), new AdRequestFactory.Callback() {
-            @Override
-            public void onRequestCreated(AdRequest adRequest) {
-                requestAdFromApi(adRequest);
-                if (adRequest != null) {
-                    try {
-                        jsonCacheParams.put(Reporting.Key.AD_REQUEST, adRequest.toString());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-
+        if (!isFormatEnabled()) {
+            if (mRequestListener != null) {
+                mRequestListener.onRequestFail(new HyBidError(HyBidErrorCode.DISABLED_FORMAT));
             }
-        });
+        } else {
+            mCacheStarted = false;
+            mCacheFinished = false;
+
+            mAdRequestFactory.createAdRequest(mZoneId, getAdSize(), isRewarded(), new AdRequestFactory.Callback() {
+                @Override
+                public void onRequestCreated(AdRequest adRequest) {
+                    requestAdFromApi(adRequest);
+                    if (adRequest != null) {
+                        try {
+                            jsonCacheParams.put(Reporting.Key.AD_REQUEST, adRequest.toString());
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                }
+            });
+        }
     }
 
     public PNInitializationHelper getInitializationHelper() {
         return mInitializationHelper;
+    }
+
+    private boolean isFormatEnabled() {
+        if (mConfigManager != null && mConfigManager.getConfig() != null) {
+            FeatureResolver featureResolver = mConfigManager.getFeatureResolver();
+            if (this instanceof BannerRequestManager || this instanceof MRectRequestManager || this instanceof LeaderboardRequestManager) {
+                return featureResolver.isAdFormatEnabled(RemoteConfigFeature.AdFormat.BANNER);
+            } else if (this instanceof InterstitialRequestManager) {
+                return featureResolver.isAdFormatEnabled(RemoteConfigFeature.AdFormat.INTERSTITIAL);
+            } else if (this instanceof RewardedRequestManager) {
+                return featureResolver.isAdFormatEnabled(RemoteConfigFeature.AdFormat.REWARDED);
+            } else {
+                return true;
+            }
+        } else {
+            return true;
+        }
     }
 
     void requestAdFromApi(final AdRequest adRequest) {
@@ -220,10 +255,10 @@ public class RequestManager {
     }
 
     private void processAd(final AdRequest adRequest, final Ad ad) {
-        if (mAdCache == null) {
+        if (mAdCache == null || mAdCache != HyBid.getAdCache()) {
             mAdCache = HyBid.getAdCache();
         }
-        if (mVideoCache == null) {
+        if (mVideoCache == null || mVideoCache != HyBid.getVideoAdCache()) {
             mVideoCache = HyBid.getVideoAdCache();
         }
         ad.setZoneId(adRequest.zoneid);
@@ -250,7 +285,9 @@ public class RequestManager {
     }
 
     public void cacheAd(final Ad ad) {
-        if (ad != null && !TextUtils.isEmpty(ad.getVast())) {
+        if (ad != null && !TextUtils.isEmpty(ad.getVast()) && !mCacheStarted && !mCacheFinished) {
+            mCacheStarted = true;
+            mCacheFinished = false;
             try {
                 jsonCacheParams.put(Reporting.Key.AD_TYPE, "VAST");
                 jsonCacheParams.put(Reporting.Key.VAST, ad.getVast());
@@ -275,13 +312,15 @@ public class RequestManager {
                     try {
                         jsonCacheParams.put(Reporting.Key.CACHE_TIME, String.valueOf(mCacheTimeMilliseconds - mRequestTimeMilliseconds));
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                        Logger.w(TAG, e.getMessage());
                     }
 
                     reportAdCache();
 
                     VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardFilePath);
                     mVideoCache.put(ad.getZoneId(), adCacheItem);
+                    mCacheStarted = false;
+                    mCacheFinished = true;
                     if (mAutoCacheOnLoad && mRequestListener != null) {
                         mRequestListener.onRequestSuccess(ad);
                     }
@@ -294,7 +333,9 @@ public class RequestManager {
                     }
 
                     Logger.w(TAG, error.getMessage());
-                    if (!mAutoCacheOnLoad && mRequestListener != null) {
+                    mCacheStarted = false;
+                    mCacheFinished = false;
+                    if (mAutoCacheOnLoad && mRequestListener != null) {
                         mRequestListener.onRequestFail(error);
                     }
                 }
@@ -318,7 +359,7 @@ public class RequestManager {
             reportingEvent.setEventType(Reporting.EventType.REQUEST);
             reportingEvent.setTimestamp(String.valueOf(System.currentTimeMillis()));
 
-            String adSize = null;
+            String adSize;
             if (getAdSize() != null) {
                 adSize = getAdSize().toString();
                 reportingEvent.setAdSize(adSize);
@@ -333,7 +374,7 @@ public class RequestManager {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.RESPONSE);
             reportingEvent.setTimestamp(String.valueOf(System.currentTimeMillis()));
-            String adSize = null;
+            String adSize;
             if (getAdSize() != null) {
                 adSize = getAdSize().toString();
                 reportingEvent.setAdSize(adSize);
@@ -373,6 +414,7 @@ public class RequestManager {
     }
 
     public boolean isRewarded() {
+        boolean mIsRewarded = false;
         return mIsRewarded;
     }
 
@@ -390,11 +432,7 @@ public class RequestManager {
         if (getAdSize() != null) {
             JsonOperations.putJsonString(finalParams, DiagnosticConstants.KEY_AD_SIZE, getAdSize().toString());
         }
-        if (HyBid.isViewabilityMeasurementActivated() && HyBid.getViewabilityManager() != null) {
-            JsonOperations.putJsonBoolean(finalParams, DiagnosticConstants.KEY_OM_ENABLED, true);
-        } else {
-            JsonOperations.putJsonBoolean(finalParams, DiagnosticConstants.KEY_OM_ENABLED, false);
-        }
+        JsonOperations.putJsonBoolean(finalParams, DiagnosticConstants.KEY_OM_ENABLED, HyBid.isViewabilityMeasurementActivated() && HyBid.getViewabilityManager() != null);
         if (mApiClient != null) {
             JSONObject apiClientParams = mApiClient.getPlacementParams();
             if (apiClientParams != null) {

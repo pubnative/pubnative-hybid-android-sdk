@@ -90,8 +90,6 @@ public class UserDataManager {
                 switch (mPreferences.getInt(KEY_GDPR_CONSENT_STATE, CONSENT_STATE_DENIED)) {
                     case CONSENT_STATE_ACCEPTED:
                         return true;
-                    case CONSENT_STATE_DENIED:
-                        return false;
                     default:
                         return false;
                 }
@@ -305,11 +303,7 @@ public class UserDataManager {
         String usPrivacyString = getIABUSPrivacyString();
         if (!TextUtils.isEmpty(usPrivacyString) && usPrivacyString.length() >= 3) {
             char optOutChar = usPrivacyString.charAt(2);
-            if (optOutChar == 'y' || optOutChar == 'Y') {
-                return true;
-            } else {
-                return false;
-            }
+            return optOutChar == 'y' || optOutChar == 'Y';
         } else {
             return false;
         }

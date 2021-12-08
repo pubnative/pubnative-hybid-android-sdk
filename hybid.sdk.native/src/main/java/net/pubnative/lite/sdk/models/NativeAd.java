@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 public class NativeAd implements ImpressionTracker.Listener {
-    private static String TAG = NativeAd.class.getSimpleName();
+    private static final String TAG = NativeAd.class.getSimpleName();
 
     /**
      * Interface definition for callbacks to be invoked when impression confirmed/failed, ad clicked/clickfailed

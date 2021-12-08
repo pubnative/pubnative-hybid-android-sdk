@@ -155,7 +155,7 @@ public class TrackingManager {
     //----------------------------------------------------------------------------------------------
 
     protected static List<TrackingUrlModel> getList(Context context, String key) {
-        List<TrackingUrlModel> result = new ArrayList<TrackingUrlModel>();
+        List<TrackingUrlModel> result = new ArrayList<>();
         SharedPreferences preferences = getSharedPreferences(context);
         String sharedPendingString = preferences.getString(key, null);
         if (sharedPendingString != null) {

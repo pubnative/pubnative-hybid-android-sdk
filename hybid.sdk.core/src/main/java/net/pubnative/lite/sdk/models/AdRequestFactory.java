@@ -31,7 +31,6 @@ import net.pubnative.lite.sdk.DisplayManager;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.config.ConfigManager;
-import net.pubnative.lite.sdk.core.BuildConfig;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.Logger;
@@ -53,9 +52,9 @@ public class AdRequestFactory {
     }
 
     private DeviceInfo mDeviceInfo;
-    private HyBidLocationManager mLocationManager;
+    private final HyBidLocationManager mLocationManager;
     private UserDataManager mUserDataManager;
-    private ConfigManager mConfigManager;
+    private final ConfigManager mConfigManager;
     private final DisplayManager mDisplayManager;
     private IntegrationType mIntegrationType = IntegrationType.HEADER_BIDDING;
     private boolean mIsRewarded;
@@ -134,12 +133,14 @@ public class AdRequestFactory {
         }
 
         String usPrivacyString = mUserDataManager.getIABUSPrivacyString();
-        if (!TextUtils.isEmpty(usPrivacyString)) {
+        if (!TextUtils.isEmpty(usPrivacyString)
+                && mConfigManager.getFeatureResolver().isUserConsentSupported(RemoteConfigFeature.UserConsent.CCPA)) {
             adRequest.usprivacy = usPrivacyString;
         }
 
         String gdprConsentString = mUserDataManager.getIABGDPRConsentString();
-        if (!TextUtils.isEmpty(gdprConsentString)) {
+        if (!TextUtils.isEmpty(gdprConsentString)
+                && mConfigManager.getFeatureResolver().isUserConsentSupported(RemoteConfigFeature.UserConsent.GDPR)) {
             adRequest.userconsent = gdprConsentString;
         }
 
@@ -187,7 +188,7 @@ public class AdRequestFactory {
         if (mLocationManager != null) {
             Location location = mLocationManager.getUserLocation();
             if (location != null && !HyBid.isCoppaEnabled() && !limitTracking
-                    && !mUserDataManager.isConsentDenied() && HyBid.isLocationTrackingEnabled()) {
+                    && !mUserDataManager.isConsentDenied() && !isCCPAOptOut && HyBid.isLocationTrackingEnabled()) {
                 adRequest.latitude = String.format(Locale.ENGLISH, "%.6f", location.getLatitude());
                 adRequest.longitude = String.format(Locale.ENGLISH, "%.6f", location.getLongitude());
             }

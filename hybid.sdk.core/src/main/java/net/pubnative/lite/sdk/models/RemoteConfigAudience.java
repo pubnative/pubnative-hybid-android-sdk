@@ -5,8 +5,6 @@ import net.pubnative.lite.sdk.utils.json.JsonModel;
 
 import org.json.JSONObject;
 
-import java.util.Map;
-
 public class RemoteConfigAudience extends JsonModel {
     @BindField
     public String name;

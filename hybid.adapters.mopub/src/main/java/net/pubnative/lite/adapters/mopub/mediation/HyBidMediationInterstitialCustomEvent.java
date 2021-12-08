@@ -106,7 +106,7 @@ public class HyBidMediationInterstitialCustomEvent extends BaseAd implements HyB
         return mZoneID;
     }
 
-    //--------------------------------- PNInterstitialAd Callbacks ---------------------------------
+    //-------------------------------- HyBidInterstitialAd Callbacks -------------------------------
     @Override
     public void onInterstitialLoaded() {
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_SUCCESS, TAG);

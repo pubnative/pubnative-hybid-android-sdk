@@ -30,7 +30,6 @@ import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.webkit.WebView;
 
@@ -94,7 +93,6 @@ public class DeviceInfo {
     private String mAdvertisingIdMd5;
     private String mAdvertisingIdSha1;
     private boolean mLimitTracking = false;
-    private final ConnectivityManager mConnectivityManager;
     private Listener mListener;
     private String deviceHeight;
     private String deviceWidth;
@@ -102,7 +100,6 @@ public class DeviceInfo {
 
     public DeviceInfo(Context context) {
         mContext = context.getApplicationContext();
-        mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         getDeviceScreenDimensions();
     }
 

@@ -24,8 +24,10 @@ package net.pubnative.lite.sdk.banner.presenter;
 
 import android.content.Context;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
+import net.pubnative.lite.sdk.models.RemoteConfigFeature;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.presenter.PresenterFactory;
 import net.pubnative.lite.sdk.utils.Logger;
@@ -56,10 +58,16 @@ public class BannerPresenterFactory extends PresenterFactory {
             case ApiAssetGroupType.MRAID_728x90:
             case ApiAssetGroupType.MRAID_768x1024:
             case ApiAssetGroupType.MRAID_1024x768: {
-                return new MraidAdPresenter(getContext(), ad);
+                return HyBid.getConfigManager() != null
+                        && !HyBid.getConfigManager().getFeatureResolver()
+                        .isRenderingSupported(RemoteConfigFeature.Rendering.MRAID) ?
+                        null : new MraidAdPresenter(getContext(), ad);
             }
             case ApiAssetGroupType.VAST_MRECT: {
-                return new VastAdPresenter(getContext(), ad);
+                return HyBid.getConfigManager() != null
+                        && !HyBid.getConfigManager().getFeatureResolver()
+                        .isRenderingSupported(RemoteConfigFeature.Rendering.VAST) ?
+                        null : new VastAdPresenter(getContext(), ad);
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for banner ad format.");

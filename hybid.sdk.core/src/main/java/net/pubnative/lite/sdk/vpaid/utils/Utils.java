@@ -1,5 +1,6 @@
 package net.pubnative.lite.sdk.vpaid.utils;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.media.AudioManager;
@@ -25,13 +26,7 @@ public class Utils {
 
     private static final String TAG = Utils.class.getSimpleName();
 
-    private static Context sContext;
-
     private static boolean debugMode = true;
-
-    public static void init(Context context) {
-        sContext = context;
-    }
 
     public static void setDebugMode(boolean mode) {
         debugMode = mode;
@@ -41,15 +36,20 @@ public class Utils {
         return debugMode;
     }
 
-    public static boolean isOnline() {
+    @SuppressLint("MissingPermission")
+    public static boolean isOnline(Context context) {
+        if (context == null) {
+            return false;
+        }
+
         try {
-            ConnectivityManager connectivityManager =
-                    (ConnectivityManager) sContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-            if (connectivityManager == null) {
-                return false;
-            }
-            NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
-            return activeNetwork != null && activeNetwork.isConnected() && activeNetwork.isAvailable();
+                ConnectivityManager connectivityManager =
+                        (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                if (connectivityManager == null) {
+                    return false;
+                }
+                NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+                return activeNetwork != null && activeNetwork.isConnected() && activeNetwork.isAvailable();
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -63,26 +63,26 @@ public class Utils {
                 || Build.MANUFACTURER.contains("Genymotion");
     }
 
-    public static float getSystemVolume() {
-        if (sContext == null) {
+    public static float getSystemVolume(Context context) {
+        if (context == null) {
             return 1.0f;
         }
-        AudioManager am = (AudioManager) sContext.getSystemService(Context.AUDIO_SERVICE);
+        AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         if (am != null) {
             int volume_level = am.getStreamVolume(AudioManager.STREAM_MUSIC);
             int max = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-            int percent = Math.round(volume_level * 100 / max);
+            int percent = Math.round(volume_level * 100.0f / max);
             return (float) percent / 100;
         } else {
             return 1.0f;
         }
     }
 
-    public static boolean isPhoneMuted() {
-        if (sContext == null) {
+    public static boolean isPhoneMuted(Context context) {
+        if (context == null) {
             return false;
         }
-        AudioManager am = (AudioManager) sContext.getSystemService(Context.AUDIO_SERVICE);
+        AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         if (am == null) {
             return false;
         }
@@ -111,7 +111,7 @@ public class Utils {
 
                 blackLines = mResizeWidth - lp.width;
                 if (lp.width != 0) {
-                    percent = blackLines * 100 / lp.width;
+                    percent = blackLines * 100.0f / lp.width;
                 }
             } else {
                 lp.width = mResizeWidth;
@@ -119,7 +119,7 @@ public class Utils {
 
                 blackLines = mResizeHeight - lp.height;
                 if (lp.height != 0) {
-                    percent = blackLines * 100 / lp.height;
+                    percent = blackLines * 100.0f / lp.height;
                 }
             }
         } else if (mVideoWidth > mVideoHeight) {
@@ -134,7 +134,7 @@ public class Utils {
 
             blackLines = mResizeHeight - lp.height;
             if (lp.height != 0) {
-                percent = blackLines * 100 / lp.height;
+                percent = blackLines * 100.0f / lp.height;
             }
         } else {
             lp.height = mResizeHeight;
@@ -148,7 +148,7 @@ public class Utils {
 
             blackLines = mResizeWidth - lp.width;
             if (lp.width != 0) {
-                percent = blackLines * 100 / lp.width;
+                percent = blackLines * 100.0f / lp.width;
             }
         }
 

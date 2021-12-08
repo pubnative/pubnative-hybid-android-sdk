@@ -28,7 +28,7 @@ import java.util.Locale;
 import java.util.Set;
 
 public class CountryUtils {
-    private static Set<String> GDPR_COUNTRIES;
+    private static final Set<String> GDPR_COUNTRIES;
 
     static {
         GDPR_COUNTRIES = new HashSet<>();

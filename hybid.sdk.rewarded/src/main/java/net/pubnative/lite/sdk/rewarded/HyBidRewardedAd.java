@@ -27,7 +27,6 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
-import net.pubnative.lite.sdk.AdCache;
 import net.pubnative.lite.sdk.DiagnosticConstants;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
@@ -38,6 +37,7 @@ import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.api.RewardedRequestManager;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.IntegrationType;
+import net.pubnative.lite.sdk.models.RemoteConfigFeature;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.rewarded.presenter.RewardedPresenter;
 import net.pubnative.lite.sdk.rewarded.presenter.RewardedPresenterFactory;
@@ -45,7 +45,6 @@ import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.SignalDataProcessor;
 import net.pubnative.lite.sdk.utils.MarkupUtils;
 import net.pubnative.lite.sdk.utils.json.JsonOperations;
-import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
@@ -74,8 +73,6 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
         void onReward();
     }
 
-    private final AdCache mAdCache;
-    private final VideoAdCache mVideoCache;
     private RequestManager mRequestManager;
     private RewardedPresenter mPresenter;
     private final Listener mListener;
@@ -105,8 +102,6 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
         mContext = context;
         mZoneId = zoneId;
         mListener = listener;
-        mAdCache = HyBid.getAdCache();
-        mVideoCache = HyBid.getVideoAdCache();
         mPlacementParams = new JSONObject();
         mRequestManager.setIntegrationType(IntegrationType.STANDALONE);
 
@@ -115,31 +110,35 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     }
 
     public void load() {
-
-        //Timestamp
-        addReportingKey(Reporting.Key.TIMESTAMP, String.valueOf(System.currentTimeMillis()));
-        if (HyBid.getAppToken() != null)
-            //AppToken
-            addReportingKey(Reporting.Key.APP_TOKEN, HyBid.getAppToken());
-        //Ad Type
-        addReportingKey(Reporting.Key.AD_TYPE, Reporting.Key.REWARDED);
-        //Ad Size
-        addReportingKey(Reporting.Key.AD_SIZE, mRequestManager.getAdSize().toString());
-        //Integration Type
-        addReportingKey(Reporting.Key.INTEGRATION_TYPE, IntegrationType.STANDALONE);
-
-        if (!HyBid.isInitialized()) {
-            mInitialLoadTime = System.currentTimeMillis();
-            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NOT_INITIALISED));
-        } else if (TextUtils.isEmpty(mZoneId)) {
-            mInitialLoadTime = System.currentTimeMillis();
-            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ZONE_ID));
+        if (HyBid.getConfigManager() != null
+                && !HyBid.getConfigManager().getFeatureResolver().isAdFormatEnabled(RemoteConfigFeature.AdFormat.REWARDED)) {
+            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.DISABLED_FORMAT));
         } else {
-            cleanup();
-            mInitialLoadTime = System.currentTimeMillis();
-            mRequestManager.setZoneId(mZoneId);
-            mRequestManager.setRequestListener(this);
-            mRequestManager.requestAd();
+            //Timestamp
+            addReportingKey(Reporting.Key.TIMESTAMP, String.valueOf(System.currentTimeMillis()));
+            if (HyBid.getAppToken() != null)
+                //AppToken
+                addReportingKey(Reporting.Key.APP_TOKEN, HyBid.getAppToken());
+            //Ad Type
+            addReportingKey(Reporting.Key.AD_TYPE, Reporting.Key.REWARDED);
+            //Ad Size
+            addReportingKey(Reporting.Key.AD_SIZE, mRequestManager.getAdSize().toString());
+            //Integration Type
+            addReportingKey(Reporting.Key.INTEGRATION_TYPE, IntegrationType.STANDALONE);
+
+            if (!HyBid.isInitialized()) {
+                mInitialLoadTime = System.currentTimeMillis();
+                invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NOT_INITIALISED));
+            } else if (TextUtils.isEmpty(mZoneId)) {
+                mInitialLoadTime = System.currentTimeMillis();
+                invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ZONE_ID));
+            } else {
+                cleanup();
+                mInitialLoadTime = System.currentTimeMillis();
+                mRequestManager.setZoneId(mZoneId);
+                mRequestManager.setRequestListener(this);
+                mRequestManager.requestAd();
+            }
         }
     }
 
@@ -325,8 +324,8 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
 
                         VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardFilePath);
                         mAd = new Ad(assetGroupId, adValue, type);
-                        mAdCache.put(mZoneId, mAd);
-                        mVideoCache.put(mZoneId, adCacheItem);
+                        HyBid.getAdCache().put(mZoneId, mAd);
+                        HyBid.getVideoAdCache().put(mZoneId, adCacheItem);
                         mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, HyBidRewardedAd.this);
                         if (mPresenter != null) {
                             mPresenter.load();
@@ -483,8 +482,8 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
             addReportingKey(DiagnosticConstants.KEY_RENDER_TIME,
                     System.currentTimeMillis() - mInitialRenderTime);
         }
-        invokeOnOpened();
         reportAdRender(Reporting.AdFormat.REWARDED, getPlacementParams());
+        invokeOnOpened();
     }
 
     @Override

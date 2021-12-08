@@ -43,6 +43,8 @@ public class Reporting {
         public static final String VIDEO_STARTED = "video_started";
         public static final String VIDEO_DISMISSED = "video_dismissed";
         public static final String VIDEO_FINISHED = "video_finished";
+        public static final String VIDEO_PAUSE = "video_pause";
+        public static final String VIDEO_RESUME = "video_resume";
         public static final String VIDEO_MUTE = "video_mute";
         public static final String VIDEO_UNMUTE = "video_unmute";
 

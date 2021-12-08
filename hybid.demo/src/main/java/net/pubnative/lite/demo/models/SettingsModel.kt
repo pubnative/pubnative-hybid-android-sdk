@@ -71,7 +71,11 @@ data class SettingsModel(var appToken: String,
                          var admobRewardedAdUnitId: String,
                          var admobInterstitialAdUnitId: String,
                          var admobInterstitialVideoAdUnitId: String,
-                         var admobNativeAdUnitId: String) : Parcelable {
+                         var admobNativeAdUnitId: String,
+                         var ironSourceAppKey: String,
+                         var ironSourceBannerAdUnitId: String,
+                         var ironSourceInterstitialAdUnitId: String,
+                         var ironSourceRewardedAdUnitId: String) : Parcelable {
     companion object {
         @JvmField
         @Suppress("unused")
@@ -95,6 +99,10 @@ data class SettingsModel(var appToken: String,
             parcel.readInt() != 0,
             parcel.readInt() != 0,
             parcel.readInt() != 0,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!,
             parcel.readString()!!,
             parcel.readString()!!,
             parcel.readString()!!,
@@ -201,6 +209,11 @@ data class SettingsModel(var appToken: String,
         dest?.writeString(admobInterstitialAdUnitId)
         dest?.writeString(admobInterstitialVideoAdUnitId)
         dest?.writeString(admobNativeAdUnitId)
+
+        dest?.writeString(ironSourceAppKey)
+        dest?.writeString(ironSourceBannerAdUnitId)
+        dest?.writeString(ironSourceInterstitialAdUnitId)
+        dest?.writeString(ironSourceRewardedAdUnitId)
     }
 
     override fun describeContents(): Int = 0

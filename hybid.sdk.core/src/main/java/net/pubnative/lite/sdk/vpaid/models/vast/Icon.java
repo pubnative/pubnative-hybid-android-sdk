@@ -10,16 +10,16 @@ public class Icon {
     private String program;
 
     @Attribute
-    private int width;
+    private String width;
 
     @Attribute
-    private int height;
+    private String height;
 
     @Attribute
-    private int xPosition;
+    private String xPosition;
 
     @Attribute
-    private int yPosition;
+    private String yPosition;
 
     @Attribute
     private String duration;
@@ -58,19 +58,19 @@ public class Icon {
         return program;
     }
 
-    public int getWidth() {
+    public String getWidth() {
         return width;
     }
 
-    public int getHeight() {
+    public String getHeight() {
         return height;
     }
 
-    public int getxPosition() {
+    public String getxPosition() {
         return xPosition;
     }
 
-    public int getyPosition() {
+    public String getyPosition() {
         return yPosition;
     }
 

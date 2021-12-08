@@ -68,7 +68,7 @@ public class MRAIDHtmlProcessor {
             // but that was a terrible case to begin with
 
             processedHtml.insert(0, "<html>" + ls);
-            processedHtml.append(ls + "</html>");
+            processedHtml.append(ls).append("</html>");
         } else if (!hasHeadTag) {
             // html tag exists, head tag doesn't, so add it
             regex = "<html[^>]*>";

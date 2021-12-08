@@ -39,10 +39,10 @@ public class VisibilityTracker {
 
     protected WeakReference<View> mDeviceView = null;
     protected WeakReference<Listener> mListener = null;
-    protected List<PubnativeVisibilityTrackerItem> mTrackedViews = new ArrayList<PubnativeVisibilityTrackerItem>();
+    protected final List<PubnativeVisibilityTrackerItem> mTrackedViews = new ArrayList<>();
     protected Handler mHandler = new Handler();
     protected boolean mIsVisibilityCheckScheduled = false;
-    protected VisibilityRunnable mVisibilityRunnable = new VisibilityRunnable();
+    protected final VisibilityRunnable mVisibilityRunnable = new VisibilityRunnable();
     protected ViewTreeObserver.OnPreDrawListener mOnPreDrawListener = new ViewTreeObserver.OnPreDrawListener() {
         @Override
         public boolean onPreDraw() {
@@ -74,7 +74,7 @@ public class VisibilityTracker {
      * @param listener valid listener
      */
     public void setListener(Listener listener) {
-        mListener = new WeakReference<Listener>(listener);
+        mListener = new WeakReference<>(listener);
     }
 
     /**
@@ -86,7 +86,7 @@ public class VisibilityTracker {
      */
     public void addView(View view, double minVisibilityPercent) {
         if (mDeviceView == null) {
-            mDeviceView = new WeakReference<View>(view);
+            mDeviceView = new WeakReference<>(view);
             ViewTreeObserver observer = view.getViewTreeObserver();
             if (observer.isAlive()) {
                 observer.addOnPreDrawListener(mOnPreDrawListener);
@@ -170,7 +170,7 @@ public class VisibilityTracker {
     //==============================================================================================
     // INNER CLASSES
     //==============================================================================================
-    protected class PubnativeVisibilityTrackerItem {
+    protected static class PubnativeVisibilityTrackerItem {
 
         private final String TAG = PubnativeVisibilityTrackerItem.class.getSimpleName();
         public View mTrackingView;
@@ -187,14 +187,14 @@ public class VisibilityTracker {
 
     protected class VisibilityRunnable implements Runnable {
 
-        private ArrayList<View> mVisibleViews;
-        private ArrayList<View> mInvisibleViews;
-        private Rect mVisibleRect;
+        private final ArrayList<View> mVisibleViews;
+        private final ArrayList<View> mInvisibleViews;
+        private final Rect mVisibleRect;
 
         VisibilityRunnable() {
             mVisibleRect = new Rect();
-            mInvisibleViews = new ArrayList<View>();
-            mVisibleViews = new ArrayList<View>();
+            mInvisibleViews = new ArrayList<>();
+            mVisibleViews = new ArrayList<>();
         }
 
         @Override

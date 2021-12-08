@@ -8,7 +8,6 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -109,7 +108,7 @@ public class ViewControllerVast implements View.OnClickListener {
         }
     }
 
-    private VideoAdView.VisibilityListener mCreateVisibilityListener = new VideoAdView.VisibilityListener() {
+    private final VideoAdView.VisibilityListener mCreateVisibilityListener = new VideoAdView.VisibilityListener() {
         @Override
         public void onVisibilityChanged(int visibility) {
             try {
@@ -128,7 +127,7 @@ public class ViewControllerVast implements View.OnClickListener {
         }
     };
 
-    private TextureView.SurfaceTextureListener mCreateTextureListener = new TextureView.SurfaceTextureListener() {
+    private final TextureView.SurfaceTextureListener mCreateTextureListener = new TextureView.SurfaceTextureListener() {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
             mSurface = new Surface(surface);
@@ -205,6 +204,10 @@ public class ViewControllerVast implements View.OnClickListener {
                 mSkipView.setClickable(true);
             }
         }
+    }
+
+    public VideoAdView getVideoView() {
+        return mBannerView;
     }
 
     public void hideSkipButton() {

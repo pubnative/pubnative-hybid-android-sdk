@@ -36,10 +36,6 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'com.google.truth:truth:0.36'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -63,7 +59,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
-def addDependency(dependency, dependenciesNode) { //finish with dependencies
+static def addDependency(dependency, dependenciesNode) { //finish with dependencies
     if(dependency.group!=null && dependency.name != null) {
         def dependencyNode = dependenciesNode.appendNode('dependency')
         dependencyNode.appendNode('groupId', dependency.group)

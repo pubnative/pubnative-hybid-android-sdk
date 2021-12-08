@@ -1,5 +1,7 @@
 package net.pubnative.lite.sdk.vpaid.models.vast;
 
+import android.text.TextUtils;
+
 import net.pubnative.lite.sdk.vpaid.xml.Attribute;
 import net.pubnative.lite.sdk.vpaid.xml.Text;
 
@@ -11,10 +13,10 @@ public class Mezzanine {
     private String type;
 
     @Attribute
-    private int width;
+    private String width;
 
     @Attribute
-    private int height;
+    private String height;
 
     @Attribute
     private String codec;
@@ -39,11 +41,11 @@ public class Mezzanine {
         return type;
     }
 
-    public int getWidth() {
+    public String getWidth() {
         return width;
     }
 
-    public int getHeight() {
+    public String getHeight() {
         return height;
     }
 
@@ -64,6 +66,6 @@ public class Mezzanine {
     }
 
     public String getText() {
-        return text;
+        return TextUtils.isEmpty(text) ? "" : text.trim();
     }
 }

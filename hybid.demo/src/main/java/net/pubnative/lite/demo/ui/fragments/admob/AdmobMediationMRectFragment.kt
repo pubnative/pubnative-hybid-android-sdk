@@ -15,15 +15,13 @@ import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
 
-class AdmobMediationMRectFragment : Fragment() {
+class AdmobMediationMRectFragment : Fragment(R.layout.fragment_admob_mrect) {
     val TAG = AdmobMediationMRectFragment::class.java.simpleName
 
     private lateinit var admobMRect: AdView
     private lateinit var admobMRectContainer: FrameLayout
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_admob_mrect, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -32,7 +30,8 @@ class AdmobMediationMRectFragment : Fragment() {
         loadButton = view.findViewById(R.id.button_load)
         admobMRectContainer = view.findViewById(R.id.admob_mrect_container)
 
-        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().admobMediumAdUnitId
+        val adUnitId =
+            SettingsManager.getInstance(requireActivity()).getSettings().admobMediumAdUnitId
 
         admobMRect = AdView(activity)
         admobMRect.adSize = AdSize.MEDIUM_RECTANGLE
@@ -43,11 +42,18 @@ class AdmobMediationMRectFragment : Fragment() {
 
         loadButton.setOnClickListener {
             errorView.text = ""
-            admobMRect.loadAd(AdRequest.Builder()
-                    .build())
+            admobMRect.loadAd(
+                AdRequest.Builder()
+                    .build()
+            )
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
+        errorView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                errorView.text.toString()
+            )
+        }
     }
 
     // ------------------ Admob Ad Listener ---------------------

@@ -2,6 +2,7 @@ package net.pubnative.lite.sdk.vpaid.helpers;
 
 import android.annotation.SuppressLint;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 
@@ -17,21 +18,22 @@ public abstract class TimerWithPause {
     private final long mTotalCountdown;
     private final long mCountdownInterval;
     private long mPauseTimeRemaining;
-    private boolean mRunAtStart;
+    private final boolean mRunAtStart;
 
     @SuppressLint("HandlerLeak")
-    private Handler mHandler = new Handler() {
+    private final Handler mHandler = new Handler(Looper.myLooper()) {
         @Override
         public void handleMessage(Message msg) {
             handleTimerMessage();
         }
     };
 
-    protected TimerWithPause(long millisOnTimer, long countDownInterval, boolean runAtStart) {
+    protected TimerWithPause(long millisOnTimer,
+                             long countDownInterval) {
         mMillisInFuture = millisOnTimer;
         mTotalCountdown = mMillisInFuture;
         mCountdownInterval = countDownInterval;
-        mRunAtStart = runAtStart;
+        mRunAtStart = true;
     }
 
     public abstract void onTick(long millisUntilFinished);

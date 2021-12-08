@@ -41,7 +41,6 @@ public class VastUrlUtils {
         return getVastURL(adValue,
                 HyBid.getDeviceInfo().getAdvertisingId(),
                 HyBid.getBundleId(),
-                "wifi",
                 dnt,
                 latitude,
                 longitude,
@@ -56,7 +55,6 @@ public class VastUrlUtils {
     private static String getVastURL(String url,
                                      String ad_id,
                                      String bundle,
-                                     String connection,
                                      String dnt,
                                      String lat,
                                      String lon,
@@ -71,7 +69,7 @@ public class VastUrlUtils {
                 new VASTtag.VASTtagBuilder(url)
                         .adId(ad_id)
                         .bundle(bundle)
-                        .connection(connection)
+                        .connection("wifi")
                         .dnt(dnt)
                         .gdpr(gdpr)
                         .gdprConsent(gdpr_consent)

@@ -8,6 +8,9 @@ import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.admob.*
 import net.pubnative.lite.demo.ui.activities.dfp.*
+import net.pubnative.lite.demo.ui.activities.ironsource.IronSourceMediationBannerActivity
+import net.pubnative.lite.demo.ui.activities.ironsource.IronSourceMediationInterstitialActivity
+import net.pubnative.lite.demo.ui.activities.ironsource.IronSourceMediationRewardedActivity
 import net.pubnative.lite.demo.ui.activities.mopub.*
 
 class MediationNavFragment : Fragment(R.layout.fragment_nav_mediation) {
@@ -117,6 +120,21 @@ class MediationNavFragment : Fragment(R.layout.fragment_nav_mediation) {
 
         view.findViewById<Button>(R.id.button_admob_native).setOnClickListener {
             val intent = Intent(activity, AdmobMediationNativeActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_ironsource_banner).setOnClickListener {
+            val intent = Intent(activity, IronSourceMediationBannerActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_ironsource_interstitial).setOnClickListener {
+            val intent = Intent(activity, IronSourceMediationInterstitialActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_ironsource_rewarded).setOnClickListener {
+            val intent = Intent(activity, IronSourceMediationRewardedActivity::class.java)
             startActivity(intent)
         }
     }

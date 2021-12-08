@@ -55,6 +55,7 @@ import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.RemoteConfigAdSource;
+import net.pubnative.lite.sdk.models.RemoteConfigFeature;
 import net.pubnative.lite.sdk.models.RemoteConfigPlacement;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
@@ -114,6 +115,15 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         init(getRequestManager());
     }
 
+    public HyBidAdView(Context context, AdSize adSize) {
+        super(context);
+        if (adSize == null) {
+            init(getRequestManager());
+        } else {
+            init(getRequestManager(adSize));
+        }
+    }
+
     public HyBidAdView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(getRequestManager());
@@ -154,49 +164,54 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         if (HyBid.isInitialized()) {
             cleanup();
             mInitialLoadTime = System.currentTimeMillis();
-            if (TextUtils.isEmpty(zoneId)) {
-                invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ZONE_ID));
+            if (HyBid.getConfigManager() != null
+                    && !HyBid.getConfigManager().getFeatureResolver().isAdFormatEnabled(RemoteConfigFeature.AdFormat.BANNER)) {
+                invokeOnLoadFailed(new HyBidError(HyBidErrorCode.DISABLED_FORMAT));
             } else {
-                addReportingKey(DiagnosticConstants.KEY_ZONE_ID, zoneId);
-
-                ConfigManager configManager = HyBid.getConfigManager();
-                if (configManager != null && configManager.getConfig() != null
-                        && configManager.getConfig().placement_info != null
-                        && configManager.getConfig().placement_info.placements != null
-                        && !configManager.getConfig().placement_info.placements.isEmpty()
-                        && configManager.getConfig().placement_info.placements.get(zoneId) != null
-                        && !TextUtils.isEmpty(configManager.getConfig().placement_info.placements.get(zoneId).type)
-                        && configManager.getConfig().placement_info.placements.get(zoneId).type.equals("auction")
-                        && configManager.getConfig().placement_info.placements.get(zoneId).ad_sources != null) {
-
-                    RemoteConfigPlacement placement = configManager.getConfig().placement_info.placements.get(zoneId);
-                    long timeout = placement.timeout != null ? placement.timeout : 5000;
-                    List<AdSource> adSources = new ArrayList<>();
-
-                    AdSourceConfig hyBidAdSourceConfig = new AdSourceConfig();
-                    hyBidAdSourceConfig.setZoneId(zoneId);
-                    HyBidAdSource hyBidAdSource = new HyBidAdSource(getContext(), hyBidAdSourceConfig, mRequestManager.getAdSize());
-                    adSources.add(hyBidAdSource);
-
-                    for (RemoteConfigAdSource remoteAdSource : placement.ad_sources) {
-                        if (!TextUtils.isEmpty(remoteAdSource.type) && remoteAdSource.type.equals("vast_tag")) {
-                            AdSourceConfig adSourceConfig = new AdSourceConfig();
-                            adSourceConfig.setName(remoteAdSource.name);
-                            adSourceConfig.setECPM(remoteAdSource.eCPM != null ? remoteAdSource.eCPM : 0);
-                            adSourceConfig.setVastTagUrl(remoteAdSource.vastTagUrl);
-
-                            VastTagAdSource adSource = new VastTagAdSource(getContext(), adSourceConfig, mRequestManager.getAdSize());
-                            adSources.add(adSource);
-                        }
-                    }
-
-                    mAuctionResponses.clear();
-                    mAuction = new Auction(adSources, timeout, HyBid.getReportingController(), this, mAdFormat);
-                    mAuction.runAuction();
+                if (TextUtils.isEmpty(zoneId)) {
+                    invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ZONE_ID));
                 } else {
-                    mRequestManager.setZoneId(zoneId);
-                    mRequestManager.setRequestListener(this);
-                    mRequestManager.requestAd();
+                    addReportingKey(DiagnosticConstants.KEY_ZONE_ID, zoneId);
+
+                    ConfigManager configManager = HyBid.getConfigManager();
+                    if (configManager != null && configManager.getConfig() != null
+                            && configManager.getConfig().placement_info != null
+                            && configManager.getConfig().placement_info.placements != null
+                            && !configManager.getConfig().placement_info.placements.isEmpty()
+                            && configManager.getConfig().placement_info.placements.get(zoneId) != null
+                            && !TextUtils.isEmpty(configManager.getConfig().placement_info.placements.get(zoneId).type)
+                            && configManager.getConfig().placement_info.placements.get(zoneId).type.equals("auction")
+                            && configManager.getConfig().placement_info.placements.get(zoneId).ad_sources != null) {
+
+                        RemoteConfigPlacement placement = configManager.getConfig().placement_info.placements.get(zoneId);
+                        long timeout = placement.timeout != null ? placement.timeout : 5000;
+                        List<AdSource> adSources = new ArrayList<>();
+
+                        AdSourceConfig hyBidAdSourceConfig = new AdSourceConfig();
+                        hyBidAdSourceConfig.setZoneId(zoneId);
+                        HyBidAdSource hyBidAdSource = new HyBidAdSource(getContext(), hyBidAdSourceConfig, mRequestManager.getAdSize());
+                        adSources.add(hyBidAdSource);
+
+                        for (RemoteConfigAdSource remoteAdSource : placement.ad_sources) {
+                            if (!TextUtils.isEmpty(remoteAdSource.type) && remoteAdSource.type.equals("vast_tag")) {
+                                AdSourceConfig adSourceConfig = new AdSourceConfig();
+                                adSourceConfig.setName(remoteAdSource.name);
+                                adSourceConfig.setECPM(remoteAdSource.eCPM != null ? remoteAdSource.eCPM : 0);
+                                adSourceConfig.setVastTagUrl(remoteAdSource.vastTagUrl);
+
+                                VastTagAdSource adSource = new VastTagAdSource(getContext(), adSourceConfig, mRequestManager.getAdSize());
+                                adSources.add(adSource);
+                            }
+                        }
+
+                        mAuctionResponses.clear();
+                        mAuction = new Auction(adSources, timeout, HyBid.getReportingController(), this, mAdFormat);
+                        mAuction.runAuction();
+                    } else {
+                        mRequestManager.setZoneId(zoneId);
+                        mRequestManager.setRequestListener(this);
+                        mRequestManager.requestAd();
+                    }
                 }
             }
         } else {
@@ -372,6 +387,10 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         return new RequestManager();
     }
 
+    RequestManager getRequestManager(AdSize adSize) {
+        return new RequestManager(adSize);
+    }
+
     protected AdPresenter createPresenter() {
         mInitialRenderTime = System.currentTimeMillis();
         return new BannerPresenterFactory(getContext())
@@ -398,6 +417,9 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
                 renderErrorEvent.setAdFormat(mAdFormat);
                 renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
                 renderErrorEvent.setIntegrationType(mIntegrationType);
+                if (mAd != null && !TextUtils.isEmpty(mAd.getVast())) {
+                    renderErrorEvent.setVast(mAd.getVast());
+                }
                 renderErrorEvent.mergeJSONObject(getPlacementParams());
 
                 getAdTypeAndCreative(renderErrorEvent);
@@ -427,6 +449,9 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
                 renderErrorEvent.setAdFormat(mAdFormat);
                 renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
                 renderErrorEvent.setIntegrationType(mIntegrationType);
+                if (mAd != null && !TextUtils.isEmpty(mAd.getVast())) {
+                    renderErrorEvent.setVast(mAd.getVast());
+                }
                 renderErrorEvent.mergeJSONObject(getPlacementParams());
 
                 getAdTypeAndCreative(renderErrorEvent);
@@ -463,6 +488,9 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
                             renderErrorEvent.setAdFormat(mAdFormat);
                             renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
                             renderErrorEvent.setIntegrationType(mIntegrationType);
+                            if (mAd != null && !TextUtils.isEmpty(mAd.getVast())) {
+                                renderErrorEvent.setVast(mAd.getVast());
+                            }
                             renderErrorEvent.mergeJSONObject(getPlacementParams());
 
                             getAdTypeAndCreative(renderErrorEvent);
@@ -491,6 +519,9 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
                 renderErrorEvent.setAdFormat(mAdFormat);
                 renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
                 renderErrorEvent.setIntegrationType(mIntegrationType);
+                if (mAd != null && !TextUtils.isEmpty(mAd.getVast())) {
+                    renderErrorEvent.setVast(mAd.getVast());
+                }
                 renderErrorEvent.mergeJSONObject(getPlacementParams());
 
                 getAdTypeAndCreative(renderErrorEvent);
@@ -771,8 +802,8 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
 
     @Override
     public void onImpression() {
-        invokeOnImpression();
         reportAdRender(mAdFormat, getPlacementParams());
+        invokeOnImpression();
     }
 
     //------------------------------ Auction Callbacks --------------------------------------

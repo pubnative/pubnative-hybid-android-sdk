@@ -118,7 +118,7 @@ public class HyBidMediationBannerCustomEvent extends BaseAd implements HyBidAdVi
         return AdSize.SIZE_320x50;
     }
 
-    //------------------------------------ PNAdView Callbacks --------------------------------------
+    //----------------------------------- HyBidAdView Callbacks ------------------------------------
     @Override
     public void onAdLoaded() {
         MoPubLog.log(MoPubLog.AdapterLogEvent.LOAD_SUCCESS, TAG);

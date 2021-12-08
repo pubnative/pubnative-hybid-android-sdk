@@ -11,9 +11,6 @@ import net.pubnative.lite.sdk.utils.Logger;
 import org.json.JSONObject;
 
 import java.security.GeneralSecurityException;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 
 public class ConfigRequest {
     private static final String TAG = ConfigRequest.class.getSimpleName();

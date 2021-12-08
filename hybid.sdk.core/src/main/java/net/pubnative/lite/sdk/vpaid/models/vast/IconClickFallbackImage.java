@@ -7,10 +7,10 @@ import java.util.List;
 
 public class IconClickFallbackImage {
     @Attribute
-    private int width;
+    private String width;
 
     @Attribute
-    private int height;
+    private String height;
 
     @Tag
     private AltText altText;
@@ -18,11 +18,11 @@ public class IconClickFallbackImage {
     @Tag("StaticResource")
     private List<StaticResource> staticResources;
 
-    public int getWidth() {
+    public String getWidth() {
         return width;
     }
 
-    public int getHeight() {
+    public String getHeight() {
         return height;
     }
 

@@ -6,19 +6,12 @@ import android.util.AttributeSet;
 import android.webkit.ValueCallback;
 
 import net.pubnative.lite.sdk.HyBid;
-import net.pubnative.lite.sdk.api.BannerRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PrebidUtils;
 import net.pubnative.lite.sdk.views.HyBidAdView;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.monet.bidder.Constants.AD_SIZE;
-import static com.monet.bidder.Constants.MONET_BID;
 
 public class AppMonetView extends HyBidAdView {
     private static final String TAG = AppMonetView.class.getSimpleName();
@@ -33,7 +26,6 @@ public class AppMonetView extends HyBidAdView {
 
     private String mAdUnitId;
     private BannerAdListener mBannerAdListener;
-    private MonetBid mBid;
     private AdSize mAdSize = AdSize.SIZE_300x250;
 
     public AppMonetView(Context context) {
@@ -109,7 +101,6 @@ public class AppMonetView extends HyBidAdView {
     }
 
     public void setMonetBid(MonetBid bid) {
-        this.mBid = bid;
     }
 
     public void setBannerAdListener(BannerAdListener bannerAdListener) {

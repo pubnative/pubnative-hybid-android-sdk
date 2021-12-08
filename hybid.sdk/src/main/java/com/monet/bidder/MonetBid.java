@@ -1,7 +1,5 @@
 package com.monet.bidder;
 
-import net.pubnative.lite.sdk.models.Ad;
-
 public class MonetBid {
     private String cpm;
     private String id;

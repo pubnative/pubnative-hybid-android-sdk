@@ -45,13 +45,13 @@ public abstract class JsonModel {
     private static final String TAG = JsonModel.class.getSimpleName();
 
     static class JsonModelMetadata {
-        String key;
-        Class entityType;
-        Class<?> collectionType;
-        Class<?> keyType;
-        boolean isArray = false;
-        boolean isMap = false;
-        boolean isDescendantFromModel;
+        final String key;
+        final Class entityType;
+        final Class<?> collectionType;
+        final Class<?> keyType;
+        boolean isArray;
+        boolean isMap;
+        final boolean isDescendantFromModel;
 
         JsonModelMetadata(String key, Class entityType) {
             this(key, void.class, entityType, void.class, false, false);
@@ -86,7 +86,7 @@ public abstract class JsonModel {
             fields = JsonModelFieldCache.getFields(modelClass.getClass());
         } else {
             try {
-                fields = new HashMap<String, JsonModelMetadata>();
+                fields = new HashMap<>();
                 for (Field field : modelClass.getClass().getDeclaredFields()) {
                     final BindField bindField = field.getAnnotation(BindField.class);
                     if (bindField != null) {
@@ -258,7 +258,7 @@ public abstract class JsonModel {
 
     private Object castNumber(Object literal, Class type) {
         if (literal instanceof Number) {
-            Number number = Number.class.cast(literal);
+            Number number = (Number) literal;
             if (type == Integer.class) {
                 return number.intValue();
             } else if (type == Long.class) {

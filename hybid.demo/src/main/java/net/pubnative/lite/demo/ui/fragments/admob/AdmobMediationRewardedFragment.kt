@@ -22,19 +22,13 @@ import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
 
-class AdmobMediationRewardedFragment : Fragment() {
+class AdmobMediationRewardedFragment : Fragment(R.layout.fragment_admob_rewarded) {
     val TAG = AdmobMediationRewardedFragment::class.java.simpleName
 
     private var admobRewarded: RewardedAd? = null
     private lateinit var loadButton: Button
     private lateinit var showButton: Button
     private lateinit var errorView: TextView
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_admob_rewarded, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -87,7 +81,6 @@ class AdmobMediationRewardedFragment : Fragment() {
             admobRewarded?.fullScreenContentCallback = fullscreenContentCallback
             Log.d(TAG, "onAdLoaded")
             displayLogs()
-            Toast.makeText(context, "Rewarded Ad Loaded", Toast.LENGTH_SHORT).show()
             showButton.isEnabled = true
         }
 
@@ -97,8 +90,8 @@ class AdmobMediationRewardedFragment : Fragment() {
             admobRewarded = null
             Log.d(TAG, "onRewardedAdFailedToLoad")
             displayLogs()
-            Toast.makeText(context, "Rewarded Ad Failed to Load", Toast.LENGTH_SHORT).show()
             errorView.text = error.message
+            showButton.isEnabled = false
         }
     }
 
@@ -129,6 +122,7 @@ class AdmobMediationRewardedFragment : Fragment() {
             Log.d(TAG, "onAdDismissedFullScreenContent")
             showButton.isEnabled = false
             admobRewarded = null
+            showButton.isEnabled = false
         }
     }
 

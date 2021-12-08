@@ -81,11 +81,8 @@ public class HeaderBiddingUtils {
     }
 
     public static String getHeaderBiddingKeywords(Ad ad, String zoneId, KeywordMode mode) {
-        StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append(KEYS.PN_BID).append(':').append(getBidECPM(ad, mode));
-
-        return stringBuilder.toString();
+        return KEYS.PN_BID + ':' + getBidECPM(ad, mode);
     }
 
     //---------------------------------- Bundle keywords -------------------------------------------

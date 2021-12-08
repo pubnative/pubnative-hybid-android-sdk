@@ -24,11 +24,11 @@ package net.pubnative.lite.sdk.rewarded.activity;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -41,6 +41,7 @@ import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastSender;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.views.CloseableContainer;
+import net.pubnative.lite.sdk.vpaid.volumeObserver.VolumeObserver;
 
 public abstract class HyBidRewardedActivity extends Activity {
     public static final String EXTRA_ZONE_ID = "extra_pn_zone_id";

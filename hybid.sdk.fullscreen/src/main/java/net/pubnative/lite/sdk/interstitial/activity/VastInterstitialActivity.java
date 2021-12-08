@@ -1,16 +1,16 @@
 package net.pubnative.lite.sdk.interstitial.activity;
 
+import android.annotation.SuppressLint;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 
 import net.pubnative.lite.sdk.HyBid;
-import net.pubnative.lite.sdk.HyBidError;
-import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
-import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastSender;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.VideoAd;
@@ -18,15 +18,15 @@ import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdListener;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
 
-public class VastInterstitialActivity extends HyBidInterstitialActivity {
+public class VastInterstitialActivity extends HyBidInterstitialActivity implements AdPresenter.ImpressionListener {
     private static final String TAG = VastInterstitialActivity.class.getSimpleName();
     private boolean mReady = false;
 
     private VideoAdView mVideoPlayer;
     private VideoAd mVideoAd;
-    private int mSkipOffset;
     private boolean mIsSkippable = true;
 
+    @SuppressLint("SourceLockedOrientationActivity")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
@@ -37,16 +37,16 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             }
         }
-      
+
         super.onCreate(savedInstanceState);
 
         try {
             hideInterstitialCloseButton();
 
             if (getAd() != null) {
-                mSkipOffset = getIntent().getIntExtra(EXTRA_SKIP_OFFSET, -1);
+                int mSkipOffset = getIntent().getIntExtra(EXTRA_SKIP_OFFSET, -1);
                 mIsSkippable = mSkipOffset == 0;
-                mVideoAd = new VideoAd(this, getAd().getVast(), true, true);
+                mVideoAd = new VideoAd(this, getAd().getVast(), true, true, this);
                 mVideoAd.useMobileNetworkForCaching(true);
                 mVideoAd.bindView(mVideoPlayer);
                 mVideoAd.setAdListener(mVideoAdListener);
@@ -134,7 +134,6 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
 
                 setProgressBarInvisible();
                 mVideoAd.show();
-                getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.SHOW);
             }
         }
 
@@ -183,5 +182,10 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
         Bundle extras = new Bundle();
         extras.putInt(HyBidInterstitialBroadcastReceiver.VIDEO_PROGRESS, progressPercentage);
         getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_DISMISS, extras);
+    }
+
+    @Override
+    public void onImpression() {
+        getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.SHOW);
     }
 }

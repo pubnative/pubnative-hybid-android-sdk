@@ -1,7 +1,5 @@
 package net.pubnative.lite.sdk.analytics;
 
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +7,7 @@ public class ReportingController {
     private static final String TAG = ReportingController.class.getSimpleName();
 
     private final List<ReportingEventCallback> mListeners;
+    private List<ReportingEvent> adEventList;
 
     public ReportingController() {
         mListeners = new ArrayList<>();
@@ -40,5 +39,18 @@ public class ReportingController {
                 callback.onEvent(event);
             }
         }
+    }
+
+    public void cacheAdEventList(List<ReportingEvent> eventList) {
+        this.adEventList = eventList;
+    }
+
+    public List<ReportingEvent> getAdEventList() {
+        return adEventList;
+    }
+
+    public void clearAdEventList() {
+        if (this.adEventList != null)
+            this.adEventList.clear();
     }
 }

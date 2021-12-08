@@ -1,5 +1,7 @@
 package net.pubnative.lite.sdk.vpaid.models.vast;
 
+import android.text.TextUtils;
+
 import net.pubnative.lite.sdk.vpaid.xml.Attribute;
 import net.pubnative.lite.sdk.vpaid.xml.Text;
 
@@ -15,10 +17,10 @@ public class MediaFile {
     private String type;
 
     @Attribute
-    private int width;
+    private String width;
 
     @Attribute
-    private int height;
+    private String height;
 
     @Attribute
     private String codec;
@@ -27,25 +29,25 @@ public class MediaFile {
     private String id;
 
     @Attribute
-    private int bitrate;
+    private String bitrate;
 
     @Attribute
-    private int minBitrate;
+    private String minBitrate;
 
     @Attribute
-    private int maxBitrate;
+    private String maxBitrate;
 
     @Attribute
-    private boolean scalable;
+    private String scalable;
 
     @Attribute
-    private boolean maintainAspectRatio;
+    private String maintainAspectRatio;
 
     @Attribute
     private String apiFramework;
 
     @Attribute
-    private long fileSize;
+    private String fileSize;
 
     @Attribute
     private String mediaType;
@@ -61,11 +63,11 @@ public class MediaFile {
         return type;
     }
 
-    public int getWidth() {
+    public String getWidth() {
         return width;
     }
 
-    public int getHeight() {
+    public String getHeight() {
         return height;
     }
 
@@ -77,23 +79,23 @@ public class MediaFile {
         return id;
     }
 
-    public int getBitrate() {
+    public String getBitrate() {
         return bitrate;
     }
 
-    public int getMinBitrate() {
+    public String getMinBitrate() {
         return minBitrate;
     }
 
-    public int getMaxBitrate() {
+    public String getMaxBitrate() {
         return maxBitrate;
     }
 
-    public boolean isScalable() {
+    public String isScalable() {
         return scalable;
     }
 
-    public boolean isMaintainAspectRatio() {
+    public String isMaintainAspectRatio() {
         return maintainAspectRatio;
     }
 
@@ -101,7 +103,7 @@ public class MediaFile {
         return apiFramework;
     }
 
-    public long getFileSize() {
+    public String getFileSize() {
         return fileSize;
     }
 
@@ -110,6 +112,6 @@ public class MediaFile {
     }
 
     public String getText() {
-        return text;
+        return TextUtils.isEmpty(text) ? "" : text.trim();
     }
 }

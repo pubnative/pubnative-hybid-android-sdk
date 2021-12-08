@@ -1,10 +1,5 @@
 package net.pubnative.lite.sdk.auction;
 
-import net.pubnative.lite.sdk.utils.json.BindField;
-import net.pubnative.lite.sdk.utils.json.JsonModel;
-
-import org.json.JSONObject;
-
 public class AdSourceConfig {
     private double eCPM;
     private boolean enabled;

@@ -206,7 +206,7 @@ public class HyBidLocationManager implements LocationListener {
         return result;
     }
 
-    private Runnable mStopUpdatesRunnable = new Runnable() {
+    private final Runnable mStopUpdatesRunnable = new Runnable() {
         @Override
         public void run() {
             stopLocationUpdates();

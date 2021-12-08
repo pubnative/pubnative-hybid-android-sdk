@@ -21,7 +21,7 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 
-class AdmobMediationNativeFragment : Fragment() {
+class AdmobMediationNativeFragment : Fragment(R.layout.fragment_admob_native) {
     val TAG = AdmobMediationNativeFragment::class.java.simpleName
 
     private lateinit var admobNativeContainer: FrameLayout
@@ -30,8 +30,6 @@ class AdmobMediationNativeFragment : Fragment() {
 
     private var admobNative: NativeAd? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_admob_native, container, false)
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -39,23 +37,24 @@ class AdmobMediationNativeFragment : Fragment() {
         loadButton = view.findViewById(R.id.button_load)
         admobNativeContainer = view.findViewById(R.id.ad_container)
 
-        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().admobNativeAdUnitId
+        val adUnitId =
+            SettingsManager.getInstance(requireActivity()).getSettings().admobNativeAdUnitId
 
         view.findViewById<Button>(R.id.button_load).setOnClickListener {
             errorView.text = ""
             admobNative?.destroy()
 
             val adLoader = AdLoader.Builder(requireContext(), adUnitId)
-                    .forNativeAd {
-                        if (isDetached) {
-                            it.destroy()
-                        } else {
-                            admobNative = it
-                            renderAd()
-                        }
+                .forNativeAd {
+                    if (isDetached) {
+                        it.destroy()
+                    } else {
+                        admobNative = it
+                        renderAd()
                     }
-                    .withAdListener(adListener)
-                    .withNativeAdOptions(nativeAdOptions).build()
+                }
+                .withAdListener(adListener)
+                .withNativeAdOptions(nativeAdOptions).build()
 
             adLoader.loadAd(AdRequest.Builder().build())
         }
@@ -70,7 +69,11 @@ class AdmobMediationNativeFragment : Fragment() {
         admobNative?.let {
             admobNativeContainer.removeAllViews()
             val adView = LayoutInflater.from(requireContext())
-                    .inflate(R.layout.layout_admob_native_ad, admobNativeContainer, false) as NativeAdView
+                .inflate(
+                    R.layout.layout_admob_native_ad,
+                    admobNativeContainer,
+                    false
+                ) as NativeAdView
             val adIcon = adView.findViewById<ImageView>(R.id.ad_icon)
             val adTitle = adView.findViewById<TextView>(R.id.ad_title)
             val adBanner = adView.findViewById<ImageView>(R.id.ad_banner)

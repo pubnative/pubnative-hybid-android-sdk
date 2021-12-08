@@ -14,11 +14,7 @@ import com.iab.omid.library.pubnativenet.adsession.media.MediaEvents;
 import com.iab.omid.library.pubnativenet.adsession.media.Position;
 import com.iab.omid.library.pubnativenet.adsession.media.VastProperties;
 
-import net.pubnative.lite.sdk.analytics.Reporting;
-import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.utils.Logger;
-
-import org.json.JSONException;
 
 import java.util.List;
 
@@ -32,6 +28,8 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
     private boolean midpointFired = false;
     private boolean thirdQuartileFired = false;
     private boolean completeFired = false;
+
+    private boolean muted = true;
 
     public HyBidViewabilityNativeVideoAdSession(ViewabilityManager viewabilityManager) {
         super(viewabilityManager);
@@ -218,9 +216,10 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
 
     public void fireVolumeChange(boolean mute) {
         try {
-            if (!viewabilityManager.isViewabilityMeasurementEnabled())
+            if (!viewabilityManager.isViewabilityMeasurementEnabled() || mute == muted)
                 return;
 
+            muted = mute;
             if (mMediaEvents != null && !completeFired) {
                 mMediaEvents.volumeChange(mute ? 0 : 1);
             }

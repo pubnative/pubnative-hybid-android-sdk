@@ -21,13 +21,13 @@ public class AdParams {
     private String skipTime;
     private int publisherSkipSeconds = 0;
 
-    private List<String> videoFileUrlsList = new ArrayList<>();
-    private List<String> endCardUrlList = new ArrayList<>();
+    private final List<String> videoFileUrlsList = new ArrayList<>();
+    private final List<String> endCardUrlList = new ArrayList<>();
 
     private final List<String> impressions = new ArrayList<>();
     private final List<String> companionCreativeViewEvents = new ArrayList<>();
-    private List<String> videoClicks = new ArrayList<>();
-    private List<String> endCardClicks = new ArrayList<>();
+    private final List<String> videoClicks = new ArrayList<>();
+    private final List<String> endCardClicks = new ArrayList<>();
     private final List<Tracking> events = new ArrayList<>();
     private final List<AdServingId> adServingIds = new ArrayList<>();
     private final List<Category> adCategories = new ArrayList<>();

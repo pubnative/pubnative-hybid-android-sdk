@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.View;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
 import net.pubnative.lite.sdk.vpaid.enums.AdFormat;
@@ -18,8 +19,8 @@ public class VideoAd extends BaseVideoAd {
 
     private volatile VideoAdView mBannerView;
 
-    public VideoAd(Context context, String data, boolean isInterstitial, boolean isFullscreen) throws Exception {
-        super(context, data, isInterstitial, isFullscreen);
+    public VideoAd(Context context, String data, boolean isInterstitial, boolean isFullscreen, AdPresenter.ImpressionListener impressionListener) throws Exception {
+        super(context, data, isInterstitial, isFullscreen,impressionListener);
     }
 
     @Override
@@ -61,25 +62,22 @@ public class VideoAd extends BaseVideoAd {
                         synchronized (this) {
                             if (getAdController() != null && getAdController().getAdParams() != null) {
                                 getViewabilityAdSession().initAdSession(mBannerView, getAdController().getAdParams().getVerificationScriptResources());
+
+                                getAdController().buildVideoAdView(mBannerView);
+
+                                for (HyBidViewabilityFriendlyObstruction obstruction : getAdController().getViewabilityFriendlyObstructions()) {
+                                    getViewabilityAdSession().addFriendlyObstruction(
+                                            obstruction.getView(),
+                                            obstruction.getPurpose(),
+                                            obstruction.getReason());
+                                }
+
+                                getAdController().setVideoVisible(mBannerView.getVisibility() == View.VISIBLE);
+                                getAdController().playAd();
+
+                                validateAudioState();
                             }
                         }
-                        getAdController().buildVideoAdView(mBannerView);
-
-                        for (HyBidViewabilityFriendlyObstruction obstruction : getAdController().getViewabilityFriendlyObstructions()) {
-                            getViewabilityAdSession().addFriendlyObstruction(
-                                    obstruction.getView(),
-                                    obstruction.getPurpose(),
-                                    obstruction.getReason());
-                        }
-
-                        getAdController().setVideoVisible(mBannerView.getVisibility() == View.VISIBLE);
-                        getAdController().playAd();
-
-                        validateAudioState();
-
-                        /*if (mBannerView.getVisibility() != View.VISIBLE) {
-                            mBannerView.setVisibility(View.VISIBLE);
-                        }*/
                     } else {
                         Logger.e(LOG_TAG, "getAdController() is null and can not set attributes to banner view ");
                         if (getAdListener() != null) {
@@ -102,7 +100,7 @@ public class VideoAd extends BaseVideoAd {
                 isMuted = true;
                 break;
             case ON:
-                if (isPhoneMuted()) {
+                if (isPhoneMuted(getContext())) {
                     isMuted = true;
                 }
                 break;

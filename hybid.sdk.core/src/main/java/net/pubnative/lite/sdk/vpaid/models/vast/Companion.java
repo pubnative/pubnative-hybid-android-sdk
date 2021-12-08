@@ -7,25 +7,25 @@ import java.util.List;
 
 public class Companion {
     @Attribute
-    private int width;
+    private String width;
 
     @Attribute
-    private int height;
+    private String height;
 
     @Attribute
     private String id;
 
     @Attribute
-    private int assetWidth;
+    private String assetWidth;
 
     @Attribute
-    private int assetHeight;
+    private String assetHeight;
 
     @Attribute
-    private int expandedWidth;
+    private String expandedWidth;
 
     @Attribute
-    private int expandedHeight;
+    private String expandedHeight;
 
     @Attribute
     private String apiFramework;
@@ -63,11 +63,11 @@ public class Companion {
     @Tag
     private TrackingEvents trackingEvents;
 
-    public int getWidth() {
+    public String getWidth() {
         return width;
     }
 
-    public int getHeight() {
+    public String getHeight() {
         return height;
     }
 
@@ -75,19 +75,19 @@ public class Companion {
         return id;
     }
 
-    public int getAssetWidth() {
+    public String getAssetWidth() {
         return assetWidth;
     }
 
-    public int getAssetHeight() {
+    public String getAssetHeight() {
         return assetHeight;
     }
 
-    public int getExpandedWidth() {
+    public String getExpandedWidth() {
         return expandedWidth;
     }
 
-    public int getExpandedHeight() {
+    public String getExpandedHeight() {
         return expandedHeight;
     }
 

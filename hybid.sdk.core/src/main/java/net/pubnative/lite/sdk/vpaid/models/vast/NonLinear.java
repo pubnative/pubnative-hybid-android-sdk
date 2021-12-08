@@ -10,22 +10,22 @@ public class NonLinear {
     private String id;
 
     @Attribute
-    private int width;
+    private String width;
 
     @Attribute
-    private int height;
+    private String height;
 
     @Attribute
-    private int expandedWidth;
+    private String expandedWidth;
 
     @Attribute
-    private int expandedHeight;
+    private String expandedHeight;
 
     @Attribute
-    private boolean scalable;
+    private String scalable;
 
     @Attribute
-    private boolean maintainAspectRatio;
+    private String maintainAspectRatio;
 
     @Attribute
     private String apiFramework;
@@ -79,27 +79,27 @@ public class NonLinear {
         return id;
     }
 
-    public int getWidth() {
+    public String getWidth() {
         return width;
     }
 
-    public int getHeight() {
+    public String getHeight() {
         return height;
     }
 
-    public int getExpandedWidth() {
+    public String getExpandedWidth() {
         return expandedWidth;
     }
 
-    public int getExpandedHeight() {
+    public String getExpandedHeight() {
         return expandedHeight;
     }
 
-    public boolean isScalable() {
+    public String isScalable() {
         return scalable;
     }
 
-    public boolean isMaintainAspectRatio() {
+    public String isMaintainAspectRatio() {
         return maintainAspectRatio;
     }
 

@@ -215,7 +215,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         AdData data = getMeta(APIMeta.CONTENT_INFO);
         if (data == null) {
             Log.e(TAG, "getContentInfo - contentInfo data not found");
-            return getDefaultContentInfo(context, result);
+            return getDefaultContentInfo(context);
         } else if (TextUtils.isEmpty(data.getStringField(DATA_CONTENTINFO_ICON_KEY))) {
             Log.e(TAG, "getContentInfo - contentInfo icon not found");
         } else if (TextUtils.isEmpty(data.getStringField(DATA_CONTENTINFO_LINK_KEY))) {
@@ -256,8 +256,8 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         }
     }
 
-    private PNAPIContentInfoView getDefaultContentInfo(Context context, PNAPIContentInfoView result){
-        result = new PNAPIContentInfoView(context);
+    private PNAPIContentInfoView getDefaultContentInfo(Context context){
+        PNAPIContentInfoView result = new PNAPIContentInfoView(context);
         result.setIconUrl(CONTENT_INFO_ICON_URL);
         result.setIconClickUrl(CONTENT_INFO_LINK_URL);
         result.setContextText(CONTENT_INFO_TEXT);

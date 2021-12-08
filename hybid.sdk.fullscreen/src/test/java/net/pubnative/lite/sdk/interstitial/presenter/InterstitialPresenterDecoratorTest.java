@@ -31,7 +31,6 @@ public class InterstitialPresenterDecoratorTest {
     private ReportingController mReportingController;
     @Mock
     private InterstitialPresenter.Listener mMockListener;
-    private Ad mTestAd;
 
     @InjectMocks
     private InterstitialPresenterDecorator mSubject;
@@ -39,7 +38,7 @@ public class InterstitialPresenterDecoratorTest {
     @Before
     public void setup() {
         initMocks(this);
-        mTestAd = TestUtil.createTestInterstitialAd();
+        Ad mTestAd = TestUtil.createTestInterstitialAd();
         when(mMockPresenter.getAd()).thenReturn(mTestAd);
     }
 

@@ -2,7 +2,6 @@ package net.pubnative.lite.sdk.interstitial.activity;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -19,6 +18,7 @@ import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastSender;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.views.CloseableContainer;
+import net.pubnative.lite.sdk.vpaid.volumeObserver.VolumeObserver;
 
 
 public abstract class HyBidInterstitialActivity extends Activity {

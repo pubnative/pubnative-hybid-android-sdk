@@ -10,8 +10,8 @@ public class ReflectionUtils {
         private final String mMethodName;
         private Class<?> mClass;
 
-        private List<Class<?>> mParameterClasses;
-        private List<Object> mParameters;
+        private final List<Class<?>> mParameterClasses;
+        private final List<Object> mParameters;
         private boolean mIsAccessible;
         private boolean mIsStatic;
 

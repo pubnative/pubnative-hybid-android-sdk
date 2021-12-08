@@ -1,6 +1,5 @@
 package net.pubnative.lite.sdk.banner;
 
-
 import com.google.common.truth.Truth;
 
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;

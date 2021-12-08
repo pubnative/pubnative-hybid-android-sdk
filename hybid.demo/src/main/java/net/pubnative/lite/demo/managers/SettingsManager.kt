@@ -86,7 +86,8 @@ class SettingsManager private constructor(context: Context) {
     }
 
     fun setBrowserPriorities(browserPriorities: List<String>) {
-        preferences.edit().putStringSet(SETTINGS_KEY_BROWSER_PRIORITIES, browserPriorities.toSet()).apply()
+        preferences.edit().putStringSet(SETTINGS_KEY_BROWSER_PRIORITIES, browserPriorities.toSet())
+            .apply()
     }
 
     fun setMoPubBannerAdUnitId(adUnitId: String) {
@@ -110,7 +111,8 @@ class SettingsManager private constructor(context: Context) {
     }
 
     fun setMoPubInterstitialVideoAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_MOPUB_INTERSTITIAL_VIDEO_AD_UNIT_ID, adUnitId).apply()
+        preferences.edit().putString(SETTINGS_KEY_MOPUB_INTERSTITIAL_VIDEO_AD_UNIT_ID, adUnitId)
+            .apply()
     }
 
     fun setMoPubRewardedAdUnitId(adUnitId: String) {
@@ -118,35 +120,43 @@ class SettingsManager private constructor(context: Context) {
     }
 
     fun setMoPubMediationBannerAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_MOPUB_MEDIATION_BANNER_AD_UNIT_ID, adUnitId).apply()
+        preferences.edit().putString(SETTINGS_KEY_MOPUB_MEDIATION_BANNER_AD_UNIT_ID, adUnitId)
+            .apply()
     }
 
     fun setMoPubMediationMediumAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_MOPUB_MEDIATION_MEDIUM_AD_UNIT_ID, adUnitId).apply()
+        preferences.edit().putString(SETTINGS_KEY_MOPUB_MEDIATION_MEDIUM_AD_UNIT_ID, adUnitId)
+            .apply()
     }
 
     fun setMoPubMediationMediumVideoAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_MOPUB_MEDIATION_MEDIUM_VIDEO_AD_UNIT_ID, adUnitId).apply()
+        preferences.edit().putString(SETTINGS_KEY_MOPUB_MEDIATION_MEDIUM_VIDEO_AD_UNIT_ID, adUnitId)
+            .apply()
     }
 
     fun setMoPubMediationLeaderboardAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_MOPUB_MEDIATION_LEADERBOARD_AD_UNIT_ID, adUnitId).apply()
+        preferences.edit().putString(SETTINGS_KEY_MOPUB_MEDIATION_LEADERBOARD_AD_UNIT_ID, adUnitId)
+            .apply()
     }
 
     fun setMoPubMediationInterstitialAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_MOPUB_MEDIATION_INTERSTITIAL_AD_UNIT_ID, adUnitId).apply()
+        preferences.edit().putString(SETTINGS_KEY_MOPUB_MEDIATION_INTERSTITIAL_AD_UNIT_ID, adUnitId)
+            .apply()
     }
 
     fun setMoPubMediationInterstitialVideoAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_MOPUB_MEDIATION_INTERSTITIAL_VIDEO_AD_UNIT_ID, adUnitId).apply()
+        preferences.edit()
+            .putString(SETTINGS_KEY_MOPUB_MEDIATION_INTERSTITIAL_VIDEO_AD_UNIT_ID, adUnitId).apply()
     }
 
     fun setMoPubMediationRewardedAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_MOPUB_MEDIATION_REWARDED_AD_UNIT_ID, adUnitId).apply()
+        preferences.edit().putString(SETTINGS_KEY_MOPUB_MEDIATION_REWARDED_AD_UNIT_ID, adUnitId)
+            .apply()
     }
 
     fun setMoPubMediationNativeAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_MOPUB_MEDIATION_NATIVE_AD_UNIT_ID, adUnitId).apply()
+        preferences.edit().putString(SETTINGS_KEY_MOPUB_MEDIATION_NATIVE_AD_UNIT_ID, adUnitId)
+            .apply()
     }
 
     fun setDFPBannerAdUnitId(adUnitId: String) {
@@ -174,15 +184,18 @@ class SettingsManager private constructor(context: Context) {
     }
 
     fun setDFPMediationLeaderboardAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_DFP_MEDIATION_LEADERBOARD_AD_UNIT_ID, adUnitId).apply()
+        preferences.edit().putString(SETTINGS_KEY_DFP_MEDIATION_LEADERBOARD_AD_UNIT_ID, adUnitId)
+            .apply()
     }
 
     fun setDFPMediationInterstitialAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_DFP_MEDIATION_INTERSTITIAL_AD_UNIT_ID, adUnitId).apply()
+        preferences.edit().putString(SETTINGS_KEY_DFP_MEDIATION_INTERSTITIAL_AD_UNIT_ID, adUnitId)
+            .apply()
     }
 
     fun setDFPMediationRewardedAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_DFP_MEDIATION_REWARDED_AD_UNIT_ID, adUnitId).apply()
+        preferences.edit().putString(SETTINGS_KEY_DFP_MEDIATION_REWARDED_AD_UNIT_ID, adUnitId)
+            .apply()
     }
 
     fun setAdmobAppId(appId: String) {
@@ -214,11 +227,29 @@ class SettingsManager private constructor(context: Context) {
     }
 
     fun setAdmobInterstitialVideoAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_ADMOB_INTERSTITIAL_VIDEO_AD_UNIT_ID, adUnitId).apply()
+        preferences.edit().putString(SETTINGS_KEY_ADMOB_INTERSTITIAL_VIDEO_AD_UNIT_ID, adUnitId)
+            .apply()
     }
 
     fun setAdmobNativeAdUnitId(adUnitId: String) {
         preferences.edit().putString(SETTINGS_KEY_ADMOB_NATIVE_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setIronSourceAppKey(appKey: String) {
+        preferences.edit().putString(SETTINGS_KEY_IRONSOURCE_APP_KEY, appKey).apply()
+    }
+
+    fun setIronSourceBannerAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_IRONSOURCE_BANNER_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setIronSourceInterstitialAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_IRONSOURCE_INTERSTITIAL_AD_UNIT_ID, adUnitId)
+            .apply()
+    }
+
+    fun setIronSourceRewardedAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_IRONSOURCE_REWARDED_AD_UNIT_ID, adUnitId).apply()
     }
 
     fun setSettings(model: SettingsModel, asynchronously: Boolean) {
@@ -237,35 +268,96 @@ class SettingsManager private constructor(context: Context) {
         editor.putString(SETTINGS_KEY_MOPUB_MEDIUM_AD_UNIT_ID, model.mopubMediumAdUnitId)
         editor.putString(SETTINGS_KEY_MOPUB_MEDIUM_VIDEO_AD_UNIT_ID, model.mopubMediumVideoAdUnitId)
         editor.putString(SETTINGS_KEY_MOPUB_LEADERBOARD_AD_UNIT_ID, model.mopubLeaderboardAdUnitId)
-        editor.putString(SETTINGS_KEY_MOPUB_INTERSTITIAL_AD_UNIT_ID, model.mopubInterstitialAdUnitId)
-        editor.putString(SETTINGS_KEY_MOPUB_INTERSTITIAL_VIDEO_AD_UNIT_ID, model.mopubInterstitialVideoAdUnitId)
+        editor.putString(
+            SETTINGS_KEY_MOPUB_INTERSTITIAL_AD_UNIT_ID,
+            model.mopubInterstitialAdUnitId
+        )
+        editor.putString(
+            SETTINGS_KEY_MOPUB_INTERSTITIAL_VIDEO_AD_UNIT_ID,
+            model.mopubInterstitialVideoAdUnitId
+        )
         editor.putString(SETTINGS_KEY_MOPUB_REWARDED_AD_UNIT_ID, model.mopubRewardedAdUnitId)
-        editor.putString(SETTINGS_KEY_MOPUB_MEDIATION_BANNER_AD_UNIT_ID, model.mopubMediationBannerAdUnitId)
-        editor.putString(SETTINGS_KEY_MOPUB_MEDIATION_MEDIUM_AD_UNIT_ID, model.mopubMediationMediumAdUnitId)
-        editor.putString(SETTINGS_KEY_MOPUB_MEDIATION_MEDIUM_VIDEO_AD_UNIT_ID, model.mopubMediationMediumVideoAdUnitId)
-        editor.putString(SETTINGS_KEY_MOPUB_MEDIATION_LEADERBOARD_AD_UNIT_ID, model.mopubMediationLeaderboardAdUnitId)
-        editor.putString(SETTINGS_KEY_MOPUB_MEDIATION_INTERSTITIAL_AD_UNIT_ID, model.mopubMediationInterstitialAdUnitId)
-        editor.putString(SETTINGS_KEY_MOPUB_MEDIATION_INTERSTITIAL_VIDEO_AD_UNIT_ID, model.mopubMediationInterstitialVideoAdUnitId)
-        editor.putString(SETTINGS_KEY_MOPUB_MEDIATION_REWARDED_AD_UNIT_ID, model.mopubMediationRewardedAdUnitId)
-        editor.putString(SETTINGS_KEY_MOPUB_MEDIATION_NATIVE_AD_UNIT_ID, model.mopubMediationNativeAdUnitId)
+        editor.putString(
+            SETTINGS_KEY_MOPUB_MEDIATION_BANNER_AD_UNIT_ID,
+            model.mopubMediationBannerAdUnitId
+        )
+        editor.putString(
+            SETTINGS_KEY_MOPUB_MEDIATION_MEDIUM_AD_UNIT_ID,
+            model.mopubMediationMediumAdUnitId
+        )
+        editor.putString(
+            SETTINGS_KEY_MOPUB_MEDIATION_MEDIUM_VIDEO_AD_UNIT_ID,
+            model.mopubMediationMediumVideoAdUnitId
+        )
+        editor.putString(
+            SETTINGS_KEY_MOPUB_MEDIATION_LEADERBOARD_AD_UNIT_ID,
+            model.mopubMediationLeaderboardAdUnitId
+        )
+        editor.putString(
+            SETTINGS_KEY_MOPUB_MEDIATION_INTERSTITIAL_AD_UNIT_ID,
+            model.mopubMediationInterstitialAdUnitId
+        )
+        editor.putString(
+            SETTINGS_KEY_MOPUB_MEDIATION_INTERSTITIAL_VIDEO_AD_UNIT_ID,
+            model.mopubMediationInterstitialVideoAdUnitId
+        )
+        editor.putString(
+            SETTINGS_KEY_MOPUB_MEDIATION_REWARDED_AD_UNIT_ID,
+            model.mopubMediationRewardedAdUnitId
+        )
+        editor.putString(
+            SETTINGS_KEY_MOPUB_MEDIATION_NATIVE_AD_UNIT_ID,
+            model.mopubMediationNativeAdUnitId
+        )
         editor.putString(SETTINGS_KEY_DFP_BANNER_AD_UNIT_ID, model.dfpBannerAdUnitId)
         editor.putString(SETTINGS_KEY_DFP_MEDIUM_AD_UNIT_ID, model.dfpMediumAdUnitId)
         editor.putString(SETTINGS_KEY_DFP_LEADERBOARD_AD_UNIT_ID, model.dfpLeaderboardAdUnitId)
         editor.putString(SETTINGS_KEY_DFP_INTERSTITIAL_AD_UNIT_ID, model.dfpInterstitialAdUnitId)
-        editor.putString(SETTINGS_KEY_DFP_MEDIATION_BANNER_AD_UNIT_ID, model.dfpMediationBannerAdUnitId)
-        editor.putString(SETTINGS_KEY_DFP_MEDIATION_MEDIUM_AD_UNIT_ID, model.dfpMediationMediumAdUnitId)
-        editor.putString(SETTINGS_KEY_DFP_MEDIATION_LEADERBOARD_AD_UNIT_ID, model.dfpMediationLeaderboardAdUnitId)
-        editor.putString(SETTINGS_KEY_DFP_MEDIATION_INTERSTITIAL_AD_UNIT_ID, model.dfpMediationInterstitialAdUnitId)
-        editor.putString(SETTINGS_KEY_DFP_MEDIATION_REWARDED_AD_UNIT_ID, model.dfpMediationRewardedAdUnitId)
+        editor.putString(
+            SETTINGS_KEY_DFP_MEDIATION_BANNER_AD_UNIT_ID,
+            model.dfpMediationBannerAdUnitId
+        )
+        editor.putString(
+            SETTINGS_KEY_DFP_MEDIATION_MEDIUM_AD_UNIT_ID,
+            model.dfpMediationMediumAdUnitId
+        )
+        editor.putString(
+            SETTINGS_KEY_DFP_MEDIATION_LEADERBOARD_AD_UNIT_ID,
+            model.dfpMediationLeaderboardAdUnitId
+        )
+        editor.putString(
+            SETTINGS_KEY_DFP_MEDIATION_INTERSTITIAL_AD_UNIT_ID,
+            model.dfpMediationInterstitialAdUnitId
+        )
+        editor.putString(
+            SETTINGS_KEY_DFP_MEDIATION_REWARDED_AD_UNIT_ID,
+            model.dfpMediationRewardedAdUnitId
+        )
         editor.putString(SETTINGS_KEY_ADMOB_APP_ID, model.admobAppId)
         editor.putString(SETTINGS_KEY_ADMOB_BANNER_AD_UNIT_ID, model.admobBannerAdUnitId)
         editor.putString(SETTINGS_KEY_ADMOB_MEDIUM_AD_UNIT_ID, model.admobMediumAdUnitId)
         editor.putString(SETTINGS_KEY_ADMOB_MEDIUM_VIDEO_AD_UNIT_ID, model.admobMediumVideoAdUnitId)
         editor.putString(SETTINGS_KEY_ADMOB_LEADERBOARD_AD_UNIT_ID, model.admobLeaderboardAdUnitId)
         editor.putString(SETTINGS_KEY_ADMOB_REWARDED_AD_UNIT_ID, model.admobRewardedAdUnitId)
-        editor.putString(SETTINGS_KEY_ADMOB_INTERSTITIAL_AD_UNIT_ID, model.admobInterstitialAdUnitId)
-        editor.putString(SETTINGS_KEY_ADMOB_INTERSTITIAL_VIDEO_AD_UNIT_ID, model.admobInterstitialVideoAdUnitId)
+        editor.putString(
+            SETTINGS_KEY_ADMOB_INTERSTITIAL_AD_UNIT_ID,
+            model.admobInterstitialAdUnitId
+        )
+        editor.putString(
+            SETTINGS_KEY_ADMOB_INTERSTITIAL_VIDEO_AD_UNIT_ID,
+            model.admobInterstitialVideoAdUnitId
+        )
         editor.putString(SETTINGS_KEY_ADMOB_NATIVE_AD_UNIT_ID, model.admobNativeAdUnitId)
+        editor.putString(SETTINGS_KEY_IRONSOURCE_APP_KEY, model.ironSourceAppKey)
+        editor.putString(SETTINGS_KEY_IRONSOURCE_BANNER_AD_UNIT_ID, model.ironSourceBannerAdUnitId)
+        editor.putString(
+            SETTINGS_KEY_IRONSOURCE_INTERSTITIAL_AD_UNIT_ID,
+            model.ironSourceInterstitialAdUnitId
+        )
+        editor.putString(
+            SETTINGS_KEY_IRONSOURCE_REWARDED_AD_UNIT_ID,
+            model.ironSourceRewardedAdUnitId
+        )
 
         editor.putBoolean(SETTINGS_KEY_INITIALISED, true)
 
@@ -283,54 +375,127 @@ class SettingsManager private constructor(context: Context) {
         val gender = preferences.getString(SETTINGS_KEY_GENDER, "")!!
         val age = preferences.getString(SETTINGS_KEY_AGE, "")!!
         val keywords = preferences.getStringSet(SETTINGS_KEY_KEYWORDS, emptySet())?.toList()!!
-        val browserPriorities = preferences.getStringSet(SETTINGS_KEY_BROWSER_PRIORITIES, emptySet())?.toList()!!
+        val browserPriorities =
+            preferences.getStringSet(SETTINGS_KEY_BROWSER_PRIORITIES, emptySet())?.toList()!!
         val coppa = preferences.getBoolean(SETTINGS_KEY_COPPA, false)
         val testMode = preferences.getBoolean(SETTINGS_KEY_TEST_MODE, false)
         val locationTracking = preferences.getBoolean(SETTINGS_KEY_LOCATION_TRACKING, false)
         val mopubBannerAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_BANNER_AD_UNIT_ID, "")!!
         val mopubMediumAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_MEDIUM_AD_UNIT_ID, "")!!
-        val mopubMediumVideoAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_MEDIUM_VIDEO_AD_UNIT_ID, "")!!
-        val mopubLeaderboardAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_LEADERBOARD_AD_UNIT_ID, "")!!
-        val mopubInterstitialAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_INTERSTITIAL_AD_UNIT_ID, "")!!
-        val mopubInterstitialVideoAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_INTERSTITIAL_VIDEO_AD_UNIT_ID, "")!!
-        val mopubRewardedAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_REWARDED_AD_UNIT_ID, "")!!
-        val mopubMediationBannerAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_MEDIATION_BANNER_AD_UNIT_ID, "")!!
-        val mopubMediationMediumAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_MEDIATION_MEDIUM_AD_UNIT_ID, "")!!
-        val mopubMediationMediumVideoAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_MEDIATION_MEDIUM_VIDEO_AD_UNIT_ID, "")!!
-        val mopubMediationLeaderboardAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_MEDIATION_LEADERBOARD_AD_UNIT_ID, "")!!
-        val mopubMediationInterstitialAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_MEDIATION_INTERSTITIAL_AD_UNIT_ID, "")!!
-        val mopubMediationInterstitialVideoAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_MEDIATION_INTERSTITIAL_VIDEO_AD_UNIT_ID, "")!!
-        val mopubMediationRewardedAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_MEDIATION_REWARDED_AD_UNIT_ID, "")!!
-        val mopubMediationNativeAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_MEDIATION_NATIVE_AD_UNIT_ID, "")!!
+        val mopubMediumVideoAdUnitId =
+            preferences.getString(SETTINGS_KEY_MOPUB_MEDIUM_VIDEO_AD_UNIT_ID, "")!!
+        val mopubLeaderboardAdUnitId =
+            preferences.getString(SETTINGS_KEY_MOPUB_LEADERBOARD_AD_UNIT_ID, "")!!
+        val mopubInterstitialAdUnitId =
+            preferences.getString(SETTINGS_KEY_MOPUB_INTERSTITIAL_AD_UNIT_ID, "")!!
+        val mopubInterstitialVideoAdUnitId =
+            preferences.getString(SETTINGS_KEY_MOPUB_INTERSTITIAL_VIDEO_AD_UNIT_ID, "")!!
+        val mopubRewardedAdUnitId =
+            preferences.getString(SETTINGS_KEY_MOPUB_REWARDED_AD_UNIT_ID, "")!!
+        val mopubMediationBannerAdUnitId =
+            preferences.getString(SETTINGS_KEY_MOPUB_MEDIATION_BANNER_AD_UNIT_ID, "")!!
+        val mopubMediationMediumAdUnitId =
+            preferences.getString(SETTINGS_KEY_MOPUB_MEDIATION_MEDIUM_AD_UNIT_ID, "")!!
+        val mopubMediationMediumVideoAdUnitId =
+            preferences.getString(SETTINGS_KEY_MOPUB_MEDIATION_MEDIUM_VIDEO_AD_UNIT_ID, "")!!
+        val mopubMediationLeaderboardAdUnitId =
+            preferences.getString(SETTINGS_KEY_MOPUB_MEDIATION_LEADERBOARD_AD_UNIT_ID, "")!!
+        val mopubMediationInterstitialAdUnitId =
+            preferences.getString(SETTINGS_KEY_MOPUB_MEDIATION_INTERSTITIAL_AD_UNIT_ID, "")!!
+        val mopubMediationInterstitialVideoAdUnitId =
+            preferences.getString(SETTINGS_KEY_MOPUB_MEDIATION_INTERSTITIAL_VIDEO_AD_UNIT_ID, "")!!
+        val mopubMediationRewardedAdUnitId =
+            preferences.getString(SETTINGS_KEY_MOPUB_MEDIATION_REWARDED_AD_UNIT_ID, "")!!
+        val mopubMediationNativeAdUnitId =
+            preferences.getString(SETTINGS_KEY_MOPUB_MEDIATION_NATIVE_AD_UNIT_ID, "")!!
         val dfpBannerAdUnitId = preferences.getString(SETTINGS_KEY_DFP_BANNER_AD_UNIT_ID, "")!!
         val dfpMediumAdUnitId = preferences.getString(SETTINGS_KEY_DFP_MEDIUM_AD_UNIT_ID, "")!!
-        val dfpLeaderboardAdUnitId = preferences.getString(SETTINGS_KEY_DFP_LEADERBOARD_AD_UNIT_ID, "")!!
-        val dfpInterstitialAdUnitId = preferences.getString(SETTINGS_KEY_DFP_INTERSTITIAL_AD_UNIT_ID, "")!!
-        val dfpMediationBannerAdUnitId = preferences.getString(SETTINGS_KEY_DFP_MEDIATION_BANNER_AD_UNIT_ID, "")!!
-        val dfpMediationMediumAdUnitId = preferences.getString(SETTINGS_KEY_DFP_MEDIATION_MEDIUM_AD_UNIT_ID, "")!!
-        val dfpMediationLeaderboardAdUnitId = preferences.getString(SETTINGS_KEY_DFP_MEDIATION_LEADERBOARD_AD_UNIT_ID, "")!!
-        val dfpMediationInterstitialAdUnitId = preferences.getString(SETTINGS_KEY_DFP_MEDIATION_INTERSTITIAL_AD_UNIT_ID, "")!!
-        val dfpMediationRewardedAdUnitId = preferences.getString(SETTINGS_KEY_DFP_MEDIATION_REWARDED_AD_UNIT_ID, "")!!
+        val dfpLeaderboardAdUnitId =
+            preferences.getString(SETTINGS_KEY_DFP_LEADERBOARD_AD_UNIT_ID, "")!!
+        val dfpInterstitialAdUnitId =
+            preferences.getString(SETTINGS_KEY_DFP_INTERSTITIAL_AD_UNIT_ID, "")!!
+        val dfpMediationBannerAdUnitId =
+            preferences.getString(SETTINGS_KEY_DFP_MEDIATION_BANNER_AD_UNIT_ID, "")!!
+        val dfpMediationMediumAdUnitId =
+            preferences.getString(SETTINGS_KEY_DFP_MEDIATION_MEDIUM_AD_UNIT_ID, "")!!
+        val dfpMediationLeaderboardAdUnitId =
+            preferences.getString(SETTINGS_KEY_DFP_MEDIATION_LEADERBOARD_AD_UNIT_ID, "")!!
+        val dfpMediationInterstitialAdUnitId =
+            preferences.getString(SETTINGS_KEY_DFP_MEDIATION_INTERSTITIAL_AD_UNIT_ID, "")!!
+        val dfpMediationRewardedAdUnitId =
+            preferences.getString(SETTINGS_KEY_DFP_MEDIATION_REWARDED_AD_UNIT_ID, "")!!
         val admobAppId = preferences.getString(SETTINGS_KEY_ADMOB_APP_ID, "")!!
         val admobBannerAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_BANNER_AD_UNIT_ID, "")!!
         val admobMediumAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_MEDIUM_AD_UNIT_ID, "")!!
-        val admobMediumVideoAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_MEDIUM_VIDEO_AD_UNIT_ID, "")!!
-        val admobLeaderboardAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_LEADERBOARD_AD_UNIT_ID, "")!!
-        val admobRewardedAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_REWARDED_AD_UNIT_ID, "")!!
-        val admobInterstitialAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_INTERSTITIAL_AD_UNIT_ID, "")!!
-        val admobInterstitialVideoAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_INTERSTITIAL_VIDEO_AD_UNIT_ID, "")!!
+        val admobMediumVideoAdUnitId =
+            preferences.getString(SETTINGS_KEY_ADMOB_MEDIUM_VIDEO_AD_UNIT_ID, "")!!
+        val admobLeaderboardAdUnitId =
+            preferences.getString(SETTINGS_KEY_ADMOB_LEADERBOARD_AD_UNIT_ID, "")!!
+        val admobRewardedAdUnitId =
+            preferences.getString(SETTINGS_KEY_ADMOB_REWARDED_AD_UNIT_ID, "")!!
+        val admobInterstitialAdUnitId =
+            preferences.getString(SETTINGS_KEY_ADMOB_INTERSTITIAL_AD_UNIT_ID, "")!!
+        val admobInterstitialVideoAdUnitId =
+            preferences.getString(SETTINGS_KEY_ADMOB_INTERSTITIAL_VIDEO_AD_UNIT_ID, "")!!
         val admobNativeAdUnitId = preferences.getString(SETTINGS_KEY_ADMOB_NATIVE_AD_UNIT_ID, "")!!
+        val ironSourceAppKey =
+            preferences.getString(SETTINGS_KEY_IRONSOURCE_APP_KEY, "")!!
+        val ironSourceBannerAdUnitId =
+            preferences.getString(SETTINGS_KEY_IRONSOURCE_BANNER_AD_UNIT_ID, "")!!
+        val ironSourceInterstitialAdUnitId =
+            preferences.getString(SETTINGS_KEY_IRONSOURCE_INTERSTITIAL_AD_UNIT_ID, "")!!
+        val ironSourceRewardedAdUnitId =
+            preferences.getString(SETTINGS_KEY_IRONSOURCE_REWARDED_AD_UNIT_ID, "")!!
 
-        val model = SettingsModel(appToken, zoneIds, apiUrl, gender, age, keywords, browserPriorities, coppa, testMode,
-                locationTracking, mopubBannerAdUnitId, mopubMediumAdUnitId, mopubMediumVideoAdUnitId, mopubLeaderboardAdUnitId, mopubInterstitialAdUnitId,
-                mopubInterstitialVideoAdUnitId, mopubRewardedAdUnitId,
-                mopubMediationBannerAdUnitId, mopubMediationMediumAdUnitId, mopubMediationMediumVideoAdUnitId,
-                mopubMediationLeaderboardAdUnitId, mopubMediationInterstitialAdUnitId, mopubMediationInterstitialVideoAdUnitId,
-                mopubMediationRewardedAdUnitId, mopubMediationNativeAdUnitId, dfpBannerAdUnitId, dfpMediumAdUnitId, dfpLeaderboardAdUnitId,
-                dfpInterstitialAdUnitId, dfpMediationBannerAdUnitId, dfpMediationMediumAdUnitId, dfpMediationLeaderboardAdUnitId,
-                dfpMediationInterstitialAdUnitId, dfpMediationRewardedAdUnitId, admobAppId, admobBannerAdUnitId,
-                admobMediumAdUnitId, admobMediumVideoAdUnitId, admobLeaderboardAdUnitId, admobRewardedAdUnitId,
-                admobInterstitialAdUnitId, admobInterstitialVideoAdUnitId, admobNativeAdUnitId)
+        val model = SettingsModel(
+            appToken,
+            zoneIds,
+            apiUrl,
+            gender,
+            age,
+            keywords,
+            browserPriorities,
+            coppa,
+            testMode,
+            locationTracking,
+            mopubBannerAdUnitId,
+            mopubMediumAdUnitId,
+            mopubMediumVideoAdUnitId,
+            mopubLeaderboardAdUnitId,
+            mopubInterstitialAdUnitId,
+            mopubInterstitialVideoAdUnitId,
+            mopubRewardedAdUnitId,
+            mopubMediationBannerAdUnitId,
+            mopubMediationMediumAdUnitId,
+            mopubMediationMediumVideoAdUnitId,
+            mopubMediationLeaderboardAdUnitId,
+            mopubMediationInterstitialAdUnitId,
+            mopubMediationInterstitialVideoAdUnitId,
+            mopubMediationRewardedAdUnitId,
+            mopubMediationNativeAdUnitId,
+            dfpBannerAdUnitId,
+            dfpMediumAdUnitId,
+            dfpLeaderboardAdUnitId,
+            dfpInterstitialAdUnitId,
+            dfpMediationBannerAdUnitId,
+            dfpMediationMediumAdUnitId,
+            dfpMediationLeaderboardAdUnitId,
+            dfpMediationInterstitialAdUnitId,
+            dfpMediationRewardedAdUnitId,
+            admobAppId,
+            admobBannerAdUnitId,
+            admobMediumAdUnitId,
+            admobMediumVideoAdUnitId,
+            admobLeaderboardAdUnitId,
+            admobRewardedAdUnitId,
+            admobInterstitialAdUnitId,
+            admobInterstitialVideoAdUnitId,
+            admobNativeAdUnitId,
+            ironSourceAppKey,
+            ironSourceBannerAdUnitId,
+            ironSourceInterstitialAdUnitId,
+            ironSourceRewardedAdUnitId
+        )
         return model
     }
 }

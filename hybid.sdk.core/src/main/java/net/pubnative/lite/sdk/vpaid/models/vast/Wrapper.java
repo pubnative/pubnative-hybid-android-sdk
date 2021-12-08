@@ -7,13 +7,13 @@ import java.util.List;
 
 public class Wrapper implements VastAdSource {
     @Attribute
-    private boolean followAdditionalWrappers;
+    private String followAdditionalWrappers;
 
     @Attribute
-    private boolean allowMultipleAds;
+    private String allowMultipleAds;
 
     @Attribute
-    private boolean fallbackOnNoAd;
+    private String fallbackOnNoAd;
 
     @Tag("Impression")
     private List<Impression> impressions;
@@ -45,15 +45,15 @@ public class Wrapper implements VastAdSource {
     @Tag("BlockedAdCategories")
     private List<BlockedAdCategories> blockedAdCategories;
 
-    public boolean isFollowAdditionalWrappers() {
+    public String isFollowAdditionalWrappers() {
         return followAdditionalWrappers;
     }
 
-    public boolean isAllowMultipleAds() {
+    public String isAllowMultipleAds() {
         return allowMultipleAds;
     }
 
-    public boolean isFallbackOnNoAd() {
+    public String isFallbackOnNoAd() {
         return fallbackOnNoAd;
     }
 

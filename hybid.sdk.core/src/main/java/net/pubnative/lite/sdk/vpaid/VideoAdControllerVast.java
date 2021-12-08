@@ -2,12 +2,9 @@ package net.pubnative.lite.sdk.vpaid;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Build;
-import android.os.Handler;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
@@ -15,6 +12,9 @@ import android.view.View;
 import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
+import net.pubnative.lite.sdk.analytics.Reporting;
+import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
@@ -30,12 +30,14 @@ import net.pubnative.lite.sdk.vpaid.models.vpaid.TrackingEvent;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
 import net.pubnative.lite.sdk.vpaid.vast.ViewControllerVast;
+import net.pubnative.lite.sdk.vpaid.volumeObserver.IVolumeObserver;
+import net.pubnative.lite.sdk.vpaid.volumeObserver.VolumeObserver;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-class VideoAdControllerVast implements VideoAdController {
+class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
 
     private static final String LOG_TAG = VideoAdControllerVast.class.getSimpleName();
     private static final int DELAY_UNTIL_EXECUTE = 100;
@@ -46,6 +48,7 @@ class VideoAdControllerVast implements VideoAdController {
     private final MacroHelper mMacroHelper;
 
     private final List<TrackingEvent> mTrackingEventsList = new ArrayList<>();
+    private final AdPresenter.ImpressionListener mImpressionListener;
     private MediaPlayer mMediaPlayer;
     private TimerWithPause mTimerWithPause;
     private TimerWithPause mSkipTimerWithPause;
@@ -58,12 +61,16 @@ class VideoAdControllerVast implements VideoAdController {
     private boolean videoStarted = false;
     private boolean videoVisible = false;
     private boolean finishedPlaying = false;
+    private boolean isResumed = false;
+    private boolean isImpressionFired = false;
 
     private final HyBidViewabilityNativeVideoAdSession mViewabilityAdSession;
     private final List<HyBidViewabilityFriendlyObstruction> mViewabilityFriendlyObstructions;
     private Boolean isAndroid6VersionDevice = false;
 
-    VideoAdControllerVast(BaseVideoAdInternal baseAd, AdParams adParams, HyBidViewabilityNativeVideoAdSession viewabilityAdSession, boolean isFullscreen) {
+    private final VolumeObserver observer;
+
+    VideoAdControllerVast(BaseVideoAdInternal baseAd, AdParams adParams, HyBidViewabilityNativeVideoAdSession viewabilityAdSession, boolean isFullscreen, AdPresenter.ImpressionListener impressionListener) {
         mBaseAdInternal = baseAd;
         mAdParams = adParams;
         mViewabilityAdSession = viewabilityAdSession;
@@ -76,6 +83,10 @@ class VideoAdControllerVast implements VideoAdController {
         if (isFullscreen) {
             this.videoVisible = true;
         }
+
+        observer = VolumeObserver.getInstance();
+        observer.registerVolumeObserver(this, mBaseAdInternal.getContext());
+        this.mImpressionListener = impressionListener;
     }
 
     @Override
@@ -133,7 +144,7 @@ class VideoAdControllerVast implements VideoAdController {
                         closeSelf();
                     }
                 }
-            }, DELAY_UNTIL_EXECUTE);
+            });
         }
     }
 
@@ -148,7 +159,7 @@ class VideoAdControllerVast implements VideoAdController {
                     closeSelf();
                 }
             }
-        }, DELAY_UNTIL_EXECUTE);
+        });
     }
 
     private void startMediaPlayer() throws IOException, IllegalStateException {
@@ -186,23 +197,30 @@ class VideoAdControllerVast implements VideoAdController {
             postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    mViewControllerVast.adjustLayoutParams(mp.getVideoWidth(), mp.getVideoHeight());
-                    mMediaPlayer.setSurface(mViewControllerVast.getSurface());
-                    if (mTimerWithPause != null && mTimerWithPause.isPaused()) {
-                        mMediaPlayer.seekTo((int) mTimerWithPause.timePassed());
-                    } else {
-                        createTimer(mp.getDuration());
-                        getViewabilityAdSession().fireImpression();
-                        Logger.d(LOG_TAG, "Ad appeared on screen");
+                    try {
+                        mViewControllerVast.adjustLayoutParams(mp.getVideoWidth(), mp.getVideoHeight());
+                        mMediaPlayer.setSurface(mViewControllerVast.getSurface());
+                        if (mTimerWithPause != null && mTimerWithPause.isPaused()) {
+                            mMediaPlayer.seekTo((int) mTimerWithPause.timePassed());
+                        } else {
+                            createTimer(mp.getDuration());
+                            getViewabilityAdSession().fireImpression();
+                            Logger.d(LOG_TAG, "Ad appeared on screen");
+                            if (mBaseAdInternal != null && mBaseAdInternal.getAdListener() != null) {
+                                mBaseAdInternal.getAdListener().onAdStarted();
+                            }
+                        }
+
+                        muteVideo(mViewControllerVast.isMute(), false);
+                        mMediaPlayer.start();
+                    } catch (RuntimeException runtimeException) {
+                        Logger.w(LOG_TAG, "Error preparing HyBid media player", runtimeException);
                         if (mBaseAdInternal != null && mBaseAdInternal.getAdListener() != null) {
-                            mBaseAdInternal.getAdListener().onAdStarted();
+                            mBaseAdInternal.getAdListener().onAdLoadFail(new PlayerInfo("Error preparing HyBid media player"));
                         }
                     }
-
-                    muteVideo(mViewControllerVast.isMute(), false);
-                    mMediaPlayer.start();
                 }
-            }, DELAY_UNTIL_EXECUTE);
+            });
         }
     };
 
@@ -212,7 +230,7 @@ class VideoAdControllerVast implements VideoAdController {
         mDoneMillis = -1;
         initSkipTime(duration);
         createProgressPoints(duration);
-        mTimerWithPause = new TimerWithPause(duration, 10, true) {
+        mTimerWithPause = new TimerWithPause(duration, 10) {
             @Override
             public void onTick(long millisUntilFinished) {
                 mViewControllerVast.setProgress((int) millisUntilFinished, duration);
@@ -220,7 +238,11 @@ class VideoAdControllerVast implements VideoAdController {
                 List<TrackingEvent> eventsToRemove = new ArrayList<>();
                 for (TrackingEvent event : mTrackingEventsList) {
                     if (mDoneMillis > event.timeMillis) {
-                        EventTracker.post(mBaseAdInternal.getContext(), event.url, mMacroHelper);
+                        if (event.name != null && event.name.equals(EventConstants.START) && !isImpressionFired) {
+                            mImpressionListener.onImpression();
+                            isImpressionFired = true;
+                        }
+                        EventTracker.post(mBaseAdInternal.getContext(), event.url, mMacroHelper, false);
                         fireViewabilityTrackingEvent(event.name);
                         eventsToRemove.add(event);
                     }
@@ -236,7 +258,7 @@ class VideoAdControllerVast implements VideoAdController {
         }.create();
 
         if (mSkipTimeMillis > 0) {
-            mSkipTimerWithPause = new TimerWithPause(mSkipTimeMillis, 1, true) {
+            mSkipTimerWithPause = new TimerWithPause(mSkipTimeMillis, 1) {
                 @Override
                 public void onTick(long millisUntilFinished) {
                     mViewControllerVast.setSkipProgress((int) millisUntilFinished, mSkipTimeMillis);
@@ -344,7 +366,7 @@ class VideoAdControllerVast implements VideoAdController {
         }
     }
 
-    private MediaPlayer.OnCompletionListener mOnCompletionListener =
+    private final MediaPlayer.OnCompletionListener mOnCompletionListener =
             new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
@@ -353,12 +375,13 @@ class VideoAdControllerVast implements VideoAdController {
                     }
                     mBaseAdInternal.onAdDidReachEnd();
                     skipVideo(false);
-                    EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.COMPLETE, mMacroHelper);
+                    EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(),
+                            EventConstants.COMPLETE, mMacroHelper, true);
                 }
             };
 
-    private void postDelayed(Runnable action, long delayMillis) {
-        mViewControllerVast.postDelayed(action, delayMillis);
+    private void postDelayed(Runnable action) {
+        mViewControllerVast.postDelayed(action, VideoAdControllerVast.DELAY_UNTIL_EXECUTE);
     }
 
     @Override
@@ -396,7 +419,7 @@ class VideoAdControllerVast implements VideoAdController {
             mViewControllerVast.showEndCard(mImageUri);
         }
         if (skipEvent) {
-            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.SKIP, mMacroHelper);
+            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.SKIP, mMacroHelper, true);
         }
 
         postDelayed(new Runnable() {
@@ -407,7 +430,7 @@ class VideoAdControllerVast implements VideoAdController {
                         closeSelf();
                 }
             }
-        }, DELAY_UNTIL_EXECUTE);
+        });
     }
 
     @Override
@@ -420,22 +443,42 @@ class VideoAdControllerVast implements VideoAdController {
         muteVideo(mute, true);
     }
 
-    private void muteVideo(boolean mute, boolean postEvent) {
+    private synchronized void muteVideo(boolean mute, boolean postEvent) {
         if (mMediaPlayer == null) {
             return;
         }
-        getViewabilityAdSession().fireVolumeChange(mute);
-        if (mute) {
-            mMediaPlayer.setVolume(0f, 0f);
-            if (postEvent) {
-                EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.MUTE, mMacroHelper);
+
+        try {
+            getViewabilityAdSession().fireVolumeChange(mute);
+
+            if (mute) {
+                mMediaPlayer.setVolume(0f, 0f);
+                if (postEvent) {
+                    ReportingEvent event = new ReportingEvent();
+                    event.setEventType(Reporting.EventType.VIDEO_MUTE);
+                    event.setCreativeType(Reporting.CreativeType.VIDEO);
+                    event.setTimestamp(System.currentTimeMillis());
+                    if (HyBid.getReportingController() != null) {
+                        HyBid.getReportingController().reportEvent(event);
+                    }
+                    EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.MUTE, mMacroHelper, false);
+                }
+            } else {
+                float systemVolume = Utils.getSystemVolume(mBaseAdInternal.getContext());
+                mMediaPlayer.setVolume(systemVolume, systemVolume);
+                if (postEvent) {
+                    ReportingEvent event = new ReportingEvent();
+                    event.setEventType(Reporting.EventType.VIDEO_UNMUTE);
+                    event.setCreativeType(Reporting.CreativeType.VIDEO);
+                    event.setTimestamp(System.currentTimeMillis());
+                    if (HyBid.getReportingController() != null) {
+                        HyBid.getReportingController().reportEvent(event);
+                    }
+                    EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.UNMUTE, mMacroHelper, false);
+                }
             }
-        } else {
-            float systemVolume = Utils.getSystemVolume();
-            mMediaPlayer.setVolume(systemVolume, systemVolume);
-            if (postEvent) {
-                EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.UNMUTE, mMacroHelper);
-            }
+        } catch (RuntimeException runtimeException) {
+            Logger.w(LOG_TAG, runtimeException.getMessage());
         }
     }
 
@@ -443,7 +486,7 @@ class VideoAdControllerVast implements VideoAdController {
         String clickUrl = mAdParams.getVideoRedirectUrl();
 
         for (String trackUrl : mAdParams.getVideoClicks()) {
-            EventTracker.post(mBaseAdInternal.getContext(), trackUrl, mMacroHelper);
+            EventTracker.post(mBaseAdInternal.getContext(), trackUrl, mMacroHelper, false);
         }
 
         return clickUrl;
@@ -453,7 +496,7 @@ class VideoAdControllerVast implements VideoAdController {
         String clickUrl = mAdParams.getEndCardRedirectUrl();
 
         for (String trackUrl : mAdParams.getEndCardClicks()) {
-            EventTracker.post(mBaseAdInternal.getContext(), trackUrl, mMacroHelper);
+            EventTracker.post(mBaseAdInternal.getContext(), trackUrl, mMacroHelper, false);
         }
 
         return clickUrl;
@@ -476,7 +519,7 @@ class VideoAdControllerVast implements VideoAdController {
             return;
         }
         Logger.d(LOG_TAG, "Handle external url");
-        if (Utils.isOnline()) {
+        if (Utils.isOnline(mBaseAdInternal.getContext())) {
             Context context = mBaseAdInternal.getContext();
             UrlHandler urlHandler = new UrlHandler(context);
             urlHandler.handleUrl(url);
@@ -488,14 +531,15 @@ class VideoAdControllerVast implements VideoAdController {
     }
 
     public void closeSelf() {
-        EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.CLOSE, mMacroHelper);
-        EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.CLOSE_LINEAR, mMacroHelper);
+        EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.CLOSE, mMacroHelper, true);
+        EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.CLOSE_LINEAR, mMacroHelper, true);
         mBaseAdInternal.dismiss();
     }
 
     @Override
     public void dismiss() {
         mViewControllerVast.dismiss();
+        observer.unregisterVolumeObserver(this, mBaseAdInternal.getContext());
     }
 
     @Override
@@ -504,7 +548,7 @@ class VideoAdControllerVast implements VideoAdController {
             mMediaPlayer.release();
         }
         if (!videoStarted) {
-            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.NOT_USED, mMacroHelper);
+            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.NOT_USED, mMacroHelper, true);
         }
 
         finishedPlaying = true;
@@ -520,6 +564,8 @@ class VideoAdControllerVast implements VideoAdController {
         }
 
         mViewControllerVast.destroy();
+
+        observer.unregisterVolumeObserver(this, mBaseAdInternal.getContext());
     }
 
     @Override
@@ -534,8 +580,16 @@ class VideoAdControllerVast implements VideoAdController {
                 mSkipTimerWithPause.pause();
             }
 
-            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.PAUSE, mMacroHelper);
+            ReportingEvent event = new ReportingEvent();
+            event.setEventType(Reporting.EventType.VIDEO_PAUSE);
+            event.setCreativeType(Reporting.CreativeType.VIDEO);
+            event.setTimestamp(System.currentTimeMillis());
+            if (HyBid.getReportingController() != null) {
+                HyBid.getReportingController().reportEvent(event);
+            }
+            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.PAUSE, mMacroHelper, false);
             getViewabilityAdSession().firePause();
+            isResumed = false;
         }
     }
 
@@ -554,7 +608,8 @@ class VideoAdControllerVast implements VideoAdController {
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
             Surface asd = new Surface(surface);
             mMediaPlayer.setSurface(asd);
-            resumeAd();
+            if (!adFinishedPlaying())
+                resumeAd();
         }
 
         @Override
@@ -573,9 +628,17 @@ class VideoAdControllerVast implements VideoAdController {
     };
 
     private void resumeAd() {
-        if (mMediaPlayer != null && !mMediaPlayer.isPlaying() && mViewControllerVast.isEndCard()) {
+        if (mMediaPlayer != null && !mMediaPlayer.isPlaying() && mViewControllerVast.isEndCard() && !isResumed && isVideoVisible()) {
+            isResumed = true;
             playAd();
-            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.RESUME, mMacroHelper);
+            ReportingEvent event = new ReportingEvent();
+            event.setEventType(Reporting.EventType.VIDEO_RESUME);
+            event.setCreativeType(Reporting.CreativeType.VIDEO);
+            event.setTimestamp(System.currentTimeMillis());
+            if (HyBid.getReportingController() != null) {
+                HyBid.getReportingController().reportEvent(event);
+            }
+            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.RESUME, mMacroHelper, false);
             getViewabilityAdSession().fireResume();
         }
     }
@@ -627,5 +690,10 @@ class VideoAdControllerVast implements VideoAdController {
     @Override
     public void setVideoVisible(boolean videoVisible) {
         this.videoVisible = videoVisible;
+    }
+
+    @Override
+    public void OnSystemVolumeChanged() {
+        muteVideo(mViewControllerVast.isMute(), false);
     }
 }
