@@ -17,7 +17,8 @@ import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.ui.adapters.QuoteAdapter
 
 
-class MoPubMediationNativeRecyclerViewFragment : Fragment(), MoPubNativeAdLoadedListener{
+class MoPubMediationNativeRecyclerViewFragment :
+    Fragment(R.layout.fragment_mopub_native_recycler_view), MoPubNativeAdLoadedListener {
     val TAG = MoPubMediationNativeRecyclerViewFragment::class.java.simpleName
 
     private var zoneId: String? = null
@@ -28,8 +29,6 @@ class MoPubMediationNativeRecyclerViewFragment : Fragment(), MoPubNativeAdLoaded
     private lateinit var quoteAdapter: QuoteAdapter
     private lateinit var mopubRecyclerAdapter: MoPubRecyclerAdapter
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_mopub_native_recycler_view, container, false)
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -37,16 +36,17 @@ class MoPubMediationNativeRecyclerViewFragment : Fragment(), MoPubNativeAdLoaded
         loadButton = view.findViewById(R.id.button_load)
         recyclerView = view.findViewById(R.id.list)
 
-        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubMediationNativeAdUnitId
+        val adUnitId = SettingsManager.getInstance(requireActivity())
+            .getSettings().mopubMediationNativeAdUnitId
 
         val viewBinder = ViewBinder.Builder(R.layout.layout_native_ad)
-                .mainImageId(R.id.ad_banner)
-                .iconImageId(R.id.ad_icon)
-                .titleId(R.id.ad_title)
-                .textId(R.id.ad_description)
-                .privacyInformationIconImageId(R.id.ad_choices)
-                .callToActionId(R.id.ad_call_to_action)
-                .build()
+            .mainImageId(R.id.ad_banner)
+            .iconImageId(R.id.ad_icon)
+            .titleId(R.id.ad_title)
+            .textId(R.id.ad_description)
+            .privacyInformationIconImageId(R.id.ad_choices)
+            .callToActionId(R.id.ad_call_to_action)
+            .build()
 
         val adRenderer = MoPubStaticNativeAdRenderer(viewBinder)
 
@@ -58,7 +58,8 @@ class MoPubMediationNativeRecyclerViewFragment : Fragment(), MoPubNativeAdLoaded
 
         mopubRecyclerAdapter.registerAdRenderer(adRenderer)
 
-        recyclerView.layoutManager = LinearLayoutManager(requireActivity(), RecyclerView.VERTICAL, false)
+        recyclerView.layoutManager =
+            LinearLayoutManager(requireActivity(), RecyclerView.VERTICAL, false)
         recyclerView.itemAnimator = DefaultItemAnimator()
         recyclerView.adapter = mopubRecyclerAdapter
 

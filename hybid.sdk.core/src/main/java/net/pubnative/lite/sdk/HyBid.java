@@ -75,11 +75,12 @@ public class HyBid {
     private static boolean sTestMode = false;
     private static boolean sLocationUpdatesEnabled = true;
     private static boolean sLocationTrackingEnabled = true;
+    private static boolean isCloseVideoAfterFinish = false;
+    private static boolean sMraidExpandEnabled = true;
     private static String sAge;
     private static String sGender;
     private static String sKeywords;
     private static String sBundleId;
-    private static Boolean isCloseVideoAfterFinish = false;
     private static Integer sHtmlInterstitialSkipOffset = -1;
     private static Integer sVideoInterstitialSkipOffset = -1;
     private static String sIabCategory;
@@ -358,12 +359,20 @@ public class HyBid {
         return sVideoInterstitialSkipOffset;
     }
 
-    public static void setCloseVideoAfterFinish(Boolean isClosing) {
+    public static void setCloseVideoAfterFinish(boolean isClosing) {
         isCloseVideoAfterFinish = isClosing;
     }
 
-    public static Boolean getCloseVideoAfterFinish() {
+    public static boolean getCloseVideoAfterFinish() {
         return isCloseVideoAfterFinish;
+    }
+
+    public static void setMraidExpandEnabled(boolean mraidExpandEnabled) {
+        sMraidExpandEnabled = mraidExpandEnabled;
+    }
+
+    public static boolean isMraidExpandEnabled() {
+        return sMraidExpandEnabled;
     }
 
     public interface InitialisationListener {

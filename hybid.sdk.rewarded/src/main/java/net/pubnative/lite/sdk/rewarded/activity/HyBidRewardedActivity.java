@@ -23,12 +23,12 @@
 package net.pubnative.lite.sdk.rewarded.activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -37,11 +37,14 @@ import android.widget.ProgressBar;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.ContentInfo;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastSender;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.views.CloseableContainer;
-import net.pubnative.lite.sdk.vpaid.volumeObserver.VolumeObserver;
+import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
+import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
+import net.pubnative.lite.sdk.vpaid.utils.Utils;
 
 public abstract class HyBidRewardedActivity extends Activity {
     public static final String EXTRA_ZONE_ID = "extra_pn_zone_id";
@@ -52,7 +55,7 @@ public abstract class HyBidRewardedActivity extends Activity {
     private Ad mAd;
     private String mZoneId;
     private HyBidRewardedBroadcastSender mBroadcastSender;
-    private ProgressBar progressBar;
+    private ProgressBar mProgressBar;
 
     public abstract View getAdView();
 
@@ -82,23 +85,16 @@ public abstract class HyBidRewardedActivity extends Activity {
                 FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
                 params.gravity = Gravity.CENTER;
 
-                progressBar = new ProgressBar(this);
+                mProgressBar = new ProgressBar(this);
                 setProgressBarInvisible();
 
                 FrameLayout.LayoutParams pBarParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
                 pBarParams.gravity = Gravity.CENTER;
 
-                mCloseableContainer.addView(progressBar, pBarParams);
+                mCloseableContainer.addView(mProgressBar, pBarParams);
 
                 mCloseableContainer.addView(adView, params);
                 mCloseableContainer.setBackgroundColor(Color.WHITE);
-
-                if (getAd() != null) {
-                    View contentInfo = getAd().getContentInfoContainer(this);
-                    if (contentInfo != null) {
-                        mCloseableContainer.addView(contentInfo);
-                    }
-                }
 
                 setContentView(mCloseableContainer);
             } else {
@@ -107,6 +103,29 @@ public abstract class HyBidRewardedActivity extends Activity {
         } else {
             finish();
         }
+    }
+
+    protected void setupContentInfo() {
+        setupContentInfo(null);
+    }
+
+    protected void setupContentInfo(Icon icon) {
+        if (getAd() != null && mCloseableContainer != null) {
+            ContentInfo contentInfo = Utils.parseContentInfo(icon);
+            View contentInfoView = getContentInfo(this, getAd(), contentInfo);
+            if (contentInfoView != null) {
+                mCloseableContainer.addView(contentInfoView);
+                if (contentInfo != null && contentInfo.getViewTrackers() != null && !contentInfo.getViewTrackers().isEmpty()) {
+                    for (String tracker : contentInfo.getViewTrackers()) {
+                        EventTracker.post(this, tracker, null, true);
+                    }
+                }
+            }
+        }
+    }
+
+    private View getContentInfo(Context context, Ad ad, ContentInfo contentInfo) {
+        return contentInfo == null ? ad.getContentInfoContainer(context) : ad.getContentInfoContainer(context, contentInfo);
     }
 
     private final CloseableContainer.OnCloseListener mCloseListener = new CloseableContainer.OnCloseListener() {
@@ -178,10 +197,10 @@ public abstract class HyBidRewardedActivity extends Activity {
     }
 
     protected void setProgressBarVisible() {
-        progressBar.setVisibility(View.VISIBLE);
+        mProgressBar.setVisibility(View.VISIBLE);
     }
 
     protected void setProgressBarInvisible() {
-        progressBar.setVisibility(View.INVISIBLE);
+        mProgressBar.setVisibility(View.INVISIBLE);
     }
 }

@@ -211,6 +211,10 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     }
 
     public View getContentInfo(Context context) {
+        return getContentInfo(context, null);
+    }
+
+    public View getContentInfo(Context context, ContentInfo contentInfo) {
         PNAPIContentInfoView result = null;
         AdData data = getMeta(APIMeta.CONTENT_INFO);
         if (data == null) {
@@ -238,8 +242,17 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     }
 
     public RelativeLayout getContentInfoContainer(Context context) {
-        View contentInfo = getContentInfo(context);
-        if (contentInfo != null) {
+        return getContentInfoContainer(context, null);
+    }
+
+    public RelativeLayout getContentInfoContainer(Context context, ContentInfo contentInfo) {
+        View contentInfoView = getCustomContentInfo(context, contentInfo);
+
+        if (contentInfoView == null) {
+            contentInfoView = getContentInfo(context);
+        }
+
+        if (contentInfoView != null) {
             RelativeLayout contentInfoContainer = new RelativeLayout(context);
 
             RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
@@ -249,10 +262,34 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
 
             contentInfoContainer.setLayoutParams(layoutParams);
-            contentInfoContainer.addView(contentInfo);
+            contentInfoContainer.addView(contentInfoView);
             return contentInfoContainer;
         } else {
             return null;
+        }
+    }
+
+    private PNAPIContentInfoView getCustomContentInfo(Context context, ContentInfo contentInfo){
+        if (contentInfo == null
+                || TextUtils.isEmpty(contentInfo.getIconUrl())
+                || TextUtils.isEmpty(contentInfo.getLinkUrl())) {
+            return null;
+        } else {
+            PNAPIContentInfoView result = new PNAPIContentInfoView(context);
+            result.setIconUrl(contentInfo.getIconUrl());
+            result.setIconClickUrl(contentInfo.getLinkUrl());
+            if (TextUtils.isEmpty(contentInfo.getText())) {
+                result.setContextText(CONTENT_INFO_TEXT);
+            } else {
+                result.setContextText(contentInfo.getText());
+            }
+            result.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ((PNAPIContentInfoView) view).openLayout();
+                }
+            });
+            return result;
         }
     }
 

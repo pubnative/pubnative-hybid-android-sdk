@@ -71,6 +71,13 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
                 VideoAdCacheItem adCacheItem = HyBid.getVideoAdCache().remove(getZoneId());
                 if (adCacheItem != null) {
                     mVideoAd.setVideoCacheItem(adCacheItem);
+                    if (adCacheItem.getAdParams() != null && adCacheItem.getAdParams().getAdIcon() != null) {
+                        setupContentInfo(adCacheItem.getAdParams().getAdIcon());
+                    } else {
+                        setupContentInfo();
+                    }
+                } else {
+                    setupContentInfo();
                 }
 
                 mVideoPlayer.postDelayed(new Runnable() {

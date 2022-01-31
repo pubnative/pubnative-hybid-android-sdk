@@ -34,6 +34,7 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
+import net.pubnative.lite.sdk.CacheListener;
 import net.pubnative.lite.sdk.DiagnosticConstants;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
@@ -222,8 +223,12 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     }
 
     public void prepare() {
+        prepare(null);
+    }
+
+    public void prepare(CacheListener cacheListener) {
         if (mRequestManager != null && mAd != null) {
-            mRequestManager.cacheAd(mAd);
+            mRequestManager.cacheAd(mAd, cacheListener);
         }
     }
 

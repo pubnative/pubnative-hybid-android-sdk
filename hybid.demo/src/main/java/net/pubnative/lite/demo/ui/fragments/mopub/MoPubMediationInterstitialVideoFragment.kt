@@ -14,15 +14,14 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 
-class MoPubMediationInterstitialVideoFragment: Fragment(), MoPubInterstitial.InterstitialAdListener {
+class MoPubMediationInterstitialVideoFragment :
+    Fragment(R.layout.fragment_mopub_interstitial_video), MoPubInterstitial.InterstitialAdListener {
     val TAG = MoPubMediationInterstitialVideoFragment::class.java.simpleName
 
     private lateinit var mopubInterstitial: MoPubInterstitial
     private lateinit var loadButton: Button
     private lateinit var showButton: Button
     private lateinit var errorView: TextView
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_mopub_interstitial_video, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -32,7 +31,8 @@ class MoPubMediationInterstitialVideoFragment: Fragment(), MoPubInterstitial.Int
         showButton = view.findViewById(R.id.button_show)
         showButton.isEnabled = false
 
-        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubMediationInterstitialVideoAdUnitId
+        val adUnitId = SettingsManager.getInstance(requireActivity())
+            .getSettings().mopubMediationInterstitialVideoAdUnitId
 
         mopubInterstitial = MoPubInterstitial(requireActivity(), adUnitId)
         mopubInterstitial.interstitialAdListener = this
@@ -59,7 +59,10 @@ class MoPubMediationInterstitialVideoFragment: Fragment(), MoPubInterstitial.Int
         displayLogs()
     }
 
-    override fun onInterstitialFailed(interstitial: MoPubInterstitial?, errorCode: MoPubErrorCode?) {
+    override fun onInterstitialFailed(
+        interstitial: MoPubInterstitial?,
+        errorCode: MoPubErrorCode?
+    ) {
         Log.d(TAG, "onInterstitialFailed")
         displayLogs()
         errorView.text = errorCode.toString()

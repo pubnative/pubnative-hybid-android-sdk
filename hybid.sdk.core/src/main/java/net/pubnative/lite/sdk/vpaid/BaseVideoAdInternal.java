@@ -356,7 +356,6 @@ abstract class BaseVideoAdInternal {
         mIsReady = true;
         mAdState = AdState.NONE;
         stopFetcherTimer();
-        getViewabilityAdSession().fireLoaded();
         if (mVideoAdListener != null) {
             mVideoAdListener.onAdLoadSuccess();
         } else {

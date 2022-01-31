@@ -7,14 +7,20 @@ import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.widget.FrameLayout;
 
+import net.pubnative.lite.sdk.models.ContentInfo;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
+import net.pubnative.lite.sdk.vpaid.models.vast.IconViewTracking;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Utils {
 
@@ -43,13 +49,13 @@ public class Utils {
         }
 
         try {
-                ConnectivityManager connectivityManager =
-                        (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-                if (connectivityManager == null) {
-                    return false;
-                }
-                NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
-                return activeNetwork != null && activeNetwork.isConnected() && activeNetwork.isAvailable();
+            ConnectivityManager connectivityManager =
+                    (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (connectivityManager == null) {
+                return false;
+            }
+            NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+            return activeNetwork != null && activeNetwork.isConnected() && activeNetwork.isAvailable();
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -129,7 +135,7 @@ public class Utils {
             if (lp.height > mResizeHeight) {
                 float factor = (float) mResizeHeight / (float) lp.height;
                 lp.height = mResizeHeight;
-                lp.width = (int)(lp.width * factor);
+                lp.width = (int) (lp.width * factor);
             }
 
             blackLines = mResizeHeight - lp.height;
@@ -143,7 +149,7 @@ public class Utils {
             if (lp.width > mResizeWidth) {
                 float factor = (float) mResizeWidth / (float) lp.width;
                 lp.width = mResizeWidth;
-                lp.height = (int)(lp.height * factor);
+                lp.height = (int) (lp.height * factor);
             }
 
             blackLines = mResizeWidth - lp.width;
@@ -209,4 +215,34 @@ public class Utils {
         return Integer.parseInt(progress);
     }
 
+    public static ContentInfo parseContentInfo(Icon icon) {
+        if (icon == null) {
+            return null;
+        }
+
+        String iconUrl = "";
+        if (icon.getStaticResources() != null
+                && !icon.getStaticResources().isEmpty()
+                && !TextUtils.isEmpty(icon.getStaticResources().get(0).getText())) {
+            iconUrl = icon.getStaticResources().get(0).getText();
+        }
+
+        String clickUrl = "";
+        if (icon.getIconClicks() != null
+                && icon.getIconClicks().getIconClickThrough() != null
+                && !TextUtils.isEmpty(icon.getIconClicks().getIconClickThrough().getText())) {
+            clickUrl = icon.getIconClicks().getIconClickThrough().getText();
+        }
+
+        List<String> viewTrackers = new ArrayList<>();
+        if (icon.getIconViewTrackingList() != null && !icon.getIconViewTrackingList().isEmpty()) {
+            for (IconViewTracking tracking : icon.getIconViewTrackingList()) {
+                if (!TextUtils.isEmpty(tracking.getText())) {
+                    viewTrackers.add(tracking.getText());
+                }
+            }
+        }
+
+        return TextUtils.isEmpty(iconUrl) || TextUtils.isEmpty(clickUrl) ? null : new ContentInfo(iconUrl, clickUrl, "", viewTrackers);
+    }
 }

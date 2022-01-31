@@ -27,6 +27,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
+import net.pubnative.lite.sdk.CacheListener;
 import net.pubnative.lite.sdk.DiagnosticConstants;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
@@ -220,8 +221,12 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     }
 
     public void prepare() {
+        prepare(null);
+    }
+
+    public void prepare(CacheListener cacheListener) {
         if (mRequestManager != null && mAd != null) {
-            mRequestManager.cacheAd(mAd);
+            mRequestManager.cacheAd(mAd, cacheListener);
         }
     }
 

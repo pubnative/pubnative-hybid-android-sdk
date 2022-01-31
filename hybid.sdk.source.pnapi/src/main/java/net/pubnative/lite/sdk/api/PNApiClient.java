@@ -212,7 +212,7 @@ public class PNApiClient {
         return PNApiUrlComposer.buildUrl(mApiUrl, adRequest);
     }
 
-    protected void processStream(String result, AdRequestListener listener) {
+    public void processStream(String result, AdRequestListener listener) {
         AdResponse apiResponseModel = null;
         Exception parseException = null;
         try {

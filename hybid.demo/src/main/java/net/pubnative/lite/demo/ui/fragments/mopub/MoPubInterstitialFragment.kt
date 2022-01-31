@@ -39,6 +39,8 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
+import net.pubnative.lite.sdk.CacheListener
+import net.pubnative.lite.sdk.HyBidError
 import net.pubnative.lite.sdk.api.InterstitialRequestManager
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
@@ -47,7 +49,9 @@ import net.pubnative.lite.sdk.utils.HeaderBiddingUtils
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, MoPubInterstitial.InterstitialAdListener {
+class MoPubInterstitialFragment : Fragment(R.layout.fragment_mopub_interstitial),
+    RequestManager.RequestListener, CacheListener,
+    MoPubInterstitial.InterstitialAdListener {
     val TAG = MoPubInterstitialFragment::class.java.simpleName
 
     private lateinit var requestManager: RequestManager
@@ -65,8 +69,6 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
 
     private var cachingEnabled: Boolean = true
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_mopub_interstitial, container, false)
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -82,7 +84,8 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
         prepareButton.isEnabled = false
         showButton.isEnabled = false
 
-        adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubInterstitialAdUnitId
+        adUnitId =
+            SettingsManager.getInstance(requireActivity()).getSettings().mopubInterstitialAdUnitId
 
         requestManager = InterstitialRequestManager()
         mopubInterstitial = MoPubInterstitial(requireActivity(), adUnitId!!)
@@ -99,11 +102,11 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
 
         prepareButton.setOnClickListener {
             ad?.let { ad ->
-                requestManager.cacheAd(ad)
+                requestManager.cacheAd(ad, this)
             }
         }
 
-        showButton.setOnClickListener{
+        showButton.setOnClickListener {
             mopubInterstitial.show()
         }
 
@@ -112,8 +115,18 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
             prepareButton.visibility = if (isChecked) View.GONE else View.VISIBLE
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
-        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), creativeIdView.text.toString()) }
+        errorView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                errorView.text.toString()
+            )
+        }
+        creativeIdView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                creativeIdView.text.toString()
+            )
+        }
     }
 
     override fun onDestroy() {
@@ -131,8 +144,12 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
     // --------------- HyBid Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
         this.ad = ad
-        mopubInterstitial.setKeywords(HeaderBiddingUtils.getHeaderBiddingKeywords(ad))
-        mopubInterstitial.load()
+        if (cachingEnabled) {
+            mopubInterstitial.setKeywords(HeaderBiddingUtils.getHeaderBiddingKeywords(ad))
+            mopubInterstitial.load()
+        } else {
+            prepareButton.isEnabled = true
+        }
 
         Log.d(TAG, "onRequestSuccess")
         displayLogs()
@@ -149,14 +166,37 @@ class MoPubInterstitialFragment : Fragment(), RequestManager.RequestListener, Mo
         displayLogs()
     }
 
+    // --------------- HyBid Cache Listener --------------------
+    override fun onCacheSuccess() {
+        Log.d(TAG, "onCacheSuccess")
+        prepareButton.isEnabled = false
+
+        mopubInterstitial.setKeywords(HeaderBiddingUtils.getHeaderBiddingKeywords(ad))
+        mopubInterstitial.load()
+    }
+
+    override fun onCacheFailed(error: Throwable?) {
+        prepareButton.isEnabled = false
+
+        if (error != null && error is HyBidError) {
+            Log.e(TAG, error.message ?: " - ")
+            errorView.text = error.message ?: " - "
+        } else {
+            errorView.text = " - "
+        }
+    }
+
     // ------------- MoPub Interstitial Listener ------------------
     override fun onInterstitialLoaded(interstitial: MoPubInterstitial?) {
         showButton.isEnabled = true
-        prepareButton.isEnabled = !cachingEnabled
+        prepareButton.isEnabled = false
         Log.d(TAG, "onInterstitialLoaded")
     }
 
-    override fun onInterstitialFailed(interstitial: MoPubInterstitial?, errorCode: MoPubErrorCode?) {
+    override fun onInterstitialFailed(
+        interstitial: MoPubInterstitial?,
+        errorCode: MoPubErrorCode?
+    ) {
         prepareButton.isEnabled = false
         showButton.isEnabled = false
         Log.d(TAG, "onInterstitialFailed")

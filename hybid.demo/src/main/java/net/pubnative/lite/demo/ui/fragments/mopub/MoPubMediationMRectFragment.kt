@@ -15,7 +15,8 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 
-class MoPubMediationMRectFragment : Fragment(R.layout.fragment_mopub_mrect), MoPubView.BannerAdListener {
+class MoPubMediationMRectFragment : Fragment(R.layout.fragment_mopub_mrect),
+    MoPubView.BannerAdListener {
     val TAG = MoPubMediationMRectFragment::class.java.simpleName
 
     private lateinit var mopubMedium: MoPubView
@@ -31,7 +32,8 @@ class MoPubMediationMRectFragment : Fragment(R.layout.fragment_mopub_mrect), MoP
         mopubMedium = view.findViewById(R.id.mopub_mrect)
         autoRefreshSwitch = view.findViewById(R.id.check_auto_refresh)
 
-        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubMediationMediumAdUnitId
+        val adUnitId = SettingsManager.getInstance(requireActivity())
+            .getSettings().mopubMediationMediumAdUnitId
 
         mopubMedium.bannerAdListener = this
         mopubMedium.setAdUnitId(adUnitId)

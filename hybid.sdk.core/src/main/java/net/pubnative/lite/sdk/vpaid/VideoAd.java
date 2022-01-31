@@ -73,6 +73,8 @@ public class VideoAd extends BaseVideoAd {
                                 }
 
                                 getAdController().setVideoVisible(mBannerView.getVisibility() == View.VISIBLE);
+
+                                getViewabilityAdSession().fireLoaded();
                                 getAdController().playAd();
 
                                 validateAudioState();

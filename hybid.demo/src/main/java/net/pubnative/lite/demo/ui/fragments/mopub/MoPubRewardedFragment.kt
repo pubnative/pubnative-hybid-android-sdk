@@ -42,7 +42,9 @@ import net.pubnative.lite.demo.managers.MoPubManager
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
+import net.pubnative.lite.sdk.CacheListener
 import net.pubnative.lite.sdk.HyBid
+import net.pubnative.lite.sdk.HyBidError
 import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.api.RewardedRequestManager
 import net.pubnative.lite.sdk.models.Ad
@@ -52,7 +54,7 @@ import net.pubnative.lite.sdk.utils.HeaderBiddingUtils
  * Created by erosgarciaponte on 30.01.18.
  */
 class MoPubRewardedFragment : Fragment(R.layout.fragment_mopub_rewarded),
-    RequestManager.RequestListener, MoPubRewardedAdListener {
+    RequestManager.RequestListener, CacheListener, MoPubRewardedAdListener {
 
     val TAG = MoPubRewardedFragment::class.java.simpleName
 
@@ -102,7 +104,7 @@ class MoPubRewardedFragment : Fragment(R.layout.fragment_mopub_rewarded),
 
         prepareButton.setOnClickListener {
             ad?.let { ad ->
-                requestManager.cacheAd(ad)
+                requestManager.cacheAd(ad, this)
             }
         }
 
@@ -150,15 +152,19 @@ class MoPubRewardedFragment : Fragment(R.layout.fragment_mopub_rewarded),
     // --------------- HyBid Request Listener --------------------
     override fun onRequestSuccess(ad: Ad?) {
         this.ad = ad
-        adUnitId?.let {
-            MoPubRewardedAds.loadRewardedAd(
-                it,
-                MoPubRewardedAdManager.RequestParameters(
-                    HeaderBiddingUtils.getHeaderBiddingKeywords(
-                        ad
+        if (cachingEnabled) {
+            adUnitId?.let {
+                MoPubRewardedAds.loadRewardedAd(
+                    it,
+                    MoPubRewardedAdManager.RequestParameters(
+                        HeaderBiddingUtils.getHeaderBiddingKeywords(
+                            ad
+                        )
                     )
                 )
-            )
+            }
+        } else {
+            prepareButton.isEnabled = true
         }
 
         Log.d(TAG, "onRequestSuccess")
@@ -176,11 +182,39 @@ class MoPubRewardedFragment : Fragment(R.layout.fragment_mopub_rewarded),
         displayLogs()
     }
 
+    // --------------- HyBid Cache Listener --------------------
+    override fun onCacheSuccess() {
+        Log.d(TAG, "onCacheSuccess")
+        prepareButton.isEnabled = false
+
+        adUnitId?.let {
+            MoPubRewardedAds.loadRewardedAd(
+                it,
+                MoPubRewardedAdManager.RequestParameters(
+                    HeaderBiddingUtils.getHeaderBiddingKeywords(
+                        ad
+                    )
+                )
+            )
+        }
+    }
+
+    override fun onCacheFailed(error: Throwable?) {
+        prepareButton.isEnabled = false
+
+        if (error != null && error is HyBidError) {
+            Log.e(TAG, error.message ?: " - ")
+            errorView.text = error.message ?: " - "
+        } else {
+            errorView.text = " - "
+        }
+    }
+
     // ------------- MoPub Rewarded Listener ------------------
     override fun onRewardedAdLoadSuccess(adUnitId: String) {
         Log.d(TAG, "onRewardedAdLoadSuccess")
         showButton.isEnabled = true
-        prepareButton.isEnabled = !cachingEnabled
+        prepareButton.isEnabled = false
     }
 
     override fun onRewardedAdLoadFailure(adUnitId: String, errorCode: MoPubErrorCode) {

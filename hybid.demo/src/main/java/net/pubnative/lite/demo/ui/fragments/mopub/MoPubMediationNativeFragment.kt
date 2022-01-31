@@ -16,7 +16,8 @@ import net.pubnative.lite.demo.ui.activities.TabActivity
 import java.util.*
 
 class
-MoPubMediationNativeFragment : Fragment(), MoPubNative.MoPubNativeNetworkListener, NativeAd.MoPubNativeEventListener {
+MoPubMediationNativeFragment : Fragment(R.layout.fragment_mopub_native),
+    MoPubNative.MoPubNativeNetworkListener, NativeAd.MoPubNativeEventListener {
     val TAG = MoPubMediationNativeFragment::class.java.simpleName
 
     private lateinit var mopubNativeContainer: FrameLayout
@@ -25,8 +26,6 @@ MoPubMediationNativeFragment : Fragment(), MoPubNative.MoPubNativeNetworkListene
 
     private var mopubNative: MoPubNative? = null
     private var adapterHelper: AdapterHelper? = null
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_mopub_native, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -39,28 +38,35 @@ MoPubMediationNativeFragment : Fragment(), MoPubNative.MoPubNativeNetworkListene
         loadButton = view.findViewById(R.id.button_load)
         mopubNativeContainer = view.findViewById(R.id.ad_container)
 
-        val adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubMediationNativeAdUnitId
+        val adUnitId = SettingsManager.getInstance(requireActivity())
+            .getSettings().mopubMediationNativeAdUnitId
 
         view.findViewById<Button>(R.id.button_load).setOnClickListener {
             errorView.text = ""
             mopubNative?.destroy()
 
-            val desiredAssets = EnumSet.of(RequestParameters.NativeAdAsset.TITLE,
-                    RequestParameters.NativeAdAsset.TEXT,
-                    RequestParameters.NativeAdAsset.CALL_TO_ACTION_TEXT,
-                    RequestParameters.NativeAdAsset.MAIN_IMAGE,
-                    RequestParameters.NativeAdAsset.ICON_IMAGE,
-                    RequestParameters.NativeAdAsset.STAR_RATING)
+            val desiredAssets = EnumSet.of(
+                RequestParameters.NativeAdAsset.TITLE,
+                RequestParameters.NativeAdAsset.TEXT,
+                RequestParameters.NativeAdAsset.CALL_TO_ACTION_TEXT,
+                RequestParameters.NativeAdAsset.MAIN_IMAGE,
+                RequestParameters.NativeAdAsset.ICON_IMAGE,
+                RequestParameters.NativeAdAsset.STAR_RATING
+            )
 
             mopubNative = MoPubNative(requireContext(), adUnitId, this)
-            mopubNative?.registerAdRenderer(MoPubStaticNativeAdRenderer(ViewBinder.Builder(R.layout.layout_native_ad)
-                    .mainImageId(R.id.ad_banner)
-                    .iconImageId(R.id.ad_icon)
-                    .titleId(R.id.ad_title)
-                    .textId(R.id.ad_description)
-                    .privacyInformationIconImageId(R.id.ad_choices)
-                    .callToActionId(R.id.ad_call_to_action)
-                    .build()))
+            mopubNative?.registerAdRenderer(
+                MoPubStaticNativeAdRenderer(
+                    ViewBinder.Builder(R.layout.layout_native_ad)
+                        .mainImageId(R.id.ad_banner)
+                        .iconImageId(R.id.ad_icon)
+                        .titleId(R.id.ad_title)
+                        .textId(R.id.ad_description)
+                        .privacyInformationIconImageId(R.id.ad_choices)
+                        .callToActionId(R.id.ad_call_to_action)
+                        .build()
+                )
+            )
 
             val requestParameters = RequestParameters.Builder().desiredAssets(desiredAssets).build()
 

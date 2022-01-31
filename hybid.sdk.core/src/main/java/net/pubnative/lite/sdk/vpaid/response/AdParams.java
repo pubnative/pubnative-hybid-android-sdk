@@ -4,6 +4,7 @@ import com.iab.omid.library.pubnativenet.adsession.VerificationScriptResource;
 
 import net.pubnative.lite.sdk.vpaid.models.vast.AdServingId;
 import net.pubnative.lite.sdk.vpaid.models.vast.Category;
+import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
 import net.pubnative.lite.sdk.vpaid.models.vast.Tracking;
 
 import java.util.ArrayList;
@@ -19,11 +20,11 @@ public class AdParams {
     private String adParams;
     private String vpaidJsUrl;
     private String skipTime;
+    private Icon adIcon;
     private int publisherSkipSeconds = 0;
 
     private final List<String> videoFileUrlsList = new ArrayList<>();
     private final List<String> endCardUrlList = new ArrayList<>();
-
     private final List<String> impressions = new ArrayList<>();
     private final List<String> companionCreativeViewEvents = new ArrayList<>();
     private final List<String> videoClicks = new ArrayList<>();
@@ -200,6 +201,14 @@ public class AdParams {
         if (adCategories != null) {
             this.adCategories.addAll(adCategories);
         }
+    }
+
+    public Icon getAdIcon() {
+        return adIcon;
+    }
+
+    public void setAdIcon(Icon adIcon) {
+        this.adIcon = adIcon;
     }
 
     public List<Category> getAdCategories() {

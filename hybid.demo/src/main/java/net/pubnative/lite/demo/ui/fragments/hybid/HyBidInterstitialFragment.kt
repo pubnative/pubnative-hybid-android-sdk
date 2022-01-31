@@ -34,6 +34,7 @@ import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
+import net.pubnative.lite.sdk.CacheListener
 import net.pubnative.lite.sdk.DiagnosticsManager
 import net.pubnative.lite.sdk.HyBidError
 import net.pubnative.lite.sdk.VideoListener
@@ -44,7 +45,7 @@ import java.util.*
  * Created by erosgarciaponte on 30.01.18.
  */
 class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial),
-    HyBidInterstitialAd.Listener, VideoListener {
+    HyBidInterstitialAd.Listener, VideoListener, CacheListener {
 
     val TAG = HyBidInterstitialFragment::class.java.simpleName
 
@@ -83,7 +84,7 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
         }
 
         prepareButton.setOnClickListener {
-            interstitial?.prepare()
+            interstitial?.prepare(this)
         }
 
         showButton.setOnClickListener {
@@ -132,7 +133,7 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
     override fun onInterstitialLoaded() {
         Log.d(TAG, "onInterstitialLoaded")
         prepareButton.isEnabled = !cachingEnabled
-        showButton.isEnabled = true
+        showButton.isEnabled = cachingEnabled
         displayLogs()
         if (!TextUtils.isEmpty(interstitial?.creativeId)) {
             creativeIdView.text = interstitial?.creativeId
@@ -190,6 +191,25 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
 
     override fun onVideoFinished() {
         Log.d(TAG, "onVideoFinished")
+    }
+
+    override fun onCacheSuccess() {
+        Log.d(TAG, "onCacheSuccess")
+        prepareButton.isEnabled = false
+        showButton.isEnabled = true
+    }
+
+    override fun onCacheFailed(error: Throwable?) {
+        prepareButton.isEnabled = false
+        showButton.isEnabled = true
+        if (error != null && error is HyBidError) {
+            Log.e(TAG, error.message ?: " - ")
+            errorCodeView.text = error.errorCode.code.toString()
+            errorView.text = error.message ?: " - "
+        } else {
+            errorCodeView.text = " - "
+            errorView.text = " - "
+        }
     }
 
     private fun displayLogs() {

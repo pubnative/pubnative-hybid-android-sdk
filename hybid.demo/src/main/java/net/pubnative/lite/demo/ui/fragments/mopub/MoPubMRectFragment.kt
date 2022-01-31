@@ -46,7 +46,8 @@ import net.pubnative.lite.sdk.utils.HeaderBiddingUtils
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView.BannerAdListener {
+class MoPubMRectFragment : Fragment(R.layout.fragment_mopub_mrect), RequestManager.RequestListener,
+    MoPubView.BannerAdListener {
     val TAG = MoPubMRectFragment::class.java.simpleName
 
     private lateinit var requestManager: RequestManager
@@ -57,8 +58,6 @@ class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_mopub_mrect, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -84,8 +83,18 @@ class MoPubMRectFragment : Fragment(), RequestManager.RequestListener, MoPubView
             loadPNAd()
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
-        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), creativeIdView.text.toString()) }
+        errorView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                errorView.text.toString()
+            )
+        }
+        creativeIdView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                creativeIdView.text.toString()
+            )
+        }
     }
 
     override fun onDestroy() {

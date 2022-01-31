@@ -49,30 +49,66 @@ public class SignalDataProcessor {
         try {
             final SignalData signalData = new SignalData(new JSONObject(signalDataValue));
             if (!TextUtils.isEmpty(signalData.tagid)) {
-                if (mApiClient != null) {
-                    mApiClient.getAd(signalData.admurl, new PNApiClient.AdRequestListener() {
-                        @Override
-                        public void onSuccess(Ad ad) {
-                            if (mIsDestroyed) {
-                                return;
+                if (!TextUtils.isEmpty(signalData.admurl)) {
+                    if (mApiClient != null) {
+                        mApiClient.getAd(signalData.admurl, new PNApiClient.AdRequestListener() {
+                            @Override
+                            public void onSuccess(Ad ad) {
+                                if (mIsDestroyed) {
+                                    return;
+                                }
+
+                                Logger.d(TAG, "Received ad response for zone id: " + signalData.tagid);
+                                processAd(signalData.tagid, ad);
                             }
 
-                            Logger.d(TAG, "Received ad response for zone id: " + signalData.tagid);
-                            processAd(signalData.tagid, ad);
+                            @Override
+                            public void onFailure(Throwable exception) {
+                                if (mIsDestroyed) {
+                                    return;
+                                }
+
+                                Logger.w(TAG, exception.getMessage());
+                                if (mListener != null) {
+                                    mListener.onError(new Exception(exception));
+                                }
+                            }
+                        });
+                    } else {
+                        if (mListener != null) {
+                            mListener.onError(new HyBidError(HyBidErrorCode.INTERNAL_ERROR));
                         }
+                    }
+                } else if (!TextUtils.isEmpty(signalData.adm)) {
+                    if (mApiClient != null) {
+                        mApiClient.processStream(signalData.adm, new PNApiClient.AdRequestListener() {
+                            @Override
+                            public void onSuccess(Ad ad) {
+                                if (mIsDestroyed) {
+                                    return;
+                                }
 
-                        @Override
-                        public void onFailure(Throwable exception) {
-                            if (mIsDestroyed) {
-                                return;
+                                Logger.d(TAG, "Received ad response for zone id: " + signalData.tagid);
+                                processAd(signalData.tagid, ad);
                             }
 
-                            Logger.w(TAG, exception.getMessage());
-                            if (mListener != null) {
-                                mListener.onError(new Exception(exception));
+                            @Override
+                            public void onFailure(Throwable exception) {
+                                if (mIsDestroyed) {
+                                    return;
+                                }
+
+                                Logger.w(TAG, exception.getMessage());
+                                if (mListener != null) {
+                                    mListener.onError(new Exception(exception));
+                                }
                             }
+                        });
+                    } else {
+                        if (mListener != null) {
+                            mListener.onError(new HyBidError(HyBidErrorCode.INTERNAL_ERROR));
                         }
-                    });
+                    }
                 } else {
                     if (mListener != null) {
                         mListener.onError(new HyBidError(HyBidErrorCode.INTERNAL_ERROR));

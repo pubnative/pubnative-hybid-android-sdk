@@ -46,7 +46,8 @@ import net.pubnative.lite.sdk.utils.HeaderBiddingUtils
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class MoPubBannerFragment : Fragment(), RequestManager.RequestListener, MoPubView.BannerAdListener {
+class MoPubBannerFragment : Fragment(R.layout.fragment_mopub_banner),
+    RequestManager.RequestListener, MoPubView.BannerAdListener {
     val TAG = MoPubBannerFragment::class.java.simpleName
 
     private lateinit var requestManager: RequestManager
@@ -57,8 +58,6 @@ class MoPubBannerFragment : Fragment(), RequestManager.RequestListener, MoPubVie
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_mopub_banner, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -84,8 +83,18 @@ class MoPubBannerFragment : Fragment(), RequestManager.RequestListener, MoPubVie
             loadPNAd()
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
-        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), creativeIdView.text.toString()) }
+        errorView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                errorView.text.toString()
+            )
+        }
+        creativeIdView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                creativeIdView.text.toString()
+            )
+        }
     }
 
     override fun onDestroy() {
@@ -106,7 +115,12 @@ class MoPubBannerFragment : Fragment(), RequestManager.RequestListener, MoPubVie
 
         adUnitId?.let {
             mopubBanner.setAdUnitId(it)
-            mopubBanner.setKeywords(HeaderBiddingUtils.getHeaderBiddingKeywords(ad, HeaderBiddingUtils.KeywordMode.TWO_DECIMALS))
+            mopubBanner.setKeywords(
+                HeaderBiddingUtils.getHeaderBiddingKeywords(
+                    ad,
+                    HeaderBiddingUtils.KeywordMode.TWO_DECIMALS
+                )
+            )
             mopubBanner.adSize = MoPubView.MoPubAdSize.HEIGHT_50
             mopubBanner.loadAd()
         }

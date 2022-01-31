@@ -1,6 +1,7 @@
 package net.pubnative.lite.sdk.interstitial.activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -16,8 +17,12 @@ import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastSender;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.ContentInfo;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.views.CloseableContainer;
+import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
+import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
+import net.pubnative.lite.sdk.vpaid.utils.Utils;
 import net.pubnative.lite.sdk.vpaid.volumeObserver.VolumeObserver;
 
 
@@ -32,6 +37,7 @@ public abstract class HyBidInterstitialActivity extends Activity {
     private String mZoneId;
     private HyBidInterstitialBroadcastSender mBroadcastSender;
     private ProgressBar progressBar;
+    private Boolean isVast = false;
 
     public abstract View getAdView();
 
@@ -73,13 +79,14 @@ public abstract class HyBidInterstitialActivity extends Activity {
                 mCloseableContainer.addView(adView, params);
                 mCloseableContainer.setBackgroundColor(Color.WHITE);
                 showInterstitialCloseButton();
-                if (shouldShowContentInfo() && getAd() != null) {
-                    View contentInfo = getAd().getContentInfoContainer(this);
-                    if (contentInfo != null) {
-                        mCloseableContainer.addView(contentInfo);
+                if (!isVast) {
+                    if (shouldShowContentInfo() && getAd() != null) {
+                        View contentInfo = getAd().getContentInfoContainer(this);
+                        if (contentInfo != null) {
+                            mCloseableContainer.addView(contentInfo);
+                        }
                     }
                 }
-
                 setContentView(mCloseableContainer);
             } else {
                 finish();
@@ -87,6 +94,29 @@ public abstract class HyBidInterstitialActivity extends Activity {
         } else {
             finish();
         }
+    }
+
+    protected void setupContentInfo() {
+        setupContentInfo(null);
+    }
+
+    protected void setupContentInfo(Icon icon) {
+        if (getAd() != null && mCloseableContainer != null) {
+            ContentInfo contentInfo = Utils.parseContentInfo(icon);
+            View contentInfoView = getContentInfo(this, getAd(), contentInfo);
+            if (contentInfoView != null) {
+                mCloseableContainer.addView(contentInfoView);
+                if (contentInfo != null && contentInfo.getViewTrackers() != null && !contentInfo.getViewTrackers().isEmpty()) {
+                    for (String tracker : contentInfo.getViewTrackers()) {
+                        EventTracker.post(this, tracker, null, true);
+                    }
+                }
+            }
+        }
+    }
+
+    private View getContentInfo(Context context, Ad ad, ContentInfo contentInfo) {
+        return contentInfo == null ? ad.getContentInfoContainer(context) : ad.getContentInfoContainer(context, contentInfo);
     }
 
     private final CloseableContainer.OnCloseListener mCloseListener = new CloseableContainer.OnCloseListener() {
@@ -165,5 +195,9 @@ public abstract class HyBidInterstitialActivity extends Activity {
 
     protected void setProgressBarInvisible() {
         progressBar.setVisibility(View.INVISIBLE);
+    }
+
+    protected void setIsVast(Boolean isVast) {
+        this.isVast = isVast;
     }
 }

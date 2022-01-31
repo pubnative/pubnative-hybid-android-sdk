@@ -19,19 +19,14 @@ import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.sdk.HyBid
 
-class MoPubMediationRewardedFragment : Fragment(), MoPubRewardedAdListener {
+class MoPubMediationRewardedFragment : Fragment(R.layout.fragment_mopub_rewarded),
+    MoPubRewardedAdListener {
     val TAG = MoPubMediationRewardedFragment::class.java.simpleName
     private lateinit var loadButton: Button
     private lateinit var showButton: Button
     private lateinit var errorView: TextView
 
     private var adUnitId: String? = null
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_mopub_rewarded, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

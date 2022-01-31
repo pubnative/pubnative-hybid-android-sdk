@@ -47,7 +47,8 @@ import java.util.*
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.Listener, VideoListener {
+class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.Listener,
+    VideoListener {
     val TAG = HyBidBannerFragment::class.java.simpleName
 
     private val AUTO_REFRESH_MILLIS: Long = 30 * 1000
@@ -183,7 +184,10 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
 
     override fun onAdImpression() {
         Log.d(TAG, "onAdImpression")
-        DiagnosticsManager.printPlacementDiagnosticsLog(requireContext(), hybidBanner.placementParams)
+        DiagnosticsManager.printPlacementDiagnosticsLog(
+            requireContext(),
+            hybidBanner.placementParams
+        )
     }
 
     override fun onAdClick() {
@@ -192,7 +196,7 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
 
     // --------------- HyBid Video Listener --------------------
     override fun onVideoError(progressPercentage: Int) {
-        Log.d(TAG, String.format(Locale.ENGLISH,"onVideoError progress: %d", progressPercentage))
+        Log.d(TAG, String.format(Locale.ENGLISH, "onVideoError progress: %d", progressPercentage))
     }
 
     override fun onVideoStarted() {
@@ -200,7 +204,10 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
     }
 
     override fun onVideoDismissed(progressPercentage: Int) {
-        Log.d(TAG, String.format(Locale.ENGLISH,"onVideoDismissed progress: %d", progressPercentage))
+        Log.d(
+            TAG,
+            String.format(Locale.ENGLISH, "onVideoDismissed progress: %d", progressPercentage)
+        )
     }
 
     override fun onVideoFinished() {

@@ -21,6 +21,7 @@ import net.pubnative.lite.sdk.vpaid.models.vast.CompanionClickTracking;
 import net.pubnative.lite.sdk.vpaid.models.vast.Creative;
 import net.pubnative.lite.sdk.vpaid.models.vast.Error;
 import net.pubnative.lite.sdk.vpaid.models.vast.Extension;
+import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
 import net.pubnative.lite.sdk.vpaid.models.vast.Impression;
 import net.pubnative.lite.sdk.vpaid.models.vast.InLine;
 import net.pubnative.lite.sdk.vpaid.models.vast.JavaScriptResource;
@@ -249,6 +250,7 @@ public class VastProcessor {
         if (adSource.getCreatives() != null && adSource.getCreatives().getCreatives() != null) {
             List<Creative> creativeList = adSource.getCreatives().getCreatives();
 
+
             Linear linear = null;
             for (Creative creative : creativeList) {
                 if (creative.getLinear() != null) {
@@ -361,6 +363,25 @@ public class VastProcessor {
                     } catch (Exception e) {
                         // Do nothing, companion is optional
                         Logger.e(LOG_TAG, e.getMessage());
+                    }
+                }
+
+                if (linear.getIcons() != null
+                        && linear.getIcons().getIcons() != null
+                        && !linear.getIcons().getIcons().isEmpty()) {
+                    List<Icon> icons = linear.getIcons().getIcons();
+                    Icon icon = null;
+                    for (int i = 0; i < icons.size() && icon == null; i++) {
+                        Icon ic = icons.get(i);
+                        if (ic != null && !TextUtils.isEmpty(ic.getProgram())
+                                && ic.getStaticResources() != null
+                                && !ic.getStaticResources().isEmpty()) {
+                            icon = ic;
+                        }
+                    }
+
+                    if (icon != null) {
+                        adParams.setAdIcon(icon);
                     }
                 }
             }

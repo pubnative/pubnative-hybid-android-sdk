@@ -105,7 +105,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -627,96 +626,100 @@ public class MRAIDView extends RelativeLayout {
         MRAIDLog.d("hz-m MRAIDView - expand " + url);
         MRAIDLog.d(MRAID_LOG_TAG + "-JS callback", "expand " + (url != null ? url : "(1-part)"));
 
-        // 1-part expansion
-        if (TextUtils.isEmpty(url)) {
-            if (state == STATE_LOADING || state == STATE_DEFAULT) {
-                // remove the existing webview
-                if (webView.getParent() != null) {
-                    ((ViewGroup) webView.getParent()).removeView(webView);
-                } else {
-                    removeView(webView);
-                }
-            } else if (state == STATE_RESIZED) {
-                removeResizeView();
-            }
-            expandHelper(webView);
-            MRAIDLog.d("hz-m MRAIDView - expand - empty url");
-            return;
-        }
-
-        // 2-part expansion
-
-        // First, try to get the content of the second (expanded) part of the creative.
-        try {
-            url = URLDecoder.decode(url, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            MRAIDLog.d("hz-m MRAIDView - expand - UnsupportedEncodingException " + e);
-            return;
-        }
-
-        // Check to see whether we've been given an absolute or relative URL.
-        // If it's relative, prepend the base URL.
-        if (!url.startsWith("http://") && !url.startsWith("https://")) {
-            url = baseUrl + url;
-        }
-
-        final String finalUrl = url;
-
-        // Go onto a background thread to read the content from the URL.
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                MRAIDLog.d("hz-m MRAIDView - expand - url loading thread");
-                if (isCustomExpand) {
-                    if (context instanceof Activity) {
-                        // Get back onto the main thread to create and load a new WebView.
-                        ((Activity) context).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (state == STATE_RESIZED) {
-                                    removeResizeView();
-                                    addView(webView);
-                                }
-                                webView.setWebChromeClient(null);
-                                webView.setWebViewClient(null);
-                                webViewPart2 = createWebView();
-                                webViewPart2.loadUrl(finalUrl);
-                                MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for " + webViewPart2);
-                                currentWebView = webViewPart2;
-                                isExpandingPart2 = true;
-                                expandHelper(currentWebView);
-                            }
-                        });
+        if (!HyBid.isMraidExpandEnabled()) {
+            MRAIDLog.d(MRAID_LOG_TAG + "-JS callback", "expand disabled by the developer");
+        } else {
+            // 1-part expansion
+            if (TextUtils.isEmpty(url)) {
+                if (state == STATE_LOADING || state == STATE_DEFAULT) {
+                    // remove the existing webview
+                    if (webView.getParent() != null) {
+                        ((ViewGroup) webView.getParent()).removeView(webView);
                     } else {
-                        MRAIDLog.e("Could not load part 2 expanded content for URL: " + finalUrl);
+                        removeView(webView);
                     }
-                } else {
-                    final String content = getStringFromUrl(finalUrl);
-                    if (!TextUtils.isEmpty(content) && context instanceof Activity) {
-                        // Get back onto the main thread to create and load a new WebView.
-                        ((Activity) context).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (state == STATE_RESIZED) {
-                                    removeResizeView();
-                                    addView(webView);
+                } else if (state == STATE_RESIZED) {
+                    removeResizeView();
+                }
+                expandHelper(webView);
+                MRAIDLog.d("hz-m MRAIDView - expand - empty url");
+                return;
+            }
+
+            // 2-part expansion
+
+            // First, try to get the content of the second (expanded) part of the creative.
+            try {
+                url = URLDecoder.decode(url, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                MRAIDLog.d("hz-m MRAIDView - expand - UnsupportedEncodingException " + e);
+                return;
+            }
+
+            // Check to see whether we've been given an absolute or relative URL.
+            // If it's relative, prepend the base URL.
+            if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                url = baseUrl + url;
+            }
+
+            final String finalUrl = url;
+
+            // Go onto a background thread to read the content from the URL.
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    MRAIDLog.d("hz-m MRAIDView - expand - url loading thread");
+                    if (isCustomExpand) {
+                        if (context instanceof Activity) {
+                            // Get back onto the main thread to create and load a new WebView.
+                            ((Activity) context).runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (state == STATE_RESIZED) {
+                                        removeResizeView();
+                                        addView(webView);
+                                    }
+                                    webView.setWebChromeClient(null);
+                                    webView.setWebViewClient(null);
+                                    webViewPart2 = createWebView();
+                                    webViewPart2.loadUrl(finalUrl);
+                                    MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for " + webViewPart2);
+                                    currentWebView = webViewPart2;
+                                    isExpandingPart2 = true;
+                                    expandHelper(currentWebView);
                                 }
-                                webView.setWebChromeClient(null);
-                                webView.setWebViewClient(null);
-                                webViewPart2 = createWebView();
-                                webViewPart2.loadDataWithBaseURL(baseUrl, content, "text/html", "UTF-8", null);
-                                MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for " + webViewPart2);
-                                currentWebView = webViewPart2;
-                                isExpandingPart2 = true;
-                                expandHelper(currentWebView);
-                            }
-                        });
+                            });
+                        } else {
+                            MRAIDLog.e("Could not load part 2 expanded content for URL: " + finalUrl);
+                        }
                     } else {
-                        MRAIDLog.e("Could not load part 2 expanded content for URL: " + finalUrl);
+                        final String content = getStringFromUrl(finalUrl);
+                        if (!TextUtils.isEmpty(content) && context instanceof Activity) {
+                            // Get back onto the main thread to create and load a new WebView.
+                            ((Activity) context).runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (state == STATE_RESIZED) {
+                                        removeResizeView();
+                                        addView(webView);
+                                    }
+                                    webView.setWebChromeClient(null);
+                                    webView.setWebViewClient(null);
+                                    webViewPart2 = createWebView();
+                                    webViewPart2.loadDataWithBaseURL(baseUrl, content, "text/html", "UTF-8", null);
+                                    MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for " + webViewPart2);
+                                    currentWebView = webViewPart2;
+                                    isExpandingPart2 = true;
+                                    expandHelper(currentWebView);
+                                }
+                            });
+                        } else {
+                            MRAIDLog.e("Could not load part 2 expanded content for URL: " + finalUrl);
+                        }
                     }
                 }
-            }
-        }, "2-part-content").start();
+            }, "2-part-content").start();
+        }
     }
 
     @JavascriptMRAIDCallback

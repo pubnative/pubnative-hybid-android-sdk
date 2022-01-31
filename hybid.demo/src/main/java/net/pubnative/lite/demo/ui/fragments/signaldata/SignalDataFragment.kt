@@ -107,6 +107,7 @@ class SignalDataFragment : Fragment(R.layout.fragment_signal_data) {
 
             override fun onInterstitialLoadFailed(error: Throwable?) {
                 Logger.e(TAG, "onInterstitialLoadFailed", error)
+                Toast.makeText(requireContext(), error?.message, Toast.LENGTH_LONG).show()
             }
 
             override fun onInterstitialImpression() {
@@ -137,6 +138,7 @@ class SignalDataFragment : Fragment(R.layout.fragment_signal_data) {
 
             override fun onRewardedLoadFailed(error: Throwable?) {
                 Logger.d(TAG, "onRewardedLoadFailed")
+                Toast.makeText(requireContext(), error?.message, Toast.LENGTH_LONG).show()
             }
 
             override fun onRewardedOpened() {

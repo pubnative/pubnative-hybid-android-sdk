@@ -17,6 +17,7 @@ import net.pubnative.lite.sdk.vpaid.VideoAd;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdListener;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
+import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
 
 public class VastInterstitialActivity extends HyBidInterstitialActivity implements AdPresenter.ImpressionListener {
     private static final String TAG = VastInterstitialActivity.class.getSimpleName();
@@ -37,6 +38,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             }
         }
+        setIsVast(true);
 
         super.onCreate(savedInstanceState);
 
@@ -56,8 +58,16 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
                 if (adCacheItem != null) {
                     if (adCacheItem.getAdParams() != null) {
                         adCacheItem.getAdParams().setPublisherSkipSeconds(mSkipOffset);
+
+                        if (adCacheItem.getAdParams().getAdIcon() != null) {
+                            setupContentInfo(adCacheItem.getAdParams().getAdIcon());
+                        } else {
+                            setupContentInfo();
+                        }
                     }
                     mVideoAd.setVideoCacheItem(adCacheItem);
+                } else {
+                    setupContentInfo();
                 }
 
                 mVideoPlayer.postDelayed(new Runnable() {

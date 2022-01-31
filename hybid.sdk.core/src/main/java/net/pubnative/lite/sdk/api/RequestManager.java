@@ -25,6 +25,7 @@ package net.pubnative.lite.sdk.api;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.AdCache;
+import net.pubnative.lite.sdk.CacheListener;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
@@ -285,6 +286,10 @@ public class RequestManager {
     }
 
     public void cacheAd(final Ad ad) {
+        cacheAd(ad, null);
+    }
+
+    public void cacheAd(final Ad ad, final CacheListener cacheListener) {
         if (ad != null && !TextUtils.isEmpty(ad.getVast()) && !mCacheStarted && !mCacheFinished) {
             mCacheStarted = true;
             mCacheFinished = false;
@@ -323,6 +328,10 @@ public class RequestManager {
                     mCacheFinished = true;
                     if (mAutoCacheOnLoad && mRequestListener != null) {
                         mRequestListener.onRequestSuccess(ad);
+                    } else {
+                        if (cacheListener != null) {
+                            cacheListener.onCacheSuccess();
+                        }
                     }
                 }
 
@@ -337,9 +346,17 @@ public class RequestManager {
                     mCacheFinished = false;
                     if (mAutoCacheOnLoad && mRequestListener != null) {
                         mRequestListener.onRequestFail(error);
+                    } else {
+                        if (cacheListener != null) {
+                            cacheListener.onCacheFailed(error);
+                        }
                     }
                 }
             });
+        } else {
+            if (cacheListener != null) {
+                cacheListener.onCacheSuccess();
+            }
         }
     }
 

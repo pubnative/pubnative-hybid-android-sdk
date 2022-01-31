@@ -21,7 +21,9 @@ import net.pubnative.lite.sdk.api.RequestManager
 import net.pubnative.lite.sdk.models.Ad
 import net.pubnative.lite.sdk.utils.HeaderBiddingUtils
 
-class MoPubLeaderboardFragment : Fragment(), RequestManager.RequestListener, MoPubView.BannerAdListener {
+class MoPubLeaderboardFragment : Fragment(R.layout.fragment_mopub_leaderboard),
+    RequestManager.RequestListener,
+    MoPubView.BannerAdListener {
     val TAG = MoPubLeaderboardFragment::class.java.simpleName
 
     private lateinit var requestManager: RequestManager
@@ -32,8 +34,6 @@ class MoPubLeaderboardFragment : Fragment(), RequestManager.RequestListener, MoP
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_mopub_leaderboard, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -50,7 +50,8 @@ class MoPubLeaderboardFragment : Fragment(), RequestManager.RequestListener, MoP
         requestManager = LeaderboardRequestManager()
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
-        adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubLeaderboardAdUnitId
+        adUnitId =
+            SettingsManager.getInstance(requireActivity()).getSettings().mopubLeaderboardAdUnitId
 
         loadButton.setOnClickListener {
             errorView.text = ""
@@ -59,8 +60,18 @@ class MoPubLeaderboardFragment : Fragment(), RequestManager.RequestListener, MoP
             loadPNAd()
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
-        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), creativeIdView.text.toString()) }
+        errorView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                errorView.text.toString()
+            )
+        }
+        creativeIdView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                creativeIdView.text.toString()
+            )
+        }
     }
 
     override fun onDestroy() {

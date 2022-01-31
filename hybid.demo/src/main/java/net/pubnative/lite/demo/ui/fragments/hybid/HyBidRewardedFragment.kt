@@ -14,11 +14,12 @@ import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
+import net.pubnative.lite.sdk.CacheListener
 import net.pubnative.lite.sdk.DiagnosticsManager
 import net.pubnative.lite.sdk.HyBidError
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedAd
 
-class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidRewardedAd.Listener {
+class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidRewardedAd.Listener, CacheListener {
     val TAG = HyBidRewardedFragment::class.java.simpleName
 
     private var zoneId: String? = null
@@ -56,7 +57,7 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
         }
 
         prepareButton.setOnClickListener {
-            rewardedAd?.prepare()
+            rewardedAd?.prepare(this)
         }
 
         showButton.setOnClickListener {
@@ -95,7 +96,7 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
     override fun onRewardedLoaded() {
         Log.d(TAG, "onRewardedLoaded")
         prepareButton.isEnabled = !cachingEnabled
-        showButton.isEnabled = true
+        showButton.isEnabled = cachingEnabled
         displayLogs()
         if (!TextUtils.isEmpty(rewardedAd?.creativeId)) {
             creativeIdView.text = rewardedAd?.creativeId
@@ -138,6 +139,25 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
 
     override fun onReward() {
         Log.d(TAG, "onReward")
+    }
+
+    override fun onCacheSuccess() {
+        Log.d(TAG, "onCacheSuccess")
+        prepareButton.isEnabled = false
+        showButton.isEnabled = true
+    }
+
+    override fun onCacheFailed(error: Throwable?) {
+        prepareButton.isEnabled = false
+        showButton.isEnabled = true
+        if (error != null && error is HyBidError) {
+            Log.e(TAG, error.message ?: " - ")
+            errorCodeView.text = error.errorCode.code.toString()
+            errorView.text = error.message ?: " - "
+        } else {
+            errorCodeView.text = " - "
+            errorView.text = " - "
+        }
     }
 
     private fun displayLogs() {

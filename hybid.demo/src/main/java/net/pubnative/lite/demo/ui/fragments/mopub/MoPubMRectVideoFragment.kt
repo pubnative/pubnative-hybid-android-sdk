@@ -46,7 +46,8 @@ import net.pubnative.lite.sdk.utils.HeaderBiddingUtils
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class MoPubMRectVideoFragment : Fragment(R.layout.fragment_mopub_mrect), RequestManager.RequestListener, MoPubView.BannerAdListener {
+class MoPubMRectVideoFragment : Fragment(R.layout.fragment_mopub_mrect),
+    RequestManager.RequestListener, MoPubView.BannerAdListener {
     val TAG = MoPubMRectVideoFragment::class.java.simpleName
 
     private lateinit var requestManager: RequestManager
@@ -73,7 +74,8 @@ class MoPubMRectVideoFragment : Fragment(R.layout.fragment_mopub_mrect), Request
         requestManager = MRectRequestManager()
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
-        adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().mopubMediumVideoAdUnitId
+        adUnitId =
+            SettingsManager.getInstance(requireActivity()).getSettings().mopubMediumVideoAdUnitId
 
         loadButton.setOnClickListener {
             errorView.text = ""
@@ -82,8 +84,18 @@ class MoPubMRectVideoFragment : Fragment(R.layout.fragment_mopub_mrect), Request
             loadPNAd()
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
-        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), creativeIdView.text.toString()) }
+        errorView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                errorView.text.toString()
+            )
+        }
+        creativeIdView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                creativeIdView.text.toString()
+            )
+        }
     }
 
     override fun onDestroy() {

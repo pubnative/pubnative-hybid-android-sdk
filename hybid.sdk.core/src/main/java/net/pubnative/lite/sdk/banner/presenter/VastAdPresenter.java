@@ -31,6 +31,7 @@ import android.widget.RelativeLayout;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.ContentInfo;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.utils.CheckUtils;
@@ -40,6 +41,9 @@ import net.pubnative.lite.sdk.vpaid.VideoAd;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdListener;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
+import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
+import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
+import net.pubnative.lite.sdk.vpaid.utils.Utils;
 
 import org.json.JSONObject;
 
@@ -51,6 +55,7 @@ public class VastAdPresenter implements AdPresenter {
     private Listener mListener;
     private ImpressionListener mImpressionListener;
     private VideoListener mVideoListener;
+    private Icon mVastIcon;
     private boolean mIsDestroyed;
     private boolean mLoaded = false;
 
@@ -99,6 +104,9 @@ public class VastAdPresenter implements AdPresenter {
                 VideoAdCacheItem adCacheItem = HyBid.getVideoAdCache().remove(getAd().getZoneId());
                 if (adCacheItem != null) {
                     mVideoAd.setVideoCacheItem(adCacheItem);
+                    if (adCacheItem.getAdParams() != null && adCacheItem.getAdParams().getAdIcon() != null) {
+                        mVastIcon = adCacheItem.getAdParams().getAdIcon();
+                    }
                 }
             }
 
@@ -148,12 +156,28 @@ public class VastAdPresenter implements AdPresenter {
 
         container.addView(mVideoPlayer, layoutParams);
 
-        mContentInfo = getAd().getContentInfoContainer(mContext);
-        if (mContentInfo != null) {
-            container.addView(mContentInfo);
-        }
+        setupContentInfo(container);
 
         return container;
+    }
+
+    private void setupContentInfo(ViewGroup container) {
+        if (getAd() != null && container != null) {
+            ContentInfo contentInfo = Utils.parseContentInfo(mVastIcon);
+            mContentInfo = getContentInfo(container.getContext(), getAd(), contentInfo);
+            if (mContentInfo != null) {
+                container.addView(mContentInfo);
+                if (contentInfo != null && contentInfo.getViewTrackers() != null && !contentInfo.getViewTrackers().isEmpty()) {
+                    for (String tracker : contentInfo.getViewTrackers()) {
+                        EventTracker.post(container.getContext(), tracker, null, true);
+                    }
+                }
+            }
+        }
+    }
+
+    private View getContentInfo(Context context, Ad ad, ContentInfo contentInfo) {
+        return contentInfo == null ? ad.getContentInfoContainer(context) : ad.getContentInfoContainer(context, contentInfo);
     }
 
     private final VideoAdListener mVideoAdListener = new VideoAdListener() {

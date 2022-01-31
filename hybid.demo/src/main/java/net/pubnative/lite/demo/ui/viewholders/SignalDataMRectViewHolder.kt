@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.RelativeLayout
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.sdk.models.AdSize
@@ -41,6 +42,7 @@ class SignalDataMRectViewHolder(itemView: View) : RecyclerView.ViewHolder(itemVi
 
     override fun onAdLoadFailed(error: Throwable?) {
         Logger.e(TAG, "onAdLoadFailed", error)
+        Toast.makeText(itemView.context, error?.message, Toast.LENGTH_LONG).show()
     }
 
     override fun onAdImpression() {

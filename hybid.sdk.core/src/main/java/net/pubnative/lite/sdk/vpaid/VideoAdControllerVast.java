@@ -304,6 +304,11 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
             mSkipTimeMillis = globalSkipMilliseconds;
         }
 
+        if (mSkipTimeMillis > duration) {
+            mSkipTimeMillis = -1;
+            return;
+        }
+
         if (mSkipTimeMillis <= 0) {
             if (TextUtils.isEmpty(mAdParams.getSkipTime())) {
                 mSkipTimeMillis = -1;
@@ -545,7 +550,11 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
     @Override
     public void destroy() {
         if (mMediaPlayer != null) {
-            mMediaPlayer.release();
+            try {
+                mMediaPlayer.release();
+            } catch (RuntimeException exception) {
+                Logger.e(LOG_TAG, "Error releasing HyBid video player");
+            }
         }
         if (!videoStarted) {
             EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.NOT_USED, mMacroHelper, true);
