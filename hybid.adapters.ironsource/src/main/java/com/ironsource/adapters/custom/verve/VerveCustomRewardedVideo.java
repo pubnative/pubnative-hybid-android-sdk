@@ -19,7 +19,6 @@ public class VerveCustomRewardedVideo extends BaseRewardedVideo<VerveCustomAdapt
 
     private RewardedVideoAdListener mRewardedVideoAdListener;
     private HyBidRewardedAd mHyBidRewardedAd;
-    private String mZoneID = "";
 
     public VerveCustomRewardedVideo(NetworkSettings networkSettings) {
         super(networkSettings);
@@ -28,9 +27,10 @@ public class VerveCustomRewardedVideo extends BaseRewardedVideo<VerveCustomAdapt
     @Override
     public void loadAd(AdData adData, Activity activity, RewardedVideoAdListener rewardedVideoAdListener) {
         String appToken;
-        if (TextUtils.isEmpty(adData.getString(VerveCustomAdapter.KEY_APP_TOKEN))
-                && TextUtils.isEmpty(adData.getString(VerveCustomAdapter.KEY_ZONE_ID))) {
-            mZoneID = adData.getString(VerveCustomAdapter.KEY_ZONE_ID);
+        String zoneID = "";
+        if (!TextUtils.isEmpty(adData.getString(VerveCustomAdapter.KEY_APP_TOKEN))
+                && !TextUtils.isEmpty(adData.getString(VerveCustomAdapter.KEY_ZONE_ID))) {
+            zoneID = adData.getString(VerveCustomAdapter.KEY_ZONE_ID);
             appToken = adData.getString(VerveCustomAdapter.KEY_APP_TOKEN);
         } else {
             String errorMessage = "Could not find the required params in VerveCustomRewardedVideo ad data";
@@ -49,7 +49,7 @@ public class VerveCustomRewardedVideo extends BaseRewardedVideo<VerveCustomAdapt
         }
 
         mRewardedVideoAdListener = rewardedVideoAdListener;
-        mHyBidRewardedAd = new HyBidRewardedAd(activity, mZoneID, this);
+        mHyBidRewardedAd = new HyBidRewardedAd(activity, zoneID, this);
         mHyBidRewardedAd.setMediation(true);
         mHyBidRewardedAd.load();
     }

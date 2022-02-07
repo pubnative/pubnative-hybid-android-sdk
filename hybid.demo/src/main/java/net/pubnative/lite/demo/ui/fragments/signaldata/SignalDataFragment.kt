@@ -31,7 +31,6 @@ class SignalDataFragment : Fragment(R.layout.fragment_signal_data) {
 
     private var rewarded: HyBidRewardedAd? = null
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -67,6 +66,7 @@ class SignalDataFragment : Fragment(R.layout.fragment_signal_data) {
         if (selectedSize == R.id.radio_size_banner
             || selectedSize == R.id.radio_size_medium
             || selectedSize == R.id.radio_size_leaderboard
+            || selectedSize == R.id.radio_size_native
         ) {
             signalDataList.visibility = View.VISIBLE
         } else {
@@ -86,12 +86,16 @@ class SignalDataFragment : Fragment(R.layout.fragment_signal_data) {
         if (TextUtils.isEmpty(signalData)) {
             Toast.makeText(activity, "Please input some signal data", Toast.LENGTH_SHORT).show()
         } else {
-            if (selectedSize == R.id.radio_size_interstitial) {
-                loadInterstitial(signalData)
-            } else if (selectedSize == R.id.radio_size_rewarded) {
-                loadRewarded(signalData)
-            } else {
-                adapter.refreshWithSignalData(signalData, selectedSize)
+            when (selectedSize) {
+                R.id.radio_size_interstitial -> {
+                    loadInterstitial(signalData)
+                }
+                R.id.radio_size_rewarded -> {
+                    loadRewarded(signalData)
+                }
+                else -> {
+                    adapter.refreshWithSignalData(signalData, selectedSize)
+                }
             }
         }
     }

@@ -111,10 +111,11 @@ class HyBidNativeFragment : Fragment(R.layout.fragment_hybid_native), HyBidNativ
     fun loadPNAd() {
         errorView.text = ""
 
+        nativeAdRequest?.setPreLoadMediaAssets(true)
         nativeAdRequest?.load(zoneId, this)
     }
 
-    fun renderAd(ad: NativeAd?) {
+    private fun renderAd(ad: NativeAd?) {
         nativeAd = ad
         adTitle.text = ad?.title
         adDescription.text = ad?.description
@@ -124,8 +125,17 @@ class HyBidNativeFragment : Fragment(R.layout.fragment_hybid_native), HyBidNativ
         val rating = ad?.rating?.toFloat()
         adRating.rating = rating!!
 
-        Picasso.get().load(ad.bannerUrl).into(adBanner)
-        Picasso.get().load(ad.iconUrl).into(adIcon)
+        if (ad.bannerBitmap != null) {
+            adBanner.setImageBitmap(ad.bannerBitmap)
+        } else {
+            Picasso.get().load(ad.bannerUrl).into(adBanner)
+        }
+
+        if (ad.iconBitmap != null) {
+            adIcon.setImageBitmap(ad.iconBitmap)
+        } else {
+            Picasso.get().load(ad.iconUrl).into(adIcon)
+        }
 
         ad.startTracking(adContainer, this)
     }

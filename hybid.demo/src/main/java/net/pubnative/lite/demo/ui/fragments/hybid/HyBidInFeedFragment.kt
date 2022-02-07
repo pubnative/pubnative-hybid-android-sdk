@@ -66,8 +66,8 @@ class HyBidInFeedFragment : Fragment(R.layout.fragment_hybid_infeed_banner), InF
     private lateinit var adapter: InFeedAdapter
 
     private val adSizes = arrayOf(
-            AdSize.SIZE_300x250,
             AdSize.SIZE_320x50,
+            AdSize.SIZE_300x250,
             AdSize.SIZE_160x600,
             AdSize.SIZE_250x250,
             AdSize.SIZE_300x50,

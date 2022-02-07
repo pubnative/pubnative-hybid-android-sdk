@@ -24,6 +24,7 @@ package net.pubnative.lite.sdk.models;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
@@ -66,6 +67,9 @@ public class NativeAd implements ImpressionTracker.Listener {
     private transient View mClickableView;
     private List<String> mUsedAssets;
     private transient View mAdView;
+
+    private Bitmap bannerBitmap;
+    private Bitmap iconBitmap;
 
     public NativeAd() {
         this.mAd = null;
@@ -131,6 +135,14 @@ public class NativeAd implements ImpressionTracker.Listener {
         return result;
     }
 
+    public Bitmap getIconBitmap() {
+        return iconBitmap;
+    }
+
+    public void setIconBitmap(Bitmap iconBitmap) {
+        this.iconBitmap = iconBitmap;
+    }
+
     /**
      * Gets the banner image url of the ad
      *
@@ -143,6 +155,14 @@ public class NativeAd implements ImpressionTracker.Listener {
             result = data.getURL();
         }
         return result;
+    }
+
+    public Bitmap getBannerBitmap() {
+        return bannerBitmap;
+    }
+
+    public void setBannerBitmap(Bitmap bannerBitmap) {
+        this.bannerBitmap = bannerBitmap;
     }
 
     /**

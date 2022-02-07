@@ -20,7 +20,6 @@ public class VerveCustomInterstitial extends BaseInterstitial<VerveCustomAdapter
 
     private InterstitialAdListener mInterstitialAdListener;
     private HyBidInterstitialAd mInterstitialAd;
-    private String mZoneID = "";
 
     public VerveCustomInterstitial(NetworkSettings networkSettings) {
         super(networkSettings);
@@ -29,9 +28,10 @@ public class VerveCustomInterstitial extends BaseInterstitial<VerveCustomAdapter
     @Override
     public void loadAd(AdData adData, Activity activity, InterstitialAdListener interstitialAdListener) {
         String appToken;
-        if (TextUtils.isEmpty(adData.getString(VerveCustomAdapter.KEY_APP_TOKEN))
-                && TextUtils.isEmpty(adData.getString(VerveCustomAdapter.KEY_ZONE_ID))) {
-            mZoneID = adData.getString(VerveCustomAdapter.KEY_ZONE_ID);
+        String zoneID = "";
+        if (!TextUtils.isEmpty(adData.getString(VerveCustomAdapter.KEY_APP_TOKEN))
+                && !TextUtils.isEmpty(adData.getString(VerveCustomAdapter.KEY_ZONE_ID))) {
+            zoneID = adData.getString(VerveCustomAdapter.KEY_ZONE_ID);
             appToken = adData.getString(VerveCustomAdapter.KEY_APP_TOKEN);
         } else {
             String errorMessage = "Could not find the required params in VerveCustomInterstitial ad data";
@@ -50,7 +50,7 @@ public class VerveCustomInterstitial extends BaseInterstitial<VerveCustomAdapter
         }
 
         mInterstitialAdListener = interstitialAdListener;
-        mInterstitialAd = new HyBidInterstitialAd(activity, mZoneID, this);
+        mInterstitialAd = new HyBidInterstitialAd(activity, zoneID, this);
         mInterstitialAd.setVideoListener(this);
         mInterstitialAd.setMediation(true);
         mInterstitialAd.load();

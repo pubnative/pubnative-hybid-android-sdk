@@ -22,6 +22,9 @@
 //
 package net.pubnative.lite.sdk.request;
 
+import android.graphics.Bitmap;
+import android.text.TextUtils;
+
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
@@ -31,6 +34,8 @@ import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.NativeAd;
 import net.pubnative.lite.sdk.models.RemoteConfigFeature;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.PNBitmapDownloader;
+import net.pubnative.lite.sdk.utils.SignalDataProcessor;
 
 public class HyBidNativeAdRequest implements RequestManager.RequestListener {
     private static final String TAG = HyBidNativeAdRequest.class.getSimpleName();
@@ -47,23 +52,60 @@ public class HyBidNativeAdRequest implements RequestManager.RequestListener {
 
     private RequestListener mListener;
     private final RequestManager mRequestManager;
+    private SignalDataProcessor mSignalDataProcessor;
+    private PNBitmapDownloader mBitmapDownloader;
+    private boolean mPreLoadMediaAssets;
 
     public HyBidNativeAdRequest() {
         this.mRequestManager = new NativeRequestManager();
         this.mRequestManager.setIntegrationType(IntegrationType.STANDALONE);
         this.mRequestManager.setRequestListener(this);
+        this.mBitmapDownloader = new PNBitmapDownloader();
+        this.mPreLoadMediaAssets = false;
     }
 
     public void load(String zoneId, RequestListener listener) {
         if (HyBid.getConfigManager() != null
                 && !HyBid.getConfigManager().getFeatureResolver().isAdFormatEnabled(RemoteConfigFeature.AdFormat.NATIVE)) {
-            if (mListener != null) {
-                mListener.onRequestFail(new HyBidError(HyBidErrorCode.DISABLED_FORMAT));
+            if (listener != null) {
+                listener.onRequestFail(new HyBidError(HyBidErrorCode.DISABLED_FORMAT));
             }
         } else {
             mListener = listener;
             mRequestManager.setZoneId(zoneId);
             mRequestManager.requestAd();
+        }
+    }
+
+    public void prepareAd(String adValue, RequestListener listener) {
+        if (!TextUtils.isEmpty(adValue)) {
+            mListener = listener;
+
+            mSignalDataProcessor = new SignalDataProcessor();
+            mSignalDataProcessor.processSignalData(adValue, new SignalDataProcessor.Listener() {
+                @Override
+                public void onProcessed(Ad ad) {
+                    if (ad != null) {
+                        createNativeAd(ad);
+                    } else {
+                        if (mListener != null) {
+                            mListener.onRequestFail(new HyBidError(HyBidErrorCode.NULL_AD));
+                        }
+                    }
+                }
+
+                @Override
+                public void onError(Throwable error) {
+                    if (mListener != null) {
+                        mListener.onRequestFail(error);
+                    }
+                }
+            });
+
+        } else {
+            if (listener != null) {
+                listener.onRequestFail(new HyBidError(HyBidErrorCode.INVALID_SIGNAL_DATA));
+            }
         }
     }
 
@@ -88,8 +130,62 @@ public class HyBidNativeAdRequest implements RequestManager.RequestListener {
     }
 
     private void createNativeAd(Ad ad) {
-        if (mListener != null) {
-            mListener.onRequestSuccess(new NativeAd(ad));
+        final NativeAd nativeAd = new NativeAd(ad);
+        if (mPreLoadMediaAssets) {
+            fetchBanner(nativeAd);
+        } else {
+            if (mListener != null) {
+                mListener.onRequestSuccess(nativeAd);
+            }
+        }
+    }
+
+    private void fetchBanner(final NativeAd nativeAd) {
+        if (TextUtils.isEmpty(nativeAd.getBannerUrl())) {
+            fetchIcon(nativeAd);
+        } else {
+            mBitmapDownloader.download(nativeAd.getBannerUrl(), new PNBitmapDownloader.DownloadListener() {
+                @Override
+                public void onDownloadFinish(String url, Bitmap bitmap) {
+                    if (bitmap != null) {
+                        nativeAd.setBannerBitmap(bitmap);
+                    }
+                    fetchIcon(nativeAd);
+                }
+
+                @Override
+                public void onDownloadFailed(String url, Exception exception) {
+                    fetchIcon(nativeAd);
+                }
+            });
+        }
+    }
+
+    private void fetchIcon(final NativeAd nativeAd) {
+        if (TextUtils.isEmpty(nativeAd.getIconUrl())) {
+            if (mListener != null) {
+                mListener.onRequestSuccess(nativeAd);
+            }
+        } else {
+            mBitmapDownloader.download(nativeAd.getIconUrl(), new PNBitmapDownloader.DownloadListener() {
+                @Override
+                public void onDownloadFinish(String url, Bitmap bitmap) {
+                    if (bitmap != null) {
+                        nativeAd.setIconBitmap(bitmap);
+                    }
+
+                    if (mListener != null) {
+                        mListener.onRequestSuccess(nativeAd);
+                    }
+                }
+
+                @Override
+                public void onDownloadFailed(String url, Exception exception) {
+                    if (mListener != null) {
+                        mListener.onRequestSuccess(nativeAd);
+                    }
+                }
+            });
         }
     }
 
@@ -97,6 +193,10 @@ public class HyBidNativeAdRequest implements RequestManager.RequestListener {
         if (mRequestManager != null) {
             mRequestManager.setIntegrationType(isMediation ? IntegrationType.MEDIATION : IntegrationType.STANDALONE);
         }
+    }
+
+    public void setPreLoadMediaAssets(boolean preLoadMediaAssets) {
+        this.mPreLoadMediaAssets = preLoadMediaAssets;
     }
 
     public void setScreenIabCategory(String screenIabCategory) {

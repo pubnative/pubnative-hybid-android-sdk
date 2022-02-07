@@ -2,6 +2,7 @@ package net.pubnative.lite.demo.ui.fragments.navigation
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
@@ -57,45 +58,51 @@ class StandaloneNavFragment : Fragment(R.layout.fragment_nav_standalone) {
         bannerButton = view.findViewById(R.id.button_banner)
         bannerButton.setOnClickListener {
             val intent = Intent(activity, HyBidBannerActivity::class.java)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            val zoneId = setZoneId(chosenZoneId, AdFormat.BANNER)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }
 
         stickyButton = view.findViewById(R.id.sticky_banner)
         stickyButton.setOnClickListener {
             val intent = Intent(activity, HyBidStickyBannerActivity::class.java)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            val zoneId = setZoneId(chosenZoneId, AdFormat.BANNER)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }
 
         inFeedBannerButton = view.findViewById(R.id.button_banner_infeed)
         inFeedBannerButton.setOnClickListener {
             val intent = Intent(activity, HyBidInFeedBannerActivity::class.java)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            val zoneId = setZoneId(chosenZoneId, AdFormat.BANNER)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }
 
         interstitialButton = view.findViewById(R.id.button_interstitial)
         interstitialButton.setOnClickListener {
             val intent = Intent(activity, HyBidInterstitialActivity::class.java)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            val zoneId = setZoneId(chosenZoneId, AdFormat.INTERSTITIAL)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }
 
         nativeButton = view.findViewById(R.id.button_native)
         nativeButton.setOnClickListener {
             val intent = Intent(activity, HyBidNativeActivity::class.java)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            val zoneId = setZoneId(chosenZoneId, AdFormat.NATIVE)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }
 
         rewardedButton = view.findViewById(R.id.button_rewarded)
         rewardedButton.setOnClickListener {
             val intent = Intent(activity, HyBidRewardedActivity::class.java)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            val zoneId = setZoneId(chosenZoneId, AdFormat.REWARDED)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }
-        disableZones()
+        enableZones()
     }
 
     override fun onResume() {
@@ -108,9 +115,6 @@ class StandaloneNavFragment : Fragment(R.layout.fragment_nav_standalone) {
         adapter.clear()
         val zoneIds = settings.zoneIds
         adapter.addZoneIds(zoneIds)
-        if (!zoneIds.contains(chosenZoneId)) {
-            disableZones()
-        }
     }
 
     private fun enableZones() {
@@ -131,5 +135,24 @@ class StandaloneNavFragment : Fragment(R.layout.fragment_nav_standalone) {
         interstitialButton.isEnabled = false
         nativeButton.isEnabled = false
         rewardedButton.isEnabled = false
+    }
+
+    enum class AdFormat {
+        BANNER, INTERSTITIAL, REWARDED, NATIVE
+    }
+
+    private fun setZoneId(zoneId: String?, adFormat: AdFormat): String? {
+        if (!TextUtils.isEmpty(zoneId)) {
+            return zoneId
+        } else {
+            return when (adFormat) {
+                AdFormat.BANNER -> "2"
+                AdFormat.INTERSTITIAL -> "3"
+                AdFormat.REWARDED -> "4"
+                else -> {
+                    "1"
+                }
+            }
+        }
     }
 }

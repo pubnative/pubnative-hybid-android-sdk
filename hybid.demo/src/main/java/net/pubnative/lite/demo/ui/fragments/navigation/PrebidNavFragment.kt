@@ -2,6 +2,7 @@ package net.pubnative.lite.demo.ui.fragments.navigation
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
@@ -64,80 +65,91 @@ class PrebidNavFragment : Fragment(R.layout.fragment_nav_prebid) {
         mopubBannerButton = view.findViewById(R.id.button_mopub_banner)
         mopubBannerButton.setOnClickListener {
             val intent = Intent(activity, MoPubBannerActivity::class.java)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            val zoneId = setZoneId(chosenZoneId, AdFormat.BANNER)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }
 
         mopubMediumButton = view.findViewById(R.id.button_mopub_medium)
         mopubMediumButton.setOnClickListener {
             val intent = Intent(activity, MoPubMRectActivity::class.java)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            val zoneId = setZoneId(chosenZoneId, AdFormat.MEDIUM)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }
 
         mopubMediumVideoButton = view.findViewById(R.id.button_mopub_medium_video)
         mopubMediumVideoButton.setOnClickListener {
             val intent = Intent(activity, MoPubMRectVideoActivity::class.java)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            val zoneId = setZoneId(chosenZoneId, AdFormat.MEDIUM_VIDEO)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }
 
         mopubLeaderboardButton = view.findViewById(R.id.button_mopub_leaderboard)
         mopubLeaderboardButton.setOnClickListener {
             val intent = Intent(activity, MoPubLeaderboardActivity::class.java)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            val zoneId = setZoneId(chosenZoneId, AdFormat.LEADERBOARD)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }
 
         mopubInterstitialButton = view.findViewById(R.id.button_mopub_interstitial)
         mopubInterstitialButton.setOnClickListener {
             val intent = Intent(activity, MoPubInterstitialActivity::class.java)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            val zoneId = setZoneId(chosenZoneId, AdFormat.INTERSTITIAL)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }
 
         mopubInterstitialVideoButton = view.findViewById(R.id.button_mopub_interstitial_video)
         mopubInterstitialVideoButton.setOnClickListener {
             val intent = Intent(activity, MoPubInterstitialVideoActivity::class.java)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            val zoneId = setZoneId(chosenZoneId, AdFormat.INTERSTITIAL_VIDEO)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }
 
         mopubRewardedButton = view.findViewById(R.id.button_mopub_rewarded)
         mopubRewardedButton.setOnClickListener {
             val intent = Intent(activity, MoPubRewardedActivity::class.java)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            val zoneId = setZoneId(chosenZoneId, AdFormat.REWARDED)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }
 
         dfpBannerButton = view.findViewById(R.id.button_dfp_banner)
         dfpBannerButton.setOnClickListener {
             val intent = Intent(activity, DFPBannerActivity::class.java)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            val zoneId = setZoneId(chosenZoneId, AdFormat.BANNER)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }
 
         dfpMediumButton = view.findViewById(R.id.button_dfp_medium)
         dfpMediumButton.setOnClickListener {
             val intent = Intent(activity, DFPMRectActivity::class.java)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            val zoneId = setZoneId(chosenZoneId, AdFormat.MEDIUM)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }
 
         dfpLeaderboardButton = view.findViewById(R.id.button_dfp_leaderboard)
         dfpLeaderboardButton.setOnClickListener {
             val intent = Intent(activity, DFPLeaderboardActivity::class.java)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            val zoneId = setZoneId(chosenZoneId, AdFormat.LEADERBOARD)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }
 
         dfpInterstitialButton = view.findViewById(R.id.button_dfp_interstitial)
         dfpInterstitialButton.setOnClickListener {
             val intent = Intent(activity, DFPInterstitialActivity::class.java)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, chosenZoneId)
+            val zoneId = setZoneId(chosenZoneId, AdFormat.INTERSTITIAL)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }
-        disableZones()
+        enableZones()
     }
 
     override fun onResume() {
@@ -150,9 +162,6 @@ class PrebidNavFragment : Fragment(R.layout.fragment_nav_prebid) {
         adapter.clear()
         val zoneIds = settings.zoneIds
         adapter.addZoneIds(zoneIds)
-        if (!zoneIds.contains(chosenZoneId)) {
-            disableZones()
-        }
     }
 
     private fun enableZones() {
@@ -183,5 +192,28 @@ class PrebidNavFragment : Fragment(R.layout.fragment_nav_prebid) {
         dfpMediumButton.isEnabled = false
         dfpLeaderboardButton.isEnabled = false
         dfpInterstitialButton.isEnabled = false
+    }
+
+    enum class AdFormat {
+        BANNER, MEDIUM, MEDIUM_VIDEO, LEADERBOARD, INTERSTITIAL, INTERSTITIAL_VIDEO, REWARDED, NATIVE,
+    }
+
+    private fun setZoneId(zoneId: String?, adFormat: AdFormat): String? {
+        if (!TextUtils.isEmpty(zoneId)) {
+            return zoneId
+        } else {
+            return when (adFormat) {
+                AdFormat.BANNER -> "2"
+                AdFormat.MEDIUM -> "5"
+                AdFormat.MEDIUM_VIDEO -> "6"
+                AdFormat.LEADERBOARD -> "8"
+                AdFormat.INTERSTITIAL -> "3"
+                AdFormat.INTERSTITIAL_VIDEO -> "4"
+                AdFormat.REWARDED -> "4"
+                else -> {
+                    "1"
+                }
+            }
+        }
     }
 }

@@ -12,12 +12,11 @@ import com.ironsource.mediationsdk.adunit.adapter.utility.AdapterErrors;
 import net.pubnative.lite.sdk.HyBid;
 
 public class VerveCustomAdapter extends BaseAdapter {
-    public static final String KEY_APP_TOKEN = "pn_app_token";
-    public static final String KEY_ZONE_ID = "pn_app_token";
+    public static final String KEY_APP_TOKEN = "appToken";
+    public static final String KEY_ZONE_ID = "zoneId";
 
-    private static final String NETWORK_SDK_VERSION = "2.9.0";
+    private static final String NETWORK_SDK_VERSION = "2.11.0";
     private static final String ADAPTER_VERSION = NETWORK_SDK_VERSION + ".0";
-
 
     @Override
     public void init(AdData adData, Context context, final NetworkInitializationListener networkInitializationListener) {
@@ -28,14 +27,20 @@ public class VerveCustomAdapter extends BaseAdapter {
                         "HyBid initialisation failed: Missing app token");
             }
         } else {
-            HyBid.initialize(appToken, (Application) context.getApplicationContext(), new HyBid.InitialisationListener() {
-                @Override
-                public void onInitialisationFinished(boolean success) {
-                    if (networkInitializationListener != null) {
-                        networkInitializationListener.onInitSuccess();
+            if (!HyBid.isInitialized()) {
+                HyBid.initialize(appToken, (Application) context.getApplicationContext(), new HyBid.InitialisationListener() {
+                    @Override
+                    public void onInitialisationFinished(boolean success) {
+                        if (networkInitializationListener != null) {
+                            networkInitializationListener.onInitSuccess();
+                        }
                     }
+                });
+            } else {
+                if (networkInitializationListener != null) {
+                    networkInitializationListener.onInitSuccess();
                 }
-            });
+            }
         }
     }
 

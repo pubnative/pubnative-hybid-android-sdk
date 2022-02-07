@@ -18,20 +18,26 @@ import net.pubnative.lite.sdk.views.PNAdView
 class SignalDataBannerViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), PNAdView.Listener {
     private val TAG = SignalDataBannerViewHolder::class.java.simpleName
 
+    private var adView: HyBidAdView? = null
+
     fun bind(signalData: String) {
         if (!TextUtils.isEmpty(signalData)) {
             val container = itemView.findViewById<FrameLayout>(R.id.banner_container)
             container.removeAllViews()
 
-            val banner = HyBidAdView(itemView.context, AdSize.SIZE_320x50)
+            adView = HyBidAdView(itemView.context, AdSize.SIZE_320x50)
 
             val adLayoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             adLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
-            container.addView(banner, adLayoutParams)
+            container.addView(adView, adLayoutParams)
             container.setBackgroundColor(Color.BLACK)
 
-            banner.renderAd(signalData, this)
+            adView?.renderAd(signalData, this)
         }
+    }
+
+    fun destroy() {
+        adView?.destroy()
     }
 
     override fun onAdLoaded() {

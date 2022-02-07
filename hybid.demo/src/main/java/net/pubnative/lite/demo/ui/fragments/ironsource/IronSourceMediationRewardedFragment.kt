@@ -19,7 +19,6 @@ class IronSourceMediationRewardedFragment : Fragment(R.layout.fragment_ironsourc
     RewardedVideoListener {
     val TAG = IronSourceMediationRewardedFragment::class.java.simpleName
 
-    private lateinit var loadButton: Button
     private lateinit var showButton: Button
     private lateinit var errorView: TextView
 
@@ -28,20 +27,12 @@ class IronSourceMediationRewardedFragment : Fragment(R.layout.fragment_ironsourc
         IronSource.setRewardedVideoListener(this)
 
         errorView = view.findViewById(R.id.view_error)
-        loadButton = view.findViewById(R.id.button_load)
         showButton = view.findViewById(R.id.button_show)
 
         val adUnitId =
             SettingsManager.getInstance(requireActivity()).getSettings().ironSourceRewardedAdUnitId
 
         showButton.isEnabled = IronSource.isRewardedVideoAvailable()
-
-        loadButton.setOnClickListener {
-            errorView.text = ""
-
-        }
-        loadButton.isEnabled = false
-
 
         showButton.setOnClickListener {
             if (IronSource.isRewardedVideoAvailable()) {
