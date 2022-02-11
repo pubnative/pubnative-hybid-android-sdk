@@ -34,7 +34,11 @@ class NavigationActivity : AppCompatActivity() {
     }
 
     private fun checkPermissions() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             val permissionList = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
             ActivityCompat.requestPermissions(this, permissionList, PERMISSION_REQUEST)
         }
@@ -42,11 +46,19 @@ class NavigationActivity : AppCompatActivity() {
 
     override fun onSupportNavigateUp() = findNavController(R.id.fragment_nav_host).navigateUp()
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         when (requestCode) {
             PERMISSION_REQUEST -> {
                 if (grantResults.isNotEmpty() && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "Location permission denied. You can change this on the app settings.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Location permission denied. You can change this on the app settings.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -54,9 +66,13 @@ class NavigationActivity : AppCompatActivity() {
     }
 
     private fun initializeIronSource() {
-        val appKey = SettingsManager.getInstance(this).getSettings().ironSourceAppKey
+        val settingsModel = SettingsManager.getInstance(this).getSettings()
+        val appKey = settingsModel.ironSourceAppKey
         if (!TextUtils.isEmpty(appKey)) {
-            IronSource.init(this, appKey)
+            IronSource.init(
+                this, appKey, IronSource.AD_UNIT.BANNER,
+                IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.REWARDED_VIDEO
+            )
         }
     }
 }

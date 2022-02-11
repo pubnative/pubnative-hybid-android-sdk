@@ -29,11 +29,17 @@ buildscript {
 subprojects {
 
     ext {
-        branchName = "${System.getenv("CIRCLE_BRANCH")}"
-        buildNumber = "${System.getenv("CIRCLE_BUILD_NUM")}"
+        branchName = null
+        if (System.getenv("CIRCLE_BRANCH") != null) {
+            branchName = "${System.getenv("CIRCLE_BRANCH")}"
+        }
+        buildNumber = null
+        if (System.getenv("CIRCLE_BUILD_NUM") != null) {
+            buildNumber = "${System.getenv("CIRCLE_BUILD_NUM")}"
+        }
         omid_version = '1.3.28'
     }
-    version = "2.11.0"
+    version = "2.11.1"
     group = "net.pubnative"
 }
 

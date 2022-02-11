@@ -69,6 +69,34 @@ class SettingsManager private constructor(context: Context) {
         preferences.edit().putBoolean(SETTINGS_KEY_LOCATION_TRACKING, enabled).apply()
     }
 
+    fun setLocationUpdates(enabled: Boolean) {
+        preferences.edit().putBoolean(SETTINGS_KEY_LOCATION_UPDATES, enabled).apply()
+    }
+
+    fun setMraidExpanded(enabled: Boolean) {
+        preferences.edit().putBoolean(SETTINGS_KEY_MRAID_EXPANDED, enabled).apply()
+    }
+
+    fun setInitialAudioState(state: Int) {
+        preferences.edit().putInt(SETTINGS_KEY_INITIAL_AUDIO_STATE, state).apply()
+    }
+
+    fun setCloseVideoAfterFinish(enabled: Boolean) {
+        preferences.edit().putBoolean(SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH, enabled).apply()
+    }
+
+    fun setSkipOffset(skipOffset: Int) {
+        preferences.edit().putInt(SETTINGS_KEY_SKIP_OFFSET, skipOffset).apply()
+    }
+
+    fun setVideoSkipOffset(videoSkipOffset: Int) {
+        preferences.edit().putInt(SETTINGS_KEY_VIDEO_SKIP_OFFSET, videoSkipOffset).apply()
+    }
+
+    fun setVideoClickBehaviour(isCreative: Boolean){
+        preferences.edit().putBoolean(SETTINGS_KEY_VIDEO_CLICK_BEHAVIOUR, isCreative).apply()
+    }
+
     fun setGender(gender: String) {
         preferences.edit().putString(SETTINGS_KEY_GENDER, gender).apply()
     }
@@ -380,6 +408,13 @@ class SettingsManager private constructor(context: Context) {
         val coppa = preferences.getBoolean(SETTINGS_KEY_COPPA, false)
         val testMode = preferences.getBoolean(SETTINGS_KEY_TEST_MODE, false)
         val locationTracking = preferences.getBoolean(SETTINGS_KEY_LOCATION_TRACKING, false)
+        val locationUpdates = preferences.getBoolean(SETTINGS_KEY_LOCATION_UPDATES, false)
+        val initialAudioState = preferences.getInt(SETTINGS_KEY_INITIAL_AUDIO_STATE, 0)
+        val mraidExpanded = preferences.getBoolean(SETTINGS_KEY_MRAID_EXPANDED, false)
+        val closeVideoAfterFinish = preferences.getBoolean(SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH, false)
+        val skipOffset = preferences.getInt(SETTINGS_KEY_SKIP_OFFSET, 3)
+        val videoSkipOffset = preferences.getInt(SETTINGS_KEY_VIDEO_SKIP_OFFSET, 8)
+        val videoClickBehaviour = preferences.getBoolean(SETTINGS_KEY_VIDEO_CLICK_BEHAVIOUR, true)
         val mopubBannerAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_BANNER_AD_UNIT_ID, "")!!
         val mopubMediumAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_MEDIUM_AD_UNIT_ID, "")!!
         val mopubMediumVideoAdUnitId =
@@ -458,6 +493,13 @@ class SettingsManager private constructor(context: Context) {
             coppa,
             testMode,
             locationTracking,
+            locationUpdates,
+            initialAudioState,
+            mraidExpanded,
+            closeVideoAfterFinish,
+            skipOffset,
+            videoSkipOffset,
+            videoClickBehaviour,
             mopubBannerAdUnitId,
             mopubMediumAdUnitId,
             mopubMediumVideoAdUnitId,

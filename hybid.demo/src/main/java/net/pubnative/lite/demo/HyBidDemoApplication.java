@@ -31,11 +31,9 @@ import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
 
 import com.google.android.gms.ads.MobileAds;
-import com.ironsource.mediationsdk.IronSource;
 import com.ogury.cm.OguryChoiceManager;
 import com.ogury.cm.OguryCmConfig;
 
-import net.pubnative.lite.demo.managers.AnalyticsSubscriber;
 import net.pubnative.lite.demo.managers.MoPubManager;
 import net.pubnative.lite.demo.managers.SettingsManager;
 import net.pubnative.lite.demo.models.SettingsModel;
@@ -98,15 +96,17 @@ public class HyBidDemoApplication extends MultiDexApplication {
         HyBid.setCoppaEnabled(settings.getCoppa());
         HyBid.setAge(settings.getAge());
         HyBid.setGender(settings.getGender());
-        HyBid.setLocationTrackingEnabled(true);
-        HyBid.setLocationUpdatesEnabled(true);
+        HyBid.setVideoAudioStatus(getAudioStateFromSettings(settings.getInitialAudioState()));
+        HyBid.setLocationTrackingEnabled(settings.getLocationTracking());
+        HyBid.setLocationUpdatesEnabled(settings.getLocationUpdates());
+        HyBid.setMraidExpandEnabled(settings.getMraidExpanded());
 
-        HyBid.setCloseVideoAfterFinish(false);
+        HyBid.setCloseVideoAfterFinish(settings.getCloseVideoAfterFinish());
 
-        HyBid.setHtmlInterstitialSkipOffset(2);
-        HyBid.setVideoInterstitialSkipOffset(8);
+        HyBid.setHtmlInterstitialSkipOffset(settings.getSkipOffset());
+        HyBid.setVideoInterstitialSkipOffset(settings.getVideoSkipOffset());
 
-        HyBid.setInterstitialClickBehaviour(InterstitialActionBehaviour.HB_CREATIVE);
+        HyBid.setInterstitialClickBehaviour(getInterstitialActionBehaviourFromSettings(settings.getVideoClickBehaviour()));
 
         StringBuilder keywordsBuilder = new StringBuilder();
         String separator = ",";
@@ -163,9 +163,16 @@ public class HyBidDemoApplication extends MultiDexApplication {
                     "",
                     new ArrayList<>(),
                     new ArrayList<>(),
-                    false,
-                    true,
-                    true,
+                    Constants.COPPA_DEFAULT,
+                    Constants.TEST_MODE_DEFAULT,
+                    Constants.LOCATION_TRACKING_DEFAULT,
+                    Constants.LOCATION_UPDATES_DEFAULT,
+                    Constants.INITIAL_AUDIO_STATE_DEFAULT,
+                    Constants.MRAID_EXPANDED_DEFAULT,
+                    Constants.CLOSE_VIDEO_AFTER_FINISH_DEFAULT,
+                    Constants.SKIP_OFFSET_DEFAULT,
+                    Constants.VIDEO_SKIP_OFFSET_DEFAULT,
+                    Constants.VIDEO_CLICK_BEHAVIOUR_DEFAULT,
                     Constants.MOPUB_MRAID_BANNER_AD_UNIT,
                     Constants.MOPUB_MRAID_MEDIUM_AD_UNIT,
                     Constants.MOPUB_VAST_MEDIUM_AD_UNIT,
@@ -208,4 +215,24 @@ public class HyBidDemoApplication extends MultiDexApplication {
 
         return model;
     }
+
+    private AudioState getAudioStateFromSettings(int settingsAudioState) {
+        switch (settingsAudioState) {
+            case 1:
+                return AudioState.ON;
+            case 2:
+                return AudioState.MUTED;
+            default:
+                return AudioState.DEFAULT;
+        }
+    }
+
+    private InterstitialActionBehaviour getInterstitialActionBehaviourFromSettings (boolean settingsActionBehaviour) {
+        if (settingsActionBehaviour) {
+            return InterstitialActionBehaviour.HB_CREATIVE;
+        } else {
+            return InterstitialActionBehaviour.HB_ACTION_BUTTON;
+        }
+    }
+
 }

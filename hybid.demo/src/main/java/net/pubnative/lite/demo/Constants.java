@@ -44,6 +44,17 @@ public class Constants {
     public static final String MRAID_320x100_ZONE_ID = "28";
     public static final String MRAID_480x320_ZONE_ID = "29";
 
+    public static final Boolean COPPA_DEFAULT = false;
+    public static final Boolean TEST_MODE_DEFAULT = true;
+    public static final Boolean LOCATION_TRACKING_DEFAULT = true;
+    public static final Boolean LOCATION_UPDATES_DEFAULT = false;
+    public static final int INITIAL_AUDIO_STATE_DEFAULT = 0;
+    public static final Boolean MRAID_EXPANDED_DEFAULT = false;
+    public static final Boolean CLOSE_VIDEO_AFTER_FINISH_DEFAULT = false;
+    public static final int SKIP_OFFSET_DEFAULT = 3;
+    public static final int VIDEO_SKIP_OFFSET_DEFAULT = 8;
+    public static final Boolean VIDEO_CLICK_BEHAVIOUR_DEFAULT = true;
+
     public static final String MOPUB_MEDIATION_BANNER_AD_UNIT = "13cb0efc7b8b4b169424bccb0a4dd349";
     public static final String MOPUB_MEDIATION_INTERSTITIAL_AD_UNIT = "ccdec09fb29846f98cf57cea8287a606";
     public static final String MOPUB_MEDIATION_INTERSTITIAL_VIDEO_AD_UNIT = "0a39b233f7774d0e9538b7b832bc35e8";

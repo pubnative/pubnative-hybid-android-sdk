@@ -1,6 +1,6 @@
 def project_name = project.name
 def version_name = project.version
-if (branchName != "master") {
+if (branchName != null && buildNumber != null && branchName.toString() != "master") {
     version_name = "${version_name}-${branchName}.${buildNumber}"
     project_name = "${project_name}.beta"
 }
@@ -31,7 +31,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':hybid.sdk')
-    compileOnly 'com.google.android.gms:play-services-ads:20.4.0'
+    compileOnly 'com.google.android.gms:play-services-ads:20.5.0'
 
     implementation project(':hybid.sdk.core')
     implementation project(':hybid.sdk.logger')
@@ -60,7 +60,7 @@ publishing {
             groupId project.group
             artifactId project.name
             version version_name
-            if (branchName == "master") {
+            if (branchName.toString() == "master") {
                 artifact sourcesJar
             }
             android.libraryVariants.all { variant ->
@@ -86,7 +86,7 @@ artifactory {
         }
 
         defaults {
-            publishArtifacts = branchName != "master"
+            publishArtifacts = branchName.toString() != "master"
             publishPom = true
         }
     }

@@ -88,6 +88,7 @@
     <string name="save_pn_zone_ids">Save Zone Ids</string>
     <string name="save_pn_keywords">Save Keywords</string>
     <string name="save_package_names">Save Package Names</string>
+    <string name="save_settings">Save settings</string>
 
     <string name="hybid_native">HyBid Native</string>
     <string name="hybid_banner">HyBid Banner</string>
@@ -245,4 +246,20 @@
     <string name="zone_id_input">Zone Id</string>
 
     <string name="custom_sdk_data">Custom SDK Data</string>
+
+    <string name="ad_customization">Ad Customization</string>
+    <string name="general">General</string>
+    <string name="fullscreen_video">Fullscreen video</string>
+    <string name="check_location_updates">Location Updates</string>
+    <string name="check_mraid_expand">MRAID Expand</string>
+    <string name="initial_audio">Initial Audio</string>
+    <string name="hint_html_mraid_skip_offset">HTML/MRAID Skip Offset</string>
+    <string name="hint_video_skip_offset">Video Skip Offset</string>
+    <string name="check_auto_close">Auto Close after Finish</string>
+    <string name="click_behaviour">Click Behaviour</string>
+    <string name="radio_creative">Creative</string>
+    <string name="radio_action_button">Action Button</string>
+    <string name="radio_sound_on">On</string>
+    <string name="radio_sound_mute">Mute</string>
+    <string name="radio_sound_default">Default</string>
 </resources>

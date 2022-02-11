@@ -54,7 +54,6 @@ dependencies {
     implementation project(':hybid.adapters.admob')
     implementation project(':hybid.adapters.dfp')
     implementation project(':hybid.adapters.ironsource')
-    implementation project(':appmonet.hybid')
 
     //Hybid SDK modules
     implementation project(':hybid.sdk')

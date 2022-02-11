@@ -126,36 +126,4 @@ public class HeaderBiddingUtils {
 
         return set;
     }
-
-    public static String getAppMonetBiddingKeywords(Ad ad) {
-        StringBuilder stringBuilder = new StringBuilder();
-        Integer integer = ad.getECPM() != null ? ad.getECPM() : 0;
-        if (integer < 1000) {
-            stringBuilder.append("mm_10").append(':').append(getBidECPM(ad, KeywordMode.TWO_DECIMALS));
-        } else if (integer < 2000) {
-            stringBuilder.append("mm_50").append(':').append(getBidECPM(ad, KeywordMode.TWO_DECIMALS));
-        } else if (integer < 5000) {
-            stringBuilder.append("mm_1d").append(':').append(getBidECPM(ad, KeywordMode.TWO_DECIMALS));
-        } else {
-            stringBuilder.append("mm_gte_5d").append(':').append("true");
-        }
-
-        return stringBuilder.toString();
-    }
-
-    public static String getAppMonetBiddingInterstitialKeywords(Ad ad) {
-        StringBuilder stringBuilder = new StringBuilder();
-        Integer integer = ad.getECPM() != null ? ad.getECPM() : 0;
-        if (integer < 1000) {
-            stringBuilder.append("mm_10").append(':').append(getBidECPM(ad, KeywordMode.TWO_DECIMALS));
-        } else if (integer < 2000) {
-            stringBuilder.append("mm_50").append(':').append(getBidECPM(ad, KeywordMode.TWO_DECIMALS));
-        } else if (integer < 10000) {
-            stringBuilder.append("mm_1d").append(':').append(getBidECPM(ad, KeywordMode.TWO_DECIMALS));
-        } else {
-            stringBuilder.append("mm_gte_10d").append(':').append("true");
-        }
-
-        return stringBuilder.toString();
-    }
 }

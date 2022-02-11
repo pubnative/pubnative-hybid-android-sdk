@@ -54,14 +54,16 @@ class IronSourceMediationRewardedFragment : Fragment(R.layout.fragment_ironsourc
     }
 
     override fun onRewardedVideoAvailabilityChanged(available: Boolean) {
-        if (available) {
-            Log.d(TAG, "onRewardedVideoAvailabilityChanged: available")
-            displayLogs()
-            showButton.isEnabled = true
-        } else {
-            Log.d(TAG, "onRewardedVideoAvailabilityChanged: unavailable")
-            displayLogs()
-            showButton.isEnabled = false
+        requireActivity().runOnUiThread {
+            if (available) {
+                Log.d(TAG, "onRewardedVideoAvailabilityChanged: available")
+                displayLogs()
+                showButton.isEnabled = true
+            } else {
+                Log.d(TAG, "onRewardedVideoAvailabilityChanged: unavailable")
+                displayLogs()
+                showButton.isEnabled = false
+            }
         }
     }
 
@@ -70,8 +72,10 @@ class IronSourceMediationRewardedFragment : Fragment(R.layout.fragment_ironsourc
     }
 
     override fun onRewardedVideoAdClosed() {
-        Log.d(TAG, "onRewardedVideoAdClosed")
-        showButton.isEnabled = false
+        requireActivity().runOnUiThread {
+            Log.d(TAG, "onRewardedVideoAdClosed")
+            showButton.isEnabled = false
+        }
     }
 
     override fun onRewardedVideoAdStarted() {
@@ -88,8 +92,10 @@ class IronSourceMediationRewardedFragment : Fragment(R.layout.fragment_ironsourc
 
     override fun onRewardedVideoAdShowFailed(error: IronSourceError?) {
         Log.d(TAG, "onRewardedVideoAdShowFailed")
-        errorView.text = error?.errorMessage
-        showButton.isEnabled = false
+        requireActivity().runOnUiThread {
+            errorView.text = error?.errorMessage
+            showButton.isEnabled = false
+        }
     }
 
     override fun onRewardedVideoAdClicked(placement: Placement?) {

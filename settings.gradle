@@ -15,7 +15,4 @@ include ':hybid.demo',
         ':hybid.sdk.native',
         ':hybid.sdk.rewarded',
         ':hybid.sdk.source.pnapi',
-        ':hybid.sdk.logger',
-        ':appmonet.hybid',
-        ':appmonet.adapters.mopub',
-        ':appmonet.adapters.gam'
+        ':hybid.sdk.logger'

@@ -252,6 +252,13 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
+
+        <activity
+            android:name=".ui.activities.AdCustomizationActivity"
+            android:label="@string/pn_settings"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.activities.config.MoPubSettingsActivity"
             android:label="@string/mopub_settings"

@@ -39,6 +39,13 @@ data class SettingsModel(var appToken: String,
                          var coppa: Boolean,
                          var testMode: Boolean,
                          var locationTracking: Boolean,
+                         var locationUpdates: Boolean,
+                         var initialAudioState: Int,
+                         var mraidExpanded: Boolean,
+                         var closeVideoAfterFinish: Boolean,
+                         var skipOffset: Int,
+                         var videoSkipOffset: Int,
+                         var videoClickBehaviour: Boolean,
                          var mopubBannerAdUnitId: String,
                          var mopubMediumAdUnitId: String,
                          var mopubMediumVideoAdUnitId: String,
@@ -98,6 +105,13 @@ data class SettingsModel(var appToken: String,
             },
             parcel.readInt() != 0,
             parcel.readInt() != 0,
+            parcel.readInt() != 0,
+            parcel.readInt() != 0,
+            parcel.readInt()!!,
+            parcel.readInt() != 0,
+            parcel.readInt() != 0,
+            parcel.readInt()!!,
+            parcel.readInt()!!,
             parcel.readInt() != 0,
             parcel.readString()!!,
             parcel.readString()!!,
@@ -171,6 +185,43 @@ data class SettingsModel(var appToken: String,
             locationTrackingByte = 0
         }
         dest?.writeInt(locationTrackingByte)
+
+        val locationUpdatesByte: Int
+        if (locationUpdates) {
+            locationUpdatesByte = 1
+        } else {
+            locationUpdatesByte = 0
+        }
+        dest?.writeInt(locationUpdatesByte)
+
+        dest?.writeInt(initialAudioState)
+
+        val mraidExpandedByte: Int
+        if (mraidExpanded) {
+            mraidExpandedByte = 1
+        } else {
+            mraidExpandedByte = 0
+        }
+        dest?.writeInt(mraidExpandedByte)
+
+        val closeVideoAfterFinishByte: Int
+        if (closeVideoAfterFinish) {
+            closeVideoAfterFinishByte = 1
+        } else {
+            closeVideoAfterFinishByte = 0
+        }
+        dest?.writeInt(closeVideoAfterFinishByte)
+
+        dest?.writeInt(skipOffset)
+        dest?.writeInt(videoSkipOffset)
+
+        val videoClickBehaviourByte: Int
+        if (videoClickBehaviour) {
+            videoClickBehaviourByte = 1
+        } else {
+            videoClickBehaviourByte = 0
+        }
+        dest?.writeInt(videoClickBehaviourByte)
 
         dest?.writeString(mopubBannerAdUnitId)
         dest?.writeString(mopubMediumAdUnitId)
