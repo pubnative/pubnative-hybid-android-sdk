@@ -36,6 +36,7 @@ class AdmobMediationInterstitialFragment : Fragment(R.layout.fragment_admob_inte
             SettingsManager.getInstance(requireActivity()).getSettings().admobInterstitialAdUnitId
 
         loadButton.setOnClickListener {
+            loadButton.isEnabled = false
             errorView.text = ""
             val adRequest = AdRequest.Builder().build()
             InterstitialAd.load(requireActivity(), adUnitId, adRequest, adLoadCallback)
@@ -70,6 +71,7 @@ class AdmobMediationInterstitialFragment : Fragment(R.layout.fragment_admob_inte
             displayLogs()
             errorView.text = error.message
             showButton.isEnabled = false
+            enableLoadBtn()
         }
     }
 
@@ -89,6 +91,7 @@ class AdmobMediationInterstitialFragment : Fragment(R.layout.fragment_admob_inte
             super.onAdDismissedFullScreenContent()
             Log.d(TAG, "onAdDismissedFullScreenContent")
             showButton.isEnabled = false
+            enableLoadBtn()
         }
 
         override fun onAdImpression() {
@@ -107,5 +110,9 @@ class AdmobMediationInterstitialFragment : Fragment(R.layout.fragment_admob_inte
             val activity = activity as TabActivity
             activity.notifyAdUpdated()
         }
+    }
+
+    private fun enableLoadBtn() {
+        loadButton.isEnabled = true
     }
 }

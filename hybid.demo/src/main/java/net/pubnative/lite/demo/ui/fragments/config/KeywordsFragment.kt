@@ -25,9 +25,7 @@ package net.pubnative.lite.demo.ui.fragments.config
 import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
@@ -44,13 +42,11 @@ import net.pubnative.lite.sdk.HyBid
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class KeywordsFragment : Fragment() {
+class KeywordsFragment : Fragment(R.layout.fragment_keywords) {
     private lateinit var keywordInput: EditText
     private lateinit var keywordList: RecyclerView
     private lateinit var settingManager: SettingsManager
     private lateinit var adapter: KeywordAdapter
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_keywords, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -94,7 +90,8 @@ class KeywordsFragment : Fragment() {
 
             HyBid.setKeywords(keywordString)
 
-            val inputMethodManager = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            val inputMethodManager =
+                activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             inputMethodManager.hideSoftInputFromWindow(keywordInput.windowToken, 0)
 
             Toast.makeText(activity, "PN Keywords saved successfully.", Toast.LENGTH_SHORT).show()

@@ -82,6 +82,7 @@ class GAMBannerFragment : Fragment(R.layout.fragment_dfp_banner), RequestManager
         gamBannerContainer.addView(gamBanner)
 
         loadButton.setOnClickListener {
+            loadButton.isEnabled = false
             errorView.text = ""
             val activity = activity as TabActivity
             activity.notifyAdCleaned()
@@ -129,11 +130,13 @@ class GAMBannerFragment : Fragment(R.layout.fragment_dfp_banner), RequestManager
         override fun onAdLoaded() {
             super.onAdLoaded()
             Log.d(TAG, "onAdLoaded")
+            enableLoadBtn()
         }
 
         override fun onAdFailedToLoad(error: LoadAdError) {
             super.onAdFailedToLoad(error)
             Log.d(TAG, "onAdFailedToLoad")
+            enableLoadBtn()
         }
 
         override fun onAdImpression() {
@@ -162,5 +165,9 @@ class GAMBannerFragment : Fragment(R.layout.fragment_dfp_banner), RequestManager
             val activity = activity as TabActivity
             activity.notifyAdUpdated()
         }
+    }
+
+    private fun enableLoadBtn() {
+        loadButton.isEnabled = true
     }
 }

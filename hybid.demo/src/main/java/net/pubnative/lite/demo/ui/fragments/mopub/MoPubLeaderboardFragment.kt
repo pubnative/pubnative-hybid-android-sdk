@@ -80,6 +80,7 @@ class MoPubLeaderboardFragment : Fragment(R.layout.fragment_mopub_leaderboard),
     }
 
     fun loadPNAd() {
+        loadButton.isEnabled = false
         requestManager.setZoneId(zoneId)
         requestManager.setRequestListener(this)
         requestManager.requestAd()
@@ -106,27 +107,33 @@ class MoPubLeaderboardFragment : Fragment(R.layout.fragment_mopub_leaderboard),
         errorView.text = throwable?.message
         creativeIdView.text = ""
         displayLogs()
+        enableLoadBtn()
     }
 
     // ---------------- MoPub Banner Listener ---------------------
     override fun onBannerLoaded(banner: MoPubView) {
         Log.d(TAG, "onAdLoaded")
+        enableLoadBtn()
     }
 
     override fun onBannerFailed(banner: MoPubView?, errorCode: MoPubErrorCode?) {
         Log.d(TAG, "onBannerFailed")
+        enableLoadBtn()
     }
 
     override fun onBannerExpanded(banner: MoPubView?) {
         Log.d(TAG, "onBannerExpanded")
+        enableLoadBtn()
     }
 
     override fun onBannerCollapsed(banner: MoPubView?) {
         Log.d(TAG, "onBannerCollapsed")
+        enableLoadBtn()
     }
 
     override fun onBannerClicked(banner: MoPubView?) {
         Log.d(TAG, "onAdClicked")
+        enableLoadBtn()
     }
 
     private fun displayLogs() {
@@ -134,5 +141,9 @@ class MoPubLeaderboardFragment : Fragment(R.layout.fragment_mopub_leaderboard),
             val activity = activity as TabActivity
             activity.notifyAdUpdated()
         }
+    }
+
+    private fun enableLoadBtn() {
+        loadButton.isEnabled = true
     }
 }

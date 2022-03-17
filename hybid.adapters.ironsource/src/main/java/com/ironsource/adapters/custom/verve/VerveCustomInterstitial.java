@@ -53,6 +53,7 @@ public class VerveCustomInterstitial extends BaseInterstitial<VerveCustomAdapter
         mInterstitialAd = new HyBidInterstitialAd(activity, zoneID, this);
         mInterstitialAd.setVideoListener(this);
         mInterstitialAd.setMediation(true);
+        mInterstitialAd.setMediationVendor(VerveCustomAdapter.IRONSOURCE_MEDIATION_VENDOR);
         mInterstitialAd.load();
     }
 

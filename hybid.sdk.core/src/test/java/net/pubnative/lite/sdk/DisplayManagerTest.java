@@ -49,13 +49,13 @@ public class DisplayManagerTest {
 
     @Test
     public void testDisplayManagerVersionInAppBidding() {
-        String expectedVersion = "sdkandroid_iab_" + BuildConfig.SDK_VERSION;
+        String expectedVersion = "sdkandroid_b_" + BuildConfig.SDK_VERSION;
         Assert.assertTrue(displayManager.getDisplayManagerVersion(IntegrationType.IN_APP_BIDDING).equalsIgnoreCase(expectedVersion));
     }
 
     @Test
     public void testDisplayManagerVersionNoIntegrationType() {
-        String expectedVersion = "sdkandroid_iab_" + BuildConfig.SDK_VERSION;
+        String expectedVersion = "sdkandroid_b_" + BuildConfig.SDK_VERSION;
         Assert.assertTrue(displayManager.getDisplayManagerVersion().equalsIgnoreCase(expectedVersion));
     }
 }

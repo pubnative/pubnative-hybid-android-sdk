@@ -76,6 +76,7 @@ public class RequestManager {
     private final AdRequestFactory mAdRequestFactory;
     private final ReportingController mReportingController;
     private final PNInitializationHelper mInitializationHelper;
+    private String mAppToken;
     private String mZoneId;
     private RequestListener mRequestListener;
     private boolean mIsDestroyed;
@@ -123,7 +124,7 @@ public class RequestManager {
 
         jsonCacheParams = new JSONObject();
         try {
-            jsonCacheParams.put(Reporting.Key.APP_TOKEN, HyBid.getAppToken());
+            jsonCacheParams.put(Reporting.Key.APP_TOKEN, TextUtils.isEmpty(mAppToken) ? HyBid.getAppToken() : mAppToken);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -131,6 +132,10 @@ public class RequestManager {
 
     public void setRequestListener(RequestListener requestListener) {
         mRequestListener = requestListener;
+    }
+
+    public void setAppToken(String appToken) {
+        this.mAppToken = appToken;
     }
 
     public void setZoneId(String zoneId) {
@@ -178,20 +183,21 @@ public class RequestManager {
             mCacheStarted = false;
             mCacheFinished = false;
 
-            mAdRequestFactory.createAdRequest(mZoneId, getAdSize(), isRewarded(), new AdRequestFactory.Callback() {
-                @Override
-                public void onRequestCreated(AdRequest adRequest) {
-                    requestAdFromApi(adRequest);
-                    if (adRequest != null) {
-                        try {
-                            jsonCacheParams.put(Reporting.Key.AD_REQUEST, adRequest.toString());
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
+            mAdRequestFactory.createAdRequest(TextUtils.isEmpty(mAppToken) ? null : mAppToken, mZoneId,
+                    getAdSize(), isRewarded(), new AdRequestFactory.Callback() {
+                        @Override
+                        public void onRequestCreated(AdRequest adRequest) {
+                            requestAdFromApi(adRequest);
+                            if (adRequest != null) {
+                                try {
+                                    jsonCacheParams.put(Reporting.Key.AD_REQUEST, adRequest.toString());
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
 
-                }
-            });
+                        }
+                    });
         }
     }
 
@@ -411,6 +417,15 @@ public class RequestManager {
                 }
             }
             mReportingController.reportEvent(reportingEvent);
+        }
+    }
+
+    public void setMediationVendor(String mediationVendor) {
+        if (mAdRequestFactory != null) {
+            mAdRequestFactory.setMediationVendor(mediationVendor);
+            if (!TextUtils.isEmpty(mediationVendor)) {
+                JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_MEDIATION_VENDOR, mediationVendor);
+            }
         }
     }
 

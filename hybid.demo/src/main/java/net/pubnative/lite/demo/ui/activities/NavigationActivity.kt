@@ -30,7 +30,6 @@ class NavigationActivity : AppCompatActivity() {
         NavigationUI.setupWithNavController(navigation, navController)
 
         checkPermissions()
-        initializeIronSource()
     }
 
     private fun checkPermissions() {
@@ -65,14 +64,4 @@ class NavigationActivity : AppCompatActivity() {
         }
     }
 
-    private fun initializeIronSource() {
-        val settingsModel = SettingsManager.getInstance(this).getSettings()
-        val appKey = settingsModel.ironSourceAppKey
-        if (!TextUtils.isEmpty(appKey)) {
-            IronSource.init(
-                this, appKey, IronSource.AD_UNIT.BANNER,
-                IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.REWARDED_VIDEO
-            )
-        }
-    }
 }

@@ -16,6 +16,7 @@
     <string name="chosen">Chosen:</string>
 
     <string name="pn_settings">HyBid Settings</string>
+    <string name="maxads_settings">MaxAds Settings</string>
     <string name="mopub_settings">MoPub Settings</string>
     <string name="dfp_settings">DFP Settings</string>
     <string name="admob_settings">Admob Settings</string>
@@ -51,6 +52,14 @@
     <string name="hint_dfp_rewarded_ad_unit_id">Rewarded Ad Unit ID</string>
     <string name="save_dfp_settings">Save DFP settings</string>
 
+    <string name="hint_maxads_sdk_key">App ID</string>
+    <string name="hint_maxads_banner_ad_unit_id">Banner Ad Unit ID</string>
+    <string name="hint_maxads_medium_ad_unit_id">Medium Ad Unit ID</string>
+    <string name="hint_maxads_interstitial_ad_unit_id">Interstitial Ad Unit ID</string>
+    <string name="hint_maxads_native_ad_unit_id">Native Ad Unit ID</string>
+    <string name="hint_maxads_rewarded_ad_unit_id">Rewarded Ad Unit ID</string>
+    <string name="save_maxads_settings">Save MaxAds settings</string>
+
     <string name="hint_admob_app_id">App ID</string>
     <string name="hint_admob_banner_ad_unit_id">Banner Ad Unit ID</string>
     <string name="hint_admob_medium_ad_unit_id">Medium Ad Unit ID</string>
@@ -67,6 +76,7 @@
     <string name="hint_ironsource_interstitial_ad_unit_id">Interstitial Ad Unit ID</string>
     <string name="hint_ironsource_rewarded_ad_unit_id">Rewarded Ad Unit ID</string>
     <string name="save_ironsouce_settings">Save IronSource settings</string>
+    <string name="init_ironsouce">Initialize IronSource SDK</string>
 
     <string name="hint_pn_apptoken">App token</string>
     <string name="hint_pn_age">Age</string>
@@ -106,6 +116,13 @@
     <string name="mopub_medium_video">MoPub Medium Video</string>
     <string name="mopub_leaderboard">MoPub Leaderboard</string>
     <string name="mopub_rewarded">MoPub Rewarded</string>
+
+    <string name="maxads">MaxAds</string>
+    <string name="maxads_banner">MaxAds Banner</string>
+    <string name="maxads_mrect">MaxAds MRect</string>
+    <string name="maxads_interstitial">MaxAds Interstitial</string>
+    <string name="maxads_rewarded">MaxAds Rewarded</string>
+    <string name="maxads_native">MaxAds Native</string>
 
     <string name="dfp_banner">DFP Banner</string>
     <string name="dfp_interstitial">DFP Interstitial</string>
@@ -255,6 +272,7 @@
     <string name="initial_audio">Initial Audio</string>
     <string name="hint_html_mraid_skip_offset">HTML/MRAID Skip Offset</string>
     <string name="hint_video_skip_offset">Video Skip Offset</string>
+    <string name="hint_endcard_close_button_delay">EndCard close button delay</string>
     <string name="check_auto_close">Auto Close after Finish</string>
     <string name="click_behaviour">Click Behaviour</string>
     <string name="radio_creative">Creative</string>

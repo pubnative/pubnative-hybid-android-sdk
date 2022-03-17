@@ -23,6 +23,7 @@ public class Reporting {
         public static final String AD_REQUEST = "ad_request";
         public static final String ERROR_CODE = "error_code";
         public static final String ERROR_MESSAGE = "error_message";
+        public static final String HYBID_VERSION = "hybid_version";
         //Ad Types
         public static final String INTERSTITIAL = "interstitial";
         public static final String REWARDED = "rewarded";

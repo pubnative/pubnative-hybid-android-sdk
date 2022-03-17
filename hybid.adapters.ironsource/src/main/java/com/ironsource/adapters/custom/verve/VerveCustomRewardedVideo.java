@@ -51,6 +51,7 @@ public class VerveCustomRewardedVideo extends BaseRewardedVideo<VerveCustomAdapt
         mRewardedVideoAdListener = rewardedVideoAdListener;
         mHyBidRewardedAd = new HyBidRewardedAd(activity, zoneID, this);
         mHyBidRewardedAd.setMediation(true);
+        mHyBidRewardedAd.setMediationVendor(VerveCustomAdapter.IRONSOURCE_MEDIATION_VENDOR);
         mHyBidRewardedAd.load();
     }
 

@@ -40,7 +40,8 @@ class AdmobMediationNativeFragment : Fragment(R.layout.fragment_admob_native) {
         val adUnitId =
             SettingsManager.getInstance(requireActivity()).getSettings().admobNativeAdUnitId
 
-        view.findViewById<Button>(R.id.button_load).setOnClickListener {
+        loadButton.setOnClickListener {
+            loadButton.isEnabled = false
             errorView.text = ""
             admobNative?.destroy()
 
@@ -112,6 +113,7 @@ class AdmobMediationNativeFragment : Fragment(R.layout.fragment_admob_native) {
             super.onAdLoaded()
             displayLogs()
             Log.d(TAG, "onAdLoaded")
+            enableLoadBtn()
         }
 
         override fun onAdFailedToLoad(error: LoadAdError) {
@@ -119,6 +121,7 @@ class AdmobMediationNativeFragment : Fragment(R.layout.fragment_admob_native) {
             displayLogs()
             errorView.text = error.message
             Log.d(TAG, "onAdFailedToLoad")
+            enableLoadBtn()
         }
 
         override fun onAdImpression() {
@@ -147,5 +150,9 @@ class AdmobMediationNativeFragment : Fragment(R.layout.fragment_admob_native) {
             val activity = activity as TabActivity
             activity.notifyAdUpdated()
         }
+    }
+
+    private fun enableLoadBtn() {
+        loadButton.isEnabled = true
     }
 }

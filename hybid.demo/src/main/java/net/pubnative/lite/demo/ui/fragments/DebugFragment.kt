@@ -12,17 +12,21 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.analytics.FirebaseAnalytics
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.adapters.ReportingEventAdapter
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.demo.util.JsonUtils
 import net.pubnative.lite.sdk.HyBid
+import net.pubnative.lite.sdk.HyBid.HYBID_VERSION
 import net.pubnative.lite.sdk.analytics.Reporting
 import net.pubnative.lite.sdk.analytics.ReportingEvent
 import net.pubnative.lite.sdk.analytics.ReportingEventCallback
 import net.pubnative.lite.sdk.utils.AdRequestRegistry
 
 class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback {
+
+    private var mFirebaseAnalytics: FirebaseAnalytics? = null
 
     private var requestView: TextView? = null
     private lateinit var latencyView: TextView
@@ -75,6 +79,11 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
 
             eventList = HyBid.getReportingController().adEventList
         }
+
+        context?.let {
+            mFirebaseAnalytics = FirebaseAnalytics.getInstance(it)
+            mFirebaseAnalytics!!.setAnalyticsCollectionEnabled(true)
+        }
     }
 
     override fun onDestroyView() {
@@ -87,6 +96,17 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
             if (event.eventType != null && event.eventType.equals(Reporting.EventType.REQUEST))
                 clearEventList()
             eventList.add(event)
+
+            event.eventObject?.let {
+                val bundle = Bundle()
+                for (key in event.eventObject.keys()) {
+                    bundle.putString(key, event.eventObject[key].toString())
+                }
+
+                mFirebaseAnalytics?.setDefaultEventParameters(bundle)
+
+                mFirebaseAnalytics?.logEvent(event.eventType, bundle)
+            }
         }
     }
 

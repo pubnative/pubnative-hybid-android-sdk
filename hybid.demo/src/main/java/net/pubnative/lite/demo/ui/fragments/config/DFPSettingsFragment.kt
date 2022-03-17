@@ -23,9 +23,7 @@
 package net.pubnative.lite.demo.ui.fragments.config
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -36,7 +34,7 @@ import net.pubnative.lite.demo.managers.SettingsManager
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class DFPSettingsFragment : Fragment() {
+class DFPSettingsFragment : Fragment(R.layout.fragment_dfp_settings) {
 
     private lateinit var bannerInput: EditText
     private lateinit var mediumInput: EditText
@@ -48,8 +46,6 @@ class DFPSettingsFragment : Fragment() {
     private lateinit var mediationInterstitialInput: EditText
     private lateinit var mediationRewardedInput: EditText
     private lateinit var settingManager: SettingsManager
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_dfp_settings, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

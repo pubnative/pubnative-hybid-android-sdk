@@ -35,6 +35,7 @@ class GAMMediationRewardedFragment : Fragment(R.layout.fragment_dfp_rewarded) {
         showButton.isEnabled = false
 
         loadButton.setOnClickListener {
+            loadButton.isEnabled = false
             errorView.text = ""
             val adRequest = AdManagerAdRequest.Builder().build()
             RewardedAd.load(requireActivity(), adUnitId, adRequest, adLoadCallback)
@@ -42,8 +43,12 @@ class GAMMediationRewardedFragment : Fragment(R.layout.fragment_dfp_rewarded) {
 
         showButton.setOnClickListener {
             if (gamRewarded != null) {
-                gamRewarded?.show(requireActivity()) { Log.d(TAG, "onUserEarnedReward") }
+                gamRewarded?.show(requireActivity()) {
+                    Log.d(TAG, "onUserEarnedReward")
+                }
             }
+            enableLoadBtn()
+            showButton.isEnabled = false
         }
 
         errorView.setOnClickListener {
@@ -70,6 +75,7 @@ class GAMMediationRewardedFragment : Fragment(R.layout.fragment_dfp_rewarded) {
             displayLogs()
             errorView.text = error.message
             Log.d(TAG, "onAdFailedToLoad")
+            enableLoadBtn()
         }
     }
 
@@ -106,5 +112,9 @@ class GAMMediationRewardedFragment : Fragment(R.layout.fragment_dfp_rewarded) {
             val activity = activity as TabActivity
             activity.notifyAdUpdated()
         }
+    }
+
+    private fun enableLoadBtn() {
+        loadButton.isEnabled = true
     }
 }

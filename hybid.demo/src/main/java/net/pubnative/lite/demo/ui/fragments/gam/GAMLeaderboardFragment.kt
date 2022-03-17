@@ -58,6 +58,7 @@ class GAMLeaderboardFragment : Fragment(R.layout.fragment_dfp_leaderboard),
         gamLeaderboardContainer.addView(gamLeaderboard)
 
         loadButton.setOnClickListener {
+            loadButton.isEnabled = false
             errorView.text = ""
             val activity = activity as TabActivity
             activity.notifyAdCleaned()
@@ -105,11 +106,13 @@ class GAMLeaderboardFragment : Fragment(R.layout.fragment_dfp_leaderboard),
         override fun onAdLoaded() {
             super.onAdLoaded()
             Log.d(TAG, "onAdLoaded")
+            enableLoadBtn()
         }
 
         override fun onAdFailedToLoad(error: LoadAdError) {
             super.onAdFailedToLoad(error)
             Log.d(TAG, "onAdFailedToLoad")
+            enableLoadBtn()
         }
 
         override fun onAdImpression() {
@@ -138,5 +141,9 @@ class GAMLeaderboardFragment : Fragment(R.layout.fragment_dfp_leaderboard),
             val activity = activity as TabActivity
             activity.notifyAdUpdated()
         }
+    }
+
+    private fun enableLoadBtn() {
+        loadButton.isEnabled = true
     }
 }

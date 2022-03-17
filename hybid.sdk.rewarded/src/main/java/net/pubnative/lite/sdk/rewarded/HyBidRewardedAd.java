@@ -59,6 +59,7 @@ import java.util.Map;
 
 public class HyBidRewardedAd implements RequestManager.RequestListener, RewardedPresenter.Listener {
     private static final String TAG = HyBidRewardedAd.class.getSimpleName();
+    private static final int TIME_TO_EXPIRE = 1800000;
 
     public interface Listener {
         void onRewardedLoaded();
@@ -78,6 +79,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     private RewardedPresenter mPresenter;
     private final Listener mListener;
     private final Context mContext;
+    private String mAppToken;
     private String mZoneId;
     private Ad mAd;
     private SignalDataProcessor mSignalDataProcessor;
@@ -96,11 +98,16 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     }
 
     public HyBidRewardedAd(Context context, String zoneId, Listener listener) {
+        this(context, null, zoneId, listener);
+    }
+
+    public HyBidRewardedAd(Context context, String appToken, String zoneId, Listener listener) {
         if (!HyBid.isInitialized()) {
             Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before creating a HyBidRewardedAd");
         }
         mRequestManager = new RewardedRequestManager();
         mContext = context;
+        mAppToken = appToken;
         mZoneId = zoneId;
         mListener = listener;
         mPlacementParams = new JSONObject();
@@ -136,6 +143,9 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
             } else {
                 cleanup();
                 mInitialLoadTime = System.currentTimeMillis();
+                if (!TextUtils.isEmpty(mAppToken)) {
+                    mRequestManager.setAppToken(mAppToken);
+                }
                 mRequestManager.setZoneId(mZoneId);
                 mRequestManager.setRequestListener(this);
                 mRequestManager.requestAd();
@@ -146,7 +156,14 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     public void show() {
         if (mPresenter != null && mReady) {
             mInitialRenderTime = System.currentTimeMillis();
-            mPresenter.show();
+            long adExpireTime = mInitialLoadTime + TIME_TO_EXPIRE;
+            if (mInitialRenderTime < adExpireTime || mInitialLoadTime == -1) {
+                mPresenter.show();
+            } else {
+                Logger.e(TAG, "Ad has expired.");
+                cleanup();
+                invokeOnLoadFailed(new HyBidError(HyBidErrorCode.EXPIRED_AD));
+            }
         } else {
             Logger.e(TAG, "Can't display ad. Rewarded ad not ready.");
         }
@@ -430,6 +447,12 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     protected void invokeOnReward() {
         if (mListener != null) {
             mListener.onReward();
+        }
+    }
+
+    public void setMediationVendor(String mediationVendor) {
+        if (mRequestManager != null) {
+            mRequestManager.setMediationVendor(mediationVendor);
         }
     }
 

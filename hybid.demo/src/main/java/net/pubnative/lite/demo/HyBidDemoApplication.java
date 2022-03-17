@@ -30,9 +30,13 @@ import android.webkit.WebView;
 import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
 
+import com.applovin.sdk.AppLovinSdk;
+import com.applovin.sdk.AppLovinSdkConfiguration;
 import com.google.android.gms.ads.MobileAds;
 import com.ogury.cm.OguryChoiceManager;
 import com.ogury.cm.OguryCmConfig;
+import com.ogury.sdk.Ogury;
+import com.ogury.sdk.OguryConfiguration;
 
 import net.pubnative.lite.demo.managers.MoPubManager;
 import net.pubnative.lite.demo.managers.SettingsManager;
@@ -139,7 +143,13 @@ public class HyBidDemoApplication extends MultiDexApplication {
         MobileAds.initialize(this, initializationStatus -> {
         });
 
-        OguryChoiceManager.initialize(this, Constants.OGURY_KEY, new OguryCmConfig());
+        AppLovinSdk.getInstance(this).setMediationProvider("max");
+        AppLovinSdk.initializeSdk(this, config -> {
+
+        });
+
+        OguryConfiguration.Builder oguryConfigBuilder = new OguryConfiguration.Builder(this, Constants.OGURY_KEY);
+        Ogury.start(oguryConfigBuilder.build());
 
         // NumberEight SDK crashes below API level 26.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -172,6 +182,7 @@ public class HyBidDemoApplication extends MultiDexApplication {
                     Constants.CLOSE_VIDEO_AFTER_FINISH_DEFAULT,
                     Constants.SKIP_OFFSET_DEFAULT,
                     Constants.VIDEO_SKIP_OFFSET_DEFAULT,
+                    Constants.ENDCARD_CLOSE_BUTTON_DELAY_DEFAULT,
                     Constants.VIDEO_CLICK_BEHAVIOUR_DEFAULT,
                     Constants.MOPUB_MRAID_BANNER_AD_UNIT,
                     Constants.MOPUB_MRAID_MEDIUM_AD_UNIT,
@@ -209,7 +220,13 @@ public class HyBidDemoApplication extends MultiDexApplication {
                     Constants.IRONSOURCE_APP_KEY,
                     Constants.IRONSOURCE_BANNER_AD_UNIT,
                     Constants.IRONSOURCE_INTERSTITIAL_AD_UNIT,
-                    Constants.IRONSOURCE_REWARDED_AD_UNIT);
+                    Constants.IRONSOURCE_REWARDED_AD_UNIT,
+                    Constants.MAXADS_SDK_KEY,
+                    Constants.MAXADS_BANNER_AD_UNIT,
+                    Constants.MAXADS_MRECT_AD_UNIT,
+                    Constants.MAXADS_INTERSTITIAL_AD_UNIT,
+                    Constants.MAXADS_REWARDED_AD_UNIT,
+                    Constants.MAXADS_NATIVE_AD_UNIT);
             manager.setSettings(model, true);
         }
 
@@ -227,7 +244,7 @@ public class HyBidDemoApplication extends MultiDexApplication {
         }
     }
 
-    private InterstitialActionBehaviour getInterstitialActionBehaviourFromSettings (boolean settingsActionBehaviour) {
+    private InterstitialActionBehaviour getInterstitialActionBehaviourFromSettings(boolean settingsActionBehaviour) {
         if (settingsActionBehaviour) {
             return InterstitialActionBehaviour.HB_CREATIVE;
         } else {

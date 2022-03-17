@@ -53,6 +53,7 @@ public class Constants {
     public static final Boolean CLOSE_VIDEO_AFTER_FINISH_DEFAULT = false;
     public static final int SKIP_OFFSET_DEFAULT = 3;
     public static final int VIDEO_SKIP_OFFSET_DEFAULT = 8;
+    public static final int ENDCARD_CLOSE_BUTTON_DELAY_DEFAULT = 5;
     public static final Boolean VIDEO_CLICK_BEHAVIOUR_DEFAULT = true;
 
     public static final String MOPUB_MEDIATION_BANNER_AD_UNIT = "13cb0efc7b8b4b169424bccb0a4dd349";
@@ -97,6 +98,13 @@ public class Constants {
     public static final String IRONSOURCE_BANNER_AD_UNIT = "HyBid_Banner";
     public static final String IRONSOURCE_INTERSTITIAL_AD_UNIT = "HyBid_Interstitial";
     public static final String IRONSOURCE_REWARDED_AD_UNIT = "HyBid_Rewarded";
+
+    public static final String MAXADS_SDK_KEY = "7-JBxCfWENehXonRZUofTDd0JdARpWUG6LmQKs1mwy61r_AfBFUK7TpkZ8VR6-63GA6vK_Vp0hTCa6raFBQsAT";
+    public static final String MAXADS_BANNER_AD_UNIT = "HyBid_Demo_Banner";
+    public static final String MAXADS_MRECT_AD_UNIT = "HyBid_Demo_MRect";
+    public static final String MAXADS_NATIVE_AD_UNIT = "HyBid_Demo_Native";
+    public static final String MAXADS_INTERSTITIAL_AD_UNIT = "HyBid_Demo_Interstitial";
+    public static final String MAXADS_REWARDED_AD_UNIT = "HyBid_Demo_Rewarded";
 
     public static final String APP_TOKEN = "dde3c298b47648459f8ada4a982fa92d";
     public static final List<String> ZONE_ID_LIST = Arrays.asList(NATIVE_ZONE_ID, MRAID_320x50_ZONE_ID,

@@ -54,6 +54,7 @@ dependencies {
     implementation project(':hybid.adapters.admob')
     implementation project(':hybid.adapters.dfp')
     implementation project(':hybid.adapters.ironsource')
+    implementation project(':hybid.adapters.applovin')
 
     //Hybid SDK modules
     implementation project(':hybid.sdk')
@@ -77,6 +78,7 @@ dependencies {
     }
 
     implementation 'com.ironsource.sdk:mediationsdk:7.1.14'
+    implementation 'com.applovin:applovin-sdk:11.1.2'
 
     implementation 'com.google.android.gms:play-services-ads:20.4.0'
     implementation 'com.google.android.ads:mediation-test-suite:2.0.0'

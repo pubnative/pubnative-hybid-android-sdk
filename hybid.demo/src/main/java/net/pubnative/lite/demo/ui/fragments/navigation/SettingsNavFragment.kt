@@ -31,6 +31,11 @@ class SettingsNavFragment : Fragment(R.layout.fragment_nav_settings) {
             startActivity(intent)
         }
 
+        view.findViewById<TextView>(R.id.button_maxads_settings).setOnClickListener {
+            val intent = Intent(activity, MaxAdsSettingsActivity::class.java)
+            startActivity(intent)
+        }
+
         view.findViewById<TextView>(R.id.button_mopub_settings).setOnClickListener {
             val intent = Intent(activity, MoPubSettingsActivity::class.java)
             startActivity(intent)

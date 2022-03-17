@@ -57,6 +57,7 @@ public class AdRequestFactory {
     private final ConfigManager mConfigManager;
     private final DisplayManager mDisplayManager;
     private IntegrationType mIntegrationType = IntegrationType.HEADER_BIDDING;
+    private String mMediationVendor;
     private boolean mIsRewarded;
 
     public AdRequestFactory() {
@@ -71,7 +72,7 @@ public class AdRequestFactory {
         mDisplayManager = displayManager;
     }
 
-    public void createAdRequest(final String zoneid, final AdSize adSize, final boolean isRewarded, final Callback callback) {
+    public void createAdRequest(final String appToken, final String zoneid, final AdSize adSize, final boolean isRewarded, final Callback callback) {
         if (mDeviceInfo == null) {
             mDeviceInfo = HyBid.getDeviceInfo();
         }
@@ -90,31 +91,35 @@ public class AdRequestFactory {
                 PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(context, new HyBidAdvertisingId.Listener() {
                     @Override
                     public void onHyBidAdvertisingIdFinish(String advertisingId, Boolean limitTracking) {
-                        processAdvertisingId(zoneid, adSize, advertisingId, limitTracking, callback);
+                        processAdvertisingId(appToken, zoneid, adSize, advertisingId, limitTracking, callback);
                     }
                 }));
             } catch (Exception exception) {
                 Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
             }
         } else {
-            processAdvertisingId(zoneid, adSize, advertisingId, limitTracking, callback);
+            processAdvertisingId(appToken, zoneid, adSize, advertisingId, limitTracking, callback);
         }
     }
 
-    private void processAdvertisingId(String zoneId, AdSize adSize, String advertisingId, boolean limitTracking, Callback callback) {
+    private void processAdvertisingId(String appToken, String zoneId, AdSize adSize, String advertisingId, boolean limitTracking, Callback callback) {
         if (callback != null) {
-            callback.onRequestCreated(buildRequest(zoneId, adSize, advertisingId, limitTracking, mIntegrationType));
+            callback.onRequestCreated(buildRequest(appToken, zoneId, adSize, advertisingId, limitTracking, mIntegrationType, mMediationVendor));
         }
     }
 
-    public AdRequest buildRequest(final String zoneid, AdSize adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType) {
+    public AdRequest buildRequest(final String appToken, final String zoneid, AdSize adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType) {
+        return buildRequest(appToken, zoneid, adSize, advertisingId, limitTracking, integrationType, null);
+    }
+
+    public AdRequest buildRequest(final String appToken, final String zoneid, AdSize adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType, final String mediationVendor) {
         if (mUserDataManager == null) {
             mUserDataManager = HyBid.getUserDataManager();
         }
         boolean isCCPAOptOut = mUserDataManager.isCCPAOptOut();
         AdRequest adRequest = new AdRequest();
         adRequest.zoneid = zoneid;
-        adRequest.apptoken = HyBid.getAppToken();
+        adRequest.apptoken = TextUtils.isEmpty(appToken) ? HyBid.getAppToken() : appToken;
         adRequest.os = "android";
         adRequest.osver = mDeviceInfo.getOSVersion();
         adRequest.devicemodel = mDeviceInfo.getModel();
@@ -183,7 +188,7 @@ public class AdRequestFactory {
         }
 
         adRequest.displaymanager = mDisplayManager.getDisplayManager();
-        adRequest.displaymanagerver = mDisplayManager.getDisplayManagerVersion(integrationType);
+        adRequest.displaymanagerver = mDisplayManager.getDisplayManagerVersion(mediationVendor, integrationType);
 
         if (mLocationManager != null) {
             Location location = mLocationManager.getUserLocation();
@@ -209,6 +214,10 @@ public class AdRequestFactory {
         adRequest.soundSetting = mDeviceInfo.getSoundSetting();
 
         return adRequest;
+    }
+
+    public void setMediationVendor(String mediationVendor) {
+        this.mMediationVendor = mediationVendor;
     }
 
     public void setIntegrationType(IntegrationType integrationType) {

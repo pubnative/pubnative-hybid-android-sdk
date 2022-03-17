@@ -76,6 +76,7 @@ public class CountDownView extends FrameLayout {
         progressBarView.setSecondaryProgress(totalMs);
         progressBarView.setProgress(currentMs);
         int remainSec = (totalMs - currentMs) / 1000 + 1;
+        remainSec--;
         progressTextView.setText(String.valueOf(remainSec));
     }
 }

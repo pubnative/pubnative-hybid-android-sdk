@@ -103,6 +103,7 @@ class MoPubBannerFragment : Fragment(R.layout.fragment_mopub_banner),
     }
 
     fun loadPNAd() {
+        loadButton.isEnabled = false
         requestManager.setZoneId(zoneId)
         requestManager.setRequestListener(this)
         requestManager.requestAd()
@@ -134,28 +135,38 @@ class MoPubBannerFragment : Fragment(R.layout.fragment_mopub_banner),
         Log.d(TAG, "onRequestFail: ", throwable)
         errorView.text = throwable?.message
         creativeIdView.text = ""
+        enableLoadBtn()
         displayLogs()
     }
 
     // ---------------- MoPub Banner Listener ---------------------
     override fun onBannerLoaded(banner: MoPubView) {
         Log.d(TAG, "onAdLoaded")
+        enableLoadBtn()
     }
 
     override fun onBannerFailed(banner: MoPubView?, errorCode: MoPubErrorCode?) {
         Log.d(TAG, "onBannerFailed")
+        enableLoadBtn()
     }
 
     override fun onBannerExpanded(banner: MoPubView?) {
         Log.d(TAG, "onBannerExpanded")
+        enableLoadBtn()
     }
 
     override fun onBannerCollapsed(banner: MoPubView?) {
         Log.d(TAG, "onBannerCollapsed")
+        enableLoadBtn()
+    }
+
+    private fun enableLoadBtn() {
+        loadButton.isEnabled = true
     }
 
     override fun onBannerClicked(banner: MoPubView?) {
         Log.d(TAG, "onAdClicked")
+        enableLoadBtn()
     }
 
     private fun displayLogs() {

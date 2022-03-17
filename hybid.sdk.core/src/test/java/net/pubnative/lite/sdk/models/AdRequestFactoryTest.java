@@ -62,14 +62,14 @@ public class AdRequestFactoryTest {
         when(mLocationManager.getUserLocation()).thenReturn(mockLocation);
 
         when(mMockUserDataManager.isCCPAOptOut()).thenReturn(false);
-        when(mMockDisplayManager.getDisplayManagerVersion(IntegrationType.HEADER_BIDDING)).thenReturn(String.format(Locale.ENGLISH, "%s_%s_%s",
+        when(mMockDisplayManager.getDisplayManagerVersion(null, IntegrationType.HEADER_BIDDING)).thenReturn(String.format(Locale.ENGLISH, "%s_%s_%s",
                 "sdkandroid", "hb", BuildConfig.SDK_VERSION));
         when(mMockDisplayManager.getDisplayManager()).thenReturn("HyBid");
     }
 
     @Test
     public void createAdRequest() {
-        AdRequest request = mSubject.buildRequest("2", AdSize.SIZE_320x50, "aabbccdd", false, IntegrationType.HEADER_BIDDING);
+        AdRequest request = mSubject.buildRequest("aabbcc112233", "2", AdSize.SIZE_320x50, "aabbccdd", false, IntegrationType.HEADER_BIDDING);
         Assert.assertEquals("aabbccdd", request.gid);
         Assert.assertEquals(PNCrypto.md5("aabbccdd"), request.gidmd5);
         Assert.assertEquals(PNCrypto.sha1("aabbccdd"), request.gidsha1);

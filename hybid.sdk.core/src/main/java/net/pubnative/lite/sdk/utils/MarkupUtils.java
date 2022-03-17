@@ -7,7 +7,7 @@ public class MarkupUtils {
     public static boolean isVastXml(String adValue) {
         try {
             Vast vast = XmlParser.parse(adValue, Vast.class);
-            return true;
+            return vast.getAds() != null;
         } catch (Exception e) {
             Logger.e("MarkupUtils", e.getMessage());
             return false;

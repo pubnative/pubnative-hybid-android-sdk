@@ -1,5 +1,7 @@
 package net.pubnative.lite.sdk;
 
+import android.text.TextUtils;
+
 import net.pubnative.lite.sdk.core.BuildConfig;
 import net.pubnative.lite.sdk.models.IntegrationType;
 
@@ -14,8 +16,18 @@ public class DisplayManager {
     }
 
     public String getDisplayManagerVersion(IntegrationType integrationType) {
-        return String.format(Locale.ENGLISH, "%s_%s_%s",
-                DISPLAY_MANAGER_ENGINE, integrationType.getCode(), BuildConfig.SDK_VERSION);
+        return getDisplayManagerVersion(null, integrationType);
+    }
+
+    public String getDisplayManagerVersion(String mediationVendor, IntegrationType integrationType) {
+        String mediationValue = "";
+
+        if (!TextUtils.isEmpty(mediationVendor)) {
+            mediationValue = String.format(Locale.ENGLISH, "_%s", mediationVendor);
+        }
+
+        return String.format(Locale.ENGLISH, "%s_%s%s_%s",
+                DISPLAY_MANAGER_ENGINE, integrationType.getCode(), mediationValue, BuildConfig.SDK_VERSION);
     }
 
     public String getDisplayManager() {

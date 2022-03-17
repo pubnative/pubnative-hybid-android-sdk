@@ -11,12 +11,38 @@ import net.pubnative.lite.demo.ui.activities.dfp.*
 import net.pubnative.lite.demo.ui.activities.ironsource.IronSourceMediationBannerActivity
 import net.pubnative.lite.demo.ui.activities.ironsource.IronSourceMediationInterstitialActivity
 import net.pubnative.lite.demo.ui.activities.ironsource.IronSourceMediationRewardedActivity
+import net.pubnative.lite.demo.ui.activities.maxads.*
 import net.pubnative.lite.demo.ui.activities.mopub.*
 
 class MediationNavFragment : Fragment(R.layout.fragment_nav_mediation) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        view.findViewById<Button>(R.id.button_max_banner).setOnClickListener {
+            val intent = Intent(activity, MaxAdsMediationBannerActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_max_mrect).setOnClickListener {
+            val intent = Intent(activity, MaxAdsMediationMRectActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_max_interstitial).setOnClickListener {
+            val intent = Intent(activity, MaxAdsMediationInterstitialActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_max_rewarded).setOnClickListener {
+            val intent = Intent(activity, MaxAdsMediationRewardedActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_max_native).setOnClickListener {
+            val intent = Intent(activity, MaxAdsMediationNativeActivity::class.java)
+            startActivity(intent)
+        }
 
         view.findViewById<Button>(R.id.button_mopub_banner).setOnClickListener {
             val intent = Intent(activity, MoPubMediationBannerActivity::class.java)

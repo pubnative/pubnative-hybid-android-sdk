@@ -93,7 +93,11 @@ class SettingsManager private constructor(context: Context) {
         preferences.edit().putInt(SETTINGS_KEY_VIDEO_SKIP_OFFSET, videoSkipOffset).apply()
     }
 
-    fun setVideoClickBehaviour(isCreative: Boolean){
+    fun setEndCardCloseButtonDelay(endCardCloseButtonDelay: Int) {
+        preferences.edit().putInt(SETTINGS_KEY_ENDCARD_CLOSE_BUTTON_DELAY, endCardCloseButtonDelay).apply()
+    }
+
+    fun setVideoClickBehaviour(isCreative: Boolean) {
         preferences.edit().putBoolean(SETTINGS_KEY_VIDEO_CLICK_BEHAVIOUR, isCreative).apply()
     }
 
@@ -280,6 +284,30 @@ class SettingsManager private constructor(context: Context) {
         preferences.edit().putString(SETTINGS_KEY_IRONSOURCE_REWARDED_AD_UNIT_ID, adUnitId).apply()
     }
 
+    fun setMaxAdsSdkKey(sdkKey: String) {
+        preferences.edit().putString(SETTINGS_KEY_MAXADS_SDK_KEY, sdkKey).apply()
+    }
+
+    fun setMaxAdsBannerAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_MAXADS_BANNER_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setMaxAdsMRectAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_MAXADS_MRECT_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setMaxAdsInterstitialAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_MAXADS_INTERSTITIAL_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setMaxAdsRewardedAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_MAXADS_REWARDED_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setMaxAdsNativeAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_MAXADS_NATIVE_AD_UNIT_ID, adUnitId).apply()
+    }
+
     fun setSettings(model: SettingsModel, asynchronously: Boolean) {
         val editor = preferences.edit()
         editor.putString(SETTINGS_KEY_APP_TOKEN, model.appToken)
@@ -386,6 +414,15 @@ class SettingsManager private constructor(context: Context) {
             SETTINGS_KEY_IRONSOURCE_REWARDED_AD_UNIT_ID,
             model.ironSourceRewardedAdUnitId
         )
+        editor.putString(SETTINGS_KEY_MAXADS_SDK_KEY, model.maxAdsSdkKey)
+        editor.putString(SETTINGS_KEY_MAXADS_BANNER_AD_UNIT_ID, model.maxAdsBannerAdUnitId)
+        editor.putString(SETTINGS_KEY_MAXADS_MRECT_AD_UNIT_ID, model.maxAdsMRectAdUnitId)
+        editor.putString(
+            SETTINGS_KEY_MAXADS_INTERSTITIAL_AD_UNIT_ID,
+            model.maxAdsInterstitialAdUnitId
+        )
+        editor.putString(SETTINGS_KEY_MAXADS_REWARDED_AD_UNIT_ID, model.maxAdsRewardedAdUnitId)
+        editor.putString(SETTINGS_KEY_MAXADS_NATIVE_AD_UNIT_ID, model.maxAdsNativeAdUnitId)
 
         editor.putBoolean(SETTINGS_KEY_INITIALISED, true)
 
@@ -411,9 +448,11 @@ class SettingsManager private constructor(context: Context) {
         val locationUpdates = preferences.getBoolean(SETTINGS_KEY_LOCATION_UPDATES, false)
         val initialAudioState = preferences.getInt(SETTINGS_KEY_INITIAL_AUDIO_STATE, 0)
         val mraidExpanded = preferences.getBoolean(SETTINGS_KEY_MRAID_EXPANDED, false)
-        val closeVideoAfterFinish = preferences.getBoolean(SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH, false)
+        val closeVideoAfterFinish =
+            preferences.getBoolean(SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH, false)
         val skipOffset = preferences.getInt(SETTINGS_KEY_SKIP_OFFSET, 3)
         val videoSkipOffset = preferences.getInt(SETTINGS_KEY_VIDEO_SKIP_OFFSET, 8)
+        val endcardCloseButtonDelay = preferences.getInt(SETTINGS_KEY_ENDCARD_CLOSE_BUTTON_DELAY, 5)
         val videoClickBehaviour = preferences.getBoolean(SETTINGS_KEY_VIDEO_CLICK_BEHAVIOUR, true)
         val mopubBannerAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_BANNER_AD_UNIT_ID, "")!!
         val mopubMediumAdUnitId = preferences.getString(SETTINGS_KEY_MOPUB_MEDIUM_AD_UNIT_ID, "")!!
@@ -481,8 +520,20 @@ class SettingsManager private constructor(context: Context) {
             preferences.getString(SETTINGS_KEY_IRONSOURCE_INTERSTITIAL_AD_UNIT_ID, "")!!
         val ironSourceRewardedAdUnitId =
             preferences.getString(SETTINGS_KEY_IRONSOURCE_REWARDED_AD_UNIT_ID, "")!!
+        val maxAdsSdkKey =
+            preferences.getString(SETTINGS_KEY_MAXADS_SDK_KEY, "")!!
+        val maxAdsBannerAdUnitId =
+            preferences.getString(SETTINGS_KEY_MAXADS_BANNER_AD_UNIT_ID, "")!!
+        val maxAdsMRectAdUnitId =
+            preferences.getString(SETTINGS_KEY_MAXADS_MRECT_AD_UNIT_ID, "")!!
+        val maxAdsInterstitialAdUnitId =
+            preferences.getString(SETTINGS_KEY_MAXADS_INTERSTITIAL_AD_UNIT_ID, "")!!
+        val maxAdsRewardedAdUnitId =
+            preferences.getString(SETTINGS_KEY_MAXADS_REWARDED_AD_UNIT_ID, "")!!
+        val maxAdsNativeAdUnitId =
+            preferences.getString(SETTINGS_KEY_MAXADS_NATIVE_AD_UNIT_ID, "")!!
 
-        val model = SettingsModel(
+        return SettingsModel(
             appToken,
             zoneIds,
             apiUrl,
@@ -499,6 +550,7 @@ class SettingsManager private constructor(context: Context) {
             closeVideoAfterFinish,
             skipOffset,
             videoSkipOffset,
+            endcardCloseButtonDelay,
             videoClickBehaviour,
             mopubBannerAdUnitId,
             mopubMediumAdUnitId,
@@ -536,8 +588,13 @@ class SettingsManager private constructor(context: Context) {
             ironSourceAppKey,
             ironSourceBannerAdUnitId,
             ironSourceInterstitialAdUnitId,
-            ironSourceRewardedAdUnitId
+            ironSourceRewardedAdUnitId,
+            maxAdsSdkKey,
+            maxAdsBannerAdUnitId,
+            maxAdsMRectAdUnitId,
+            maxAdsInterstitialAdUnitId,
+            maxAdsRewardedAdUnitId,
+            maxAdsNativeAdUnitId
         )
-        return model
     }
 }

@@ -135,6 +135,7 @@ class MoPubInterstitialFragment : Fragment(R.layout.fragment_mopub_interstitial)
     }
 
     fun loadPNAd() {
+        loadButton.isEnabled = false
         requestManager.setZoneId(zoneId)
         requestManager.setRequestListener(this)
         requestManager.isAutoCacheOnLoad = cachingEnabled
@@ -164,13 +165,13 @@ class MoPubInterstitialFragment : Fragment(R.layout.fragment_mopub_interstitial)
         errorView.text = throwable?.message
         creativeIdView.text = ""
         displayLogs()
+        enableLoadBtn()
     }
 
     // --------------- HyBid Cache Listener --------------------
     override fun onCacheSuccess() {
         Log.d(TAG, "onCacheSuccess")
         prepareButton.isEnabled = false
-
         mopubInterstitial.setKeywords(HeaderBiddingUtils.getHeaderBiddingKeywords(ad))
         mopubInterstitial.load()
     }
@@ -191,6 +192,7 @@ class MoPubInterstitialFragment : Fragment(R.layout.fragment_mopub_interstitial)
         showButton.isEnabled = true
         prepareButton.isEnabled = false
         Log.d(TAG, "onInterstitialLoaded")
+        enableLoadBtn()
     }
 
     override fun onInterstitialFailed(
@@ -200,20 +202,24 @@ class MoPubInterstitialFragment : Fragment(R.layout.fragment_mopub_interstitial)
         prepareButton.isEnabled = false
         showButton.isEnabled = false
         Log.d(TAG, "onInterstitialFailed")
+        enableLoadBtn()
     }
 
     override fun onInterstitialShown(interstitial: MoPubInterstitial?) {
         Log.d(TAG, "onInterstitialShown")
+        enableLoadBtn()
     }
 
     override fun onInterstitialDismissed(interstitial: MoPubInterstitial?) {
         Log.d(TAG, "onInterstitialDismissed")
         prepareButton.isEnabled = false
         showButton.isEnabled = false
+        enableLoadBtn()
     }
 
     override fun onInterstitialClicked(interstitial: MoPubInterstitial?) {
         Log.d(TAG, "onInterstitialClicked")
+        enableLoadBtn()
     }
 
     private fun displayLogs() {
@@ -221,5 +227,9 @@ class MoPubInterstitialFragment : Fragment(R.layout.fragment_mopub_interstitial)
             val activity = activity as TabActivity
             activity.notifyAdUpdated()
         }
+    }
+
+    private fun enableLoadBtn() {
+        loadButton.isEnabled = true
     }
 }

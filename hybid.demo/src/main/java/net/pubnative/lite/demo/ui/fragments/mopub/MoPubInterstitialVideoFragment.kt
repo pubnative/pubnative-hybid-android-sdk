@@ -134,6 +134,7 @@ class MoPubInterstitialVideoFragment : Fragment(R.layout.fragment_mopub_intersti
     }
 
     fun loadPNAd() {
+        loadButton.isEnabled = false
         requestManager.setZoneId(zoneId)
         requestManager.setRequestListener(this)
         requestManager.isAutoCacheOnLoad = cachingEnabled
@@ -163,6 +164,7 @@ class MoPubInterstitialVideoFragment : Fragment(R.layout.fragment_mopub_intersti
         errorView.text = throwable?.message
         creativeIdView.text = ""
         displayLogs()
+        enableLoadBtn()
     }
 
     // --------------- HyBid Cache Listener --------------------
@@ -190,6 +192,7 @@ class MoPubInterstitialVideoFragment : Fragment(R.layout.fragment_mopub_intersti
         showButton.isEnabled = true
         prepareButton.isEnabled = false
         Log.d(TAG, "onInterstitialLoaded")
+        enableLoadBtn()
     }
 
     override fun onInterstitialFailed(
@@ -199,20 +202,24 @@ class MoPubInterstitialVideoFragment : Fragment(R.layout.fragment_mopub_intersti
         prepareButton.isEnabled = false
         showButton.isEnabled = false
         Log.d(TAG, "onInterstitialFailed")
+        enableLoadBtn()
     }
 
     override fun onInterstitialShown(interstitial: MoPubInterstitial?) {
         Log.d(TAG, "onInterstitialShown")
+        enableLoadBtn()
     }
 
     override fun onInterstitialDismissed(interstitial: MoPubInterstitial?) {
         Log.d(TAG, "onInterstitialDismissed")
         prepareButton.isEnabled = false
         showButton.isEnabled = false
+        enableLoadBtn()
     }
 
     override fun onInterstitialClicked(interstitial: MoPubInterstitial?) {
         Log.d(TAG, "onInterstitialClicked")
+        enableLoadBtn()
     }
 
     private fun displayLogs() {
@@ -220,5 +227,9 @@ class MoPubInterstitialVideoFragment : Fragment(R.layout.fragment_mopub_intersti
             val activity = activity as TabActivity
             activity.notifyAdUpdated()
         }
+    }
+
+    private fun enableLoadBtn() {
+        loadButton.isEnabled = true
     }
 }

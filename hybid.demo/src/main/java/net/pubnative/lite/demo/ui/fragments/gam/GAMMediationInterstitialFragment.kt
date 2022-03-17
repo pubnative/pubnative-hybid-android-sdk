@@ -35,6 +35,7 @@ class GAMMediationInterstitialFragment : Fragment(R.layout.fragment_dfp_intersti
             .getSettings().dfpMediationInterstitialAdUnitId
 
         loadButton.setOnClickListener {
+            loadButton.isEnabled = false
             errorView.text = ""
             val adRequest = AdManagerAdRequest.Builder().build()
             AdManagerInterstitialAd.load(requireActivity(), adUnitId, adRequest, adLoadCallback)
@@ -68,6 +69,7 @@ class GAMMediationInterstitialFragment : Fragment(R.layout.fragment_dfp_intersti
             displayLogs()
             errorView.text = error.message
             Log.d(TAG, "onAdFailedToLoad")
+            enableLoadBtn()
         }
     }
 
@@ -106,4 +108,7 @@ class GAMMediationInterstitialFragment : Fragment(R.layout.fragment_dfp_intersti
         }
     }
 
+    private fun enableLoadBtn() {
+        loadButton.isEnabled = true
+    }
 }

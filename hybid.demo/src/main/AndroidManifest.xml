@@ -152,6 +152,31 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".ui.activities.maxads.MaxAdsMediationBannerActivity"
+            android:label="@string/maxads_banner"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.maxads.MaxAdsMediationMRectActivity"
+            android:label="@string/maxads_mrect"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.maxads.MaxAdsMediationInterstitialActivity"
+            android:label="@string/maxads_interstitial"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.maxads.MaxAdsMediationRewardedActivity"
+            android:label="@string/maxads_rewarded"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.maxads.MaxAdsMediationNativeActivity"
+            android:label="@string/maxads_native"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".ui.activities.dfp.DFPBannerActivity"
             android:label="@string/dfp_banner"
             android:screenOrientation="portrait"
@@ -262,6 +287,12 @@
         <activity
             android:name=".ui.activities.config.MoPubSettingsActivity"
             android:label="@string/mopub_settings"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".ui.activities.config.MaxAdsSettingsActivity"
+            android:label="@string/maxads_settings"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
@@ -431,6 +462,10 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-9763601123242224~7761163696" />
+
+        <meta-data
+            android:name="applovin.sdk.key"
+            android:value="7-JBxCfWENehXonRZUofTDd0JdARpWUG6LmQKs1mwy61r_AfBFUK7TpkZ8VR6-63GA6vK_Vp0hTCa6raFBQsAT" />
 
     </application>
 </manifest>

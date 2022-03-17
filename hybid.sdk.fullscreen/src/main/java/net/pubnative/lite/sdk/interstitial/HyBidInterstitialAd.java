@@ -61,6 +61,7 @@ import java.util.Map;
 
 public class HyBidInterstitialAd implements RequestManager.RequestListener, InterstitialPresenter.Listener, VideoListener {
     private static final String TAG = HyBidInterstitialAd.class.getSimpleName();
+    private static final long TIME_TO_EXPIRE = 1800000;
 
     public interface Listener {
         void onInterstitialLoaded();
@@ -79,6 +80,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     private final Listener mListener;
     private VideoListener mVideoListener;
     private final Context mContext;
+    private String mAppToken;
     private String mZoneId;
     private SignalDataProcessor mSignalDataProcessor;
     private Ad mAd;
@@ -103,11 +105,16 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     }
 
     public HyBidInterstitialAd(Context context, String zoneId, Listener listener) {
+        this(context, null, zoneId, listener);
+    }
+
+    public HyBidInterstitialAd(Context context, String appToken, String zoneId, Listener listener) {
         if (!HyBid.isInitialized()) {
             Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before creating a HyBidInterstitialAd");
         }
         mRequestManager = new InterstitialRequestManager();
         mContext = context;
+        mAppToken = appToken;
         mZoneId = zoneId;
         mListener = listener;
         mPlacementParams = new JSONObject();
@@ -148,6 +155,9 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
             } else {
                 cleanup();
                 mInitialLoadTime = System.currentTimeMillis();
+                if (!TextUtils.isEmpty(mAppToken)) {
+                    mRequestManager.setAppToken(mAppToken);
+                }
                 mRequestManager.setZoneId(mZoneId);
                 mRequestManager.setRequestListener(this);
                 mRequestManager.requestAd();
@@ -158,8 +168,16 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     public boolean show() {
         if (mPresenter != null && mReady) {
             mInitialRenderTime = System.currentTimeMillis();
-            mPresenter.show();
-            return true;
+            long adExpireTime = mInitialLoadTime + TIME_TO_EXPIRE;
+            if (mInitialRenderTime < adExpireTime || mInitialLoadTime == -1) {
+                mPresenter.show();
+                return true;
+            } else {
+                Logger.e(TAG, "Ad has expired.");
+                cleanup();
+                invokeOnLoadFailed(new HyBidError(HyBidErrorCode.EXPIRED_AD));
+                return false;
+            }
         } else {
             Logger.e(TAG, "Can't display ad. Interstitial not ready.");
             return false;
@@ -483,6 +501,12 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
 
     public void setVideoListener(VideoListener videoListener) {
         this.mVideoListener = videoListener;
+    }
+
+    public void setMediationVendor(String mediationVendor) {
+        if (mRequestManager != null) {
+            mRequestManager.setMediationVendor(mediationVendor);
+        }
     }
 
     public void setMediation(boolean isMediation) {

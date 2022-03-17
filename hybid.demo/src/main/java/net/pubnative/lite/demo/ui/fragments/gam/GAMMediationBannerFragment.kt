@@ -42,6 +42,7 @@ class GAMMediationBannerFragment : Fragment(R.layout.fragment_dfp_banner) {
         gamBannerContainer.addView(gamBanner)
 
         loadButton.setOnClickListener {
+            loadButton.isEnabled = false
             errorView.text = ""
             gamBanner.loadAd(
                 AdRequest.Builder()
@@ -63,6 +64,7 @@ class GAMMediationBannerFragment : Fragment(R.layout.fragment_dfp_banner) {
             super.onAdLoaded()
             displayLogs()
             Log.d(TAG, "onAdLoaded")
+            enableLoadBtn()
         }
 
         override fun onAdFailedToLoad(loadAdError: LoadAdError) {
@@ -70,6 +72,7 @@ class GAMMediationBannerFragment : Fragment(R.layout.fragment_dfp_banner) {
             displayLogs()
             errorView.text = loadAdError.message
             Log.d(TAG, "onAdFailedToLoad")
+            enableLoadBtn()
         }
 
         override fun onAdClicked() {
@@ -100,4 +103,7 @@ class GAMMediationBannerFragment : Fragment(R.layout.fragment_dfp_banner) {
         }
     }
 
+    private fun enableLoadBtn() {
+        loadButton.isEnabled = true
+    }
 }

@@ -78,6 +78,7 @@ import java.util.PriorityQueue;
 public class HyBidAdView extends RelativeLayout implements RequestManager.RequestListener, AdPresenter.Listener, AdPresenter.ImpressionListener, VideoListener, Auction.Listener {
 
     private static final String TAG = HyBidAdView.class.getSimpleName();
+    private static final int TIME_TO_EXPIRE = 1800000;
     private Position mPosition;
     private WindowManager mWindowManager;
     private FrameLayout mContainer;
@@ -161,6 +162,10 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     }
 
     public void load(String zoneId, HyBidAdView.Listener listener) {
+        load(null, zoneId, listener);
+    }
+
+    public void load(String appToken, String zoneId, HyBidAdView.Listener listener) {
         mListener = listener;
         if (HyBid.isInitialized()) {
             cleanup();
@@ -209,6 +214,9 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
                         mAuction = new Auction(adSources, timeout, HyBid.getReportingController(), this, mAdFormat);
                         mAuction.runAuction();
                     } else {
+                        if (!TextUtils.isEmpty(appToken)) {
+                            mRequestManager.setAppToken(appToken);
+                        }
                         mRequestManager.setZoneId(zoneId);
                         mRequestManager.setRequestListener(this);
                         mRequestManager.requestAd();
@@ -237,7 +245,6 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     }
 
     public void show(View view, Position position) {
-
         //Timestamp
         addReportingKey(Reporting.Key.TIMESTAMP, String.valueOf(System.currentTimeMillis()));
         if (HyBid.getAppToken() != null)
@@ -403,34 +410,44 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     }
 
     public void renderAd() {
-        //Banner
-        mPresenter = createPresenter();
-        if (mPresenter != null) {
-            mPresenter.setVideoListener(this);
-            mPresenter.load();
-        } else {
-            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.UNSUPPORTED_ASSET));
+        long currentTime = System.currentTimeMillis();
+        long adExpireTime = mInitialLoadTime + TIME_TO_EXPIRE;
 
-            if (HyBid.getReportingController() != null) {
-                ReportingEvent renderErrorEvent = new ReportingEvent();
-                renderErrorEvent.setAppToken(HyBid.getAppToken());
-                renderErrorEvent.setEventType(Reporting.EventType.RENDER_ERROR);
-                renderErrorEvent.setErrorCode(HyBidErrorCode.UNSUPPORTED_ASSET.getCode());
-                renderErrorEvent.setErrorMessage(HyBidErrorCode.UNSUPPORTED_ASSET.getMessage());
-                renderErrorEvent.setTimestamp(System.currentTimeMillis());
-                renderErrorEvent.setZoneId(mAd.getZoneId());
-                renderErrorEvent.setAdFormat(mAdFormat);
-                renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
-                renderErrorEvent.setIntegrationType(mIntegrationType);
-                if (mAd != null && !TextUtils.isEmpty(mAd.getVast())) {
-                    renderErrorEvent.setVast(mAd.getVast());
+        if (currentTime < adExpireTime) {
+
+            //Banner
+            mPresenter = createPresenter();
+            if (mPresenter != null) {
+                mPresenter.setVideoListener(this);
+                mPresenter.load();
+            } else {
+                invokeOnLoadFailed(new HyBidError(HyBidErrorCode.UNSUPPORTED_ASSET));
+
+                if (HyBid.getReportingController() != null) {
+                    ReportingEvent renderErrorEvent = new ReportingEvent();
+                    renderErrorEvent.setAppToken(HyBid.getAppToken());
+                    renderErrorEvent.setEventType(Reporting.EventType.RENDER_ERROR);
+                    renderErrorEvent.setErrorCode(HyBidErrorCode.UNSUPPORTED_ASSET.getCode());
+                    renderErrorEvent.setErrorMessage(HyBidErrorCode.UNSUPPORTED_ASSET.getMessage());
+                    renderErrorEvent.setTimestamp(System.currentTimeMillis());
+                    renderErrorEvent.setZoneId(mAd.getZoneId());
+                    renderErrorEvent.setAdFormat(mAdFormat);
+                    renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
+                    renderErrorEvent.setIntegrationType(mIntegrationType);
+                    if (mAd != null && !TextUtils.isEmpty(mAd.getVast())) {
+                        renderErrorEvent.setVast(mAd.getVast());
+                    }
+                    renderErrorEvent.mergeJSONObject(getPlacementParams());
+
+                    getAdTypeAndCreative(renderErrorEvent);
+
+                    HyBid.getReportingController().reportEvent(renderErrorEvent);
                 }
-                renderErrorEvent.mergeJSONObject(getPlacementParams());
-
-                getAdTypeAndCreative(renderErrorEvent);
-
-                HyBid.getReportingController().reportEvent(renderErrorEvent);
             }
+        } else {
+            Logger.e(TAG, "Ad has expired.");
+            cleanup();
+            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.EXPIRED_AD));
         }
     }
 
@@ -703,6 +720,12 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
             }
         } else {
             show(view, mPosition);
+        }
+    }
+
+    public void setMediationVendor(String mediationVendor) {
+        if (mRequestManager != null) {
+            mRequestManager.setMediationVendor(mediationVendor);
         }
     }
 

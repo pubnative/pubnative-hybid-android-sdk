@@ -42,6 +42,7 @@ class AdmobMediationRewardedFragment : Fragment(R.layout.fragment_admob_rewarded
         showButton.isEnabled = false
 
         loadButton.setOnClickListener {
+            loadButton.isEnabled = false
             errorView.text = ""
             loadRewardedAd(adUnitId, adLoadCallback)
         }
@@ -92,6 +93,7 @@ class AdmobMediationRewardedFragment : Fragment(R.layout.fragment_admob_rewarded
             displayLogs()
             errorView.text = error.message
             showButton.isEnabled = false
+            enableLoadBtn()
         }
     }
 
@@ -122,7 +124,7 @@ class AdmobMediationRewardedFragment : Fragment(R.layout.fragment_admob_rewarded
             Log.d(TAG, "onAdDismissedFullScreenContent")
             showButton.isEnabled = false
             admobRewarded = null
-            showButton.isEnabled = false
+            enableLoadBtn()
         }
     }
 
@@ -131,5 +133,9 @@ class AdmobMediationRewardedFragment : Fragment(R.layout.fragment_admob_rewarded
             val activity = activity as TabActivity
             activity.notifyAdUpdated()
         }
+    }
+
+    private fun enableLoadBtn() {
+        loadButton.isEnabled = true
     }
 }

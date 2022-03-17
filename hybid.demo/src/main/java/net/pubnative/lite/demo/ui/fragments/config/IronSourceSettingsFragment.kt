@@ -1,6 +1,7 @@
 package net.pubnative.lite.demo.ui.fragments.config
 
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -41,6 +42,10 @@ class IronSourceSettingsFragment : Fragment(R.layout.fragment_ironsource_setting
             IronSource.init(requireActivity(), appKey)
         }
 
+        view.findViewById<Button>(R.id.button_init_ironsource).setOnClickListener {
+            initializeIronSource()
+        }
+
         fillSavedValues()
     }
 
@@ -50,5 +55,16 @@ class IronSourceSettingsFragment : Fragment(R.layout.fragment_ironsource_setting
         mediationBannerInput.setText(settings.ironSourceBannerAdUnitId)
         mediationInterstitialInput.setText(settings.ironSourceInterstitialAdUnitId)
         mediationRewardedInput.setText(settings.ironSourceRewardedAdUnitId)
+    }
+
+    private fun initializeIronSource() {
+        val settings = settingManager.getSettings()
+        val appKey = settings.ironSourceAppKey
+        if (!TextUtils.isEmpty(appKey)) {
+            IronSource.init(
+                requireActivity(), appKey, IronSource.AD_UNIT.BANNER,
+                IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.REWARDED_VIDEO
+            )
+        }
     }
 }

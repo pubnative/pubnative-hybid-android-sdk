@@ -38,6 +38,7 @@ class AdmobMediationInterstitialVideoFragment :
             .getSettings().admobInterstitialVideoAdUnitId
 
         loadButton.setOnClickListener {
+            loadButton.isEnabled = false
             errorView.text = ""
             val adRequest = AdRequest.Builder().build()
             InterstitialAd.load(requireActivity(), adUnitId, adRequest, adLoadCallback)
@@ -72,6 +73,7 @@ class AdmobMediationInterstitialVideoFragment :
             displayLogs()
             errorView.text = error.message
             showButton.isEnabled = false
+            enableLoadBtn()
         }
     }
 
@@ -91,6 +93,7 @@ class AdmobMediationInterstitialVideoFragment :
             super.onAdDismissedFullScreenContent()
             Log.d(TAG, "onAdDismissedFullScreenContent")
             showButton.isEnabled = false
+            enableLoadBtn()
         }
 
         override fun onAdImpression() {
@@ -109,5 +112,9 @@ class AdmobMediationInterstitialVideoFragment :
             val activity = activity as TabActivity
             activity.notifyAdUpdated()
         }
+    }
+
+    private fun enableLoadBtn() {
+        loadButton.isEnabled = true
     }
 }

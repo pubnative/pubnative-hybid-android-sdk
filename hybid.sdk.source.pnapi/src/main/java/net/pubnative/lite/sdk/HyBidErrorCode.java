@@ -23,7 +23,8 @@ public enum HyBidErrorCode {
     INTERNAL_ERROR(20, "An internal error has occurred in the HyBid SDK"),
     UNKNOWN_ERROR(21, "An unknown error has occurred in the HyBid SDK"),
     DISABLED_FORMAT(22, "The requested ad format has been disabled"),
-    DISABLED_RENDERING_ENGINE(23, "The requested rendering engine has been disabled");
+    DISABLED_RENDERING_ENGINE(23, "The requested rendering engine has been disabled"),
+    EXPIRED_AD(24, "The ad has expired");
 
     private final int code;
     private final String message;

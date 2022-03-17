@@ -23,9 +23,7 @@
 package net.pubnative.lite.demo.ui.fragments.config
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -71,7 +69,8 @@ class MoPubSettingsFragment : Fragment(R.layout.fragment_mopub_settings) {
         mediationMediumVideoInput = view.findViewById(R.id.input_mopub_mediation_medium_video)
         mediationLeaderboardInput = view.findViewById(R.id.input_mopub_mediation_leaderboard)
         mediationInterstitialInput = view.findViewById(R.id.input_mopub_mediation_interstitial)
-        mediationInterstitialVideoInput = view.findViewById(R.id.input_mopub_mediation_interstitial_video)
+        mediationInterstitialVideoInput =
+            view.findViewById(R.id.input_mopub_mediation_interstitial_video)
         mediationRewardedInput = view.findViewById(R.id.input_mopub_mediation_rewarded)
         mediationNativeInput = view.findViewById(R.id.input_mopub_mediation_native)
 
@@ -106,14 +105,17 @@ class MoPubSettingsFragment : Fragment(R.layout.fragment_mopub_settings) {
             settingManager.setMoPubMediationMediumVideoAdUnitId(mediationMediumVideoAdUnitId)
             settingManager.setMoPubMediationLeaderboardAdUnitId(mediationLeaderboardAdUnitId)
             settingManager.setMoPubMediationInterstitialAdUnitId(mediationInterstitialAdUnitId)
-            settingManager.setMoPubMediationInterstitialVideoAdUnitId(mediationInterstitialVideoAdUnitId)
+            settingManager.setMoPubMediationInterstitialVideoAdUnitId(
+                mediationInterstitialVideoAdUnitId
+            )
             settingManager.setMoPubMediationRewardedAdUnitId(mediationRewardedAdUnitId)
             settingManager.setMoPubMediationNativeAdUnitId(mediationNativeAdUnitId)
 
             val appToken = settingManager.getSettings().appToken
 
             MoPubManager.initMoPubSdk(activity, bannerAdUnitId, appToken) {
-                Toast.makeText(activity, "MoPub settings saved successfully.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(activity, "MoPub settings saved successfully.", Toast.LENGTH_SHORT)
+                    .show()
                 activity?.finish()
             }
         }

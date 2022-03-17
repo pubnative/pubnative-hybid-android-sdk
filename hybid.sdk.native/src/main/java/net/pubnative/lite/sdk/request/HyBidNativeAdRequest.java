@@ -65,6 +65,10 @@ public class HyBidNativeAdRequest implements RequestManager.RequestListener {
     }
 
     public void load(String zoneId, RequestListener listener) {
+        load(null, zoneId, listener);
+    }
+
+    public void load(String appToken, String zoneId, RequestListener listener) {
         if (HyBid.getConfigManager() != null
                 && !HyBid.getConfigManager().getFeatureResolver().isAdFormatEnabled(RemoteConfigFeature.AdFormat.NATIVE)) {
             if (listener != null) {
@@ -72,6 +76,9 @@ public class HyBidNativeAdRequest implements RequestManager.RequestListener {
             }
         } else {
             mListener = listener;
+            if (!TextUtils.isEmpty(appToken)) {
+                mRequestManager.setAppToken(appToken);
+            }
             mRequestManager.setZoneId(zoneId);
             mRequestManager.requestAd();
         }
@@ -186,6 +193,12 @@ public class HyBidNativeAdRequest implements RequestManager.RequestListener {
                     }
                 }
             });
+        }
+    }
+
+    public void setMediationVendor(String mediationVendor) {
+        if (mRequestManager != null) {
+            mRequestManager.setMediationVendor(mediationVendor);
         }
     }
 

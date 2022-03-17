@@ -24,9 +24,7 @@ package net.pubnative.lite.demo.ui.fragments.config
 
 import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
@@ -42,13 +40,11 @@ import net.pubnative.lite.demo.ui.adapters.ZoneIdAdapter
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class ZoneIdsFragment : Fragment() {
+class ZoneIdsFragment : Fragment(R.layout.fragment_zone_ids) {
     private lateinit var zoneIdInput: EditText
     private lateinit var zoneIdList: RecyclerView
     private lateinit var settingManager: SettingsManager
     private lateinit var adapter: ZoneIdAdapter
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_zone_ids, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -77,7 +73,8 @@ class ZoneIdsFragment : Fragment() {
         view.findViewById<Button>(R.id.button_save_pn_zone_ids).setOnClickListener {
             settingManager.setZoneIds(adapter.getZoneIds())
 
-            val inputMethodManager = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            val inputMethodManager =
+                activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             inputMethodManager.hideSoftInputFromWindow(zoneIdInput.windowToken, 0)
 
             Toast.makeText(activity, "PN Zone Ids saved successfully.", Toast.LENGTH_SHORT).show()

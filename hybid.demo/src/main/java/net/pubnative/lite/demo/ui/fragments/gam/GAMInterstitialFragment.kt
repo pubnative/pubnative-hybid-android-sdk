@@ -75,6 +75,7 @@ class GAMInterstitialFragment : Fragment(R.layout.fragment_dfp_interstitial),
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
         loadButton.setOnClickListener {
+            loadButton.isEnabled = false
             errorView.text = ""
             val activity = activity as TabActivity
             activity.notifyAdCleaned()
@@ -130,6 +131,7 @@ class GAMInterstitialFragment : Fragment(R.layout.fragment_dfp_interstitial),
             super.onAdFailedToLoad(error)
             gamInterstitial = null
             Log.d(TAG, "onAdFailedToLoad")
+            enableLoadBtn()
         }
     }
 
@@ -166,5 +168,9 @@ class GAMInterstitialFragment : Fragment(R.layout.fragment_dfp_interstitial),
             val activity = activity as TabActivity
             activity.notifyAdUpdated()
         }
+    }
+
+    private fun enableLoadBtn() {
+        loadButton.isEnabled = true
     }
 }

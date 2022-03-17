@@ -75,7 +75,14 @@
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
-
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_init_ironsource"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/init_ironsouce" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_save_ironsource_settings"

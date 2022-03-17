@@ -5,7 +5,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.KeyEvent;
+import android.text.TextUtils;
 import android.view.View;
 
 import net.pubnative.lite.sdk.HyBid;
@@ -17,7 +17,6 @@ import net.pubnative.lite.sdk.vpaid.VideoAd;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdListener;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
-import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
 
 public class VastInterstitialActivity extends HyBidInterstitialActivity implements AdPresenter.ImpressionListener {
     private static final String TAG = VastInterstitialActivity.class.getSimpleName();
@@ -26,6 +25,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
     private VideoAdView mVideoPlayer;
     private VideoAd mVideoAd;
     private boolean mIsSkippable = true;
+    private boolean mHasEndCard = false;
 
     @SuppressLint("SourceLockedOrientationActivity")
     @Override
@@ -58,6 +58,12 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
                 if (adCacheItem != null) {
                     if (adCacheItem.getAdParams() != null) {
                         adCacheItem.getAdParams().setPublisherSkipSeconds(mSkipOffset);
+
+                        if (!TextUtils.isEmpty(adCacheItem.getEndCardFilePath())) {
+                            String endCardFilePath = adCacheItem.getEndCardFilePath();
+                            Logger.d(TAG, endCardFilePath);
+                            mHasEndCard = true;
+                        }
 
                         if (adCacheItem.getAdParams().getAdIcon() != null) {
                             setupContentInfo(adCacheItem.getAdParams().getAdIcon());
@@ -167,7 +173,9 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
         public void onAdDidReachEnd() {
             mReady = false;
             mIsSkippable = true;
-            showInterstitialCloseButton();
+            if (!mHasEndCard) {
+                showInterstitialCloseButton();
+            }
             getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_FINISH);
         }
 

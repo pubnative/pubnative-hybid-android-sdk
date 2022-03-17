@@ -1,9 +1,7 @@
 package net.pubnative.lite.demo.ui.fragments.config
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -11,7 +9,7 @@ import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 
-class AdmobSettingsFragment : Fragment() {
+class AdmobSettingsFragment : Fragment(R.layout.fragment_admob_settings) {
 
     private lateinit var appIdInput: EditText
     private lateinit var bannerInput: EditText
@@ -23,8 +21,6 @@ class AdmobSettingsFragment : Fragment() {
     private lateinit var nativeInput: EditText
     private lateinit var rewardedInput: EditText
     private lateinit var settingManager: SettingsManager
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_admob_settings, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -62,7 +58,8 @@ class AdmobSettingsFragment : Fragment() {
             settingManager.setAdmobNativeAdUnitId(nativeAdUnitId)
             settingManager.setAdmobRewardedAdUnitId(rewardedAdUnitId)
 
-            Toast.makeText(activity, "Admob settings saved successfully.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, "Admob settings saved successfully.", Toast.LENGTH_SHORT)
+                .show()
             activity?.finish()
         }
 

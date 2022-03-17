@@ -47,6 +47,7 @@ import java.util.*
 class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial),
     HyBidInterstitialAd.Listener, VideoListener, CacheListener {
 
+    private var isLoadingAd: Boolean = false
     val TAG = HyBidInterstitialFragment::class.java.simpleName
 
     private var zoneId: String? = null
@@ -77,10 +78,8 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
         loadButton.setOnClickListener {
-            errorView.text = ""
-            val activity = activity as TabActivity
-            activity.notifyAdCleaned()
-            loadInterstitialAd()
+            if (!isLoadingAd)
+                fireLoadClicked()
         }
 
         prepareButton.setOnClickListener {
@@ -115,6 +114,14 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
         }
     }
 
+    private fun fireLoadClicked() {
+        cleanLogs()
+        errorView.text = ""
+        val activity = activity as TabActivity
+        activity.notifyAdCleaned()
+        loadInterstitialAd()
+    }
+
     override fun onDestroy() {
         interstitial?.destroy()
         super.onDestroy()
@@ -122,12 +129,11 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
 
     private fun loadInterstitialAd() {
         interstitial = HyBidInterstitialAd(activity, zoneId, this)
-        interstitial?.setHtmlSkipOffset(4)
-        interstitial?.setVideoSkipOffset(10)
         interstitial?.isAutoCacheOnLoad = cachingEnabled
         //Optional to track video events
         interstitial?.setVideoListener(this)
         interstitial?.load()
+        isLoadingAd = true
     }
 
     override fun onInterstitialLoaded() {
@@ -138,6 +144,7 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
         if (!TextUtils.isEmpty(interstitial?.creativeId)) {
             creativeIdView.text = interstitial?.creativeId
         }
+        isLoadingAd = false
     }
 
     override fun onInterstitialLoadFailed(error: Throwable?) {
@@ -153,6 +160,7 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
         }
         displayLogs()
         creativeIdView.text = ""
+        isLoadingAd = false
     }
 
     override fun onInterstitialImpression() {
@@ -216,6 +224,13 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
         if (activity != null) {
             val activity = activity as TabActivity
             activity.notifyAdUpdated()
+        }
+    }
+
+    private fun cleanLogs() {
+        if (activity != null) {
+            val activity = activity as TabActivity
+            activity.notifyAdCleaned()
         }
     }
 }

@@ -76,7 +76,7 @@ public class DiagnosticsManager {
         Logger.d(TAG, getDiagnosticsLog(context, event));
     }
 
-    public static String getDiagnosticsLog(Context context, Event event) {
+    public static synchronized String getDiagnosticsLog(Context context, Event event) {
         StringBuilder logBuilder = new StringBuilder();
 
         logBuilder.append("\nHyBid Diagnostics Log:\n\n");
@@ -112,7 +112,7 @@ public class DiagnosticsManager {
         return logBuilder.toString();
     }
 
-    public static String generatePlacementDiagnosticsLog(Context context, JSONObject placementParams) {
+    public static synchronized String generatePlacementDiagnosticsLog(Context context, JSONObject placementParams) {
         StringBuilder logBuilder = new StringBuilder();
 
         logBuilder.append("\nHyBid Placement Diagnostics Log:\n\n");

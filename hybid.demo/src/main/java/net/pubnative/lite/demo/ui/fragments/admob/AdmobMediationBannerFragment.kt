@@ -41,6 +41,7 @@ class AdmobMediationBannerFragment : Fragment(R.layout.fragment_admob_banner) {
         admobBannerContainer.addView(admobBanner)
 
         loadButton.setOnClickListener {
+            loadButton.isEnabled = false
             errorView.text = ""
             admobBanner.loadAd(
                 AdRequest.Builder()
@@ -62,6 +63,7 @@ class AdmobMediationBannerFragment : Fragment(R.layout.fragment_admob_banner) {
             super.onAdLoaded()
             displayLogs()
             Log.d(TAG, "onAdLoaded")
+            enableLoadBtn()
         }
 
         override fun onAdFailedToLoad(error: LoadAdError) {
@@ -69,6 +71,7 @@ class AdmobMediationBannerFragment : Fragment(R.layout.fragment_admob_banner) {
             displayLogs()
             errorView.text = error.message
             Log.d(TAG, "onAdFailedToLoad")
+            enableLoadBtn()
         }
 
         override fun onAdClicked() {
@@ -97,5 +100,9 @@ class AdmobMediationBannerFragment : Fragment(R.layout.fragment_admob_banner) {
             val activity = activity as TabActivity
             activity.notifyAdUpdated()
         }
+    }
+
+    private fun enableLoadBtn() {
+        loadButton.isEnabled = true
     }
 }

@@ -2,6 +2,7 @@ package net.pubnative.lite.sdk.vpaid.vast;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Surface;
@@ -19,10 +20,14 @@ import net.pubnative.lite.sdk.core.R;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.VideoAdController;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
+import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
 import net.pubnative.lite.sdk.vpaid.utils.ImageUtils;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
 import net.pubnative.lite.sdk.vpaid.widget.CountDownView;
 import net.pubnative.lite.sdk.vpaid.widget.LinearCountDownView;
+
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 
 public class ViewControllerVast implements View.OnClickListener {
     private final static String LOG_TAG = ViewControllerVast.class.getSimpleName();
@@ -36,10 +41,12 @@ public class ViewControllerVast implements View.OnClickListener {
     private ImageView mEndCardView;
     private View mControlsLayout;
     private View mEndCardLayout;
+    private ImageView mEndCardCloseView;
     private boolean mMuteState;
     private Surface mSurface;
     private View mSkipView;
     private ImageView mMuteView;
+    private SimpleTimer mEndcardTimer;
 
     private InterstitialActionBehaviour interstitialClickBehaviour;
 
@@ -75,7 +82,10 @@ public class ViewControllerVast implements View.OnClickListener {
         mEndCardLayout.setVisibility(View.GONE);
         mEndCardView = mControlsLayout.findViewById(R.id.endCardView);
 
-        mControlsLayout.findViewById(R.id.closeView).setOnClickListener(this);
+        mEndCardCloseView = mControlsLayout.findViewById(R.id.closeView);
+        mEndCardCloseView.setOnClickListener(this);
+        mEndCardCloseView.setVisibility(View.GONE);
+
         mControlsLayout.findViewById(R.id.replayView).setOnClickListener(this);
         mControlsLayout.findViewById(R.id.openURL).setOnClickListener(this);
 
@@ -193,6 +203,8 @@ public class ViewControllerVast implements View.OnClickListener {
 
     public void showEndCard(String imageUri) {
         mEndCardLayout.setVisibility(View.VISIBLE);
+        int endCardCloseDelay = HyBid.getEndCardCloseButtonDelay();
+        showEndCardCloseButton(endCardCloseDelay);
         mVideoPlayerLayout.setVisibility(View.GONE);
         ImageUtils.setScaledImage(mEndCardView, imageUri);
     }
@@ -228,6 +240,9 @@ public class ViewControllerVast implements View.OnClickListener {
         if (mEndCardView != null) {
             mEndCardView.setImageDrawable(null);
         }
+        if (mEndcardTimer != null) {
+            mEndcardTimer.cancel();
+        }
     }
 
     @Override
@@ -257,6 +272,22 @@ public class ViewControllerVast implements View.OnClickListener {
         mEndCardLayout.setVisibility(View.GONE);
         mVideoPlayerLayout.setVisibility(View.VISIBLE);
         mAdController.playAd();
+    }
+
+    private void showEndCardCloseButton(int endCardDelay) {
+        if (endCardDelay >= 0) {
+            int endCardDelayInMillis = endCardDelay * 1000;
+
+            mEndcardTimer = new SimpleTimer(endCardDelayInMillis, new SimpleTimer.Listener() {
+                @Override
+                public void onFinish() {
+                    mEndCardCloseView.setVisibility(View.VISIBLE);
+                }
+            });
+            mEndcardTimer.start();
+        } else {
+            mEndCardCloseView.setVisibility(View.VISIBLE);
+        }
     }
 
     public void muteVideo() {

@@ -83,6 +83,7 @@ public class HyBid {
     private static String sBundleId;
     private static Integer sHtmlInterstitialSkipOffset = -1;
     private static Integer sVideoInterstitialSkipOffset = -1;
+    private static Integer sEndCardCloseButtonDelay = -1;
     private static String sIabCategory;
     private static String sIabSubcategory;
     private static String sAppVersion;
@@ -359,6 +360,15 @@ public class HyBid {
         return sVideoInterstitialSkipOffset;
     }
 
+    public static void setEndCardCloseButtonDelay(int seconds) {
+        if (seconds >= 0)
+            sEndCardCloseButtonDelay = seconds;
+    }
+
+    public static Integer getEndCardCloseButtonDelay() {
+        return sEndCardCloseButtonDelay;
+    }
+
     public static void setCloseVideoAfterFinish(boolean isClosing) {
         isCloseVideoAfterFinish = isClosing;
     }
@@ -444,7 +454,7 @@ public class HyBid {
             return "";
         }
         AdRequestFactory adRequestFactory = new AdRequestFactory();
-        AdRequest adRequest = adRequestFactory.buildRequest("", AdSize.SIZE_INTERSTITIAL, "", true, IntegrationType.IN_APP_BIDDING);
+        AdRequest adRequest = adRequestFactory.buildRequest("", "", AdSize.SIZE_INTERSTITIAL, "", true, IntegrationType.IN_APP_BIDDING);
         return PNApiUrlComposer.getUrlQuery(HyBid.getApiClient().getApiUrl(), adRequest);
     }
 

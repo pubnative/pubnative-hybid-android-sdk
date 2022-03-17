@@ -8,6 +8,7 @@ public class DiagnosticConstants {
     public static final String KEY_OM_ENABLED = "om_enabled";
     public static final String KEY_OM_VENDORS = "om_vendors";
     public static final String KEY_INTEGRATION_TYPE = "integration_type";
+    public static final String KEY_MEDIATION_VENDOR = "mediation_vendor";
     public static final String KEY_AD_POSITION = "ad_position";
     public static final String KEY_RESPONSE_TIME = "response_time";
     public static final String KEY_TIME_TO_LOAD = "time_to_load";

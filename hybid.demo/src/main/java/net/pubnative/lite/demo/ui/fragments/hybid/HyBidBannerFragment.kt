@@ -36,6 +36,7 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.demo.util.convertDpToPx
+import net.pubnative.lite.sdk.CacheListener
 import net.pubnative.lite.sdk.DiagnosticsManager
 import net.pubnative.lite.sdk.HyBidError
 import net.pubnative.lite.sdk.VideoListener
@@ -48,7 +49,7 @@ import java.util.*
  * Created by erosgarciaponte on 30.01.18.
  */
 class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.Listener,
-    VideoListener {
+    VideoListener, CacheListener {
     val TAG = HyBidBannerFragment::class.java.simpleName
 
     private val AUTO_REFRESH_MILLIS: Long = 30 * 1000
@@ -59,11 +60,15 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
     private lateinit var hybidBanner: HyBidAdView
     private lateinit var autoRefreshSwitch: Switch
     private lateinit var loadButton: Button
+    private lateinit var prepareButton: Button
+    private lateinit var showButton: Button
+    private lateinit var cachingCheckbox: CheckBox
     private lateinit var adSizeSpinner: Spinner
     private lateinit var spinnerAdapter: ArrayAdapter<AdSize>
     private lateinit var errorCodeView: TextView
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
+    private var cachingEnabled: Boolean = true
 
     private val adSizes = arrayOf(
         AdSize.SIZE_320x50,
@@ -87,9 +92,14 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
         errorCodeView = view.findViewById(R.id.view_error_code)
         creativeIdView = view.findViewById(R.id.view_creative_id)
         loadButton = view.findViewById(R.id.button_load)
+        prepareButton = view.findViewById(R.id.button_prepare)
+        showButton = view.findViewById(R.id.button_show)
+        cachingCheckbox = view.findViewById(R.id.check_caching)
         hybidBanner = view.findViewById(R.id.hybid_banner)
         adSizeSpinner = view.findViewById(R.id.spinner_ad_size)
         autoRefreshSwitch = view.findViewById(R.id.check_auto_refresh)
+        prepareButton.isEnabled = false
+        showButton.isEnabled = false
 
         autoRefreshSwitch.isChecked = false
 
@@ -105,6 +115,21 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
             activity.notifyAdCleaned()
             loadPNAd()
             autoRefresh()
+        }
+
+        prepareButton.setOnClickListener {
+            hybidBanner.prepare(this)
+        }
+
+        showButton.setOnClickListener {
+            hybidBanner.show()
+        }
+
+        cachingCheckbox.setOnCheckedChangeListener { _, isChecked ->
+            cachingEnabled = isChecked
+            prepareButton.visibility = if (isChecked) View.GONE else View.VISIBLE
+            showButton.visibility = if (isChecked) View.GONE else View.VISIBLE
+            hybidBanner.isAutoShowOnLoad = isChecked
         }
 
         errorView.setOnClickListener {
@@ -141,6 +166,8 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
 
         hybidBanner.layoutParams = layoutParams
 
+        hybidBanner.isAutoCacheOnLoad = cachingEnabled
+
         hybidBanner.load(zoneId, this)
     }
 
@@ -163,6 +190,8 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
     // --------------- PNAdView Listener --------------------
     override fun onAdLoaded() {
         Log.d(TAG, "onAdLoaded")
+        prepareButton.isEnabled = !cachingEnabled
+        showButton.isEnabled = cachingEnabled
         displayLogs()
         if (!TextUtils.isEmpty(hybidBanner.creativeId)) {
             creativeIdView.text = hybidBanner.creativeId
@@ -170,6 +199,8 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
     }
 
     override fun onAdLoadFailed(error: Throwable?) {
+        prepareButton.isEnabled = false
+        showButton.isEnabled = false
         if (error != null && error is HyBidError) {
             Log.e(TAG, error.message ?: " - ")
             errorCodeView.text = error.errorCode.code.toString()
@@ -214,6 +245,26 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
         Log.d(TAG, "onVideoFinished")
     }
 
+
+    override fun onCacheSuccess() {
+        Log.d(TAG, "onCacheSuccess")
+        prepareButton.isEnabled = false
+        showButton.isEnabled = true
+    }
+
+    override fun onCacheFailed(error: Throwable?) {
+        prepareButton.isEnabled = false
+        showButton.isEnabled = true
+        if (error != null && error is HyBidError) {
+            Log.e(TAG, error.message ?: " - ")
+            errorCodeView.text = error.errorCode.code.toString()
+            errorView.text = error.message ?: " - "
+        } else {
+            errorCodeView.text = " - "
+            errorView.text = " - "
+        }
+    }
+
     private fun displayLogs() {
         if (activity != null) {
             val activity = activity as TabActivity
@@ -225,4 +276,5 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
         hybidBanner.destroy()
         super.onDestroy()
     }
+
 }

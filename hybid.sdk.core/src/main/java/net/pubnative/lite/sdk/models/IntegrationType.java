@@ -2,7 +2,7 @@ package net.pubnative.lite.sdk.models;
 
 public enum IntegrationType {
     HEADER_BIDDING("hb"),
-    IN_APP_BIDDING("iab"),
+    IN_APP_BIDDING("b"),
     MEDIATION("m"),
     STANDALONE("s");
 

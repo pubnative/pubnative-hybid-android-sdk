@@ -1,13 +1,11 @@
 package net.pubnative.lite.demo.ui.fragments
 
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.RadioGroup
-import android.widget.Switch
+import android.widget.*
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
@@ -24,6 +22,7 @@ class AdCustomizationFragment : Fragment()  {
     private lateinit var autocloseSwitch: Switch
     private lateinit var htmlSkipOffsetInput: EditText
     private lateinit var videoSkipOffsetInput: EditText
+    private lateinit var endCardCloseButtonDelayInput: EditText
     private lateinit var clickBehaviourGroup: RadioGroup
     private lateinit var settingManager: SettingsManager
 
@@ -44,6 +43,7 @@ class AdCustomizationFragment : Fragment()  {
         autocloseSwitch = view.findViewById(R.id.check_auto_close)
         htmlSkipOffsetInput = view.findViewById(R.id.input_skip_offset)
         videoSkipOffsetInput = view.findViewById(R.id.input_video_skip_offset)
+        endCardCloseButtonDelayInput = view.findViewById(R.id.input_endcard_close_button_delay)
         clickBehaviourGroup = view.findViewById(R.id.group_click_behaviour)
 
         settingManager = SettingsManager.getInstance(requireContext())
@@ -71,6 +71,7 @@ class AdCustomizationFragment : Fragment()  {
         autocloseSwitch.isChecked = settings.closeVideoAfterFinish
         htmlSkipOffsetInput.setText(settings.skipOffset.toString())
         videoSkipOffsetInput.setText(settings.videoSkipOffset.toString())
+        endCardCloseButtonDelayInput.setText(settings.endCardCloseButtonDelay.toString())
 
         val selectedClickBehaviour = when (settings.videoClickBehaviour) {
             true -> R.id.radio_creative
@@ -94,14 +95,38 @@ class AdCustomizationFragment : Fragment()  {
         val autoCloseVideo = autocloseSwitch.isChecked
         val skipOffset = htmlSkipOffsetInput.text.toString()
         val videoSkipOffset = videoSkipOffsetInput.text.toString()
+        val endCardCloseButtonDelay = endCardCloseButtonDelayInput.text.toString()
         val videoClickBehaviour = when (clickBehaviourGroup.checkedRadioButtonId) {
             R.id.radio_creative -> InterstitialActionBehaviour.HB_CREATIVE
             R.id.radio_action_button -> InterstitialActionBehaviour.HB_ACTION_BUTTON
             else -> InterstitialActionBehaviour.HB_CREATIVE
         }
 
-        val skipOffsetInt : Int = skipOffset.toInt()
-        val videoSkipOffsetInt : Int = videoSkipOffset.toInt()
+        var skipOffsetInt: Int
+        var videoSkipOffsetInt: Int
+        var endCardCloseButtonDelayInt: Int
+
+        if (skipOffset.isEmpty() || videoSkipOffset.isEmpty() || skipOffset.contains(" ") ||
+            videoSkipOffset.contains(" ") || endCardCloseButtonDelay.isEmpty() || endCardCloseButtonDelay.contains(" ")) {
+            Toast.makeText(context, "Please make sure skipOffset, videoSkipOffset and endCardCloseButtonDelay values are correct.", Toast.LENGTH_LONG).show()
+            return
+        } else {
+            skipOffsetInt = if (TextUtils.isEmpty(skipOffset)) {
+                0
+            } else {
+                skipOffset.toInt()
+            }
+            videoSkipOffsetInt = if (TextUtils.isEmpty(videoSkipOffset)) {
+                0
+            } else {
+                videoSkipOffset.toInt()
+            }
+            endCardCloseButtonDelayInt = if (TextUtils.isEmpty(endCardCloseButtonDelay)) {
+                0
+            } else {
+                endCardCloseButtonDelay.toInt()
+            }
+        }
 
         settingManager.setInitialAudioState(getAudioStateInt(initialAudioState))
         settingManager.setMraidExpanded(mraidExpand)
@@ -110,6 +135,7 @@ class AdCustomizationFragment : Fragment()  {
         settingManager.setCloseVideoAfterFinish(autoCloseVideo)
         settingManager.setSkipOffset(skipOffsetInt)
         settingManager.setVideoSkipOffset(videoSkipOffsetInt)
+        settingManager.setEndCardCloseButtonDelay(endCardCloseButtonDelayInt)
         settingManager.setVideoClickBehaviour(getVideoClickBehaviourBoolean(videoClickBehaviour))
 
 
@@ -120,6 +146,7 @@ class AdCustomizationFragment : Fragment()  {
         HyBid.setCloseVideoAfterFinish(autoCloseVideo)
         HyBid.setHtmlInterstitialSkipOffset(skipOffsetInt)
         HyBid.setVideoInterstitialSkipOffset(videoSkipOffsetInt)
+        HyBid.setEndCardCloseButtonDelay(endCardCloseButtonDelayInt)
         HyBid.setInterstitialClickBehaviour(videoClickBehaviour)
     }
 

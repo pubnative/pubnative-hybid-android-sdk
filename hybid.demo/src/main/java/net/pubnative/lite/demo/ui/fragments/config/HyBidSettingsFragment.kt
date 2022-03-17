@@ -24,9 +24,7 @@ package net.pubnative.lite.demo.ui.fragments.config
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
@@ -40,7 +38,7 @@ import net.pubnative.lite.sdk.api.ApiManager
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class HyBidSettingsFragment : Fragment() {
+class HyBidSettingsFragment : Fragment(R.layout.fragment_hybid_settings) {
     private val REQUEST_KEYWORDS = 1
     private val REQUEST_ZONE_IDS = 2
     private val REQUEST_BROWSER_PRIORITY = 3
@@ -53,8 +51,6 @@ class HyBidSettingsFragment : Fragment() {
     private lateinit var locationTrackingSwitch: Switch
     private lateinit var genderRadioGroup: RadioGroup
     private lateinit var settingManager: SettingsManager
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_hybid_settings, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -86,7 +82,8 @@ class HyBidSettingsFragment : Fragment() {
 
         view.findViewById<Button>(R.id.button_save_pn_settings).setOnClickListener {
             saveData()
-            Toast.makeText(activity, "PubNative settings saved successfully.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, "PubNative settings saved successfully.", Toast.LENGTH_SHORT)
+                .show()
             activity?.finish()
         }
 

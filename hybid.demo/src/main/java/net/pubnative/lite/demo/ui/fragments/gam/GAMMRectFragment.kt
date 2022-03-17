@@ -81,6 +81,7 @@ class GAMMRectFragment : Fragment(R.layout.fragment_dfp_mrect), RequestManager.R
         gamMRectContainer.addView(gamMRect)
 
         loadButton.setOnClickListener {
+            loadButton.isEnabled = false
             errorView.text = ""
             val activity = activity as TabActivity
             activity.notifyAdCleaned()
@@ -128,11 +129,13 @@ class GAMMRectFragment : Fragment(R.layout.fragment_dfp_mrect), RequestManager.R
         override fun onAdLoaded() {
             super.onAdLoaded()
             Log.d(TAG, "onAdLoaded")
+            enableLoadBtn()
         }
 
         override fun onAdFailedToLoad(error: LoadAdError) {
             super.onAdFailedToLoad(error)
             Log.d(TAG, "onAdFailedToLoad")
+            enableLoadBtn()
         }
 
         override fun onAdImpression() {
@@ -161,5 +164,9 @@ class GAMMRectFragment : Fragment(R.layout.fragment_dfp_mrect), RequestManager.R
             val activity = activity as TabActivity
             activity.notifyAdUpdated()
         }
+    }
+
+    private fun enableLoadBtn() {
+        loadButton.isEnabled = true
     }
 }
