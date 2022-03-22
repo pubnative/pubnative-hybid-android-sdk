@@ -26,6 +26,7 @@ import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.AdCache;
 import net.pubnative.lite.sdk.CacheListener;
+import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
@@ -71,6 +72,7 @@ public class RequestManager {
     private static final String TAG = RequestManager.class.getSimpleName();
     private final ConfigManager mConfigManager;
     private PNApiClient mApiClient;
+    private DeviceInfo mDeviceInfo;
     private AdCache mAdCache;
     private VideoAdCache mVideoCache;
     private final AdRequestFactory mAdRequestFactory;
@@ -95,10 +97,11 @@ public class RequestManager {
     }
 
     public RequestManager(AdSize adSize) {
-        this(HyBid.getApiClient(), HyBid.getAdCache(), HyBid.getVideoAdCache(), HyBid.getConfigManager(), new AdRequestFactory(), HyBid.getReportingController(), adSize, new PNInitializationHelper());
+        this(HyBid.getApiClient(), HyBid.getDeviceInfo(), HyBid.getAdCache(), HyBid.getVideoAdCache(), HyBid.getConfigManager(), new AdRequestFactory(), HyBid.getReportingController(), adSize, new PNInitializationHelper());
     }
 
     RequestManager(PNApiClient apiClient,
+                   DeviceInfo deviceInfo,
                    AdCache adCache,
                    VideoAdCache videoCache,
                    ConfigManager configManager,
@@ -107,6 +110,7 @@ public class RequestManager {
                    AdSize adSize,
                    PNInitializationHelper initializationHelper) {
         mApiClient = apiClient;
+        mDeviceInfo = deviceInfo;
         mAdCache = adCache;
         mVideoCache = videoCache;
         mReportingController = reportingController;
@@ -227,6 +231,10 @@ public class RequestManager {
             mApiClient = HyBid.getApiClient();
         }
 
+        if (mDeviceInfo == null) {
+            mDeviceInfo = HyBid.getDeviceInfo();
+        }
+
         try {
             jsonCacheParams.put(Reporting.Key.TIMESTAMP, String.valueOf(System.currentTimeMillis()));
         } catch (JSONException e) {
@@ -235,7 +243,7 @@ public class RequestManager {
 
         Logger.d(TAG, "Requesting ad for zone id: " + adRequest.zoneid);
         reportAdRequest(adRequest);
-        mApiClient.getAd(adRequest, new PNApiClient.AdRequestListener() {
+        mApiClient.getAd(adRequest, mDeviceInfo.getUserAgent(), new PNApiClient.AdRequestListener() {
             @Override
             public void onSuccess(Ad ad) {
                 if (mIsDestroyed) {

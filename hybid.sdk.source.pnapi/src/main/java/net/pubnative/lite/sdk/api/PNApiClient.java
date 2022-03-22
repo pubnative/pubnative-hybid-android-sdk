@@ -74,7 +74,7 @@ public class PNApiClient {
     private final Context mContext;
     private String mApiUrl = BuildConfig.BASE_URL;
     private JSONObject mPlacementParams;
-    private String mUserAgent;
+    //private String mUserAgent;
 
     public String getApiUrl() {
         return mApiUrl;
@@ -88,24 +88,14 @@ public class PNApiClient {
 
     public PNApiClient(Context context) {
         this.mContext = context;
-        Handler mainHandler = new Handler(Looper.getMainLooper());
-        mainHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    mUserAgent = new WebView(mContext).getSettings().getUserAgentString();
-                } catch (RuntimeException ignored) {
-                }
-            }
-        });
     }
 
-    public void getAd(AdRequest request, final AdRequestListener listener) {
+    public void getAd(AdRequest request, String userAgent, final AdRequestListener listener) {
         final String url = getAdRequestURL(request);
-        getAd(url, listener);
+        getAd(url, userAgent, listener);
     }
 
-    public void getAd(final String url, final AdRequestListener listener) {
+    public void getAd(final String url, String userAgent, final AdRequestListener listener) {
         mPlacementParams = new JSONObject();
         if (TextUtils.isEmpty(url)) {
             if (listener != null) {
@@ -115,8 +105,8 @@ public class PNApiClient {
             final long initTime = System.currentTimeMillis();
 
             Map<String, String> headers = new HashMap<>();
-            if (!TextUtils.isEmpty(mUserAgent)) {
-                headers.put("User-Agent", mUserAgent);
+            if (!TextUtils.isEmpty(userAgent)) {
+                headers.put("User-Agent", userAgent);
             }
 
             PNHttpClient.makeRequest(mContext, url, headers, null, new PNHttpClient.Listener() {
@@ -142,14 +132,14 @@ public class PNApiClient {
         return mContext;
     }
 
-    public void trackUrl(String url, final TrackUrlListener listener) {
-        sendTrackingRequest(url, listener);
+    public void trackUrl(String url, String userAgent, final TrackUrlListener listener) {
+        sendTrackingRequest(url, userAgent, listener);
     }
 
-    private void sendTrackingRequest(String url, final TrackUrlListener listener) {
+    private void sendTrackingRequest(String url, String userAgent, final TrackUrlListener listener) {
         Map<String, String> headers = new HashMap<>();
-        if (!TextUtils.isEmpty(mUserAgent)) {
-            headers.put("User-Agent", mUserAgent);
+        if (!TextUtils.isEmpty(userAgent)) {
+            headers.put("User-Agent", userAgent);
         }
 
         PNHttpClient.makeRequest(mContext, url, headers, null, false, true, new PNHttpClient.Listener() {

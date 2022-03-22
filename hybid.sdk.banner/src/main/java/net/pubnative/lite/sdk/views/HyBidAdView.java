@@ -454,6 +454,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     public void renderAd(Ad ad, Listener listener) {
         if (ad != null) {
             cleanup();
+            mInitialLoadTime = System.currentTimeMillis();
             mListener = listener;
             mAd = ad;
             renderAd();
@@ -486,6 +487,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
 
     public void renderAd(String adValue, Listener listener) {
         cleanup();
+        mInitialLoadTime = System.currentTimeMillis();
         mListener = listener;
 
         if (!TextUtils.isEmpty(adValue)) {
@@ -582,6 +584,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
 
     public void renderCustomMarkup(String adValue, Listener listener) {
         cleanup();
+        mInitialLoadTime = System.currentTimeMillis();
         mListener = listener;
 
         if (!TextUtils.isEmpty(adValue)) {

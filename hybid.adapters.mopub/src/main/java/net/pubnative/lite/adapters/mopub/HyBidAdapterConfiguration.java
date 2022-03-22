@@ -39,7 +39,7 @@ import java.util.Map;
 public class HyBidAdapterConfiguration extends BaseAdapterConfiguration {
 
     private static final String NETWORK_NAME = "pubnative";
-    private static final String NETWORK_SDK_VERSION = "2.12.0";
+    private static final String NETWORK_SDK_VERSION = "2.12.1";
     private static final String ADAPTER_VERSION = NETWORK_SDK_VERSION + ".0";
 
     public static final String CONFIG_KEY_APP_TOKEN = "pubnative_app_token";

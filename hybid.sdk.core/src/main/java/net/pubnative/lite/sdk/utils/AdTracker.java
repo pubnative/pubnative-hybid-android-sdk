@@ -24,6 +24,7 @@ package net.pubnative.lite.sdk.utils;
 
 import android.text.TextUtils;
 
+import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.DiagnosticConstants;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.api.PNApiClient;
@@ -59,6 +60,7 @@ public class AdTracker {
 
     private static final String TAG = AdTracker.class.getSimpleName();
     private final PNApiClient mApiClient;
+    private final DeviceInfo mDeviceInfo;
     private final List<AdData> mImpressionUrls;
     private final List<AdData> mClickUrls;
     private final JSONObject mPlacementParams;
@@ -70,13 +72,15 @@ public class AdTracker {
 
     public AdTracker(List<AdData> impressionUrls,
                      List<AdData> clickUrls) {
-        this(HyBid.getApiClient(), impressionUrls, clickUrls);
+        this(HyBid.getApiClient(), HyBid.getDeviceInfo(), impressionUrls, clickUrls);
     }
 
     AdTracker(PNApiClient apiClient,
+              DeviceInfo deviceInfo,
               List<AdData> impressionUrls,
               List<AdData> clickUrls) {
         mApiClient = apiClient;
+        mDeviceInfo = deviceInfo;
         mImpressionUrls = impressionUrls;
         mClickUrls = clickUrls;
         mPlacementParams = new JSONObject();
@@ -135,7 +139,7 @@ public class AdTracker {
                 if (!TextUtils.isEmpty(url.getURL())) {
                     Logger.d(TAG, "Tracking " + type.toString() + " url: " + url.getURL());
                     JsonOperations.putJsonString(beaconsArray, url.getURL());
-                    mApiClient.trackUrl(url.getURL(), mTrackUrlListener);
+                    mApiClient.trackUrl(url.getURL(), mDeviceInfo.getUserAgent(), mTrackUrlListener);
                 }
 
                 if (!TextUtils.isEmpty(url.getJS())) {

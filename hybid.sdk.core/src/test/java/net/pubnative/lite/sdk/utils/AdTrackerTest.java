@@ -1,5 +1,6 @@
 package net.pubnative.lite.sdk.utils;
 
+import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.testing.TestUtil;
 
@@ -21,6 +22,8 @@ public class AdTrackerTest {
     @Mock
     private PNApiClient mMockApiClient;
     @Mock
+    private DeviceInfo mMockDeviceInfo;
+    @Mock
     private PNApiClient.TrackUrlListener mListener;
 
     private AdTracker mSubject;
@@ -28,7 +31,7 @@ public class AdTrackerTest {
     @Before
     public void setup() {
         initMocks(this);
-        mSubject = new AdTracker(mMockApiClient, TestUtil.createMockImpressionBeacons(), TestUtil.createMockClickBeacons());
+        mSubject = new AdTracker(mMockApiClient, mMockDeviceInfo, TestUtil.createMockImpressionBeacons(), TestUtil.createMockClickBeacons());
         mSubject.setTrackUrlListener(mListener);
     }
 
@@ -37,7 +40,7 @@ public class AdTrackerTest {
         mSubject.trackClick();
         mSubject.trackClick();
 
-        verify(mMockApiClient, times(1)).trackUrl("https://got.pubnative.net/click/rtb?aid=1036637", mListener);
+        verify(mMockApiClient, times(1)).trackUrl("https://got.pubnative.net/click/rtb?aid=1036637", null, mListener);
     }
 
     @Test
@@ -45,6 +48,6 @@ public class AdTrackerTest {
         mSubject.trackImpression();
         mSubject.trackImpression();
 
-        verify(mMockApiClient, times(1)).trackUrl("https://mock-dsp.pubnative.net/tracker/nurl?app_id=1036637&p=0.01", mListener);
+        verify(mMockApiClient, times(1)).trackUrl("https://mock-dsp.pubnative.net/tracker/nurl?app_id=1036637&p=0.01", null, mListener);
     }
 }

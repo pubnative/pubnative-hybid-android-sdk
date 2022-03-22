@@ -3,6 +3,7 @@ package net.pubnative.lite.sdk.utils;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.AdCache;
+import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
@@ -29,17 +30,19 @@ public class SignalDataProcessor {
     }
 
     private final PNApiClient mApiClient;
+    private final DeviceInfo mDeviceInfo;
     private final AdCache mAdCache;
     private final VideoAdCache mVideoCache;
     private Listener mListener;
     private boolean mIsDestroyed;
 
     public SignalDataProcessor() {
-        this(HyBid.getApiClient(), HyBid.getAdCache(), HyBid.getVideoAdCache());
+        this(HyBid.getApiClient(), HyBid.getDeviceInfo(), HyBid.getAdCache(), HyBid.getVideoAdCache());
     }
 
-    SignalDataProcessor(PNApiClient apiClient, AdCache adCache, VideoAdCache videoAdCache) {
+    SignalDataProcessor(PNApiClient apiClient, DeviceInfo deviceInfo, AdCache adCache, VideoAdCache videoAdCache) {
         this.mApiClient = apiClient;
+        this.mDeviceInfo = deviceInfo;
         this.mAdCache = adCache;
         this.mVideoCache = videoAdCache;
     }
@@ -51,7 +54,11 @@ public class SignalDataProcessor {
             if (!TextUtils.isEmpty(signalData.tagid)) {
                 if (!TextUtils.isEmpty(signalData.admurl)) {
                     if (mApiClient != null) {
-                        mApiClient.getAd(signalData.admurl, new PNApiClient.AdRequestListener() {
+                        String userAgent = "";
+                        if (mDeviceInfo != null) {
+                            userAgent = mDeviceInfo.getUserAgent();
+                        }
+                        mApiClient.getAd(signalData.admurl, userAgent, new PNApiClient.AdRequestListener() {
                             @Override
                             public void onSuccess(Ad ad) {
                                 if (mIsDestroyed) {

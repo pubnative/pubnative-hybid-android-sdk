@@ -2,6 +2,7 @@ package net.pubnative.lite.sdk.vpaid.vast;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
+import android.os.Build;
 import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,7 +38,8 @@ public class ViewControllerVast implements View.OnClickListener {
     private VideoAdView mBannerView;
     private CountDownView mSkipCountdownView;
     private LinearCountDownView mLinearCountdownView;
-    private View mVideoPlayerLayout;
+    private FrameLayout mVideoPlayerLayout;
+    private TextureView mVideoPlayerLayoutTexture;
     private ImageView mEndCardView;
     private View mControlsLayout;
     private View mEndCardLayout;
@@ -78,6 +80,10 @@ public class ViewControllerVast implements View.OnClickListener {
 
         mVideoPlayerLayout = mControlsLayout.findViewById(R.id.videoPlayerLayout);
 
+        mVideoPlayerLayoutTexture = new TextureView(mVideoPlayerLayout.getContext());
+        mVideoPlayerLayout.addView(mVideoPlayerLayoutTexture, 0,
+                new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+
         mEndCardLayout = mControlsLayout.findViewById(R.id.endCardLayout);
         mEndCardLayout.setVisibility(View.GONE);
         mEndCardView = mControlsLayout.findViewById(R.id.endCardView);
@@ -91,8 +97,9 @@ public class ViewControllerVast implements View.OnClickListener {
 
         mSkipCountdownView = mControlsLayout.findViewById(R.id.count_down);
         mLinearCountdownView = mControlsLayout.findViewById(R.id.linear_count_down);
-        ((TextureView) mControlsLayout.findViewById(R.id.textureView))
-                .setSurfaceTextureListener(mCreateTextureListener);
+        if (mVideoPlayerLayoutTexture != null) {
+            mVideoPlayerLayoutTexture.setSurfaceTextureListener(mCreateTextureListener);
+        }
 
         mMuteView = mControlsLayout.findViewById(R.id.muteView);
         mMuteView.setOnClickListener(this);
@@ -301,6 +308,6 @@ public class ViewControllerVast implements View.OnClickListener {
     }
 
     public TextureView getTexture() {
-        return mControlsLayout.findViewById(R.id.textureView);
+        return mVideoPlayerLayoutTexture;
     }
 }
