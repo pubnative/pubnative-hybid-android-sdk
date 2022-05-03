@@ -8,11 +8,13 @@ import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.admob.*
 import net.pubnative.lite.demo.ui.activities.dfp.*
+import net.pubnative.lite.demo.ui.activities.fairbid.FairbidMediationBannerActivity
+import net.pubnative.lite.demo.ui.activities.fairbid.FairbidMediationInterstitialActivity
+import net.pubnative.lite.demo.ui.activities.fairbid.FairbidMediationRewardedActivity
 import net.pubnative.lite.demo.ui.activities.ironsource.IronSourceMediationBannerActivity
 import net.pubnative.lite.demo.ui.activities.ironsource.IronSourceMediationInterstitialActivity
 import net.pubnative.lite.demo.ui.activities.ironsource.IronSourceMediationRewardedActivity
 import net.pubnative.lite.demo.ui.activities.maxads.*
-import net.pubnative.lite.demo.ui.activities.mopub.*
 
 class MediationNavFragment : Fragment(R.layout.fragment_nav_mediation) {
 
@@ -41,51 +43,6 @@ class MediationNavFragment : Fragment(R.layout.fragment_nav_mediation) {
 
         view.findViewById<Button>(R.id.button_max_native).setOnClickListener {
             val intent = Intent(activity, MaxAdsMediationNativeActivity::class.java)
-            startActivity(intent)
-        }
-
-        view.findViewById<Button>(R.id.button_mopub_banner).setOnClickListener {
-            val intent = Intent(activity, MoPubMediationBannerActivity::class.java)
-            startActivity(intent)
-        }
-
-        view.findViewById<Button>(R.id.button_mopub_medium).setOnClickListener {
-            val intent = Intent(activity, MoPubMediationMRectActivity::class.java)
-            startActivity(intent)
-        }
-
-        view.findViewById<Button>(R.id.button_mopub_medium_video).setOnClickListener {
-            val intent = Intent(activity, MoPubMediationMRectVideoActivity::class.java)
-            startActivity(intent)
-        }
-
-        view.findViewById<Button>(R.id.button_mopub_leaderboard).setOnClickListener {
-            val intent = Intent(activity, MoPubMediationLeaderboardActivity::class.java)
-            startActivity(intent)
-        }
-
-        view.findViewById<Button>(R.id.button_mopub_interstitial).setOnClickListener {
-            val intent = Intent(activity, MoPubMediationInterstitialActivity::class.java)
-            startActivity(intent)
-        }
-
-        view.findViewById<Button>(R.id.button_mopub_interstitial_video).setOnClickListener {
-            val intent = Intent(activity, MoPubMediationInterstitialVideoActivity::class.java)
-            startActivity(intent)
-        }
-
-        view.findViewById<Button>(R.id.button_mopub_rewarded).setOnClickListener {
-            val intent = Intent(activity, MoPubMediationRewardedActivity::class.java)
-            startActivity(intent)
-        }
-
-        view.findViewById<Button>(R.id.button_mopub_native).setOnClickListener {
-            val intent = Intent(activity, MoPubMediationNativeActivity::class.java)
-            startActivity(intent)
-        }
-
-        view.findViewById<Button>(R.id.button_mopub_recycler_view_native).setOnClickListener {
-            val intent = Intent(activity, MoPubMediationNativeRecyclerViewActivity::class.java)
             startActivity(intent)
         }
 
@@ -161,6 +118,21 @@ class MediationNavFragment : Fragment(R.layout.fragment_nav_mediation) {
 
         view.findViewById<Button>(R.id.button_ironsource_rewarded).setOnClickListener {
             val intent = Intent(activity, IronSourceMediationRewardedActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_fairbid_banner).setOnClickListener {
+            val intent = Intent(activity, FairbidMediationBannerActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_fairbid_interstitial).setOnClickListener {
+            val intent = Intent(activity, FairbidMediationInterstitialActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_fairbid_rewarded).setOnClickListener {
+            val intent = Intent(activity, FairbidMediationRewardedActivity::class.java)
             startActivity(intent)
         }
     }

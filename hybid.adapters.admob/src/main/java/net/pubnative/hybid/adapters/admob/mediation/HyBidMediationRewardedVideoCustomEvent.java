@@ -58,7 +58,9 @@ public class HyBidMediationRewardedVideoCustomEvent extends Adapter implements H
             zoneId = HyBidAdmobUtils.getZoneId(customEventParam);
             appToken = HyBidAdmobUtils.getAppToken(customEventParam);
         } else {
-            Logger.e(TAG, "Could not find the required params in MediationRewardedAdConfiguration params");
+            Logger.e(TAG, "Could not find the required params in MediationRewardedAdConfiguration params." +
+                    "Required params in MediationRewardedAdConfiguration params must be provided as a valid JSON Object. " +
+                    "Please consult HyBid documentation and update settings in your AdMob publisher dashboard.");
             mAdLoadCallback.onFailure(new AdError(AdRequest.ERROR_CODE_NETWORK_ERROR,
                     "Could not find the required params in MediationRewardedAdConfiguration params",
                     AdError.UNDEFINED_DOMAIN));

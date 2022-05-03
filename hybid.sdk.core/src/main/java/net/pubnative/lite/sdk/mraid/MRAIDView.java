@@ -345,10 +345,15 @@ public class MRAIDView extends RelativeLayout {
             }
         } else {
             currentWebView = webView;
-            String processedHtml = MRAIDHtmlProcessor.processRawHtml(data);
-            MRAIDLog.d("hz-m loading mraid " + processedHtml);
+            if (!TextUtils.isEmpty(data)) {
+                String processedHtml = MRAIDHtmlProcessor.processRawHtml(data);
+                MRAIDLog.d("hz-m loading mraid " + processedHtml);
 
-            webView.loadDataWithBaseURL(this.baseUrl, processedHtml, "text/html", "UTF-8", null);
+                webView.loadDataWithBaseURL(this.baseUrl, processedHtml, "text/html", "UTF-8", null);
+            } else {
+                MRAIDLog.d("hz-m loading mraid from url: " + baseUrl);
+                webView.loadUrl(baseUrl);
+            }
         }
     }
 
@@ -395,10 +400,6 @@ public class MRAIDView extends RelativeLayout {
                             " (actual " + getVisibilityString(actualVisibility) + ')');
                     if (isInterstitial) {
                         setViewable(actualVisibility);
-                    }
-                    if (visibility != View.VISIBLE) {
-                        // FIXME: is called when view is removed and WebView is destroyed already
-                        //pauseWebView(this);
                     }
                 }
 
@@ -580,18 +581,15 @@ public class MRAIDView extends RelativeLayout {
     protected void close() {
         MRAIDLog.d(MRAID_LOG_TAG + "-JS callback", "close");
         MRAIDLog.d("hz-m closing wv: " + webView);
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                if (state == STATE_DEFAULT || state == STATE_EXPANDED) {
-                    if (closeLayoutListener != null) {
-                        closeLayoutListener.onClose();
-                    } else {
-                        closeFromExpanded();
-                    }
-                } else if (state == STATE_RESIZED) {
-                    closeFromResized();
+        handler.post(() -> {
+            if (state == STATE_DEFAULT || state == STATE_EXPANDED) {
+                if (closeLayoutListener != null) {
+                    closeLayoutListener.onClose();
+                } else {
+                    closeFromExpanded();
                 }
+            } else if (state == STATE_RESIZED) {
+                closeFromResized();
             }
         });
     }
@@ -665,57 +663,54 @@ public class MRAIDView extends RelativeLayout {
             final String finalUrl = url;
 
             // Go onto a background thread to read the content from the URL.
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    MRAIDLog.d("hz-m MRAIDView - expand - url loading thread");
-                    if (isCustomExpand) {
-                        if (context instanceof Activity) {
-                            // Get back onto the main thread to create and load a new WebView.
-                            ((Activity) context).runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (state == STATE_RESIZED) {
-                                        removeResizeView();
-                                        addView(webView);
-                                    }
-                                    webView.setWebChromeClient(null);
-                                    webView.setWebViewClient(null);
-                                    webViewPart2 = createWebView();
-                                    webViewPart2.loadUrl(finalUrl);
-                                    MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for " + webViewPart2);
-                                    currentWebView = webViewPart2;
-                                    isExpandingPart2 = true;
-                                    expandHelper(currentWebView);
+            new Thread(() -> {
+                MRAIDLog.d("hz-m MRAIDView - expand - url loading thread");
+                if (isCustomExpand) {
+                    if (context instanceof Activity) {
+                        // Get back onto the main thread to create and load a new WebView.
+                        ((Activity) context).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (state == STATE_RESIZED) {
+                                    removeResizeView();
+                                    addView(webView);
                                 }
-                            });
-                        } else {
-                            MRAIDLog.e("Could not load part 2 expanded content for URL: " + finalUrl);
-                        }
+                                webView.setWebChromeClient(null);
+                                webView.setWebViewClient(null);
+                                webViewPart2 = createWebView();
+                                webViewPart2.loadUrl(finalUrl);
+                                MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for " + webViewPart2);
+                                currentWebView = webViewPart2;
+                                isExpandingPart2 = true;
+                                expandHelper(currentWebView);
+                            }
+                        });
                     } else {
-                        final String content = getStringFromUrl(finalUrl);
-                        if (!TextUtils.isEmpty(content) && context instanceof Activity) {
-                            // Get back onto the main thread to create and load a new WebView.
-                            ((Activity) context).runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (state == STATE_RESIZED) {
-                                        removeResizeView();
-                                        addView(webView);
-                                    }
-                                    webView.setWebChromeClient(null);
-                                    webView.setWebViewClient(null);
-                                    webViewPart2 = createWebView();
-                                    webViewPart2.loadDataWithBaseURL(baseUrl, content, "text/html", "UTF-8", null);
-                                    MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for " + webViewPart2);
-                                    currentWebView = webViewPart2;
-                                    isExpandingPart2 = true;
-                                    expandHelper(currentWebView);
+                        MRAIDLog.e("Could not load part 2 expanded content for URL: " + finalUrl);
+                    }
+                } else {
+                    final String content = getStringFromUrl(finalUrl);
+                    if (!TextUtils.isEmpty(content) && context instanceof Activity) {
+                        // Get back onto the main thread to create and load a new WebView.
+                        ((Activity) context).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (state == STATE_RESIZED) {
+                                    removeResizeView();
+                                    addView(webView);
                                 }
-                            });
-                        } else {
-                            MRAIDLog.e("Could not load part 2 expanded content for URL: " + finalUrl);
-                        }
+                                webView.setWebChromeClient(null);
+                                webView.setWebViewClient(null);
+                                webViewPart2 = createWebView();
+                                webViewPart2.loadDataWithBaseURL(baseUrl, content, "text/html", "UTF-8", null);
+                                MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for " + webViewPart2);
+                                currentWebView = webViewPart2;
+                                isExpandingPart2 = true;
+                                expandHelper(currentWebView);
+                            }
+                        });
+                    } else {
+                        MRAIDLog.e("Could not load part 2 expanded content for URL: " + finalUrl);
                     }
                 }
             }, "2-part-content").start();
@@ -786,12 +781,7 @@ public class MRAIDView extends RelativeLayout {
         setResizedViewSize();
         setResizedViewPosition();
 
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                fireStateChangeEvent();
-            }
-        });
+        handler.post(this::fireStateChangeEvent);
     }
 
     @JavascriptMRAIDCallback
@@ -1021,12 +1011,9 @@ public class MRAIDView extends RelativeLayout {
             expandedView = null;
             closeRegion = null;
 
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    restoreOriginalOrientation();
-                    restoreOriginalScreenState();
-                }
+            handler.post(() -> {
+                restoreOriginalOrientation();
+                restoreOriginalScreenState();
             });
             if (webViewPart2 == null) {
                 // close from 1-part expansion
@@ -1041,13 +1028,10 @@ public class MRAIDView extends RelativeLayout {
                 currentWebView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             }
 
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    fireStateChangeEvent();
-                    if (listener != null) {
-                        listener.mraidViewClose(MRAIDView.this);
-                    }
+            handler.post(() -> {
+                fireStateChangeEvent();
+                if (listener != null) {
+                    listener.mraidViewClose(MRAIDView.this);
                 }
             });
         }
@@ -1058,13 +1042,10 @@ public class MRAIDView extends RelativeLayout {
         isClosing = true;
         removeResizeView();
         addView(webView);
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                fireStateChangeEvent();
-                if (listener != null) {
-                    listener.mraidViewClose(MRAIDView.this);
-                }
+        handler.post(() -> {
+            fireStateChangeEvent();
+            if (listener != null) {
+                listener.mraidViewClose(MRAIDView.this);
             }
         });
     }
@@ -1172,12 +1153,7 @@ public class MRAIDView extends RelativeLayout {
 
         closeRegion = new ImageButton(context);
         closeRegion.setBackgroundColor(Color.TRANSPARENT);
-        closeRegion.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                close();
-            }
-        });
+        closeRegion.setOnClickListener(v -> close());
 
         // The default close button is shown only on expanded banners and interstitials,
         // but not on resized banners.
@@ -1294,12 +1270,7 @@ public class MRAIDView extends RelativeLayout {
         if (webView != null && !TextUtils.isEmpty(js)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 MRAIDLog.d(MRAID_LOG_TAG, "evaluating js: " + js);
-                webView.evaluateJavascript(js, new ValueCallback<String>() {
-                    @Override
-                    public void onReceiveValue(String value) {
-                        MRAIDLog.d("Evaluated JS: " + value);
-                    }
-                });
+                webView.evaluateJavascript(js, value -> MRAIDLog.d("Evaluated JS: " + value));
 
             } else {
                 MRAIDLog.d(MRAID_LOG_TAG, "loading url: " + js);
@@ -1357,7 +1328,6 @@ public class MRAIDView extends RelativeLayout {
         } else {
             return pixels;
         }
-        // return pixels;
     }
 
     private void setCurrentPosition() {
@@ -1449,13 +1419,6 @@ public class MRAIDView extends RelativeLayout {
         }
     }
 
-    private void pauseWebView(WebView webView) {
-        MRAIDLog.d(MRAID_LOG_TAG, "pauseWebView " + webView.toString());
-        // Stop any video/animation that may be running in the WebView.
-        // Otherwise, it will keep playing in the background.
-        webView.onPause();
-    }
-
     /**************************************************************************
      * WebChromeClient and WebViewClient
      **************************************************************************/
@@ -1467,11 +1430,10 @@ public class MRAIDView extends RelativeLayout {
             if (cm == null || cm.message() == null) {
                 return false;
             }
-//            if (!cm.message().contains("Uncaught ReferenceError")) {
+
             MRAIDLog.i("JS console", cm.message()
                     + (cm.sourceId() == null ? "" : " at " + cm.sourceId())
                     + ":" + cm.lineNumber());
-//            }
             return true;
         }
 
@@ -1598,23 +1560,20 @@ public class MRAIDView extends RelativeLayout {
             }
             if (isExpandingPart2) {
                 isExpandingPart2 = false;
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        injectJavaScript("mraid.setPlacementType('" + (isInterstitial ? "interstitial" : "inline") + "');");
-                        setSupportedServices();
-                        setEnvironmentVariables();
-                        setLocation();
-                        setScreenSize();
-                        setDefaultPosition();
-                        MRAIDLog.d(MRAID_LOG_TAG, "calling fireStateChangeEvent 2");
-                        fireStateChangeEvent();
-                        fireReadyEvent();
-                        if (isViewable) {
-                            fireViewableChangeEvent();
-                        }
-                        fireExposureChangeEvent();
+                handler.post(() -> {
+                    injectJavaScript("mraid.setPlacementType('" + (isInterstitial ? "interstitial" : "inline") + "');");
+                    setSupportedServices();
+                    setEnvironmentVariables();
+                    setLocation();
+                    setScreenSize();
+                    setDefaultPosition();
+                    MRAIDLog.d(MRAID_LOG_TAG, "calling fireStateChangeEvent 2");
+                    fireStateChangeEvent();
+                    fireReadyEvent();
+                    if (isViewable) {
+                        fireViewableChangeEvent();
                     }
+                    fireExposureChangeEvent();
                 });
             }
         }
@@ -1708,12 +1667,7 @@ public class MRAIDView extends RelativeLayout {
             MRAIDLog.d("hz-m shouldInterceptRequest - " + url);
             if (url.contains("mraid.js")) {
                 MRAIDLog.d("hz-m shouldInterceptRequest - intercepting mraid - " + url);
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        injectJavaScript(webView, "mraid.logLevel = mraid.LogLevelEnum.DEBUG;");
-                    }
-                });
+                handler.post(() -> injectJavaScript(webView, "mraid.logLevel = mraid.LogLevelEnum.DEBUG;"));
                 return new WebResourceResponse("application/javascript", "UTF-8", getMraidJsStream());
             }
             return null;
@@ -1814,12 +1768,7 @@ public class MRAIDView extends RelativeLayout {
             calculatePosition(false);
         }
         if (state == STATE_RESIZED && changed) {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    setResizedViewPosition();
-                }
-            });
+            handler.post(() -> setResizedViewPosition());
         }
         isLaidOut = true;
         onLayoutCompleted();
@@ -1845,12 +1794,10 @@ public class MRAIDView extends RelativeLayout {
         // If closing from expanded state, just set currentPosition to default position in onLayout above.
         if (!isClosing) {
             calculatePosition(true);
-            if (isInterstitial) {
-                // For interstitials, the default position is always the current position
-                if (!defaultPosition.equals(currentPosition)) {
-                    defaultPosition = new Rect(currentPosition);
-                    setDefaultPosition();
-                }
+            if (isInterstitial && !defaultPosition.equals(currentPosition)) {
+
+                defaultPosition = new Rect(currentPosition);
+                setDefaultPosition();
             }
         }
 
@@ -2045,12 +1992,7 @@ public class MRAIDView extends RelativeLayout {
 
     private void startSkipTimer() {
         if (mSkipTimeMillis > 0) {
-            SimpleTimer mExpirationTimer = new SimpleTimer(mSkipTimeMillis, new SimpleTimer.Listener() {
-                @Override
-                public void onFinish() {
-                    listener.mraidShowCloseButton();
-                }
-            });
+            SimpleTimer mExpirationTimer = new SimpleTimer(mSkipTimeMillis, () -> listener.mraidShowCloseButton());
             mExpirationTimer.start();
         } else {
             listener.mraidShowCloseButton();

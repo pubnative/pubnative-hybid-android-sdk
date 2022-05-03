@@ -22,6 +22,7 @@ import net.pubnative.lite.sdk.vpaid.enums.VastError;
 import net.pubnative.lite.sdk.vpaid.helpers.ErrorLog;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
 import net.pubnative.lite.sdk.vpaid.macros.MacroHelper;
+import net.pubnative.lite.sdk.vpaid.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.models.vast.Tracking;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.AdSpotDimensions;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.CreativeParams;
@@ -101,6 +102,10 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
 
     @Override
     public void setEndCardFilePath(String endCardFilePath) {
+    }
+
+    @Override
+    public void setEndCardData(EndCardData endCardData) {
     }
 
     @Override

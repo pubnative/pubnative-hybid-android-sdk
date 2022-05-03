@@ -19,7 +19,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:text="@string/add" />
 
@@ -28,9 +27,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_toStartOf="@id/button_add_zone_id"
-            android:layout_toLeftOf="@id/button_add_zone_id">
+            android:layout_toStartOf="@id/button_add_zone_id">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_zone_id"

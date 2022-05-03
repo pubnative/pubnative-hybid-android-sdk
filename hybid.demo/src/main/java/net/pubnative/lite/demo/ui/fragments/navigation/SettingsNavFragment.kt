@@ -13,6 +13,7 @@ import net.pubnative.lite.demo.ui.activities.CustomSDKDataActivity
 import net.pubnative.lite.demo.ui.activities.admob.MediationTestSuiteActivity
 import net.pubnative.lite.demo.ui.activities.audiences.NumberEightAudiencesActivity
 import net.pubnative.lite.demo.ui.activities.config.*
+import net.pubnative.lite.demo.ui.activities.creativetester.P161CreativeTesterActivity
 import net.pubnative.lite.demo.ui.activities.markup.MarkupActivity
 import net.pubnative.lite.demo.ui.activities.signaldata.SignalDataActivity
 import net.pubnative.lite.demo.ui.activities.vast.VastTagRequestActivity
@@ -36,11 +37,6 @@ class SettingsNavFragment : Fragment(R.layout.fragment_nav_settings) {
             startActivity(intent)
         }
 
-        view.findViewById<TextView>(R.id.button_mopub_settings).setOnClickListener {
-            val intent = Intent(activity, MoPubSettingsActivity::class.java)
-            startActivity(intent)
-        }
-
         view.findViewById<TextView>(R.id.button_admob_settings).setOnClickListener {
             val intent = Intent(activity, AdmobSettingsActivity::class.java)
             startActivity(intent)
@@ -61,6 +57,11 @@ class SettingsNavFragment : Fragment(R.layout.fragment_nav_settings) {
             startActivity(intent)
         }
 
+        view.findViewById<TextView>(R.id.button_creative_tester).setOnClickListener {
+            val intent = Intent(activity, P161CreativeTesterActivity::class.java)
+            startActivity(intent)
+        }
+
         view.findViewById<TextView>(R.id.button_signal_data).setOnClickListener {
             val intent = Intent(activity, SignalDataActivity::class.java)
             startActivity(intent)
@@ -78,7 +79,7 @@ class SettingsNavFragment : Fragment(R.layout.fragment_nav_settings) {
                 startActivity(intent)
             }
         } else {
-            view.findViewById<TextView>(R.id.button_numbereight_audiences).setVisibility(View.GONE)
+            view.findViewById<TextView>(R.id.button_numbereight_audiences).visibility = View.GONE
         }
 
         view.findViewById<TextView>(R.id.button_mediation_test_suite).setOnClickListener {
@@ -103,6 +104,10 @@ class SettingsNavFragment : Fragment(R.layout.fragment_nav_settings) {
         val buildVersion = BuildConfig.VERSION_CODE
         val sdkVersion = net.pubnative.lite.sdk.BuildConfig.SDK_VERSION
 
-        versionTextView.text = "SDK Version: $sdkVersion build: $buildVersion "
+        versionTextView.text = String.format(
+            getString(R.string.sdk_and_build_version_concat),
+            sdkVersion,
+            buildVersion
+        )
     }
 }

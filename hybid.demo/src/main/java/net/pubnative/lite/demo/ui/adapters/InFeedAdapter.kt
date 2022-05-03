@@ -20,6 +20,7 @@ class InFeedAdapter(val zoneId: String, val adListener: InFeedAdListener) : Recy
     private var adSize: AdSize = AdSize.SIZE_300x250
 
     private var shouldLoadAd: Boolean = false
+    private var autoRefresh: Boolean = false
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
@@ -32,7 +33,7 @@ class InFeedAdapter(val zoneId: String, val adListener: InFeedAdListener) : Recy
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
-            is HyBidBannerViewHolder -> holder.bind(zoneId, adSize, shouldLoadAd)
+            is HyBidBannerViewHolder -> holder.bind(zoneId, adSize, shouldLoadAd, autoRefresh)
             else -> {
                 holder as SampleTextViewHolder
                 holder.bind(list[position])
@@ -54,5 +55,9 @@ class InFeedAdapter(val zoneId: String, val adListener: InFeedAdListener) : Recy
         this.adSize = adSize
         notifyDataSetChanged()
         shouldLoadAd = true
+    }
+
+    fun setAutoRefresh(enableAutoRefresh: Boolean) {
+        autoRefresh = enableAutoRefresh
     }
 }

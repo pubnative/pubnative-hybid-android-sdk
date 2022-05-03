@@ -56,7 +56,7 @@ public class TrackingManager {
      * @param context valid context
      * @param url     Url to track
      */
-    public synchronized static void track(Context context, String url) {
+    public static synchronized void track(Context context, String url) {
         if (context == null) {
             Log.w(TAG, "track - ERROR: Context parameter is null");
         } else if (TextUtils.isEmpty(url)) {
@@ -78,7 +78,7 @@ public class TrackingManager {
     // PRIVATE
     //==============================================================================================
 
-    protected synchronized static void trackNextItem(final Context context) {
+    protected static synchronized void trackNextItem(final Context context) {
         if (sIsTracking) {
             Log.w(TAG, "trackNextItem - Currently tracking, dropping the call, will be resumed soon");
         } else {
@@ -140,7 +140,7 @@ public class TrackingManager {
     protected static TrackingUrlModel dequeueItem(Context context, String listKey) {
         TrackingUrlModel result = null;
         List<TrackingUrlModel> list = getList(context, listKey);
-        if (list.size() > 0) {
+        if (!list.isEmpty()) {
             result = list.get(0);
             list.remove(0);
             setList(context, listKey, list);

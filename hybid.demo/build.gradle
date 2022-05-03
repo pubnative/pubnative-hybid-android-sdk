@@ -1,17 +1,22 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'com.google.firebase.appdistribution'
-apply plugin: 'com.google.firebase.firebase-perf'
-apply plugin: 'com.google.firebase.crashlytics'
-apply plugin: 'com.google.gms.google-services'
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-parcelize'
+    id 'com.fyber.fairbid-sdk-plugin' version '3.26.0'
+    id 'com.google.firebase.appdistribution'
+    id 'com.google.firebase.firebase-perf'
+    id 'com.google.firebase.crashlytics'
+    id 'com.google.gms.google-services'
+    id "org.sonarqube" version "3.3"
+}
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 32
 
     defaultConfig {
         applicationId "net.pubnative.lite.demo"
         minSdkVersion 19
-        targetSdkVersion 30
+        targetSdkVersion 32
         versionCode System.getenv("CIRCLE_BUILD_NUM") ? System.getenv("CIRCLE_BUILD_NUM").toInteger() : 1
         versionName project.version
         multiDexEnabled true
@@ -37,12 +42,22 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = '1.8'
-        targetCompatibility = '1.8'
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
-    lintOptions {
+    lint {
         abortOnError false
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
     }
 }
 
@@ -50,7 +65,6 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     //Hybid Adapters
-    implementation project(':hybid.adapters.mopub')
     implementation project(':hybid.adapters.admob')
     implementation project(':hybid.adapters.dfp')
     implementation project(':hybid.adapters.ironsource')
@@ -68,28 +82,24 @@ dependencies {
     implementation project(':hybid.sdk.logger')
     implementation project(':hybid.sdk.source.pnapi')
 
-    implementation 'androidx.appcompat:appcompat:1.3.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
-    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
+    implementation 'com.google.android.material:material:1.5.0'
     implementation 'androidx.multidex:multidex:2.0.1'
 
-    implementation('com.mopub:mopub-sdk:5.18.0@aar') {
-        transitive = true
-    }
+    implementation 'com.ironsource.sdk:mediationsdk:7.2.1.1'
+    implementation 'com.applovin:applovin-sdk:11.3.3'
 
-    implementation 'com.ironsource.sdk:mediationsdk:7.1.14'
-    implementation 'com.applovin:applovin-sdk:11.1.2'
-
-    implementation 'com.google.android.gms:play-services-ads:20.4.0'
+    implementation 'com.google.android.gms:play-services-ads:20.6.0'
     implementation 'com.google.android.ads:mediation-test-suite:2.0.0'
-    implementation "androidx.navigation:navigation-fragment-ktx:2.3.5"
-    implementation "androidx.navigation:navigation-ui-ktx:2.3.5"
+    implementation "androidx.navigation:navigation-fragment-ktx:2.4.2"
+    implementation "androidx.navigation:navigation-ui-ktx:2.4.2"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.google.code.gson:gson:2.8.9'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
-    implementation 'co.ogury:ogury-sdk:5.0.10'
+    implementation 'co.ogury:ogury-sdk:5.2.0'
     implementation 'com.google.android.ump:user-messaging-platform:2.0.0'
 
     implementation 'ai.numbereight.sdk:audiences:2.3.4'
@@ -97,7 +107,7 @@ dependencies {
         transitive = true
     }
 
-    implementation platform('com.google.firebase:firebase-bom:29.0.1')
+    implementation platform('com.google.firebase:firebase-bom:29.2.1')
     implementation 'com.google.firebase:firebase-perf'
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
@@ -105,4 +115,15 @@ dependencies {
     testImplementation 'com.google.truth:truth:0.36'
 }
 
-apply plugin: 'kotlin-android-extensions'
+sonarqube {
+    sonarqube {
+        properties {
+            property "sonar.projectName", "HyBidDemo"
+            property "sonar.projectKey", "HyBidDemoSample"
+            property "sonar.host.url", "http://localhost:9000"
+            property "sonar.projectVersion", "1.0"
+            property "sonar.language", "java"
+            property "sonar.sources", "src/main/"
+        }
+    }
+}

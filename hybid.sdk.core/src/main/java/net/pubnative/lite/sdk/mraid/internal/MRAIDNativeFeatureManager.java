@@ -36,7 +36,7 @@ import java.util.ArrayList;
  */
 
 public class MRAIDNativeFeatureManager {
-    private final static String TAG = MRAIDNativeFeatureManager.class.getSimpleName();
+    private static final String TAG = MRAIDNativeFeatureManager.class.getSimpleName();
 
     private final Context context;
     private final ArrayList<String> supportedNativeFeatures;

@@ -3,14 +3,15 @@ package net.pubnative.lite.sdk.vpaid;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
-import android.view.View;
 
 import com.iab.omid.library.pubnativenet.adsession.VerificationScriptResource;
 
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
+import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.helpers.AssetsLoader;
+import net.pubnative.lite.sdk.vpaid.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.AdSpotDimensions;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.response.VastProcessor;
@@ -22,13 +23,13 @@ public class VideoAdProcessor {
     private static final String TAG = VideoAdProcessor.class.getSimpleName();
 
     public interface Listener {
-        void onCacheSuccess(AdParams adParams, String videoFilePath, String endCardFilePath, List<String> omidVendors);
+        void onCacheSuccess(AdParams adParams, String videoFilePath, EndCardData endCardData, String endCardFilePath, List<String> omidVendors);
 
         void onCacheError(Throwable error);
     }
 
-    public void process(final Context context, String vast, View adView, final Listener listener) {
-        VastProcessor vastProcessor = new VastProcessor(context, getAdSpotDimensions(context, adView));
+    public void process(final Context context, String vast, AdSize adSize, final Listener listener) {
+        VastProcessor vastProcessor = new VastProcessor(context, getAdSpotDimensions(context, adSize));
         vastProcessor.parseResponse(vast, new VastProcessor.Listener() {
             @Override
             public void onParseSuccess(AdParams adParams, String vastFileContent) {
@@ -49,9 +50,9 @@ public class VideoAdProcessor {
         AssetsLoader assetsLoader = new AssetsLoader();
         assetsLoader.load(adParams, context, new AssetsLoader.OnAssetsLoaded() {
             @Override
-            public void onAssetsLoaded(String videoFilePath, String endCardFilePath) {
+            public void onAssetsLoaded(String videoFilePath, EndCardData endCardData, String endCardFilePath) {
                 if (listener != null) {
-                    listener.onCacheSuccess(adParams, videoFilePath, endCardFilePath, getOmidVendors(adParams));
+                    listener.onCacheSuccess(adParams, videoFilePath, endCardData, endCardFilePath, getOmidVendors(adParams));
                 }
             }
 
@@ -65,9 +66,9 @@ public class VideoAdProcessor {
         });
     }
 
-    private AdSpotDimensions getAdSpotDimensions(Context context, View view) {
-        if (view != null) {
-            return new AdSpotDimensions(view.getWidth(), view.getHeight());
+    private AdSpotDimensions getAdSpotDimensions(Context context, AdSize adSize) {
+        if (adSize != null && adSize != AdSize.SIZE_INTERSTITIAL) {
+            return new AdSpotDimensions(adSize.getWidth(), adSize.getHeight());
         } else {
             DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
             return new AdSpotDimensions(displayMetrics.widthPixels, displayMetrics.heightPixels);

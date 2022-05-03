@@ -61,7 +61,9 @@ public class HyBidDFPInterstitialCustomEvent implements CustomEventInterstitial,
         } else if (!TextUtils.isEmpty(HyBidDFPUtils.getZoneId(customEventExtras))) {
             zoneIdKey = HyBidDFPUtils.getZoneId(customEventExtras);
         } else {
-            Logger.e(TAG, "Could not find zone id value in CustomEventInterstitial localExtras or serverExtras");
+            Logger.e(TAG, "Could not find zone id value in CustomEventInterstitial localExtras or serverExtras" +
+                    "Required params in CustomEventInterstitial localExtras or serverExtras must be provided as a valid JSON Object. " +
+                    "Please consult HyBid documentation and update settings in your dfp publisher dashboard.");
             mInterstitialListener.onAdFailedToLoad(AdRequest.ERROR_CODE_INVALID_REQUEST);
             return;
         }

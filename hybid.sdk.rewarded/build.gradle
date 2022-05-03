@@ -1,4 +1,9 @@
-apply plugin: 'com.android.library'
+plugins {
+    id 'com.android.library'
+    id 'com.jfrog.artifactory'
+    id 'maven-publish'
+    id "org.sonarqube" version "3.3"
+}
 
 def project_name = project.name
 def version_name = project.version
@@ -8,16 +13,13 @@ if (branchName != null && buildNumber != null && branchName.toString() != "maste
 }
 version = version_name
 
-
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.3"
+    compileSdkVersion 32
+    buildToolsVersion "32.0.0"
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
+        targetSdkVersion 32
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -28,6 +30,11 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 }
 
@@ -44,19 +51,18 @@ dependencies {
 //--------------------------------------------------------------------------------------------------
 // PUBLISHING
 //--------------------------------------------------------------------------------------------------
-apply plugin: 'com.jfrog.artifactory'
-apply plugin: 'maven-publish'
-
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
     classifier = 'sources'
 }
+
 task javadoc(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
     classpath += project.rootProject.files(android.getBootClasspath().join(File.pathSeparator))
     options.memberLevel = JavadocMemberLevel.PUBLIC
     failOnError false
 }
+
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
@@ -83,7 +89,6 @@ static def addDependency(dependency, dependenciesNode) { //finish with dependenc
         }
     }
 }
-
 
 publishing {
     publications {
@@ -136,6 +141,19 @@ artifactory {
             username = System.getenv("ARTIFACTORY_USER")
             password = System.getenv("ARTIFACTORY_PASSWORD")
             maven = true
+        }
+    }
+}
+
+sonarqube {
+    sonarqube {
+        properties {
+            property "sonar.projectName", "HyBidDemo"
+            property "sonar.projectKey", "HyBidDemoSample"
+            property "sonar.host.url", "http://localhost:9000"
+            property "sonar.projectVersion", version
+            property "sonar.language", "java"
+            property "sonar.sources", "src/main/"
         }
     }
 }

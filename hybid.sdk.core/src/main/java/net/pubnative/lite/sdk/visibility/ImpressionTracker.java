@@ -46,29 +46,26 @@ public class ImpressionTracker {
     protected final Runnable mImpressionRunnable = new ImpressionRunnable();
     protected VisibilityTracker mVisibilityTracker = null;
 
-    protected VisibilityTracker.Listener mVisibilityListener = new VisibilityTracker.Listener() {
-        @Override
-        public void onVisibilityCheck(List<View> visibleViews, List<View> invisibleViews) {
-            if (mImpressionListener == null || mImpressionListener.get() == null) {
-                clear();
-            } else {
-                for (View visibleView : visibleViews) {
+    protected VisibilityTracker.Listener mVisibilityListener = (visibleViews, invisibleViews) -> {
+        if (mImpressionListener == null || mImpressionListener.get() == null) {
+            clear();
+        } else {
+            for (View visibleView : visibleViews) {
 
-                    if (mVisibleViews.containsKey(visibleView)) {
-                        // View already tracked, leave it there
-                        continue;
-                    }
-
-                    mVisibleViews.put(visibleView, SystemClock.uptimeMillis());
+                if (mVisibleViews.containsKey(visibleView)) {
+                    // View already tracked, leave it there
+                    continue;
                 }
 
-                for (View invisibleView : invisibleViews) {
-                    mVisibleViews.remove(invisibleView);
-                }
+                mVisibleViews.put(visibleView, SystemClock.uptimeMillis());
+            }
 
-                if (!mVisibleViews.isEmpty()) {
-                    scheduleNextRun();
-                }
+            for (View invisibleView : invisibleViews) {
+                mVisibleViews.remove(invisibleView);
+            }
+
+            if (!mVisibleViews.isEmpty()) {
+                scheduleNextRun();
             }
         }
     };

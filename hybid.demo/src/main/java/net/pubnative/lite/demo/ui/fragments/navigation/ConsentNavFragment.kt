@@ -35,11 +35,6 @@ class ConsentNavFragment : Fragment(R.layout.fragment_nav_consent) {
             startActivity(intent)
         }
 
-        view.findViewById<TextView>(R.id.button_mopub_cmp).setOnClickListener {
-            val intent = Intent(activity, MoPubCMPActivity::class.java)
-            startActivity(intent)
-        }
-
         view.findViewById<TextView>(R.id.button_gdpr_applies).setOnClickListener {
             val gdprApplies = HyBid.getUserDataManager().gdprApplies()
             if (gdprApplies) {

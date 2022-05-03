@@ -23,24 +23,21 @@
 package net.pubnative.lite.demo.ui.fragments.hybid
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.text.TextUtils
 import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.*
+import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.demo.util.convertDpToPx
-import net.pubnative.lite.sdk.CacheListener
-import net.pubnative.lite.sdk.DiagnosticsManager
-import net.pubnative.lite.sdk.HyBidError
-import net.pubnative.lite.sdk.VideoListener
+import net.pubnative.lite.sdk.*
 import net.pubnative.lite.sdk.models.AdSize
+import net.pubnative.lite.sdk.models.ImpressionTrackingMethod
 import net.pubnative.lite.sdk.views.HyBidAdView
 import net.pubnative.lite.sdk.views.PNAdView
 import java.util.*
@@ -50,15 +47,13 @@ import java.util.*
  */
 class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.Listener,
     VideoListener, CacheListener {
-    val TAG = HyBidBannerFragment::class.java.simpleName
-
-    private val AUTO_REFRESH_MILLIS: Long = 30 * 1000
+    private val hyBidTAG = HyBidBannerFragment::class.java.simpleName
 
     private var zoneId: String? = null
-    private val handler = Handler(Looper.getMainLooper())
 
     private lateinit var hybidBanner: HyBidAdView
-    private lateinit var autoRefreshSwitch: Switch
+    private lateinit var autoRefreshSwitch: SwitchCompat
+    private lateinit var autoShowSwitch: SwitchCompat
     private lateinit var loadButton: Button
     private lateinit var prepareButton: Button
     private lateinit var showButton: Button
@@ -98,10 +93,12 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
         hybidBanner = view.findViewById(R.id.hybid_banner)
         adSizeSpinner = view.findViewById(R.id.spinner_ad_size)
         autoRefreshSwitch = view.findViewById(R.id.check_auto_refresh)
+        autoShowSwitch = view.findViewById(R.id.check_auto_show)
         prepareButton.isEnabled = false
         showButton.isEnabled = false
 
         autoRefreshSwitch.isChecked = false
+        autoShowSwitch.isChecked = true
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
@@ -110,11 +107,11 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
         hybidBanner.setAdSize(AdSize.SIZE_320x50)
 
         loadButton.setOnClickListener {
+            prepareButton.isEnabled = false
+            showButton.isEnabled = false
             val activity = activity as TabActivity
-            handler.removeCallbacksAndMessages(null)
             activity.notifyAdCleaned()
             loadPNAd()
-            autoRefresh()
         }
 
         prepareButton.setOnClickListener {
@@ -129,6 +126,18 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
             cachingEnabled = isChecked
             prepareButton.visibility = if (isChecked) View.GONE else View.VISIBLE
             showButton.visibility = if (isChecked) View.GONE else View.VISIBLE
+            hybidBanner.isAutoShowOnLoad = isChecked
+        }
+
+        autoRefreshSwitch.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                hybidBanner.setAutoRefreshTimeInSeconds(30)
+            } else {
+                hybidBanner.stopAutoRefresh()
+            }
+        }
+
+        autoShowSwitch.setOnCheckedChangeListener{_, isChecked ->
             hybidBanner.isAutoShowOnLoad = isChecked
         }
 
@@ -151,7 +160,6 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
     }
 
     fun loadPNAd() {
-
         errorView.text = ""
 
         val adSize = adSizes[adSizeSpinner.selectedItemPosition]
@@ -168,30 +176,17 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
 
         hybidBanner.isAutoCacheOnLoad = cachingEnabled
 
+        hybidBanner.setTrackingMethod(ImpressionTrackingMethod.AD_VIEWABLE)
         hybidBanner.load(zoneId, this)
-    }
-
-    fun autoRefresh() {
-        if (autoRefreshSwitch.isChecked) {
-            handler.postDelayed({
-                loadPNAd()
-                autoRefresh()
-            }, AUTO_REFRESH_MILLIS)
-        } else {
-            handler.removeCallbacksAndMessages(null)
-        }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        handler.removeCallbacksAndMessages(null);
     }
 
     // --------------- PNAdView Listener --------------------
     override fun onAdLoaded() {
-        Log.d(TAG, "onAdLoaded")
+        Log.d(hyBidTAG, "onAdLoaded")
         prepareButton.isEnabled = !cachingEnabled
         showButton.isEnabled = cachingEnabled
+        errorCodeView.text = ""
+        errorView.text = ""
         displayLogs()
         if (!TextUtils.isEmpty(hybidBanner.creativeId)) {
             creativeIdView.text = hybidBanner.creativeId
@@ -202,7 +197,7 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
         prepareButton.isEnabled = false
         showButton.isEnabled = false
         if (error != null && error is HyBidError) {
-            Log.e(TAG, error.message ?: " - ")
+            Log.e(hyBidTAG, error.message ?: " - ")
             errorCodeView.text = error.errorCode.code.toString()
             errorView.text = error.message ?: " - "
         } else {
@@ -214,40 +209,42 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
     }
 
     override fun onAdImpression() {
-        Log.d(TAG, "onAdImpression")
-        DiagnosticsManager.printPlacementDiagnosticsLog(
-            requireContext(),
-            hybidBanner.placementParams
-        )
+        Log.d(hyBidTAG, "onAdImpression")
+        if (HyBid.getDiagnosticsManager() != null) {
+            HyBid.getDiagnosticsManager().printPlacementDiagnosticsLog(
+                requireContext(),
+                hybidBanner.placementParams
+            )
+        }
     }
 
     override fun onAdClick() {
-        Log.d(TAG, "onAdClick")
+        Log.d(hyBidTAG, "onAdClick")
     }
 
     // --------------- HyBid Video Listener --------------------
     override fun onVideoError(progressPercentage: Int) {
-        Log.d(TAG, String.format(Locale.ENGLISH, "onVideoError progress: %d", progressPercentage))
+        Log.d(hyBidTAG, String.format(Locale.ENGLISH, "onVideoError progress: %d", progressPercentage))
     }
 
     override fun onVideoStarted() {
-        Log.d(TAG, "onVideoStarted")
+        Log.d(hyBidTAG, "onVideoStarted")
     }
 
     override fun onVideoDismissed(progressPercentage: Int) {
         Log.d(
-            TAG,
+            hyBidTAG,
             String.format(Locale.ENGLISH, "onVideoDismissed progress: %d", progressPercentage)
         )
     }
 
     override fun onVideoFinished() {
-        Log.d(TAG, "onVideoFinished")
+        Log.d(hyBidTAG, "onVideoFinished")
     }
 
 
     override fun onCacheSuccess() {
-        Log.d(TAG, "onCacheSuccess")
+        Log.d(hyBidTAG, "onCacheSuccess")
         prepareButton.isEnabled = false
         showButton.isEnabled = true
     }
@@ -256,7 +253,7 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
         prepareButton.isEnabled = false
         showButton.isEnabled = true
         if (error != null && error is HyBidError) {
-            Log.e(TAG, error.message ?: " - ")
+            Log.e(hyBidTAG, error.message ?: " - ")
             errorCodeView.text = error.errorCode.code.toString()
             errorView.text = error.message ?: " - "
         } else {

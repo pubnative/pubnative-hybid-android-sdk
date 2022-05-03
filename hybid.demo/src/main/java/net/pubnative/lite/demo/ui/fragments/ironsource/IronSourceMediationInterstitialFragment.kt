@@ -1,6 +1,7 @@
 package net.pubnative.lite.demo.ui.fragments.ironsource
 
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -33,6 +34,8 @@ class IronSourceMediationInterstitialFragment : Fragment(R.layout.fragment_irons
         val adUnitId =
             SettingsManager.getInstance(requireActivity())
                 .getSettings().ironSourceInterstitialAdUnitId
+
+        initializeIronSource()
 
         loadButton.setOnClickListener {
             errorView.text = ""
@@ -98,6 +101,17 @@ class IronSourceMediationInterstitialFragment : Fragment(R.layout.fragment_irons
         if (activity != null) {
             val activity = activity as TabActivity
             activity.notifyAdUpdated()
+        }
+    }
+
+    private fun initializeIronSource() {
+        val settings = SettingsManager.getInstance(requireContext()).getSettings()
+        val appKey = settings.ironSourceAppKey
+        if (!TextUtils.isEmpty(appKey)) {
+            IronSource.init(
+                requireActivity(), appKey, IronSource.AD_UNIT.BANNER,
+                IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.REWARDED_VIDEO
+            )
         }
     }
 }

@@ -48,12 +48,7 @@ public class PNAPIContentInfoView extends RelativeLayout implements View.OnClick
 
     private Handler mHandler;
 
-    private final Runnable mCloseTask = new Runnable() {
-        @Override
-        public void run() {
-            closeLayout();
-        }
-    };
+    private final Runnable mCloseTask = PNAPIContentInfoView.this::closeLayout;
 
     public PNAPIContentInfoView(Context context) {
         super(context);
@@ -71,6 +66,7 @@ public class PNAPIContentInfoView extends RelativeLayout implements View.OnClick
     }
 
     public void init(Context context) {
+
         LayoutInflater inflator = LayoutInflater.from(context);
         mHandler = new Handler(Looper.getMainLooper());
         RelativeLayout containerView = (RelativeLayout) inflator.inflate(R.layout.content_info_layout, this, true);
@@ -102,18 +98,15 @@ public class PNAPIContentInfoView extends RelativeLayout implements View.OnClick
     }
 
     public void setIconClickUrl(final String iconClickUrl) {
-        mContentInfoText.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        mContentInfoText.setOnClickListener(view -> {
 
-                try {
-                    Intent openLink = new Intent(Intent.ACTION_VIEW);
-                    openLink.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    openLink.setData(Uri.parse(iconClickUrl));
-                    view.getContext().startActivity(openLink);
-                } catch (Exception e) {
-                    Log.e(TAG, "error on click content info text", e);
-                }
+            try {
+                Intent openLink = new Intent(Intent.ACTION_VIEW);
+                openLink.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                openLink.setData(Uri.parse(iconClickUrl));
+                view.getContext().startActivity(openLink);
+            } catch (Exception e) {
+                Log.e(TAG, "error on click content info text", e);
             }
         });
     }

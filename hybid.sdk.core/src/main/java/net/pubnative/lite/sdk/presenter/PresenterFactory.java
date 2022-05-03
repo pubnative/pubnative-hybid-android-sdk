@@ -26,6 +26,7 @@ import android.content.Context;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
 import net.pubnative.lite.sdk.utils.AdTracker;
 
 public abstract class PresenterFactory {
@@ -42,7 +43,12 @@ public abstract class PresenterFactory {
 
     public AdPresenter createPresenter(Ad ad,
                                        AdPresenter.Listener bannerPresenterListener, AdPresenter.ImpressionListener impressionListener) {
-        final AdPresenter adPresenter = fromCreativeType(ad.assetgroupid, ad);
+        return createPresenter(ad, ImpressionTrackingMethod.AD_RENDERED, bannerPresenterListener, null);
+    }
+
+    public AdPresenter createPresenter(Ad ad, ImpressionTrackingMethod trackingMethod,
+                                       AdPresenter.Listener bannerPresenterListener, AdPresenter.ImpressionListener impressionListener) {
+        final AdPresenter adPresenter = fromCreativeType(ad.assetgroupid, ad, trackingMethod);
         if (adPresenter == null) {
             return null;
         }
@@ -60,4 +66,6 @@ public abstract class PresenterFactory {
     }
 
     protected abstract AdPresenter fromCreativeType(int assetGroupId, Ad ad);
+
+    protected abstract AdPresenter fromCreativeType(int assetGroupId, Ad ad, ImpressionTrackingMethod trackingMethod);
 }

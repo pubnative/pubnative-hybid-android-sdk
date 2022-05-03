@@ -3,6 +3,7 @@ package net.pubnative.lite.sdk.vpaid.models.vast;
 import net.pubnative.lite.sdk.vpaid.xml.Attribute;
 import net.pubnative.lite.sdk.vpaid.xml.Tag;
 
+import java.util.Collections;
 import java.util.List;
 
 public class Wrapper implements VastAdSource {
@@ -112,6 +113,6 @@ public class Wrapper implements VastAdSource {
 
     @Override
     public List<Category> getCategories() {
-        return null;
+        return Collections.emptyList();
     }
 }

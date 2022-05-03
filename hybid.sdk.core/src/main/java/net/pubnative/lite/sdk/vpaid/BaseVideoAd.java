@@ -2,6 +2,7 @@ package net.pubnative.lite.sdk.vpaid;
 
 import android.content.Context;
 
+import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.enums.AdState;
@@ -15,8 +16,8 @@ abstract class BaseVideoAd extends BaseVideoAdInternal {
 
     private static final String LOG_TAG = BaseVideoAd.class.getSimpleName();
 
-    BaseVideoAd(Context context, String appKey, boolean isInterstitial, boolean isFullscreen, AdPresenter.ImpressionListener impressionListener) throws Exception {
-        super(context, appKey, isInterstitial, isFullscreen, impressionListener);
+    BaseVideoAd(Context context, Ad ad, boolean isInterstitial, boolean isFullscreen, AdPresenter.ImpressionListener impressionListener) throws Exception {
+        super(context, ad, isInterstitial, isFullscreen, impressionListener);
     }
 
     public boolean isRewarded() {
@@ -108,35 +109,32 @@ abstract class BaseVideoAd extends BaseVideoAdInternal {
      * After its execution, the interstitial/banner notifies whether the loading of the ad content failed or succeeded.
      */
     public void load() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Logger.d(LOG_TAG, "Start loading ad");
-                if (getAdState() == AdState.LOADING || getAdState() == AdState.SHOWING) {
-                    Logger.d(LOG_TAG, "Ad already loading or showing");
-                    return;
-                }
+        runOnUiThread(() -> {
+            Logger.d(LOG_TAG, "Start loading ad");
+            if (getAdState() == AdState.LOADING || getAdState() == AdState.SHOWING) {
+                Logger.d(LOG_TAG, "Ad already loading or showing");
+                return;
+            }
 
-                EventTracker.clear();
+            EventTracker.clear();
 
-                setAdState(AdState.LOADING);
+            setAdState(AdState.LOADING);
 
-                initAdLoadingStartTime();
-                startFetcherTimer();
+            initAdLoadingStartTime();
+            startFetcherTimer();
 
-                FileUtils.deleteExpiredFiles(getContext());
+            FileUtils.deleteExpiredFiles(getContext());
 
-                if (isReady()) {
-                    Logger.d(LOG_TAG, "Ad already loaded");
-                    onAdLoadSuccessInternal();
-                    return;
-                }
+            if (isReady()) {
+                Logger.d(LOG_TAG, "Ad already loaded");
+                onAdLoadSuccessInternal();
+                return;
+            }
 
-                if (Utils.isOnline(getContext())) {
-                    proceedLoad();
-                } else {
-                    onAdLoadFailInternal(new PlayerInfo("No connection"));
-                }
+            if (Utils.isOnline(getContext())) {
+                proceedLoad();
+            } else {
+                onAdLoadFailInternal(new PlayerInfo("No connection"));
             }
         });
     }

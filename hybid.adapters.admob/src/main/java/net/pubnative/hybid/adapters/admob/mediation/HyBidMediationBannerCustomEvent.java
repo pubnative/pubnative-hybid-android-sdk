@@ -43,7 +43,9 @@ public class HyBidMediationBannerCustomEvent implements CustomEventBanner, HyBid
             zoneId = HyBidAdmobUtils.getZoneId(serverParameter);
             appToken = HyBidAdmobUtils.getAppToken(serverParameter);
         } else {
-            Logger.e(TAG, "Could not find the required params in CustomEventBanner serverExtras");
+            Logger.e(TAG, "Could not find the required params in CustomEventBanner serverExtras. " +
+                    "Required params in CustomEventBanner serverExtras must be provided as a valid JSON Object. " +
+                    "Please consult HyBid documentation and update settings in your AdMob publisher dashboard.");
             mBannerListener.onAdFailedToLoad(new AdError(AdRequest.ERROR_CODE_NETWORK_ERROR,
                     "Could not find the required params in CustomEventBanner serverExtras",
                     AdError.UNDEFINED_DOMAIN

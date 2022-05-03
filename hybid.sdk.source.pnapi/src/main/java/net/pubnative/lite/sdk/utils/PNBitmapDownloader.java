@@ -198,27 +198,21 @@ public class PNBitmapDownloader {
     // Callback helpers
     //==============================================================================================
     protected void invokeLoad(final Bitmap bitmap) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                final DownloadListener listener = mDownloadListener;
-                mDownloadListener = null;
-                if (listener != null) {
-                    listener.onDownloadFinish(mURL, bitmap);
-                }
+        mHandler.post(() -> {
+            final DownloadListener listener = mDownloadListener;
+            mDownloadListener = null;
+            if (listener != null) {
+                listener.onDownloadFinish(mURL, bitmap);
             }
         });
     }
 
     protected void invokeFail(final Exception exception) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                final DownloadListener listener = mDownloadListener;
-                mDownloadListener = null;
-                if (listener != null) {
-                    listener.onDownloadFailed(mURL, exception);
-                }
+        mHandler.post(() -> {
+            final DownloadListener listener = mDownloadListener;
+            mDownloadListener = null;
+            if (listener != null) {
+                listener.onDownloadFailed(mURL, exception);
             }
         });
     }

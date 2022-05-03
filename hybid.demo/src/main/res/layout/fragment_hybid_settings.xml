@@ -27,7 +27,7 @@
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <Switch
+        <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/check_coppa"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -36,7 +36,7 @@
             android:layout_marginEnd="16dp"
             android:text="@string/check_coppa" />
 
-        <Switch
+        <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/check_test_mode"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -45,7 +45,7 @@
             android:layout_marginEnd="16dp"
             android:text="@string/check_test_mode" />
 
-        <Switch
+        <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/check_location_tracking"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -5,6 +5,7 @@ import android.content.Context;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.enums.VastError;
+import net.pubnative.lite.sdk.vpaid.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 
 import java.util.Locale;
@@ -12,7 +13,7 @@ import java.util.Locale;
 public class AssetsLoader {
 
     public interface OnAssetsLoaded {
-        void onAssetsLoaded(String videoFilePath, String endCardFilePath);
+        void onAssetsLoaded(String videoFilePath, EndCardData endCardData, String endCardFilePath);
 
         void onError(PlayerInfo info);
     }
@@ -79,34 +80,40 @@ public class AssetsLoader {
     }
 
     private void loadEndCard() {
-        if (mAdParams.getEndCardUrlList() == null || mAdParams.getEndCardUrlList().isEmpty()) {
-            mListener.onAssetsLoaded(mVideoFilePath, null);
+        if (mAdParams.getEndCardList() == null || mAdParams.getEndCardList().isEmpty()) {
+            mListener.onAssetsLoaded(mVideoFilePath, null, null);
             return;
         }
-        mFileLoader = new FileLoader(mAdParams.getEndCardUrlList().get(endCardFileIndex), mContext, new FileLoader.Callback() {
-            @Override
-            public void onFileLoaded(String filePath) {
-                mListener.onAssetsLoaded(mVideoFilePath, filePath);
-            }
-
-            @Override
-            public void onError(PlayerInfo info) {
-                ErrorLog.postError(mContext, VastError.COMPANION);
-                endCardFileIndex++;
-                if (endCardFileIndex < mAdParams.getEndCardUrlList().size()) {
-                    loadEndCard();
-                } else {
-                    mListener.onAssetsLoaded(mVideoFilePath, null);
+        final EndCardData endCardData = mAdParams.getEndCardList().get(endCardFileIndex);
+        if (endCardData != null && endCardData.getType() == EndCardData.Type.STATIC_RESOURCE) {
+            mFileLoader = new FileLoader(endCardData.getContent(), mContext, new FileLoader.Callback() {
+                @Override
+                public void onFileLoaded(String filePath) {
+                    mListener.onAssetsLoaded(mVideoFilePath, endCardData, filePath);
                 }
-            }
 
-            @Override
-            public void onProgress(double progress) {
-                String percent = String.format(Locale.US, "Loaded: %.2f%%", progress * 100);
-                Logger.d(LOG_TAG, percent);
-            }
-        });
-        mFileLoader.start();
+                @Override
+                public void onError(PlayerInfo info) {
+                    ErrorLog.postError(mContext, VastError.COMPANION);
+                    endCardFileIndex++;
+                    if (endCardFileIndex < mAdParams.getEndCardList().size()) {
+                        loadEndCard();
+                    } else {
+                        mListener.onAssetsLoaded(mVideoFilePath, null, null);
+                    }
+                }
+
+                @Override
+                public void onProgress(double progress) {
+                    String percent = String.format(Locale.US, "Loaded: %.2f%%", progress * 100);
+                    Logger.d(LOG_TAG, percent);
+                }
+            });
+            mFileLoader.start();
+        } else {
+            mListener.onAssetsLoaded(mVideoFilePath, endCardData, null);
+        }
+
     }
 
     public void breakLoading() {

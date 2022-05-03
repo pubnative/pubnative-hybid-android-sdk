@@ -25,14 +25,13 @@ package net.pubnative.lite.sdk.api;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
 import android.text.TextUtils;
+import android.util.Log;
 import android.webkit.WebView;
 
-import net.pubnative.lite.sdk.DiagnosticConstants;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
+import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdResponse;
@@ -52,6 +51,8 @@ import java.util.Map;
  */
 
 public class PNApiClient {
+    private static final String TAG = PNApiClient.class.getSimpleName();
+
 
     public interface AdRequestListener {
         void onSuccess(Ad ad);
@@ -74,7 +75,6 @@ public class PNApiClient {
     private final Context mContext;
     private String mApiUrl = BuildConfig.BASE_URL;
     private JSONObject mPlacementParams;
-    //private String mUserAgent;
 
     public String getApiUrl() {
         return mApiUrl;
@@ -121,6 +121,7 @@ public class PNApiClient {
                     registerAdRequest(url, error.getMessage(), initTime);
 
                     if (listener != null) {
+                        Log.d(TAG, HyBidErrorCode.SERVER_ERROR_PREFIX.getMessage() + error.getMessage());
                         listener.onFailure(new HyBidError(HyBidErrorCode.SERVER_ERROR_PREFIX, error));
                     }
                 }
@@ -225,6 +226,7 @@ public class PNApiClient {
             }
         } else {
             // STATUS 'ERROR'
+            Log.d(TAG, HyBidErrorCode.SERVER_ERROR_PREFIX.getMessage() + apiResponseModel.error_message);
             listener.onFailure(new HyBidError(HyBidErrorCode.SERVER_ERROR_PREFIX, new Exception(apiResponseModel.error_message)));
         }
     }
@@ -232,9 +234,9 @@ public class PNApiClient {
     private void registerAdRequest(String url, String response, long initTime) {
         long responseTime = System.currentTimeMillis() - initTime;
 
-        JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_AD_REQUEST, url);
-        JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_AD_RESPONSE, response);
-        JsonOperations.putJsonLong(mPlacementParams, DiagnosticConstants.KEY_RESPONSE_TIME, responseTime);
+        JsonOperations.putJsonString(mPlacementParams, Reporting.Key.AD_REQUEST, url);
+        JsonOperations.putJsonString(mPlacementParams, Reporting.Key.AD_RESPONSE, response);
+        JsonOperations.putJsonLong(mPlacementParams, Reporting.Key.RESPONSE_TIME, responseTime);
 
         AdRequestRegistry.getInstance().setLastAdRequest(url, response, responseTime);
     }

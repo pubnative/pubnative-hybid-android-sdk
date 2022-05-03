@@ -33,4 +33,5 @@ public interface APIMeta {
     String CREATIVE_ID = "creativeid";
     String BUNDLE_ID = "bundleid";
     String CONTENT_INFO = "contentinfo";
+    String RENDERING_OPTIONS = "renderingoptions";
 }

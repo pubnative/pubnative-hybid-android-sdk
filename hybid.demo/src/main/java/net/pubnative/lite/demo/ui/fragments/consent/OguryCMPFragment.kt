@@ -9,8 +9,8 @@ import androidx.fragment.app.Fragment
 import com.ogury.cm.OguryChoiceManager
 import com.ogury.cm.OguryConsentListener
 import com.ogury.core.OguryError
-import kotlinx.android.synthetic.main.fragment_ogury_cmp.*
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.databinding.FragmentOguryCmpBinding
 import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.utils.Logger
 import java.lang.RuntimeException
@@ -19,17 +19,28 @@ import java.util.*
 class OguryCMPFragment : Fragment() {
     private val TAG = OguryCMPFragment::class.java.simpleName
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_ogury_cmp, container, false)
+    private var _binding: FragmentOguryCmpBinding? = null
+
+    private val binding get() = _binding!!
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentOguryCmpBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        button_ask.setOnClickListener { askConsent() }
-        button_edit.setOnClickListener { editConsent() }
-        button_get_consent.setOnClickListener { showConsentString() }
-        button_check_purpose.setOnClickListener { checkPurposeAccepted() }
-        button_check_vendor.setOnClickListener { checkVendor() }
-        button_check_vendor_purposes.setOnClickListener { checkVendorAndPurposes() }
+        _binding?.buttonAsk?.setOnClickListener { askConsent() }
+        _binding?.buttonEdit?.setOnClickListener { editConsent() }
+        _binding?.buttonGetConsent?.setOnClickListener { showConsentString() }
+        _binding?.buttonCheckPurpose?.setOnClickListener { checkPurposeAccepted() }
+        _binding?.buttonCheckVendor?.setOnClickListener { checkVendor() }
+        _binding?.buttonCheckVendorPurposes?.setOnClickListener { checkVendorAndPurposes() }
 
         showConsentString()
     }
@@ -46,26 +57,30 @@ class OguryCMPFragment : Fragment() {
         try {
             val consentString = OguryChoiceManager.TcfV2.getIabString()
             if (TextUtils.isEmpty(consentString)) {
-                view_consent_string.setText(R.string.consent_string_not_set)
+                _binding?.viewConsentString?.setText(R.string.consent_string_not_set)
             } else {
-                view_consent_string.text = consentString
+                _binding?.viewConsentString?.text = consentString
             }
         } catch (exception: RuntimeException) {
-            view_consent_string.setText(R.string.consent_string_not_set)
+            _binding?.viewConsentString?.setText(R.string.consent_string_not_set)
         }
     }
 
     private fun checkVendor() {
-        val vendorIdString = input_vendor_id.text.toString().trim()
+        val vendorIdString = _binding?.inputVendorId?.text.toString().trim()
+
         if (!TextUtils.isEmpty(vendorIdString)) {
             val accepted = OguryChoiceManager.TcfV2.isAccepted(vendorIdString.toInt())
             val consentedString = if (accepted) "accepted" else "denied"
-            view_consent_result.text = String.format(Locale.ENGLISH, "Consent has been $consentedString for vendor with id: $vendorIdString")
+            _binding?.viewConsentResult?.text = String.format(
+                Locale.ENGLISH,
+                "Consent has been $consentedString for vendor with id: $vendorIdString"
+            )
         }
     }
 
     private fun checkPurposeAccepted() {
-        val purposeId = when(group_purposes.checkedRadioButtonId) {
+        val purposeId = when (_binding?.groupPurposes?.checkedRadioButtonId) {
             R.id.radio_personalised_ads -> OguryChoiceManager.TcfV2.Purpose.CREATE_PERSONALISED_ADS
             R.id.radio_personalised_content -> OguryChoiceManager.TcfV2.Purpose.CREATE_PERSONALISED_CONTENT
             R.id.radio_develop_improve_product -> OguryChoiceManager.TcfV2.Purpose.DEVELOP_AND_IMPROVE_PRODUCTS
@@ -82,16 +97,23 @@ class OguryCMPFragment : Fragment() {
         if (purposeId != -1) {
             val accepted = OguryChoiceManager.TcfV2.isPurposeAccepted(purposeId)
             val consentedString = if (accepted) "accepted" else "denied"
-            view_consent_result.text = String.format(Locale.ENGLISH, "Consent has been $consentedString for the purpose with id: $purposeId")
+            _binding?.viewConsentResult?.text = String.format(
+                Locale.ENGLISH,
+                "Consent has been $consentedString for the purpose with id: $purposeId"
+            )
         }
     }
 
     private fun checkVendorAndPurposes() {
-        val vendorIdString = input_vendor_id.text.toString().trim()
+        val vendorIdString = _binding?.inputVendorId?.text.toString().trim()
         if (!TextUtils.isEmpty(vendorIdString)) {
-            val accepted = OguryChoiceManager.TcfV2.isVendorAndItsPurposesAccepted(vendorIdString.toInt())
+            val accepted =
+                OguryChoiceManager.TcfV2.isVendorAndItsPurposesAccepted(vendorIdString.toInt())
             val consentedString = if (accepted) "accepted" else "denied"
-            view_consent_result.text = String.format(Locale.ENGLISH, "Consent has been $consentedString for vendor with id: $vendorIdString and all it\'s purposes")
+            _binding?.viewConsentResult?.text = String.format(
+                Locale.ENGLISH,
+                "Consent has been $consentedString for vendor with id: $vendorIdString and all it\'s purposes"
+            )
         }
     }
 
@@ -107,5 +129,11 @@ class OguryCMPFragment : Fragment() {
         override fun onError(error: OguryError?) {
             Logger.e(TAG, "Ogury consent error: ", error)
         }
+    }
+
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

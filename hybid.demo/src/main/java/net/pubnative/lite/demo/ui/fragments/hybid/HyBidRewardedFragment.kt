@@ -16,6 +16,7 @@ import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.CacheListener
 import net.pubnative.lite.sdk.DiagnosticsManager
+import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.HyBidError
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedAd
 
@@ -51,6 +52,8 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
 
         loadButton.setOnClickListener {
             errorView.text = ""
+            prepareButton.isEnabled = false
+            showButton.isEnabled = false
             val activity = activity as TabActivity
             activity.notifyAdCleaned()
             loadPNRewardedAd()
@@ -120,10 +123,12 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
 
     override fun onRewardedOpened() {
         Log.d(TAG, "onRewardedOpened")
-        DiagnosticsManager.printPlacementDiagnosticsLog(
-            requireContext(),
-            rewardedAd?.placementParams
-        )
+        if (HyBid.getDiagnosticsManager() != null) {
+            HyBid.getDiagnosticsManager().printPlacementDiagnosticsLog(
+                requireContext(),
+                rewardedAd?.placementParams
+            )
+        }
     }
 
     override fun onRewardedClosed() {

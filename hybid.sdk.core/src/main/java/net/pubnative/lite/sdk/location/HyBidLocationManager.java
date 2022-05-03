@@ -90,28 +90,13 @@ public class HyBidLocationManager implements LocationListener {
         Handler mainHandler = new Handler(Looper.getMainLooper());
         if (hasFinePermission()) {
             if (hasGPSProvider()) {
-                mainHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, HyBidLocationManager.this);
-                    }
-                });
+                mainHandler.post(() -> mManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, HyBidLocationManager.this));
             }
             if (hasNetworkProvider()) {
-                mainHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, HyBidLocationManager.this);
-                    }
-                });
+                mainHandler.post(() -> mManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, HyBidLocationManager.this));
             }
         } else if (hasCoarsePermission()) {
-            mainHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, HyBidLocationManager.this);
-                }
-            });
+            mainHandler.post(() -> mManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, HyBidLocationManager.this));
         }
         mainHandler.postDelayed(mStopUpdatesRunnable, LOCATION_UPDATE_TIMEOUT);
     }
@@ -192,10 +177,8 @@ public class HyBidLocationManager implements LocationListener {
         Location result = null;
         if (hasPermission()) {
             Location locationFromProviders = getLocationFromProviders();
-            if (locationFromProviders != null) {
-                if (isBetterLocation(locationFromProviders, mCurrentBestLocation)) {
+            if (locationFromProviders != null && isBetterLocation(locationFromProviders, mCurrentBestLocation)) {
                     mCurrentBestLocation = locationFromProviders;
-                }
             }
             result = mCurrentBestLocation;
 
@@ -206,12 +189,7 @@ public class HyBidLocationManager implements LocationListener {
         return result;
     }
 
-    private final Runnable mStopUpdatesRunnable = new Runnable() {
-        @Override
-        public void run() {
-            stopLocationUpdates();
-        }
-    };
+    private final Runnable mStopUpdatesRunnable = this::stopLocationUpdates;
 
     @Override
     public void onLocationChanged(Location location) {

@@ -63,7 +63,7 @@ public class MRAIDNativeFeatureProvider {
         this.nativeFeatureManager = nativeFeatureManager;
     }
 
-    final public void callTel(String url) {
+    public final void callTel(String url) {
         if (nativeFeatureManager.isTelSupported()) {
             Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse(url));
             context.startActivity(intent);
@@ -186,14 +186,11 @@ public class MRAIDNativeFeatureProvider {
     public void storePicture(final String url) {
         if (nativeFeatureManager.isStorePictureSupported()) {
             // Spawn a new thread to download and save the image
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        storePictureInGallery(url);
-                    } catch (Exception e) {
-                        MRAIDLog.e(TAG, e.getLocalizedMessage());
-                    }
+            new Thread(() -> {
+                try {
+                    storePictureInGallery(url);
+                } catch (Exception e) {
+                    MRAIDLog.e(TAG, e.getLocalizedMessage());
                 }
             }).start();
         }
@@ -222,13 +219,7 @@ public class MRAIDNativeFeatureProvider {
             copyStream(is, os);
             MediaScannerConnection.scanFile(context,
                     new String[]{f.getAbsolutePath()}, null,
-                    new MediaScannerConnection.OnScanCompletedListener() {
-
-                        @Override
-                        public void onScanCompleted(String path, Uri uri) {
-                            MRAIDLog.d("File saves successfully to " + path);
-                        }
-                    });
+                    (path, uri) -> MRAIDLog.d("File saves successfully to " + path));
             MRAIDLog.i(TAG, "Saved image successfully");
         } catch (MalformedURLException e) {
             MRAIDLog.e(TAG, "Not able to save image due to invalid URL: " + e.getLocalizedMessage());
@@ -259,11 +250,9 @@ public class MRAIDNativeFeatureProvider {
             storageDir = new File(
                     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
                     "Image");
-            if (!storageDir.mkdirs()) {
-                if (!storageDir.exists()) {
-                    MRAIDLog.i(TAG, "Failed to create camera directory");
-                    return null;
-                }
+            if (!storageDir.mkdirs() && !storageDir.exists()) {
+                MRAIDLog.i(TAG, "Failed to create camera directory");
+                return null;
             }
         } else {
             MRAIDLog.i(TAG, "External storage is not mounted READ/WRITE.");

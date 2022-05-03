@@ -62,14 +62,15 @@ public class AdRequestFactoryTest {
         when(mLocationManager.getUserLocation()).thenReturn(mockLocation);
 
         when(mMockUserDataManager.isCCPAOptOut()).thenReturn(false);
-        when(mMockDisplayManager.getDisplayManagerVersion(null, IntegrationType.HEADER_BIDDING)).thenReturn(String.format(Locale.ENGLISH, "%s_%s_%s",
+        when(mMockDisplayManager.getDisplayManagerVersion("b", IntegrationType.HEADER_BIDDING)).thenReturn(String.format(Locale.ENGLISH, "%s_%s_%s",
                 "sdkandroid", "hb", BuildConfig.SDK_VERSION));
         when(mMockDisplayManager.getDisplayManager()).thenReturn("HyBid");
     }
 
     @Test
     public void createAdRequest() {
-        AdRequest request = mSubject.buildRequest("aabbcc112233", "2", AdSize.SIZE_320x50, "aabbccdd", false, IntegrationType.HEADER_BIDDING);
+//        AdRequest request = mSubject.buildRequest("aabbcc112233", "2", AdSize.SIZE_320x50, "aabbccdd", false, IntegrationType.HEADER_BIDDING,"m");
+        AdRequest request = mSubject.buildRequest("aabbcc112233", "2", AdSize.SIZE_320x50, "aabbccdd", false, IntegrationType.HEADER_BIDDING,"b");
         Assert.assertEquals("aabbccdd", request.gid);
         Assert.assertEquals(PNCrypto.md5("aabbccdd"), request.gidmd5);
         Assert.assertEquals(PNCrypto.sha1("aabbccdd"), request.gidsha1);
@@ -85,7 +86,7 @@ public class AdRequestFactoryTest {
         Assert.assertEquals("0", request.coppa);
         Assert.assertEquals("12.126543", request.latitude);
         Assert.assertEquals("15.151534", request.longitude);
-        Assert.assertEquals("points,revenuemodel,contentinfo,creativeid", request.mf);
+        Assert.assertEquals("points,revenuemodel,contentinfo,creativeid,renderingoptions", request.mf);
         Assert.assertEquals("1,2,3,4,5,6,7,8,11,12,13,14", request.protocol);
         Assert.assertEquals("3,5,6,7", request.api);
         Assert.assertEquals("HyBid", request.displaymanager);

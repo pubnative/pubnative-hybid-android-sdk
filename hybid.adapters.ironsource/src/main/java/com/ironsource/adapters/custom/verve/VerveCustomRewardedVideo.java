@@ -33,7 +33,9 @@ public class VerveCustomRewardedVideo extends BaseRewardedVideo<VerveCustomAdapt
             zoneID = adData.getString(VerveCustomAdapter.KEY_ZONE_ID);
             appToken = adData.getString(VerveCustomAdapter.KEY_APP_TOKEN);
         } else {
-            String errorMessage = "Could not find the required params in VerveCustomRewardedVideo ad data";
+            String errorMessage = "Could not find the required params in VerveCustomRewardedVideo ad data. " +
+                    "Required params in VerveCustomRewardedVideo ad data must be provided as a valid JSON Object. " +
+                    "Please consult HyBid documentation and update settings in your IronSource publisher dashboard.";
             Logger.e(TAG, errorMessage);
             rewardedVideoAdListener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_INTERNAL,
                     AdapterErrors.ADAPTER_ERROR_MISSING_PARAMS, errorMessage);

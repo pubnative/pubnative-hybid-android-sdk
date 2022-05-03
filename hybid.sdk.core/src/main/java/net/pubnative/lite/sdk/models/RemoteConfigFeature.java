@@ -18,6 +18,7 @@ public interface RemoteConfigFeature {
         String AD_ERRORS = "ad_errors";
         String DIAGNOSTIC_INIT = "diagnostic_init";
         String DIAGNOSTIC_PLACEMENT = "diagnostic_placement";
+        String DIAGNOSTIC_REPORT = "diagnostic_report";
     }
 
     interface UserConsent {

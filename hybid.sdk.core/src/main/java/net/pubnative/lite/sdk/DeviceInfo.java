@@ -26,7 +26,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
-import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -111,19 +110,16 @@ public class DeviceInfo {
 
     private void fetchAdvertisingId() {
         try {
-            PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(mContext, new HyBidAdvertisingId.Listener() {
-                @Override
-                public void onHyBidAdvertisingIdFinish(String advertisingId, Boolean limitTracking) {
-                    mLimitTracking = limitTracking;
-                    if (!TextUtils.isEmpty(advertisingId)) {
-                        mAdvertisingId = advertisingId;
-                        mAdvertisingIdMd5 = PNCrypto.md5(mAdvertisingId);
-                        mAdvertisingIdSha1 = PNCrypto.sha1(mAdvertisingId);
-                    }
+            PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(mContext, (advertisingId, limitTracking) -> {
+                mLimitTracking = limitTracking;
+                if (!TextUtils.isEmpty(advertisingId)) {
+                    mAdvertisingId = advertisingId;
+                    mAdvertisingIdMd5 = PNCrypto.md5(mAdvertisingId);
+                    mAdvertisingIdSha1 = PNCrypto.sha1(mAdvertisingId);
+                }
 
-                    if (mListener != null) {
-                        mListener.onInfoLoaded();
-                    }
+                if (mListener != null) {
+                    mListener.onInfoLoaded();
                 }
             }));
         } catch (Exception exception) {
@@ -136,14 +132,11 @@ public class DeviceInfo {
 
     public void fetchUserAgent(){
         Handler mainHandler = new Handler(Looper.getMainLooper());
-        mainHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    mUserAgent = new WebView(mContext).getSettings().getUserAgentString();
-                } catch (RuntimeException runtimeException){
-                    Logger.e(TAG, runtimeException.getMessage());
-                }
+        mainHandler.post(() -> {
+            try {
+                mUserAgent = new WebView(mContext).getSettings().getUserAgentString();
+            } catch (RuntimeException runtimeException){
+                Logger.e(TAG, runtimeException.getMessage());
             }
         });
     }

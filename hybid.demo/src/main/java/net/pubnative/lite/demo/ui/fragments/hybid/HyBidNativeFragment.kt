@@ -27,10 +27,10 @@ import android.os.Handler
 import android.os.Looper
 import android.text.TextUtils
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import com.squareup.picasso.Picasso
 import net.pubnative.lite.demo.Constants
@@ -42,9 +42,9 @@ import net.pubnative.lite.sdk.models.NativeAd
 import net.pubnative.lite.sdk.request.HyBidNativeAdRequest
 
 class HyBidNativeFragment : Fragment(R.layout.fragment_hybid_native), HyBidNativeAdRequest.RequestListener, NativeAd.Listener {
-    val TAG = HyBidNativeFragment::class.java.simpleName
+    private val hyBidTAG = HyBidNativeFragment::class.java.simpleName
 
-    private val AUTO_REFRESH_MILLIS : Long = 30 * 1000
+    private val autoRefreshMillis : Long = 30 * 1000
 
     private var zoneId: String? = null
     private val handler = Handler(Looper.getMainLooper())
@@ -58,7 +58,7 @@ class HyBidNativeFragment : Fragment(R.layout.fragment_hybid_native), HyBidNativ
     private lateinit var adCallToAction: Button
     private lateinit var adRating: RatingBar
 
-    private lateinit var autoRefreshSwitch: Switch
+    private lateinit var autoRefreshSwitch: SwitchCompat
     private lateinit var loadButton: Button
     private lateinit var errorCodeView: TextView
     private lateinit var errorView: TextView
@@ -140,12 +140,12 @@ class HyBidNativeFragment : Fragment(R.layout.fragment_hybid_native), HyBidNativ
         ad.startTracking(adContainer, this)
     }
 
-    fun autoRefresh(){
+    private fun autoRefresh(){
         if (autoRefreshSwitch.isChecked){
             handler.postDelayed({
                 loadPNAd()
                 autoRefresh()
-            }, AUTO_REFRESH_MILLIS)
+            }, autoRefreshMillis)
         } else {
             handler.removeCallbacksAndMessages(null)
         }
@@ -153,7 +153,7 @@ class HyBidNativeFragment : Fragment(R.layout.fragment_hybid_native), HyBidNativ
 
     override fun onDestroyView() {
         super.onDestroyView()
-        handler.removeCallbacksAndMessages(null);
+        handler.removeCallbacksAndMessages(null)
     }
 
     //----------------- Listeners ----------------------
@@ -168,7 +168,7 @@ class HyBidNativeFragment : Fragment(R.layout.fragment_hybid_native), HyBidNativ
 
     override fun onRequestFail(throwable: Throwable?) {
         if (throwable != null && throwable is HyBidError) {
-            Log.e(TAG, throwable.message ?: " - ")
+            Log.e(hyBidTAG, throwable.message ?: " - ")
             errorCodeView.text = throwable.errorCode.code.toString()
             errorView.text = throwable.message ?: " - "
         } else {
@@ -180,11 +180,11 @@ class HyBidNativeFragment : Fragment(R.layout.fragment_hybid_native), HyBidNativ
     }
 
     override fun onAdImpression(PNAPIAdModel: NativeAd?, view: View?) {
-        Log.d(TAG, "onAdImpression")
+        Log.d(hyBidTAG, "onAdImpression")
     }
 
     override fun onAdClick(PNAPIAdModel: NativeAd?, view: View?) {
-        Log.d(TAG, "onAdClick")
+        Log.d(hyBidTAG, "onAdClick")
     }
 
     private fun displayLogs() {

@@ -9,25 +9,26 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.ironsource.mediationsdk.IronSource
-import kotlinx.android.synthetic.main.activity_navigation.*
-import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
-import net.pubnative.lite.demo.managers.SettingsManager
-import net.pubnative.lite.demo.ui.fragments.navigation.*
+import net.pubnative.lite.demo.databinding.ActivityNavigationBinding
 
 class NavigationActivity : AppCompatActivity() {
 
     private val PERMISSION_REQUEST = 1000
 
+    private lateinit var binding: ActivityNavigationBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_navigation)
+
+        binding = ActivityNavigationBinding.inflate(layoutInflater)
+        val view = binding.root
+
+        setContentView(view)
 
         val navController = findNavController(R.id.fragment_nav_host)
         NavigationUI.setupActionBarWithNavController(this, navController)
-        NavigationUI.setupWithNavController(navigation, navController)
+        NavigationUI.setupWithNavController(binding.navigation, navController)
 
         checkPermissions()
     }

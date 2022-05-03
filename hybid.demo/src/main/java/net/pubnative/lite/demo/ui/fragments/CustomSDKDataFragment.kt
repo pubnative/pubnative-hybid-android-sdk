@@ -10,6 +10,7 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.models.SDKDataItem
 import net.pubnative.lite.demo.ui.adapters.CustomSDKDataAdapter
 import net.pubnative.lite.sdk.HyBid
+import net.pubnative.lite.sdk.models.IntegrationType
 
 class CustomSDKDataFragment : Fragment(R.layout.fragment_custom_sdk_data) {
     private lateinit var itemList: RecyclerView
@@ -28,7 +29,7 @@ class CustomSDKDataFragment : Fragment(R.layout.fragment_custom_sdk_data) {
     private fun getItems(): List<SDKDataItem> {
         val list = mutableListOf<SDKDataItem>()
         list.add(SDKDataItem("SDK version info", HyBid.getSDKVersionInfo()))
-        list.add(SDKDataItem("Custom request signal data", HyBid.getCustomRequestSignalData()))
+        list.add(SDKDataItem("Custom request signal data", HyBid.getCustomRequestSignalData("m")))
         return list
     }
 }

@@ -11,6 +11,7 @@ import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.enums.VastError;
 import net.pubnative.lite.sdk.vpaid.helpers.ErrorLog;
+import net.pubnative.lite.sdk.vpaid.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.models.vast.Ad;
 import net.pubnative.lite.sdk.vpaid.models.vast.AdVerifications;
 import net.pubnative.lite.sdk.vpaid.models.vast.ClickThrough;
@@ -19,8 +20,11 @@ import net.pubnative.lite.sdk.vpaid.models.vast.Companion;
 import net.pubnative.lite.sdk.vpaid.models.vast.CompanionClickThrough;
 import net.pubnative.lite.sdk.vpaid.models.vast.CompanionClickTracking;
 import net.pubnative.lite.sdk.vpaid.models.vast.Creative;
+import net.pubnative.lite.sdk.vpaid.models.vast.CreativeExtension;
 import net.pubnative.lite.sdk.vpaid.models.vast.Error;
 import net.pubnative.lite.sdk.vpaid.models.vast.Extension;
+import net.pubnative.lite.sdk.vpaid.models.vast.HTMLResource;
+import net.pubnative.lite.sdk.vpaid.models.vast.IFrameResource;
 import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
 import net.pubnative.lite.sdk.vpaid.models.vast.Impression;
 import net.pubnative.lite.sdk.vpaid.models.vast.InLine;
@@ -32,6 +36,7 @@ import net.pubnative.lite.sdk.vpaid.models.vast.Tracking;
 import net.pubnative.lite.sdk.vpaid.models.vast.Vast;
 import net.pubnative.lite.sdk.vpaid.models.vast.VastAdSource;
 import net.pubnative.lite.sdk.vpaid.models.vast.Verification;
+import net.pubnative.lite.sdk.vpaid.models.vast.VerveCTAButton;
 import net.pubnative.lite.sdk.vpaid.models.vast.Wrapper;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.AdSpotDimensions;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
@@ -250,8 +255,8 @@ public class VastProcessor {
         if (adSource.getCreatives() != null && adSource.getCreatives().getCreatives() != null) {
             List<Creative> creativeList = adSource.getCreatives().getCreatives();
 
-
             Linear linear = null;
+
             for (Creative creative : creativeList) {
                 if (creative.getLinear() != null) {
                     linear = creative.getLinear();
@@ -322,18 +327,35 @@ public class VastProcessor {
                     }
 
                     try {
-                        List<Companion> companionList = getSortedCompanions(creativeList);
-                        List<String> endCardUrlList = new ArrayList<>();
-                        for (Companion companion : companionList) {
-                            if (companion.getStaticResources() != null && !companion.getStaticResources().isEmpty()) {
-                                for (StaticResource staticResource : companion.getStaticResources()) {
-                                    if (!TextUtils.isEmpty(staticResource.getText())) {
-                                        endCardUrlList.add(staticResource.getText().trim());
+                        List<Companion> companionList = getSortedCompanions(creativeList, parseParams);
+                        List<EndCardData> endCardList = new ArrayList<>();
+                        for (int i = 0; i < companionList.size() && endCardList.isEmpty(); i++) {
+                            Companion companion = companionList.get(i);
+                            // Disable endcard for QA purposes until test ads are fixed
+                            /*if (companion.getHtmlResources() != null && !companion.getHtmlResources().isEmpty()) {
+                                for (HTMLResource htmlResource : companion.getHtmlResources()) {
+                                    if (!TextUtils.isEmpty(htmlResource.getText())) {
+                                        endCardList.add(new EndCardData(EndCardData.Type.HTML_RESOURCE, htmlResource.getText().trim()));
                                     }
                                 }
                             }
+                            if (companion.getiFrameResources() != null && !companion.getiFrameResources().isEmpty()) {
+                                for (IFrameResource iFrameResource : companion.getiFrameResources()) {
+                                    if (!TextUtils.isEmpty(iFrameResource.getText())) {
+                                        endCardList.add(new EndCardData(EndCardData.Type.IFRAME_RESOURCE, iFrameResource.getText().trim()));
+                                    }
+                                }
+                            }*/
+                            if (companion.getStaticResources() != null && !companion.getStaticResources().isEmpty()) {
+                                for (StaticResource staticResource : companion.getStaticResources()) {
+                                    if (!TextUtils.isEmpty(staticResource.getText())) {
+                                        endCardList.add(new EndCardData(EndCardData.Type.STATIC_RESOURCE, staticResource.getText().trim()));
+                                    }
+                                }
+                            }
+
                         }
-                        adParams.setEndCardUrlList(endCardUrlList);
+                        adParams.setEndCardList(endCardList);
 
                         if (!companionList.isEmpty()) {
                             Companion companion = companionList.get(0);
@@ -384,6 +406,49 @@ public class VastProcessor {
                         adParams.setAdIcon(icon);
                     }
                 }
+
+                CreativeExtension extension = null;
+                int i = 0;
+                while (i < creativeList.size() && extension == null) {
+                    Creative creative = creativeList.get(i);
+
+                    if (creative != null && creative.getCreativeExtensions() != null
+                            && creative.getCreativeExtensions().getCreativeExtensions() != null
+                            && !creative.getCreativeExtensions().getCreativeExtensions().isEmpty()) {
+                        List<CreativeExtension> creativeExtensions = creative.getCreativeExtensions().getCreativeExtensions();
+                        VerveCTAButton ctaExtension = null;
+                        int j = 0;
+                        while (j < creativeExtensions.size() && ctaExtension == null) {
+                            extension = creativeExtensions.get(j);
+                            if (extension != null && extension.getType().equals("Verve") && extension.getVerveCTAButton() != null) {
+                                ctaExtension = extension.getVerveCTAButton();
+                            } else {
+                                j++;
+                            }
+                        }
+
+                        if (ctaExtension != null) {
+                            if (ctaExtension.getHtmlResource() != null && !TextUtils.isEmpty(ctaExtension.getHtmlResource().getText())) {
+                                adParams.setCtaExtensionHtml(ctaExtension.getHtmlResource().getText());
+                            }
+
+                            if (ctaExtension.getTrackingEvents() != null
+                                    && ctaExtension.getTrackingEvents().getTrackingList() != null
+                                    && !ctaExtension.getTrackingEvents().getTrackingList().isEmpty()) {
+                                List<String> ctaClicks = new ArrayList<>();
+                                for (Tracking tracking : ctaExtension.getTrackingEvents().getTrackingList()) {
+                                    if (tracking != null && !TextUtils.isEmpty(tracking.getEvent())
+                                            && tracking.getEvent().equals("CTAClick")
+                                            && !TextUtils.isEmpty(tracking.getText())) {
+                                        ctaClicks.add(tracking.getText());
+                                    }
+                                }
+                                adParams.setCtaExtensionClicks(ctaClicks);
+                            }
+                        }
+                    }
+                    i++;
+                }
             }
         }
     }
@@ -417,11 +482,13 @@ public class VastProcessor {
         }
     }
 
-    private static List<Companion> getSortedCompanions(List<Creative> creativeList) {
+    private List<Companion> getSortedCompanions(List<Creative> creativeList, AdSpotDimensions adSpotDimensions) {
         for (Creative creative : creativeList) {
             if (creative.getCompanionAds() != null &&
                     creative.getCompanionAds().getCompanions() != null) {
-                return creative.getCompanionAds().getCompanions();
+                List<Companion> companions = new ArrayList<>(creative.getCompanionAds().getCompanions());
+                Collections.sort(companions, createCompanionComparator(adSpotDimensions));
+                return companions;
             }
         }
         return new ArrayList<>();
@@ -443,29 +510,50 @@ public class VastProcessor {
     }
 
     private Comparator<MediaFile> createComparator(final AdSpotDimensions adSpotDimensions) {
-        return new Comparator<MediaFile>() {
-            @Override
-            public int compare(MediaFile mediaFile1, MediaFile mediaFile2) {
-                int width1 = 0;
-                int height1 = 0;
-                int width2 = 0;
-                int height2 = 0;
+        return (mediaFile1, mediaFile2) -> {
+            int width1 = 0;
+            int height1 = 0;
+            int width2 = 0;
+            int height2 = 0;
 
-                try {
-                    width1 = Integer.parseInt(mediaFile1.getWidth());
-                    height1 = Integer.parseInt(mediaFile1.getHeight());
-                    width2 = Integer.parseInt(mediaFile2.getWidth());
-                    height2 = Integer.parseInt(mediaFile2.getHeight());
-                } catch (RuntimeException e) {
-                    Logger.w(LOG_TAG, e.getMessage());
-                }
-
-                int delta1 = Math.abs(adSpotDimensions.getWidth() - width1) +
-                        Math.abs(adSpotDimensions.getHeight() - height1);
-                int delta2 = Math.abs(adSpotDimensions.getWidth() - width2) +
-                        Math.abs(adSpotDimensions.getHeight() - height2);
-                return Integer.compare(delta1, delta2);
+            try {
+                width1 = Integer.parseInt(mediaFile1.getWidth());
+                height1 = Integer.parseInt(mediaFile1.getHeight());
+                width2 = Integer.parseInt(mediaFile2.getWidth());
+                height2 = Integer.parseInt(mediaFile2.getHeight());
+            } catch (RuntimeException e) {
+                Logger.w(LOG_TAG, e.getMessage());
             }
+
+            int delta1 = Math.abs(adSpotDimensions.getWidth() - width1) +
+                    Math.abs(adSpotDimensions.getHeight() - height1);
+            int delta2 = Math.abs(adSpotDimensions.getWidth() - width2) +
+                    Math.abs(adSpotDimensions.getHeight() - height2);
+            return Integer.compare(delta1, delta2);
+        };
+    }
+
+    private Comparator<Companion> createCompanionComparator(final AdSpotDimensions adSpotDimensions) {
+        return (companion1, companion2) -> {
+            int width1 = 0;
+            int height1 = 0;
+            int width2 = 0;
+            int height2 = 0;
+
+            try {
+                width1 = Integer.parseInt(companion1.getWidth());
+                height1 = Integer.parseInt(companion1.getHeight());
+                width2 = Integer.parseInt(companion2.getWidth());
+                height2 = Integer.parseInt(companion2.getHeight());
+            } catch (RuntimeException e) {
+                Logger.w(LOG_TAG, e.getMessage());
+            }
+
+            int delta1 = Math.abs(adSpotDimensions.getWidth() - width1) +
+                    Math.abs(adSpotDimensions.getHeight() - height1);
+            int delta2 = Math.abs(adSpotDimensions.getWidth() - width2) +
+                    Math.abs(adSpotDimensions.getHeight() - height2);
+            return Integer.compare(delta1, delta2);
         };
     }
 }

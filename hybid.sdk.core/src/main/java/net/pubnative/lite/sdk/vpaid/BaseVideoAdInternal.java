@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
+import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeVideoAdSession;
@@ -16,6 +17,7 @@ import net.pubnative.lite.sdk.vpaid.enums.VastError;
 import net.pubnative.lite.sdk.vpaid.helpers.AssetsLoader;
 import net.pubnative.lite.sdk.vpaid.helpers.ErrorLog;
 import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
+import net.pubnative.lite.sdk.vpaid.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.AdSpotDimensions;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.response.VastProcessor;
@@ -38,6 +40,7 @@ abstract class BaseVideoAdInternal {
     private SimpleTimer mFetcherTimer;
     private SimpleTimer mPrepareTimer;
     private final String mVastData;
+    private Ad mAd;
 
     private final boolean isInterstitial;
     private final boolean isFullscreen;
@@ -48,10 +51,12 @@ abstract class BaseVideoAdInternal {
 
     AdPresenter.ImpressionListener mImpressionListener;
 
-    BaseVideoAdInternal(Context context, String data, boolean isInterstitial, boolean isFullscreen, AdPresenter.ImpressionListener impressionListener) throws Exception {
+    BaseVideoAdInternal(Context context, Ad ad, boolean isInterstitial, boolean isFullscreen, AdPresenter.ImpressionListener impressionListener) throws Exception {
+        String data = ad.getVast();
         if (context == null || TextUtils.isEmpty(data)) {
             throw new HyBidError(HyBidErrorCode.VAST_PLAYER_ERROR);
         }
+        mAd = ad;
         mAdState = AdState.NONE;
         mContext = context;
         mVastData = data;
@@ -68,6 +73,10 @@ abstract class BaseVideoAdInternal {
     abstract AdSpotDimensions getAdSpotDimensions();
 
     abstract int getAdFormat();
+
+    Ad getAd() {
+        return mAd;
+    }
 
     Context getContext() {
         return mContext;
@@ -146,12 +155,7 @@ abstract class BaseVideoAdInternal {
         if (mExpirationTimer != null) {
             return;
         }
-        mExpirationTimer = new SimpleTimer(VpaidConstants.DEFAULT_EXPIRED_TIME, new SimpleTimer.Listener() {
-            @Override
-            public void onFinish() {
-                onAdExpired();
-            }
-        });
+        mExpirationTimer = new SimpleTimer(VpaidConstants.DEFAULT_EXPIRED_TIME, this::onAdExpired);
         mExpirationTimer.start();
         Logger.d(LOG_TAG, "Start schedule expiration");
     }
@@ -168,16 +172,13 @@ abstract class BaseVideoAdInternal {
         if (mPrepareTimer != null) {
             return;
         }
-        mPrepareTimer = new SimpleTimer(VpaidConstants.PREPARE_PLAYER_TIMEOUT, new SimpleTimer.Listener() {
-            @Override
-            public void onFinish() {
-                mPrepareTimer = null;
-                if (mAdController != null && mAdController instanceof VideoAdControllerVpaid) {
-                    ErrorLog.postError(getContext(), VastError.FILE_NOT_FOUND);
-                    onAdLoadFail(new PlayerInfo("Problem with js file"));
-                }
-                cancelFetcher();
+        mPrepareTimer = new SimpleTimer(VpaidConstants.PREPARE_PLAYER_TIMEOUT, () -> {
+            mPrepareTimer = null;
+            if (mAdController != null && mAdController instanceof VideoAdControllerVpaid) {
+                ErrorLog.postError(getContext(), VastError.FILE_NOT_FOUND);
+                onAdLoadFail(new PlayerInfo("Problem with js file"));
             }
+            cancelFetcher();
         });
         mPrepareTimer.start();
         Logger.d(LOG_TAG, "Start prepare timer");
@@ -204,13 +205,10 @@ abstract class BaseVideoAdInternal {
         if (mFetcherTimer != null) {
             return;
         }
-        mFetcherTimer = new SimpleTimer(VpaidConstants.FETCH_TIMEOUT, new SimpleTimer.Listener() {
-            @Override
-            public void onFinish() {
-                cancelFetcher();
-                ErrorLog.postError(getContext(), VastError.TIMEOUT);
-                onAdLoadFail(new PlayerInfo("Ad processing timeout"));
-            }
+        mFetcherTimer = new SimpleTimer(VpaidConstants.FETCH_TIMEOUT, () -> {
+            cancelFetcher();
+            ErrorLog.postError(getContext(), VastError.TIMEOUT);
+            onAdLoadFail(new PlayerInfo("Ad processing timeout"));
         });
         mFetcherTimer.start();
         Logger.d(LOG_TAG, "Start fetcher timer");
@@ -253,7 +251,7 @@ abstract class BaseVideoAdInternal {
             mAdController = new VideoAdControllerVast(this, adParams, getViewabilityAdSession(), isFullscreen, this.mImpressionListener);
         }
         if (mCacheItem != null) {
-            prepareAdController(mCacheItem.getVideoFilePath(), mCacheItem.getEndCardFilePath());
+            prepareAdController(mCacheItem.getVideoFilePath(), mCacheItem.getEndCardData(), mCacheItem.getEndCardFilePath());
         } else {
             mAssetsLoader.load(adParams, mContext, createAssetsLoadListener());
         }
@@ -262,8 +260,8 @@ abstract class BaseVideoAdInternal {
     private AssetsLoader.OnAssetsLoaded createAssetsLoadListener() {
         return new AssetsLoader.OnAssetsLoaded() {
             @Override
-            public void onAssetsLoaded(String videoFilePath, String endCardFilePath) {
-                prepareAdController(videoFilePath, endCardFilePath);
+            public void onAssetsLoaded(String videoFilePath, EndCardData endCardData, String endCardFilePath) {
+                prepareAdController(videoFilePath, endCardData, endCardFilePath);
             }
 
             @Override
@@ -273,7 +271,7 @@ abstract class BaseVideoAdInternal {
         };
     }
 
-    private void prepareAdController(String videoFilePath, String endCardFilePath) {
+    private void prepareAdController(String videoFilePath, EndCardData endCardData, String endCardFilePath) {
         if (mAdController == null) {
             onAdLoadFailInternal(new PlayerInfo("Error during video loading"));
             ErrorLog.postError(getContext(), VastError.UNDEFINED);
@@ -281,46 +279,31 @@ abstract class BaseVideoAdInternal {
             return;
         }
         mAdController.setVideoFilePath(videoFilePath);
+        mAdController.setEndCardData(endCardData);
         mAdController.setEndCardFilePath(endCardFilePath);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                startPrepareTimer();
-                mAdController.prepare(createOnPrepareListener());
-            }
+        runOnUiThread(() -> {
+            startPrepareTimer();
+            mAdController.prepare(createOnPrepareListener());
         });
     }
 
     private VideoAdController.OnPreparedListener createOnPrepareListener() {
-        return new VideoAdController.OnPreparedListener() {
-            @Override
-            public void onPrepared() {
-                if (getAdState() == AdState.SHOWING) {
-                    Logger.d(LOG_TAG, "Creative call unexpected AdLoaded");
-                    return;
-                }
-                stopPrepareTimer();
-                onAdLoadSuccessInternal();
+        return () -> {
+            if (getAdState() == AdState.SHOWING) {
+                Logger.d(LOG_TAG, "Creative call unexpected AdLoaded");
+                return;
             }
+            stopPrepareTimer();
+            onAdLoadSuccessInternal();
         };
     }
 
     void onAdLoadFailInternal(final PlayerInfo issue) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                onAdLoadFail(issue);
-            }
-        });
+        runOnUiThread(() -> onAdLoadFail(issue));
     }
 
     void onAdLoadSuccessInternal() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                onAdLoadSuccess();
-            }
-        });
+        runOnUiThread(() -> onAdLoadSuccess());
     }
 
     private void onAdExpired() {

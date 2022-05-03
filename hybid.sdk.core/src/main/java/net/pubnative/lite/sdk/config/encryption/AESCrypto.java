@@ -5,6 +5,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -19,7 +20,6 @@ public final class AESCrypto {
 
     //AESCrypto-ObjC uses CBC and PKCS7Padding
     private static final String AES_MODE = "AES/CBC/PKCS7Padding";
-    private static final String CHARSET = "UTF-8";
 
     //AESCrypto-ObjC uses SHA-256 (and so a 256-bit key)
     private static final String HASH_ALGORITHM = "SHA-256";
@@ -39,7 +39,7 @@ public final class AESCrypto {
      */
     private static SecretKeySpec generateKey(final String token) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         final MessageDigest digest = MessageDigest.getInstance(HASH_ALGORITHM);
-        byte[] bytes = token.getBytes(CHARSET);
+        byte[] bytes = token.getBytes(StandardCharsets.UTF_8);
         digest.update(bytes, 0, bytes.length);
         byte[] key = digest.digest();
 
@@ -65,7 +65,7 @@ public final class AESCrypto {
 
             log("json", json);
 
-            byte[] cipherText = encrypt(key, ivBytes, json.getBytes(CHARSET));
+            byte[] cipherText = encrypt(key, ivBytes, json.getBytes(StandardCharsets.UTF_8));
 
             //NO_WRAP is important as was getting \n at the end
             String encoded = Base64.encodeToString(cipherText, Base64.NO_WRAP);
@@ -122,7 +122,7 @@ public final class AESCrypto {
             byte[] decryptedBytes = decrypt(key, ivBytes, decodedCipherText);
 
             log("decryptedBytes", decryptedBytes);
-            String message = new String(decryptedBytes, CHARSET);
+            String message = new String(decryptedBytes, StandardCharsets.UTF_8);
             log("message", message);
 
 

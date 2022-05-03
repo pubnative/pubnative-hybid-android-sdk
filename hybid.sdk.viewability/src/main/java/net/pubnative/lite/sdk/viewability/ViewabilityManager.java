@@ -15,34 +15,31 @@ public class ViewabilityManager {
     public static final String VIEWABILITY_PARTNER_NAME = "Pubnativenet";
     private static String VIEWABILITY_JS_SERVICE_CONTENT;
 
-    private static Partner mPubNativePartner = null;
+    private Partner mPubNativePartner = null;
     private boolean mShouldMeasureViewability = true;
 
     public ViewabilityManager(final Application application) {
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
+        new Handler(Looper.getMainLooper()).post(() -> {
+            try {
+                if (!Omid.isActive()) {
+                    Omid.activate(application);
+                }
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            }
+
+            if (Omid.isActive() && mPubNativePartner == null) {
                 try {
-                    if (!Omid.isActive()) {
-                        Omid.activate(application);
-                    }
+                    mPubNativePartner = Partner.createPartner(VIEWABILITY_PARTNER_NAME, BuildConfig.SDK_VERSION);
                 } catch (IllegalArgumentException e) {
                     e.printStackTrace();
                 }
+            }
 
-                if (Omid.isActive() && mPubNativePartner == null) {
-                    try {
-                        mPubNativePartner = Partner.createPartner(VIEWABILITY_PARTNER_NAME, BuildConfig.SDK_VERSION);
-                    } catch (IllegalArgumentException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                if (TextUtils.isEmpty(VIEWABILITY_JS_SERVICE_CONTENT)) {
-                    String omsdkStr = Assets.omsdkjs;
-                    byte[] omsdkBytes = Base64.decode(omsdkStr, Base64.DEFAULT);
-                    VIEWABILITY_JS_SERVICE_CONTENT = new String(omsdkBytes);
-                }
+            if (TextUtils.isEmpty(VIEWABILITY_JS_SERVICE_CONTENT)) {
+                String omsdkStr = Assets.omsdkjs;
+                byte[] omsdkBytes = Base64.decode(omsdkStr, Base64.DEFAULT);
+                VIEWABILITY_JS_SERVICE_CONTENT = new String(omsdkBytes);
             }
         });
     }

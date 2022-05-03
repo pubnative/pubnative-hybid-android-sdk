@@ -10,6 +10,7 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.listeners.InFeedAdListener
 import net.pubnative.lite.demo.util.convertDpToPx
 import net.pubnative.lite.sdk.models.AdSize
+import net.pubnative.lite.sdk.models.ImpressionTrackingMethod
 import net.pubnative.lite.sdk.views.HyBidAdView
 import net.pubnative.lite.sdk.views.PNAdView
 
@@ -18,7 +19,7 @@ class HyBidBannerViewHolder(itemView: View, val adListener: InFeedAdListener) : 
 
     private val adView: HyBidAdView = itemView.findViewById(R.id.banner_view)
 
-    fun bind(zoneId: String, adSize: AdSize, shouldLoad: Boolean) {
+    fun bind(zoneId: String, adSize: AdSize, shouldLoad: Boolean, autoRefresh: Boolean) {
         if (!TextUtils.isEmpty(zoneId) && shouldLoad) {
             adView.setAdSize(adSize)
             val layoutParams = FrameLayout.LayoutParams(
@@ -28,7 +29,16 @@ class HyBidBannerViewHolder(itemView: View, val adListener: InFeedAdListener) : 
 
             adView.layoutParams = layoutParams
             adView.visibility = View.VISIBLE
+            autoRefreshCheck(autoRefresh)
             adView.load(zoneId, this)
+        }
+    }
+
+    private fun autoRefreshCheck(autoRefresh: Boolean) {
+        if (autoRefresh) {
+            adView.setAutoRefreshTimeInSeconds(30)
+        } else {
+            adView.stopAutoRefresh()
         }
     }
 

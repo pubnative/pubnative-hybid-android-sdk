@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <Switch
+        <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/check_auto_refresh"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -45,8 +45,8 @@
                 android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                tools:ignore="ContentDescription" />
 
             <TextView
                 android:id="@+id/ad_title"
@@ -56,7 +56,6 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
                 android:layout_toEndOf="@id/ad_icon"
-                android:layout_toRightOf="@id/ad_icon"
                 android:ellipsize="end"
                 android:fontFamily="@font/roboto"
                 android:maxLines="2"
@@ -70,7 +69,8 @@
                 android:layout_below="@id/ad_icon"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp" />
+                android:layout_marginEnd="16dp"
+                tools:ignore="ContentDescription" />
 
             <TextView
                 android:id="@+id/ad_description"
@@ -91,7 +91,6 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/ad_description"
                 android:layout_marginStart="16dp"
-                android:layout_marginLeft="16dp"
                 android:layout_marginTop="8dp"
                 android:isIndicator="true"
                 android:numStars="5"
@@ -103,7 +102,6 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/ad_description"
                 android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
@@ -115,8 +113,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true" />
+                android:layout_alignParentEnd="true" />
         </RelativeLayout>
 
         <TextView

@@ -58,7 +58,7 @@ class MaxAdsMediationRewardedFragment : Fragment(R.layout.fragment_maxads_reward
         super.onDestroy()
     }
 
-    // ------------- MoPub Rewarded Listener ------------------
+    // ------------- MaxAds Rewarded Listener ------------------
 
     override fun onAdLoaded(ad: MaxAd?) {
         Log.d(TAG, "onAdLoaded")

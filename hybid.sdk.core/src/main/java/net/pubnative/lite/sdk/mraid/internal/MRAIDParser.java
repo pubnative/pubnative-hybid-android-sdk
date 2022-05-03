@@ -31,7 +31,7 @@ import java.util.Map;
  */
 
 public class MRAIDParser {
-    private final static String TAG = MRAIDParser.class.getSimpleName();
+    private static final String TAG = MRAIDParser.class.getSimpleName();
 
     public Map<String, String> parseCommandUrl(String commandUrl) {
         // The command is a URL string that looks like this:

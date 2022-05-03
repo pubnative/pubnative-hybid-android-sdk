@@ -2,10 +2,9 @@ package net.pubnative.lite.demo.ui.fragments
 
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
@@ -13,25 +12,18 @@ import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.InterstitialActionBehaviour
 import net.pubnative.lite.sdk.vpaid.enums.AudioState
 
-class AdCustomizationFragment : Fragment()  {
+class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization)  {
 
     private lateinit var initialAudioGroup: RadioGroup
-    private lateinit var mraidExpandSwitch: Switch
-    private lateinit var locationTrackingSwitch: Switch
-    private lateinit var locationUpdatesSwitch: Switch
-    private lateinit var autocloseSwitch: Switch
+    private lateinit var mraidExpandSwitch: SwitchCompat
+    private lateinit var locationTrackingSwitch: SwitchCompat
+    private lateinit var locationUpdatesSwitch: SwitchCompat
+    private lateinit var autocloseSwitch: SwitchCompat
     private lateinit var htmlSkipOffsetInput: EditText
     private lateinit var videoSkipOffsetInput: EditText
     private lateinit var endCardCloseButtonDelayInput: EditText
     private lateinit var clickBehaviourGroup: RadioGroup
     private lateinit var settingManager: SettingsManager
-
-
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(
-        R.layout.fragment_ad_customization, container, false)
-
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -102,9 +94,9 @@ class AdCustomizationFragment : Fragment()  {
             else -> InterstitialActionBehaviour.HB_CREATIVE
         }
 
-        var skipOffsetInt: Int
-        var videoSkipOffsetInt: Int
-        var endCardCloseButtonDelayInt: Int
+        val skipOffsetInt: Int
+        val videoSkipOffsetInt: Int
+        val endCardCloseButtonDelayInt: Int
 
         if (skipOffset.isEmpty() || videoSkipOffset.isEmpty() || skipOffset.contains(" ") ||
             videoSkipOffset.contains(" ") || endCardCloseButtonDelay.isEmpty() || endCardCloseButtonDelay.contains(" ")) {

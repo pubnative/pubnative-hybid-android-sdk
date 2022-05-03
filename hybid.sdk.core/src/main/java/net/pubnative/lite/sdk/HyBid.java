@@ -25,9 +25,12 @@ package net.pubnative.lite.sdk;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
+import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
+import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.analytics.ReportingEventCallback;
 import net.pubnative.lite.sdk.browser.BrowserManager;
 import net.pubnative.lite.sdk.config.ConfigManager;
@@ -66,6 +69,7 @@ public class HyBid {
     @SuppressLint("StaticFieldLeak")
     private static HyBidLocationManager sLocationManager;
     private static ReportingController sReportingController;
+    private static DiagnosticsManager sDiagnosticsManager;
     private static AdCache sAdCache;
     private static VideoAdCache sVideoAdCache;
     private static BrowserManager sBrowserManager;
@@ -76,6 +80,7 @@ public class HyBid {
     private static boolean sLocationUpdatesEnabled = true;
     private static boolean sLocationTrackingEnabled = true;
     private static boolean isCloseVideoAfterFinish = false;
+    private static boolean isDiagnosticsEnabled = true;
     private static boolean sMraidExpandEnabled = true;
     private static String sAge;
     private static String sGender;
@@ -106,7 +111,7 @@ public class HyBid {
     /**
      * This method must be called to initialize the SDK before request ads.
      */
-    public static void initialize(String appToken,
+    public static void initialize(final String appToken,
                                   final Application application, final InitialisationListener initialisationListener) {
 
         sAppToken = appToken;
@@ -127,29 +132,31 @@ public class HyBid {
         sBrowserManager = new BrowserManager();
         sVgiIdManager = new VgiIdManager(application.getApplicationContext());
         sReportingController = new ReportingController();
+        sDiagnosticsManager = new DiagnosticsManager(application.getApplicationContext(), sReportingController);
         sViewabilityManager = new ViewabilityManager(application);
         ReportingDelegate sReportingDelegate = new ReportingDelegate(application.getApplicationContext(),
                 sReportingController, sConfigManager, appToken);
-        sDeviceInfo.initialize(new DeviceInfo.Listener() {
-            @Override
-            public void onInfoLoaded() {
-                DiagnosticsManager.printDiagnosticsLog(application, DiagnosticsManager.Event.INITIALISATION);
-                if (initialisationListener != null) {
-                    initialisationListener.onInitialisationFinished(true);
+        sDeviceInfo.initialize(() -> {
+            ReportingEvent event = new ReportingEvent();
+            event.setEventType(Reporting.EventType.SDK_INIT);
+            event.setAppToken(appToken);
+            sReportingController.reportEvent(event);
+
+            if (initialisationListener != null) {
+                initialisationListener.onInitialisationFinished(true);
+            }
+
+            sConfigManager.initialize(new ConfigManager.ConfigListener() {
+                @Override
+                public void onConfigFetched() {
+                    // The fetched config will be optionally used during the ad request
                 }
 
-                sConfigManager.initialize(new ConfigManager.ConfigListener() {
-                    @Override
-                    public void onConfigFetched() {
-                        // The fetched config will be optionally used during the ad request
-                    }
-
-                    @Override
-                    public void onConfigFetchFailed(Throwable error) {
-                        Logger.d(TAG, "Error fetching config: ", error);
-                    }
-                });
-            }
+                @Override
+                public void onConfigFetchFailed(Throwable error) {
+                    Logger.d(TAG, "Error fetching config: ", error);
+                }
+            });
         });
         sInitialized = true;
     }
@@ -158,14 +165,14 @@ public class HyBid {
         return HYBID_VERSION;
     }
 
-    public static String getAppToken() {
+    public static synchronized String getAppToken() {
         if (!isInitialized()) {
             Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before using getAppToken()");
         }
         return sAppToken;
     }
 
-    public synchronized static void setAppToken(String appToken) {
+    public static synchronized void setAppToken(String appToken) {
         sAppToken = appToken;
     }
 
@@ -229,7 +236,7 @@ public class HyBid {
         return sAdCache;
     }
 
-    public synchronized static VideoAdCache getVideoAdCache() {
+    public static synchronized VideoAdCache getVideoAdCache() {
         if (!isInitialized()) {
             Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before using getVideoAdCache()");
         }
@@ -323,6 +330,10 @@ public class HyBid {
         return sReportingController;
     }
 
+    public static DiagnosticsManager getDiagnosticsManager() {
+        return sDiagnosticsManager;
+    }
+
     public static void addReportingCallback(ReportingEventCallback callback) {
         sReportingController.addCallback(callback);
     }
@@ -340,6 +351,14 @@ public class HyBid {
     public static void setInterstitialSkipOffset(Integer seconds) {
         setHtmlInterstitialSkipOffset(seconds);
         setVideoInterstitialSkipOffset(seconds);
+    }
+
+    public static void setDiagnosticsEnabled(Boolean enabled) {
+        isDiagnosticsEnabled = enabled;
+    }
+
+    public static Boolean isDiagnosticsEnabled() {
+        return isDiagnosticsEnabled;
     }
 
     public static void setHtmlInterstitialSkipOffset(Integer seconds) {
@@ -450,11 +469,15 @@ public class HyBid {
     }
 
     public static String getCustomRequestSignalData() {
+        return getCustomRequestSignalData(null);
+    }
+
+    public static String getCustomRequestSignalData(String mediationVendorName) {
         if (!HyBid.isInitialized()) {
             return "";
         }
         AdRequestFactory adRequestFactory = new AdRequestFactory();
-        AdRequest adRequest = adRequestFactory.buildRequest("", "", AdSize.SIZE_INTERSTITIAL, "", true, IntegrationType.IN_APP_BIDDING);
+        AdRequest adRequest = adRequestFactory.buildRequest("", "", AdSize.SIZE_INTERSTITIAL, "", true, IntegrationType.IN_APP_BIDDING, mediationVendorName);
         return PNApiUrlComposer.getUrlQuery(HyBid.getApiClient().getApiUrl(), adRequest);
     }
 

@@ -32,10 +32,13 @@ import android.widget.RelativeLayout;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ContentInfo;
+import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.visibility.ImpressionManager;
+import net.pubnative.lite.sdk.visibility.ImpressionTracker;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.VideoAd;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
@@ -47,10 +50,11 @@ import net.pubnative.lite.sdk.vpaid.utils.Utils;
 
 import org.json.JSONObject;
 
-public class VastAdPresenter implements AdPresenter {
+public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener {
     private static final String TAG = VastAdPresenter.class.getSimpleName();
     private final Context mContext;
     private final Ad mAd;
+    private final ImpressionTrackingMethod mTrackingMethod;
 
     private Listener mListener;
     private ImpressionListener mImpressionListener;
@@ -63,9 +67,14 @@ public class VastAdPresenter implements AdPresenter {
     private VideoAd mVideoAd;
     private View mContentInfo;
 
-    public VastAdPresenter(Context context, Ad ad) {
+    public VastAdPresenter(Context context, Ad ad, ImpressionTrackingMethod trackingMethod) {
         mContext = context;
         mAd = ad;
+        if (trackingMethod != null) {
+            mTrackingMethod = trackingMethod;
+        } else {
+            mTrackingMethod = ImpressionTrackingMethod.AD_RENDERED;
+        }
     }
 
     @Override
@@ -95,7 +104,7 @@ public class VastAdPresenter implements AdPresenter {
         }
 
         try {
-            mVideoAd = new VideoAd(mContext, mAd.getVast(), false, false, mImpressionListener);
+            mVideoAd = new VideoAd(mContext, mAd, false, false, mVideoImpressionListener);
             mVideoPlayer = new VideoAdView(mContext);
             mVideoAd.bindView(mVideoPlayer);
             mVideoAd.setAdListener(mVideoAdListener);
@@ -134,11 +143,20 @@ public class VastAdPresenter implements AdPresenter {
 
     @Override
     public void startTracking() {
-        mVideoAd.show();
+        if (mTrackingMethod == ImpressionTrackingMethod.AD_VIEWABLE) {
+            ImpressionManager.startTrackingView(mVideoPlayer, mNativeTrackerListener);
+        } else {
+            if (mVideoAd != null) {
+                mVideoAd.show();
+            }
+        }
     }
 
     @Override
     public void stopTracking() {
+        if (mTrackingMethod == ImpressionTrackingMethod.AD_VIEWABLE) {
+            ImpressionManager.stopTrackingView(mVideoPlayer);
+        }
         mVideoAd.dismiss();
     }
 
@@ -179,6 +197,29 @@ public class VastAdPresenter implements AdPresenter {
     private View getContentInfo(Context context, Ad ad, ContentInfo contentInfo) {
         return contentInfo == null ? ad.getContentInfoContainer(context) : ad.getContentInfoContainer(context, contentInfo);
     }
+
+    @Override
+    public void onImpression(View visibleView) {
+
+    }
+
+    private final ImpressionTracker.Listener mNativeTrackerListener = new ImpressionTracker.Listener() {
+        @Override
+        public void onImpression(View visibleView) {
+            if (mVideoAd != null) {
+                mVideoAd.show();
+            }
+        }
+    };
+
+    private final ImpressionListener mVideoImpressionListener = new ImpressionListener() {
+        @Override
+        public void onImpression() {
+            if (mImpressionListener != null) {
+                mImpressionListener.onImpression();
+            }
+        }
+    };
 
     private final VideoAdListener mVideoAdListener = new VideoAdListener() {
         @Override

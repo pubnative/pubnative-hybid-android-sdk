@@ -64,7 +64,9 @@ public class HyBidDFPBannerCustomEvent implements CustomEventBanner, AdPresenter
         } else if (!TextUtils.isEmpty(HyBidDFPUtils.getZoneId(customEventExtras))) {
             zoneIdKey = HyBidDFPUtils.getZoneId(customEventExtras);
         } else {
-            Logger.e(TAG, "Could not find zone id value in CustomEventBanner serverParameter or customEventExtras");
+            Logger.e(TAG, "Could not find zone id value in CustomEventBanner serverParameter or customEventExtras" +
+                    "Required params in CustomEventBanner serverParameter or customEventExtras must be provided as a valid JSON Object. " +
+                    "Please consult HyBid documentation and update settings in your dfp publisher dashboard.");
             mBannerListener.onAdFailedToLoad(AdRequest.ERROR_CODE_INVALID_REQUEST);
             return;
         }

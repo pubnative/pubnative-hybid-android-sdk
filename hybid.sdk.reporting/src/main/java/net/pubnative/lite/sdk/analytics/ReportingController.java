@@ -34,7 +34,8 @@ public class ReportingController {
     }
 
     public void reportEvent(ReportingEvent event) {
-        for (ReportingEventCallback callback : mListeners) {
+        for (int i = 0; i < mListeners.size(); i++) {
+            ReportingEventCallback callback = mListeners.get(i);
             if (callback != null) {
                 callback.onEvent(event);
             }

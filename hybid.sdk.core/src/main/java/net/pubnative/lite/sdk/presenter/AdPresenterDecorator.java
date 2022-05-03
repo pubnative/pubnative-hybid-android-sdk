@@ -23,6 +23,7 @@
 package net.pubnative.lite.sdk.presenter;
 
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 
 import net.pubnative.lite.sdk.VideoListener;
@@ -43,13 +44,16 @@ import org.json.JSONObject;
 
 public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, AdPresenter.ImpressionListener, VideoListener {
     private static final String TAG = AdPresenterDecorator.class.getSimpleName();
+    private static final String ERROR_DECORATOR_DESTROYED = "AdPresenterDecorator is destroyed";
+
     private final AdPresenter mAdPresenter;
     private final AdTracker mAdTrackingDelegate;
     private final ReportingController mReportingController;
     private final AdPresenter.Listener mListener;
     private final ImpressionListener mImpressionListener;
     private VideoListener mVideoListener;
-    private boolean mIsDestroyed;
+    private boolean mIsDestroyed = false;
+    private boolean mImpressionConfirmed = false;
 
     public AdPresenterDecorator(AdPresenter adPresenter,
                                 AdTracker adTrackingDelegate,
@@ -85,7 +89,7 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
 
     @Override
     public void load() {
-        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "AdPresenterDecorator is destroyed")) {
+        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, ERROR_DECORATOR_DESTROYED)) {
             return;
         }
 
@@ -100,7 +104,7 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
 
     @Override
     public void startTracking() {
-        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "AdPresenterDecorator is destroyed")) {
+        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, ERROR_DECORATOR_DESTROYED)) {
             return;
         }
         mAdPresenter.startTracking();
@@ -108,7 +112,7 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
 
     @Override
     public void stopTracking() {
-        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, "AdPresenterDecorator is destroyed")) {
+        if (!CheckUtils.NoThrow.checkArgument(!mIsDestroyed, ERROR_DECORATOR_DESTROYED)) {
             return;
         }
 
@@ -188,6 +192,11 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
             return;
         }
 
+        if (mImpressionConfirmed) {
+            Log.i(TAG, "impression is already confirmed, dropping impression tracking");
+            return;
+        }
+
         if (mReportingController != null) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.IMPRESSION);
@@ -196,6 +205,7 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
             mReportingController.reportEvent(reportingEvent);
         }
 
+        mImpressionConfirmed = true;
         mAdTrackingDelegate.trackImpression();
         if (mImpressionListener != null) {
             mImpressionListener.onImpression();

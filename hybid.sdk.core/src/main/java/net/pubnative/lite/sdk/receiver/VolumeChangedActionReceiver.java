@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import net.pubnative.lite.sdk.vpaid.volumeObserver.VolumeObserver;
+import net.pubnative.lite.sdk.vpaid.volume.VolumeObserver;
 
 public class VolumeChangedActionReceiver extends BroadcastReceiver {
 

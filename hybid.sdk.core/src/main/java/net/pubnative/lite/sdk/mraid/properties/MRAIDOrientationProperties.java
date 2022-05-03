@@ -49,7 +49,7 @@ public final class MRAIDOrientationProperties {
         this.forceOrientation = forceOrienation;
     }
 
-    static public int forceOrientationFromString(String name) {
+    public static int forceOrientationFromString(String name) {
         final List<String> names = Arrays.asList("portrait", "landscape", "none");
         int idx = names.indexOf(name);
         if (idx != -1) {

@@ -28,6 +28,7 @@ import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -112,49 +113,38 @@ public class PNHttpClient {
                 listener.onFailure(new Exception("{\"status\": \"error\", \"error_message\": \"Unable to connect to URL. No network connection.\"}"));
             }
         } else {
-            sExecutor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    final Response response = sendRequest(url, headers, postBody);
-                    if (response.exception != null) {
-                        if (shouldRetryIfFail) {
-                            if (!TextUtils.isEmpty(url)) {
-                                sPendingRequests.add(new PendingRequest(url, postBody, headers));
-                            }
-                        }
+            sExecutor.submit(() -> {
+                final Response response = sendRequest(url, headers, postBody);
+                if (response.exception != null) {
+                    if (shouldRetryIfFail && !TextUtils.isEmpty(url)) {
+                            sPendingRequests.add(new PendingRequest(url, postBody, headers));
+                    }
 
-                        if (shouldReturnOnMainThread) {
-                            sUiHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (listener != null) {
-                                        listener.onFailure(response.exception);
-                                    }
-                                }
-                            });
-                        } else {
+                    if (shouldReturnOnMainThread) {
+                        sUiHandler.post(() -> {
                             if (listener != null) {
                                 listener.onFailure(response.exception);
                             }
-                        }
+                        });
                     } else {
-                        if (shouldReturnOnMainThread) {
-                            sUiHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (listener != null) {
-                                        listener.onSuccess(response.response);
-                                    }
-                                }
-                            });
-                        } else {
+                        if (listener != null) {
+                            listener.onFailure(response.exception);
+                        }
+                    }
+                } else {
+                    if (shouldReturnOnMainThread) {
+                        sUiHandler.post(() -> {
                             if (listener != null) {
                                 listener.onSuccess(response.response);
                             }
+                        });
+                    } else {
+                        if (listener != null) {
+                            listener.onSuccess(response.response);
                         }
                     }
-                    performPendingRequests(context);
                 }
+                performPendingRequests(context);
             });
         }
     }
@@ -190,6 +180,7 @@ public class PNHttpClient {
 
             int responseCode = urlConnection.getResponseCode();
             result.responseCode = responseCode;
+            Log.d("Response Code: ", String.valueOf(result.getResponseCode()));
 
             if (isHttpSuccess(responseCode)) {
                 InputStream inputStream = urlConnection.getInputStream();
@@ -256,15 +247,10 @@ public class PNHttpClient {
         NetworkInfo networkInfo = getActiveNetworkInfo(context);
         if (networkInfo != null && networkInfo.isConnected()
                 && (networkInfo.getType() == ConnectivityManager.TYPE_WIFI || networkInfo.getType() == ConnectivityManager.TYPE_MOBILE)) {
-            sExecutor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    final Response response = sendRequest(url, headers, postBody);
-                    if (response.exception != null) {
-                        if (!TextUtils.isEmpty(url)) {
-                            sPendingRequests.add(new PendingRequest(url, postBody, headers));
-                        }
-                    }
+            sExecutor.submit(() -> {
+                final Response response = sendRequest(url, headers, postBody);
+                if (response.exception != null && !TextUtils.isEmpty(url)) {
+                        sPendingRequests.add(new PendingRequest(url, postBody, headers));
                 }
             });
         }

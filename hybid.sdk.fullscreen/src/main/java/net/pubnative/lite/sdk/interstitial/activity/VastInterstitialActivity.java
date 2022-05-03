@@ -48,7 +48,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
             if (getAd() != null) {
                 int mSkipOffset = getIntent().getIntExtra(EXTRA_SKIP_OFFSET, -1);
                 mIsSkippable = mSkipOffset == 0;
-                mVideoAd = new VideoAd(this, getAd().getVast(), true, true, this);
+                mVideoAd = new VideoAd(this, getAd(), true, true, this);
                 mVideoAd.useMobileNetworkForCaching(true);
                 mVideoAd.bindView(mVideoPlayer);
                 mVideoAd.setAdListener(mVideoAdListener);
@@ -76,12 +76,14 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
                     setupContentInfo();
                 }
 
-                mVideoPlayer.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mVideoAd.load();
-                    }
-                }, 1000);
+                mVideoPlayer.postDelayed(() -> mVideoAd.load(), 1000);
+            } else {
+                Bundle extras = new Bundle();
+                extras.putInt(HyBidInterstitialBroadcastReceiver.VIDEO_PROGRESS, 0);
+                getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.ERROR);
+                getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_ERROR, extras);
+                getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
+                finish();
             }
         } catch (Exception exception) {
             Logger.e(TAG, exception.getMessage());

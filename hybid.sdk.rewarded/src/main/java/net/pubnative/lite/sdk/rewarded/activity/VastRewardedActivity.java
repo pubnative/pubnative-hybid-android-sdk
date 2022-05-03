@@ -62,7 +62,7 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
 
         try {
             if (getAd() != null) {
-                mVideoAd = new VideoAd(this, getAd().getVast(), false, true, this);
+                mVideoAd = new VideoAd(this, getAd(), false, true, this);
                 mVideoAd.setRewarded(true);
                 mVideoAd.bindView(mVideoPlayer);
                 mVideoAd.setAdListener(mVideoAdListener);
@@ -80,12 +80,7 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
                     setupContentInfo();
                 }
 
-                mVideoPlayer.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mVideoAd.load();
-                    }
-                }, 1000);
+                mVideoPlayer.postDelayed(() -> mVideoAd.load(), 1000);
             }
         } catch (Exception exception) {
             Logger.e(TAG, exception.getMessage());

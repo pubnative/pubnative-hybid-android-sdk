@@ -1,3 +1,10 @@
+plugins {
+    id 'com.android.library'
+    id 'com.jfrog.artifactory'
+    id 'maven-publish'
+    id "org.sonarqube" version "3.3"
+}
+
 def project_name = project.name
 def version_name = project.version
 if (branchName != null && buildNumber != null && branchName.toString() != "master") {
@@ -9,14 +16,12 @@ if (branchName != null && buildNumber != null && branchName.toString() != "maste
 //==================================================================================================
 version = version_name
 
-apply plugin: 'com.android.library'
-
 android {
-    compileSdkVersion 30
+    compileSdkVersion 32
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 30
+        targetSdkVersion 32
         versionCode System.getenv("CIRCLE_BUILD_NUM") ? System.getenv("CIRCLE_BUILD_NUM").toInteger() : 1
         versionName version_name
     }
@@ -24,6 +29,17 @@ android {
     buildTypes {
         release {
             minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
         }
     }
 }
@@ -38,14 +54,8 @@ dependencies {
     implementation project(':hybid.sdk.logger')
     implementation project(':hybid.sdk.source.pnapi')
 
-    compileOnly 'com.google.android.gms:play-services-ads:20.5.0'
+    compileOnly 'com.google.android.gms:play-services-ads:20.6.0'
 }
-
-//--------------------------------------------------------------------------------------------------
-// PUBLISHING
-//--------------------------------------------------------------------------------------------------
-apply plugin: 'com.jfrog.artifactory'
-apply plugin: 'maven-publish'
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
@@ -95,6 +105,19 @@ artifactory {
             username = System.getenv("ARTIFACTORY_USER")
             password = System.getenv("ARTIFACTORY_PASSWORD")
             maven = true
+        }
+    }
+}
+
+sonarqube {
+    sonarqube {
+        properties {
+            property "sonar.projectName", "HyBidDemo"
+            property "sonar.projectKey", "HyBidDemoSample"
+            property "sonar.host.url", "http://localhost:9000"
+            property "sonar.projectVersion", version
+            property "sonar.language", "java"
+            property "sonar.sources", "src/main/"
         }
     }
 }

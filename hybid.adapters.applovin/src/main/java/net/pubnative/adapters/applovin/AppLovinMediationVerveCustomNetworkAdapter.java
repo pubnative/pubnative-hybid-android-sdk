@@ -32,6 +32,7 @@ import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd;
 import net.pubnative.lite.sdk.models.AdSize;
+import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
 import net.pubnative.lite.sdk.models.NativeAd;
 import net.pubnative.lite.sdk.request.HyBidNativeAdRequest;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedAd;
@@ -44,7 +45,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AppLovinMediationVerveCustomNetworkAdapter extends MediationAdapterBase implements MaxAdViewAdapter,
         MaxInterstitialAdapter, MaxRewardedAdapter, MaxNativeAdAdapter {
     public static final String MAX_MEDIATION_VENDOR = "m";
-    public static final String MAX_ADAPTER_VERSION = "2.12.1.0";
+    public static final String MAX_ADAPTER_VERSION = "2.13.0.0";
     public static final String PARAM_APP_TOKEN = "pn_app_token";
     public static final String DUMMY_TOKEN = "dummytoken";
 
@@ -139,7 +140,10 @@ public class AppLovinMediationVerveCustomNetworkAdapter extends MediationAdapter
             appToken = parameters.getCustomParameters().getString(PARAM_APP_TOKEN);
             log("found pn_zone_id=" + zoneId + ", pn_app_token=" + appToken);
         } else {
-            log("Could not find the required params in MaxAdapterResponseParameters.");
+            String errorMessage = "Could not find the required params in MaxAdapterResponseParameters. " +
+                    "Required params in MaxAdapterResponseParameters parameters must be provided as a valid JSON Object. " +
+                    "Please consult HyBid documentation and update settings in your Applovin publisher dashboard.";
+            log(errorMessage);
             adapterListener.onAdViewAdLoadFailed(MaxAdapterError.INVALID_CONFIGURATION);
             return;
         }
@@ -158,6 +162,7 @@ public class AppLovinMediationVerveCustomNetworkAdapter extends MediationAdapter
         mAdView = new HyBidAdView(activity, getSize(adFormat));
         mAdView.setMediation(true);
         mAdView.setMediationVendor(AppLovinMediationVerveCustomNetworkAdapter.MAX_MEDIATION_VENDOR);
+        mAdView.setTrackingMethod(ImpressionTrackingMethod.AD_VIEWABLE);
         mAdView.load(appToken, zoneId, new AdViewListener(adapterListener));
     }
 
@@ -180,7 +185,10 @@ public class AppLovinMediationVerveCustomNetworkAdapter extends MediationAdapter
             appToken = parameters.getCustomParameters().getString(PARAM_APP_TOKEN);
             log("found pn_zone_id=" + zoneId + ", pn_app_token=" + appToken);
         } else {
-            log("Could not find the required params in MaxAdapterResponseParameters.");
+            String errorMessage = "Could not find the required params in MaxAdapterResponseParameters. " +
+                    "Required params in MaxAdapterResponseParameters parameters must be provided as a valid JSON Object. " +
+                    "Please consult HyBid documentation and update settings in your Applovin publisher dashboard.";
+            log(errorMessage);
             adapterListener.onInterstitialAdLoadFailed(MaxAdapterError.INVALID_CONFIGURATION);
             return;
         }
@@ -188,7 +196,7 @@ public class AppLovinMediationVerveCustomNetworkAdapter extends MediationAdapter
         if (HyBid.getAppToken() != null && HyBid.getAppToken().equalsIgnoreCase(appToken) && HyBid.isInitialized()) {
             requestInterstitial(parameters, activity, appToken, zoneId, adapterListener);
         } else {
-            HyBid.initialize(appToken, activity.getApplication(), b -> requestInterstitial(parameters, activity,appToken, zoneId, adapterListener));
+            HyBid.initialize(appToken, activity.getApplication(), b -> requestInterstitial(parameters, activity, appToken, zoneId, adapterListener));
         }
     }
 
@@ -235,7 +243,10 @@ public class AppLovinMediationVerveCustomNetworkAdapter extends MediationAdapter
             appToken = parameters.getCustomParameters().getString(PARAM_APP_TOKEN);
             log("found pn_zone_id=" + zoneId + ", pn_app_token=" + appToken);
         } else {
-            log("Could not find the required params in MaxAdapterResponseParameters.");
+            String errorMessage = "Could not find the required params in MaxAdapterResponseParameters. " +
+                    "Required params in MaxAdapterResponseParameters parameters must be provided as a valid JSON Object. " +
+                    "Please consult HyBid documentation and update settings in your Applovin publisher dashboard.";
+            log(errorMessage);
             adapterListener.onRewardedAdLoadFailed(MaxAdapterError.INVALID_CONFIGURATION);
             return;
         }
@@ -291,7 +302,10 @@ public class AppLovinMediationVerveCustomNetworkAdapter extends MediationAdapter
             appToken = parameters.getCustomParameters().getString(PARAM_APP_TOKEN);
             log("found pn_zone_id=" + zoneId + ", pn_app_token=" + appToken);
         } else {
-            log("Could not find the required params in MaxAdapterResponseParameters.");
+            String errorMessage = "Could not find the required params in MaxAdapterResponseParameters. " +
+                    "Required params in MaxAdapterResponseParameters parameters must be provided as a valid JSON Object. " +
+                    "Please consult HyBid documentation and update settings in your Applovin publisher dashboard.";
+            log(errorMessage);
             adapterListener.onNativeAdLoadFailed(MaxAdapterError.INVALID_CONFIGURATION);
             return;
         }

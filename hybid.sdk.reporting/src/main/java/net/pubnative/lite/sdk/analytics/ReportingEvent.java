@@ -132,7 +132,7 @@ public class ReportingEvent {
         setCustomString(Reporting.Key.APP_TOKEN, appToken);
     }
 
-    public String getAppToken(String appToken) {
+    public String getAppToken() {
         return getCustomString(Reporting.Key.APP_TOKEN);
     }
 

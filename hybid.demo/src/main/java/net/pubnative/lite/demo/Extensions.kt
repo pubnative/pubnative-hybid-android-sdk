@@ -24,8 +24,12 @@ package net.pubnative.lite.demo
 
 import android.os.Parcel
 import android.os.Parcelable
-import android.widget.Toast
-import androidx.fragment.app.Fragment
+
+//
+//import android.os.Parcel
+//import android.os.Parcelable
+//import android.widget.Toast
+//import androidx.fragment.app.Fragment
 
 /**
  * Created by erosgarciaponte on 30.01.18.
@@ -37,16 +41,16 @@ inline fun <reified T : Parcelable> createParcel(crossinline createFromParcel: (
         }
 
 
-fun Fragment.getPackageName(): String? {
-    context?.let {
-        return it.packageName
-    }
-    return ""
-}
-
-fun Fragment.showToast(message: String) {
-    context?.let {
-        Toast.makeText(it, message, Toast.LENGTH_SHORT).show()
-    }
-
-}
+//fun Fragment.getPackageName(): String? {
+//    context?.let {
+//        return it.packageName
+//    }
+//    return ""
+//}
+//
+//fun Fragment.showToast(message: String) {
+//    context?.let {
+//        Toast.makeText(it, message, Toast.LENGTH_SHORT).show()
+//    }
+//
+//}

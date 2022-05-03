@@ -28,7 +28,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import net.pubnative.lite.sdk.CacheListener;
-import net.pubnative.lite.sdk.DiagnosticConstants;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
@@ -48,6 +47,7 @@ import net.pubnative.lite.sdk.utils.MarkupUtils;
 import net.pubnative.lite.sdk.utils.json.JsonOperations;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
+import net.pubnative.lite.sdk.vpaid.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.vast.VastUrlUtils;
 
@@ -113,7 +113,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
         mPlacementParams = new JSONObject();
         mRequestManager.setIntegrationType(IntegrationType.STANDALONE);
 
-        addReportingKey(DiagnosticConstants.KEY_ZONE_ID, mZoneId);
+        addReportingKey(Reporting.Key.ZONE_ID, mZoneId);
 
     }
 
@@ -128,7 +128,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
                 //AppToken
                 addReportingKey(Reporting.Key.APP_TOKEN, HyBid.getAppToken());
             //Ad Type
-            addReportingKey(Reporting.Key.AD_TYPE, Reporting.Key.REWARDED);
+            addReportingKey(Reporting.Key.AD_TYPE, Reporting.AdFormat.REWARDED);
             //Ad Size
             addReportingKey(Reporting.Key.AD_SIZE, mRequestManager.getAdSize().toString());
             //Integration Type
@@ -273,7 +273,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
             mAd = ad;
             if (!mAd.getZoneId().equalsIgnoreCase(mZoneId)) {
                 mZoneId = mAd.getZoneId();
-                JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_ZONE_ID, mZoneId);
+                JsonOperations.putJsonString(mPlacementParams, Reporting.Key.ZONE_ID, mZoneId);
             }
             mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, this);
             if (mPresenter != null) {
@@ -328,23 +328,23 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
             if (MarkupUtils.isVastXml(adValue)) {
                 if (TextUtils.isEmpty(mZoneId)) {
                     mZoneId = "4";
-                    JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_ZONE_ID, mZoneId);
+                    JsonOperations.putJsonString(mPlacementParams, Reporting.Key.ZONE_ID, mZoneId);
                 }
                 assetGroupId = 15;
                 type = Ad.AdType.VIDEO;
                 VideoAdProcessor videoAdProcessor = new VideoAdProcessor();
                 videoAdProcessor.process(mContext, adValue, null, new VideoAdProcessor.Listener() {
                     @Override
-                    public void onCacheSuccess(AdParams adParams, String videoFilePath, String endCardFilePath, List<String> omidVendors) {
+                    public void onCacheSuccess(AdParams adParams, String videoFilePath, EndCardData endCardData, String endCardFilePath, List<String> omidVendors) {
                         if (mIsDestroyed) {
                             return;
                         }
 
                         if (omidVendors != null && !omidVendors.isEmpty()) {
-                            JsonOperations.putStringArray(mPlacementParams, DiagnosticConstants.KEY_OM_VENDORS, omidVendors);
+                            JsonOperations.putStringArray(mPlacementParams, Reporting.Key.OM_VENDORS, omidVendors);
                         }
 
-                        VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardFilePath);
+                        VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardData, endCardFilePath);
                         mAd = new Ad(assetGroupId, adValue, type);
                         HyBid.getAdCache().put(mZoneId, mAd);
                         HyBid.getVideoAdCache().put(mZoneId, adCacheItem);
@@ -378,7 +378,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
         long loadTime = -1;
         if (mInitialLoadTime != -1) {
             loadTime = System.currentTimeMillis() - mInitialLoadTime;
-            JsonOperations.putJsonLong(mPlacementParams, DiagnosticConstants.KEY_TIME_TO_LOAD,
+            JsonOperations.putJsonLong(mPlacementParams, Reporting.Key.TIME_TO_LOAD,
                     loadTime);
         }
 
@@ -386,7 +386,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
             ReportingEvent loadEvent = new ReportingEvent();
             loadEvent.setEventType(Reporting.EventType.LOAD);
             loadEvent.setAdFormat(Reporting.AdFormat.REWARDED);
-            loadEvent.setCustomInteger(DiagnosticConstants.KEY_TIME_TO_LOAD, loadTime);
+            loadEvent.setCustomInteger(Reporting.Key.TIME_TO_LOAD, loadTime);
             loadEvent.mergeJSONObject(getPlacementParams());
             HyBid.getReportingController().reportEvent(loadEvent);
         }
@@ -400,7 +400,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
         long loadTime = -1;
         if (mInitialLoadTime != -1) {
             loadTime = System.currentTimeMillis() - mInitialLoadTime;
-            JsonOperations.putJsonLong(mPlacementParams, DiagnosticConstants.KEY_TIME_TO_LOAD_FAILED,
+            JsonOperations.putJsonLong(mPlacementParams, Reporting.Key.TIME_TO_LOAD_FAILED,
                     loadTime);
         }
 
@@ -408,7 +408,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
             ReportingEvent loadFailEvent = new ReportingEvent();
             loadFailEvent.setEventType(Reporting.EventType.LOAD_FAIL);
             loadFailEvent.setAdFormat(Reporting.AdFormat.REWARDED);
-            loadFailEvent.setCustomInteger(DiagnosticConstants.KEY_TIME_TO_LOAD, loadTime);
+            loadFailEvent.setCustomInteger(Reporting.Key.TIME_TO_LOAD, loadTime);
             loadFailEvent.mergeJSONObject(getPlacementParams());
             HyBid.getReportingController().reportEvent(loadFailEvent);
         }
@@ -507,7 +507,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     @Override
     public void onRewardedOpened(RewardedPresenter rewardedPresenter) {
         if (mInitialRenderTime != -1) {
-            addReportingKey(DiagnosticConstants.KEY_RENDER_TIME,
+            addReportingKey(Reporting.Key.RENDER_TIME,
                     System.currentTimeMillis() - mInitialRenderTime);
         }
         reportAdRender(Reporting.AdFormat.REWARDED, getPlacementParams());

@@ -40,9 +40,9 @@ import net.pubnative.lite.sdk.utils.SignalDataProcessor;
 public class HyBidNativeAdRequest implements RequestManager.RequestListener {
     private static final String TAG = HyBidNativeAdRequest.class.getSimpleName();
 
-    private static String mScreenIabCategory;
-    private static String mScreenKeywords;
-    private static String mUserIntent;
+    private String mScreenIabCategory;
+    private String mScreenKeywords;
+    private String mUserIntent;
 
     public interface RequestListener {
         void onRequestSuccess(NativeAd ad);

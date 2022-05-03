@@ -43,17 +43,14 @@ public class VisibilityTracker {
     protected Handler mHandler = new Handler();
     protected boolean mIsVisibilityCheckScheduled = false;
     protected final VisibilityRunnable mVisibilityRunnable = new VisibilityRunnable();
-    protected ViewTreeObserver.OnPreDrawListener mOnPreDrawListener = new ViewTreeObserver.OnPreDrawListener() {
-        @Override
-        public boolean onPreDraw() {
+    protected ViewTreeObserver.OnPreDrawListener mOnPreDrawListener = () -> {
 
-            if (mListener == null || mListener.get() == null) {
-                clear();
-            } else {
-                scheduleVisibilityCheck();
-            }
-            return true;
+        if (mListener == null || mListener.get() == null) {
+            clear();
+        } else {
+            scheduleVisibilityCheck();
         }
+        return true;
     };
 
     //==============================================================================================

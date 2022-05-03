@@ -61,12 +61,12 @@ public class NativeAd implements ImpressionTracker.Listener {
     private Map<String, String> mTrackingExtras;
 
     protected Ad mAd;
-    protected transient Listener mListener;
+    protected Listener mListener;
 
-    private transient boolean mIsImpressionConfirmed;
-    private transient View mClickableView;
+    private boolean mIsImpressionConfirmed;
+    private View mClickableView;
     private List<String> mUsedAssets;
-    private transient View mAdView;
+    private View mAdView;
 
     private Bitmap bannerBitmap;
     private Bitmap iconBitmap;
@@ -222,9 +222,8 @@ public class NativeAd implements ImpressionTracker.Listener {
                 && mTrackingExtras != null
                 && mTrackingExtras.size() > 0) {
             Uri.Builder builder = Uri.parse(url).buildUpon();
-            for (String key : mTrackingExtras.keySet()) {
-                String value = mTrackingExtras.get(key);
-                builder.appendQueryParameter(key, value);
+            for (Map.Entry<String, String> entry : mTrackingExtras.entrySet()) {
+                builder.appendQueryParameter(entry.getKey(), entry.getKey());
             }
             result = builder.build().toString();
         }
@@ -285,13 +284,7 @@ public class NativeAd implements ImpressionTracker.Listener {
             Log.w(TAG, "click view is null, clicks won't be tracked");
         } else {
             mClickableView = clickableView;
-            mClickableView.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View view) {
-                    onNativeClick(view);
-                }
-            });
+            mClickableView.setOnClickListener(this::onNativeClick);
         }
     }
 

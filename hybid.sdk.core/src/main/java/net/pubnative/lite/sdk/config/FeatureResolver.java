@@ -61,6 +61,20 @@ public class FeatureResolver {
         }
     }
 
+    public boolean isDiagnosticsModeEnabled(String feature) {
+        if (TextUtils.isEmpty(feature)) {
+            return false;
+        }
+
+        if (mAppFeaturesModel != null
+                && mAppFeaturesModel.reporting != null) {
+            List<String> supportedReporting = mAppFeaturesModel.reporting;
+            return supportedReporting.contains(feature);
+        } else {
+            return !feature.equals(RemoteConfigFeature.Reporting.DIAGNOSTIC_REPORT);
+        }
+    }
+
     public boolean isUserConsentSupported(String feature) {
         if (TextUtils.isEmpty(feature)) {
             return false;

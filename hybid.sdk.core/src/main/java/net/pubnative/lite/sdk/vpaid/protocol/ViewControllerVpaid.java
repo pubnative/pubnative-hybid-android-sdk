@@ -41,21 +41,12 @@ public class ViewControllerVpaid {
         mEndCardLayout = LayoutInflater.from(context).inflate(R.layout.end_card, bannerView, false);
         mEndCardLayout.setVisibility(View.GONE);
 
-        mEndCardView = mEndCardLayout.findViewById(R.id.endCardView);
+        mEndCardView = mEndCardLayout.findViewById(R.id.staticEndCardView);
         ImageView closeView = mEndCardLayout.findViewById(R.id.closeView);
         closeView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mAdController.closeSelf();
-            }
-        });
-
-        ImageView replayView = mEndCardLayout.findViewById(R.id.replayView);
-        replayView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showControls();
-                mAdController.playAd();
             }
         });
 

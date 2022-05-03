@@ -1,3 +1,10 @@
+plugins {
+    id 'com.android.library'
+    id 'com.jfrog.artifactory'
+    id 'maven-publish'
+    id "org.sonarqube" version "3.3"
+}
+
 //==================================================================================================
 // PROJECT
 //==================================================================================================
@@ -12,13 +19,12 @@ version = version_name
 //==================================================================================================
 // ANDROID
 //==================================================================================================
-apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 32
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 30
+        targetSdkVersion 32
         versionCode System.getenv("CIRCLE_BUILD_NUM") ? System.getenv("CIRCLE_BUILD_NUM").toInteger() : 1
         versionName version_name
 
@@ -41,6 +47,17 @@ android {
             buildConfigField "String", "BASE_URL", "\"https://api.pubnative.net/\""
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -61,8 +78,8 @@ dependencies {
     testImplementation 'com.google.truth:truth:0.36'
 
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.robolectric:robolectric:4.5.1'
-    testImplementation 'org.mockito:mockito-core:2.28.2'
+    testImplementation 'org.robolectric:robolectric:4.6.1'
+    testImplementation 'org.mockito:mockito-core:3.9.0'
     testImplementation 'com.google.truth:truth:0.36'
     testImplementation 'com.squareup.assertj:assertj-android:1.1.1'
     androidTestImplementation "androidx.test:runner:1.1.0-beta01", {
@@ -79,26 +96,20 @@ dependencies {
 //--------------------------------------------------------------------------------------------------
 // COVERALLS
 //--------------------------------------------------------------------------------------------------
-apply plugin: "net.saliman.cobertura"
-apply plugin: "com.github.kt3k.coveralls"
-cobertura.coverageFormats = ['html', 'xml']
-
-//--------------------------------------------------------------------------------------------------
-// PUBLISHING
-//--------------------------------------------------------------------------------------------------
-apply plugin: 'com.jfrog.artifactory'
-apply plugin: 'maven-publish'
+//cobertura.coverageFormats = ['html', 'xml']
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
     classifier = 'sources'
 }
+
 task javadoc(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
     classpath += project.rootProject.files(android.getBootClasspath().join(File.pathSeparator))
     options.memberLevel = JavadocMemberLevel.PUBLIC
     failOnError false
 }
+
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
@@ -177,6 +188,18 @@ artifactory {
             username = System.getenv("ARTIFACTORY_USER")
             password = System.getenv("ARTIFACTORY_PASSWORD")
             maven = true
+        }
+    }
+}
+sonarqube {
+    sonarqube {
+        properties {
+            property "sonar.projectName", "HyBidDemo"
+            property "sonar.projectKey", "HyBidDemoSample"
+            property "sonar.host.url", "http://localhost:9000"
+            property "sonar.projectVersion", version
+            property "sonar.language", "java"
+            property "sonar.sources", "src/main/"
         }
     }
 }

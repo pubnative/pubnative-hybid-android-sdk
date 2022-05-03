@@ -34,6 +34,8 @@ public class Creative {
     @Tag
     private CompanionAds companionAds;
 
+
+
     public String getId() {
         return id;
     }

@@ -10,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -19,6 +20,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
  */
 
 @RunWith(RobolectricTestRunner.class)
+@Config(sdk = 29)
 public class InterstitialPresenterFactoryTest {
     @Mock
     private InterstitialPresenter.Listener mMockListener;

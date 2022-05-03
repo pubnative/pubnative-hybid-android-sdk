@@ -82,7 +82,7 @@ public class ConfigManager {
 
     public boolean isConfigOutdated() {
         if (mConfigModel != null) {
-            long ttlInMillis = mConfigModel.ttl * 1000;
+            long ttlInMillis = (long) mConfigModel.ttl * 1000;
             long configTimestamp = mPreferences.getLong(KEY_CONFIG_TIMESTAMP, 0);
             long timeToUpdate = ttlInMillis + configTimestamp;
             long currentTimestamp = System.currentTimeMillis();

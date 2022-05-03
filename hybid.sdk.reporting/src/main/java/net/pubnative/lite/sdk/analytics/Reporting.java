@@ -21,15 +21,24 @@ public class Reporting {
         public static final String VAST = "vast";
         public static final String CACHE_TIME = "cache_time";
         public static final String AD_REQUEST = "ad_request";
+        public static final String AD_RESPONSE = "ad_response";
         public static final String ERROR_CODE = "error_code";
         public static final String ERROR_MESSAGE = "error_message";
         public static final String HYBID_VERSION = "hybid_version";
-        //Ad Types
-        public static final String INTERSTITIAL = "interstitial";
-        public static final String REWARDED = "rewarded";
+        public static final String MEDIATION_VENDOR = "mediation_vendor";
+        public static final String AD_POSITION = "ad_position";
+        public static final String OM_ENABLED = "om_enabled";
+        public static final String OM_VENDORS = "om_vendors";
+        public static final String RESPONSE_TIME = "response_time";
+        public static final String TIME_TO_LOAD = "time_to_load";
+        public static final String TIME_TO_LOAD_FAILED = "time_to_load_failed";
+        public static final String RENDER_TIME = "render_time";
+        public static final String FIRED_IMPRESSION_BEACONS = "fired_impressions";
+        public static final String FIRED_CLICK_BEACONS = "fired_clicks";
     }
 
     public static final class EventType {
+        public static final String SDK_INIT = "init";
         public static final String REQUEST = "request";
         public static final String RESPONSE = "response";
         public static final String CACHE = "cache";
@@ -48,9 +57,7 @@ public class Reporting {
         public static final String VIDEO_RESUME = "video_resume";
         public static final String VIDEO_MUTE = "video_mute";
         public static final String VIDEO_UNMUTE = "video_unmute";
-
         public static final String RENDER_ERROR = "render_error";
-
         public static final String AUCTION_START = "auction_start";
         public static final String AUCTION_FINISHED = "auction_finished";
         public static final String AUCTION_NEXT_ITEM = "auction_next_item";
@@ -58,7 +65,6 @@ public class Reporting {
         public static final String NO_FILL = "no_fill";
         public static final String WINNER = "winner";
         public static final String NEXT_AD_SOURCE = "next_ad_source";
-
         public static final String VIDEO_AD_SESSION_INITIALIZED = "session_initialized";
         public static final String VIDEO_AD_SESSION_LOADED = "session_loaded";
         public static final String VIDEO_AD_SESSION_STARTED = "session_started";
@@ -74,9 +80,7 @@ public class Reporting {
         public static final String VIDEO_AD_SKIPPED = "skipped";
         public static final String VIDEO_AD_CLICKED = "clicked";
         public static final String VIDEO_AD_IMPRESSION = "impression";
-
         public static final String WEB_AD_SESSION_INITIALIZED = "web_ad_session_started";
-
         public static final String VIDEO_AD_SESSION_STOPPED = "session_stopped";
     }
 

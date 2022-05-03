@@ -18,7 +18,6 @@ import net.pubnative.lite.demo.ui.adapters.ReportingEventAdapter
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.demo.util.JsonUtils
 import net.pubnative.lite.sdk.HyBid
-import net.pubnative.lite.sdk.HyBid.HYBID_VERSION
 import net.pubnative.lite.sdk.analytics.Reporting
 import net.pubnative.lite.sdk.analytics.ReportingEvent
 import net.pubnative.lite.sdk.analytics.ReportingEventCallback
@@ -29,8 +28,8 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
 
     private var requestView: TextView? = null
-    private lateinit var latencyView: TextView
-    private lateinit var responseView: TextView
+    private var latencyView: TextView? = null
+    private var responseView: TextView? = null
 
     private var eventList = mutableListOf<ReportingEvent>()
 
@@ -47,16 +46,16 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
                 requestView?.text.toString()
             )
         }
-        latencyView.setOnClickListener {
+        latencyView?.setOnClickListener {
             ClipboardUtils.copyToClipboard(
                 requireActivity(),
-                latencyView.text.toString()
+                latencyView?.text.toString()
             )
         }
-        responseView.setOnClickListener {
+        responseView?.setOnClickListener {
             ClipboardUtils.copyToClipboard(
                 requireActivity(),
-                responseView.text.toString()
+                responseView?.text.toString()
             )
         }
 
@@ -74,8 +73,8 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
             val responseViewText = it.getString("responseViewText", "")
 
             requestView?.text = requestViewText
-            latencyView.text = latencyViewText
-            responseView.text = responseViewText
+            latencyView?.text = latencyViewText
+            responseView?.text = responseViewText
 
             eventList = HyBid.getReportingController().adEventList
         }
@@ -117,10 +116,10 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
             requestView?.text = ""
         }
         if (isLatencyViewInitializedNotNull()) {
-            latencyView.text = ""
+            latencyView?.text = ""
         }
         if (isResponseViewInitializedNotNull()) {
-            responseView.text = ""
+            responseView?.text = ""
         }
     }
 
@@ -142,12 +141,12 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
                 requestView?.text = registryItem.url
             }
             if (isLatencyViewInitializedNotNull()) {
-                latencyView.text = registryItem.latency.toString()
+                latencyView?.text = registryItem.latency.toString()
             }
 
             if (!TextUtils.isEmpty(registryItem.response)) {
                 if (isResponseViewInitializedNotNull()) {
-                    responseView.text = JsonUtils.toFormattedJson(registryItem.response)
+                    responseView?.text = JsonUtils.toFormattedJson(registryItem.response)
                 }
             }
         }
@@ -180,11 +179,13 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
     }
 
     private fun isLatencyViewInitializedNotNull(): Boolean {
-        return this::latencyView.isInitialized && latencyView != null
+//        return this::latencyView.isInitialized && latencyView != null
+        return latencyView != null
     }
 
     private fun isResponseViewInitializedNotNull(): Boolean {
-        return this::responseView.isInitialized && responseView != null
+        return responseView != null
+//        return this::responseView.isInitialized && responseView != null
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

@@ -11,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -22,6 +23,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
  * Created by erosgarciaponte on 24.01.18.
  */
 @RunWith(RobolectricTestRunner.class)
+@Config(sdk = 29)
 public class InterstitialPresenterDecoratorTest {
     @Mock
     private InterstitialPresenter mMockPresenter;

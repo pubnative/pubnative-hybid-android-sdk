@@ -6,6 +6,7 @@ import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
 
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeVideoAdSession;
+import net.pubnative.lite.sdk.vpaid.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 
 import java.util.List;
@@ -19,6 +20,8 @@ public interface VideoAdController {
     void prepare(OnPreparedListener listener);
 
     void setVideoFilePath(String filePath);
+
+    void setEndCardData(EndCardData endCardData);
 
     void setEndCardFilePath(String filePath);
 

@@ -16,19 +16,11 @@ import net.pubnative.lite.demo.ui.activities.dfp.DFPBannerActivity
 import net.pubnative.lite.demo.ui.activities.dfp.DFPInterstitialActivity
 import net.pubnative.lite.demo.ui.activities.dfp.DFPLeaderboardActivity
 import net.pubnative.lite.demo.ui.activities.dfp.DFPMRectActivity
-import net.pubnative.lite.demo.ui.activities.mopub.*
 import net.pubnative.lite.demo.ui.adapters.ZoneIdAdapter
 import net.pubnative.lite.demo.ui.listeners.ZoneIdClickListener
 
 class PrebidNavFragment : Fragment(R.layout.fragment_nav_prebid) {
 
-    private lateinit var mopubBannerButton: Button
-    private lateinit var mopubMediumButton: Button
-    private lateinit var mopubMediumVideoButton: Button
-    private lateinit var mopubLeaderboardButton: Button
-    private lateinit var mopubInterstitialButton: Button
-    private lateinit var mopubInterstitialVideoButton: Button
-    private lateinit var mopubRewardedButton: Button
     private lateinit var dfpBannerButton: Button
     private lateinit var dfpMediumButton: Button
     private lateinit var dfpLeaderboardButton: Button
@@ -61,62 +53,6 @@ class PrebidNavFragment : Fragment(R.layout.fragment_nav_prebid) {
             }
         })
         zoneIdList.adapter = adapter
-
-        mopubBannerButton = view.findViewById(R.id.button_mopub_banner)
-        mopubBannerButton.setOnClickListener {
-            val intent = Intent(activity, MoPubBannerActivity::class.java)
-            val zoneId = setZoneId(chosenZoneId, AdFormat.BANNER)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
-            startActivity(intent)
-        }
-
-        mopubMediumButton = view.findViewById(R.id.button_mopub_medium)
-        mopubMediumButton.setOnClickListener {
-            val intent = Intent(activity, MoPubMRectActivity::class.java)
-            val zoneId = setZoneId(chosenZoneId, AdFormat.MEDIUM)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
-            startActivity(intent)
-        }
-
-        mopubMediumVideoButton = view.findViewById(R.id.button_mopub_medium_video)
-        mopubMediumVideoButton.setOnClickListener {
-            val intent = Intent(activity, MoPubMRectVideoActivity::class.java)
-            val zoneId = setZoneId(chosenZoneId, AdFormat.MEDIUM_VIDEO)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
-            startActivity(intent)
-        }
-
-        mopubLeaderboardButton = view.findViewById(R.id.button_mopub_leaderboard)
-        mopubLeaderboardButton.setOnClickListener {
-            val intent = Intent(activity, MoPubLeaderboardActivity::class.java)
-            val zoneId = setZoneId(chosenZoneId, AdFormat.LEADERBOARD)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
-            startActivity(intent)
-        }
-
-        mopubInterstitialButton = view.findViewById(R.id.button_mopub_interstitial)
-        mopubInterstitialButton.setOnClickListener {
-            val intent = Intent(activity, MoPubInterstitialActivity::class.java)
-            val zoneId = setZoneId(chosenZoneId, AdFormat.INTERSTITIAL)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
-            startActivity(intent)
-        }
-
-        mopubInterstitialVideoButton = view.findViewById(R.id.button_mopub_interstitial_video)
-        mopubInterstitialVideoButton.setOnClickListener {
-            val intent = Intent(activity, MoPubInterstitialVideoActivity::class.java)
-            val zoneId = setZoneId(chosenZoneId, AdFormat.INTERSTITIAL_VIDEO)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
-            startActivity(intent)
-        }
-
-        mopubRewardedButton = view.findViewById(R.id.button_mopub_rewarded)
-        mopubRewardedButton.setOnClickListener {
-            val intent = Intent(activity, MoPubRewardedActivity::class.java)
-            val zoneId = setZoneId(chosenZoneId, AdFormat.REWARDED)
-            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
-            startActivity(intent)
-        }
 
         dfpBannerButton = view.findViewById(R.id.button_dfp_banner)
         dfpBannerButton.setOnClickListener {
@@ -165,13 +101,6 @@ class PrebidNavFragment : Fragment(R.layout.fragment_nav_prebid) {
     }
 
     private fun enableZones() {
-        mopubBannerButton.isEnabled = true
-        mopubMediumButton.isEnabled = true
-        mopubMediumVideoButton.isEnabled = true
-        mopubLeaderboardButton.isEnabled = true
-        mopubInterstitialButton.isEnabled = true
-        mopubInterstitialVideoButton.isEnabled = true
-        mopubRewardedButton.isEnabled = true
         dfpBannerButton.isEnabled = true
         dfpMediumButton.isEnabled = true
         dfpLeaderboardButton.isEnabled = true
@@ -181,13 +110,6 @@ class PrebidNavFragment : Fragment(R.layout.fragment_nav_prebid) {
     private fun disableZones() {
         chosenZoneIdView.text = ""
         chosenZoneId = ""
-        mopubBannerButton.isEnabled = false
-        mopubMediumButton.isEnabled = false
-        mopubMediumVideoButton.isEnabled = false
-        mopubLeaderboardButton.isEnabled = false
-        mopubInterstitialButton.isEnabled = false
-        mopubInterstitialVideoButton.isEnabled = false
-        mopubRewardedButton.isEnabled = false
         dfpBannerButton.isEnabled = false
         dfpMediumButton.isEnabled = false
         dfpLeaderboardButton.isEnabled = false

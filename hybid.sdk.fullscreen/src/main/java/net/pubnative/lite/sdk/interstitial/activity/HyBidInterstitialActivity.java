@@ -23,7 +23,6 @@ import net.pubnative.lite.sdk.views.CloseableContainer;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
 import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
-import net.pubnative.lite.sdk.vpaid.volumeObserver.VolumeObserver;
 
 
 public abstract class HyBidInterstitialActivity extends Activity {
@@ -37,7 +36,7 @@ public abstract class HyBidInterstitialActivity extends Activity {
     private String mZoneId;
     private HyBidInterstitialBroadcastSender mBroadcastSender;
     private ProgressBar progressBar;
-    private Boolean isVast = false;
+    private boolean isVast = false;
 
     public abstract View getAdView();
 
@@ -79,12 +78,10 @@ public abstract class HyBidInterstitialActivity extends Activity {
                 mCloseableContainer.addView(adView, params);
                 mCloseableContainer.setBackgroundColor(Color.WHITE);
                 showInterstitialCloseButton();
-                if (!isVast) {
-                    if (shouldShowContentInfo() && getAd() != null) {
-                        View contentInfo = getAd().getContentInfoContainer(this);
-                        if (contentInfo != null) {
-                            mCloseableContainer.addView(contentInfo);
-                        }
+                if (!isVast && shouldShowContentInfo() && getAd() != null) {
+                    View contentInfo = getAd().getContentInfoContainer(this);
+                    if (contentInfo != null) {
+                        mCloseableContainer.addView(contentInfo);
                     }
                 }
                 setContentView(mCloseableContainer);
@@ -119,12 +116,7 @@ public abstract class HyBidInterstitialActivity extends Activity {
         return contentInfo == null ? ad.getContentInfoContainer(context) : ad.getContentInfoContainer(context, contentInfo);
     }
 
-    private final CloseableContainer.OnCloseListener mCloseListener = new CloseableContainer.OnCloseListener() {
-        @Override
-        public void onClose() {
-            dismiss();
-        }
-    };
+    private final CloseableContainer.OnCloseListener mCloseListener = this::dismiss;
 
     protected void dismiss() {
         getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);

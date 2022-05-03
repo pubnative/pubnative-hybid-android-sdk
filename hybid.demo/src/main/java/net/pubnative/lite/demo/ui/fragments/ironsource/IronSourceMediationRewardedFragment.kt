@@ -1,6 +1,7 @@
 package net.pubnative.lite.demo.ui.fragments.ironsource
 
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -24,13 +25,14 @@ class IronSourceMediationRewardedFragment : Fragment(R.layout.fragment_ironsourc
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        IronSource.setRewardedVideoListener(this)
 
         errorView = view.findViewById(R.id.view_error)
         showButton = view.findViewById(R.id.button_show)
 
         val adUnitId =
             SettingsManager.getInstance(requireActivity()).getSettings().ironSourceRewardedAdUnitId
+
+        initializeIronSource()
 
         showButton.isEnabled = IronSource.isRewardedVideoAvailable()
 
@@ -48,13 +50,8 @@ class IronSourceMediationRewardedFragment : Fragment(R.layout.fragment_ironsourc
         }
     }
 
-    override fun onDestroy() {
-        IronSource.removeRewardedVideoListener()
-        super.onDestroy()
-    }
-
     override fun onRewardedVideoAvailabilityChanged(available: Boolean) {
-        requireActivity().runOnUiThread {
+        activity?.let {
             if (available) {
                 Log.d(TAG, "onRewardedVideoAvailabilityChanged: available")
                 displayLogs()
@@ -72,7 +69,7 @@ class IronSourceMediationRewardedFragment : Fragment(R.layout.fragment_ironsourc
     }
 
     override fun onRewardedVideoAdClosed() {
-        requireActivity().runOnUiThread {
+        activity?.let {
             Log.d(TAG, "onRewardedVideoAdClosed")
             showButton.isEnabled = false
         }
@@ -92,7 +89,7 @@ class IronSourceMediationRewardedFragment : Fragment(R.layout.fragment_ironsourc
 
     override fun onRewardedVideoAdShowFailed(error: IronSourceError?) {
         Log.d(TAG, "onRewardedVideoAdShowFailed")
-        requireActivity().runOnUiThread {
+        activity?.let {
             errorView.text = error?.errorMessage
             showButton.isEnabled = false
         }
@@ -103,9 +100,31 @@ class IronSourceMediationRewardedFragment : Fragment(R.layout.fragment_ironsourc
     }
 
     private fun displayLogs() {
-        if (activity != null) {
-            val activity = activity as TabActivity
-            activity.notifyAdUpdated()
+        activity?.let {
+            if (it is TabActivity) {
+                it.notifyAdUpdated()
+            }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        IronSource.setRewardedVideoListener(this)
+    }
+
+    override fun onStop() {
+        IronSource.removeRewardedVideoListener()
+        super.onStop()
+    }
+
+    private fun initializeIronSource() {
+        val settings = SettingsManager.getInstance(requireContext()).getSettings()
+        val appKey = settings.ironSourceAppKey
+        if (!TextUtils.isEmpty(appKey)) {
+            IronSource.init(
+                requireActivity(), appKey, IronSource.AD_UNIT.BANNER,
+                IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.REWARDED_VIDEO
+            )
         }
     }
 }

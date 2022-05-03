@@ -55,7 +55,9 @@ public class HyBidMediationNativeCustomEvent implements CustomEventNative, HyBid
             zoneId = HyBidAdmobUtils.getZoneId(serverParameter);
             appToken = HyBidAdmobUtils.getAppToken(serverParameter);
         } else {
-            Logger.e(TAG, "Could not find the required params in CustomEventBanner serverExtras");
+            Logger.e(TAG, "Could not find the required params in CustomEventNative serverExtras. " +
+                    "Required params in CustomEventNative serverExtras must be provided as a valid JSON Object. " +
+                    "Please consult HyBid documentation and update settings in your AdMob publisher dashboard.");
             mNativeListener.onAdFailedToLoad(AdRequest.ERROR_CODE_INVALID_REQUEST);
             return;
         }

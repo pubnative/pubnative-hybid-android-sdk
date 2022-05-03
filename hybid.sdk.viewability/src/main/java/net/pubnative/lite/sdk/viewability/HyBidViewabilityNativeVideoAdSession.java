@@ -20,6 +20,7 @@ import java.util.List;
 
 public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNativeAdSession {
     private static final String TAG = HyBidViewabilityNativeVideoAdSession.class.getSimpleName();
+    private static final String OM_EXCEPTION = "OM SDK Ad Session - Exception";
 
     private MediaEvents mMediaEvents;
 
@@ -57,7 +58,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
             createMediaEvents();
             mAdSession.start();
         } catch (Exception exception) {
-            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
+            Logger.e(TAG, OM_EXCEPTION, exception);
         }
     }
 
@@ -67,7 +68,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
                 mMediaEvents = MediaEvents.createMediaEvents(mAdSession);
             }
         } catch (Exception exception) {
-            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
+            Logger.e(TAG, OM_EXCEPTION, exception);
         }
     }
 
@@ -82,7 +83,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
                 mAdEvents.loaded(vastProperties);
             }
         } catch (Exception exception) {
-            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
+            Logger.e(TAG, OM_EXCEPTION, exception);
         }
     }
 
@@ -96,7 +97,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
                 startFired = true;
             }
         } catch (Exception exception) {
-            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
+            Logger.e(TAG, OM_EXCEPTION, exception);
         }
     }
 
@@ -110,7 +111,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
                 firstQuartileFired = true;
             }
         } catch (Exception exception) {
-            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
+            Logger.e(TAG, OM_EXCEPTION, exception);
         }
     }
 
@@ -124,7 +125,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
                 midpointFired = true;
             }
         } catch (Exception exception) {
-            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
+            Logger.e(TAG, OM_EXCEPTION, exception);
         }
     }
 
@@ -138,7 +139,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
                 thirdQuartileFired = true;
             }
         } catch (Exception exception) {
-            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
+            Logger.e(TAG, OM_EXCEPTION, exception);
         }
     }
 
@@ -152,7 +153,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
                 completeFired = true;
             }
         } catch (Exception exception) {
-            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
+            Logger.e(TAG, OM_EXCEPTION, exception);
         }
     }
 
@@ -165,7 +166,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
                 mMediaEvents.pause();
             }
         } catch (Exception exception) {
-            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
+            Logger.e(TAG, OM_EXCEPTION, exception);
         }
     }
 
@@ -178,7 +179,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
                 mMediaEvents.resume();
             }
         } catch (Exception exception) {
-            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
+            Logger.e(TAG, OM_EXCEPTION, exception);
         }
     }
 
@@ -194,7 +195,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
                 mMediaEvents.bufferStart();
             }
         } catch (Exception exception) {
-            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
+            Logger.e(TAG, OM_EXCEPTION, exception);
         }
     }
 
@@ -210,7 +211,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
                 mMediaEvents.bufferFinish();
             }
         } catch (Exception exception) {
-            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
+            Logger.e(TAG, OM_EXCEPTION, exception);
         }
     }
 
@@ -224,7 +225,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
                 mMediaEvents.volumeChange(mute ? 0 : 1);
             }
         } catch (Exception exception) {
-            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
+            Logger.e(TAG, OM_EXCEPTION, exception);
         }
     }
 
@@ -240,7 +241,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
                 mMediaEvents.skipped();
             }
         } catch (Exception exception) {
-            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
+            Logger.e(TAG, OM_EXCEPTION, exception);
         }
     }
 
@@ -253,7 +254,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
                 mMediaEvents.adUserInteraction(InteractionType.CLICK);
             }
         } catch (Exception exception) {
-            Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
+            Logger.e(TAG, OM_EXCEPTION, exception);
         }
     }
 }

@@ -22,7 +22,6 @@
 //
 package net.pubnative.lite.sdk.api;
 
-import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.models.AdSize;
 
 /**

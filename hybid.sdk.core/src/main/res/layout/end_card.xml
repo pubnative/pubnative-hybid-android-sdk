@@ -7,17 +7,17 @@
     android:background="#000">
 
     <ImageView
-        android:id="@+id/endCardView"
+        android:id="@+id/staticEndCardView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="fitCenter" />
+        android:scaleType="fitCenter"
+        android:visibility="gone" />
 
-    <ImageView
-        android:id="@+id/replayView"
-        android:layout_width="@dimen/replay_view_size"
-        android:layout_height="@dimen/replay_view_size"
-        android:scaleType="center"
-        android:src="@drawable/replay" />
+    <FrameLayout
+        android:id="@+id/htmlEndCardContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
 
     <ImageView
         android:id="@+id/closeView"

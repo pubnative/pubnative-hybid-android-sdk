@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.View;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
@@ -19,8 +20,8 @@ public class VideoAd extends BaseVideoAd {
 
     private volatile VideoAdView mBannerView;
 
-    public VideoAd(Context context, String data, boolean isInterstitial, boolean isFullscreen, AdPresenter.ImpressionListener impressionListener) throws Exception {
-        super(context, data, isInterstitial, isFullscreen,impressionListener);
+    public VideoAd(Context context, Ad ad, boolean isInterstitial, boolean isFullscreen, AdPresenter.ImpressionListener impressionListener) throws Exception {
+        super(context, ad, isInterstitial, isFullscreen,impressionListener);
     }
 
     @Override
@@ -138,22 +139,19 @@ public class VideoAd extends BaseVideoAd {
      */
     @Override
     public void dismiss() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Logger.d(LOG_TAG, "Video will be dismissed");
-                if (getAdState() == AdState.SHOWING) {
-                    if (mBannerView != null) {
-                        mBannerView.setVisibility(View.GONE);
-                        mBannerView.removeAllViews();
-                    }
-                    if (getAdController() != null) {
-                        getAdController().dismiss();
-                    }
-                    onBannerHide();
-                } else {
-                    Logger.e(LOG_TAG, "Can't dismiss ad, it's not displaying");
+        runOnUiThread(() -> {
+            Logger.d(LOG_TAG, "Video will be dismissed");
+            if (getAdState() == AdState.SHOWING) {
+                if (mBannerView != null) {
+                    mBannerView.setVisibility(View.GONE);
+                    mBannerView.removeAllViews();
                 }
+                if (getAdController() != null) {
+                    getAdController().dismiss();
+                }
+                onBannerHide();
+            } else {
+                Logger.e(LOG_TAG, "Can't dismiss ad, it's not displaying");
             }
         });
     }

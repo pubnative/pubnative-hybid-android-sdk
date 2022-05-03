@@ -82,13 +82,10 @@ public class MRAIDInterstitial extends MRAIDView {
         if (state == STATE_DEFAULT) {
             state = STATE_HIDDEN;
             clearView();
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    fireStateChangeEvent();
-                    if (listener != null) {
-                        listener.mraidViewClose(MRAIDInterstitial.this);
-                    }
+            handler.post(() -> {
+                fireStateChangeEvent();
+                if (listener != null) {
+                    listener.mraidViewClose(MRAIDInterstitial.this);
                 }
             });
         }

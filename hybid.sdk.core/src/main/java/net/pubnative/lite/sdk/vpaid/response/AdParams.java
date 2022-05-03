@@ -2,6 +2,7 @@ package net.pubnative.lite.sdk.vpaid.response;
 
 import com.iab.omid.library.pubnativenet.adsession.VerificationScriptResource;
 
+import net.pubnative.lite.sdk.vpaid.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.models.vast.AdServingId;
 import net.pubnative.lite.sdk.vpaid.models.vast.Category;
 import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
@@ -19,16 +20,18 @@ public class AdParams {
     private boolean vpaid;
     private String adParams;
     private String vpaidJsUrl;
+    private String ctaExtensionHtml;
     private String skipTime;
     private Icon adIcon;
     private int publisherSkipSeconds = 0;
 
     private final List<String> videoFileUrlsList = new ArrayList<>();
-    private final List<String> endCardUrlList = new ArrayList<>();
+    private final List<EndCardData> endCardList = new ArrayList<>();
     private final List<String> impressions = new ArrayList<>();
     private final List<String> companionCreativeViewEvents = new ArrayList<>();
     private final List<String> videoClicks = new ArrayList<>();
     private final List<String> endCardClicks = new ArrayList<>();
+    private final List<String> ctaExtensionClicks = new ArrayList<>();
     private final List<Tracking> events = new ArrayList<>();
     private final List<AdServingId> adServingIds = new ArrayList<>();
     private final List<Category> adCategories = new ArrayList<>();
@@ -123,6 +126,16 @@ public class AdParams {
         }
     }
 
+    public List<String> getCtaExtensionClicks() {
+        return ctaExtensionClicks;
+    }
+
+    public void setCtaExtensionClicks(List<String> ctaExtensionClicks) {
+        if (ctaExtensionClicks != null) {
+            this.ctaExtensionClicks.addAll(ctaExtensionClicks);
+        }
+    }
+
     public List<String> getEndCardClicks() {
         return endCardClicks;
     }
@@ -151,13 +164,13 @@ public class AdParams {
         }
     }
 
-    public List<String> getEndCardUrlList() {
-        return endCardUrlList;
+    public List<EndCardData> getEndCardList() {
+        return endCardList;
     }
 
-    public void setEndCardUrlList(List<String> endCardUrlList) {
-        if (endCardUrlList != null) {
-            this.endCardUrlList.addAll(endCardUrlList);
+    public void setEndCardList(List<EndCardData> endCardList) {
+        if (endCardList != null) {
+            this.endCardList.addAll(endCardList);
         }
     }
 
@@ -213,5 +226,13 @@ public class AdParams {
 
     public List<Category> getAdCategories() {
         return adCategories;
+    }
+
+    public String getCtaExtensionHtml() {
+        return ctaExtensionHtml;
+    }
+
+    public void setCtaExtensionHtml(String ctaExtensionHtml) {
+        this.ctaExtensionHtml = ctaExtensionHtml;
     }
 }

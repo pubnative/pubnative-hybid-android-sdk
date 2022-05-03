@@ -12,8 +12,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
+@Config(sdk = 29)
 public class HyBidInterstitialActivityTest {
     private HyBidInterstitialActivity subject;
     private long broadcastIdentifier;
@@ -65,7 +67,7 @@ public class HyBidInterstitialActivityTest {
         subject = Robolectric.buildActivity(TestInterstitialActivity.class, intent)
                 .create().destroy().get();
 
-        Assert.assertEquals(getContentView(subject).getChildCount(), 0);
+        Assert.assertEquals(0, getContentView(subject).getChildCount());
     }
 
     @Test
@@ -77,7 +79,7 @@ public class HyBidInterstitialActivityTest {
 
         subject = Robolectric.buildActivity(TestInterstitialActivity.class, intent)
                 .create().get();
-        Assert.assertEquals(subject.getBroadcastSender().getBroadcastId(), 2222L);
+        Assert.assertEquals(2222L, subject.getBroadcastSender().getBroadcastId());
     }
 
     protected FrameLayout getContentView(HyBidInterstitialActivity subject) {

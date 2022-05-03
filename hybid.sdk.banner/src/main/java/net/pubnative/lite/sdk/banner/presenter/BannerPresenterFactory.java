@@ -27,6 +27,7 @@ import android.content.Context;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
+import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
 import net.pubnative.lite.sdk.models.RemoteConfigFeature;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.presenter.PresenterFactory;
@@ -45,6 +46,11 @@ public class BannerPresenterFactory extends PresenterFactory {
 
     @Override
     public AdPresenter fromCreativeType(int assetGroupId, Ad ad) {
+        return fromCreativeType(assetGroupId, ad, ImpressionTrackingMethod.AD_RENDERED);
+    }
+
+    @Override
+    protected AdPresenter fromCreativeType(int assetGroupId, Ad ad, ImpressionTrackingMethod trackingMethod) {
         switch (assetGroupId) {
             case ApiAssetGroupType.MRAID_160x600:
             case ApiAssetGroupType.MRAID_250x250:
@@ -61,13 +67,13 @@ public class BannerPresenterFactory extends PresenterFactory {
                 return HyBid.getConfigManager() != null
                         && !HyBid.getConfigManager().getFeatureResolver()
                         .isRenderingSupported(RemoteConfigFeature.Rendering.MRAID) ?
-                        null : new MraidAdPresenter(getContext(), ad);
+                        null : new MraidAdPresenter(getContext(), ad, trackingMethod);
             }
             case ApiAssetGroupType.VAST_MRECT: {
                 return HyBid.getConfigManager() != null
                         && !HyBid.getConfigManager().getFeatureResolver()
                         .isRenderingSupported(RemoteConfigFeature.Rendering.VAST) ?
-                        null : new VastAdPresenter(getContext(), ad);
+                        null : new VastAdPresenter(getContext(), ad, trackingMethod);
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for banner ad format.");

@@ -26,6 +26,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.*
+import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
@@ -39,16 +40,16 @@ import net.pubnative.lite.sdk.api.ApiManager
  * Created by erosgarciaponte on 30.01.18.
  */
 class HyBidSettingsFragment : Fragment(R.layout.fragment_hybid_settings) {
-    private val REQUEST_KEYWORDS = 1
-    private val REQUEST_ZONE_IDS = 2
-    private val REQUEST_BROWSER_PRIORITY = 3
+//    private val REQUEST_KEYWORDS = 1
+//    private val REQUEST_ZONE_IDS = 2
+//    private val REQUEST_BROWSER_PRIORITY = 3
 
     private lateinit var appTokenInput: EditText
     private lateinit var ageInput: EditText
     private lateinit var apiUrlInput: EditText
-    private lateinit var coppaSwitch: Switch
-    private lateinit var testModeSwitch: Switch
-    private lateinit var locationTrackingSwitch: Switch
+    private lateinit var coppaSwitch: SwitchCompat
+    private lateinit var testModeSwitch: SwitchCompat
+    private lateinit var locationTrackingSwitch: SwitchCompat
     private lateinit var genderRadioGroup: RadioGroup
     private lateinit var settingManager: SettingsManager
 
@@ -67,17 +68,17 @@ class HyBidSettingsFragment : Fragment(R.layout.fragment_hybid_settings) {
 
         view.findViewById<Button>(R.id.button_keywords).setOnClickListener {
             val intent = Intent(activity, KeywordsActivity::class.java)
-            startActivityForResult(intent, REQUEST_KEYWORDS)
+            startActivity(intent)
         }
 
         view.findViewById<Button>(R.id.button_zone_ids).setOnClickListener {
             val intent = Intent(activity, ZoneIdsActivity::class.java)
-            startActivityForResult(intent, REQUEST_ZONE_IDS)
+            startActivity(intent)
         }
 
         view.findViewById<Button>(R.id.button_browser_priority).setOnClickListener {
             val intent = Intent(activity, BrowserPriorityActivity::class.java)
-            startActivityForResult(intent, REQUEST_BROWSER_PRIORITY)
+            startActivity(intent)
         }
 
         view.findViewById<Button>(R.id.button_save_pn_settings).setOnClickListener {

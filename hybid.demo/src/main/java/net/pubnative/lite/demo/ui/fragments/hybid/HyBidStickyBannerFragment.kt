@@ -12,6 +12,7 @@ import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
+import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.HyBidError
 import net.pubnative.lite.sdk.models.AdSize
 import net.pubnative.lite.sdk.views.HyBidAdView
@@ -114,6 +115,12 @@ class HyBidStickyBannerFragment : Fragment(R.layout.fragment_sticky_top_bottom),
         Log.d(TAG, "onAdImpression")
         if (!TextUtils.isEmpty(hybidBanner.creativeId)) {
             creativeIdView.text = hybidBanner.creativeId
+        }
+        if (HyBid.getDiagnosticsManager() != null) {
+            HyBid.getDiagnosticsManager().printPlacementDiagnosticsLog(
+                requireContext(),
+                hybidBanner.placementParams
+            )
         }
     }
 

@@ -66,7 +66,7 @@
                 android:text="@string/radio_sound_mute" />
         </RadioGroup>
 
-        <Switch
+        <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/check_mraid_expand"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -75,7 +75,7 @@
             android:layout_marginEnd="16dp"
             android:text="@string/check_mraid_expand" />
 
-        <Switch
+        <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/check_location_tracking"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -84,7 +84,7 @@
             android:layout_marginEnd="16dp"
             android:text="@string/check_location_tracking" />
 
-        <Switch
+        <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/check_location_updates"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -105,7 +105,7 @@
             android:textSize="14sp"
             android:textStyle="bold" />
 
-        <Switch
+        <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/check_auto_close"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -25,6 +25,8 @@ package net.pubnative.lite.sdk.views;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -35,7 +37,6 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import net.pubnative.lite.sdk.CacheListener;
-import net.pubnative.lite.sdk.DiagnosticConstants;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
@@ -54,6 +55,7 @@ import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
+import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.RemoteConfigAdSource;
 import net.pubnative.lite.sdk.models.RemoteConfigFeature;
@@ -82,9 +84,9 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     private Position mPosition;
     private WindowManager mWindowManager;
     private FrameLayout mContainer;
-    private static String mScreenIabCategory;
-    private static String mScreenKeywords;
-    private static String mUserIntent;
+    private String mScreenIabCategory;
+    private String mScreenKeywords;
+    private String mUserIntent;
 
     public interface Listener {
         void onAdLoaded();
@@ -104,13 +106,19 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
 
     protected PriorityQueue<Ad> mAuctionResponses;
     private boolean mAutoShowOnLoad = true;
-    private final static String mAdFormat = Reporting.AdFormat.BANNER;
+    private final String mAdFormat = Reporting.AdFormat.BANNER;
     private Auction mAuction;
     private SignalDataProcessor mSignalDataProcessor;
     private JSONObject mPlacementParams;
     private long mInitialLoadTime = -1;
     private long mInitialRenderTime = -1;
     private String mIntegrationType = IntegrationType.STANDALONE.getCode();
+    private ImpressionTrackingMethod mTrackingMethod = ImpressionTrackingMethod.AD_RENDERED;
+
+    private Long mAutoRefreshTime = 0L;
+    private String mAppToken = null;
+    private String mZoneId = null;
+    private final android.os.Handler mHandler = new Handler(Looper.getMainLooper());
 
     public HyBidAdView(Context context) {
         super(context);
@@ -166,6 +174,8 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     }
 
     public void load(String appToken, String zoneId, HyBidAdView.Listener listener) {
+        mAppToken = appToken;
+        mZoneId = zoneId;
         mListener = listener;
         if (HyBid.isInitialized()) {
             cleanup();
@@ -177,7 +187,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
                 if (TextUtils.isEmpty(zoneId)) {
                     invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ZONE_ID));
                 } else {
-                    addReportingKey(DiagnosticConstants.KEY_ZONE_ID, zoneId);
+                    addReportingKey(Reporting.Key.ZONE_ID, zoneId);
 
                     ConfigManager configManager = HyBid.getConfigManager();
                     if (configManager != null && configManager.getConfig() != null
@@ -256,22 +266,16 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         //Integration Type
         addReportingKey(Reporting.Key.INTEGRATION_TYPE, mIntegrationType);
 
-        addReportingKey(DiagnosticConstants.KEY_AD_POSITION, position.name());
+        addReportingKey(Reporting.Key.AD_POSITION, position.name());
 
         if (mWindowManager == null) {
             mWindowManager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
             WindowManager.LayoutParams localLayoutParams = new WindowManager.LayoutParams();
 
-            switch (position) {
-                case TOP: {
-                    localLayoutParams.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
-                    break;
-                }
-
-                case BOTTOM: {
-                    localLayoutParams.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
-                    break;
-                }
+            if (position == Position.TOP) {
+                localLayoutParams.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+            } else if (position == Position.BOTTOM) {
+                localLayoutParams.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
             }
 
             localLayoutParams.flags = WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -296,7 +300,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         startTracking();
 
         if (mInitialRenderTime != -1) {
-            addReportingKey(DiagnosticConstants.KEY_RENDER_TIME,
+            addReportingKey(Reporting.Key.RENDER_TIME,
                     System.currentTimeMillis() - mInitialRenderTime);
         }
 
@@ -304,6 +308,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     }
 
     public void destroy() {
+        stopAutoRefresh();
         cleanup();
         if (mRequestManager != null) {
             mRequestManager.destroy();
@@ -375,6 +380,9 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
 
     public void setAutoShowOnLoad(boolean autoShowOnLoad) {
         this.mAutoShowOnLoad = autoShowOnLoad;
+        if (!autoShowOnLoad) {
+            stopAutoRefresh();
+        }
     }
 
     public boolean isAutoCacheOnLoad() {
@@ -406,7 +414,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
     protected AdPresenter createPresenter() {
         mInitialRenderTime = System.currentTimeMillis();
         return new BannerPresenterFactory(getContext())
-                .createPresenter(mAd, this, this);
+                .createPresenter(mAd, mTrackingMethod, this, this);
     }
 
     public void renderAd() {
@@ -414,35 +422,39 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         long adExpireTime = mInitialLoadTime + TIME_TO_EXPIRE;
 
         if (currentTime < adExpireTime) {
+            if (mPresenter == null) {
 
-            //Banner
-            mPresenter = createPresenter();
-            if (mPresenter != null) {
-                mPresenter.setVideoListener(this);
-                mPresenter.load();
-            } else {
-                invokeOnLoadFailed(new HyBidError(HyBidErrorCode.UNSUPPORTED_ASSET));
+                //Banner
+                mPresenter = createPresenter();
+                if (mPresenter != null) {
+                    mPresenter.setVideoListener(this);
+                    mPresenter.load();
+                } else {
+                    invokeOnLoadFailed(new HyBidError(HyBidErrorCode.UNSUPPORTED_ASSET));
 
-                if (HyBid.getReportingController() != null) {
-                    ReportingEvent renderErrorEvent = new ReportingEvent();
-                    renderErrorEvent.setAppToken(HyBid.getAppToken());
-                    renderErrorEvent.setEventType(Reporting.EventType.RENDER_ERROR);
-                    renderErrorEvent.setErrorCode(HyBidErrorCode.UNSUPPORTED_ASSET.getCode());
-                    renderErrorEvent.setErrorMessage(HyBidErrorCode.UNSUPPORTED_ASSET.getMessage());
-                    renderErrorEvent.setTimestamp(System.currentTimeMillis());
-                    renderErrorEvent.setZoneId(mAd.getZoneId());
-                    renderErrorEvent.setAdFormat(mAdFormat);
-                    renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
-                    renderErrorEvent.setIntegrationType(mIntegrationType);
-                    if (mAd != null && !TextUtils.isEmpty(mAd.getVast())) {
-                        renderErrorEvent.setVast(mAd.getVast());
+                    if (HyBid.getReportingController() != null) {
+                        ReportingEvent renderErrorEvent = new ReportingEvent();
+                        renderErrorEvent.setAppToken(HyBid.getAppToken());
+                        renderErrorEvent.setEventType(Reporting.EventType.RENDER_ERROR);
+                        renderErrorEvent.setErrorCode(HyBidErrorCode.UNSUPPORTED_ASSET.getCode());
+                        renderErrorEvent.setErrorMessage(HyBidErrorCode.UNSUPPORTED_ASSET.getMessage());
+                        renderErrorEvent.setTimestamp(System.currentTimeMillis());
+                        renderErrorEvent.setZoneId(mAd.getZoneId());
+                        renderErrorEvent.setAdFormat(mAdFormat);
+                        renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
+                        renderErrorEvent.setIntegrationType(mIntegrationType);
+                        if (mAd != null && !TextUtils.isEmpty(mAd.getVast())) {
+                            renderErrorEvent.setVast(mAd.getVast());
+                        }
+                        renderErrorEvent.mergeJSONObject(getPlacementParams());
+
+                        getAdTypeAndCreative(renderErrorEvent);
+
+                        HyBid.getReportingController().reportEvent(renderErrorEvent);
                     }
-                    renderErrorEvent.mergeJSONObject(getPlacementParams());
-
-                    getAdTypeAndCreative(renderErrorEvent);
-
-                    HyBid.getReportingController().reportEvent(renderErrorEvent);
                 }
+            } else {
+                Logger.e(TAG, "Ad is already rendering. Dropping call.");
             }
         } else {
             Logger.e(TAG, "Ad has expired.");
@@ -496,6 +508,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
                 @Override
                 public void onProcessed(Ad ad) {
                     if (ad != null) {
+                        mTrackingMethod = ImpressionTrackingMethod.AD_VIEWABLE;
                         mAd = ad;
                         renderAd();
                     } else {
@@ -644,14 +657,14 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         long loadTime = -1;
         if (mInitialLoadTime != -1) {
             loadTime = System.currentTimeMillis() - mInitialLoadTime;
-            addReportingKey(DiagnosticConstants.KEY_TIME_TO_LOAD, loadTime);
+            addReportingKey(Reporting.Key.TIME_TO_LOAD, loadTime);
         }
 
         if (HyBid.getReportingController() != null) {
             ReportingEvent loadEvent = new ReportingEvent();
             loadEvent.setEventType(Reporting.EventType.LOAD);
             loadEvent.setAdFormat(Reporting.AdFormat.BANNER);
-            loadEvent.setCustomInteger(DiagnosticConstants.KEY_TIME_TO_LOAD, loadTime);
+            loadEvent.setCustomInteger(Reporting.Key.TIME_TO_LOAD, loadTime);
             loadEvent.mergeJSONObject(getPlacementParams());
             HyBid.getReportingController().reportEvent(loadEvent);
         }
@@ -665,7 +678,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         long loadTime = -1;
         if (mInitialLoadTime != -1) {
             loadTime = System.currentTimeMillis() - mInitialLoadTime;
-            addReportingKey(DiagnosticConstants.KEY_TIME_TO_LOAD_FAILED,
+            addReportingKey(Reporting.Key.TIME_TO_LOAD_FAILED,
                     loadTime);
         }
 
@@ -673,7 +686,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
             ReportingEvent loadFailEvent = new ReportingEvent();
             loadFailEvent.setEventType(Reporting.EventType.LOAD_FAIL);
             loadFailEvent.setAdFormat(Reporting.AdFormat.BANNER);
-            loadFailEvent.setCustomInteger(DiagnosticConstants.KEY_TIME_TO_LOAD, loadTime);
+            loadFailEvent.setCustomInteger(Reporting.Key.TIME_TO_LOAD, loadTime);
             loadFailEvent.mergeJSONObject(getPlacementParams());
             HyBid.getReportingController().reportEvent(loadFailEvent);
         }
@@ -718,7 +731,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
 
             startTracking();
             if (mInitialRenderTime != -1) {
-                addReportingKey(DiagnosticConstants.KEY_RENDER_TIME,
+                addReportingKey(Reporting.Key.RENDER_TIME,
                         System.currentTimeMillis() - mInitialRenderTime);
             }
         } else {
@@ -749,6 +762,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
             case ApiAssetGroupType.VAST_MRECT: {
                 reportingEvent.setAdType("VAST");
                 reportingEvent.setCreative(mAd.getVast());
+                break;
             }
 
             default: {
@@ -783,9 +797,35 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         mVideoListener = videoListener;
     }
 
+    public void setTrackingMethod(ImpressionTrackingMethod trackingMethod) {
+        if (trackingMethod != null) {
+            this.mTrackingMethod = trackingMethod;
+        }
+    }
+
+    private void refresh() {
+        mHandler.removeCallbacksAndMessages(null);
+        if (mAutoRefreshTime > 0) {
+            mHandler.postDelayed(() ->
+                    load(mAppToken, mZoneId, mListener), mAutoRefreshTime);
+        }
+    }
+
+    public void setAutoRefreshTimeInSeconds(int seconds) {
+        if (mAutoShowOnLoad) {
+            mAutoRefreshTime = seconds * 1000L;
+        }
+    }
+
+    public void stopAutoRefresh() {
+        mAutoRefreshTime = 0L;
+        mHandler.removeCallbacksAndMessages(null);
+    }
+
     //------------------------------ RequestManager Callbacks --------------------------------------
     @Override
     public void onRequestSuccess(Ad ad) {
+        refresh();
         if (ad == null) {
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NULL_AD));
         } else {
@@ -800,6 +840,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
 
     @Override
     public void onRequestFail(Throwable throwable) {
+        refresh();
         invokeOnLoadFailed(throwable);
     }
 

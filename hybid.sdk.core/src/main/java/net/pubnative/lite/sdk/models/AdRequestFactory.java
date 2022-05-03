@@ -88,12 +88,7 @@ public class AdRequestFactory {
         mIsRewarded = isRewarded;
         if (TextUtils.isEmpty(advertisingId) && context != null) {
             try {
-                PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(context, new HyBidAdvertisingId.Listener() {
-                    @Override
-                    public void onHyBidAdvertisingIdFinish(String advertisingId, Boolean limitTracking) {
-                        processAdvertisingId(appToken, zoneid, adSize, advertisingId, limitTracking, callback);
-                    }
-                }));
+                PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(context, (advertisingId1, limitTracking1) -> processAdvertisingId(appToken, zoneid, adSize, advertisingId1, limitTracking1, callback)));
             } catch (Exception exception) {
                 Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
             }
@@ -229,7 +224,8 @@ public class AdRequestFactory {
                 APIMeta.POINTS,
                 APIMeta.REVENUE_MODEL,
                 APIMeta.CONTENT_INFO,
-                APIMeta.CREATIVE_ID};
+                APIMeta.CREATIVE_ID,
+                APIMeta.RENDERING_OPTIONS};
         return TextUtils.join(",", metaFields);
     }
 

@@ -34,7 +34,6 @@ import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.config.ConfigManager;
-import net.pubnative.lite.sdk.DiagnosticConstants;
 import net.pubnative.lite.sdk.config.FeatureResolver;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdRequest;
@@ -52,6 +51,7 @@ import net.pubnative.lite.sdk.utils.json.JsonOperations;
 import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
+import net.pubnative.lite.sdk.vpaid.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 
 import org.json.JSONException;
@@ -122,13 +122,17 @@ public class RequestManager {
         } else {
             mAdSize = adSize;
         }
-        JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_AD_SIZE, mAdSize.toString());
-        JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_INTEGRATION_TYPE, IntegrationType.HEADER_BIDDING.getCode());
+        JsonOperations.putJsonString(mPlacementParams, Reporting.Key.AD_SIZE, mAdSize.toString());
+        JsonOperations.putJsonString(mPlacementParams, Reporting.Key.INTEGRATION_TYPE, IntegrationType.HEADER_BIDDING.getCode());
         mConfigManager = configManager;
 
         jsonCacheParams = new JSONObject();
+        if (mAppToken == null || TextUtils.isEmpty(mAppToken)) {
+            mAppToken = HyBid.getAppToken();
+        }
+
         try {
-            jsonCacheParams.put(Reporting.Key.APP_TOKEN, TextUtils.isEmpty(mAppToken) ? HyBid.getAppToken() : mAppToken);
+            jsonCacheParams.put(Reporting.Key.APP_TOKEN, mAppToken);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -149,9 +153,9 @@ public class RequestManager {
     public void setAdSize(AdSize adSize) {
         mAdSize = adSize;
         if (adSize != null) {
-            JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_AD_SIZE, adSize.toString());
+            JsonOperations.putJsonString(mPlacementParams, Reporting.Key.AD_SIZE, adSize.toString());
         } else {
-            JsonOperations.removeJsonValue(mPlacementParams, DiagnosticConstants.KEY_AD_SIZE);
+            JsonOperations.removeJsonValue(mPlacementParams, Reporting.Key.AD_SIZE);
         }
     }
 
@@ -316,16 +320,17 @@ public class RequestManager {
 
             mRequestTimeMilliseconds = System.currentTimeMillis();
             VideoAdProcessor videoAdProcessor = new VideoAdProcessor();
-            videoAdProcessor.process(mApiClient.getContext(), ad.getVast(), null, new VideoAdProcessor.Listener() {
+            videoAdProcessor.process(mApiClient.getContext(), ad.getVast(), getAdSize(), new VideoAdProcessor.Listener() {
                 @Override
-                public void onCacheSuccess(AdParams adParams, String videoFilePath, String endCardFilePath, List<String> omidVendors) {
+                public void onCacheSuccess(AdParams adParams, String videoFilePath, EndCardData endCardData,
+                                           String endCardFilePath, List<String> omidVendors) {
                     if (mIsDestroyed) {
                         return;
                     }
                     mCacheTimeMilliseconds = System.currentTimeMillis();
 
                     if (omidVendors != null && !omidVendors.isEmpty()) {
-                        JsonOperations.putStringArray(mPlacementParams, DiagnosticConstants.KEY_OM_VENDORS, omidVendors);
+                        JsonOperations.putStringArray(mPlacementParams, Reporting.Key.OM_VENDORS, omidVendors);
                     }
 
                     try {
@@ -336,7 +341,7 @@ public class RequestManager {
 
                     reportAdCache();
 
-                    VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardFilePath);
+                    VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardData, endCardFilePath);
                     mVideoCache.put(ad.getZoneId(), adCacheItem);
                     mCacheStarted = false;
                     mCacheFinished = true;
@@ -432,7 +437,7 @@ public class RequestManager {
         if (mAdRequestFactory != null) {
             mAdRequestFactory.setMediationVendor(mediationVendor);
             if (!TextUtils.isEmpty(mediationVendor)) {
-                JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_MEDIATION_VENDOR, mediationVendor);
+                JsonOperations.putJsonString(mPlacementParams, Reporting.Key.MEDIATION_VENDOR, mediationVendor);
             }
         }
     }
@@ -440,7 +445,7 @@ public class RequestManager {
     public void setIntegrationType(IntegrationType integrationType) {
         if (mAdRequestFactory != null) {
             mAdRequestFactory.setIntegrationType(integrationType);
-            JsonOperations.putJsonString(mPlacementParams, DiagnosticConstants.KEY_INTEGRATION_TYPE, integrationType.getCode());
+            JsonOperations.putJsonString(mPlacementParams, Reporting.Key.INTEGRATION_TYPE, integrationType.getCode());
         }
     }
 
@@ -470,9 +475,9 @@ public class RequestManager {
         JSONObject finalParams = new JSONObject();
         JsonOperations.mergeJsonObjects(finalParams, mPlacementParams);
         if (getAdSize() != null) {
-            JsonOperations.putJsonString(finalParams, DiagnosticConstants.KEY_AD_SIZE, getAdSize().toString());
+            JsonOperations.putJsonString(finalParams, Reporting.Key.AD_SIZE, getAdSize().toString());
         }
-        JsonOperations.putJsonBoolean(finalParams, DiagnosticConstants.KEY_OM_ENABLED, HyBid.isViewabilityMeasurementActivated() && HyBid.getViewabilityManager() != null);
+        JsonOperations.putJsonBoolean(finalParams, Reporting.Key.OM_ENABLED, HyBid.isViewabilityMeasurementActivated() && HyBid.getViewabilityManager() != null);
         if (mApiClient != null) {
             JSONObject apiClientParams = mApiClient.getPlacementParams();
             if (apiClientParams != null) {

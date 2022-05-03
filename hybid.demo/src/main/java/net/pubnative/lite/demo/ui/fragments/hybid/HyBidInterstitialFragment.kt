@@ -34,10 +34,7 @@ import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
-import net.pubnative.lite.sdk.CacheListener
-import net.pubnative.lite.sdk.DiagnosticsManager
-import net.pubnative.lite.sdk.HyBidError
-import net.pubnative.lite.sdk.VideoListener
+import net.pubnative.lite.sdk.*
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd
 import java.util.*
 
@@ -78,6 +75,8 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
         loadButton.setOnClickListener {
+            prepareButton.isEnabled = false
+            showButton.isEnabled = false
             if (!isLoadingAd)
                 fireLoadClicked()
         }
@@ -165,10 +164,12 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
 
     override fun onInterstitialImpression() {
         Log.d(TAG, "onInterstitialImpression")
-        DiagnosticsManager.printPlacementDiagnosticsLog(
-            requireContext(),
-            interstitial?.placementParams
-        )
+        if (HyBid.getDiagnosticsManager() != null) {
+            HyBid.getDiagnosticsManager().printPlacementDiagnosticsLog(
+                requireContext(),
+                interstitial?.placementParams
+            )
+        }
     }
 
     override fun onInterstitialDismissed() {

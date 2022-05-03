@@ -25,8 +25,8 @@ package net.pubnative.lite.sdk.utils;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.DeviceInfo;
-import net.pubnative.lite.sdk.DiagnosticConstants;
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.models.AdData;
 import net.pubnative.lite.sdk.utils.json.JsonOperations;
@@ -148,13 +148,10 @@ public class AdTracker {
                     mApiClient.trackJS(url.getJS(), mTrackJSListener);
                 }
             }
-            switch (type) {
-                case CLICK:
-                    JsonOperations.putJsonArray(mPlacementParams, DiagnosticConstants.KEY_FIRED_CLICK_BEACONS, beaconsArray);
-                    break;
-                case IMPRESSION:
-                    JsonOperations.putJsonArray(mPlacementParams, DiagnosticConstants.KEY_FIRED_IMPRESSION_BEACONS, beaconsArray);
-                    break;
+            if (type == Type.CLICK) {
+                JsonOperations.putJsonArray(mPlacementParams, Reporting.Key.FIRED_CLICK_BEACONS, beaconsArray);
+            } else if (type == Type.IMPRESSION) {
+                JsonOperations.putJsonArray(mPlacementParams, Reporting.Key.FIRED_IMPRESSION_BEACONS, beaconsArray);
             }
         }
     }

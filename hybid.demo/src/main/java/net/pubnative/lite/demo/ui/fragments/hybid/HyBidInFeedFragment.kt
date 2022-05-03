@@ -27,10 +27,9 @@ import android.os.Handler
 import android.os.Looper
 import android.text.TextUtils
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -48,14 +47,11 @@ import net.pubnative.lite.sdk.models.AdSize
  * Created by erosgarciaponte on 30.01.18.
  */
 class HyBidInFeedFragment : Fragment(R.layout.fragment_hybid_infeed_banner), InFeedAdListener {
-    val TAG = HyBidInFeedFragment::class.java.simpleName
-
-    private val AUTO_REFRESH_MILLIS : Long = 30 * 1000
+    private val hyBidTAG = HyBidInFeedFragment::class.java.simpleName
 
     private var zoneId: String? = null
-    private val handler = Handler(Looper.getMainLooper())
 
-    private lateinit var autoRefreshSwitch: Switch
+    private lateinit var autoRefreshSwitch: SwitchCompat
     private lateinit var loadButton: Button
     private lateinit var errorCodeView: TextView
     private lateinit var errorView: TextView
@@ -102,10 +98,16 @@ class HyBidInFeedFragment : Fragment(R.layout.fragment_hybid_infeed_banner), InF
 
         loadButton.setOnClickListener {
             val activity = activity as TabActivity
-            handler.removeCallbacksAndMessages(null)
             activity.notifyAdCleaned()
             loadPNAd()
-            autoRefresh()
+        }
+
+        autoRefreshSwitch.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                adapter.setAutoRefresh(true)
+            } else {
+                adapter.setAutoRefresh(false)
+            }
         }
 
         errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
@@ -122,22 +124,6 @@ class HyBidInFeedFragment : Fragment(R.layout.fragment_hybid_infeed_banner), InF
         adapter.loadWithAd(adSize)
     }
 
-    fun autoRefresh(){
-        if (autoRefreshSwitch.isChecked){
-            handler.postDelayed({
-                loadPNAd()
-                autoRefresh()
-            }, AUTO_REFRESH_MILLIS)
-        } else {
-            handler.removeCallbacksAndMessages(null)
-        }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        handler.removeCallbacksAndMessages(null);
-    }
-
     // --------------- InFeedAdListener Listener --------------------
 
     override fun onInFeedAdLoaded() {
@@ -146,7 +132,7 @@ class HyBidInFeedFragment : Fragment(R.layout.fragment_hybid_infeed_banner), InF
 
     override fun onInFeedAdLoadError(error: Throwable?) {
         if (error != null && error is HyBidError) {
-            Log.e(TAG, error.message ?: " - ")
+            Log.e(hyBidTAG, error.message ?: " - ")
             errorCodeView.text = error.errorCode.code.toString()
             errorView.text = error.message ?: " - "
         } else {

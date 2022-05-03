@@ -2,7 +2,6 @@
     <string name="app_name">HyBid demo</string>
 
     <string name="native_ad">"Native"</string>
-    <string name="native_ad_recycler">"Native - RecyclerView"</string>
     <string name="banner">Banner</string>
     <string name="interstitial">Interstitial</string>
     <string name="interstitial_video">Interstitial Video</string>
@@ -17,10 +16,10 @@
 
     <string name="pn_settings">HyBid Settings</string>
     <string name="maxads_settings">MaxAds Settings</string>
-    <string name="mopub_settings">MoPub Settings</string>
     <string name="dfp_settings">DFP Settings</string>
     <string name="admob_settings">Admob Settings</string>
     <string name="ironsource_settings">IronSource Settings</string>
+    <string name="fairbid_settings">Fairbid Settings</string>
 
     <string name="load">Load</string>
     <string name="prepare">Prepare</string>
@@ -30,20 +29,10 @@
     <string name="add">Add</string>
     <string name="ad_caching_enabled">Ad caching enabled</string>
 
-    <string name="mopub">MoPub</string>
     <string name="dfp">DFP</string>
     <string name="admob">Admob</string>
     <string name="ironsource">IronSource</string>
-
-    <string name="hint_mopub_banner_ad_unit_id">Banner Ad Unit ID</string>
-    <string name="hint_mopub_medium_ad_unit_id">Medium Ad Unit ID</string>
-    <string name="hint_mopub_medium_video_ad_unit_id">Medium Video Ad Unit ID</string>
-    <string name="hint_mopub_leaderboard_ad_unit_id">Leaderboard Ad Unit ID</string>
-    <string name="hint_mopub_interstitial_ad_unit_id">Interstitial Ad Unit ID</string>
-    <string name="hint_mopub_interstitial_video_ad_unit_id">Interstitial Video Ad Unit ID</string>
-    <string name="hint_mopub_rewarded_ad_unit_id">Rewarded Ad Unit ID</string>
-    <string name="hint_mopub_native_ad_unit_id">Native Ad Unit ID</string>
-    <string name="save_mopub_settings">Save MoPub settings</string>
+    <string name="fairbid">Fairbid</string>
 
     <string name="hint_dfp_banner_ad_unit_id">Banner Ad Unit ID</string>
     <string name="hint_dfp_medium_ad_unit_id">Medium Ad Unit ID</string>
@@ -104,18 +93,7 @@
     <string name="hybid_banner">HyBid Banner</string>
     <string name="hybid_interstitial">HyBid Interstitial</string>
     <string name="hybid_medium">HyBid Medium</string>
-    <string name="hybid_leaderboard">HyBid Leaderboard</string>
     <string name="hybid_rewarded">HyBid Rewarded</string>
-
-    <string name="mopub_native">MoPub Native</string>
-    <string name="mopub_native_recycler">MoPub Native - RecyclerView</string>
-    <string name="mopub_banner">MoPub Banner</string>
-    <string name="mopub_interstitial">MoPub Interstitial</string>
-    <string name="mopub_interstitial_video">MoPub Interstitial Video</string>
-    <string name="mopub_medium">MoPub Medium</string>
-    <string name="mopub_medium_video">MoPub Medium Video</string>
-    <string name="mopub_leaderboard">MoPub Leaderboard</string>
-    <string name="mopub_rewarded">MoPub Rewarded</string>
 
     <string name="maxads">MaxAds</string>
     <string name="maxads_banner">MaxAds Banner</string>
@@ -143,14 +121,24 @@
     <string name="ironsource_interstitial">IronSource Interstitial</string>
     <string name="ironsource_rewarded">IronSource Rewarded Video</string>
 
-    <string name="pn_owned_consent">PN Owned</string>
-    <string name="pn_accept_consent">Accept consent</string>
-    <string name="pn_deny_consent">Reject consent</string>
-    <string name="pn_can_collect_data">Can collect data?</string>
-    <string name="publisher_owned_consent">Publisher Owned</string>
-    <string name="action_check">Check</string>
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
+    <string name="fairbid_banner">Fairbid Banner</string>
+    <string name="fairbid_interstitial">Fairbid Interstitial</string>
+    <string name="fairbid_rewarded">Fairbid Rewarded Video</string>
+    <string name="hint_fairbid_app_id">Fairbid App Id</string>
+    <string name="hint_fairbid_banner_ad_unit_id">Fairbid Banner Ad Unit Id</string>
+    <string name="hint_fairbid_interstitial_ad_unit_id">Fairbid Interstitial Ad Unit Id</string>
+    <string name="hint_fairbid_rewarded_ad_unit_id">Fairbid Rewarded Ad Unit Id</string>
+    <string name="save_fairbid_settings">Save Fairbid Settings</string>
+    <string name="init_fairbid">Init Fairbid SDK</string>
+
+<!--    <string name="pn_owned_consent">PN Owned</string>-->
+<!--    <string name="pn_accept_consent">Accept consent</string>-->
+<!--    <string name="pn_deny_consent">Reject consent</string>-->
+<!--    <string name="pn_can_collect_data">Can collect data?</string>-->
+<!--    <string name="publisher_owned_consent">Publisher Owned</string>-->
+<!--    <string name="action_check">Check</string>-->
+<!--    <string name="yes">Yes</string>-->
+<!--    <string name="no">No</string>-->
 
     <string name="action_ask_consent">Ask consent</string>
     <string name="action_edit_consent">Edit consent</string>
@@ -163,15 +151,12 @@
     <string name="action_check_vendor_purpose">Check all purposes for vendor</string>
     <string name="action_set">Set</string>
     <string name="action_remove">Remove</string>
-    <string name="title_pn_cmp">PubNative CMP</string>
     <string name="title_ogury_cmp">Ogury CMP</string>
     <string name="title_google_cmp">Funding Choices CMP</string>
     <string name="title_consent_strings">Consent Strings</string>
     <string name="title_vgi_id">VGI ID</string>
-    <string name="title_mopub_cmp">MoPub CMP</string>
     <string name="title_gdpr_applies">GDPR Applies</string>
     <string name="title_iab_v2_consent_string">TCF 2.0 Consent String:</string>
-    <string name="title_iab_v1_consent_string">TCF 1.0 Consent String:</string>
     <string name="title_purpose">Purposes:</string>
     <string name="title_consent_result">Consent result:</string>
     <string name="hint_vendor_id">Vendor ID</string>
@@ -199,16 +184,10 @@
     <string name="purpose_tcf2_select_personalised_ads">Select personalised ads</string>
     <string name="purpose_tcf2_select_personalised_content">Select personalised content</string>
     <string name="purpose_tcf2_store_information">Store information</string>
-    <string name="purpose_tcf1_ad">Ad</string>
-    <string name="purpose_tcf1_content">Content</string>
-    <string name="purpose_tcf1_information">Information</string>
-    <string name="purpose_tcf1_measurement">Measurement</string>
-    <string name="purpose_tcf1_personalisation">Personalisation</string>
 
     <string name="mediation">Mediation</string>
 
     <string name="creative_id">Creative ID:</string>
-    <string name="impression_id">Impression ID:</string>
     <string name="error_code">Error code:</string>
     <string name="error">Error:</string>
     <string name="banner_ad_size">Ad Size:</string>
@@ -228,16 +207,9 @@
 
     <string name="ad">Ad</string>
     <string name="debug">Debug</string>
-    <string name="privacy_policy">Privacy policy:</string>
-    <string name="vendor_list">Vendor list:</string>
-    <string name="consent_result">Consent result:</string>
-    <string name="consent_given">Accepted</string>
-    <string name="consent_refused">Refused</string>
-    <string name="consent_dnt">DNT</string>
-    <string name="consent_unknown">Unknown</string>
-
 
     <string name="title_markup">Custom markup</string>
+    <string name="title_creative_tester">P161 Creative Tester</string>
     <string name="title_signal_data_tester">Signal data tester</string>
     <string name="ad_size">Ad size:</string>
 
@@ -246,9 +218,8 @@
     <string name="title_mediation_test_suite">Google Mediation Test Suite</string>
     <string name="open_mediation_test_suite">Open Mediation Test Suite</string>
 
-    <string name="title_analytics">Analytics</string>
-
     <string name="check_auto_refresh">Auto Refresh Enabled (30 sec)</string>
+    <string name="check_auto_show">Auto Show on Load</string>
 
     <string name="title_bundle_id">Bundle Id</string>
 
@@ -280,4 +251,8 @@
     <string name="radio_sound_on">On</string>
     <string name="radio_sound_mute">Mute</string>
     <string name="radio_sound_default">Default</string>
+
+    <string name="hint_creative_id">Enter creative ID</string>
+    <string name="sdk_and_build_versions">SDK and Build versions</string>
+    <string name="sdk_and_build_version_concat">SDK Version: %s build: %s</string>
 </resources>

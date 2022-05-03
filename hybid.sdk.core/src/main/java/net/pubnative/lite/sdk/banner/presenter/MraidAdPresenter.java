@@ -23,9 +23,11 @@
 package net.pubnative.lite.sdk.banner.presenter;
 
 import android.content.Context;
+import android.view.View;
 
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
 import net.pubnative.lite.sdk.mraid.MRAIDBanner;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeature;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
@@ -35,6 +37,8 @@ import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.UrlHandler;
+import net.pubnative.lite.sdk.visibility.ImpressionManager;
+import net.pubnative.lite.sdk.visibility.ImpressionTracker;
 
 import org.json.JSONObject;
 
@@ -42,20 +46,26 @@ import org.json.JSONObject;
  * Created by erosgarciaponte on 08.01.18.
  */
 
-public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNativeFeatureListener {
+public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNativeFeatureListener, ImpressionTracker.Listener {
     private final Context mContext;
     private final Ad mAd;
+    private final ImpressionTrackingMethod mTrackingMethod;
     private final UrlHandler mUrlHandlerDelegate;
     private final String[] mSupportedNativeFeatures;
 
     private AdPresenter.Listener mListener;
     private ImpressionListener mImpressionListener;
     private MRAIDBanner mMRAIDBanner;
-    private boolean mIsDestroyed;
+    private boolean mIsDestroyed = false;
 
-    public MraidAdPresenter(Context context, Ad ad) {
+    public MraidAdPresenter(Context context, Ad ad, ImpressionTrackingMethod trackingMethod) {
         mContext = context;
         mAd = ad;
+        if (trackingMethod != null) {
+            mTrackingMethod = trackingMethod;
+        } else {
+            mTrackingMethod = ImpressionTrackingMethod.AD_RENDERED;
+        }
         mUrlHandlerDelegate = new UrlHandler(context);
         mSupportedNativeFeatures = new String[]{
                 MRAIDNativeFeature.CALENDAR,
@@ -113,13 +123,18 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
 
     @Override
     public void startTracking() {
-
+        if (mMRAIDBanner != null && mTrackingMethod == ImpressionTrackingMethod.AD_VIEWABLE) {
+            ImpressionManager.startTrackingView(mMRAIDBanner, this);
+        }
     }
 
     @Override
     public void stopTracking() {
         if (mMRAIDBanner != null) {
             mMRAIDBanner.stopAdSession();
+            if (mTrackingMethod == ImpressionTrackingMethod.AD_VIEWABLE) {
+                ImpressionManager.stopTrackingView(mMRAIDBanner);
+            }
         }
     }
 
@@ -135,8 +150,11 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
         }
 
         if (mListener != null) {
-            mListener.onAdLoaded(this, mraidView);
-            mImpressionListener.onImpression();
+            mListener.onAdLoaded(this, mMRAIDBanner);
+            if (mTrackingMethod == ImpressionTrackingMethod.AD_RENDERED
+                    && mImpressionListener != null) {
+                mImpressionListener.onImpression();
+            }
         }
     }
 
@@ -211,5 +229,12 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
     @Override
     public void mraidNativeFeatureSendSms(String url) {
 
+    }
+
+    @Override
+    public void onImpression(View visibleView) {
+        if (mImpressionListener != null) {
+            mImpressionListener.onImpression();
+        }
     }
 }

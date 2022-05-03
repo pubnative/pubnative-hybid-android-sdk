@@ -48,21 +48,6 @@ data class SettingsModel(
     var videoSkipOffset: Int,
     var endCardCloseButtonDelay: Int,
     var videoClickBehaviour: Boolean,
-    var mopubBannerAdUnitId: String,
-    var mopubMediumAdUnitId: String,
-    var mopubMediumVideoAdUnitId: String,
-    var mopubLeaderboardAdUnitId: String,
-    var mopubInterstitialAdUnitId: String,
-    var mopubInterstitialVideoAdUnitId: String,
-    var mopubRewardedAdUnitId: String,
-    var mopubMediationBannerAdUnitId: String,
-    var mopubMediationMediumAdUnitId: String,
-    var mopubMediationMediumVideoAdUnitId: String,
-    var mopubMediationLeaderboardAdUnitId: String,
-    var mopubMediationInterstitialAdUnitId: String,
-    var mopubMediationInterstitialVideoAdUnitId: String,
-    var mopubMediationRewardedAdUnitId: String,
-    var mopubMediationNativeAdUnitId: String,
     var dfpBannerAdUnitId: String,
     var dfpMediumAdUnitId: String,
     var dfpLeaderboardAdUnitId: String,
@@ -90,7 +75,11 @@ data class SettingsModel(
     var maxAdsMRectAdUnitId: String,
     var maxAdsInterstitialAdUnitId: String,
     var maxAdsRewardedAdUnitId: String,
-    var maxAdsNativeAdUnitId: String
+    var maxAdsNativeAdUnitId: String,
+    var fairbidAppId: String,
+    var fairbidMediationBannerAdUnitId: String,
+    var fairbidMediationInterstitialAdUnitId: String,
+    var fairbidMediationRewardedAdUnitId: String
 ) : Parcelable {
     companion object {
         @JvmField
@@ -123,17 +112,6 @@ data class SettingsModel(
         parcel.readInt(),
         parcel.readInt(),
         parcel.readInt() != 0,
-        parcel.readString()!!,
-        parcel.readString()!!,
-        parcel.readString()!!,
-        parcel.readString()!!,
-        parcel.readString()!!,
-        parcel.readString()!!,
-        parcel.readString()!!,
-        parcel.readString()!!,
-        parcel.readString()!!,
-        parcel.readString()!!,
-        parcel.readString()!!,
         parcel.readString()!!,
         parcel.readString()!!,
         parcel.readString()!!,
@@ -241,23 +219,6 @@ data class SettingsModel(
         }
         dest?.writeInt(videoClickBehaviourByte)
 
-        dest?.writeString(mopubBannerAdUnitId)
-        dest?.writeString(mopubMediumAdUnitId)
-        dest?.writeString(mopubMediumVideoAdUnitId)
-        dest?.writeString(mopubLeaderboardAdUnitId)
-        dest?.writeString(mopubInterstitialAdUnitId)
-        dest?.writeString(mopubInterstitialVideoAdUnitId)
-        dest?.writeString(mopubRewardedAdUnitId)
-
-        dest?.writeString(mopubMediationBannerAdUnitId)
-        dest?.writeString(mopubMediationMediumAdUnitId)
-        dest?.writeString(mopubMediationMediumVideoAdUnitId)
-        dest?.writeString(mopubMediationLeaderboardAdUnitId)
-        dest?.writeString(mopubMediationInterstitialAdUnitId)
-        dest?.writeString(mopubMediationInterstitialVideoAdUnitId)
-        dest?.writeString(mopubMediationRewardedAdUnitId)
-        dest?.writeString(mopubMediationNativeAdUnitId)
-
         dest?.writeString(dfpBannerAdUnitId)
         dest?.writeString(dfpMediumAdUnitId)
         dest?.writeString(dfpLeaderboardAdUnitId)
@@ -290,6 +251,11 @@ data class SettingsModel(
         dest?.writeString(maxAdsInterstitialAdUnitId)
         dest?.writeString(maxAdsRewardedAdUnitId)
         dest?.writeString(maxAdsNativeAdUnitId)
+
+        dest?.writeString(fairbidAppId)
+        dest?.writeString(fairbidMediationBannerAdUnitId)
+        dest?.writeString(fairbidMediationInterstitialAdUnitId)
+        dest?.writeString(fairbidMediationRewardedAdUnitId)
     }
 
     override fun describeContents(): Int = 0

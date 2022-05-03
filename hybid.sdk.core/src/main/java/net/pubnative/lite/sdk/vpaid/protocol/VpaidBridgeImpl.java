@@ -262,23 +262,13 @@ public class VpaidBridgeImpl implements VpaidBridge {
     @JavascriptInterface
     public void vpaidAdSkipped() {
         Logger.d(LOG_TAG, "JS: vpaidAdSkipped");
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mBridge.onAdSkipped();
-            }
-        });
+        runOnUiThread(mBridge::onAdSkipped);
     }
 
     @JavascriptInterface
     public void vpaidAdStopped() {
         Logger.d(LOG_TAG, "JS: vpaidAdStopped");
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mBridge.onAdStopped();
-            }
-        });
+        runOnUiThread(mBridge::onAdStopped);
     }
 
     @JavascriptInterface

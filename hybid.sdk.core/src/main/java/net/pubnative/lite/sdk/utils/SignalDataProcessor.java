@@ -14,6 +14,7 @@ import net.pubnative.lite.sdk.models.SignalData;
 import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
+import net.pubnative.lite.sdk.vpaid.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 
 import org.json.JSONObject;
@@ -144,12 +145,13 @@ public class SignalDataProcessor {
                 VideoAdProcessor videoAdProcessor = new VideoAdProcessor();
                 videoAdProcessor.process(mApiClient.getContext(), ad.getVast(), null, new VideoAdProcessor.Listener() {
                     @Override
-                    public void onCacheSuccess(AdParams adParams, String videoFilePath, String endCardFilePath, List<String> omidVendors) {
+                    public void onCacheSuccess(AdParams adParams, String videoFilePath, EndCardData endCardData,
+                                               String endCardFilePath, List<String> omidVendors) {
                         if (mIsDestroyed) {
                             return;
                         }
 
-                        VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardFilePath);
+                        VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardData, endCardFilePath);
                         mVideoCache.put(zoneId, adCacheItem);
                         if (mListener != null) {
                             mListener.onProcessed(ad);

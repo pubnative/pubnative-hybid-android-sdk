@@ -6,6 +6,11 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.text.TextUtils;
 
+import net.pubnative.lite.sdk.analytics.Reporting;
+import net.pubnative.lite.sdk.analytics.ReportingController;
+import net.pubnative.lite.sdk.analytics.ReportingEvent;
+import net.pubnative.lite.sdk.analytics.ReportingEventCallback;
+import net.pubnative.lite.sdk.models.RemoteConfigFeature;
 import net.pubnative.lite.sdk.utils.Logger;
 
 import org.json.JSONException;
@@ -14,23 +19,43 @@ import org.json.JSONObject;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class DiagnosticsManager {
+public class DiagnosticsManager implements ReportingEventCallback {
     private static final String TAG = DiagnosticsManager.class.getSimpleName();
 
-    public enum Event {
-        INITIALISATION("Initialisation"),
-        AD_REQUEST("Ad Request"),
-        UNKNOWN("Unknown");
+    private final String googleAdsPackageId;
 
-        final String eventName;
-
-        Event(String eventName) {
-            this.eventName = eventName;
+    public DiagnosticsManager(Context context, ReportingController reportingController) {
+        if (context != null) {
+            googleAdsPackageId = getGoogleAdsAppId(context);
+        } else {
+            googleAdsPackageId = "";
         }
 
-        public String getEventName() {
-            return eventName;
+        if (reportingController != null) {
+            reportingController.addCallback(this);
         }
+    }
+
+    @Override
+    public void onEvent(ReportingEvent event) {
+        if (event != null && !TextUtils.isEmpty(event.getEventType())
+                && event.getEventType().equals(Reporting.EventType.SDK_INIT)
+                && isDiagnosticsEnabled()) {
+            reportInitialisation(event);
+        }
+    }
+
+    private Boolean isDiagnosticsEnabled() {
+        Boolean isEnabled = HyBid.isDiagnosticsEnabled();
+
+        if (!isEnabled)
+            isEnabled = HyBid.getConfigManager().getFeatureResolver().isDiagnosticsModeEnabled(RemoteConfigFeature.Reporting.DIAGNOSTIC_REPORT);
+
+        return isEnabled;
+    }
+
+    private void reportInitialisation(ReportingEvent event) {
+        printDiagnosticsLog(event);
     }
 
     //Ad format classes
@@ -68,21 +93,21 @@ public class DiagnosticsManager {
     private static final String GAM_HEADER_BIDDING_LEADERBOARD_ADAPTER_CLASS = "net.pubnative.lite.adapters.dfp.HyBidDFPLeaderboardCustomEvent";
     private static final String GAM_HEADER_BIDDING_INTERSTITIAL_ADAPTER_CLASS = "net.pubnative.lite.adapters.dfp.HyBidDFPInterstitialCustomEvent";
 
-    public static void printDiagnosticsLog(Context context) {
-        printDiagnosticsLog(context, Event.UNKNOWN);
+    public void printDiagnosticsLog() {
+        Logger.d(TAG, getDiagnosticsLog(null));
     }
 
-    public static void printDiagnosticsLog(Context context, Event event) {
-        Logger.d(TAG, getDiagnosticsLog(context, event));
+    public void printDiagnosticsLog(ReportingEvent event) {
+        Logger.d(TAG, getDiagnosticsLog(event));
     }
 
-    public static synchronized String getDiagnosticsLog(Context context, Event event) {
+    private synchronized String getDiagnosticsLog(ReportingEvent event) {
         StringBuilder logBuilder = new StringBuilder();
 
         logBuilder.append("\nHyBid Diagnostics Log:\n\n");
 
         if (HyBid.isInitialized()) {
-            logBuilder.append("Event: ").append(event).append("\n");
+            logBuilder.append("Event: ").append(event.getEventType()).append("\n");
             logBuilder.append("Version: ").append(HyBid.getHyBidVersion()).append("\n");
             logBuilder.append("Bundle Id: ").append(HyBid.getBundleId()).append("\n");
             logBuilder.append("App Token: ").append(HyBid.getAppToken()).append("\n");
@@ -97,7 +122,6 @@ public class DiagnosticsManager {
             logBuilder.append("Device Model: ").append(Build.MODEL).append("\n");
             logBuilder.append("Device Manufacturer: ").append(Build.MANUFACTURER).append("\n");
 
-            String googleAdsPackageId = getGoogleAdsAppId(context);
             if (!TextUtils.isEmpty(googleAdsPackageId)) {
                 logBuilder.append("Google Ads Application Id: ").append(googleAdsPackageId).append("\n");
             }
@@ -129,11 +153,12 @@ public class DiagnosticsManager {
         return logBuilder.toString();
     }
 
-    public static void printPlacementDiagnosticsLog(Context context, JSONObject placementParams) {
-        Logger.d(TAG, generatePlacementDiagnosticsLog(context, placementParams));
+    public void printPlacementDiagnosticsLog(Context context, JSONObject placementParams) {
+        if (HyBid.isDiagnosticsEnabled())
+            Logger.d(TAG, generatePlacementDiagnosticsLog(context, placementParams));
     }
 
-    private static String getAvailableFormats() {
+    private String getAvailableFormats() {
         StringBuilder formatsBuilder = new StringBuilder();
 
         if (checkAvailableClass(FORMAT_BANNER_CLASS)) {
@@ -156,7 +181,7 @@ public class DiagnosticsManager {
         return formatsBuilder.toString();
     }
 
-    private static String getAvailableAdapters() {
+    private String getAvailableAdapters() {
         StringBuilder adaptersBuilder = new StringBuilder();
 
         if (checkAvailableClass(MOPUB_MEDIATION_BANNER_ADAPTER_CLASS)) {
@@ -233,7 +258,7 @@ public class DiagnosticsManager {
         return adaptersBuilder.toString();
     }
 
-    private static boolean checkAvailableClass(String className) {
+    private boolean checkAvailableClass(String className) {
         try {
             Class.forName(className);
             return true;
@@ -242,7 +267,7 @@ public class DiagnosticsManager {
         }
     }
 
-    private static String getGoogleAdsAppId(Context context) {
+    private String getGoogleAdsAppId(Context context) {
         try {
             ApplicationInfo info = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
             if (info != null && info.metaData != null) {

@@ -1,6 +1,4 @@
 include ':hybid.demo',
-        ':hybid.adapters.mopub',
-        ':hybid.adapters.mopub-510',
         ':hybid.adapters.dfp',
         ':hybid.adapters.admob',
         ':hybid.adapters.ironsource',

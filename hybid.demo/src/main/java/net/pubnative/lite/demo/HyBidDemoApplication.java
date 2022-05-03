@@ -22,6 +22,7 @@
 //
 package net.pubnative.lite.demo;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.text.TextUtils;
@@ -31,14 +32,12 @@ import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
 
 import com.applovin.sdk.AppLovinSdk;
-import com.applovin.sdk.AppLovinSdkConfiguration;
+import com.fyber.FairBid;
 import com.google.android.gms.ads.MobileAds;
-import com.ogury.cm.OguryChoiceManager;
-import com.ogury.cm.OguryCmConfig;
 import com.ogury.sdk.Ogury;
 import com.ogury.sdk.OguryConfiguration;
 
-import net.pubnative.lite.demo.managers.MoPubManager;
+import net.pubnative.lite.demo.managers.AnalyticsSubscriber;
 import net.pubnative.lite.demo.managers.SettingsManager;
 import net.pubnative.lite.demo.models.SettingsModel;
 import net.pubnative.lite.sdk.HyBid;
@@ -84,15 +83,13 @@ public class HyBidDemoApplication extends MultiDexApplication {
 
         String appToken = settings.getAppToken();
 
-        MoPubManager.initMoPubSdk(this, settings.getMopubMediationBannerAdUnitId(), appToken);
-
-        /*HyBid.initialize(appToken, this, new HyBid.InitialisationListener() {
+        HyBid.initialize(appToken, this, new HyBid.InitialisationListener() {
             @Override
             public void onInitialisationFinished(boolean success) {
                 // HyBid SDK has been initialised
                 HyBid.addReportingCallback(AnalyticsSubscriber.INSTANCE.getEventCallback());
             }
-        });*/
+        });
 
         HyBid.setLogLevel(Logger.Level.debug);
 
@@ -109,6 +106,7 @@ public class HyBidDemoApplication extends MultiDexApplication {
 
         HyBid.setHtmlInterstitialSkipOffset(settings.getSkipOffset());
         HyBid.setVideoInterstitialSkipOffset(settings.getVideoSkipOffset());
+        HyBid.setEndCardCloseButtonDelay(settings.getEndCardCloseButtonDelay());
 
         HyBid.setInterstitialClickBehaviour(getInterstitialActionBehaviourFromSettings(settings.getVideoClickBehaviour()));
 
@@ -148,6 +146,8 @@ public class HyBidDemoApplication extends MultiDexApplication {
 
         });
 
+        FairBid.start(Constants.FAIRBID_APP_ID, (Activity) getApplicationContext());
+
         OguryConfiguration.Builder oguryConfigBuilder = new OguryConfiguration.Builder(this, Constants.OGURY_KEY);
         Ogury.start(oguryConfigBuilder.build());
 
@@ -184,21 +184,6 @@ public class HyBidDemoApplication extends MultiDexApplication {
                     Constants.VIDEO_SKIP_OFFSET_DEFAULT,
                     Constants.ENDCARD_CLOSE_BUTTON_DELAY_DEFAULT,
                     Constants.VIDEO_CLICK_BEHAVIOUR_DEFAULT,
-                    Constants.MOPUB_MRAID_BANNER_AD_UNIT,
-                    Constants.MOPUB_MRAID_MEDIUM_AD_UNIT,
-                    Constants.MOPUB_VAST_MEDIUM_AD_UNIT,
-                    Constants.MOPUB_MRAID_LEADERBOARD_AD_UNIT,
-                    Constants.MOPUB_MRAID_INTERSTITIAL_AD_UNIT,
-                    Constants.MOPUB_VAST_INTERSTITIAL_AD_UNIT,
-                    Constants.MOPUB_VAST_REWARDED_AD_UNIT,
-                    Constants.MOPUB_MEDIATION_BANNER_AD_UNIT,
-                    Constants.MOPUB_MEDIATION_MEDIUM_AD_UNIT,
-                    Constants.MOPUB_MEDIATION_MEDIUM_VIDEO_AD_UNIT,
-                    Constants.MOPUB_MEDIATION_LEADERBOARD_AD_UNIT,
-                    Constants.MOPUB_MEDIATION_INTERSTITIAL_AD_UNIT,
-                    Constants.MOPUB_MEDIATION_INTERSTITIAL_VIDEO_AD_UNIT,
-                    Constants.MOPUB_MEDIATION_REWARDED_AD_UNIT,
-                    Constants.MOPUB_MEDIATION_NATIVE_AD_UNIT,
                     Constants.DFP_MRAID_BANNER_AD_UNIT,
                     Constants.DFP_MRAID_MEDIUM_AD_UNIT,
                     Constants.DFP_MRAID_LEADERBOARD_AD_UNIT,
@@ -226,7 +211,11 @@ public class HyBidDemoApplication extends MultiDexApplication {
                     Constants.MAXADS_MRECT_AD_UNIT,
                     Constants.MAXADS_INTERSTITIAL_AD_UNIT,
                     Constants.MAXADS_REWARDED_AD_UNIT,
-                    Constants.MAXADS_NATIVE_AD_UNIT);
+                    Constants.MAXADS_NATIVE_AD_UNIT,
+                    Constants.FAIRBID_APP_ID,
+                    Constants.FAIRBID_MEDIATION_BANNER_AD_UNIT,
+                    Constants.FAIRBID_MEDIATION_INTERSTITIAL_AD_UNIT,
+                    Constants.FAIRBID_MEDIATION_REWARDED_AD_UNIT);
             manager.setSettings(model, true);
         }
 

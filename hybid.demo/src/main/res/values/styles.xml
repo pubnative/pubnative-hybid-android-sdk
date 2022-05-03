@@ -10,6 +10,7 @@
         <item name="colorOnSecondary">@color/secondary_text</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowBackground">@color/white</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -27,4 +28,7 @@
         <item name="android:maxHeight">13dip</item>
     </style>
 
+    <style name="textStyleTheme">
+        <item name="android:selectableItemBackground">@color/white</item>
+    </style>
 </resources>

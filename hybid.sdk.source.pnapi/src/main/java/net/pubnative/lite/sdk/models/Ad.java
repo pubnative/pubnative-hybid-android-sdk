@@ -231,12 +231,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             result.setIconUrl(data.getStringField(DATA_CONTENTINFO_ICON_KEY));
             result.setIconClickUrl(data.getStringField(DATA_CONTENTINFO_LINK_KEY));
             result.setContextText(data.getText());
-            result.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    ((PNAPIContentInfoView) view).openLayout();
-                }
-            });
+            result.setOnClickListener(view -> ((PNAPIContentInfoView) view).openLayout());
         }
         return result;
     }
@@ -283,12 +278,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             } else {
                 result.setContextText(contentInfo.getText());
             }
-            result.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    ((PNAPIContentInfoView) view).openLayout();
-                }
-            });
+            result.setOnClickListener(view -> ((PNAPIContentInfoView) view).openLayout());
             return result;
         }
     }
@@ -298,12 +288,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         result.setIconUrl(CONTENT_INFO_ICON_URL);
         result.setIconClickUrl(CONTENT_INFO_LINK_URL);
         result.setContextText(CONTENT_INFO_TEXT);
-        result.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ((PNAPIContentInfoView) view).openLayout();
-            }
-        });
+        result.setOnClickListener(view -> ((PNAPIContentInfoView) view).openLayout());
         return result;
     }
 
@@ -349,6 +334,42 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         String creativeId = adData.getStringField(DATA_TEXT_KEY);
 
         return TextUtils.isEmpty(creativeId) ? "" : creativeId;
+    }
+
+    public Integer getUnskippableVideoDuration() {
+        AdData adData = getMeta(APIMeta.RENDERING_OPTIONS);
+
+        if (adData == null) {
+            return 0;
+        }
+
+        Integer unskippableVideoDuration = adData.getIntField("unskippableVideoDuration");
+
+        return unskippableVideoDuration == null ? 0 : unskippableVideoDuration;
+    }
+
+    public Integer getMinimumSkipOffset() {
+        AdData adData = getMeta(APIMeta.RENDERING_OPTIONS);
+
+        if (adData == null) {
+            return 0;
+        }
+
+        Integer minimumSkipOffset = adData.getIntField("minimumSkipOffset");
+
+        return minimumSkipOffset == null ? 0 : minimumSkipOffset;
+    }
+
+    public Integer getMaximumSkipOffset() {
+        AdData adData = getMeta(APIMeta.RENDERING_OPTIONS);
+
+        if (adData == null) {
+            return 0;
+        }
+
+        Integer maximumSkipOffset = adData.getIntField("maximumSkipOffset");
+
+        return maximumSkipOffset == null ? 0 : maximumSkipOffset;
     }
 
     public String getImpressionId() {

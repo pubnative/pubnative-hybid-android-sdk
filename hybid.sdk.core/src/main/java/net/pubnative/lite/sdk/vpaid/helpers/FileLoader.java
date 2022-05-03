@@ -98,12 +98,7 @@ public class FileLoader {
             }
             return;
         }
-        ExecutorHelper.getExecutor().submit(new Runnable() {
-            @Override
-            public void run() {
-                load();
-            }
-        });
+        ExecutorHelper.getExecutor().submit(() -> load());
     }
 
     private void load() {
@@ -238,12 +233,9 @@ public class FileLoader {
 
     private void handleFileFullDownloaded() {
         mIsFileFullyDownloaded = true;
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                if (mCallback != null) {
-                    mCallback.onFileLoaded(mLoadingFile.getAbsolutePath());
-                }
+        new Handler(Looper.getMainLooper()).post(() -> {
+            if (mCallback != null) {
+                mCallback.onFileLoaded(mLoadingFile.getAbsolutePath());
             }
         });
     }
@@ -252,12 +244,9 @@ public class FileLoader {
         Logger.e(LOG_TAG, "stop()");
         mStop = true;
         if (mConnection != null) {
-            ExecutorHelper.getExecutor().submit(new Runnable() {
-                @Override
-                public void run() {
-                    Logger.e(LOG_TAG, "disconnect()");
-                    mConnection.disconnect();
-                }
+            ExecutorHelper.getExecutor().submit(() -> {
+                Logger.e(LOG_TAG, "disconnect()");
+                mConnection.disconnect();
             });
         }
 

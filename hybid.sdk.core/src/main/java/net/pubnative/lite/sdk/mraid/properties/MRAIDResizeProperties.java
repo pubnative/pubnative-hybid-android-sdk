@@ -64,7 +64,7 @@ public final class MRAIDResizeProperties {
         this.allowOffscreen = allowOffscreen;
     }
 
-    static public int customClosePositionFromString(String name) {
+    public static int customClosePositionFromString(String name) {
         final List<String> names = Arrays.asList(
                 "top-left",
                 "top-center",

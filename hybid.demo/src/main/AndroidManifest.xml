@@ -28,11 +28,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
-        tools:ignore="GoogleAppIndexingWarning">
+        tools:ignore="GoogleAppIndexingWarning,UnusedAttribute">
+
         <activity
             android:name=".ui.activities.NavigationActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait">
+            android:exported="true"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -45,361 +47,348 @@
             android:name=".ui.activities.hybid.HyBidNativeActivity"
             android:label="@string/hybid_native"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.hybid.HyBidBannerActivity"
             android:label="@string/hybid_banner"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.hybid.HyBidStickyBannerActivity"
             android:label="@string/hybid_banner"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.hybid.HyBidInFeedBannerActivity"
             android:label="@string/hybid_medium"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.hybid.HyBidInterstitialActivity"
             android:label="@string/hybid_interstitial"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.hybid.HyBidRewardedActivity"
             android:label="@string/hybid_rewarded"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.activities.mopub.MoPubBannerActivity"
-            android:label="@string/mopub_banner"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.activities.mopub.MoPubMRectActivity"
-            android:label="@string/mopub_medium"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.activities.mopub.MoPubMRectVideoActivity"
-            android:label="@string/mopub_medium_video"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.activities.mopub.MoPubLeaderboardActivity"
-            android:label="@string/mopub_leaderboard"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.activities.mopub.MoPubInterstitialActivity"
-            android:label="@string/mopub_interstitial"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.activities.mopub.MoPubInterstitialVideoActivity"
-            android:label="@string/mopub_interstitial_video"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.activities.mopub.MoPubRewardedActivity"
-            android:label="@string/mopub_rewarded"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.activities.mopub.MoPubMediationBannerActivity"
-            android:label="@string/mopub_banner"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.activities.mopub.MoPubMediationMRectActivity"
-            android:label="@string/mopub_medium"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.activities.mopub.MoPubMediationMRectVideoActivity"
-            android:label="@string/mopub_medium"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.activities.mopub.MoPubMediationLeaderboardActivity"
-            android:label="@string/mopub_leaderboard"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.activities.mopub.MoPubMediationInterstitialActivity"
-            android:label="@string/mopub_interstitial"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.activities.mopub.MoPubMediationInterstitialVideoActivity"
-            android:label="@string/mopub_interstitial_video"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.activities.mopub.MoPubMediationRewardedActivity"
-            android:label="@string/mopub_rewarded"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.activities.mopub.MoPubMediationNativeActivity"
-            android:label="@string/mopub_native"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.activities.mopub.MoPubMediationNativeRecyclerViewActivity"
-            android:label="@string/mopub_native_recycler"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.maxads.MaxAdsMediationBannerActivity"
             android:label="@string/maxads_banner"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.maxads.MaxAdsMediationMRectActivity"
             android:label="@string/maxads_mrect"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.maxads.MaxAdsMediationInterstitialActivity"
             android:label="@string/maxads_interstitial"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.maxads.MaxAdsMediationRewardedActivity"
             android:label="@string/maxads_rewarded"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.maxads.MaxAdsMediationNativeActivity"
             android:label="@string/maxads_native"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.dfp.DFPBannerActivity"
             android:label="@string/dfp_banner"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.dfp.DFPMRectActivity"
             android:label="@string/dfp_medium"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.dfp.DFPLeaderboardActivity"
             android:label="@string/dfp_leaderboard"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.dfp.DFPInterstitialActivity"
             android:label="@string/dfp_interstitial"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.dfp.DFPMediationBannerActivity"
             android:label="@string/dfp_banner"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.dfp.DFPMediationMRectActivity"
             android:label="@string/dfp_medium"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.dfp.DFPMediationLeaderboardActivity"
             android:label="@string/dfp_leaderboard"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.dfp.DFPMediationInterstitialActivity"
             android:label="@string/dfp_interstitial"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.admob.AdmobMediationBannerActivity"
             android:label="@string/admob_banner"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.admob.AdmobMediationMRectActivity"
             android:label="@string/admob_medium"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.admob.AdmobMediationMRectVideoActivity"
             android:label="@string/admob_medium"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.admob.AdmobMediationLeaderboardActivity"
             android:label="@string/admob_leaderboard"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.admob.AdmobMediationInterstitialActivity"
             android:label="@string/admob_interstitial"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.admob.AdmobMediationInterstitialVideoActivity"
             android:label="@string/admob_interstitial_video"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.admob.AdmobMediationRewardedActivity"
             android:label="@string/admob_rewarded"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.admob.AdmobMediationNativeActivity"
             android:label="@string/admob_native"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.ironsource.IronSourceMediationBannerActivity"
             android:label="@string/ironsource_banner"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.ironsource.IronSourceMediationInterstitialActivity"
             android:label="@string/ironsource_interstitial"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.ironsource.IronSourceMediationRewardedActivity"
             android:label="@string/ironsource_rewarded"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
+        <activity
+            android:name=".ui.activities.fairbid.FairbidMediationBannerActivity"
+            android:label="@string/fairbid_banner"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
+        <activity
+            android:name=".ui.activities.fairbid.FairbidMediationInterstitialActivity"
+            android:label="@string/fairbid_interstitial"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
+        <activity
+            android:name=".ui.activities.fairbid.FairbidMediationRewardedActivity"
+            android:label="@string/fairbid_rewarded"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.config.HyBidSettingsActivity"
             android:label="@string/pn_settings"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"
+            tools:ignore="LockedOrientationActivity" />
 
         <activity
             android:name=".ui.activities.AdCustomizationActivity"
             android:label="@string/pn_settings"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
-        <activity
-            android:name=".ui.activities.config.MoPubSettingsActivity"
-            android:label="@string/mopub_settings"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.config.MaxAdsSettingsActivity"
             android:label="@string/maxads_settings"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.config.DFPSettingsActivity"
             android:label="@string/dfp_settings"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.config.AdmobSettingsActivity"
             android:label="@string/admob_settings"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.config.IronSourceSettingsActivity"
             android:label="@string/ironsource_settings"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"
+            tools:ignore="LockedOrientationActivity" />
+        <activity
+            android:name=".ui.activities.config.FairbidSettingsActivity"
+            android:label="@string/fairbid_settings"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.config.KeywordsActivity"
             android:label="@string/title_pn_keywords"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.config.ZoneIdsActivity"
             android:label="@string/title_pn_zone_ids"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.config.BrowserPriorityActivity"
             android:label="@string/title_browser_priority"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.markup.MarkupActivity"
             android:label="@string/title_markup"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"
+            tools:ignore="LockedOrientationActivity" />
+        <activity
+            android:name=".ui.activities.creativetester.P161CreativeTesterActivity"
+            android:label="@string/title_creative_tester"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.signaldata.SignalDataActivity"
             android:label="@string/title_signal_data_tester"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"
+            tools:ignore="LockedOrientationActivity" />
 
         <activity
             android:name=".ui.activities.CustomSDKDataActivity"
             android:label="@string/custom_sdk_data"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"
+            tools:ignore="LockedOrientationActivity" />
 
         <activity
             android:name=".ui.activities.ReportingEventDetailsActivity"
             android:label="@string/event_details"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"
+            tools:ignore="LockedOrientationActivity" />
 
         <activity
             android:name=".ui.activities.consent.OguryCMPActivity"
             android:label="@string/title_ogury_cmp"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"
+            tools:ignore="LockedOrientationActivity" />
 
         <activity
             android:name=".ui.activities.consent.VgiIdActivity"
             android:label="@string/title_vgi_id"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"
+            tools:ignore="LockedOrientationActivity" />
 
         <activity
             android:name=".ui.activities.consent.GoogleCMPActivity"
             android:label="@string/title_google_cmp"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"
+            tools:ignore="LockedOrientationActivity" />
 
         <activity
             android:name=".ui.activities.consent.ConsentStringsActivity"
             android:label="@string/title_consent_strings"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
-
-        <activity
-            android:name=".ui.activities.consent.MoPubCMPActivity"
-            android:label="@string/title_mopub_cmp"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"
+            tools:ignore="LockedOrientationActivity" />
 
         <activity
             android:name=".ui.activities.audiences.NumberEightAudiencesActivity"
             android:label="@string/title_numbereight_audiences"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"
+            tools:ignore="LockedOrientationActivity" />
 
         <activity
             android:name=".ui.activities.vast.VastTagRequestActivity"
@@ -412,25 +401,6 @@
             android:label="@string/admob_settings"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
-
-        <activity
-            android:name="com.mopub.mobileads.MoPubActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name="com.mopub.mobileads.MraidActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name="com.mopub.common.MoPubBrowser"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name="com.mopub.mobileads.MraidVideoPlayerActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name="com.mopub.mobileads.RewardedMraidActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name="com.mopub.common.privacy.ConsentDialogActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <activity
             android:name="com.ironsource.sdk.controller.ControllerActivity"
@@ -449,7 +419,8 @@
 
         <provider
             android:name="com.ironsource.lifecycle.IronsourceLifecycleProvider"
-            android:authorities="${applicationId}.IronsourceLifecycleProvider" />
+            android:authorities="${applicationId}.IronsourceLifecycleProvider"
+            android:exported="false" />
 
         <meta-data
             android:name="io.fabric.ApiKey"
