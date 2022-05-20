@@ -32,17 +32,22 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import net.pubnative.lite.sdk.models.ContentInfo;
+import net.pubnative.lite.sdk.models.PositionX;
 import net.pubnative.lite.sdk.source.pnapi.R;
 import net.pubnative.lite.sdk.utils.PNBitmapDownloader;
+import net.pubnative.lite.sdk.utils.ViewUtils;
 
-public class PNAPIContentInfoView extends RelativeLayout implements View.OnClickListener {
+public class PNAPIContentInfoView extends FrameLayout implements View.OnClickListener {
 
     private static final String TAG = PNAPIContentInfoView.class.getSimpleName();
 
+    private LinearLayout mContainerView;
     private TextView mContentInfoText;
     private ImageView mContentInfoIcon;
 
@@ -66,12 +71,12 @@ public class PNAPIContentInfoView extends RelativeLayout implements View.OnClick
     }
 
     public void init(Context context) {
-
-        LayoutInflater inflator = LayoutInflater.from(context);
+        LayoutInflater inflater = LayoutInflater.from(context);
         mHandler = new Handler(Looper.getMainLooper());
-        RelativeLayout containerView = (RelativeLayout) inflator.inflate(R.layout.content_info_layout, this, true);
-        mContentInfoIcon = containerView.findViewById(R.id.ic_context_icon);
-        mContentInfoText = containerView.findViewById(R.id.tv_context_text);
+        mContainerView = (LinearLayout) inflater.inflate(R.layout.content_info_layout, this, false);
+        mContentInfoIcon = mContainerView.findViewById(R.id.ic_context_icon);
+        mContentInfoText = mContainerView.findViewById(R.id.tv_context_text);
+        addView(mContainerView);
     }
 
     public void openLayout() {
@@ -115,6 +120,27 @@ public class PNAPIContentInfoView extends RelativeLayout implements View.OnClick
         if (text != null && !text.isEmpty()) {
             mContentInfoText.setText(text);
         }
+    }
+
+    public void setDpDimensions(ContentInfo contentInfo) {
+        if (contentInfo.getPositionX() == PositionX.RIGHT) {
+            mContainerView.removeView(mContentInfoIcon);
+            mContainerView.addView(mContentInfoIcon);
+        }
+
+        LinearLayout.LayoutParams imageLayoutParams = (LinearLayout.LayoutParams) mContentInfoIcon.getLayoutParams();
+        LinearLayout.LayoutParams textLayoutParams = (LinearLayout.LayoutParams) mContentInfoText.getLayoutParams();
+
+        if (contentInfo.getWidth() != -1 && contentInfo.getHeight() != -1) {
+            imageLayoutParams.width = ViewUtils.asIntPixels(contentInfo.getWidth(), getContext());
+            imageLayoutParams.height = ViewUtils.asIntPixels(contentInfo.getHeight(), getContext());
+
+            textLayoutParams.width = LayoutParams.WRAP_CONTENT;
+            textLayoutParams.height = ViewUtils.asIntPixels(contentInfo.getHeight(), getContext());
+        }
+
+        mContentInfoIcon.setLayoutParams(imageLayoutParams);
+        mContentInfoText.setLayoutParams(textLayoutParams);
     }
 
     @Override

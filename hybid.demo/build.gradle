@@ -2,7 +2,7 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-parcelize'
-    id 'com.fyber.fairbid-sdk-plugin' version '3.26.0'
+    id 'com.fyber.fairbid-sdk-plugin' version '3.26.1'
     id 'com.google.firebase.appdistribution'
     id 'com.google.firebase.firebase-perf'
     id 'com.google.firebase.crashlytics'
@@ -88,7 +88,7 @@ dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
 
     implementation 'com.ironsource.sdk:mediationsdk:7.2.1.1'
-    implementation 'com.applovin:applovin-sdk:11.3.3'
+    implementation 'com.applovin:applovin-sdk:11.4.0'
 
     implementation 'com.google.android.gms:play-services-ads:20.6.0'
     implementation 'com.google.android.ads:mediation-test-suite:2.0.0'

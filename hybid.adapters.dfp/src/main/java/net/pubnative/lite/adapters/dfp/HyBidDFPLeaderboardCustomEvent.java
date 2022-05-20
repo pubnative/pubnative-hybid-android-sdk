@@ -22,8 +22,15 @@
 //
 package net.pubnative.lite.adapters.dfp;
 
+import net.pubnative.lite.sdk.models.AdSize;
+
 public class HyBidDFPLeaderboardCustomEvent extends HyBidDFPBannerCustomEvent {
     /*
      *  This class is kept for backwards compatibility.
      */
+
+    @Override
+    public AdSize getAdSize(com.google.android.gms.ads.AdSize adSize) {
+        return AdSize.SIZE_728x90;
+    }
 }

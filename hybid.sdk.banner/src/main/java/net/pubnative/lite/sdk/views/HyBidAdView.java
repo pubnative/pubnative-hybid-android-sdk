@@ -67,6 +67,10 @@ import net.pubnative.lite.sdk.utils.MarkupUtils;
 import net.pubnative.lite.sdk.utils.SignalDataProcessor;
 import net.pubnative.lite.sdk.utils.ViewUtils;
 import net.pubnative.lite.sdk.utils.json.JsonOperations;
+import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
+import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
+import net.pubnative.lite.sdk.vpaid.models.EndCardData;
+import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.vast.VastUrlUtils;
 
 import org.json.JSONObject;
@@ -77,7 +81,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 
-public class HyBidAdView extends RelativeLayout implements RequestManager.RequestListener, AdPresenter.Listener, AdPresenter.ImpressionListener, VideoListener, Auction.Listener {
+public class HyBidAdView extends FrameLayout implements RequestManager.RequestListener, AdPresenter.Listener, AdPresenter.ImpressionListener, VideoListener, Auction.Listener {
 
     private static final String TAG = HyBidAdView.class.getSimpleName();
     private static final int TIME_TO_EXPIRE = 1800000;
@@ -106,6 +110,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
 
     protected PriorityQueue<Ad> mAuctionResponses;
     private boolean mAutoShowOnLoad = true;
+    private boolean mIsDestroyed;
     private final String mAdFormat = Reporting.AdFormat.BANNER;
     private Auction mAuction;
     private SignalDataProcessor mSignalDataProcessor;
@@ -314,6 +319,7 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
             mRequestManager.destroy();
             mRequestManager = null;
         }
+        mIsDestroyed = true;
     }
 
     protected void cleanup() {
@@ -413,8 +419,12 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
 
     protected AdPresenter createPresenter() {
         mInitialRenderTime = System.currentTimeMillis();
+        AdSize adSize = AdSize.SIZE_320x50;
+        if (mRequestManager != null && mRequestManager.getAdSize() != null) {
+            adSize = mRequestManager.getAdSize();
+        }
         return new BannerPresenterFactory(getContext())
-                .createPresenter(mAd, mTrackingMethod, this, this);
+                .createPresenter(mAd, adSize, mTrackingMethod, this, this);
     }
 
     public void renderAd() {
@@ -602,30 +612,72 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
 
         if (!TextUtils.isEmpty(adValue)) {
             int assetGroup;
+            String zoneId;
             Ad.AdType type;
             switch (mRequestManager.getAdSize()) {
                 case SIZE_300x250: {
                     if (MarkupUtils.isVastXml(adValue)) {
                         assetGroup = 4;
+                        zoneId = "6";
                         type = Ad.AdType.VIDEO;
+                        VideoAdProcessor videoAdProcessor = new VideoAdProcessor();
+                        videoAdProcessor.process(getContext(), adValue, AdSize.SIZE_300x250, new VideoAdProcessor.Listener() {
+                            @Override
+                            public void onCacheSuccess(AdParams adParams, String videoFilePath, EndCardData endCardData, String endCardFilePath, List<String> omidVendors) {
+                                if (mIsDestroyed) {
+                                    return;
+                                }
+
+                                if (omidVendors != null && !omidVendors.isEmpty()) {
+                                    JsonOperations.putStringArray(mPlacementParams, Reporting.Key.OM_VENDORS, omidVendors);
+                                }
+
+                                VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardData, endCardFilePath);
+                                mAd = new Ad(assetGroup, adValue, type);
+                                mAd.setZoneId(zoneId);
+                                HyBid.getAdCache().put(zoneId, mAd);
+                                HyBid.getVideoAdCache().put(zoneId, adCacheItem);
+                                renderFromCustomAd();
+                            }
+
+                            @Override
+                            public void onCacheError(Throwable error) {
+                                if (mIsDestroyed) {
+                                    return;
+                                }
+
+                                Logger.w(TAG, "onCacheError", error);
+                                invokeOnLoadFailed(error);
+                            }
+                        });
                     } else {
                         assetGroup = 8;
+                        zoneId = "5";
                         type = Ad.AdType.HTML;
+                        mAd = new Ad(assetGroup, adValue, type);
+                        mAd.setZoneId(zoneId);
+                        renderFromCustomAd();
                     }
                     break;
                 }
                 case SIZE_728x90: {
                     assetGroup = 24;
+                    zoneId = "8";
                     type = Ad.AdType.HTML;
+                    mAd = new Ad(assetGroup, adValue, type);
+                    mAd.setZoneId(zoneId);
+                    renderFromCustomAd();
                     break;
                 }
                 default: {
                     assetGroup = 10;
+                    zoneId = "2";
                     type = Ad.AdType.HTML;
+                    mAd = new Ad(assetGroup, adValue, type);
+                    mAd.setZoneId(zoneId);
+                    renderFromCustomAd();
                 }
             }
-            mAd = new Ad(assetGroup, adValue, type);
-            renderFromCustomAd();
         } else {
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ASSET));
         }
@@ -720,8 +772,8 @@ public class HyBidAdView extends RelativeLayout implements RequestManager.Reques
         if (mPosition == null) {
             int width = (int) ViewUtils.convertDpToPixel(mRequestManager.getAdSize().getWidth(), getContext());
             int height = (int) ViewUtils.convertDpToPixel(mRequestManager.getAdSize().getHeight(), getContext());
-            RelativeLayout.LayoutParams adLayoutParams = new RelativeLayout.LayoutParams(width, height);
-            adLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+            FrameLayout.LayoutParams adLayoutParams = new FrameLayout.LayoutParams(width, height);
+            adLayoutParams.gravity = Gravity.CENTER;
 
             addView(view, adLayoutParams);
 

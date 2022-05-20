@@ -66,11 +66,11 @@ public class Icon {
         return height;
     }
 
-    public String getxPosition() {
+    public String getXPosition() {
         return xPosition;
     }
 
-    public String getyPosition() {
+    public String getYPosition() {
         return yPosition;
     }
 
@@ -102,7 +102,7 @@ public class Icon {
         return staticResources;
     }
 
-    public List<IFrameResource> getiFrameResources() {
+    public List<IFrameResource> getIFrameResources() {
         return iFrameResources;
     }
 

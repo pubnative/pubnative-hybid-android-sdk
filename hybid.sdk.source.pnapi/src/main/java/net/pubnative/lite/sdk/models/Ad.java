@@ -27,8 +27,10 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
+import net.pubnative.lite.sdk.utils.ViewUtils;
 import net.pubnative.lite.sdk.utils.json.BindField;
 import net.pubnative.lite.sdk.utils.json.JsonModel;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
@@ -236,11 +238,11 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         return result;
     }
 
-    public RelativeLayout getContentInfoContainer(Context context) {
+    public FrameLayout getContentInfoContainer(Context context) {
         return getContentInfoContainer(context, null);
     }
 
-    public RelativeLayout getContentInfoContainer(Context context, ContentInfo contentInfo) {
+    public FrameLayout getContentInfoContainer(Context context, ContentInfo contentInfo) {
         View contentInfoView = getCustomContentInfo(context, contentInfo);
 
         if (contentInfoView == null) {
@@ -248,13 +250,11 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         }
 
         if (contentInfoView != null) {
-            RelativeLayout contentInfoContainer = new RelativeLayout(context);
+            FrameLayout contentInfoContainer = new FrameLayout(context);
 
-            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-                    RelativeLayout.LayoutParams.WRAP_CONTENT,
-                    RelativeLayout.LayoutParams.WRAP_CONTENT);
-            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT);
 
             contentInfoContainer.setLayoutParams(layoutParams);
             contentInfoContainer.addView(contentInfoView);
@@ -264,7 +264,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         }
     }
 
-    private PNAPIContentInfoView getCustomContentInfo(Context context, ContentInfo contentInfo){
+    private PNAPIContentInfoView getCustomContentInfo(Context context, ContentInfo contentInfo) {
         if (contentInfo == null
                 || TextUtils.isEmpty(contentInfo.getIconUrl())
                 || TextUtils.isEmpty(contentInfo.getLinkUrl())) {
@@ -278,12 +278,15 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             } else {
                 result.setContextText(contentInfo.getText());
             }
+            if (contentInfo.getWidth() != -1 && contentInfo.getHeight() != -1) {
+                result.setDpDimensions(contentInfo);
+            }
             result.setOnClickListener(view -> ((PNAPIContentInfoView) view).openLayout());
             return result;
         }
     }
 
-    private PNAPIContentInfoView getDefaultContentInfo(Context context){
+    private PNAPIContentInfoView getDefaultContentInfo(Context context) {
         PNAPIContentInfoView result = new PNAPIContentInfoView(context);
         result.setIconUrl(CONTENT_INFO_ICON_URL);
         result.setIconClickUrl(CONTENT_INFO_LINK_URL);

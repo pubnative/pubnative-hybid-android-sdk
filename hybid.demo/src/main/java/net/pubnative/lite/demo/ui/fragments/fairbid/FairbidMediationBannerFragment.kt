@@ -20,7 +20,7 @@ import net.pubnative.lite.demo.util.ClipboardUtils
 
 
 class FairbidMediationBannerFragment : Fragment(R.layout.fragment_fairbid_banner),
-BannerListener {
+    BannerListener {
     val TAG = FairbidMediationBannerFragment::class.java.simpleName
 
     private lateinit var fairbidBannerContainer: FrameLayout
@@ -39,7 +39,8 @@ BannerListener {
         val bannerOptions = BannerOptions().placeInContainer(fairbidBannerContainer)
 
         adUnitId =
-            SettingsManager.getInstance(requireActivity()).getSettings().fairbidMediationBannerAdUnitId
+            SettingsManager.getInstance(requireActivity())
+                .getSettings().fairbidMediationBannerAdUnitId
 
         Banner.setBannerListener(this)
 
@@ -75,7 +76,6 @@ BannerListener {
     override fun onLoad(placementId: String) {
         Log.d(TAG, "onLoad")
         displayLogs()
-        //showButton.isEnabled = true
     }
 
     override fun onShow(placementId: String, impressionData: ImpressionData) {

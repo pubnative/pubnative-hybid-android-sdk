@@ -27,6 +27,8 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.view.View;
 
+import net.pubnative.lite.sdk.models.AdSize;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,6 +47,7 @@ public class ImpressionTracker {
     protected Handler mHandler = new Handler(Looper.getMainLooper());
     protected final Runnable mImpressionRunnable = new ImpressionRunnable();
     protected VisibilityTracker mVisibilityTracker = null;
+    protected double mVisiblePercent = DEFAULT_MIN_VISIBLE_PERCENT;
 
     protected VisibilityTracker.Listener mVisibilityListener = (visibleViews, invisibleViews) -> {
         if (mImpressionListener == null || mImpressionListener.get() == null) {
@@ -109,6 +112,23 @@ public class ImpressionTracker {
         mImpressionListener = new WeakReference<>(listener);
     }
 
+    public void setAdSize(AdSize adSize) {
+        if (adSize != null) {
+            switch (adSize) {
+                case SIZE_160x600:
+                case SIZE_300x600:
+                case SIZE_320x480:
+                case SIZE_480x320:
+                case SIZE_768x1024:
+                case SIZE_1024x768:
+                    mVisiblePercent = 0.3;
+                    break;
+                default:
+                    mVisiblePercent = DEFAULT_MIN_VISIBLE_PERCENT;
+            }
+        }
+    }
+
     /**
      * Adds a view to the list of views to be tracked
      *
@@ -120,7 +140,7 @@ public class ImpressionTracker {
             return;
         }
         mTrackingViews.add(view);
-        getVisibilityTracker().addView(view, DEFAULT_MIN_VISIBLE_PERCENT);
+        getVisibilityTracker().addView(view, mVisiblePercent);
     }
 
     /**

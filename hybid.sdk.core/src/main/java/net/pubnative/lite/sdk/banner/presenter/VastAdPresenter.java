@@ -25,14 +25,19 @@ package net.pubnative.lite.sdk.banner.presenter;
 import android.content.Context;
 import android.graphics.Color;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.ContentInfo;
 import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
+import net.pubnative.lite.sdk.models.PositionX;
+import net.pubnative.lite.sdk.models.PositionY;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.utils.CheckUtils;
@@ -62,13 +67,15 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener 
     private Icon mVastIcon;
     private boolean mIsDestroyed;
     private boolean mLoaded = false;
+    private AdSize mAdSize;
 
     private VideoAdView mVideoPlayer;
     private VideoAd mVideoAd;
     private View mContentInfo;
 
-    public VastAdPresenter(Context context, Ad ad, ImpressionTrackingMethod trackingMethod) {
+    public VastAdPresenter(Context context, Ad ad, AdSize adSize, ImpressionTrackingMethod trackingMethod) {
         mContext = context;
+        mAdSize = adSize;
         mAd = ad;
         if (trackingMethod != null) {
             mTrackingMethod = trackingMethod;
@@ -144,7 +151,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener 
     @Override
     public void startTracking() {
         if (mTrackingMethod == ImpressionTrackingMethod.AD_VIEWABLE) {
-            ImpressionManager.startTrackingView(mVideoPlayer, mNativeTrackerListener);
+            ImpressionManager.startTrackingView(mVideoPlayer, mAdSize, mNativeTrackerListener);
         } else {
             if (mVideoAd != null) {
                 mVideoAd.show();
@@ -166,9 +173,9 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener 
     }
 
     private View buildView() {
-        RelativeLayout container = new RelativeLayout(mContext);
-        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+        FrameLayout container = new FrameLayout(mContext);
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        layoutParams.gravity = Gravity.CENTER;
 
         container.setBackgroundColor(Color.BLACK);
 
@@ -184,7 +191,24 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener 
             ContentInfo contentInfo = Utils.parseContentInfo(mVastIcon);
             mContentInfo = getContentInfo(container.getContext(), getAd(), contentInfo);
             if (mContentInfo != null) {
-                container.addView(mContentInfo);
+                if (contentInfo != null) {
+                    FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) mContentInfo.getLayoutParams();
+                    int horizontalAlign = Gravity.START;
+                    int verticalAlign = Gravity.TOP;
+
+                    if (contentInfo.getPositionX() == PositionX.RIGHT) {
+                        horizontalAlign = Gravity.END;
+                    }
+
+                    if (contentInfo.getPositionY() == PositionY.BOTTOM) {
+                        verticalAlign = Gravity.BOTTOM;
+                    }
+
+                    layoutParams.gravity = horizontalAlign | verticalAlign;
+                    container.addView(mContentInfo, layoutParams);
+                } else {
+                    container.addView(mContentInfo);
+                }
                 if (contentInfo != null && contentInfo.getViewTrackers() != null && !contentInfo.getViewTrackers().isEmpty()) {
                     for (String tracker : contentInfo.getViewTrackers()) {
                         EventTracker.post(container.getContext(), tracker, null, true);

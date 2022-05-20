@@ -15,7 +15,7 @@ import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
 
 class FairbidMediationRewardedFragment : Fragment(R.layout.fragment_fairbid_rewarded),
-RewardedListener {
+    RewardedListener {
     val TAG = FairbidMediationRewardedFragment::class.java.simpleName
 
     private lateinit var loadButton: Button
@@ -31,7 +31,8 @@ RewardedListener {
         showButton.isEnabled = false
 
         val adUnitId =
-            SettingsManager.getInstance(requireActivity()).getSettings().fairbidMediationRewardedAdUnitId
+            SettingsManager.getInstance(requireActivity())
+                .getSettings().fairbidMediationRewardedAdUnitId
 
         Rewarded.setRewardedListener(this)
 
@@ -41,7 +42,9 @@ RewardedListener {
         }
 
         showButton.setOnClickListener {
-            Rewarded.show(adUnitId, activity)
+            if (Rewarded.isAvailable(adUnitId)) {
+                Rewarded.show(adUnitId, requireActivity())
+            }
         }
 
         errorView.setOnClickListener {

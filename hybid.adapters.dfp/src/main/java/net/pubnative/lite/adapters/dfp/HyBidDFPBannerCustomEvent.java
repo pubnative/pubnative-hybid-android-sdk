@@ -78,7 +78,7 @@ public class HyBidDFPBannerCustomEvent implements CustomEventBanner, AdPresenter
             return;
         }
 
-        mPresenter = new BannerPresenterFactory(context).createPresenter(ad, this);
+        mPresenter = new BannerPresenterFactory(context).createPresenter(ad, getAdSize(size), this);
         if (mPresenter == null) {
             Logger.e(TAG, "Could not create valid banner presenter");
             mBannerListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NETWORK_ERROR);
@@ -86,6 +86,11 @@ public class HyBidDFPBannerCustomEvent implements CustomEventBanner, AdPresenter
         }
 
         mPresenter.load();
+    }
+
+    public net.pubnative.lite.sdk.models.AdSize getAdSize(AdSize adSize) {
+
+        return net.pubnative.lite.sdk.models.AdSize.SIZE_320x50;
     }
 
     @Override

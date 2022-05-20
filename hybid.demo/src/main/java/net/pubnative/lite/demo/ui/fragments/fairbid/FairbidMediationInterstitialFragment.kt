@@ -15,7 +15,7 @@ import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
 
 class FairbidMediationInterstitialFragment : Fragment(R.layout.fragment_fairbid_interstitial),
-InterstitialListener {
+    InterstitialListener {
     val TAG = FairbidMediationInterstitialFragment::class.java.simpleName
 
     private lateinit var loadButton: Button
@@ -31,17 +31,20 @@ InterstitialListener {
         showButton.isEnabled = false
 
         val adUnitId =
-            SettingsManager.getInstance(requireActivity()).getSettings().fairbidMediationInterstitialAdUnitId
+            SettingsManager.getInstance(requireActivity())
+                .getSettings().fairbidMediationInterstitialAdUnitId
 
         Interstitial.setInterstitialListener(this)
 
-        loadButton.setOnClickListener{
+        loadButton.setOnClickListener {
             showButton.isEnabled = false
             Interstitial.request(adUnitId)
         }
 
         showButton.setOnClickListener {
-            Interstitial.show(adUnitId, activity)
+            if (Interstitial.isAvailable(adUnitId)) {
+                Interstitial.show(adUnitId, requireActivity())
+            }
         }
 
         errorView.setOnClickListener {

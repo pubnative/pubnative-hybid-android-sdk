@@ -146,8 +146,6 @@ public class HyBidDemoApplication extends MultiDexApplication {
 
         });
 
-        FairBid.start(Constants.FAIRBID_APP_ID, (Activity) getApplicationContext());
-
         OguryConfiguration.Builder oguryConfigBuilder = new OguryConfiguration.Builder(this, Constants.OGURY_KEY);
         Ogury.start(oguryConfigBuilder.build());
 

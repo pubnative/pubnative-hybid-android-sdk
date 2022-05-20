@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -18,6 +19,8 @@ import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastSender;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ContentInfo;
+import net.pubnative.lite.sdk.models.PositionX;
+import net.pubnative.lite.sdk.models.PositionY;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.views.CloseableContainer;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
@@ -102,7 +105,23 @@ public abstract class HyBidInterstitialActivity extends Activity {
             ContentInfo contentInfo = Utils.parseContentInfo(icon);
             View contentInfoView = getContentInfo(this, getAd(), contentInfo);
             if (contentInfoView != null) {
-                mCloseableContainer.addView(contentInfoView);
+                if (contentInfo != null) {
+                    int xGravity = Gravity.START;
+                    int yGravity = Gravity.TOP;
+
+                    if (contentInfo.getPositionX() == PositionX.RIGHT) {
+                        xGravity = Gravity.END;
+                    }
+
+                    if (contentInfo.getPositionY() == PositionY.BOTTOM) {
+                        yGravity = Gravity.BOTTOM;
+                    }
+                    FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    layoutParams.gravity = xGravity | yGravity;
+                    mCloseableContainer.addView(contentInfoView, layoutParams);
+                } else {
+                    mCloseableContainer.addView(contentInfoView);
+                }
                 if (contentInfo != null && contentInfo.getViewTrackers() != null && !contentInfo.getViewTrackers().isEmpty()) {
                     for (String tracker : contentInfo.getViewTrackers()) {
                         EventTracker.post(this, tracker, null, true);

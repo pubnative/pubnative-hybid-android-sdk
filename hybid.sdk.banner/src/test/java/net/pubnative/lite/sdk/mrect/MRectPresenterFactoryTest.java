@@ -4,6 +4,7 @@ import com.google.common.truth.Truth;
 
 import net.pubnative.lite.sdk.banner.presenter.MraidAdPresenter;
 import net.pubnative.lite.sdk.banner.presenter.VastAdPresenter;
+import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
@@ -40,12 +41,12 @@ public class MRectPresenterFactoryTest {
     public void createMRectPresenter_withHTML() {
         mTestAd = TestUtil.createTestMRectAd();
 
-        Truth.assertThat(mSubject.createPresenter(mTestAd, mMockListener)).isNotNull();
+        Truth.assertThat(mSubject.createPresenter(mTestAd, AdSize.SIZE_300x250, mMockListener)).isNotNull();
     }
 
     @Test
     public void fromCreativeType_withHTML() {
-        Truth.assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_300x250, mTestAd))
+        Truth.assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_300x250, mTestAd, AdSize.SIZE_300x250))
                 .isInstanceOf(MraidAdPresenter.class);
     }
 
@@ -53,12 +54,12 @@ public class MRectPresenterFactoryTest {
     public void createMRectPresenter_withVast() {
         mTestAd = TestUtil.createTestVideoMRectAd();
 
-        Truth.assertThat(mSubject.createPresenter(mTestAd, mMockListener)).isNotNull();
+        Truth.assertThat(mSubject.createPresenter(mTestAd, AdSize.SIZE_300x250, mMockListener)).isNotNull();
     }
 
     @Test
     public void fromCreativeType_withVast() {
-        Truth.assertThat(mSubject.fromCreativeType(ApiAssetGroupType.VAST_MRECT, mTestAd))
+        Truth.assertThat(mSubject.fromCreativeType(ApiAssetGroupType.VAST_MRECT, mTestAd, AdSize.SIZE_300x250))
                 .isInstanceOf(VastAdPresenter.class);
     }
 }

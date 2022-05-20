@@ -27,6 +27,7 @@ import android.view.View;
 
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
 import net.pubnative.lite.sdk.mraid.MRAIDBanner;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeature;
@@ -52,14 +53,16 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
     private final ImpressionTrackingMethod mTrackingMethod;
     private final UrlHandler mUrlHandlerDelegate;
     private final String[] mSupportedNativeFeatures;
+    private AdSize mAdSize;
 
     private AdPresenter.Listener mListener;
     private ImpressionListener mImpressionListener;
     private MRAIDBanner mMRAIDBanner;
     private boolean mIsDestroyed = false;
 
-    public MraidAdPresenter(Context context, Ad ad, ImpressionTrackingMethod trackingMethod) {
+    public MraidAdPresenter(Context context, Ad ad, AdSize adSize, ImpressionTrackingMethod trackingMethod) {
         mContext = context;
+        mAdSize = adSize;
         mAd = ad;
         if (trackingMethod != null) {
             mTrackingMethod = trackingMethod;
@@ -124,7 +127,7 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
     @Override
     public void startTracking() {
         if (mMRAIDBanner != null && mTrackingMethod == ImpressionTrackingMethod.AD_VIEWABLE) {
-            ImpressionManager.startTrackingView(mMRAIDBanner, this);
+            ImpressionManager.startTrackingView(mMRAIDBanner, mAdSize, this);
         }
     }
 

@@ -12,6 +12,8 @@ import android.view.Gravity;
 import android.widget.FrameLayout;
 
 import net.pubnative.lite.sdk.models.ContentInfo;
+import net.pubnative.lite.sdk.models.PositionX;
+import net.pubnative.lite.sdk.models.PositionY;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
 import net.pubnative.lite.sdk.vpaid.models.vast.IconViewTracking;
@@ -243,6 +245,38 @@ public class Utils {
             }
         }
 
-        return TextUtils.isEmpty(iconUrl) || TextUtils.isEmpty(clickUrl) ? null : new ContentInfo(iconUrl, clickUrl, "", viewTrackers);
+        PositionX positionX = PositionX.LEFT;
+        PositionY positionY = PositionY.TOP;
+
+        if (!TextUtils.isEmpty(icon.getXPosition()) && icon.getXPosition().equals(PositionX.RIGHT.getValue())) {
+            positionX = PositionX.RIGHT;
+        }
+
+        if (!TextUtils.isEmpty(icon.getYPosition()) && icon.getYPosition().equals(PositionY.BOTTOM.getValue())) {
+            positionY = PositionY.BOTTOM;
+        }
+
+        int width = -1;
+        int height = -1;
+
+        if (!TextUtils.isEmpty(icon.getWidth()) && !TextUtils.isEmpty(icon.getHeight())) {
+            int tempWidth = -1;
+            int tempHeight = -1;
+            try {
+                tempWidth = Integer.parseInt(icon.getWidth());
+                tempHeight = Integer.parseInt(icon.getHeight());
+            } catch (RuntimeException ignored) {
+
+            }
+
+            // Only use the values if both could be parsed
+            if (tempWidth != -1 && tempHeight != -1) {
+                width = tempWidth;
+                height = tempHeight;
+            }
+        }
+
+        return TextUtils.isEmpty(iconUrl) || TextUtils.isEmpty(clickUrl) ? null :
+                new ContentInfo(iconUrl, clickUrl, "", width, height, positionX, positionY, viewTrackers);
     }
 }

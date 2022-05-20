@@ -1,14 +1,16 @@
 package net.pubnative.lite.demo.ui.activities
 
 import android.Manifest
+import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.text.TextUtils
 import android.widget.Toast
-import androidx.navigation.findNavController
-import androidx.navigation.ui.NavigationUI
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.navigation.findNavController
+import androidx.navigation.ui.NavigationUI
+import com.fyber.FairBid
+import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.databinding.ActivityNavigationBinding
 
@@ -29,6 +31,8 @@ class NavigationActivity : AppCompatActivity() {
         val navController = findNavController(R.id.fragment_nav_host)
         NavigationUI.setupActionBarWithNavController(this, navController)
         NavigationUI.setupWithNavController(binding.navigation, navController)
+
+        FairBid.start(Constants.FAIRBID_APP_ID, this)
 
         checkPermissions()
     }

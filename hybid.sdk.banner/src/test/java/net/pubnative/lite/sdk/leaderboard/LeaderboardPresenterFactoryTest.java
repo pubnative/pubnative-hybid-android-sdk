@@ -3,6 +3,7 @@ package net.pubnative.lite.sdk.leaderboard;
 import com.google.common.truth.Truth;
 
 import net.pubnative.lite.sdk.banner.presenter.MraidAdPresenter;
+import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.leaderboard.presenter.LeaderboardPresenterFactory;
 import net.pubnative.lite.sdk.models.Ad;
@@ -36,12 +37,12 @@ public class LeaderboardPresenterFactoryTest {
     public void createLeaderboardPresenter_withHTML() {
         mTestAd = TestUtil.createTestLeaderboardAd();
 
-        Truth.assertThat(mSubject.createPresenter(mTestAd, mMockListener)).isNotNull();
+        Truth.assertThat(mSubject.createPresenter(mTestAd, AdSize.SIZE_728x90, mMockListener)).isNotNull();
     }
 
     @Test
     public void fromCreativeType_withHTML() {
-        Truth.assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_728x90, mTestAd))
+        Truth.assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_728x90, mTestAd, AdSize.SIZE_728x90))
                 .isInstanceOf(MraidAdPresenter.class);
     }
 }

@@ -26,6 +26,7 @@ import android.content.Context;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
 import net.pubnative.lite.sdk.models.RemoteConfigFeature;
@@ -45,12 +46,12 @@ public class BannerPresenterFactory extends PresenterFactory {
     }
 
     @Override
-    public AdPresenter fromCreativeType(int assetGroupId, Ad ad) {
-        return fromCreativeType(assetGroupId, ad, ImpressionTrackingMethod.AD_RENDERED);
+    public AdPresenter fromCreativeType(int assetGroupId, Ad ad, AdSize adSize) {
+        return fromCreativeType(assetGroupId, ad, adSize, ImpressionTrackingMethod.AD_RENDERED);
     }
 
     @Override
-    protected AdPresenter fromCreativeType(int assetGroupId, Ad ad, ImpressionTrackingMethod trackingMethod) {
+    protected AdPresenter fromCreativeType(int assetGroupId, Ad ad, AdSize adSize, ImpressionTrackingMethod trackingMethod) {
         switch (assetGroupId) {
             case ApiAssetGroupType.MRAID_160x600:
             case ApiAssetGroupType.MRAID_250x250:
@@ -67,13 +68,13 @@ public class BannerPresenterFactory extends PresenterFactory {
                 return HyBid.getConfigManager() != null
                         && !HyBid.getConfigManager().getFeatureResolver()
                         .isRenderingSupported(RemoteConfigFeature.Rendering.MRAID) ?
-                        null : new MraidAdPresenter(getContext(), ad, trackingMethod);
+                        null : new MraidAdPresenter(getContext(), ad, adSize, trackingMethod);
             }
             case ApiAssetGroupType.VAST_MRECT: {
                 return HyBid.getConfigManager() != null
                         && !HyBid.getConfigManager().getFeatureResolver()
                         .isRenderingSupported(RemoteConfigFeature.Rendering.VAST) ?
-                        null : new VastAdPresenter(getContext(), ad, trackingMethod);
+                        null : new VastAdPresenter(getContext(), ad, adSize, trackingMethod);
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for banner ad format.");

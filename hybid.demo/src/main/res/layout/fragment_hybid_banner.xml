@@ -89,7 +89,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
             android:text="@string/show"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <net.pubnative.lite.sdk.views.HyBidAdView
             android:id="@+id/hybid_banner"

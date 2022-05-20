@@ -4,6 +4,7 @@ import com.google.common.truth.Truth;
 
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
 import net.pubnative.lite.sdk.banner.presenter.MraidAdPresenter;
+import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
@@ -39,12 +40,12 @@ public class AdPresenterFactoryTest {
     public void createBannerPresenter_withHTML() {
         mTestAd = TestUtil.createTestBannerAd();
 
-        Truth.assertThat(mSubject.createPresenter(mTestAd, mMockListener)).isNotNull();
+        Truth.assertThat(mSubject.createPresenter(mTestAd, AdSize.SIZE_320x50, mMockListener)).isNotNull();
     }
 
     @Test
     public void fromCreativeType_withHTML() {
-        Truth.assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_320x50, mTestAd))
+        Truth.assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_320x50, mTestAd, AdSize.SIZE_320x50))
                 .isInstanceOf(MraidAdPresenter.class);
     }
 }

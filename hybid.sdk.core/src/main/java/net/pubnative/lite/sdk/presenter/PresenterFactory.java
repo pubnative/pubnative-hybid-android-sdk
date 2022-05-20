@@ -26,6 +26,7 @@ import android.content.Context;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
 import net.pubnative.lite.sdk.utils.AdTracker;
 
@@ -36,19 +37,19 @@ public abstract class PresenterFactory {
         mContext = context;
     }
 
-    public AdPresenter createPresenter(Ad ad,
+    public AdPresenter createPresenter(Ad ad, AdSize adSize,
                                        AdPresenter.Listener bannerPresenterListener) {
-        return createPresenter(ad, bannerPresenterListener, null);
+        return createPresenter(ad, adSize, bannerPresenterListener, null);
     }
 
-    public AdPresenter createPresenter(Ad ad,
+    public AdPresenter createPresenter(Ad ad, AdSize adSize,
                                        AdPresenter.Listener bannerPresenterListener, AdPresenter.ImpressionListener impressionListener) {
-        return createPresenter(ad, ImpressionTrackingMethod.AD_RENDERED, bannerPresenterListener, null);
+        return createPresenter(ad, adSize, ImpressionTrackingMethod.AD_RENDERED, bannerPresenterListener, impressionListener);
     }
 
-    public AdPresenter createPresenter(Ad ad, ImpressionTrackingMethod trackingMethod,
+    public AdPresenter createPresenter(Ad ad, AdSize adSize, ImpressionTrackingMethod trackingMethod,
                                        AdPresenter.Listener bannerPresenterListener, AdPresenter.ImpressionListener impressionListener) {
-        final AdPresenter adPresenter = fromCreativeType(ad.assetgroupid, ad, trackingMethod);
+        final AdPresenter adPresenter = fromCreativeType(ad.assetgroupid, ad, adSize, trackingMethod);
         if (adPresenter == null) {
             return null;
         }
@@ -65,7 +66,7 @@ public abstract class PresenterFactory {
         return mContext;
     }
 
-    protected abstract AdPresenter fromCreativeType(int assetGroupId, Ad ad);
+    protected abstract AdPresenter fromCreativeType(int assetGroupId, Ad ad, AdSize adSize);
 
-    protected abstract AdPresenter fromCreativeType(int assetGroupId, Ad ad, ImpressionTrackingMethod trackingMethod);
+    protected abstract AdPresenter fromCreativeType(int assetGroupId, Ad ad, AdSize adSize, ImpressionTrackingMethod trackingMethod);
 }

@@ -25,6 +25,8 @@ package net.pubnative.lite.sdk.visibility;
 import android.util.Log;
 import android.view.View;
 
+import net.pubnative.lite.sdk.models.AdSize;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,7 +65,19 @@ public class ImpressionManager {
      * @param listener valid listener for impressions
      */
     public static void startTrackingView(View view, ImpressionTracker.Listener listener) {
-        getInstance().addView(view, listener);
+        startTrackingView(view, null, listener);
+    }
+
+    /**
+     * Starts tracking a view removing any previous reference of this one, so there is not
+     * duplicated check, (that could happen when reusing views)
+     *
+     * @param view      view that we want to start tracking
+     * @param adSize    size of the view to be tracked
+     * @param listener  valid listener for impressions
+     */
+    public static void startTrackingView(View view, AdSize adSize, ImpressionTracker.Listener listener) {
+        getInstance().addView(view, adSize, listener);
     }
 
     /**
@@ -87,7 +101,7 @@ public class ImpressionManager {
     //==============================================================================================
     // PRIVATE
     //==============================================================================================
-    protected void addView(View view, ImpressionTracker.Listener listener) {
+    protected void addView(View view, AdSize adSize, ImpressionTracker.Listener listener) {
         // Adds view to tracker, removing any previous instance of the view on other trackers
         // This should also create an independent tracker for each listener
         if (view == null) {
@@ -114,6 +128,9 @@ public class ImpressionManager {
                 tracker = mTrackers.get(trackerIndex);
             } else {
                 tracker = new ImpressionTracker();
+                if (adSize != null) {
+                    tracker.setAdSize(adSize);
+                }
                 tracker.setListener(listener);
                 mTrackers.add(tracker);
             }
