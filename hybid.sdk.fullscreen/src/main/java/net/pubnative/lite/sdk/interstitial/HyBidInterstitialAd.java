@@ -314,7 +314,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
                 mZoneId = mAd.getZoneId();
                 JsonOperations.putJsonString(mPlacementParams, Reporting.Key.ZONE_ID, mZoneId);
             }
-            mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, this);
+            mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, this);
             if (mPresenter != null) {
                 mPresenter.setVideoListener(this);
                 mPresenter.load();
@@ -353,8 +353,11 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
                             JsonOperations.putStringArray(mPlacementParams, Reporting.Key.OM_VENDORS, omidVendors);
                         }
 
+                        boolean hasEndCard = adParams.getEndCardList() != null && !adParams.getEndCardList().isEmpty();
+
                         VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardData, endCardFilePath);
                         mAd = new Ad(assetGroupId, adValue, type);
+                        mAd.setHasEndCard(hasEndCard);
                         HyBid.getAdCache().put(mZoneId, mAd);
                         HyBid.getVideoAdCache().put(mZoneId, adCacheItem);
                         mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, HyBidInterstitialAd.this);
@@ -623,8 +626,17 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         ReportingEvent event = new ReportingEvent();
         event.setEventType(Reporting.EventType.RENDER);
         event.setAdFormat(adFormat);
+        event.setHasEndCard(hasEndCard());
         event.mergeJSONObject(placementParams);
         if (HyBid.getReportingController() != null)
             HyBid.getReportingController().reportEvent(event);
+    }
+
+    public boolean hasEndCard() {
+        if (mAd == null || !HyBid.isEndCardEnabled()) {
+            return false;
+        } else {
+            return mAd.hasEndCard();
+        }
     }
 }

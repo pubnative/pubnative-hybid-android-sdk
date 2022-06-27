@@ -87,7 +87,7 @@ public class DeviceInfo {
 
     private static final String TAG = DeviceInfo.class.getSimpleName();
     private final Context mContext;
-    private String mUserAgent;
+    private final UserAgentProvider mUserAgentProvider;
     private String mAdvertisingId;
     private String mAdvertisingIdMd5;
     private String mAdvertisingIdSha1;
@@ -99,13 +99,14 @@ public class DeviceInfo {
 
     public DeviceInfo(Context context) {
         mContext = context.getApplicationContext();
+        mUserAgentProvider = new UserAgentProvider();
         getDeviceScreenDimensions();
     }
 
     public void initialize(Listener listener) {
         mListener = listener;
-        fetchAdvertisingId();
         fetchUserAgent();
+        fetchAdvertisingId();
     }
 
     private void fetchAdvertisingId() {
@@ -130,18 +131,11 @@ public class DeviceInfo {
         }
     }
 
-    public void fetchUserAgent(){
-        Handler mainHandler = new Handler(Looper.getMainLooper());
-        mainHandler.post(() -> {
-            try {
-                mUserAgent = new WebView(mContext).getSettings().getUserAgentString();
-            } catch (RuntimeException runtimeException){
-                Logger.e(TAG, runtimeException.getMessage());
-            }
-        });
+    public void fetchUserAgent() {
+        mUserAgentProvider.initialise(mContext);
     }
 
-    public void getDeviceScreenDimensions(){
+    public void getDeviceScreenDimensions() {
         ScreenDimensionsUtils screenDimensionsUtils = new ScreenDimensionsUtils();
         Point point = screenDimensionsUtils.getScreenDimensionsToPoint(mContext);
         deviceWidth = Integer.toString(point.x);
@@ -191,7 +185,7 @@ public class DeviceInfo {
         }
     }
 
-    public void checkSoundSetting(){
+    public void checkSoundSetting() {
         SoundUtils soundUtils = new SoundUtils();
         boolean muted = soundUtils.isSoundMuted(mContext);
 
@@ -226,7 +220,7 @@ public class DeviceInfo {
         return soundSetting;
     }
 
-    public String getUserAgent(){
-        return mUserAgent;
+    public String getUserAgent() {
+        return mUserAgentProvider != null ? mUserAgentProvider.getUserAgent() : "";
     }
 }

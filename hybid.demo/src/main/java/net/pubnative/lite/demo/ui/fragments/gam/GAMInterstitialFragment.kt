@@ -106,7 +106,7 @@ class GAMInterstitialFragment : Fragment(R.layout.fragment_dfp_interstitial),
         HyBidGAMBidUtils.addBids(ad, builder)
         val adRequest = builder.build()
 
-        AdManagerInterstitialAd.load(requireActivity(), adUnitId, adRequest, adLoadCallback)
+        AdManagerInterstitialAd.load(requireActivity(), adUnitId!!, adRequest, adLoadCallback)
 
         Log.d(TAG, "onRequestSuccess")
         displayLogs()

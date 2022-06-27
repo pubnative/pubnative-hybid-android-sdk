@@ -331,8 +331,7 @@ public class VastProcessor {
                         List<EndCardData> endCardList = new ArrayList<>();
                         for (int i = 0; i < companionList.size() && endCardList.isEmpty(); i++) {
                             Companion companion = companionList.get(i);
-                            // Disable endcard for QA purposes until test ads are fixed
-                            /*if (companion.getHtmlResources() != null && !companion.getHtmlResources().isEmpty()) {
+                            if (companion.getHtmlResources() != null && !companion.getHtmlResources().isEmpty()) {
                                 for (HTMLResource htmlResource : companion.getHtmlResources()) {
                                     if (!TextUtils.isEmpty(htmlResource.getText())) {
                                         endCardList.add(new EndCardData(EndCardData.Type.HTML_RESOURCE, htmlResource.getText().trim()));
@@ -345,7 +344,7 @@ public class VastProcessor {
                                         endCardList.add(new EndCardData(EndCardData.Type.IFRAME_RESOURCE, iFrameResource.getText().trim()));
                                     }
                                 }
-                            }*/
+                            }
                             if (companion.getStaticResources() != null && !companion.getStaticResources().isEmpty()) {
                                 for (StaticResource staticResource : companion.getStaticResources()) {
                                     if (!TextUtils.isEmpty(staticResource.getText())) {

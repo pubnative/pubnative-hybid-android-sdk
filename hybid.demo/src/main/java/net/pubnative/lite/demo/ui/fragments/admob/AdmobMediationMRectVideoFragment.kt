@@ -34,7 +34,7 @@ class AdmobMediationMRectVideoFragment : Fragment(R.layout.fragment_admob_mrect_
             SettingsManager.getInstance(requireActivity()).getSettings().admobMediumVideoAdUnitId
 
         admobMRect = AdView(requireActivity())
-        admobMRect.adSize = AdSize.MEDIUM_RECTANGLE
+        admobMRect.setAdSize(AdSize.MEDIUM_RECTANGLE)
         admobMRect.adUnitId = adUnitId
         admobMRect.adListener = adListener
 

@@ -1,5 +1,6 @@
 package net.pubnative.hybid.adapters.admob.mediation;
 
+import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -50,15 +51,23 @@ public class HyBidMediationInterstitialCustomEvent implements CustomEventInterst
             return;
         }
 
-        if (appToken == null || !appToken.equals(HyBid.getAppToken())) {
-            Logger.e(TAG, "The provided app token doesn't match the one used to initialise HyBid");
-            mInterstitialListener.onAdFailedToLoad(new AdError(AdRequest.ERROR_CODE_NETWORK_ERROR,
-                    "The provided app token doesn't match the one used to initialise HyBid",
-                    AdError.UNDEFINED_DOMAIN
-            ));
-            return;
+        if (HyBid.isInitialized()) {
+            if (TextUtils.isEmpty(appToken) || !appToken.equals(HyBid.getAppToken())) {
+                Logger.e(TAG, "The provided app token doesn't match the one used to initialise HyBid");
+                mInterstitialListener.onAdFailedToLoad(new AdError(AdRequest.ERROR_CODE_NETWORK_ERROR,
+                        "The provided app token doesn't match the one used to initialise HyBid",
+                        AdError.UNDEFINED_DOMAIN
+                ));
+            } else {
+                loadInterstitial(context, zoneId);
+            }
+        } else {
+            HyBid.initialize(appToken, (Application) context.getApplicationContext(), b ->
+                    loadInterstitial(context, zoneId));
         }
+    }
 
+    private void loadInterstitial(Context context, String zoneId) {
         mInterstitialAd = new HyBidInterstitialAd(context, zoneId, this);
         mInterstitialAd.setMediation(true);
         mInterstitialAd.load();

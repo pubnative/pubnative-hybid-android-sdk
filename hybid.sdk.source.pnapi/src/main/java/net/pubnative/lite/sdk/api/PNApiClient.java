@@ -213,6 +213,11 @@ public class PNApiClient {
         } catch (Error error) {
             parseException = new HyBidError(HyBidErrorCode.PARSER_ERROR, error);
         }
+
+        processStream(apiResponseModel, parseException, listener);
+    }
+
+    public void processStream(AdResponse apiResponseModel, Exception parseException, AdRequestListener listener) {
         if (parseException != null) {
             listener.onFailure(new HyBidError(HyBidErrorCode.PARSER_ERROR, parseException));
         } else if (apiResponseModel == null) {

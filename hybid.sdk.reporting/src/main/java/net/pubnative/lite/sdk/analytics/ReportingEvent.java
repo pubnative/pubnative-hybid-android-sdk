@@ -112,6 +112,14 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.AD_SIZE);
     }
 
+    public void setHasEndCard(boolean hasEndCard) {
+        setCustomBoolean(Reporting.Key.HAS_END_CARD, hasEndCard);
+    }
+
+    public boolean getHasEndCard() {
+        return getCustomBoolean(Reporting.Key.HAS_END_CARD);
+    }
+
     public void setZoneId(String zoneId) {
         setCustomString(Reporting.Key.ZONE_ID, zoneId);
     }

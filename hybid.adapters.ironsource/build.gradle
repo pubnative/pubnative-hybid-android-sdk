@@ -42,7 +42,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':hybid.sdk')
-    compileOnly 'com.ironsource.sdk:mediationsdk:7.2.1.1'
+    compileOnly 'com.ironsource.sdk:mediationsdk:7.2.2.1'
 
     implementation project(':hybid.sdk.core')
     implementation project(':hybid.sdk.logger')

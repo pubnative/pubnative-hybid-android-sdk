@@ -16,7 +16,7 @@ public class VerveCustomAdapter extends BaseAdapter {
     public static final String KEY_APP_TOKEN = "appToken";
     public static final String KEY_ZONE_ID = "zoneId";
 
-    private static final String NETWORK_SDK_VERSION = "2.13.1";
+    private static final String NETWORK_SDK_VERSION = "2.14.0";
     private static final String ADAPTER_VERSION = NETWORK_SDK_VERSION + ".0";
 
     @Override

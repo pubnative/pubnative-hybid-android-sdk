@@ -16,7 +16,7 @@ public class SignalData extends JsonModel {
     public String admurl;
 
     @BindField
-    public String adm;
+    public AdResponse adm;
 
 
     public SignalData() {

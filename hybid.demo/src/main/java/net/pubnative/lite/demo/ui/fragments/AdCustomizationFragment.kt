@@ -19,6 +19,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization)  {
     private lateinit var locationTrackingSwitch: SwitchCompat
     private lateinit var locationUpdatesSwitch: SwitchCompat
     private lateinit var autocloseSwitch: SwitchCompat
+    private lateinit var enableEndcardSwitch: SwitchCompat
     private lateinit var htmlSkipOffsetInput: EditText
     private lateinit var videoSkipOffsetInput: EditText
     private lateinit var endCardCloseButtonDelayInput: EditText
@@ -33,6 +34,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization)  {
         locationTrackingSwitch = view.findViewById(R.id.check_location_tracking)
         locationUpdatesSwitch = view.findViewById(R.id.check_location_updates)
         autocloseSwitch = view.findViewById(R.id.check_auto_close)
+        enableEndcardSwitch = view.findViewById(R.id.check_enable_endcard)
         htmlSkipOffsetInput = view.findViewById(R.id.input_skip_offset)
         videoSkipOffsetInput = view.findViewById(R.id.input_video_skip_offset)
         endCardCloseButtonDelayInput = view.findViewById(R.id.input_endcard_close_button_delay)
@@ -61,6 +63,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization)  {
         locationTrackingSwitch.isChecked = settings.locationTracking
         locationUpdatesSwitch.isChecked = settings.locationUpdates
         autocloseSwitch.isChecked = settings.closeVideoAfterFinish
+        enableEndcardSwitch.isChecked = settings.enableEndcard
         htmlSkipOffsetInput.setText(settings.skipOffset.toString())
         videoSkipOffsetInput.setText(settings.videoSkipOffset.toString())
         endCardCloseButtonDelayInput.setText(settings.endCardCloseButtonDelay.toString())
@@ -85,6 +88,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization)  {
         val locationTracking = locationTrackingSwitch.isChecked
         val locationUpdates = locationUpdatesSwitch.isChecked
         val autoCloseVideo = autocloseSwitch.isChecked
+        val enableEndcard = enableEndcardSwitch.isChecked
         val skipOffset = htmlSkipOffsetInput.text.toString()
         val videoSkipOffset = videoSkipOffsetInput.text.toString()
         val endCardCloseButtonDelay = endCardCloseButtonDelayInput.text.toString()
@@ -125,6 +129,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization)  {
         settingManager.setLocationTracking(locationTracking)
         settingManager.setLocationUpdates(locationUpdates)
         settingManager.setCloseVideoAfterFinish(autoCloseVideo)
+        settingManager.setEnableEndcard(enableEndcard)
         settingManager.setSkipOffset(skipOffsetInt)
         settingManager.setVideoSkipOffset(videoSkipOffsetInt)
         settingManager.setEndCardCloseButtonDelay(endCardCloseButtonDelayInt)
@@ -136,6 +141,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization)  {
         HyBid.setLocationTrackingEnabled(locationTracking)
         HyBid.setLocationUpdatesEnabled(locationUpdates)
         HyBid.setCloseVideoAfterFinish(autoCloseVideo)
+        HyBid.setEndCardEnabled(enableEndcard)
         HyBid.setHtmlInterstitialSkipOffset(skipOffsetInt)
         HyBid.setVideoInterstitialSkipOffset(videoSkipOffsetInt)
         HyBid.setEndCardCloseButtonDelay(endCardCloseButtonDelayInt)

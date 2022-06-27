@@ -1,5 +1,6 @@
 package net.pubnative.hybid.adapters.admob.mediation;
 
+import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -62,12 +63,20 @@ public class HyBidMediationNativeCustomEvent implements CustomEventNative, HyBid
             return;
         }
 
-        if (appToken == null || !appToken.equals(HyBid.getAppToken())) {
-            Logger.e(TAG, "The provided app token doesn't match the one used to initialise HyBid");
-            mNativeListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NETWORK_ERROR);
-            return;
+        if (HyBid.isInitialized()) {
+            if (TextUtils.isEmpty(appToken) || !appToken.equals(HyBid.getAppToken())) {
+                Logger.e(TAG, "The provided app token doesn't match the one used to initialise HyBid");
+                mNativeListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NETWORK_ERROR);
+            } else {
+                loadNativeAd(zoneId);
+            }
+        } else {
+            HyBid.initialize(appToken, (Application) context.getApplicationContext(), b ->
+                    loadNativeAd(zoneId));
         }
+    }
 
+    private void loadNativeAd(String zoneId) {
         mAdRequest = new HyBidNativeAdRequest();
         mAdRequest.setMediation(true);
         mAdRequest.load(zoneId, this);

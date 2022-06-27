@@ -7,6 +7,6 @@ import net.pubnative.lite.demo.ui.fragments.fairbid.FairbidMediationRewardedFrag
 class FairbidMediationRewardedActivity : TabActivity() {
     override fun getAdFragment() = FairbidMediationRewardedFragment()
 
-    override fun getActivityTitle() = getString(R.string.fairbid_rewarded)
+    override fun getActivityTitle() = getString(R.string.fairbid_mediation_rewarded)
 
 }

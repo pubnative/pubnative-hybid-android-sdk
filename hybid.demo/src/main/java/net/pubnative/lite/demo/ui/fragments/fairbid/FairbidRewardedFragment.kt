@@ -13,20 +13,16 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
-import net.pubnative.lite.sdk.HyBid
-import net.pubnative.lite.sdk.vpaid.enums.AudioState
 
-val FairbidMediationRewardedFragment_TAG: String =
-    FairbidMediationRewardedFragment::class.java.simpleName
+val FairbidRewardedFragment_TAG: String =
+    FairbidRewardedFragment::class.java.simpleName
 
-class FairbidMediationRewardedFragment : Fragment(R.layout.fragment_fairbid_mediation_rewarded),
+class FairbidRewardedFragment : Fragment(R.layout.fragment_fairbid_rewarded),
     RewardedListener {
 
     private lateinit var loadButton: Button
     private lateinit var showButton: Button
     private lateinit var errorView: TextView
-
-    private lateinit var videoAudioStatus: AudioState
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -36,11 +32,9 @@ class FairbidMediationRewardedFragment : Fragment(R.layout.fragment_fairbid_medi
         showButton = view.findViewById(R.id.button_show)
         showButton.isEnabled = false
 
-        videoAudioStatus = HyBid.getVideoAudioStatus()
-
         val adUnitId =
             SettingsManager.getInstance(requireActivity())
-                .getSettings().fairbidMediationRewardedAdUnitId
+                .getSettings().fairbidRewardedAdUnitId
 
         Rewarded.setRewardedListener(this)
         Rewarded.disableAutoRequesting(adUnitId)
@@ -67,25 +61,25 @@ class FairbidMediationRewardedFragment : Fragment(R.layout.fragment_fairbid_medi
 
     // Fairbid Rewarded Listeners
     override fun onShow(placementId: String, impressionData: ImpressionData) {
-        Log.d(FairbidMediationRewardedFragment_TAG, "onShow")
+        Log.d(FairbidRewardedFragment_TAG, "onShow")
         showButton.isEnabled = false
     }
 
     override fun onClick(placementId: String) {
-        Log.d(FairbidMediationRewardedFragment_TAG, "onClick")
+        Log.d(FairbidRewardedFragment_TAG, "onClick")
     }
 
     override fun onHide(placementId: String) {
-        Log.d(FairbidMediationRewardedFragment_TAG, "onHide")
+        Log.d(FairbidRewardedFragment_TAG, "onHide")
     }
 
     override fun onShowFailure(placementId: String, impressionData: ImpressionData) {
-        Log.d(FairbidMediationRewardedFragment_TAG, "onShowFailure")
+        Log.d(FairbidRewardedFragment_TAG, "onShowFailure")
         showButton.isEnabled = false
     }
 
     override fun onAvailable(placementId: String) {
-        Log.d(FairbidMediationRewardedFragment_TAG, "onAvailable")
+        Log.d(FairbidRewardedFragment_TAG, "onAvailable")
         showButton.isEnabled = true
         displayLogs()
     }
@@ -97,11 +91,11 @@ class FairbidMediationRewardedFragment : Fragment(R.layout.fragment_fairbid_medi
     }
 
     override fun onCompletion(placementId: String, userRewarded: Boolean) {
-        Log.d(FairbidMediationRewardedFragment_TAG, "onCompletion")
+        Log.d(FairbidRewardedFragment_TAG, "onCompletion")
     }
 
     override fun onRequestStart(placementId: String) {
-        Log.d(FairbidMediationRewardedFragment_TAG, "onRequestStart")
+        Log.d(FairbidRewardedFragment_TAG, "onRequestStart")
     }
 
     private fun displayLogs() {
@@ -109,10 +103,5 @@ class FairbidMediationRewardedFragment : Fragment(R.layout.fragment_fairbid_medi
             val activity = activity as TabActivity
             activity.notifyAdUpdated()
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        HyBid.setVideoAudioStatus(videoAudioStatus)
     }
 }

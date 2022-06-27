@@ -34,7 +34,7 @@ class AdmobMediationBannerFragment : Fragment(R.layout.fragment_admob_banner) {
             SettingsManager.getInstance(requireActivity()).getSettings().admobBannerAdUnitId
 
         admobBanner = AdView(requireActivity())
-        admobBanner.adSize = AdSize.BANNER
+        admobBanner.setAdSize(AdSize.BANNER)
         admobBanner.adUnitId = adUnitId
         admobBanner.adListener = adListener
 

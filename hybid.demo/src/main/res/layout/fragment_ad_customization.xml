@@ -114,6 +114,14 @@
             android:layout_marginEnd="16dp"
             android:text="@string/check_auto_close" />
 
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/check_enable_endcard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/check_enable_endcard" />
+
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"

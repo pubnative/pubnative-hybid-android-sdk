@@ -16,6 +16,9 @@ import net.pubnative.lite.demo.ui.activities.dfp.DFPBannerActivity
 import net.pubnative.lite.demo.ui.activities.dfp.DFPInterstitialActivity
 import net.pubnative.lite.demo.ui.activities.dfp.DFPLeaderboardActivity
 import net.pubnative.lite.demo.ui.activities.dfp.DFPMRectActivity
+import net.pubnative.lite.demo.ui.activities.fairbid.FairbidBannerActivity
+import net.pubnative.lite.demo.ui.activities.fairbid.FairbidInterstitialActivity
+import net.pubnative.lite.demo.ui.activities.fairbid.FairbidRewardedActivity
 import net.pubnative.lite.demo.ui.adapters.ZoneIdAdapter
 import net.pubnative.lite.demo.ui.listeners.ZoneIdClickListener
 
@@ -25,6 +28,10 @@ class PrebidNavFragment : Fragment(R.layout.fragment_nav_prebid) {
     private lateinit var dfpMediumButton: Button
     private lateinit var dfpLeaderboardButton: Button
     private lateinit var dfpInterstitialButton: Button
+
+    private lateinit var fairbidBannerButton: Button
+    private lateinit var fairbidInterstitialButton: Button
+    private lateinit var fairbidRewardedButton: Button
 
     private lateinit var zoneIdList: RecyclerView
     private lateinit var chosenZoneIdView: TextView
@@ -85,6 +92,32 @@ class PrebidNavFragment : Fragment(R.layout.fragment_nav_prebid) {
             intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }
+
+        fairbidBannerButton = view.findViewById(R.id.button_fairbid_banner)
+        fairbidBannerButton.setOnClickListener {
+            val intent = Intent(activity, FairbidBannerActivity::class.java)
+            val zoneId = setZoneId(chosenZoneId, AdFormat.BANNER)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
+            startActivity(intent)
+        }
+
+        fairbidInterstitialButton = view.findViewById(R.id.button_fairbid_interstitial)
+        fairbidInterstitialButton.setOnClickListener {
+            val intent = Intent(activity, FairbidInterstitialActivity::class.java)
+            val zoneId = setZoneId(chosenZoneId, AdFormat.INTERSTITIAL)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
+            startActivity(intent)
+        }
+
+        fairbidRewardedButton = view.findViewById(R.id.button_fairbid_rewarded)
+        fairbidRewardedButton.setOnClickListener {
+            val intent = Intent(activity, FairbidRewardedActivity::class.java)
+            val zoneId = setZoneId(chosenZoneId, AdFormat.INTERSTITIAL)
+            intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
+            startActivity(intent)
+        }
+
+
         enableZones()
     }
 

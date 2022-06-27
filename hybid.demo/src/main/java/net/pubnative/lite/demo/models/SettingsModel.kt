@@ -44,6 +44,7 @@ data class SettingsModel(
     var initialAudioState: Int,
     var mraidExpanded: Boolean,
     var closeVideoAfterFinish: Boolean,
+    var enableEndcard: Boolean,
     var skipOffset: Int,
     var videoSkipOffset: Int,
     var endCardCloseButtonDelay: Int,
@@ -79,7 +80,10 @@ data class SettingsModel(
     var fairbidAppId: String,
     var fairbidMediationBannerAdUnitId: String,
     var fairbidMediationInterstitialAdUnitId: String,
-    var fairbidMediationRewardedAdUnitId: String
+    var fairbidMediationRewardedAdUnitId: String,
+    var fairbidBannerAdUnitId: String,
+    var fairbidInterstitialAdUnitId: String,
+    var fairbidRewardedAdUnitId: String
 ) : Parcelable {
     companion object {
         @JvmField
@@ -108,10 +112,14 @@ data class SettingsModel(
         parcel.readInt(),
         parcel.readInt() != 0,
         parcel.readInt() != 0,
+        parcel.readInt() != 0,
         parcel.readInt(),
         parcel.readInt(),
         parcel.readInt(),
         parcel.readInt() != 0,
+        parcel.readString()!!,
+        parcel.readString()!!,
+        parcel.readString()!!,
         parcel.readString()!!,
         parcel.readString()!!,
         parcel.readString()!!,
@@ -207,6 +215,14 @@ data class SettingsModel(
         }
         dest?.writeInt(closeVideoAfterFinishByte)
 
+        val enableEndcardByte: Int
+        if (enableEndcard) {
+            enableEndcardByte = 1
+        } else {
+            enableEndcardByte = 0
+        }
+        dest?.writeInt(enableEndcardByte)
+
         dest?.writeInt(skipOffset)
         dest?.writeInt(videoSkipOffset)
         dest?.writeInt(endCardCloseButtonDelay)
@@ -253,9 +269,14 @@ data class SettingsModel(
         dest?.writeString(maxAdsNativeAdUnitId)
 
         dest?.writeString(fairbidAppId)
+
         dest?.writeString(fairbidMediationBannerAdUnitId)
         dest?.writeString(fairbidMediationInterstitialAdUnitId)
         dest?.writeString(fairbidMediationRewardedAdUnitId)
+
+        dest?.writeString(fairbidBannerAdUnitId)
+        dest?.writeString(fairbidInterstitialAdUnitId)
+        dest?.writeString(fairbidRewardedAdUnitId)
     }
 
     override fun describeContents(): Int = 0

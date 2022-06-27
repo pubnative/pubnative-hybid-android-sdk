@@ -29,6 +29,7 @@ public class Reporting {
         public static final String AD_POSITION = "ad_position";
         public static final String OM_ENABLED = "om_enabled";
         public static final String OM_VENDORS = "om_vendors";
+        public static final String HAS_END_CARD = "has_end_card";
         public static final String RESPONSE_TIME = "response_time";
         public static final String TIME_TO_LOAD = "time_to_load";
         public static final String TIME_TO_LOAD_FAILED = "time_to_load_failed";

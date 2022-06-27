@@ -457,7 +457,8 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
             mSkipTimerWithPause = null;
         }
 
-        if (mEndCardData == null || (mEndCardData.getType() == EndCardData.Type.STATIC_RESOURCE && TextUtils.isEmpty(mImageUri))) {
+        if (mEndCardData == null || !HyBid.isEndCardEnabled() ||
+                (mEndCardData.getType() == EndCardData.Type.STATIC_RESOURCE && TextUtils.isEmpty(mImageUri))) {
             if (skipEvent) {
                 closeSelf();
             }

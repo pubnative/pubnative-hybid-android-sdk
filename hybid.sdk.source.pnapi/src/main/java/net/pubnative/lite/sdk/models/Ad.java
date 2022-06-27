@@ -73,6 +73,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
 
     private String zoneId;
     private String adSourceName;
+    private boolean hasEndCard = false;
 
     //==============================================================================================
     // Interfaces
@@ -417,6 +418,14 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
 
     public String getAdSourceName() {
         return adSourceName;
+    }
+
+    public void setHasEndCard(boolean hasEndCard) {
+        this.hasEndCard = hasEndCard;
+    }
+
+    public boolean hasEndCard() {
+        return hasEndCard;
     }
 
     @Override

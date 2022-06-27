@@ -1,5 +1,7 @@
 package net.pubnative.hybid.adapters.admob.mediation;
 
+import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -13,6 +15,7 @@ import com.google.android.gms.ads.mediation.customevent.CustomEventBannerListene
 
 import net.pubnative.hybid.adapters.admob.HyBidAdmobUtils;
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.views.HyBidAdView;
 
@@ -64,17 +67,25 @@ public class HyBidMediationBannerCustomEvent implements CustomEventBanner, HyBid
             return;
         }
 
-        if (appToken == null || !appToken.equals(HyBid.getAppToken())) {
-            Logger.e(TAG, "The provided app token doesn't match the one used to initialise HyBid");
-            mBannerListener.onAdFailedToLoad(new AdError(AdRequest.ERROR_CODE_NETWORK_ERROR,
-                    "The provided app token doesn't match the one used to initialise HyBid",
-                    AdError.UNDEFINED_DOMAIN
-            ));
-            return;
+        if (HyBid.isInitialized()) {
+            if (TextUtils.isEmpty(appToken) || !appToken.equals(HyBid.getAppToken())) {
+                Logger.e(TAG, "The provided app token doesn't match the one used to initialise HyBid");
+                mBannerListener.onAdFailedToLoad(new AdError(AdRequest.ERROR_CODE_NETWORK_ERROR,
+                        "The provided app token doesn't match the one used to initialise HyBid",
+                        AdError.UNDEFINED_DOMAIN
+                ));
+            } else {
+                loadBanner(context, hyBidAdSize, zoneId);
+            }
+        } else {
+            HyBid.initialize(appToken, (Application) context.getApplicationContext(), b ->
+                    loadBanner(context, hyBidAdSize, zoneId));
         }
+    }
 
+    private void loadBanner(Context context, net.pubnative.lite.sdk.models.AdSize adSize, String zoneId) {
         mBannerView = new HyBidAdView(context);
-        mBannerView.setAdSize(hyBidAdSize);
+        mBannerView.setAdSize(adSize);
         mBannerView.setMediation(true);
         mBannerView.load(zoneId, this);
     }

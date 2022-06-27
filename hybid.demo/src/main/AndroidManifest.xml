@@ -241,6 +241,25 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             tools:ignore="LockedOrientationActivity" />
+
+        <activity
+            android:name=".ui.activities.fairbid.FairbidBannerActivity"
+            android:label="@string/fairbid_banner"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
+        <activity
+            android:name=".ui.activities.fairbid.FairbidInterstitialActivity"
+            android:label="@string/fairbid_interstitial"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
+        <activity
+            android:name=".ui.activities.fairbid.FairbidRewardedActivity"
+            android:label="@string/fairbid_rewarded"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.config.HyBidSettingsActivity"
             android:label="@string/pn_settings"

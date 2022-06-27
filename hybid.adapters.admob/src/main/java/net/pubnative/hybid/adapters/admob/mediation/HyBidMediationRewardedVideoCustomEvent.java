@@ -1,5 +1,6 @@
 package net.pubnative.hybid.adapters.admob.mediation;
 
+import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -67,15 +68,23 @@ public class HyBidMediationRewardedVideoCustomEvent extends Adapter implements H
             return;
         }
 
-        if (appToken == null || !appToken.equals(HyBid.getAppToken())) {
-            Logger.e(TAG, "The provided app token doesn't match the one used to initialise HyBid");
-            mAdLoadCallback.onFailure(new AdError(AdRequest.ERROR_CODE_NETWORK_ERROR,
-                    "The provided app token doesn't match the one used to initialise HyBid",
-                    AdError.UNDEFINED_DOMAIN));
-            return;
+        if (HyBid.isInitialized()) {
+            if (TextUtils.isEmpty(appToken) || !appToken.equals(HyBid.getAppToken())) {
+                Logger.e(TAG, "The provided app token doesn't match the one used to initialise HyBid");
+                mAdLoadCallback.onFailure(new AdError(AdRequest.ERROR_CODE_NETWORK_ERROR,
+                        "The provided app token doesn't match the one used to initialise HyBid",
+                        AdError.UNDEFINED_DOMAIN));
+            } else {
+                requestRewardedAd(adConfiguration.getContext(), zoneId);
+            }
+        } else {
+            HyBid.initialize(appToken, (Application) adConfiguration.getContext().getApplicationContext(), b ->
+                    requestRewardedAd(adConfiguration.getContext(), zoneId));
         }
+    }
 
-        mRewardedAd = new HyBidRewardedAd(adConfiguration.getContext(), zoneId, this);
+    private void requestRewardedAd(Context context, String zoneId) {
+        mRewardedAd = new HyBidRewardedAd(context, zoneId, this);
         mRewardedAd.setMediation(true);
         mRewardedAd.load();
     }

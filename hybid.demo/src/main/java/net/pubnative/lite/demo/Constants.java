@@ -51,6 +51,7 @@ public class Constants {
     public static final int INITIAL_AUDIO_STATE_DEFAULT = 0;
     public static final Boolean MRAID_EXPANDED_DEFAULT = true;
     public static final Boolean CLOSE_VIDEO_AFTER_FINISH_DEFAULT = false;
+    public static final Boolean ENABLE_ENDCARD_DEFAULT = false;
     public static final int SKIP_OFFSET_DEFAULT = 3;
     public static final int VIDEO_SKIP_OFFSET_DEFAULT = 8;
     public static final int ENDCARD_CLOSE_BUTTON_DELAY_DEFAULT = 5;
@@ -93,6 +94,10 @@ public class Constants {
     public static final String FAIRBID_MEDIATION_BANNER_AD_UNIT = "681242";
     public static final String FAIRBID_MEDIATION_INTERSTITIAL_AD_UNIT = "681244";
     public static final String FAIRBID_MEDIATION_REWARDED_AD_UNIT = "681245";
+
+    public static final String FAIRBID_BANNER_AD_UNIT = "";
+    public static final String FAIRBID_INTERSTITIAL_AD_UNIT = "";
+    public static final String FAIRBID_REWARDED_AD_UNIT = "";
 
     public static final String APP_TOKEN = "dde3c298b47648459f8ada4a982fa92d";
     public static final List<String> ZONE_ID_LIST = Arrays.asList(NATIVE_ZONE_ID, MRAID_320x50_ZONE_ID,

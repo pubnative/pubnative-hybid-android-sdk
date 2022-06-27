@@ -341,6 +341,9 @@ public class RequestManager {
 
                     reportAdCache();
 
+                    boolean hasEndCard = adParams.getEndCardList() != null && !adParams.getEndCardList().isEmpty();
+                    ad.setHasEndCard(hasEndCard);
+
                     VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardData, endCardFilePath);
                     mVideoCache.put(ad.getZoneId(), adCacheItem);
                     mCacheStarted = false;

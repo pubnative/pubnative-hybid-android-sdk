@@ -135,6 +135,7 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
     }
 
     fun updateLogs() {
+        cleanLogs()
         val registryItem = AdRequestRegistry.getInstance().lastAdRequest
         if (registryItem != null) {
             if (requestView != null) {

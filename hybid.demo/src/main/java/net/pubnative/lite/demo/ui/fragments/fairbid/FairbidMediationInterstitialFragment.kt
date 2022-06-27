@@ -1,11 +1,13 @@
 package net.pubnative.lite.demo.ui.fragments.fairbid
 
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.fyber.fairbid.ads.Banner
 import com.fyber.fairbid.ads.ImpressionData
 import com.fyber.fairbid.ads.Interstitial
 import com.fyber.fairbid.ads.interstitial.InterstitialListener
@@ -13,14 +15,19 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
+import net.pubnative.lite.sdk.HyBid
+import net.pubnative.lite.sdk.vpaid.enums.AudioState
 
-class FairbidMediationInterstitialFragment : Fragment(R.layout.fragment_fairbid_interstitial),
+class FairbidMediationInterstitialFragment :
+    Fragment(R.layout.fragment_fairbid_mediation_interstitial),
     InterstitialListener {
     val TAG = FairbidMediationInterstitialFragment::class.java.simpleName
 
     private lateinit var loadButton: Button
     private lateinit var showButton: Button
     private lateinit var errorView: TextView
+
+    private lateinit var videoAudioStatus: AudioState
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -35,6 +42,9 @@ class FairbidMediationInterstitialFragment : Fragment(R.layout.fragment_fairbid_
                 .getSettings().fairbidMediationInterstitialAdUnitId
 
         Interstitial.setInterstitialListener(this)
+        Interstitial.disableAutoRequesting(adUnitId)
+
+        videoAudioStatus = HyBid.getVideoAudioStatus()
 
         loadButton.setOnClickListener {
             showButton.isEnabled = false
@@ -45,6 +55,7 @@ class FairbidMediationInterstitialFragment : Fragment(R.layout.fragment_fairbid_
             if (Interstitial.isAvailable(adUnitId)) {
                 Interstitial.show(adUnitId, requireActivity())
             }
+            showButton.isEnabled = false
         }
 
         errorView.setOnClickListener {
@@ -57,6 +68,7 @@ class FairbidMediationInterstitialFragment : Fragment(R.layout.fragment_fairbid_
 
     override fun onDestroy() {
         super.onDestroy()
+        HyBid.setVideoAudioStatus(videoAudioStatus)
     }
 
 

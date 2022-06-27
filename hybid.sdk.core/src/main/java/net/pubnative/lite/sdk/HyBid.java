@@ -82,6 +82,7 @@ public class HyBid {
     private static boolean isCloseVideoAfterFinish = false;
     private static boolean isDiagnosticsEnabled = true;
     private static boolean sMraidExpandEnabled = true;
+    private static boolean isEndCardEnabled = false;
     private static String sAge;
     private static String sGender;
     private static String sKeywords;
@@ -123,7 +124,6 @@ public class HyBid {
                 sLocationManager.startLocationUpdates();
             }
         }
-        sDeviceInfo = new DeviceInfo(application.getApplicationContext());
         sUserDataManager = new UserDataManager(application.getApplicationContext());
         sConfigManager = new ConfigManager(application.getApplicationContext(), appToken);
         sAdCache = new AdCache();
@@ -136,17 +136,20 @@ public class HyBid {
         sViewabilityManager = new ViewabilityManager(application);
         ReportingDelegate sReportingDelegate = new ReportingDelegate(application.getApplicationContext(),
                 sReportingController, sConfigManager, appToken);
-        sDeviceInfo.initialize(() -> {
-            ReportingEvent event = new ReportingEvent();
-            event.setEventType(Reporting.EventType.SDK_INIT);
-            event.setAppToken(appToken);
-            sReportingController.reportEvent(event);
 
-            if (initialisationListener != null) {
-                initialisationListener.onInitialisationFinished(true);
-            }
+        if (sDeviceInfo == null) {
+            sDeviceInfo = new DeviceInfo(application.getApplicationContext());
+            sDeviceInfo.initialize(() -> {
+                ReportingEvent event = new ReportingEvent();
+                event.setEventType(Reporting.EventType.SDK_INIT);
+                event.setAppToken(appToken);
+                sReportingController.reportEvent(event);
 
-            sConfigManager.initialize(new ConfigManager.ConfigListener() {
+                if (initialisationListener != null) {
+                    initialisationListener.onInitialisationFinished(true);
+                }
+                //Remote config is disabled
+            /*sConfigManager.initialize(new ConfigManager.ConfigListener() {
                 @Override
                 public void onConfigFetched() {
                     // The fetched config will be optionally used during the ad request
@@ -156,8 +159,14 @@ public class HyBid {
                 public void onConfigFetchFailed(Throwable error) {
                     Logger.d(TAG, "Error fetching config: ", error);
                 }
+            });*/
             });
-        });
+        } else {
+            if (initialisationListener != null) {
+                initialisationListener.onInitialisationFinished(true);
+            }
+        }
+
         sInitialized = true;
     }
 
@@ -402,6 +411,14 @@ public class HyBid {
 
     public static boolean isMraidExpandEnabled() {
         return sMraidExpandEnabled;
+    }
+
+    public static void setEndCardEnabled(boolean endCardEnabled) {
+        isEndCardEnabled = endCardEnabled;
+    }
+
+    public static boolean isEndCardEnabled() {
+        return isEndCardEnabled;
     }
 
     public interface InitialisationListener {

@@ -85,6 +85,10 @@ class SettingsManager private constructor(context: Context) {
         preferences.edit().putBoolean(SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH, enabled).apply()
     }
 
+    fun setEnableEndcard(enabled: Boolean) {
+        preferences.edit().putBoolean(SETTINGS_KEY_ENABLE_ENDCARD, enabled).apply()
+    }
+
     fun setSkipOffset(skipOffset: Int) {
         preferences.edit().putInt(SETTINGS_KEY_SKIP_OFFSET, skipOffset).apply()
     }
@@ -94,7 +98,8 @@ class SettingsManager private constructor(context: Context) {
     }
 
     fun setEndCardCloseButtonDelay(endCardCloseButtonDelay: Int) {
-        preferences.edit().putInt(SETTINGS_KEY_ENDCARD_CLOSE_BUTTON_DELAY, endCardCloseButtonDelay).apply()
+        preferences.edit().putInt(SETTINGS_KEY_ENDCARD_CLOSE_BUTTON_DELAY, endCardCloseButtonDelay)
+            .apply()
     }
 
     fun setVideoClickBehaviour(isCreative: Boolean) {
@@ -244,16 +249,32 @@ class SettingsManager private constructor(context: Context) {
     }
 
     fun setFairbidMediationBannerAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_FAIRBID_MEDIATION_BANNER_AD_UNIT_ID, adUnitId).apply()
+        preferences.edit().putString(SETTINGS_KEY_FAIRBID_MEDIATION_BANNER_AD_UNIT_ID, adUnitId)
+            .apply()
     }
 
     fun setFairbidMediationInterstitialAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_FAIRBID_MEDIATION_INTERSTITIAL_AD_UNIT_ID, adUnitId).apply()
+        preferences.edit()
+            .putString(SETTINGS_KEY_FAIRBID_MEDIATION_INTERSTITIAL_AD_UNIT_ID, adUnitId).apply()
     }
 
     fun setFairbidMediationRewardedAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_FAIRBID_MEDIATION_REWARDED_AD_UNIT_ID, adUnitId).apply()
+        preferences.edit().putString(SETTINGS_KEY_FAIRBID_MEDIATION_REWARDED_AD_UNIT_ID, adUnitId)
+            .apply()
     }
+
+    fun setFairbidBannerAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_FAIRBID_BANNER_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setFairbidInterstitialAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_FAIRBID_INTERSTITIAL_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setFairbidRewardedAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_FAIRBID_REWARDED_AD_UNIT_ID, adUnitId).apply()
+    }
+
 
     fun setSettings(model: SettingsModel, asynchronously: Boolean) {
         val editor = preferences.edit()
@@ -326,9 +347,25 @@ class SettingsManager private constructor(context: Context) {
         editor.putString(SETTINGS_KEY_MAXADS_REWARDED_AD_UNIT_ID, model.maxAdsRewardedAdUnitId)
         editor.putString(SETTINGS_KEY_MAXADS_NATIVE_AD_UNIT_ID, model.maxAdsNativeAdUnitId)
         editor.putString(SETTINGS_KEY_FAIRBID_APP_ID, model.fairbidAppId)
-        editor.putString(SETTINGS_KEY_FAIRBID_MEDIATION_BANNER_AD_UNIT_ID, model.fairbidMediationBannerAdUnitId)
-        editor.putString(SETTINGS_KEY_FAIRBID_MEDIATION_INTERSTITIAL_AD_UNIT_ID, model.fairbidMediationInterstitialAdUnitId)
-        editor.putString(SETTINGS_KEY_FAIRBID_MEDIATION_REWARDED_AD_UNIT_ID, model.fairbidMediationRewardedAdUnitId)
+        editor.putString(
+            SETTINGS_KEY_FAIRBID_MEDIATION_BANNER_AD_UNIT_ID,
+            model.fairbidMediationBannerAdUnitId
+        )
+        editor.putString(
+            SETTINGS_KEY_FAIRBID_MEDIATION_INTERSTITIAL_AD_UNIT_ID,
+            model.fairbidMediationInterstitialAdUnitId
+        )
+        editor.putString(
+            SETTINGS_KEY_FAIRBID_MEDIATION_REWARDED_AD_UNIT_ID,
+            model.fairbidMediationRewardedAdUnitId
+        )
+
+        editor.putString(SETTINGS_KEY_FAIRBID_BANNER_AD_UNIT_ID, model.fairbidBannerAdUnitId)
+        editor.putString(
+            SETTINGS_KEY_FAIRBID_INTERSTITIAL_AD_UNIT_ID,
+            model.fairbidInterstitialAdUnitId
+        )
+        editor.putString(SETTINGS_KEY_FAIRBID_REWARDED_AD_UNIT_ID, model.fairbidRewardedAdUnitId)
 
         editor.putBoolean(SETTINGS_KEY_INITIALISED, true)
 
@@ -356,6 +393,7 @@ class SettingsManager private constructor(context: Context) {
         val mraidExpanded = preferences.getBoolean(SETTINGS_KEY_MRAID_EXPANDED, true)
         val closeVideoAfterFinish =
             preferences.getBoolean(SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH, false)
+        val enableEndcard = preferences.getBoolean(SETTINGS_KEY_ENABLE_ENDCARD, false)
         val skipOffset = preferences.getInt(SETTINGS_KEY_SKIP_OFFSET, 3)
         val videoSkipOffset = preferences.getInt(SETTINGS_KEY_VIDEO_SKIP_OFFSET, 8)
         val endcardCloseButtonDelay = preferences.getInt(SETTINGS_KEY_ENDCARD_CLOSE_BUTTON_DELAY, 5)
@@ -419,6 +457,13 @@ class SettingsManager private constructor(context: Context) {
         val fairbidMediationRewardedAdUnitId =
             preferences.getString(SETTINGS_KEY_FAIRBID_MEDIATION_REWARDED_AD_UNIT_ID, "")!!
 
+        val fairbidBannerAdUnitId =
+            preferences.getString(SETTINGS_KEY_FAIRBID_BANNER_AD_UNIT_ID, "")!!
+        val fairbidInterstitialAdUnitId =
+            preferences.getString(SETTINGS_KEY_FAIRBID_INTERSTITIAL_AD_UNIT_ID, "")!!
+        val fairbidRewardedAdUnitId =
+            preferences.getString(SETTINGS_KEY_FAIRBID_REWARDED_AD_UNIT_ID, "")!!
+
         return SettingsModel(
             appToken,
             zoneIds,
@@ -434,6 +479,7 @@ class SettingsManager private constructor(context: Context) {
             initialAudioState,
             mraidExpanded,
             closeVideoAfterFinish,
+            enableEndcard,
             skipOffset,
             videoSkipOffset,
             endcardCloseButtonDelay,
@@ -469,7 +515,10 @@ class SettingsManager private constructor(context: Context) {
             fairbidAppId,
             fairbidMediationBannerAdUnitId,
             fairbidMediationInterstitialAdUnitId,
-            fairbidMediationRewardedAdUnitId
+            fairbidMediationRewardedAdUnitId,
+            fairbidBannerAdUnitId,
+            fairbidInterstitialAdUnitId,
+            fairbidRewardedAdUnitId,
         )
     }
 }

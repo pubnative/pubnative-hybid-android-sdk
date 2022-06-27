@@ -178,6 +178,7 @@ public class HyBidDemoApplication extends MultiDexApplication {
                     Constants.INITIAL_AUDIO_STATE_DEFAULT,
                     Constants.MRAID_EXPANDED_DEFAULT,
                     Constants.CLOSE_VIDEO_AFTER_FINISH_DEFAULT,
+                    Constants.ENABLE_ENDCARD_DEFAULT,
                     Constants.SKIP_OFFSET_DEFAULT,
                     Constants.VIDEO_SKIP_OFFSET_DEFAULT,
                     Constants.ENDCARD_CLOSE_BUTTON_DELAY_DEFAULT,
@@ -213,7 +214,10 @@ public class HyBidDemoApplication extends MultiDexApplication {
                     Constants.FAIRBID_APP_ID,
                     Constants.FAIRBID_MEDIATION_BANNER_AD_UNIT,
                     Constants.FAIRBID_MEDIATION_INTERSTITIAL_AD_UNIT,
-                    Constants.FAIRBID_MEDIATION_REWARDED_AD_UNIT);
+                    Constants.FAIRBID_MEDIATION_REWARDED_AD_UNIT,
+                    Constants.FAIRBID_BANNER_AD_UNIT,
+                    Constants.FAIRBID_INTERSTITIAL_AD_UNIT,
+                    Constants.FAIRBID_REWARDED_AD_UNIT);
             manager.setSettings(model, true);
         }
 

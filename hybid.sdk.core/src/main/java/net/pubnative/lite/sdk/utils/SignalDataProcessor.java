@@ -7,10 +7,12 @@ import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
+import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.models.SignalData;
+import net.pubnative.lite.sdk.utils.json.JsonOperations;
 import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
@@ -87,9 +89,9 @@ public class SignalDataProcessor {
                             mListener.onError(new HyBidError(HyBidErrorCode.INTERNAL_ERROR));
                         }
                     }
-                } else if (!TextUtils.isEmpty(signalData.adm)) {
+                } else if (signalData.adm != null) {
                     if (mApiClient != null) {
-                        mApiClient.processStream(signalData.adm, new PNApiClient.AdRequestListener() {
+                        mApiClient.processStream(signalData.adm, null, new PNApiClient.AdRequestListener() {
                             @Override
                             public void onSuccess(Ad ad) {
                                 if (mIsDestroyed) {
@@ -150,6 +152,9 @@ public class SignalDataProcessor {
                         if (mIsDestroyed) {
                             return;
                         }
+
+                        boolean hasEndCard = adParams.getEndCardList() != null && !adParams.getEndCardList().isEmpty();
+                        ad.setHasEndCard(hasEndCard);
 
                         VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardData, endCardFilePath);
                         mVideoCache.put(zoneId, adCacheItem);

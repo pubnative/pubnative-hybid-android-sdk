@@ -35,7 +35,7 @@ class GAMMediationBannerFragment : Fragment(R.layout.fragment_dfp_banner) {
             SettingsManager.getInstance(requireActivity()).getSettings().dfpMediationBannerAdUnitId
 
         gamBanner = AdManagerAdView(requireActivity())
-        gamBanner.adSize = AdSize.BANNER
+        gamBanner.setAdSize(AdSize.BANNER)
         gamBanner.adUnitId = adUnitId
         gamBanner.adListener = adListener
 

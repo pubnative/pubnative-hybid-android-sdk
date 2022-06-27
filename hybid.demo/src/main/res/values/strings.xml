@@ -124,10 +124,21 @@
     <string name="fairbid_banner">Fairbid Banner</string>
     <string name="fairbid_interstitial">Fairbid Interstitial</string>
     <string name="fairbid_rewarded">Fairbid Rewarded Video</string>
+
+    <string name="fairbid_mediation_banner">Fairbid Mediation Banner</string>
+    <string name="fairbid_mediation_interstitial">Fairbid Mediation Interstitial</string>
+    <string name="fairbid_mediation_rewarded">Fairbid Mediation  Rewarded Video</string>
+
     <string name="hint_fairbid_app_id">Fairbid App Id</string>
+
+    <string name="hint_fairbid_mediation_banner_ad_unit_id">Fairbid Mediation Banner Ad Unit Id</string>
+    <string name="hint_fairbid_mediation_interstitial_ad_unit_id">Fairbid Mediation Interstitial Ad Unit Id</string>
+    <string name="hint_fairbid_mediation_rewarded_ad_unit_id">Fairbid Mediation Rewarded Ad Unit Id</string>
+
     <string name="hint_fairbid_banner_ad_unit_id">Fairbid Banner Ad Unit Id</string>
     <string name="hint_fairbid_interstitial_ad_unit_id">Fairbid Interstitial Ad Unit Id</string>
     <string name="hint_fairbid_rewarded_ad_unit_id">Fairbid Rewarded Ad Unit Id</string>
+
     <string name="save_fairbid_settings">Save Fairbid Settings</string>
     <string name="init_fairbid">Init Fairbid SDK</string>
 
@@ -245,6 +256,7 @@
     <string name="hint_video_skip_offset">Video Skip Offset</string>
     <string name="hint_endcard_close_button_delay">EndCard close button delay</string>
     <string name="check_auto_close">Auto Close after Finish</string>
+    <string name="check_enable_endcard">Enable endcard</string>
     <string name="click_behaviour">Click Behaviour</string>
     <string name="radio_creative">Creative</string>
     <string name="radio_action_button">Action Button</string>

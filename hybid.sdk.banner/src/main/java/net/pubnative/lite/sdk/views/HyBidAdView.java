@@ -632,9 +632,12 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                                     JsonOperations.putStringArray(mPlacementParams, Reporting.Key.OM_VENDORS, omidVendors);
                                 }
 
+                                boolean hasEndCard = adParams.getEndCardList() != null && !adParams.getEndCardList().isEmpty();
+
                                 VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardData, endCardFilePath);
                                 mAd = new Ad(assetGroup, adValue, type);
                                 mAd.setZoneId(zoneId);
+                                mAd.setHasEndCard(hasEndCard);
                                 HyBid.getAdCache().put(zoneId, mAd);
                                 HyBid.getVideoAdCache().put(zoneId, adCacheItem);
                                 renderFromCustomAd();
@@ -998,8 +1001,17 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         ReportingEvent event = new ReportingEvent();
         event.setEventType(Reporting.EventType.RENDER);
         event.setAdFormat(adFormat);
+        event.setHasEndCard(hasEndCard());
         event.mergeJSONObject(placementParams);
         if (HyBid.getReportingController() != null)
             HyBid.getReportingController().reportEvent(event);
+    }
+
+    public boolean hasEndCard() {
+        if (mAd == null || !HyBid.isEndCardEnabled()) {
+            return false;
+        } else {
+            return mAd.hasEndCard();
+        }
     }
 }

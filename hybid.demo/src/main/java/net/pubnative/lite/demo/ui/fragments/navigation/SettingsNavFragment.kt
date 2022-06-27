@@ -42,6 +42,11 @@ class SettingsNavFragment : Fragment(R.layout.fragment_nav_settings) {
             startActivity(intent)
         }
 
+        view.findViewById<TextView>(R.id.button_fairbid_settings).setOnClickListener {
+            val intent = Intent(activity, FairbidSettingsActivity::class.java)
+            startActivity(intent)
+        }
+
         view.findViewById<TextView>(R.id.button_dfp_settings).setOnClickListener {
             val intent = Intent(activity, DFPSettingsActivity::class.java)
             startActivity(intent)

@@ -7,6 +7,6 @@ import net.pubnative.lite.demo.ui.fragments.fairbid.FairbidMediationBannerFragme
 class FairbidMediationBannerActivity : TabActivity() {
     override fun getAdFragment() = FairbidMediationBannerFragment()
 
-    override fun getActivityTitle() = getString(R.string.fairbid_banner)
+    override fun getActivityTitle() = getString(R.string.fairbid_mediation_banner)
 
 }

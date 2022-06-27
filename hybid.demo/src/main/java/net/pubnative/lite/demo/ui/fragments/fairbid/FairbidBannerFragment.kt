@@ -17,20 +17,15 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
-import net.pubnative.lite.sdk.HyBid
-import net.pubnative.lite.sdk.vpaid.enums.AudioState
 
+val FairbidBannerFragment_TAG: String = FairbidBannerFragment::class.java.simpleName
 
-class FairbidMediationBannerFragment : Fragment(R.layout.fragment_fairbid_mediation_banner),
-    BannerListener {
-    val TAG = FairbidMediationBannerFragment::class.java.simpleName
+class FairbidBannerFragment : Fragment(R.layout.fragment_fairbid_banner), BannerListener {
 
     private lateinit var fairbidBannerContainer: FrameLayout
     private lateinit var showButton: Button
     private lateinit var errorView: TextView
     private lateinit var adUnitId: String
-
-    private lateinit var videoAudioStatus: AudioState
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -40,13 +35,11 @@ class FairbidMediationBannerFragment : Fragment(R.layout.fragment_fairbid_mediat
         showButton = view.findViewById(R.id.button_show)
         showButton.isEnabled = true
 
-        videoAudioStatus = HyBid.getVideoAudioStatus()
-
         val bannerOptions = BannerOptions().placeInContainer(fairbidBannerContainer)
 
         adUnitId =
             SettingsManager.getInstance(requireActivity())
-                .getSettings().fairbidMediationBannerAdUnitId
+                .getSettings().fairbidBannerAdUnitId
 
         Banner.setBannerListener(this)
 
@@ -69,34 +62,32 @@ class FairbidMediationBannerFragment : Fragment(R.layout.fragment_fairbid_mediat
         super.onDestroy()
         if (!TextUtils.isEmpty(adUnitId)) {
             Banner.destroy(adUnitId)
-            HyBid.setVideoAudioStatus(videoAudioStatus)
         }
     }
 
     // Fairbid Banner Listeners
     override fun onError(p0: String, error: BannerError?) {
-        Log.d(TAG, "onError")
+        Log.d(FairbidBannerFragment_TAG, "onError")
         displayLogs()
         errorView.text = error?.errorMessage
     }
 
     override fun onLoad(placementId: String) {
-        Log.d(TAG, "onLoad")
+        Log.d(FairbidBannerFragment_TAG, "onLoad")
         displayLogs()
     }
 
     override fun onShow(placementId: String, impressionData: ImpressionData) {
-        Log.d(TAG, "onShow")
+        Log.d(FairbidBannerFragment_TAG, "onShow")
     }
 
     override fun onClick(placementId: String) {
-        Log.d(TAG, "onClick")
+        Log.d(FairbidBannerFragment_TAG, "onClick")
     }
 
     override fun onRequestStart(placementId: String) {
-        Log.d(TAG, "onAvailable")
+        Log.d(FairbidBannerFragment_TAG, "onAvailable")
     }
-
 
     private fun displayLogs() {
         if (activity != null) {

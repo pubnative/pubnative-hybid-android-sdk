@@ -32,7 +32,7 @@ class GAMMediationMRectFragment : Fragment(R.layout.fragment_dfp_mrect) {
             SettingsManager.getInstance(requireActivity()).getSettings().dfpMediationMediumAdUnitId
 
         gamMRect = AdView(requireActivity())
-        gamMRect.adSize = AdSize.MEDIUM_RECTANGLE
+        gamMRect.setAdSize(AdSize.MEDIUM_RECTANGLE)
         gamMRect.adUnitId = adUnitId
         gamMRect.adListener = adListener
 

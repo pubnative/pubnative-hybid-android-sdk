@@ -34,7 +34,7 @@ class AdmobMediationLeaderboardFragment : Fragment(R.layout.fragment_admob_leade
             SettingsManager.getInstance(requireActivity()).getSettings().admobLeaderboardAdUnitId
 
         admobLeaderboard = AdView(requireActivity())
-        admobLeaderboard.adSize = AdSize.LEADERBOARD
+        admobLeaderboard.setAdSize(AdSize.LEADERBOARD)
         admobLeaderboard.adUnitId = adUnitId
         admobLeaderboard.adListener = adListener
 

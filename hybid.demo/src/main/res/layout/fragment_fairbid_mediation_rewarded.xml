@@ -1,31 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="net.pubnative.lite.demo.ui.fragments.fairbid.FairbidBannerFragment">
+    tools:context="net.pubnative.lite.demo.ui.fragments.fairbid.FairbidMediationRewardedFragment"
+    tools:showIn="@layout/activity_tab">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
         android:orientation="vertical">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_load"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/load" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_show"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginBottom="20dp"
-            android:text="@string/load" />
-
-        <FrameLayout
-            android:id="@+id/ad_container"
-            android:layout_width="320dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center_horizontal" />
+            android:text="@string/show" />
 
         <TextView
             android:id="@+id/label_creative_id"
