@@ -106,6 +106,7 @@ public class HyBidDemoApplication extends MultiDexApplication {
 
         HyBid.setHtmlInterstitialSkipOffset(settings.getSkipOffset());
         HyBid.setVideoInterstitialSkipOffset(settings.getVideoSkipOffset());
+        HyBid.setEndCardEnabled(settings.getEnableEndcard());
         HyBid.setEndCardCloseButtonDelay(settings.getEndCardCloseButtonDelay());
 
         HyBid.setInterstitialClickBehaviour(getInterstitialActionBehaviourFromSettings(settings.getVideoClickBehaviour()));

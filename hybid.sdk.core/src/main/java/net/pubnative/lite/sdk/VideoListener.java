@@ -30,4 +30,6 @@ public interface VideoListener {
     void onVideoDismissed(int progressPercentage);
 
     void onVideoFinished();
+
+    void onVideoSkipped();
 }

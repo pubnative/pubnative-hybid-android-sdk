@@ -75,6 +75,7 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
 
         loadButton.setOnClickListener {
+            cleanLogs()
             prepareButton.isEnabled = false
             showButton.isEnabled = false
             if (!isLoadingAd)
@@ -140,7 +141,7 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
         prepareButton.isEnabled = !cachingEnabled
         showButton.isEnabled = cachingEnabled
         displayLogs()
-        if (!TextUtils.isEmpty(interstitial?.creativeId)) {
+        if (interstitial?.creativeId?.isNotEmpty() == true) {
             creativeIdView.text = interstitial?.creativeId
         }
         isLoadingAd = false
@@ -200,6 +201,13 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
 
     override fun onVideoFinished() {
         Log.d(TAG, "onVideoFinished")
+    }
+
+    override fun onVideoSkipped() {
+        Log.d(
+            TAG,
+            String.format(Locale.ENGLISH, "onVideoSkipped", "")
+        )
     }
 
     override fun onCacheSuccess() {

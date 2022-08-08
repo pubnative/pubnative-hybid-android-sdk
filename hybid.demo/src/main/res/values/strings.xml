@@ -220,9 +220,12 @@
     <string name="debug">Debug</string>
 
     <string name="title_markup">Custom markup</string>
-    <string name="title_creative_tester">P161 Creative Tester</string>
+    <string name="title_creative_tester">Creative Tester</string>
     <string name="title_signal_data_tester">Signal data tester</string>
     <string name="ad_size">Ad size:</string>
+    <string name="creative_server">Creative server:</string>
+    <string name="p161">P161</string>
+    <string name="foundry">Foundry</string>
 
     <string name="title_numbereight_audiences">NumberEight Audiences</string>
 

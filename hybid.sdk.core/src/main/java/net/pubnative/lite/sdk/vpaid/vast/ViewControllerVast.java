@@ -227,6 +227,7 @@ public class ViewControllerVast implements View.OnClickListener {
 
     public void showEndCard(EndCardData endCardData, String imageUri) {
         mEndCardLayout.setVisibility(View.VISIBLE);
+        mEndCardLayout.setOnClickListener(v -> validateOpenURLClicked());
         int endCardCloseDelay = HyBid.getEndCardCloseButtonDelay();
         if (endCardData != null) {
             mControlsLayout.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
@@ -390,6 +391,16 @@ public class ViewControllerVast implements View.OnClickListener {
         } else {
             mEndCardCloseView.setVisibility(View.VISIBLE);
         }
+    }
+
+    public void pauseEndCardCloseButtonTimer() {
+        if (mEndcardTimer != null)
+            mEndcardTimer.pauseTimer();
+    }
+
+    public void resumeEndCardCloseButtonTimer() {
+        if (mEndcardTimer != null)
+            mEndcardTimer.resumeTimer();
     }
 
     public void muteVideo() {

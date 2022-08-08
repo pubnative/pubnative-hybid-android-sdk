@@ -60,7 +60,8 @@ public class UserDataManager {
         mContext = context.getApplicationContext();
         mPreferences = mContext.getSharedPreferences(PREFERENCES_CONSENT, Context.MODE_PRIVATE);
         mAppPreferences = PreferenceManager.getDefaultSharedPreferences(mContext.getApplicationContext());
-        mAppPreferences.registerOnSharedPreferenceChangeListener(mAppPrefsListener);
+        if (mAppPreferences != null)
+            mAppPreferences.registerOnSharedPreferenceChangeListener(mAppPrefsListener);
         updatePublicConsent(mAppPreferences);
     }
 
@@ -169,7 +170,15 @@ public class UserDataManager {
     }
 
     public boolean gdprApplies() {
-        int gdprApplies = mAppPreferences.getInt(KEY_GDPR_APPLIES, 0);
+        int gdprApplies;
+
+        try {
+            String gdprAppliesString = mAppPreferences.getString(KEY_GDPR_APPLIES, "0");
+            gdprApplies = Integer.parseInt(gdprAppliesString);
+        } catch (Exception e) {
+            gdprApplies = mAppPreferences.getInt(KEY_GDPR_APPLIES, 0);
+        }
+
         return gdprApplies == 1;
     }
 

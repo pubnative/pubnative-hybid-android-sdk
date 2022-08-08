@@ -15,20 +15,26 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.analytics.Reporting;
+import net.pubnative.lite.sdk.contentinfo.AdFeedbackView;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastSender;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ContentInfo;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.PositionX;
 import net.pubnative.lite.sdk.models.PositionY;
+import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.views.CloseableContainer;
+import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
 import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
 
 
-public abstract class HyBidInterstitialActivity extends Activity {
+public abstract class HyBidInterstitialActivity extends Activity implements PNAPIContentInfoView.ContentInfoListener {
+    private static final String TAG = HyBidInterstitialActivity.class.getSimpleName();
     public static final String EXTRA_ZONE_ID = "extra_pn_zone_id";
     public static final String EXTRA_BROADCAST_ID = "extra_pn_broadcast_id";
     public static final String EXTRA_SKIP_OFFSET = "extra_pn_skip_offset";
@@ -82,7 +88,7 @@ public abstract class HyBidInterstitialActivity extends Activity {
                 mCloseableContainer.setBackgroundColor(Color.WHITE);
                 showInterstitialCloseButton();
                 if (!isVast && shouldShowContentInfo() && getAd() != null) {
-                    View contentInfo = getAd().getContentInfoContainer(this);
+                    View contentInfo = getAd().getContentInfoContainer(this, HyBid.isAdFeedbackEnabled(), this);
                     if (contentInfo != null) {
                         mCloseableContainer.addView(contentInfo);
                     }
@@ -132,13 +138,16 @@ public abstract class HyBidInterstitialActivity extends Activity {
     }
 
     private View getContentInfo(Context context, Ad ad, ContentInfo contentInfo) {
-        return contentInfo == null ? ad.getContentInfoContainer(context) : ad.getContentInfoContainer(context, contentInfo);
+        return contentInfo == null ? ad.getContentInfoContainer(context, HyBid.isAdFeedbackEnabled(), this)
+                : ad.getContentInfoContainer(context, contentInfo, HyBid.isAdFeedbackEnabled(), this);
     }
 
     private final CloseableContainer.OnCloseListener mCloseListener = this::dismiss;
 
     protected void dismiss() {
-        getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
+        if (getBroadcastSender() != null) {
+            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
+        }
         finish();
     }
 
@@ -164,7 +173,12 @@ public abstract class HyBidInterstitialActivity extends Activity {
     }
 
     protected void showInterstitialCloseButton() {
-        if (mCloseableContainer != null) {
+        boolean hasEndcard = false;
+        if (getAd() != null) {
+            hasEndcard = getAd().hasEndCard() && HyBid.isEndCardEnabled();
+        }
+
+        if (mCloseableContainer != null && !hasEndcard) {
             mCloseableContainer.setCloseVisible(true);
             mCloseableContainer.setOnCloseListener(mCloseListener);
         }
@@ -194,6 +208,29 @@ public abstract class HyBidInterstitialActivity extends Activity {
             }
         }
         return mAd;
+    }
+
+    // Content info listener
+    @Override
+    public void onIconClicked() {
+        //TODO report content info icon clicked
+    }
+
+    @Override
+    public void onLinkClicked(String url) {
+        AdFeedbackView adFeedbackView = new AdFeedbackView();
+        adFeedbackView.prepare(this, url, mAd, Reporting.AdFormat.FULLSCREEN,
+                IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
+                    @Override
+                    public void onLoadFinished() {
+                        adFeedbackView.showFeedbackForm(HyBidInterstitialActivity.this);
+                    }
+
+                    @Override
+                    public void onLoadFailed(Throwable error) {
+                        Logger.e(TAG, error.getMessage());
+                    }
+                });
     }
 
     protected HyBidInterstitialBroadcastSender getBroadcastSender() {

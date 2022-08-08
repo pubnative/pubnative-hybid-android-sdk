@@ -67,6 +67,8 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
     private boolean isImpressionFired = false;
     private boolean isVideoSkipped = false;
 
+    private boolean hasEndcard = false;
+
     private final HyBidViewabilityNativeVideoAdSession mViewabilityAdSession;
     private final List<HyBidViewabilityFriendlyObstruction> mViewabilityFriendlyObstructions;
     private Boolean isAndroid6VersionDevice = false;
@@ -90,6 +92,16 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
         observer = VolumeObserver.getInstance();
         observer.registerVolumeObserver(this, mBaseAdInternal.getContext());
         this.mImpressionListener = impressionListener;
+    }
+
+    @Override
+    public void resumeEndCardCloseButtonTimer() {
+        mViewControllerVast.resumeEndCardCloseButtonTimer();
+    }
+
+    @Override
+    public void pauseEndCardCloseButtonTimer() {
+        mViewControllerVast.pauseEndCardCloseButtonTimer();
     }
 
     @Override
@@ -438,6 +450,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
 
         if (skipEvent) {
             getViewabilityAdSession().fireSkipped();
+            mBaseAdInternal.onAdSkipped();
         } else {
             if (!isVideoSkipped)
                 getViewabilityAdSession().fireComplete();
@@ -463,6 +476,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
                 closeSelf();
             }
         } else {
+            hasEndcard = true;
             mViewControllerVast.showEndCard(mEndCardData, mImageUri);
         }
 
@@ -475,7 +489,9 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
         postDelayed(() -> {
             if (mBaseAdInternal.isInterstitial() && finishedPlaying
                     && mImageUri == null && HyBid.getCloseVideoAfterFinish()) {
+                if (!hasEndcard) {
                     closeSelf();
+                }
             }
         });
     }

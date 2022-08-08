@@ -70,9 +70,7 @@
         <activity
             android:name=".ui.activities.hybid.HyBidInterstitialActivity"
             android:label="@string/hybid_interstitial"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"
-            tools:ignore="LockedOrientationActivity" />
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.hybid.HyBidRewardedActivity"
             android:label="@string/hybid_rewarded"

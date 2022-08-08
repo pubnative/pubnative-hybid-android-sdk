@@ -239,4 +239,11 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
             mVideoListener.onVideoFinished();
         }
     }
+
+    @Override
+    public void onVideoSkipped() {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoSkipped();
+        }
+    }
 }

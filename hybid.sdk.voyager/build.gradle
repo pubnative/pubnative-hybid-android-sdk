@@ -132,7 +132,7 @@ artifactory {
     contextUrl = System.getenv("ARTIFACTORY_CONTEXT_URL")
     publish {
         repository {
-            repoKey = 'verve-gradle-release-local'
+            repoKey = (branchName.toString() == 'master') ? 'verve-gradle-release-local' : 'verve-gradle-dev-local'
             username = System.getenv("ARTIFACTORY_USER")
             password = System.getenv("ARTIFACTORY_PASSWORD")
             maven = true
@@ -145,7 +145,7 @@ artifactory {
     }
     resolve {
         repository {
-            repoKey = 'verve-gradle-release'
+            repoKey = (branchName.toString() == 'master') ? 'verve-gradle-release' : 'verve-gradle-dev'
             username = System.getenv("ARTIFACTORY_USER")
             password = System.getenv("ARTIFACTORY_PASSWORD")
             maven = true

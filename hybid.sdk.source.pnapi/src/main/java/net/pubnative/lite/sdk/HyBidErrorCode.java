@@ -24,7 +24,8 @@ public enum HyBidErrorCode {
     UNKNOWN_ERROR(21, "An unknown error has occurred in the HyBid SDK"),
     DISABLED_FORMAT(22, "The requested ad format has been disabled"),
     DISABLED_RENDERING_ENGINE(23, "The requested rendering engine has been disabled"),
-    EXPIRED_AD(24, "The ad has expired");
+    EXPIRED_AD(24, "The ad has expired"),
+    ERROR_LOADING_FEEDBACK(25, "An error has ocurred loading the feedback form");
 
     private final int code;
     private final String message;

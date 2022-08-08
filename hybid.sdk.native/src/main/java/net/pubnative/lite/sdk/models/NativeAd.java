@@ -30,6 +30,11 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 
+import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.analytics.Reporting;
+import net.pubnative.lite.sdk.contentinfo.AdFeedbackView;
+import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.views.PNBeaconWebView;
 import net.pubnative.lite.sdk.visibility.ImpressionManager;
 import net.pubnative.lite.sdk.visibility.ImpressionTracker;
@@ -38,7 +43,7 @@ import net.pubnative.lite.sdk.visibility.TrackingManager;
 import java.util.List;
 import java.util.Map;
 
-public class NativeAd implements ImpressionTracker.Listener {
+public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoView.ContentInfoListener {
     private static final String TAG = NativeAd.class.getSimpleName();
 
     /**
@@ -200,7 +205,7 @@ public class NativeAd implements ImpressionTracker.Listener {
     }
 
     public View getContentInfo(Context context) {
-        return mAd.getContentInfo(context);
+        return mAd.getContentInfo(context, HyBid.isAdFeedbackEnabled(), this);
     }
 
     public String getImpressionId() {
@@ -407,5 +412,30 @@ public class NativeAd implements ImpressionTracker.Listener {
         invokeOnClick(view);
         confirmClickBeacons(view.getContext());
         openURL(getClickUrl(), false);
+    }
+
+    // Content info listener
+    @Override
+    public void onIconClicked() {
+        //TODO report content info icon clicked
+    }
+
+    @Override
+    public void onLinkClicked(String url) {
+        if (mAdView != null && mAdView.getContext() != null) {
+            AdFeedbackView adFeedbackView = new AdFeedbackView();
+            adFeedbackView.prepare(mAdView.getContext(), url, mAd, Reporting.AdFormat.NATIVE,
+                    IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
+                        @Override
+                        public void onLoadFinished() {
+                            adFeedbackView.showFeedbackForm(mAdView.getContext());
+                        }
+
+                        @Override
+                        public void onLoadFailed(Throwable error) {
+                            Logger.e(TAG, error.getMessage());
+                        }
+                    });
+        }
     }
 }

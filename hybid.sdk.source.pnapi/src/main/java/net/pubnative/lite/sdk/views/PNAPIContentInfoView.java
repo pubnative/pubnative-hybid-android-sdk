@@ -22,6 +22,7 @@
 //
 package net.pubnative.lite.sdk.views;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -37,6 +38,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.models.ContentInfo;
 import net.pubnative.lite.sdk.models.PositionX;
 import net.pubnative.lite.sdk.source.pnapi.R;
@@ -47,9 +49,17 @@ public class PNAPIContentInfoView extends FrameLayout implements View.OnClickLis
 
     private static final String TAG = PNAPIContentInfoView.class.getSimpleName();
 
+    public interface ContentInfoListener {
+        void onIconClicked();
+
+        void onLinkClicked(String url);
+    }
+
     private LinearLayout mContainerView;
     private TextView mContentInfoText;
     private ImageView mContentInfoIcon;
+    private ContentInfoListener mContentInfoListener;
+    private boolean mAdFeedbackEnabled = false;
 
     private Handler mHandler;
 
@@ -79,6 +89,16 @@ public class PNAPIContentInfoView extends FrameLayout implements View.OnClickLis
         addView(mContainerView);
     }
 
+    public void setContentInfoListener(ContentInfoListener listener) {
+        if (listener != null) {
+            mContentInfoListener = listener;
+        }
+    }
+
+    public void setAdFeedbackEnabled(boolean feedbackEnabled) {
+        this.mAdFeedbackEnabled = feedbackEnabled;
+    }
+
     public void openLayout() {
         mContentInfoText.setVisibility(VISIBLE);
         mHandler.postDelayed(mCloseTask, 3000);
@@ -104,14 +124,17 @@ public class PNAPIContentInfoView extends FrameLayout implements View.OnClickLis
 
     public void setIconClickUrl(final String iconClickUrl) {
         mContentInfoText.setOnClickListener(view -> {
-
-            try {
-                Intent openLink = new Intent(Intent.ACTION_VIEW);
-                openLink.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                openLink.setData(Uri.parse(iconClickUrl));
-                view.getContext().startActivity(openLink);
-            } catch (Exception e) {
-                Log.e(TAG, "error on click content info text", e);
+            if (mContentInfoListener == null || !mAdFeedbackEnabled || !(getContext() instanceof Activity)) {
+                try {
+                    Intent openLink = new Intent(Intent.ACTION_VIEW);
+                    openLink.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    openLink.setData(Uri.parse(iconClickUrl));
+                    view.getContext().startActivity(openLink);
+                } catch (Exception e) {
+                    Log.e(TAG, "error on click content info text", e);
+                }
+            } else {
+                mContentInfoListener.onLinkClicked(iconClickUrl);
             }
         });
     }
@@ -145,6 +168,9 @@ public class PNAPIContentInfoView extends FrameLayout implements View.OnClickLis
 
     @Override
     public void onClick(View v) {
+        if (mContentInfoListener != null) {
+            mContentInfoListener.onIconClicked();
+        }
         openLayout();
     }
 }

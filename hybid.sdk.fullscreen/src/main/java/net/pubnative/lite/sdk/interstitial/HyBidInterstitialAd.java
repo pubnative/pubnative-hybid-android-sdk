@@ -609,6 +609,13 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         }
     }
 
+    @Override
+    public void onVideoSkipped() {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoSkipped();
+        }
+    }
+
     private void addReportingKey(String key, Object value) {
         if (mPlacementParams != null) {
             if (value instanceof Long)

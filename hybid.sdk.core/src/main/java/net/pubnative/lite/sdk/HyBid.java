@@ -90,6 +90,8 @@ public class HyBid {
     private static Integer sHtmlInterstitialSkipOffset = -1;
     private static Integer sVideoInterstitialSkipOffset = -1;
     private static Integer sEndCardCloseButtonDelay = -1;
+    private static String sContentInfoUrl;
+    private static boolean sAdFeedbackEnabled = false;
     private static String sIabCategory;
     private static String sIabSubcategory;
     private static String sAppVersion;
@@ -131,7 +133,8 @@ public class HyBid {
         sVideoAdCache = new VideoAdCache();
         sBrowserManager = new BrowserManager();
         sVgiIdManager = new VgiIdManager(application.getApplicationContext());
-        sReportingController = new ReportingController();
+        if (sReportingController == null)
+            sReportingController = new ReportingController();
         sDiagnosticsManager = new DiagnosticsManager(application.getApplicationContext(), sReportingController);
         sViewabilityManager = new ViewabilityManager(application);
         ReportingDelegate sReportingDelegate = new ReportingDelegate(application.getApplicationContext(),
@@ -447,6 +450,22 @@ public class HyBid {
 
     public static String getAppVersion() {
         return sAppVersion;
+    }
+
+    public static void setContentInfoUrl(String url) {
+        sContentInfoUrl = url;
+    }
+
+    public static String getContentInfoUrl() {
+        return sContentInfoUrl;
+    }
+
+    public static void setAdFeedbackEnabled(boolean feedbackEnabled) {
+        sAdFeedbackEnabled = feedbackEnabled;
+    }
+
+    public static boolean isAdFeedbackEnabled() {
+        return sAdFeedbackEnabled;
     }
 
     public static void setDeveloperDomain(String developerDomain) {

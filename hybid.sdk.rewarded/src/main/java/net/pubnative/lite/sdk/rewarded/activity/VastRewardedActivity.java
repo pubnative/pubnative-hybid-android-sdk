@@ -84,7 +84,9 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
             }
         } catch (Exception exception) {
             Logger.e(TAG, exception.getMessage());
-            getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.ERROR);
+            if (getBroadcastSender() != null) {
+                getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.ERROR);
+            }
             finish();
         }
     }
@@ -145,13 +147,17 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
         @Override
         public void onAdLoadFail(PlayerInfo info) {
             setProgressBarInvisible();
-            getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.ERROR);
+            if (getBroadcastSender() != null) {
+                getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.ERROR);
+            }
             finish();
         }
 
         @Override
         public void onAdClicked() {
-            getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLICK);
+            if (getBroadcastSender() != null) {
+                getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLICK);
+            }
         }
 
         @Override
@@ -159,7 +165,9 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
             mReady = false;
             mFinished = true;
             showRewardedCloseButton();
-            getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.FINISH);
+            if (getBroadcastSender() != null) {
+                getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.FINISH);
+            }
         }
 
         @Override
@@ -168,8 +176,18 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
         }
 
         @Override
+        public void onAdDismissed(int progressPercentage) {
+            dismiss();
+        }
+
+        @Override
         public void onAdExpired() {
 
+        }
+
+        @Override
+        public void onAdSkipped() {
+            mFinished = true;
         }
 
         @Override
@@ -180,6 +198,8 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
 
     @Override
     public void onImpression() {
-        getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.OPEN);
+        if (getBroadcastSender() != null) {
+            getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.OPEN);
+        }
     }
 }

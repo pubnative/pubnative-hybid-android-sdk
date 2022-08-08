@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.mraid.MRAIDBanner;
@@ -32,14 +33,12 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
     @SuppressLint("SourceLockedOrientationActivity")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
             if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             }
             if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             }
-        }
         super.onCreate(savedInstanceState);
         hideInterstitialCloseButton();
     }
@@ -55,10 +54,10 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
 
             if (getAd().getAssetUrl(APIAsset.HTML_BANNER) != null) {
                 adView = new MRAIDBanner(this, getAd().getAssetUrl(APIAsset.HTML_BANNER), "", mSupportedNativeFeatures,
-                        this, this, getAd().getContentInfoContainer(this));
+                        this, this, getAd().getContentInfoContainer(this, HyBid.isAdFeedbackEnabled(), this));
             } else if (getAd().getAssetHtml(APIAsset.HTML_BANNER) != null) {
                 adView = new MRAIDBanner(this, "", getAd().getAssetHtml(APIAsset.HTML_BANNER), mSupportedNativeFeatures,
-                        this, this, getAd().getContentInfoContainer(this));
+                        this, this, getAd().getContentInfoContainer(this, HyBid.isAdFeedbackEnabled(), this));
             }
 
             if (adView != null) {
@@ -99,12 +98,16 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
 
     @Override
     public void mraidViewLoaded(MRAIDView mraidView) {
-        getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.SHOW);
+        if (getBroadcastSender() != null) {
+            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.SHOW);
+        }
     }
 
     @Override
     public void mraidViewError(MRAIDView mraidView) {
-        getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.ERROR);
+        if (getBroadcastSender() != null) {
+            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.ERROR);
+        }
         dismiss();
     }
 
@@ -149,7 +152,9 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
 
     @Override
     public void mraidNativeFeatureOpenBrowser(String url) {
-        getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CLICK);
+        if (getBroadcastSender() != null) {
+            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CLICK);
+        }
         getUrlHandler().handleUrl(url);
     }
 
@@ -179,5 +184,17 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
     @Override
     public void onClose() {
         dismiss();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mView.pause();
+    }
+
+    @Override
+    protected void onResume() {
+        mView.resume();
+        super.onResume();
     }
 }

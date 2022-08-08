@@ -69,7 +69,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 static def addDependency(dependency, dependenciesNode) { //finish with dependencies
-    if(dependency.group!=null && dependency.name != null) {
+    if (dependency.group != null && dependency.name != null) {
         def dependencyNode = dependenciesNode.appendNode('dependency')
         dependencyNode.appendNode('groupId', dependency.group)
         dependencyNode.appendNode('artifactId', dependency.name)
@@ -124,7 +124,7 @@ artifactory {
     contextUrl = System.getenv("ARTIFACTORY_CONTEXT_URL")
     publish {
         repository {
-            repoKey = 'verve-gradle-release-local'
+            repoKey = (branchName.toString() == 'master') ? 'verve-gradle-release-local' : 'verve-gradle-dev-local'
             username = System.getenv("ARTIFACTORY_USER")
             password = System.getenv("ARTIFACTORY_PASSWORD")
             maven = true
@@ -137,7 +137,7 @@ artifactory {
     }
     resolve {
         repository {
-            repoKey = 'verve-gradle-release'
+            repoKey = (branchName.toString() == 'master') ? 'verve-gradle-release' : 'verve-gradle-dev'
             username = System.getenv("ARTIFACTORY_USER")
             password = System.getenv("ARTIFACTORY_PASSWORD")
             maven = true

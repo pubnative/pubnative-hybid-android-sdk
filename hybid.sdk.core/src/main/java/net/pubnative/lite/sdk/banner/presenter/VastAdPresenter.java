@@ -32,16 +32,20 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.analytics.Reporting;
+import net.pubnative.lite.sdk.contentinfo.AdFeedbackView;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.ContentInfo;
 import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.PositionX;
 import net.pubnative.lite.sdk.models.PositionY;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.visibility.ImpressionManager;
 import net.pubnative.lite.sdk.visibility.ImpressionTracker;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
@@ -55,7 +59,7 @@ import net.pubnative.lite.sdk.vpaid.utils.Utils;
 
 import org.json.JSONObject;
 
-public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener {
+public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener, PNAPIContentInfoView.ContentInfoListener {
     private static final String TAG = VastAdPresenter.class.getSimpleName();
     private final Context mContext;
     private final Ad mAd;
@@ -219,7 +223,8 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener 
     }
 
     private View getContentInfo(Context context, Ad ad, ContentInfo contentInfo) {
-        return contentInfo == null ? ad.getContentInfoContainer(context) : ad.getContentInfoContainer(context, contentInfo);
+        return contentInfo == null ? ad.getContentInfoContainer(context, HyBid.isAdFeedbackEnabled(), this)
+                : ad.getContentInfoContainer(context, contentInfo, HyBid.isAdFeedbackEnabled(), this);
     }
 
     @Override
@@ -286,6 +291,13 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener 
         }
 
         @Override
+        public void onAdSkipped() {
+            if (mVideoListener != null) {
+                mVideoListener.onVideoSkipped();
+            }
+        }
+
+        @Override
         public void onAdDismissed() {
             onAdDismissed(-1);
         }
@@ -307,4 +319,27 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener 
             }
         }
     };
+
+    // Content info listener
+    @Override
+    public void onIconClicked() {
+        //TODO report content info icon clicked
+    }
+
+    @Override
+    public void onLinkClicked(String url) {
+        AdFeedbackView adFeedbackView = new AdFeedbackView();
+        adFeedbackView.prepare(mContext, url, mAd, Reporting.AdFormat.BANNER,
+                IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
+                    @Override
+                    public void onLoadFinished() {
+                        adFeedbackView.showFeedbackForm(mContext);
+                    }
+
+                    @Override
+                    public void onLoadFailed(Throwable error) {
+                        Logger.e(TAG, error.getMessage());
+                    }
+                });
+    }
 }

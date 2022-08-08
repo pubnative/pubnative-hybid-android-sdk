@@ -47,7 +47,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':hybid.sdk')
-    compileOnly 'com.applovin:applovin-sdk:11.4.3'
+    compileOnly 'com.applovin:applovin-sdk:11.4.4'
 
     implementation project(':hybid.sdk.core')
     implementation project(':hybid.sdk.logger')
@@ -91,7 +91,7 @@ artifactory {
     contextUrl = System.getenv("ARTIFACTORY_CONTEXT_URL")
     publish {
         repository {
-            repoKey = 'verve-gradle-release-local'
+            repoKey = (branchName.toString() == 'master') ? 'verve-gradle-release-local' : 'verve-gradle-dev-local'
             username = System.getenv("ARTIFACTORY_USER")
             password = System.getenv("ARTIFACTORY_PASSWORD")
             maven = true
@@ -104,7 +104,7 @@ artifactory {
     }
     resolve {
         repository {
-            repoKey = 'verve-gradle-release'
+            repoKey = (branchName.toString() == 'master') ? 'verve-gradle-release' : 'verve-gradle-dev'
             username = System.getenv("ARTIFACTORY_USER")
             password = System.getenv("ARTIFACTORY_PASSWORD")
             maven = true

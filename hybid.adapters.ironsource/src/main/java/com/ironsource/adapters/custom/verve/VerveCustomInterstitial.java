@@ -135,6 +135,10 @@ public class VerveCustomInterstitial extends BaseInterstitial<VerveCustomAdapter
     }
 
     @Override
+    public void onVideoSkipped() {
+    }
+
+    @Override
     public void onVideoDismissed(int progressPercentage) {
 
     }

@@ -22,7 +22,7 @@
 
     <fragment
         android:id="@+id/fragment"
-        android:name="net.pubnative.lite.demo.ui.fragments.creativetester.P161CreativeTesterFragment"
+        android:name="net.pubnative.lite.demo.ui.fragments.creativetester.CreativeTesterFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"

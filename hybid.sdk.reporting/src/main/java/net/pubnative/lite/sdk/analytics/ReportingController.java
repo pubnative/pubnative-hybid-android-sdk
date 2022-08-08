@@ -1,5 +1,8 @@
 package net.pubnative.lite.sdk.analytics;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,13 +36,15 @@ public class ReportingController {
         }
     }
 
-    public void reportEvent(ReportingEvent event) {
-        for (int i = 0; i < mListeners.size(); i++) {
-            ReportingEventCallback callback = mListeners.get(i);
-            if (callback != null) {
-                callback.onEvent(event);
+    public synchronized void reportEvent(ReportingEvent event) {
+        new Handler(Looper.getMainLooper()).post(() -> {
+            for (int i = 0; i < mListeners.size(); i++) {
+                ReportingEventCallback callback = mListeners.get(i);
+                if (callback != null) {
+                    callback.onEvent(event);
+                }
             }
-        }
+        });
     }
 
     public void cacheAdEventList(List<ReportingEvent> eventList) {

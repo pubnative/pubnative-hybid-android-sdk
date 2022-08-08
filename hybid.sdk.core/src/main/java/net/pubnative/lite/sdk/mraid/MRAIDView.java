@@ -59,7 +59,6 @@ import android.webkit.JsPromptResult;
 import android.webkit.JsResult;
 import android.webkit.PermissionRequest;
 import android.webkit.SslErrorHandler;
-import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -119,6 +118,18 @@ public class MRAIDView extends RelativeLayout {
     // used to differentiate logging
     private static final String MRAID_LOG_TAG = MRAIDView.class.getSimpleName();
     private Integer mSkipTimeMillis = -1;
+
+    private SimpleTimer mExpirationTimer;
+
+    public void pause() {
+        if (mExpirationTimer != null)
+            mExpirationTimer.pauseTimer();
+    }
+
+    public void resume() {
+        if (mExpirationTimer != null)
+            mExpirationTimer.resumeTimer();
+    }
 
     // used to define state of the MRAID advertisement
     @Retention(RetentionPolicy.SOURCE)
@@ -376,9 +387,13 @@ public class MRAIDView extends RelativeLayout {
                     super.onConfigurationChanged(newConfig);
                     MRAIDLog.d(TAG, "onConfigurationChanged " + (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT ? "portrait" : "landscape"));
                     if (isInterstitial) {
-                        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-                        if (windowManager != null) {
-                            windowManager.getDefaultDisplay().getMetrics(displayMetrics);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            context.getDisplay().getMetrics(displayMetrics);
+                        } else {
+                            WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+                            if (windowManager != null) {
+                                windowManager.getDefaultDisplay().getMetrics(displayMetrics);
+                            }
                         }
                     }
                 }
@@ -898,9 +913,7 @@ public class MRAIDView extends RelativeLayout {
         StringBuilder mLine = new StringBuilder();
         String[] urlElements = fileURL.split("/");
         if (urlElements[3].equals("android_asset")) {
-            try {
-                BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(context.getAssets().open(urlElements[4])));
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(context.getAssets().open(urlElements[4])))) {
 
                 // do reading, usually loop until end of file reading
                 String line = reader.readLine();
@@ -910,7 +923,6 @@ public class MRAIDView extends RelativeLayout {
                     mLine.append(line);
                 }
 
-                reader.close();
             } catch (IOException e) {
                 MRAIDLog.e("Error fetching file: " + e.getMessage());
             }
@@ -1992,7 +2004,7 @@ public class MRAIDView extends RelativeLayout {
 
     private void startSkipTimer() {
         if (mSkipTimeMillis > 0) {
-            SimpleTimer mExpirationTimer = new SimpleTimer(mSkipTimeMillis, () -> listener.mraidShowCloseButton());
+            mExpirationTimer = new SimpleTimer(mSkipTimeMillis, () -> listener.mraidShowCloseButton());
             mExpirationTimer.start();
         } else {
             listener.mraidShowCloseButton();

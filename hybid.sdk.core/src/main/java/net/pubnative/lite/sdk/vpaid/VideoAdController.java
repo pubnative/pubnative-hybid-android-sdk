@@ -13,6 +13,10 @@ import java.util.List;
 
 public interface VideoAdController {
 
+    void resumeEndCardCloseButtonTimer();
+
+    void pauseEndCardCloseButtonTimer();
+
     interface OnPreparedListener {
         void onPrepared();
     }

@@ -163,6 +163,16 @@ public class VideoAd extends BaseVideoAd {
         }
     }
 
+    public void resumeEndCardCloseButtonTimer() {
+        Logger.d(LOG_TAG, "resume End Card Timer");
+        getAdController().resumeEndCardCloseButtonTimer();
+    }
+
+    public void pauseEndCardCloseButtonTimer() {
+        Logger.d(LOG_TAG, "resume End Card Timer");
+        getAdController().pauseEndCardCloseButtonTimer();
+    }
+
     /**
      * Pauses video ad
      * Needs to be triggered on appropriate Activity life-cycle method "onPause()".

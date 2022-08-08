@@ -25,11 +25,16 @@ package net.pubnative.lite.sdk.banner.presenter;
 import android.content.Context;
 import android.view.View;
 
+import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.analytics.Reporting;
+import net.pubnative.lite.sdk.contentinfo.AdFeedbackView;
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.mraid.MRAIDBanner;
+import net.pubnative.lite.sdk.mraid.MRAIDInterstitial;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeature;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
@@ -37,7 +42,9 @@ import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.utils.CheckUtils;
+import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.UrlHandler;
+import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.visibility.ImpressionManager;
 import net.pubnative.lite.sdk.visibility.ImpressionTracker;
 
@@ -47,7 +54,8 @@ import org.json.JSONObject;
  * Created by erosgarciaponte on 08.01.18.
  */
 
-public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNativeFeatureListener, ImpressionTracker.Listener {
+public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNativeFeatureListener, ImpressionTracker.Listener, PNAPIContentInfoView.ContentInfoListener {
+    private static final String TAG = MraidAdPresenter.class.getSimpleName();
     private final Context mContext;
     private final Ad mAd;
     private final ImpressionTrackingMethod mTrackingMethod;
@@ -108,10 +116,10 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
 
         if (mAd.getAssetUrl(APIAsset.HTML_BANNER) != null) {
             mMRAIDBanner = new MRAIDBanner(mContext, mAd.getAssetUrl(APIAsset.HTML_BANNER), "", mSupportedNativeFeatures,
-                    this, this, mAd.getContentInfoContainer(mContext));
+                    this, this, mAd.getContentInfoContainer(mContext, HyBid.isAdFeedbackEnabled(), this));
         } else if (mAd.getAssetHtml(APIAsset.HTML_BANNER) != null) {
             mMRAIDBanner = new MRAIDBanner(mContext, "", mAd.getAssetHtml(APIAsset.HTML_BANNER), mSupportedNativeFeatures,
-                    this, this, mAd.getContentInfoContainer(mContext));
+                    this, this, mAd.getContentInfoContainer(mContext, HyBid.isAdFeedbackEnabled(), this));
         }
     }
 
@@ -239,5 +247,28 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
         if (mImpressionListener != null) {
             mImpressionListener.onImpression();
         }
+    }
+
+    // Content info listener
+    @Override
+    public void onIconClicked() {
+        //TODO report content info icon clicked
+    }
+
+    @Override
+    public void onLinkClicked(String url) {
+        AdFeedbackView adFeedbackView = new AdFeedbackView();
+        adFeedbackView.prepare(mContext, url, mAd, Reporting.AdFormat.BANNER,
+                IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
+                    @Override
+                    public void onLoadFinished() {
+                        adFeedbackView.showFeedbackForm(mContext);
+                    }
+
+                    @Override
+                    public void onLoadFailed(Throwable error) {
+                        Logger.e(TAG, error.getMessage());
+                    }
+                });
     }
 }

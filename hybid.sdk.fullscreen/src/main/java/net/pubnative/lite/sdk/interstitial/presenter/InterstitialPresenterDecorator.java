@@ -232,4 +232,11 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             mVideoListener.onVideoFinished();
         }
     }
+
+    @Override
+    public void onVideoSkipped() {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoSkipped();
+        }
+    }
 }

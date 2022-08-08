@@ -26,17 +26,16 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
     private VideoAd mVideoAd;
     private boolean mIsSkippable = true;
     private boolean mHasEndCard = false;
+    private boolean mIsVideoFinished = false;
 
     @SuppressLint("SourceLockedOrientationActivity")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
-            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-            }
-            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            }
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
         setIsVast(true);
 
@@ -59,9 +58,9 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
                     if (adCacheItem.getAdParams() != null) {
                         adCacheItem.getAdParams().setPublisherSkipSeconds(mSkipOffset);
 
-                        if (!TextUtils.isEmpty(adCacheItem.getEndCardFilePath())) {
-                            String endCardFilePath = adCacheItem.getEndCardFilePath();
-                            Logger.d(TAG, endCardFilePath);
+                        if (adCacheItem.getEndCardData() != null
+                                && !TextUtils.isEmpty(adCacheItem.getEndCardData().getContent())
+                                && HyBid.isEndCardEnabled()) {
                             mHasEndCard = true;
                         }
 
@@ -78,20 +77,24 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
 
                 mVideoPlayer.postDelayed(() -> mVideoAd.load(), 1000);
             } else {
+                if (getBroadcastSender() != null) {
+                    Bundle extras = new Bundle();
+                    extras.putInt(HyBidInterstitialBroadcastReceiver.VIDEO_PROGRESS, 0);
+                    getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.ERROR);
+                    getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_ERROR, extras);
+                    getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
+                }
+                finish();
+            }
+        } catch (Exception exception) {
+            Logger.e(TAG, exception.getMessage());
+            if (getBroadcastSender() != null) {
                 Bundle extras = new Bundle();
                 extras.putInt(HyBidInterstitialBroadcastReceiver.VIDEO_PROGRESS, 0);
                 getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.ERROR);
                 getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_ERROR, extras);
                 getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
-                finish();
             }
-        } catch (Exception exception) {
-            Logger.e(TAG, exception.getMessage());
-            Bundle extras = new Bundle();
-            extras.putInt(HyBidInterstitialBroadcastReceiver.VIDEO_PROGRESS, 0);
-            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.ERROR);
-            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_ERROR, extras);
-            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
             finish();
         }
     }
@@ -121,6 +124,9 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
         if (mReady) {
             mVideoAd.resume();
         }
+
+        if (mIsVideoFinished)
+            mVideoAd.resumeEndCardCloseButtonTimer();
     }
 
     @Override
@@ -129,6 +135,9 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
         if (mReady) {
             mVideoAd.pause();
         }
+
+        if (mIsVideoFinished)
+            mVideoAd.pauseEndCardCloseButtonTimer();
     }
 
     @Override
@@ -158,11 +167,13 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
         @Override
         public void onAdLoadFail(PlayerInfo info) {
             setProgressBarInvisible();
-            Bundle extras = new Bundle();
-            extras.putInt(HyBidInterstitialBroadcastReceiver.VIDEO_PROGRESS, 0);
-            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.ERROR);
-            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_ERROR, extras);
-            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
+            if (getBroadcastSender() != null) {
+                Bundle extras = new Bundle();
+                extras.putInt(HyBidInterstitialBroadcastReceiver.VIDEO_PROGRESS, 0);
+                getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.ERROR);
+                getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_ERROR, extras);
+                getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
+            }
             finish();
         }
 
@@ -178,7 +189,15 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
             if (!mHasEndCard) {
                 showInterstitialCloseButton();
             }
-            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_FINISH);
+            mIsVideoFinished = true;
+            if (getBroadcastSender() != null) {
+                getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_FINISH);
+            }
+        }
+
+        @Override
+        public void onAdSkipped() {
+            mIsVideoFinished = true;
         }
 
         @Override
@@ -194,18 +213,24 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
 
         @Override
         public void onAdStarted() {
-            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_START);
+            if (getBroadcastSender() != null) {
+                getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_START);
+            }
         }
     };
 
     private void dismissVideo(int progressPercentage) {
-        Bundle extras = new Bundle();
-        extras.putInt(HyBidInterstitialBroadcastReceiver.VIDEO_PROGRESS, progressPercentage);
-        getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_DISMISS, extras);
+        if (getBroadcastSender() != null) {
+            Bundle extras = new Bundle();
+            extras.putInt(HyBidInterstitialBroadcastReceiver.VIDEO_PROGRESS, progressPercentage);
+            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_DISMISS, extras);
+        }
     }
 
     @Override
     public void onImpression() {
-        getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.SHOW);
+        if (getBroadcastSender() != null) {
+            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.SHOW);
+        }
     }
 }

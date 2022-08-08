@@ -24,27 +24,35 @@ import net.pubnative.lite.sdk.views.HyBidLeaderboardAdView
 import net.pubnative.lite.sdk.views.HyBidMRectAdView
 
 
-class P161CreativeTesterFragment : Fragment(), HyBidAdView.Listener {
-    private val TAG = P161CreativeTesterFragment::class.java.simpleName
+class CreativeTesterFragment : Fragment(), HyBidAdView.Listener {
+    private val TAG = CreativeTesterFragment::class.java.simpleName
 
     private lateinit var creativeIdInput: EditText
     private lateinit var adSizeGroup: RadioGroup
+    private lateinit var serverGroup: RadioGroup
     private lateinit var bannerAdView: HyBidBannerAdView
     private lateinit var mrectAdView: HyBidMRectAdView
     private lateinit var leaderboardAdView: HyBidLeaderboardAdView
 
     private var selectedSize: Int = R.id.radio_size_banner
+    private var selectedServer: Int = R.id.radio_server_p161
 
     private var interstitial: HyBidInterstitialAd? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(
-        R.layout.fragment_creative_tester, container, false)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? = inflater.inflate(
+        R.layout.fragment_creative_tester, container, false
+    )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         creativeIdInput = view.findViewById(R.id.input_creative_id)
         adSizeGroup = view.findViewById(R.id.group_ad_size)
+        serverGroup = view.findViewById(R.id.group_server)
         bannerAdView = view.findViewById(R.id.banner_adview)
         mrectAdView = view.findViewById(R.id.mrect_adview)
         leaderboardAdView = view.findViewById(R.id.leaderboard_adview)
@@ -71,6 +79,10 @@ class P161CreativeTesterFragment : Fragment(), HyBidAdView.Listener {
             selectedSize = checkedId
             updateListVisibility()
         }
+
+        serverGroup.setOnCheckedChangeListener { _, checkedId ->
+            selectedServer = checkedId
+        }
     }
 
     override fun onDestroy() {
@@ -83,13 +95,11 @@ class P161CreativeTesterFragment : Fragment(), HyBidAdView.Listener {
             bannerAdView.visibility = View.VISIBLE
             mrectAdView.visibility = View.GONE
             leaderboardAdView.visibility = View.GONE
-        }
-        else if (selectedSize == R.id.radio_size_medium) {
+        } else if (selectedSize == R.id.radio_size_medium) {
             bannerAdView.visibility = View.GONE
             mrectAdView.visibility = View.VISIBLE
             leaderboardAdView.visibility = View.GONE
-        }
-        else if (selectedSize == R.id.radio_size_leaderboard) {
+        } else if (selectedSize == R.id.radio_size_leaderboard) {
             bannerAdView.visibility = View.GONE
             mrectAdView.visibility = View.GONE
             leaderboardAdView.visibility = View.VISIBLE
@@ -106,31 +116,72 @@ class P161CreativeTesterFragment : Fragment(), HyBidAdView.Listener {
     private fun loadCreative() {
         if (!TextUtils.isEmpty(creativeIdInput.text.toString())) {
             val creativeId = creativeIdInput.text.toString().trim()
-            val url = "https://docker.creative-serving.com/preview?cr=$creativeId&type=adi"
-            Toast.makeText(activity, "Making request to: $url", Toast.LENGTH_SHORT).show()
-
-            PNHttpClient.makeRequest(context, url, null, null, true,
-                object : PNHttpClient.Listener {
-                    override fun onSuccess(response: String) {
-                        Log.d("onSuccess", response)
-                        loadMarkup(response)
-                    }
-
-                    override fun onFailure(error: Throwable) {
-                        Log.d("onFailure", error.toString())
-                        Toast.makeText(activity, "Creative request failed", Toast.LENGTH_SHORT).show()
-                    }
-                })
-
+            if (selectedServer == R.id.radio_server_p161) {
+                loadP161Creative(creativeId)
+            } else {
+                loadFoundryCreative(creativeId)
+            }
         } else {
             Toast.makeText(activity, "Please input some creative ID", Toast.LENGTH_SHORT).show()
             return
         }
     }
 
+    private fun loadP161Creative(creativeId: String) {
+        val url = "https://docker.creative-serving.com/preview?cr=$creativeId&type=adi"
+        Toast.makeText(activity, "Making request to: $url", Toast.LENGTH_SHORT).show()
+
+        PNHttpClient.makeRequest(context, url, null, null, true,
+            object : PNHttpClient.Listener {
+                override fun onSuccess(response: String) {
+                    Log.d("onSuccess", response)
+                    loadMarkup(response)
+                }
+
+                override fun onFailure(error: Throwable) {
+                    Log.d("onFailure", error.toString())
+                    Toast.makeText(activity, "Creative request failed", Toast.LENGTH_SHORT).show()
+                }
+            })
+    }
+
+    private fun loadFoundryCreative(creativeId: String) {
+        val url =
+            "https://adcel-gcp.vrvm.com/banner?b=qa&p=iphn&adunit=mma&size=320x50&nwk=54&flt=1&ctg=$creativeId"
+        Toast.makeText(activity, "Making request to: $url", Toast.LENGTH_SHORT).show()
+
+        val headers: MutableMap<String, String> = HashMap()
+
+        headers["user-agent"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"
+
+        PNHttpClient.makeRequest(context, url, headers, null, true,
+            object : PNHttpClient.Listener {
+                override fun onSuccess(response: String) {
+                    if (!response.isNullOrEmpty()) {
+                        Log.d("onSuccess", response)
+                        val result: String = response.substring(
+                            response.indexOf("<![CDATA[") + 9,
+                            response.indexOf("]]>")
+                        )
+                        Log.d("result", result)
+                        loadMarkup(result)
+                    } else {
+                        Log.d("onSuccess", "Request succeeded with an empty response")
+                        Toast.makeText(activity, "Request succeeded with an empty response", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onFailure(error: Throwable) {
+                    Log.d("onFailure", error.toString())
+                    Toast.makeText(activity, "Creative request failed", Toast.LENGTH_SHORT).show()
+                }
+            })
+    }
+
     private fun loadMarkup(markup: String) {
         if (TextUtils.isEmpty(markup)) {
-            Toast.makeText(activity, "The returned markup is empty or null", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, "The returned markup is empty or null", Toast.LENGTH_SHORT)
+                .show()
         } else {
             when (selectedSize) {
                 R.id.radio_size_banner -> bannerAdView.renderCustomMarkup(markup, this)

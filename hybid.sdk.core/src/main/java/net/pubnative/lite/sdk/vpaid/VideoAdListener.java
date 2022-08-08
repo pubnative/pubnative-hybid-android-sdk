@@ -59,4 +59,6 @@ public abstract class VideoAdListener {
      */
     public void onLeaveApp() {
     }
+
+    public abstract void onAdSkipped();
 }

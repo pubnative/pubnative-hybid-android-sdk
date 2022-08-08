@@ -366,4 +366,11 @@ abstract class BaseVideoAdInternal {
             mVideoAdListener.onAdClicked();
         }
     }
+
+    void onAdSkipped() {
+        Logger.d(LOG_TAG, "onAdSkipped");
+        if (mVideoAdListener != null) {
+            mVideoAdListener.onAdSkipped();
+        }
+    }
 }

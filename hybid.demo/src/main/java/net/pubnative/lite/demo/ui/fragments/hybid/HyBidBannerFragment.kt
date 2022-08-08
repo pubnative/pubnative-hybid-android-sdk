@@ -242,6 +242,13 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
         Log.d(hyBidTAG, "onVideoFinished")
     }
 
+    override fun onVideoSkipped() {
+        Log.d(
+            hyBidTAG,
+            String.format(Locale.ENGLISH, "onVideoSkipped", "")
+        )
+    }
+
 
     override fun onCacheSuccess() {
         Log.d(hyBidTAG, "onCacheSuccess")

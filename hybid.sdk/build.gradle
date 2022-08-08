@@ -3,6 +3,7 @@ plugins {
     id 'com.jfrog.artifactory'
     id 'maven-publish'
     id "org.sonarqube" version "3.3"
+    id "com.github.kt3k.coveralls" version "2.12.0"
 }
 
 //==================================================================================================
@@ -171,7 +172,7 @@ artifactory {
     contextUrl = System.getenv("ARTIFACTORY_CONTEXT_URL")
     publish {
         repository {
-            repoKey = 'verve-gradle-release-local'
+            repoKey = (branchName.toString() == 'master') ? 'verve-gradle-release-local' : 'verve-gradle-dev-local'
             username = System.getenv("ARTIFACTORY_USER")
             password = System.getenv("ARTIFACTORY_PASSWORD")
             maven = true
@@ -184,7 +185,7 @@ artifactory {
     }
     resolve {
         repository {
-            repoKey = 'verve-gradle-release'
+            repoKey = (branchName.toString() == 'master') ? 'verve-gradle-release' : 'verve-gradle-dev'
             username = System.getenv("ARTIFACTORY_USER")
             password = System.getenv("ARTIFACTORY_PASSWORD")
             maven = true

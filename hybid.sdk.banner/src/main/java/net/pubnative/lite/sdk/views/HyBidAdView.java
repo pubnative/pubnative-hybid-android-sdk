@@ -320,6 +320,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
             mRequestManager = null;
         }
         mIsDestroyed = true;
+        mListener = null;
     }
 
     protected void cleanup() {
@@ -981,6 +982,13 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     public void onVideoFinished() {
         if (mVideoListener != null) {
             mVideoListener.onVideoFinished();
+        }
+    }
+
+    @Override
+    public void onVideoSkipped() {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoSkipped();
         }
     }
 

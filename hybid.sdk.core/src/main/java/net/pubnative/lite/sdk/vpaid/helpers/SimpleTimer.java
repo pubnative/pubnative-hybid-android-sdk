@@ -1,7 +1,5 @@
 package net.pubnative.lite.sdk.vpaid.helpers;
 
-import android.os.CountDownTimer;
-
 public class SimpleTimer extends CountDownTimer {
 
     private final Listener mListener;
@@ -24,5 +22,13 @@ public class SimpleTimer extends CountDownTimer {
         if (mListener != null) {
             mListener.onFinish();
         }
+    }
+
+    public void pauseTimer() {
+        pause();
+    }
+
+    public void resumeTimer() {
+        resume();
     }
 }

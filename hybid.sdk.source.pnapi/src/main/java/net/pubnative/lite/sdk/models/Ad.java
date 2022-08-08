@@ -213,16 +213,21 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         return result;
     }
 
-    public View getContentInfo(Context context) {
-        return getContentInfo(context, null);
+    public View getContentInfo(Context context,
+                               boolean feedbackEnabled,
+                               PNAPIContentInfoView.ContentInfoListener listener) {
+        return getContentInfo(context, null, feedbackEnabled, listener);
     }
 
-    public View getContentInfo(Context context, ContentInfo contentInfo) {
+    public View getContentInfo(Context context,
+                               ContentInfo contentInfo,
+                               boolean feedbackEnabled,
+                               PNAPIContentInfoView.ContentInfoListener listener) {
         PNAPIContentInfoView result = null;
         AdData data = getMeta(APIMeta.CONTENT_INFO);
         if (data == null) {
             Log.e(TAG, "getContentInfo - contentInfo data not found");
-            return getDefaultContentInfo(context);
+            return getDefaultContentInfo(context, feedbackEnabled, listener);
         } else if (TextUtils.isEmpty(data.getStringField(DATA_CONTENTINFO_ICON_KEY))) {
             Log.e(TAG, "getContentInfo - contentInfo icon not found");
         } else if (TextUtils.isEmpty(data.getStringField(DATA_CONTENTINFO_LINK_KEY))) {
@@ -234,20 +239,26 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             result.setIconUrl(data.getStringField(DATA_CONTENTINFO_ICON_KEY));
             result.setIconClickUrl(data.getStringField(DATA_CONTENTINFO_LINK_KEY));
             result.setContextText(data.getText());
+            result.setContentInfoListener(listener);
+            result.setAdFeedbackEnabled(feedbackEnabled);
             result.setOnClickListener(view -> ((PNAPIContentInfoView) view).openLayout());
         }
         return result;
     }
 
-    public FrameLayout getContentInfoContainer(Context context) {
-        return getContentInfoContainer(context, null);
+    public FrameLayout getContentInfoContainer(Context context, boolean feedbackEnabled,
+                                               PNAPIContentInfoView.ContentInfoListener listener) {
+        return getContentInfoContainer(context, null, feedbackEnabled, listener);
     }
 
-    public FrameLayout getContentInfoContainer(Context context, ContentInfo contentInfo) {
-        View contentInfoView = getCustomContentInfo(context, contentInfo);
+    public FrameLayout getContentInfoContainer(Context context,
+                                               ContentInfo contentInfo,
+                                               boolean feedbackEnabled,
+                                               PNAPIContentInfoView.ContentInfoListener listener) {
+        View contentInfoView = getCustomContentInfo(context, contentInfo, feedbackEnabled, listener);
 
         if (contentInfoView == null) {
-            contentInfoView = getContentInfo(context);
+            contentInfoView = getContentInfo(context, feedbackEnabled, listener);
         }
 
         if (contentInfoView != null) {
@@ -265,7 +276,10 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         }
     }
 
-    private PNAPIContentInfoView getCustomContentInfo(Context context, ContentInfo contentInfo) {
+    private PNAPIContentInfoView getCustomContentInfo(Context context,
+                                                      ContentInfo contentInfo,
+                                                      boolean feedbackEnabled,
+                                                      PNAPIContentInfoView.ContentInfoListener listener) {
         if (contentInfo == null
                 || TextUtils.isEmpty(contentInfo.getIconUrl())
                 || TextUtils.isEmpty(contentInfo.getLinkUrl())) {
@@ -282,16 +296,22 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             if (contentInfo.getWidth() != -1 && contentInfo.getHeight() != -1) {
                 result.setDpDimensions(contentInfo);
             }
+            result.setAdFeedbackEnabled(feedbackEnabled);
+            result.setContentInfoListener(listener);
             result.setOnClickListener(view -> ((PNAPIContentInfoView) view).openLayout());
             return result;
         }
     }
 
-    private PNAPIContentInfoView getDefaultContentInfo(Context context) {
+    private PNAPIContentInfoView getDefaultContentInfo(Context context,
+                                                       boolean feedbackEnabled,
+                                                       PNAPIContentInfoView.ContentInfoListener listener) {
         PNAPIContentInfoView result = new PNAPIContentInfoView(context);
         result.setIconUrl(CONTENT_INFO_ICON_URL);
         result.setIconClickUrl(CONTENT_INFO_LINK_URL);
         result.setContextText(CONTENT_INFO_TEXT);
+        result.setContentInfoListener(listener);
+        result.setAdFeedbackEnabled(feedbackEnabled);
         result.setOnClickListener(view -> ((PNAPIContentInfoView) view).openLayout());
         return result;
     }

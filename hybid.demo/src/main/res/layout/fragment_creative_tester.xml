@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:animateLayoutChanges="true"
     android:orientation="vertical"
-    tools:context="net.pubnative.lite.demo.ui.fragments.creativetester.P161CreativeTesterFragment"
+    tools:context="net.pubnative.lite.demo.ui.fragments.creativetester.CreativeTesterFragment"
     tools:showIn="@layout/activity_creative_tester">
 
     <RelativeLayout
@@ -40,52 +40,110 @@
         </com.google.android.material.textfield.TextInputLayout>
     </RelativeLayout>
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:fontFamily="@font/roboto"
-        android:text="@string/ad_size"
-        android:textColor="?colorPrimaryVariant"
-        android:textSize="14sp"
-        android:textStyle="bold" />
+        android:animateLayoutChanges="true"
+        android:orientation="horizontal">
 
-    <RadioGroup
-        android:id="@+id/group_ad_size"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="16dp"
-        android:orientation="vertical">
-
-        <RadioButton
-            android:id="@+id/radio_size_banner"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="@string/banner" />
+            android:orientation="vertical"
+            android:layout_weight="1">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:fontFamily="@font/roboto"
+                android:text="@string/ad_size"
+                android:textColor="?colorPrimaryVariant"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+            <RadioGroup
+                android:id="@+id/group_ad_size"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="16dp"
+                android:orientation="vertical">
 
-        <RadioButton
-            android:id="@+id/radio_size_medium"
+                <RadioButton
+                    android:id="@+id/radio_size_banner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/banner" />
+
+                <RadioButton
+                    android:id="@+id/radio_size_medium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/medium" />
+
+                <RadioButton
+                    android:id="@+id/radio_size_leaderboard"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/leaderboard" />
+
+                <RadioButton
+                    android:id="@+id/radio_size_interstitial"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/interstitial" />
+            </RadioGroup>
+
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/medium" />
+            android:orientation="vertical"
+            android:layout_weight="1">
 
-        <RadioButton
-            android:id="@+id/radio_size_leaderboard"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/leaderboard" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:fontFamily="@font/roboto"
+                android:text="@string/creative_server"
+                android:textColor="?colorPrimaryVariant"
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
-        <RadioButton
-            android:id="@+id/radio_size_interstitial"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/interstitial" />
-    </RadioGroup>
+            <RadioGroup
+                android:id="@+id/group_server"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="16dp"
+                android:orientation="vertical">
+
+                <RadioButton
+                    android:id="@+id/radio_server_p161"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/p161" />
+
+                <RadioButton
+                    android:id="@+id/radio_server_foundry"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/foundry" />
+
+            </RadioGroup>
+
+        </LinearLayout>
+
+    </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/button_load"

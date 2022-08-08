@@ -82,6 +82,16 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
         mMacroHelper = new MacroHelper();
     }
 
+    @Override
+    public void resumeEndCardCloseButtonTimer() {
+
+    }
+
+    @Override
+    public void pauseEndCardCloseButtonTimer() {
+
+    }
+
     //region VideoAdController methods
     @Override
     public void prepare(VideoAdController.OnPreparedListener listener) {

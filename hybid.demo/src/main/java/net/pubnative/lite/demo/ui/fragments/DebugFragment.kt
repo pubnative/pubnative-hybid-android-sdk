@@ -31,7 +31,7 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
     private var latencyView: TextView? = null
     private var responseView: TextView? = null
 
-    private var eventList = mutableListOf<ReportingEvent>()
+    private var eventList: ArrayList<ReportingEvent>? = ArrayList()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -63,9 +63,7 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
             displayEventReport()
         }
 
-        HyBid.getReportingController()?.apply {
-            addCallback(this@DebugFragment)
-        }
+        HyBid.getReportingController().addCallback(this)
 
         savedInstanceState?.let {
             val requestViewText = it.getString("requestViewText", "")
@@ -76,7 +74,7 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
             latencyView?.text = latencyViewText
             responseView?.text = responseViewText
 
-            eventList = HyBid.getReportingController().adEventList
+            eventList = HyBid.getReportingController().adEventList as ArrayList<ReportingEvent>?
         }
 
         context?.let {
@@ -85,16 +83,17 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
         }
     }
 
-    override fun onDestroyView() {
-        HyBid.getReportingController().removeCallback(this)
-        super.onDestroyView()
-    }
+//    override fun onDestroyView() {
+//        HyBid.getReportingController().removeCallback(this)
+//        super.onDestroyView()
+//    }
 
     override fun onEvent(event: ReportingEvent?) {
         if (event != null) {
             if (event.eventType != null && event.eventType.equals(Reporting.EventType.REQUEST))
                 clearEventList()
-            eventList.add(event)
+
+            eventList?.add(event)
 
             event.eventObject?.let {
                 val bundle = Bundle()
@@ -110,7 +109,7 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
     }
 
     fun cleanLogs() {
-        clearEventList()
+//        clearEventList()
 
         if (requestView != null) {
             requestView?.text = ""
@@ -124,8 +123,8 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
     }
 
     private fun clearEventList() {
-        if (eventList.isNotEmpty()) {
-            eventList.clear()
+        if (eventList != null && eventList!!.isNotEmpty()) {
+            eventList!!.clear()
             HyBid.getReportingController().clearAdEventList()
         }
     }
@@ -136,6 +135,7 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
 
     fun updateLogs() {
         cleanLogs()
+
         val registryItem = AdRequestRegistry.getInstance().lastAdRequest
         if (registryItem != null) {
             if (requestView != null) {
@@ -169,7 +169,8 @@ class DebugFragment : Fragment(R.layout.fragment_debug), ReportingEventCallback 
                 )
             )
             itemAnimator = DefaultItemAnimator()
-            adapter = ReportingEventAdapter(eventList)
+            if (eventList != null)
+                adapter = ReportingEventAdapter(eventList!!)
 
         }
         builder.setTitle(R.string.sdk_event_report)

@@ -37,19 +37,25 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.analytics.Reporting;
+import net.pubnative.lite.sdk.contentinfo.AdFeedbackView;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ContentInfo;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.PositionX;
 import net.pubnative.lite.sdk.models.PositionY;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastSender;
+import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.views.CloseableContainer;
+import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
 import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
 
-public abstract class HyBidRewardedActivity extends Activity {
+public abstract class HyBidRewardedActivity extends Activity implements PNAPIContentInfoView.ContentInfoListener {
+    private static final String TAG = HyBidRewardedActivity.class.getSimpleName();
     public static final String EXTRA_ZONE_ID = "extra_pn_zone_id";
     public static final String EXTRA_BROADCAST_ID = "extra_pn_broadcast_id";
 
@@ -144,13 +150,16 @@ public abstract class HyBidRewardedActivity extends Activity {
     }
 
     private View getContentInfo(Context context, Ad ad, ContentInfo contentInfo) {
-        return contentInfo == null ? ad.getContentInfoContainer(context) : ad.getContentInfoContainer(context, contentInfo);
+        return contentInfo == null ? ad.getContentInfoContainer(context, HyBid.isAdFeedbackEnabled(), this)
+                : ad.getContentInfoContainer(context, contentInfo, HyBid.isAdFeedbackEnabled(), this);
     }
 
     private final CloseableContainer.OnCloseListener mCloseListener = this::dismiss;
 
     protected void dismiss() {
-        getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLOSE);
+        if (getBroadcastSender() != null) {
+            getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLOSE);
+        }
         finish();
     }
 
@@ -176,7 +185,12 @@ public abstract class HyBidRewardedActivity extends Activity {
     }
 
     protected void showRewardedCloseButton() {
-        if (mCloseableContainer != null) {
+        boolean hasEndcard = false;
+        if (getAd() != null) {
+            hasEndcard = getAd().hasEndCard() && HyBid.isEndCardEnabled();
+        }
+
+        if (mCloseableContainer != null && !hasEndcard) {
             mCloseableContainer.setCloseVisible(true);
             mCloseableContainer.setOnCloseListener(mCloseListener);
         }
@@ -202,6 +216,29 @@ public abstract class HyBidRewardedActivity extends Activity {
             mAd = HyBid.getAdCache().remove(mZoneId);
         }
         return mAd;
+    }
+
+    // Content info listener
+    @Override
+    public void onIconClicked() {
+        //TODO report content info icon clicked
+    }
+
+    @Override
+    public void onLinkClicked(String url) {
+        AdFeedbackView adFeedbackView = new AdFeedbackView();
+        adFeedbackView.prepare(this, url, mAd, Reporting.AdFormat.REWARDED,
+                IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
+                    @Override
+                    public void onLoadFinished() {
+                        adFeedbackView.showFeedbackForm(HyBidRewardedActivity.this);
+                    }
+
+                    @Override
+                    public void onLoadFailed(Throwable error) {
+                        Logger.e(TAG, error.getMessage());
+                    }
+                });
     }
 
     protected HyBidRewardedBroadcastSender getBroadcastSender() {
