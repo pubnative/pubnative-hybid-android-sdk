@@ -42,7 +42,7 @@ subprojects {
         }
         omid_version = '1.3.29'
     }
-    version = "2.15.0"
+    version = "2.15.1"
     group = "net.pubnative"
 }
 

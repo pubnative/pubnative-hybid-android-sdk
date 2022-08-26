@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.CookieManager;
+import android.webkit.RenderProcessGoneDetail;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -321,6 +322,12 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
                     Logger.d(LOG_TAG, "Init webView done");
                     mIsWaitingForWebView = false;
                 }
+            }
+
+            @Override
+            public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
+                Logger.d(LOG_TAG, "WebViewClient - onRenderProcessGone");
+                return true;
             }
         });
         CookieManager.getInstance().setAcceptCookie(true);

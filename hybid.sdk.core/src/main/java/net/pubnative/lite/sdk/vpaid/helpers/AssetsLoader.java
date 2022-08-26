@@ -39,6 +39,7 @@ public class AssetsLoader {
         endCardFileIndex = 0;
         mVideoFilePath = null;
 
+        FileLoader.setUseMobileNetworkForCaching(true);
         if (adParams.isVpaid()) {
             loadEndCard();
         } else {

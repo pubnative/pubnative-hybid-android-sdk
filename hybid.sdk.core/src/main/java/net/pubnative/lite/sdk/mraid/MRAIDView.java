@@ -58,6 +58,7 @@ import android.webkit.HttpAuthHandler;
 import android.webkit.JsPromptResult;
 import android.webkit.JsResult;
 import android.webkit.PermissionRequest;
+import android.webkit.RenderProcessGoneDetail;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
@@ -1670,6 +1671,15 @@ public class MRAIDView extends RelativeLayout {
                         e.printStackTrace();
                     }
                 }
+            }
+            return true;
+        }
+
+        @Override
+        public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
+            MRAIDLog.d("hz-m MRAIDView WebViewClient - onRenderProcessGone");
+            if (listener != null) {
+                listener.mraidViewError(MRAIDView.this);
             }
             return true;
         }
