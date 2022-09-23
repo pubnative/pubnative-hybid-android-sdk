@@ -1685,15 +1685,6 @@ public class MRAIDView extends RelativeLayout {
         }
 
         @Override
-        public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
-            MRAIDLog.d("hz-m MRAIDView WebViewClient - onRenderProcessGone");
-            if (listener != null) {
-                listener.mraidViewError(MRAIDView.this);
-            }
-            return true;
-        }
-
-        @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
             MRAIDLog.d("hz-m shouldInterceptRequest - " + url);
             if (url.contains("mraid.js")) {
