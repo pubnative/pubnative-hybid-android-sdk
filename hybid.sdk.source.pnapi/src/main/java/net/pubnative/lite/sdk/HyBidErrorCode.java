@@ -10,6 +10,8 @@ public enum HyBidErrorCode {
     INVALID_AD(7, "The provided ad is invalid"),
     INVALID_ZONE_ID(8, "Invalid zone id provided"),
     INVALID_SIGNAL_DATA(9, "Invalid signal data provided"),
+    OUT_OF_MEMORY(9, "Out of Memory"),
+    INVALID_VIEW_BINDER(9, "view can only be set inside its original thread"),
     NOT_INITIALISED(10, "The HyBid SDK has not been initialised"),
     AUCTION_NO_AD(11, "The auction returned no ad"),
     ERROR_RENDERING_BANNER(12, "An error has occurred while rendering the ad"),

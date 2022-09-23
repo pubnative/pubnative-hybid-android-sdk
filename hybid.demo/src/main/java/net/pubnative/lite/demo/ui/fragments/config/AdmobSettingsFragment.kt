@@ -67,15 +67,17 @@ class AdmobSettingsFragment : Fragment(R.layout.fragment_admob_settings) {
     }
 
     private fun fillSavedValues() {
-        val settings = settingManager.getSettings()
-        appIdInput.setText(settings.admobAppId)
-        bannerInput.setText(settings.admobBannerAdUnitId)
-        mediumInput.setText(settings.admobMediumAdUnitId)
-        mediumVideoInput.setText(settings.admobMediumVideoAdUnitId)
-        leaderboardInput.setText(settings.admobLeaderboardAdUnitId)
-        interstitialInput.setText(settings.admobInterstitialAdUnitId)
-        interstitialVideoInput.setText(settings.admobInterstitialVideoAdUnitId)
-        rewardedInput.setText(settings.admobRewardedAdUnitId)
-        nativeInput.setText(settings.admobNativeAdUnitId)
+        val settings = settingManager.getSettings().admobSettings
+        if (settings != null) {
+            appIdInput.setText(settings.appId)
+            bannerInput.setText(settings.bannerAdUnitId)
+            mediumInput.setText(settings.mediumAdUnitId)
+            mediumVideoInput.setText(settings.mediumVideoAdUnitId)
+            leaderboardInput.setText(settings.leaderboardAdUnitId)
+            interstitialInput.setText(settings.interstitialAdUnitId)
+            interstitialVideoInput.setText(settings.interstitialVideoAdUnitId)
+            rewardedInput.setText(settings.rewardedAdUnitId)
+            nativeInput.setText(settings.nativeAdUnitId)
+        }
     }
 }

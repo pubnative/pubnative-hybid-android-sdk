@@ -31,11 +31,13 @@ class AdmobMediationLeaderboardFragment : Fragment(R.layout.fragment_admob_leade
         admobLeaderboardContainer = view.findViewById(R.id.admob_leaderboard_container)
 
         val adUnitId =
-            SettingsManager.getInstance(requireActivity()).getSettings().admobLeaderboardAdUnitId
+            SettingsManager.getInstance(requireActivity()).getSettings().admobSettings?.leaderboardAdUnitId
 
         admobLeaderboard = AdView(requireActivity())
         admobLeaderboard.setAdSize(AdSize.LEADERBOARD)
-        admobLeaderboard.adUnitId = adUnitId
+        if (adUnitId != null) {
+            admobLeaderboard.adUnitId = adUnitId
+        }
         admobLeaderboard.adListener = adListener
 
         admobLeaderboardContainer.addView(admobLeaderboard)

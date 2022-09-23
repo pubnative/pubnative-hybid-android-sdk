@@ -12,6 +12,7 @@ import android.view.View;
 import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.models.SkipOffset;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
@@ -307,7 +308,8 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
         int minimumSkipOffsetMillis = mBaseAdInternal.getAd().getMinimumSkipOffset() * 1000;
         int maximumSkipOffsetMillis = mBaseAdInternal.getAd().getMaximumSkipOffset() * 1000;
         int publisherSkipMilliseconds = mAdParams.getPublisherSkipSeconds() * 1000;
-        int globalSkipMilliseconds = HyBid.getVideoInterstitialSkipOffset() * 1000;
+        SkipOffset globalSkip = HyBid.getVideoInterstitialSkipOffset();
+        int globalSkipMilliseconds = globalSkip.getOffset() * 1000;
         int lowerLimit = 0;
         int upperLimit = 0;
 
@@ -427,6 +429,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
                     if (mBaseAdInternal.isInterstitial()) {
                         mViewControllerVast.hideSkipButton();
                     }
+                    mViewControllerVast.hideTimerAndMuteButton();
                     mBaseAdInternal.onAdDidReachEnd();
                     skipVideo(false);
                     if (!isVideoSkipped)
@@ -470,17 +473,38 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
             mSkipTimerWithPause = null;
         }
 
-        if (mEndCardData == null || !HyBid.isEndCardEnabled() ||
-                (mEndCardData.getType() == EndCardData.Type.STATIC_RESOURCE && TextUtils.isEmpty(mImageUri))) {
-            if (skipEvent) {
-                closeSelf();
-            }
+        boolean isAutoClose = false;
+
+        if (isRewarded()) {
+            isAutoClose = HyBid.getCloseVideoAfterFinishForRewarded();
         } else {
-            hasEndcard = true;
-            mViewControllerVast.showEndCard(mEndCardData, mImageUri);
+            isAutoClose = HyBid.getCloseVideoAfterFinish();
+        }
+
+        if (isAutoClose) {
+            closeSelf();
+        } else {
+            if (mEndCardData == null || !HyBid.isEndCardEnabled() ||
+                    (mEndCardData.getType() == EndCardData.Type.STATIC_RESOURCE && TextUtils.isEmpty(mImageUri))) {
+                if (skipEvent) {
+                    closeSelf();
+                }
+            } else {
+                hasEndcard = true;
+                mViewControllerVast.showEndCard(mEndCardData, mImageUri);
+            }
         }
 
         if (skipEvent) {
+
+            ReportingEvent event = new ReportingEvent();
+            event.setEventType(Reporting.EventType.VIDEO_AD_SKIPPED);
+            event.setCreativeType(Reporting.CreativeType.VIDEO);
+            event.setTimestamp(System.currentTimeMillis());
+            if (HyBid.getReportingController() != null) {
+                HyBid.getReportingController().reportEvent(event);
+            }
+
             EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.SKIP, mMacroHelper, true);
             if (!TextUtils.isEmpty(mImageUri))
                 return;

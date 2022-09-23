@@ -22,10 +22,10 @@ version = version_name
 //==================================================================================================
 
 android {
-    compileSdkVersion 32
+    compileSdkVersion android_api
     defaultConfig {
-        minSdkVersion 19
-        targetSdkVersion 32
+        minSdkVersion min_android_api
+        targetSdkVersion android_api
         versionCode System.getenv("CIRCLE_BUILD_NUM") ? System.getenv("CIRCLE_BUILD_NUM").toInteger() : 1
         versionName version_name
 

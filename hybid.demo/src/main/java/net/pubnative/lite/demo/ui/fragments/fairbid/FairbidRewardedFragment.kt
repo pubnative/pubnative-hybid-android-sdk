@@ -34,18 +34,22 @@ class FairbidRewardedFragment : Fragment(R.layout.fragment_fairbid_rewarded),
 
         val adUnitId =
             SettingsManager.getInstance(requireActivity())
-                .getSettings().fairbidRewardedAdUnitId
+                .getSettings().fairbidSettings?.rewardedAdUnitId
 
         Rewarded.setRewardedListener(this)
-        Rewarded.disableAutoRequesting(adUnitId)
+        if (adUnitId != null) {
+            Rewarded.disableAutoRequesting(adUnitId)
+        }
 
         loadButton.setOnClickListener {
             showButton.isEnabled = false
-            Rewarded.request(adUnitId)
+            if (adUnitId != null) {
+                Rewarded.request(adUnitId)
+            }
         }
 
         showButton.setOnClickListener {
-            if (Rewarded.isAvailable(adUnitId)) {
+            if (adUnitId != null && Rewarded.isAvailable(adUnitId)) {
                 Rewarded.show(adUnitId, requireActivity())
             }
             showButton.isEnabled = false

@@ -31,7 +31,7 @@ class MaxAdsMediationMRectFragment : Fragment(R.layout.fragment_maxads_mrect), M
         adContainer = view.findViewById(R.id.ad_container)
 
         val adUnitId = SettingsManager.getInstance(requireActivity())
-            .getSettings().maxAdsMRectAdUnitId
+            .getSettings().maxAdsSettings?.mRectAdUnitId
 
         maxMRect = MaxAdView(adUnitId, requireActivity())
         maxMRect?.setListener(this)

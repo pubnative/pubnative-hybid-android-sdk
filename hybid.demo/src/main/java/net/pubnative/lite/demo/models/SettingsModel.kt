@@ -44,11 +44,14 @@ data class SettingsModel(
     var initialAudioState: Int,
     var mraidExpanded: Boolean,
     var closeVideoAfterFinish: Boolean,
+    var closeVideoAfterFinishForRewardedVideo: Boolean,
     var enableEndcard: Boolean,
     var skipOffset: Int,
     var videoSkipOffset: Int,
     var endCardCloseButtonDelay: Int,
     var videoClickBehaviour: Boolean,
+    var feedbackEnabled: Boolean,
+    var feedbackFormUrl: String,
     var dfpBannerAdUnitId: String,
     var dfpMediumAdUnitId: String,
     var dfpLeaderboardAdUnitId: String,
@@ -85,13 +88,14 @@ data class SettingsModel(
     var fairbidInterstitialAdUnitId: String,
     var fairbidRewardedAdUnitId: String
 ) : Parcelable {
+
     companion object {
         @JvmField
         @Suppress("unused")
         val CREATOR = createParcel { SettingsModel(it) }
     }
 
-    protected constructor(parcel: Parcel) : this(
+    private constructor(parcel: Parcel) : this(
         parcel.readString()!!,
         mutableListOf<String>().apply {
             parcel.readStringList(this)
@@ -113,10 +117,13 @@ data class SettingsModel(
         parcel.readInt() != 0,
         parcel.readInt() != 0,
         parcel.readInt() != 0,
+        parcel.readInt() != 0,
         parcel.readInt(),
         parcel.readInt(),
         parcel.readInt(),
         parcel.readInt() != 0,
+        parcel.readInt() != 0,
+        parcel.readString()!!,
         parcel.readString()!!,
         parcel.readString()!!,
         parcel.readString()!!,
@@ -154,16 +161,16 @@ data class SettingsModel(
         parcel.readString()!!
     )
 
-    override fun writeToParcel(dest: Parcel?, flags: Int) {
-        dest?.writeString(appToken)
-        dest?.writeStringList(zoneIds)
-        dest?.writeString(apiUrl)
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeString(appToken)
+        dest.writeStringList(zoneIds)
+        dest.writeString(apiUrl)
 
-        dest?.writeString(gender)
-        dest?.writeString(age)
+        dest.writeString(gender)
+        dest.writeString(age)
 
-        dest?.writeStringList(keywords)
-        dest?.writeStringList(browserPriorities)
+        dest.writeStringList(keywords)
+        dest.writeStringList(browserPriorities)
 
         val coppaByte: Int
         if (coppa) {
@@ -171,112 +178,109 @@ data class SettingsModel(
         } else {
             coppaByte = 0
         }
-        dest?.writeInt(coppaByte)
+        dest.writeInt(coppaByte)
 
-        val testModeByte: Int
-        if (testMode) {
-            testModeByte = 1
+        val testModeByte: Int = if (testMode) {
+            1
         } else {
-            testModeByte = 0
+            0
         }
-        dest?.writeInt(testModeByte)
+        dest.writeInt(testModeByte)
 
-        val locationTrackingByte: Int
-        if (locationTracking) {
-            locationTrackingByte = 1
+        val locationTrackingByte: Int = if (locationTracking) {
+            1
         } else {
-            locationTrackingByte = 0
+            0
         }
-        dest?.writeInt(locationTrackingByte)
+        dest.writeInt(locationTrackingByte)
 
-        val locationUpdatesByte: Int
-        if (locationUpdates) {
-            locationUpdatesByte = 1
+        val locationUpdatesByte: Int = if (locationUpdates) {
+            1
         } else {
-            locationUpdatesByte = 0
+            0
         }
-        dest?.writeInt(locationUpdatesByte)
+        dest.writeInt(locationUpdatesByte)
 
-        dest?.writeInt(initialAudioState)
+        dest.writeInt(initialAudioState)
 
-        val mraidExpandedByte: Int
-        if (mraidExpanded) {
-            mraidExpandedByte = 1
+        val mraidExpandedByte: Int = if (mraidExpanded) {
+            1
         } else {
-            mraidExpandedByte = 0
+            0
         }
-        dest?.writeInt(mraidExpandedByte)
+        dest.writeInt(mraidExpandedByte)
 
-        val closeVideoAfterFinishByte: Int
-        if (closeVideoAfterFinish) {
-            closeVideoAfterFinishByte = 1
+        val closeVideoAfterFinishByte: Int = if (closeVideoAfterFinish) {
+            1
         } else {
-            closeVideoAfterFinishByte = 0
+            0
         }
-        dest?.writeInt(closeVideoAfterFinishByte)
+        dest.writeInt(closeVideoAfterFinishByte)
 
-        val enableEndcardByte: Int
-        if (enableEndcard) {
-            enableEndcardByte = 1
+        val enableEndcardByte: Int = if (enableEndcard) {
+            1
         } else {
-            enableEndcardByte = 0
+            0
         }
-        dest?.writeInt(enableEndcardByte)
+        dest.writeInt(enableEndcardByte)
 
-        dest?.writeInt(skipOffset)
-        dest?.writeInt(videoSkipOffset)
-        dest?.writeInt(endCardCloseButtonDelay)
+        dest.writeInt(skipOffset)
+        dest.writeInt(videoSkipOffset)
+        dest.writeInt(endCardCloseButtonDelay)
 
-        val videoClickBehaviourByte: Int
-        if (videoClickBehaviour) {
-            videoClickBehaviourByte = 1
+        val videoClickBehaviourByte: Int = if (videoClickBehaviour) {
+            1
         } else {
-            videoClickBehaviourByte = 0
+            0
         }
-        dest?.writeInt(videoClickBehaviourByte)
+        dest.writeInt(videoClickBehaviourByte)
 
-        dest?.writeString(dfpBannerAdUnitId)
-        dest?.writeString(dfpMediumAdUnitId)
-        dest?.writeString(dfpLeaderboardAdUnitId)
-        dest?.writeString(dfpInterstitialAdUnitId)
+        val feedbackFormEnabled = if(feedbackEnabled) 1 else 0
+        dest.writeInt(feedbackFormEnabled)
+        dest.writeString(feedbackFormUrl)
 
-        dest?.writeString(dfpMediationBannerAdUnitId)
-        dest?.writeString(dfpMediationMediumAdUnitId)
-        dest?.writeString(dfpMediationLeaderboardAdUnitId)
-        dest?.writeString(dfpMediationInterstitialAdUnitId)
-        dest?.writeString(dfpMediationRewardedAdUnitId)
+        dest.writeString(dfpBannerAdUnitId)
+        dest.writeString(dfpMediumAdUnitId)
+        dest.writeString(dfpLeaderboardAdUnitId)
+        dest.writeString(dfpInterstitialAdUnitId)
 
-        dest?.writeString(admobAppId)
-        dest?.writeString(admobBannerAdUnitId)
-        dest?.writeString(admobMediumAdUnitId)
-        dest?.writeString(admobMediumVideoAdUnitId)
-        dest?.writeString(admobLeaderboardAdUnitId)
-        dest?.writeString(admobRewardedAdUnitId)
-        dest?.writeString(admobInterstitialAdUnitId)
-        dest?.writeString(admobInterstitialVideoAdUnitId)
-        dest?.writeString(admobNativeAdUnitId)
+        dest.writeString(dfpMediationBannerAdUnitId)
+        dest.writeString(dfpMediationMediumAdUnitId)
+        dest.writeString(dfpMediationLeaderboardAdUnitId)
+        dest.writeString(dfpMediationInterstitialAdUnitId)
+        dest.writeString(dfpMediationRewardedAdUnitId)
 
-        dest?.writeString(ironSourceAppKey)
-        dest?.writeString(ironSourceBannerAdUnitId)
-        dest?.writeString(ironSourceInterstitialAdUnitId)
-        dest?.writeString(ironSourceRewardedAdUnitId)
+        dest.writeString(admobAppId)
+        dest.writeString(admobBannerAdUnitId)
+        dest.writeString(admobMediumAdUnitId)
+        dest.writeString(admobMediumVideoAdUnitId)
+        dest.writeString(admobLeaderboardAdUnitId)
+        dest.writeString(admobRewardedAdUnitId)
+        dest.writeString(admobInterstitialAdUnitId)
+        dest.writeString(admobInterstitialVideoAdUnitId)
+        dest.writeString(admobNativeAdUnitId)
 
-        dest?.writeString(maxAdsSdkKey)
-        dest?.writeString(maxAdsBannerAdUnitId)
-        dest?.writeString(maxAdsMRectAdUnitId)
-        dest?.writeString(maxAdsInterstitialAdUnitId)
-        dest?.writeString(maxAdsRewardedAdUnitId)
-        dest?.writeString(maxAdsNativeAdUnitId)
+        dest.writeString(ironSourceAppKey)
+        dest.writeString(ironSourceBannerAdUnitId)
+        dest.writeString(ironSourceInterstitialAdUnitId)
+        dest.writeString(ironSourceRewardedAdUnitId)
 
-        dest?.writeString(fairbidAppId)
+        dest.writeString(maxAdsSdkKey)
+        dest.writeString(maxAdsBannerAdUnitId)
+        dest.writeString(maxAdsMRectAdUnitId)
+        dest.writeString(maxAdsInterstitialAdUnitId)
+        dest.writeString(maxAdsRewardedAdUnitId)
+        dest.writeString(maxAdsNativeAdUnitId)
 
-        dest?.writeString(fairbidMediationBannerAdUnitId)
-        dest?.writeString(fairbidMediationInterstitialAdUnitId)
-        dest?.writeString(fairbidMediationRewardedAdUnitId)
+        dest.writeString(fairbidAppId)
 
-        dest?.writeString(fairbidBannerAdUnitId)
-        dest?.writeString(fairbidInterstitialAdUnitId)
-        dest?.writeString(fairbidRewardedAdUnitId)
+        dest.writeString(fairbidMediationBannerAdUnitId)
+        dest.writeString(fairbidMediationInterstitialAdUnitId)
+        dest.writeString(fairbidMediationRewardedAdUnitId)
+
+        dest.writeString(fairbidBannerAdUnitId)
+        dest.writeString(fairbidInterstitialAdUnitId)
+        dest.writeString(fairbidRewardedAdUnitId)
     }
 
     override fun describeContents(): Int = 0

@@ -38,13 +38,15 @@ class AdmobMediationRewardedFragment : Fragment(R.layout.fragment_admob_rewarded
         showButton = view.findViewById(R.id.button_show)
 
         val adUnitId =
-            SettingsManager.getInstance(requireActivity()).getSettings().admobRewardedAdUnitId
+            SettingsManager.getInstance(requireActivity()).getSettings().admobSettings?.rewardedAdUnitId
         showButton.isEnabled = false
 
         loadButton.setOnClickListener {
             loadButton.isEnabled = false
             errorView.text = ""
-            loadRewardedAd(adUnitId, adLoadCallback)
+            if (adUnitId != null) {
+                loadRewardedAd(adUnitId, adLoadCallback)
+            }
         }
 
         showButton.setOnClickListener {

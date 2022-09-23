@@ -5,7 +5,10 @@ import android.graphics.BitmapFactory;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
+import net.pubnative.lite.sdk.utils.Logger;
+
 public class ImageUtils {
+    private static final String TAG = ImageUtils.class.getSimpleName();
 
     public static void setScaledImage(ImageView imageView, final String filePath) {
         final ImageView view = imageView;
@@ -15,19 +18,27 @@ public class ImageUtils {
                 view.getViewTreeObserver().removeOnPreDrawListener(this);
                 int imageViewHeight = view.getMeasuredHeight();
                 int imageViewWidth = view.getMeasuredWidth();
-                view.setImageBitmap(decodeSampledBitmap(filePath, imageViewWidth, imageViewHeight));
+                Bitmap decoded = decodeSampledBitmap(filePath, imageViewWidth, imageViewHeight);
+                if (decoded != null) {
+                    view.setImageBitmap(decoded);
+                }
                 return true;
             }
         });
     }
 
     private static Bitmap decodeSampledBitmap(String filePath, int reqWidth, int reqHeight) {
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(filePath, options);
-        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-        options.inJustDecodeBounds = false;
-        return BitmapFactory.decodeFile(filePath, options);
+        try {
+            final BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(filePath, options);
+            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+            options.inJustDecodeBounds = false;
+            return BitmapFactory.decodeFile(filePath, options);
+        } catch (RuntimeException exception) {
+            Logger.e(TAG, exception.getMessage());
+            return null;
+        }
     }
 
     private static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {

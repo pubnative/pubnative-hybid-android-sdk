@@ -17,12 +17,12 @@ if (branchName != null && buildNumber != null && branchName.toString() != "maste
 version = version_name
 
 android {
-    compileSdkVersion 32
-    buildToolsVersion "32.0.0"
+    compileSdkVersion android_api
+    buildToolsVersion android_build_tools
 
     defaultConfig {
-        minSdkVersion 19
-        targetSdkVersion 32
+        minSdkVersion min_android_api
+        targetSdkVersion android_api
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"

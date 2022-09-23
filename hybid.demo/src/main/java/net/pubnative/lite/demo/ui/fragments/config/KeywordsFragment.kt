@@ -102,8 +102,8 @@ class KeywordsFragment : Fragment(R.layout.fragment_keywords) {
     }
 
     private fun fillSavedValues() {
-        val settings = settingManager.getSettings()
+        val settings = settingManager.getSettings().hybidSettings
 
-        adapter.addKeywords(settings.keywords)
+        settings?.keywords?.let { adapter.addKeywords(it) }
     }
 }

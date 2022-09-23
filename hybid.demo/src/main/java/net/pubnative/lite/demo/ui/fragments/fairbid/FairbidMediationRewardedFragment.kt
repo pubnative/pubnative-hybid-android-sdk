@@ -22,6 +22,7 @@ val FairbidMediationRewardedFragment_TAG: String =
 class FairbidMediationRewardedFragment : Fragment(R.layout.fragment_fairbid_mediation_rewarded),
     RewardedListener {
 
+    private var adUnitId: String? = null
     private lateinit var loadButton: Button
     private lateinit var showButton: Button
     private lateinit var errorView: TextView
@@ -38,21 +39,21 @@ class FairbidMediationRewardedFragment : Fragment(R.layout.fragment_fairbid_medi
 
         videoAudioStatus = HyBid.getVideoAudioStatus()
 
-        val adUnitId =
+        adUnitId =
             SettingsManager.getInstance(requireActivity())
-                .getSettings().fairbidMediationRewardedAdUnitId
+                .getSettings().fairbidSettings?.mediationRewardedAdUnitId
 
         Rewarded.setRewardedListener(this)
-        Rewarded.disableAutoRequesting(adUnitId)
+        adUnitId?.let { Rewarded.disableAutoRequesting(it) }
 
         loadButton.setOnClickListener {
             showButton.isEnabled = false
-            Rewarded.request(adUnitId)
+            adUnitId?.let { it1 -> Rewarded.request(it1) }
         }
 
         showButton.setOnClickListener {
-            if (Rewarded.isAvailable(adUnitId)) {
-                Rewarded.show(adUnitId, requireActivity())
+            if (adUnitId != null && Rewarded.isAvailable(adUnitId!!)) {
+                Rewarded.show(adUnitId!!, requireActivity())
             }
             showButton.isEnabled = false
         }

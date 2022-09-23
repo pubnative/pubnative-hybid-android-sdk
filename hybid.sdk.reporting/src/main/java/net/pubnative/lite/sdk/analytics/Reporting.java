@@ -51,6 +51,7 @@ public class Reporting {
         public static final String ERROR = "error";
         public static final String CLICK = "click";
         public static final String INTERSTITIAL_CLOSED = "interstitial_closed";
+        public static final String REWARDED_CLOSED = "rewarded_closed";
         public static final String VIDEO_STARTED = "video_started";
         public static final String VIDEO_DISMISSED = "video_dismissed";
         public static final String VIDEO_FINISHED = "video_finished";
@@ -83,6 +84,7 @@ public class Reporting {
         public static final String VIDEO_AD_IMPRESSION = "impression";
         public static final String WEB_AD_SESSION_INITIALIZED = "web_ad_session_started";
         public static final String VIDEO_AD_SESSION_STOPPED = "session_stopped";
+        public static final String COMPANION_VIEW_END_CARD = "companion_view";
     }
 
     public static final class CreativeType {

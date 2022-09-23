@@ -55,12 +55,15 @@ class MaxAdsSettingsFragment : Fragment(R.layout.fragment_maxads_settings) {
     }
 
     private fun fillSavedValues() {
-        val settings = settingManager.getSettings()
-        sdkKeyInput.setText(settings.maxAdsSdkKey)
-        bannerInput.setText(settings.maxAdsBannerAdUnitId)
-        mediumInput.setText(settings.maxAdsMRectAdUnitId)
-        interstitialInput.setText(settings.maxAdsInterstitialAdUnitId)
-        rewardedInput.setText(settings.maxAdsRewardedAdUnitId)
-        nativeInput.setText(settings.maxAdsNativeAdUnitId)
+        val settings = settingManager.getSettings().maxAdsSettings
+        if (settings != null) {
+            sdkKeyInput.setText(settings.sdkKey)
+            bannerInput.setText(settings.bannerAdUnitId)
+            mediumInput.setText(settings.mRectAdUnitId)
+            interstitialInput.setText(settings.interstitialAdUnitId)
+            rewardedInput.setText(settings.rewardedAdUnitId)
+            nativeInput.setText(settings.nativeAdUnitId)
+        }
+
     }
 }

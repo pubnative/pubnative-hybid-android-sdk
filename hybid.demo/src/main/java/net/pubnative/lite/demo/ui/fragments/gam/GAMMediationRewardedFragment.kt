@@ -31,14 +31,16 @@ class GAMMediationRewardedFragment : Fragment(R.layout.fragment_dfp_rewarded) {
         showButton = view.findViewById(R.id.button_show)
 
         val adUnitId = SettingsManager.getInstance(requireActivity())
-            .getSettings().dfpMediationRewardedAdUnitId
+            .getSettings().dfpSettings?.mediationRewardedAdUnitId
         showButton.isEnabled = false
 
         loadButton.setOnClickListener {
             loadButton.isEnabled = false
             errorView.text = ""
             val adRequest = AdManagerAdRequest.Builder().build()
-            RewardedAd.load(requireActivity(), adUnitId, adRequest, adLoadCallback)
+            if (adUnitId != null) {
+                RewardedAd.load(requireActivity(), adUnitId, adRequest, adLoadCallback)
+            }
         }
 
         showButton.setOnClickListener {

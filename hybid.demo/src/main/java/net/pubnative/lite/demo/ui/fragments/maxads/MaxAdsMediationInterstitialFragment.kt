@@ -33,7 +33,7 @@ class MaxAdsMediationInterstitialFragment : Fragment(R.layout.fragment_maxads_in
         showButton.isEnabled = false
 
         val adUnitId = SettingsManager.getInstance(requireActivity())
-            .getSettings().maxAdsInterstitialAdUnitId
+            .getSettings().maxAdsSettings?.interstitialAdUnitId
 
         maxInterstitial = MaxInterstitialAd(adUnitId, requireActivity())
         maxInterstitial?.setListener(this)

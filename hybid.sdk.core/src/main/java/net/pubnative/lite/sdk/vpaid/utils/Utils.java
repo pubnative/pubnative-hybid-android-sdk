@@ -276,7 +276,7 @@ public class Utils {
             }
         }
 
-        return TextUtils.isEmpty(iconUrl) || TextUtils.isEmpty(clickUrl) ? null :
+        return TextUtils.isEmpty(iconUrl) ? null :
                 new ContentInfo(iconUrl, clickUrl, "", width, height, positionX, positionY, viewTrackers);
     }
 }

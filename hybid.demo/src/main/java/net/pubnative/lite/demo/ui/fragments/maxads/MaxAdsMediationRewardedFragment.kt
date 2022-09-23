@@ -33,7 +33,7 @@ class MaxAdsMediationRewardedFragment : Fragment(R.layout.fragment_maxads_reward
         showButton.isEnabled = false
 
         val adUnitId = SettingsManager.getInstance(requireActivity())
-            .getSettings().maxAdsRewardedAdUnitId
+            .getSettings().maxAdsSettings?.rewardedAdUnitId
 
         maxRewarded = MaxRewardedAd.getInstance(adUnitId, requireActivity())
         maxRewarded?.setListener(this)

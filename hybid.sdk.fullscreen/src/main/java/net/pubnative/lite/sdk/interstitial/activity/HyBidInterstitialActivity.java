@@ -44,8 +44,9 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
     private Ad mAd;
     private String mZoneId;
     private HyBidInterstitialBroadcastSender mBroadcastSender;
-    private ProgressBar progressBar;
-    private boolean isVast = false;
+    private ProgressBar mProgressBar;
+    private boolean mIsVast = false;
+    protected boolean mIsFeedbackFormOpen = false;
 
     public abstract View getAdView();
 
@@ -76,18 +77,18 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
                 FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
                 params.gravity = Gravity.CENTER;
 
-                progressBar = new ProgressBar(this);
+                mProgressBar = new ProgressBar(this);
                 setProgressBarInvisible();
 
                 FrameLayout.LayoutParams pBarParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
                 pBarParams.gravity = Gravity.CENTER;
 
-                mCloseableContainer.addView(progressBar, pBarParams);
+                mCloseableContainer.addView(mProgressBar, pBarParams);
 
                 mCloseableContainer.addView(adView, params);
                 mCloseableContainer.setBackgroundColor(Color.WHITE);
                 showInterstitialCloseButton();
-                if (!isVast && shouldShowContentInfo() && getAd() != null) {
+                if (!mIsVast && shouldShowContentInfo() && getAd() != null) {
                     View contentInfo = getAd().getContentInfoContainer(this, HyBid.isAdFeedbackEnabled(), this);
                     if (contentInfo != null) {
                         mCloseableContainer.addView(contentInfo);
@@ -223,12 +224,20 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
                 IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
                     @Override
                     public void onLoadFinished() {
+                        pauseAd();
+                        mIsFeedbackFormOpen = true;
                         adFeedbackView.showFeedbackForm(HyBidInterstitialActivity.this);
                     }
 
                     @Override
                     public void onLoadFailed(Throwable error) {
                         Logger.e(TAG, error.getMessage());
+                    }
+
+                    @Override
+                    public void onFormClosed() {
+                        mIsFeedbackFormOpen = false;
+                        resumeAd();
                     }
                 });
     }
@@ -237,15 +246,19 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
         return mBroadcastSender;
     }
 
+    protected abstract void resumeAd();
+
+    protected abstract void pauseAd();
+
     protected void setProgressBarVisible() {
-        progressBar.setVisibility(View.VISIBLE);
+        mProgressBar.setVisibility(View.VISIBLE);
     }
 
     protected void setProgressBarInvisible() {
-        progressBar.setVisibility(View.INVISIBLE);
+        mProgressBar.setVisibility(View.INVISIBLE);
     }
 
     protected void setIsVast(Boolean isVast) {
-        this.isVast = isVast;
+        this.mIsVast = isVast;
     }
 }

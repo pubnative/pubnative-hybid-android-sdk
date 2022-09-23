@@ -169,7 +169,7 @@ public class VideoAd extends BaseVideoAd {
     }
 
     public void pauseEndCardCloseButtonTimer() {
-        Logger.d(LOG_TAG, "resume End Card Timer");
+        Logger.d(LOG_TAG, "pause End Card Timer");
         getAdController().pauseEndCardCloseButtonTimer();
     }
 

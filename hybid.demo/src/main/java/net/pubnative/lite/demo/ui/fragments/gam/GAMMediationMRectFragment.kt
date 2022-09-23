@@ -29,11 +29,13 @@ class GAMMediationMRectFragment : Fragment(R.layout.fragment_dfp_mrect) {
         gamMRectContainer = view.findViewById(R.id.dfp_mrect_container)
 
         val adUnitId =
-            SettingsManager.getInstance(requireActivity()).getSettings().dfpMediationMediumAdUnitId
+            SettingsManager.getInstance(requireActivity()).getSettings().dfpSettings?.mediationMediumAdUnitId
 
         gamMRect = AdView(requireActivity())
         gamMRect.setAdSize(AdSize.MEDIUM_RECTANGLE)
-        gamMRect.adUnitId = adUnitId
+        if (adUnitId != null) {
+            gamMRect.adUnitId = adUnitId
+        }
         gamMRect.adListener = adListener
 
         gamMRectContainer.addView(gamMRect)

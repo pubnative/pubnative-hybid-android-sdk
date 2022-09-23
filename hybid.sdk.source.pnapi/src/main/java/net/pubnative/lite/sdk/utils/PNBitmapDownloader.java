@@ -68,6 +68,8 @@ public class PNBitmapDownloader {
 
                 PNBitmapLruCache.addBitmapToMemoryCache(mURL, bitmap);
                 invokeLoad(bitmap);
+            } catch (RuntimeException e) {
+                invokeFail(e);
             } catch (Error error) {
                 invokeFail(new Exception(error.toString()));
             } catch (Exception e) {
@@ -88,6 +90,8 @@ public class PNBitmapDownloader {
                 Bitmap bitmap = BitmapFactory.decodeFile(uri.getEncodedPath(), getBitmapOptionsDecodingBounds(false));
                 PNBitmapLruCache.addBitmapToMemoryCache(mURL, bitmap);
                 invokeLoad(bitmap);
+            } catch (RuntimeException e) {
+                invokeFail(e);
             } catch (Error error) {
                 invokeFail(new Exception(error.toString()));
             } catch (Exception e) {

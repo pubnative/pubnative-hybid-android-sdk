@@ -24,10 +24,12 @@ package net.pubnative.lite.sdk.interstitial.presenter;
 
 import android.content.Context;
 
+import net.pubnative.lite.sdk.AdConstants;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.models.RemoteConfigFeature;
+import net.pubnative.lite.sdk.models.SkipOffset;
 import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.Logger;
 
@@ -48,13 +50,16 @@ public class InterstitialPresenterFactory {
     public InterstitialPresenter createInterstitialPresenter(
             Ad ad,
             InterstitialPresenter.Listener interstitialPresenterListener) {
-        return createInterstitialPresenter(ad, -1, -1, interstitialPresenterListener);
+        return createInterstitialPresenter(ad, new SkipOffset(AdConstants.Skip.HTML_SKIP_OFFSET, false),
+                new SkipOffset(ad.hasEndCard() ? AdConstants.Skip.VIDEO_WITH_ENDCARD_SKIP_OFFSET :
+                        AdConstants.Skip.VIDEO_WITHOUT_ENDCARD_SKIP_OFFSET, false),
+                interstitialPresenterListener);
     }
 
     public InterstitialPresenter createInterstitialPresenter(
             Ad ad,
-            int htmlSkipOffset,
-            int videoSkipOffset,
+            SkipOffset htmlSkipOffset,
+            SkipOffset videoSkipOffset,
             InterstitialPresenter.Listener interstitialPresenterListener) {
 
         final InterstitialPresenter interstitialPresenter = fromCreativeType(ad.assetgroupid, ad, htmlSkipOffset, videoSkipOffset);
@@ -73,7 +78,7 @@ public class InterstitialPresenterFactory {
         return interstitialPresenterDecorator;
     }
 
-    InterstitialPresenter fromCreativeType(int assetGroupId, Ad ad, int htmlSkipOffset, int videoSkipOffset) {
+    InterstitialPresenter fromCreativeType(int assetGroupId, Ad ad, SkipOffset htmlSkipOffset, SkipOffset videoSkipOffset) {
         switch (assetGroupId) {
             case ApiAssetGroupType.MRAID_300x600:
             case ApiAssetGroupType.MRAID_320x480:
@@ -83,13 +88,21 @@ public class InterstitialPresenterFactory {
                 return HyBid.getConfigManager() != null
                         && !HyBid.getConfigManager().getFeatureResolver()
                         .isRenderingSupported(RemoteConfigFeature.Rendering.MRAID) ?
-                        null : new MraidInterstitialPresenter(mContext, ad, mZoneId, htmlSkipOffset);
+                        null : new MraidInterstitialPresenter(mContext, ad, mZoneId, htmlSkipOffset.getOffset());
             }
             case ApiAssetGroupType.VAST_INTERSTITIAL: {
+                int videoOffset = videoSkipOffset.getOffset();
+                if (!videoSkipOffset.isCustom()) {
+                    if (ad.hasEndCard() && HyBid.isEndCardEnabled()) {
+                        videoOffset = AdConstants.Skip.VIDEO_WITH_ENDCARD_SKIP_OFFSET;
+                    } else {
+                        videoOffset = AdConstants.Skip.VIDEO_WITHOUT_ENDCARD_SKIP_OFFSET;
+                    }
+                }
                 return HyBid.getConfigManager() != null
                         && !HyBid.getConfigManager().getFeatureResolver()
                         .isRenderingSupported(RemoteConfigFeature.Rendering.VAST) ?
-                        null : new VastInterstitialPresenter(mContext, ad, mZoneId, videoSkipOffset);
+                        null : new VastInterstitialPresenter(mContext, ad, mZoneId, videoOffset);
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for interstitial ad format.");

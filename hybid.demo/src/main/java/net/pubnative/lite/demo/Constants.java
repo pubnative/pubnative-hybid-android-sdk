@@ -51,6 +51,7 @@ public class Constants {
     public static final int INITIAL_AUDIO_STATE_DEFAULT = 0;
     public static final Boolean MRAID_EXPANDED_DEFAULT = true;
     public static final Boolean CLOSE_VIDEO_AFTER_FINISH_DEFAULT = false;
+    public static final Boolean CLOSE_VIDEO_AFTER_FINISH_DEFAULT_FOR_REWARDED = false;
     public static final Boolean ENABLE_ENDCARD_DEFAULT = false;
     public static final int SKIP_OFFSET_DEFAULT = 3;
     public static final int VIDEO_SKIP_OFFSET_DEFAULT = 8;
@@ -108,7 +109,8 @@ public class Constants {
 
     public static final String OGURY_KEY = "OGY-7B028F43E33F";
 
-    public static final String NUMBEREIGHT_API_TOKEN = "T954C5VJTIAXAGMUVPDU0TZMGEV2";
+    public static final Boolean FEEDBACK_ENABLED = true;
+    public static final String FEEDBACK_FORM_URL = "https://feedback-dev.verve.com";
 
     public static final class IntentParams {
         public static final String ZONE_ID = "zone_id";

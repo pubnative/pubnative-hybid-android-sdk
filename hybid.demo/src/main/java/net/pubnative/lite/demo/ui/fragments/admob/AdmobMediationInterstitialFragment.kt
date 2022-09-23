@@ -33,13 +33,15 @@ class AdmobMediationInterstitialFragment : Fragment(R.layout.fragment_admob_inte
         showButton.isEnabled = false
 
         val adUnitId =
-            SettingsManager.getInstance(requireActivity()).getSettings().admobInterstitialAdUnitId
+            SettingsManager.getInstance(requireActivity()).getSettings().admobSettings?.interstitialAdUnitId
 
         loadButton.setOnClickListener {
             loadButton.isEnabled = false
             errorView.text = ""
             val adRequest = AdRequest.Builder().build()
-            InterstitialAd.load(requireActivity(), adUnitId, adRequest, adLoadCallback)
+            if (adUnitId != null) {
+                InterstitialAd.load(requireActivity(), adUnitId, adRequest, adLoadCallback)
+            }
         }
 
         showButton.setOnClickListener {

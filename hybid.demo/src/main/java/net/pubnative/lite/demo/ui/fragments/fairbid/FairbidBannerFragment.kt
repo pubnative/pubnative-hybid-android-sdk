@@ -37,9 +37,13 @@ class FairbidBannerFragment : Fragment(R.layout.fragment_fairbid_banner), Banner
 
         val bannerOptions = BannerOptions().placeInContainer(fairbidBannerContainer)
 
-        adUnitId =
-            SettingsManager.getInstance(requireActivity())
-                .getSettings().fairbidBannerAdUnitId
+        if (SettingsManager.getInstance(requireActivity())
+                .getSettings().fairbidSettings?.bannerAdUnitId != null
+        ) {
+            adUnitId =
+                SettingsManager.getInstance(requireActivity())
+                    .getSettings().fairbidSettings?.bannerAdUnitId!!
+        }
 
         Banner.setBannerListener(this)
 

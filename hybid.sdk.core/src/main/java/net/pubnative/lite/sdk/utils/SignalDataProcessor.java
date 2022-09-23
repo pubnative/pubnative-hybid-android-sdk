@@ -1,6 +1,8 @@
 package net.pubnative.lite.sdk.utils;
 
 import android.text.TextUtils;
+import android.util.AndroidRuntimeException;
+import android.view.Surface;
 
 import net.pubnative.lite.sdk.AdCache;
 import net.pubnative.lite.sdk.DeviceInfo;
@@ -129,6 +131,18 @@ public class SignalDataProcessor {
                     mListener.onError(new HyBidError(HyBidErrorCode.INVALID_ZONE_ID));
                 }
             }
+        } catch (OutOfMemoryError e) {
+            Logger.e(TAG, e.getMessage());
+            if (mListener != null) {
+                mListener.onError(new HyBidError(HyBidErrorCode.OUT_OF_MEMORY));
+            }
+        } catch (RuntimeException e) {
+            Logger.e(TAG, e.getMessage());
+            if (e instanceof AndroidRuntimeException) {
+                if (mListener != null) {
+                    mListener.onError(new HyBidError(HyBidErrorCode.INVALID_VIEW_BINDER));
+                }
+            }
         } catch (Exception e) {
             Logger.e(TAG, e.getMessage());
             if (mListener != null) {
@@ -147,8 +161,7 @@ public class SignalDataProcessor {
                 VideoAdProcessor videoAdProcessor = new VideoAdProcessor();
                 videoAdProcessor.process(mApiClient.getContext(), ad.getVast(), null, new VideoAdProcessor.Listener() {
                     @Override
-                    public void onCacheSuccess(AdParams adParams, String videoFilePath, EndCardData endCardData,
-                                               String endCardFilePath, List<String> omidVendors) {
+                    public void onCacheSuccess(AdParams adParams, String videoFilePath, EndCardData endCardData, String endCardFilePath, List<String> omidVendors) {
                         if (mIsDestroyed) {
                             return;
                         }

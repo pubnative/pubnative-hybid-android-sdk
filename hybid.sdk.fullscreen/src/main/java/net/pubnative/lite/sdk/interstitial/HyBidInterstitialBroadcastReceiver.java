@@ -24,6 +24,7 @@ public class HyBidInterstitialBroadcastReceiver extends BroadcastReceiver {
         ERROR("net.pubnative.hybid.interstitial.error"),
         VIDEO_ERROR("net.pubnative.hybid.interstitial.video_error"),
         VIDEO_START("net.pubnative.hybid.interstitial.video_start"),
+        VIDEO_SKIP("net.pubnative.hybid.interstitial.video_skip"),
         VIDEO_DISMISS("net.pubnative.hybid.interstitial.video_dismiss"),
         VIDEO_FINISH("net.pubnative.hybid.interstitial.video_finish"),
         NONE("none");
@@ -41,6 +42,8 @@ public class HyBidInterstitialBroadcastReceiver extends BroadcastReceiver {
                 return VIDEO_ERROR;
             } else if (VIDEO_START.getId().equals(action)) {
                 return VIDEO_START;
+            } else if (VIDEO_SKIP.getId().equals(action)) {
+                return VIDEO_SKIP;
             } else if (VIDEO_DISMISS.getId().equals(action)) {
                 return VIDEO_DISMISS;
             } else if (VIDEO_FINISH.getId().equals(action)) {
@@ -87,6 +90,7 @@ public class HyBidInterstitialBroadcastReceiver extends BroadcastReceiver {
         mIntentFilter.addAction(Action.DISMISS.getId());
         mIntentFilter.addAction(Action.VIDEO_ERROR.getId());
         mIntentFilter.addAction(Action.VIDEO_START.getId());
+        mIntentFilter.addAction(Action.VIDEO_SKIP.getId());
         mIntentFilter.addAction(Action.VIDEO_DISMISS.getId());
         mIntentFilter.addAction(Action.VIDEO_FINISH.getId());
         mIntentFilter.addAction(Action.ERROR.getId());
@@ -168,6 +172,11 @@ public class HyBidInterstitialBroadcastReceiver extends BroadcastReceiver {
             case VIDEO_START:
                 if (videoListener != null) {
                     videoListener.onVideoStarted();
+                }
+                break;
+            case VIDEO_SKIP:
+                if (videoListener != null){
+                    videoListener.onVideoSkipped();
                 }
                 break;
             case VIDEO_DISMISS:

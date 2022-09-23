@@ -11,7 +11,6 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.AdCustomizationActivity
 import net.pubnative.lite.demo.ui.activities.CustomSDKDataActivity
 import net.pubnative.lite.demo.ui.activities.admob.MediationTestSuiteActivity
-import net.pubnative.lite.demo.ui.activities.audiences.NumberEightAudiencesActivity
 import net.pubnative.lite.demo.ui.activities.config.*
 import net.pubnative.lite.demo.ui.activities.creativetester.P161CreativeTesterActivity
 import net.pubnative.lite.demo.ui.activities.markup.MarkupActivity
@@ -75,16 +74,6 @@ class SettingsNavFragment : Fragment(R.layout.fragment_nav_settings) {
         view.findViewById<TextView>(R.id.button_render_vast).setOnClickListener {
             val intent = Intent(activity, VastTagRequestActivity::class.java)
             startActivity(intent)
-        }
-
-        // NumberEight SDK crashes below API level 26.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            view.findViewById<TextView>(R.id.button_numbereight_audiences).setOnClickListener {
-                val intent = Intent(activity, NumberEightAudiencesActivity::class.java)
-                startActivity(intent)
-            }
-        } else {
-            view.findViewById<TextView>(R.id.button_numbereight_audiences).visibility = View.GONE
         }
 
         view.findViewById<TextView>(R.id.button_mediation_test_suite).setOnClickListener {

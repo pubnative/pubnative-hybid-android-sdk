@@ -38,26 +38,30 @@ class AdmobMediationNativeFragment : Fragment(R.layout.fragment_admob_native) {
         admobNativeContainer = view.findViewById(R.id.ad_container)
 
         val adUnitId =
-            SettingsManager.getInstance(requireActivity()).getSettings().admobNativeAdUnitId
+            SettingsManager.getInstance(requireActivity())
+                .getSettings().admobSettings?.nativeAdUnitId
 
         loadButton.setOnClickListener {
             loadButton.isEnabled = false
             errorView.text = ""
             admobNative?.destroy()
 
-            val adLoader = AdLoader.Builder(requireContext(), adUnitId)
-                .forNativeAd {
-                    if (isDetached) {
-                        it.destroy()
-                    } else {
-                        admobNative = it
-                        renderAd()
-                    }
-                }
-                .withAdListener(adListener)
-                .withNativeAdOptions(nativeAdOptions).build()
 
-            adLoader.loadAd(AdRequest.Builder().build())
+            if (adUnitId != null) {
+                val adLoader = AdLoader.Builder(requireContext(), adUnitId)
+                    .forNativeAd {
+                        if (isDetached) {
+                            it.destroy()
+                        } else {
+                            admobNative = it
+                            renderAd()
+                        }
+                    }
+                    .withAdListener(adListener)
+                    .withNativeAdOptions(nativeAdOptions).build()
+
+                adLoader.loadAd(AdRequest.Builder().build())
+            }
         }
     }
 

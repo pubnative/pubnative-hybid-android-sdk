@@ -72,7 +72,7 @@ class GAMMRectFragment : Fragment(R.layout.fragment_dfp_mrect), RequestManager.R
         requestManager = MRectRequestManager()
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
-        adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().dfpMediumAdUnitId
+        adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().dfpSettings?.mediumAdUnitId
 
         gamMRect = AdManagerAdView(requireActivity())
         gamMRect.adUnitId = adUnitId!!

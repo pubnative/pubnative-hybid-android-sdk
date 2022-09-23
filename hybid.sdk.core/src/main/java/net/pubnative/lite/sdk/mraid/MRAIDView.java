@@ -35,6 +35,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.location.Location;
+import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Handler;
@@ -77,6 +78,7 @@ import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.core.BuildConfig;
+import net.pubnative.lite.sdk.core.R;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.mraid.internal.MRAIDHtmlProcessor;
 import net.pubnative.lite.sdk.mraid.internal.MRAIDLog;
@@ -121,16 +123,6 @@ public class MRAIDView extends RelativeLayout {
     private Integer mSkipTimeMillis = -1;
 
     private SimpleTimer mExpirationTimer;
-
-    public void pause() {
-        if (mExpirationTimer != null)
-            mExpirationTimer.pauseTimer();
-    }
-
-    public void resume() {
-        if (mExpirationTimer != null)
-            mExpirationTimer.resumeTimer();
-    }
 
     // used to define state of the MRAID advertisement
     @Retention(RetentionPolicy.SOURCE)
@@ -203,6 +195,7 @@ public class MRAIDView extends RelativeLayout {
 
     private final Context context;
     private Activity showActivity;
+    private int activityInitialOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
     private final String baseUrl;
 
@@ -294,10 +287,10 @@ public class MRAIDView extends RelativeLayout {
             ViewGroup contentInfo,
             boolean isInterstitial) {
         super(context);
-
         this.context = context;
         if (context instanceof Activity) {
             this.showActivity = (Activity) context;
+            this.activityInitialOrientation = this.showActivity.getRequestedOrientation();
         }
         this.baseUrl = baseUrl == null ? "http://example.com/" : baseUrl;
         this.isInterstitial = isInterstitial;
@@ -465,6 +458,8 @@ public class MRAIDView extends RelativeLayout {
 
             wv.setWebChromeClient(mraidWebChromeClient);
             wv.setWebViewClient(mraidWebViewClient);
+            wv.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                 wv.getSettings().setMediaPlaybackRequiresUserGesture(false);
@@ -639,6 +634,12 @@ public class MRAIDView extends RelativeLayout {
     private void expandCreative(String url, final boolean isCustomExpand) {
         MRAIDLog.d("hz-m MRAIDView - expand " + url);
         MRAIDLog.d(MRAID_LOG_TAG + "-JS callback", "expand " + (url != null ? url : "(1-part)"));
+
+        // Disable screen rotation
+        if(orientationProperties != null) {
+            orientationProperties.allowOrientationChange = false;
+            applyOrientationProperties();
+        }
 
         if (!HyBid.isMraidExpandEnabled()) {
             MRAIDLog.d(MRAID_LOG_TAG + "-JS callback", "expand disabled by the developer");
@@ -958,7 +959,6 @@ public class MRAIDView extends RelativeLayout {
 
         MRAIDLog.d("hz-m MRAIDView - expandHelper - adding contentview to activity " + context);
         showActivity.addContentView(expandedView, new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-
         isExpandingFromDefault = true;
         isExpanded = true;
     }
@@ -1012,6 +1012,12 @@ public class MRAIDView extends RelativeLayout {
             state = STATE_DEFAULT;
         }
 
+        // Recover default orientation configs
+        if(orientationProperties != null) {
+            orientationProperties.allowOrientationChange = true;
+        }
+        setOrientationInitialState();
+
         isClosing = true;
         isExpanded = false;
 
@@ -1030,7 +1036,7 @@ public class MRAIDView extends RelativeLayout {
             });
             if (webViewPart2 == null) {
                 // close from 1-part expansion
-                addView(webView, new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                addView(webView, 0, new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             } else {
                 // close from 2-part expansion
                 webViewPart2.destroy();
@@ -1165,6 +1171,7 @@ public class MRAIDView extends RelativeLayout {
         // The input parameter should be either expandedView or resizedView.
 
         closeRegion = new ImageButton(context);
+        closeRegion.setId(R.id.closeView);
         closeRegion.setBackgroundColor(Color.TRANSPARENT);
         closeRegion.setOnClickListener(v -> close());
 
@@ -1275,7 +1282,7 @@ public class MRAIDView extends RelativeLayout {
         return new ByteArrayInputStream(mraidJs.getBytes(StandardCharsets.UTF_8));
     }
 
-    private void injectJavaScript(String js) {
+    public void injectJavaScript(String js) {
         injectJavaScript(currentWebView, js);
     }
 
@@ -1664,6 +1671,8 @@ public class MRAIDView extends RelativeLayout {
                 // Fix for Verve custom creatives
                 if (isVerveCustomExpand(url)) {
                     expandCreative(url, true);
+                } else if (isCloseSignal(url)) {
+                    closeOnMainThread();
                 } else {
                     try {
                         open(URLEncoder.encode(url, "UTF-8"));
@@ -1694,6 +1703,15 @@ public class MRAIDView extends RelativeLayout {
             }
             return null;
         }
+
+        @Override
+        public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
+            MRAIDLog.d("hz-m MRAIDView WebViewClient - onRenderProcessGone");
+            if (listener != null) {
+                listener.mraidViewError(MRAIDView.this);
+            }
+            return true;
+        }
     }
 
     public void stopAdSession() {
@@ -1712,6 +1730,26 @@ public class MRAIDView extends RelativeLayout {
         }
 
         return url.contains("tags-prod.vrvm.com") && url.contains("type=expandable");
+    }
+
+    private boolean isCloseSignal(String url) {
+        if (TextUtils.isEmpty(url)
+                || !HyBid.isAdFeedbackEnabled()
+                || TextUtils.isEmpty(HyBid.getContentInfoUrl())) {
+            return false;
+        }
+
+        // This url needs to be hardcoded until production website is released
+        if (url.contains("https://feedback.verve.com")) {
+            Uri uri = Uri.parse(url);
+            if (uri != null) {
+                List<String> pathSegments = uri.getPathSegments();
+                if (pathSegments != null && !pathSegments.isEmpty()) {
+                    return uri.getPathSegments().contains("close");
+                }
+            }
+        }
+        return false;
     }
 
     /**************************************************************************
@@ -1984,6 +2022,13 @@ public class MRAIDView extends RelativeLayout {
         }
     }
 
+    private void setOrientationInitialState(){
+        if (context != null && context instanceof Activity) {
+            Activity activity = (Activity) context;
+            activity.setRequestedOrientation(this.activityInitialOrientation);
+        }
+    }
+
     private void restoreOriginalOrientation() {
         if (context instanceof Activity) {
             MRAIDLog.d(MRAID_LOG_TAG, "restoreOriginalOrientation");
@@ -2006,7 +2051,7 @@ public class MRAIDView extends RelativeLayout {
     }
 
     private void initSkipTime() {
-        int globalSkipMilliseconds = HyBid.getHtmlInterstitialSkipOffset() * 1000;
+        int globalSkipMilliseconds = HyBid.getHtmlInterstitialSkipOffset().getOffset() * 1000;
 
         if (this.mSkipTimeMillis <= 0 && globalSkipMilliseconds > 0)
             mSkipTimeMillis = globalSkipMilliseconds;
@@ -2019,5 +2064,19 @@ public class MRAIDView extends RelativeLayout {
         } else {
             listener.mraidShowCloseButton();
         }
+    }
+
+    public void pause() {
+        if (mExpirationTimer != null)
+            mExpirationTimer.pauseTimer();
+    }
+
+    public void resume() {
+        if (mExpirationTimer != null)
+            mExpirationTimer.resumeTimer();
+    }
+
+    private void closeOnMainThread() {
+        new Handler(Looper.getMainLooper()).post(this::close);
     }
 }

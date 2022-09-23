@@ -20,7 +20,6 @@ import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.vpaid.enums.AudioState
 
-
 class FairbidMediationBannerFragment : Fragment(R.layout.fragment_fairbid_mediation_banner),
     BannerListener {
     val TAG = FairbidMediationBannerFragment::class.java.simpleName
@@ -28,7 +27,7 @@ class FairbidMediationBannerFragment : Fragment(R.layout.fragment_fairbid_mediat
     private lateinit var fairbidBannerContainer: FrameLayout
     private lateinit var showButton: Button
     private lateinit var errorView: TextView
-    private lateinit var adUnitId: String
+    private var adUnitId: String?=null
 
     private lateinit var videoAudioStatus: AudioState
 
@@ -46,14 +45,14 @@ class FairbidMediationBannerFragment : Fragment(R.layout.fragment_fairbid_mediat
 
         adUnitId =
             SettingsManager.getInstance(requireActivity())
-                .getSettings().fairbidMediationBannerAdUnitId
+                .getSettings().fairbidSettings?.mediationBannerAdUnitId
 
         Banner.setBannerListener(this)
 
         showButton.setOnClickListener {
             showButton.isEnabled = true
             if (!TextUtils.isEmpty(adUnitId)) {
-                Banner.show(adUnitId, bannerOptions, requireActivity())
+                adUnitId?.let { it1 -> Banner.show(it1, bannerOptions, requireActivity()) }
             }
         }
 
@@ -68,7 +67,7 @@ class FairbidMediationBannerFragment : Fragment(R.layout.fragment_fairbid_mediat
     override fun onDestroy() {
         super.onDestroy()
         if (!TextUtils.isEmpty(adUnitId)) {
-            Banner.destroy(adUnitId)
+            adUnitId?.let { Banner.destroy(it) }
             HyBid.setVideoAudioStatus(videoAudioStatus)
         }
     }

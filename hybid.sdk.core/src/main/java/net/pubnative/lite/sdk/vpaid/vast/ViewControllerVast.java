@@ -17,7 +17,10 @@ import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.InterstitialActionBehaviour;
+import net.pubnative.lite.sdk.analytics.Reporting;
+import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.core.R;
+import net.pubnative.lite.sdk.models.SkipOffset;
 import net.pubnative.lite.sdk.mraid.MRAIDBanner;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
@@ -135,12 +138,8 @@ public class ViewControllerVast implements View.OnClickListener {
     }
 
     private void validateOpenURLClicked() {
-        if (mAdController.isRewarded() && !mAdController.adFinishedPlaying() && interstitialClickBehaviour == InterstitialActionBehaviour.HB_CREATIVE) {
-            // Define pause/resume behaviour
-        } else {
-            mAdController.getViewabilityAdSession().fireClick();
-            mAdController.openUrl(null);
-        }
+        mAdController.getViewabilityAdSession().fireClick();
+        mAdController.openUrl(null);
     }
 
     private final VideoAdView.VisibilityListener mCreateVisibilityListener = new VideoAdView.VisibilityListener() {
@@ -228,7 +227,7 @@ public class ViewControllerVast implements View.OnClickListener {
     public void showEndCard(EndCardData endCardData, String imageUri) {
         mEndCardLayout.setVisibility(View.VISIBLE);
         mEndCardLayout.setOnClickListener(v -> validateOpenURLClicked());
-        int endCardCloseDelay = HyBid.getEndCardCloseButtonDelay();
+        SkipOffset endCardCloseDelay = HyBid.getEndCardCloseButtonDelay();
         if (endCardData != null) {
             mControlsLayout.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
             if (endCardData.getType() == EndCardData.Type.STATIC_RESOURCE) {
@@ -253,7 +252,15 @@ public class ViewControllerVast implements View.OnClickListener {
         }
 
         if (mIsFullscreen) {
-            showEndCardCloseButton(endCardCloseDelay);
+            showEndCardCloseButton(endCardCloseDelay.getOffset());
+        }
+
+        ReportingEvent event = new ReportingEvent();
+        event.setEventType(Reporting.EventType.COMPANION_VIEW_END_CARD);
+        event.setCreativeType(Reporting.CreativeType.VIDEO);
+        event.setTimestamp(System.currentTimeMillis());
+        if (HyBid.getReportingController() != null) {
+            HyBid.getReportingController().reportEvent(event);
         }
     }
 
@@ -333,6 +340,11 @@ public class ViewControllerVast implements View.OnClickListener {
         mSkipView.setVisibility(View.GONE);
     }
 
+    public void hideTimerAndMuteButton() {
+        mLinearCountdownView.setVisibility(View.GONE);
+        mMuteView.setVisibility(View.GONE);
+    }
+
     public boolean isEndCard() {
         return mEndCardLayout != null && mEndCardLayout.getVisibility() != View.VISIBLE;
     }
@@ -386,7 +398,9 @@ public class ViewControllerVast implements View.OnClickListener {
         if (endCardDelay >= 0) {
             int endCardDelayInMillis = endCardDelay * 1000;
 
-            mEndcardTimer = new SimpleTimer(endCardDelayInMillis, () -> mEndCardCloseView.setVisibility(View.VISIBLE));
+            mEndcardTimer = new SimpleTimer(endCardDelayInMillis, () -> {
+                mEndCardCloseView.setVisibility(View.VISIBLE);
+            });
             mEndcardTimer.start();
         } else {
             mEndCardCloseView.setVisibility(View.VISIBLE);

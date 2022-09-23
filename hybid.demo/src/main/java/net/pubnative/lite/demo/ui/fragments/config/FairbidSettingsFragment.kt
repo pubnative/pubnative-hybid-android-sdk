@@ -72,20 +72,23 @@ class FairbidSettingsFragment : Fragment(R.layout.fragment_fairbid_settings) {
     }
 
     private fun fillSavedValues() {
-        val settings = settingManager.getSettings()
-        appId.setText(settings.fairbidAppId)
-        mediationBannerInput.setText(settings.fairbidMediationBannerAdUnitId)
-        mediationInterstitialInput.setText(settings.fairbidMediationInterstitialAdUnitId)
-        mediationRewardedInput.setText(settings.fairbidMediationRewardedAdUnitId)
+        val settings = settingManager.getSettings().fairbidSettings
+        if (settings != null) {
+            appId.setText(settings.appId)
+            mediationBannerInput.setText(settings.mediationBannerAdUnitId)
+            mediationInterstitialInput.setText(settings.mediationInterstitialAdUnitId)
+            mediationRewardedInput.setText(settings.mediationRewardedAdUnitId)
 
-        bannerInput.setText(settings.fairbidBannerAdUnitId)
-        interstitialInput.setText(settings.fairbidInterstitialAdUnitId)
-        rewardedInput.setText(settings.fairbidRewardedAdUnitId)
+            bannerInput.setText(settings.bannerAdUnitId)
+            interstitialInput.setText(settings.interstitialAdUnitId)
+            rewardedInput.setText(settings.rewardedAdUnitId)
+        }
+
     }
 
     private fun initializeFairbid() {
-        val settings = settingManager.getSettings()
-        val appKey = settings.fairbidAppId
+        val settings = settingManager.getSettings().fairbidSettings
+        val appKey = settings?.appId
         val isInitialized = FairBid.hasStarted()
         if (!TextUtils.isEmpty(appKey) && !isInitialized) {
             FairBid.start(Constants.FAIRBID_APP_ID, activity)

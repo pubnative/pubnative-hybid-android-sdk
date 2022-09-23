@@ -34,7 +34,6 @@ import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.mraid.MRAIDBanner;
-import net.pubnative.lite.sdk.mraid.MRAIDInterstitial;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeature;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
@@ -185,10 +184,6 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
         if (mIsDestroyed) {
             return;
         }
-
-        if (mListener != null) {
-            mListener.onAdClicked(this);
-        }
     }
 
     @Override
@@ -262,12 +257,22 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
                 IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
                     @Override
                     public void onLoadFinished() {
+                        if (mMRAIDBanner != null) {
+                            mMRAIDBanner.pause();
+                        }
                         adFeedbackView.showFeedbackForm(mContext);
                     }
 
                     @Override
                     public void onLoadFailed(Throwable error) {
                         Logger.e(TAG, error.getMessage());
+                    }
+
+                    @Override
+                    public void onFormClosed() {
+                        if (mMRAIDBanner != null) {
+                            mMRAIDBanner.resume();
+                        }
                     }
                 });
     }

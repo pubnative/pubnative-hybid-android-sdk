@@ -19,58 +19,69 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization)  {
     private lateinit var locationTrackingSwitch: SwitchCompat
     private lateinit var locationUpdatesSwitch: SwitchCompat
     private lateinit var autocloseSwitch: SwitchCompat
+    private lateinit var autocloseSwitchRewarded: SwitchCompat
     private lateinit var enableEndcardSwitch: SwitchCompat
     private lateinit var htmlSkipOffsetInput: EditText
     private lateinit var videoSkipOffsetInput: EditText
     private lateinit var endCardCloseButtonDelayInput: EditText
     private lateinit var clickBehaviourGroup: RadioGroup
     private lateinit var settingManager: SettingsManager
+    private lateinit var feedbackFormSwitch: SwitchCompat
+    private lateinit var feedbackFormUrlInput: EditText
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        initialAudioGroup = view.findViewById(R.id.group_initial_audio)
-        mraidExpandSwitch = view.findViewById(R.id.check_mraid_expand)
-        locationTrackingSwitch = view.findViewById(R.id.check_location_tracking)
-        locationUpdatesSwitch = view.findViewById(R.id.check_location_updates)
-        autocloseSwitch = view.findViewById(R.id.check_auto_close)
-        enableEndcardSwitch = view.findViewById(R.id.check_enable_endcard)
-        htmlSkipOffsetInput = view.findViewById(R.id.input_skip_offset)
-        videoSkipOffsetInput = view.findViewById(R.id.input_video_skip_offset)
-        endCardCloseButtonDelayInput = view.findViewById(R.id.input_endcard_close_button_delay)
-        clickBehaviourGroup = view.findViewById(R.id.group_click_behaviour)
-
+        initViews()
         settingManager = SettingsManager.getInstance(requireContext())
-
         view.findViewById<Button>(R.id.button_save_settings).setOnClickListener {
             saveData()
         }
-
         fillSavedValues()
     }
 
-    private fun fillSavedValues() {
-        val settings = settingManager.getSettings()
+    private fun initViews(){
+        initialAudioGroup = requireView().findViewById(R.id.group_initial_audio)
+        mraidExpandSwitch = requireView().findViewById(R.id.check_mraid_expand)
+        locationTrackingSwitch = requireView().findViewById(R.id.check_location_tracking)
+        locationUpdatesSwitch = requireView().findViewById(R.id.check_location_updates)
+        autocloseSwitch = requireView().findViewById(R.id.check_auto_close)
+        autocloseSwitchRewarded = requireView().findViewById(R.id.check_auto_close_rewarded)
+        enableEndcardSwitch = requireView().findViewById(R.id.check_enable_endcard)
+        htmlSkipOffsetInput = requireView().findViewById(R.id.input_skip_offset)
+        videoSkipOffsetInput = requireView().findViewById(R.id.input_video_skip_offset)
+        endCardCloseButtonDelayInput = requireView().findViewById(R.id.input_endcard_close_button_delay)
+        clickBehaviourGroup = requireView().findViewById(R.id.group_click_behaviour)
+        feedbackFormSwitch = requireView().findViewById(R.id.feedback_form_switch)
+        feedbackFormUrlInput = requireView().findViewById(R.id.feedback_form_url_input)
+    }
 
-        val selectedInitialAudio = when (settings.initialAudioState) {
+    private fun fillSavedValues() {
+        val settings = settingManager.getSettings().adCustomizationSettings
+
+        val selectedInitialAudio = when (settings?.initialAudioState) {
             0 -> R.id.radio_sound_default
             1 -> R.id.radio_sound_on
             2 -> R.id.radio_sound_mute
             else -> {R.id.radio_sound_default}
         }
         initialAudioGroup.check(selectedInitialAudio)
-        mraidExpandSwitch.isChecked = settings.mraidExpanded
-        locationTrackingSwitch.isChecked = settings.locationTracking
-        locationUpdatesSwitch.isChecked = settings.locationUpdates
-        autocloseSwitch.isChecked = settings.closeVideoAfterFinish
-        enableEndcardSwitch.isChecked = settings.enableEndcard
-        htmlSkipOffsetInput.setText(settings.skipOffset.toString())
-        videoSkipOffsetInput.setText(settings.videoSkipOffset.toString())
-        endCardCloseButtonDelayInput.setText(settings.endCardCloseButtonDelay.toString())
+        mraidExpandSwitch.isChecked = settings?.mraidExpanded == true
+        locationTrackingSwitch.isChecked = settings?.locationTracking == true
+        locationUpdatesSwitch.isChecked = settings?.locationUpdates == true
+        autocloseSwitch.isChecked = settings?.closeVideoAfterFinish == true
+        autocloseSwitchRewarded.isChecked = settings?.closeVideoAfterFinishForRewardedVideo == true
+        enableEndcardSwitch.isChecked = settings?.enableEndcard == true
+        htmlSkipOffsetInput.setText(settings?.skipOffset.toString())
+        videoSkipOffsetInput.setText(settings?.videoSkipOffset.toString())
+        endCardCloseButtonDelayInput.setText(settings?.endCardCloseButtonDelay.toString())
+        feedbackFormSwitch.isChecked = settings?.feedbackEnabled == true
+        feedbackFormUrlInput.setText(settings?.feedbackFormUrl)
 
-        val selectedClickBehaviour = when (settings.videoClickBehaviour) {
+        val selectedClickBehaviour = when (settings?.videoClickBehaviour) {
             true -> R.id.radio_creative
             false -> R.id.radio_action_button
+            else ->
+                R.id.radio_creative
         }
 
         clickBehaviourGroup.check(selectedClickBehaviour)
@@ -88,6 +99,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization)  {
         val locationTracking = locationTrackingSwitch.isChecked
         val locationUpdates = locationUpdatesSwitch.isChecked
         val autoCloseVideo = autocloseSwitch.isChecked
+        val autoCloseVideoRewarded = autocloseSwitchRewarded.isChecked
         val enableEndcard = enableEndcardSwitch.isChecked
         val skipOffset = htmlSkipOffsetInput.text.toString()
         val videoSkipOffset = videoSkipOffsetInput.text.toString()
@@ -97,6 +109,8 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization)  {
             R.id.radio_action_button -> InterstitialActionBehaviour.HB_ACTION_BUTTON
             else -> InterstitialActionBehaviour.HB_CREATIVE
         }
+        val feedbackFormEnabled = feedbackFormSwitch.isChecked
+        val feedbackFormUrl = feedbackFormUrlInput.text.toString()
 
         val skipOffsetInt: Int
         val videoSkipOffsetInt: Int
@@ -124,16 +138,24 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization)  {
             }
         }
 
+        if(feedbackFormEnabled && feedbackFormUrl.isBlank()){
+            Toast.makeText(context, "Feedback can not be enabled with blank url", Toast.LENGTH_LONG).show()
+            return
+        }
+
         settingManager.setInitialAudioState(getAudioStateInt(initialAudioState))
         settingManager.setMraidExpanded(mraidExpand)
         settingManager.setLocationTracking(locationTracking)
         settingManager.setLocationUpdates(locationUpdates)
         settingManager.setCloseVideoAfterFinish(autoCloseVideo)
+        settingManager.setCloseVideoAfterFinishForRewardedVideo(autoCloseVideoRewarded)
         settingManager.setEnableEndcard(enableEndcard)
         settingManager.setSkipOffset(skipOffsetInt)
         settingManager.setVideoSkipOffset(videoSkipOffsetInt)
         settingManager.setEndCardCloseButtonDelay(endCardCloseButtonDelayInt)
         settingManager.setVideoClickBehaviour(getVideoClickBehaviourBoolean(videoClickBehaviour))
+        settingManager.setFeedbackFormEnabled(feedbackFormEnabled)
+        settingManager.setFeedbackFormUrl(feedbackFormUrl)
 
 
         HyBid.setVideoAudioStatus(initialAudioState)
@@ -141,7 +163,10 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization)  {
         HyBid.setLocationTrackingEnabled(locationTracking)
         HyBid.setLocationUpdatesEnabled(locationUpdates)
         HyBid.setCloseVideoAfterFinish(autoCloseVideo)
+        HyBid.setCloseVideoAfterFinishForRewarded(autoCloseVideoRewarded)
         HyBid.setEndCardEnabled(enableEndcard)
+        HyBid.setAdFeedbackEnabled(feedbackFormEnabled)
+        HyBid.setContentInfoUrl(feedbackFormUrl)
         HyBid.setHtmlInterstitialSkipOffset(skipOffsetInt)
         HyBid.setVideoInterstitialSkipOffset(videoSkipOffsetInt)
         HyBid.setEndCardCloseButtonDelay(endCardCloseButtonDelayInt)

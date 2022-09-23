@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.*
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedAd
@@ -38,6 +39,7 @@ class VastTagRequestFragment : Fragment(R.layout.fragment_vast_tag), HyBidInters
         }
 
         view.findViewById<Button>(R.id.button_vast_load).setOnClickListener {
+            cleanLogs()
             loadVastTag()
         }
 
@@ -100,11 +102,13 @@ class VastTagRequestFragment : Fragment(R.layout.fragment_vast_tag), HyBidInters
 
     // Interstitial listeners
     override fun onInterstitialLoaded() {
+        displayLogs()
         Logger.d(TAG, "onInterstitialAdLoaded")
         mInterstitial.show()
     }
 
     override fun onInterstitialLoadFailed(error: Throwable?) {
+        displayLogs()
         Logger.e(TAG, "onInterstitialAdLoadFailed", error)
     }
 
@@ -125,11 +129,13 @@ class VastTagRequestFragment : Fragment(R.layout.fragment_vast_tag), HyBidInters
     }
 
     override fun onRewardedLoaded() {
+        displayLogs()
         Logger.d(TAG, "onRewardedLoaded")
         mRewarded.show()
     }
 
     override fun onRewardedLoadFailed(error: Throwable?) {
+        displayLogs()
         Logger.d(TAG, "onRewardedLoadFailed")
     }
 
@@ -147,5 +153,20 @@ class VastTagRequestFragment : Fragment(R.layout.fragment_vast_tag), HyBidInters
 
     override fun onReward() {
         Logger.d(TAG, "onReward")
+    }
+
+    private fun displayLogs() {
+        if (activity != null) {
+            val activity = activity as TabActivity
+            activity.notifyAdUpdated()
+        }
+    }
+
+    private fun cleanLogs() {
+        if (activity != null) {
+            val activity = activity as TabActivity
+            activity.clearEventList()
+            activity.notifyAdCleaned()
+        }
     }
 }

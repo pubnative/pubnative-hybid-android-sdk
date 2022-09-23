@@ -92,21 +92,24 @@ class HyBidSettingsFragment : Fragment(R.layout.fragment_hybid_settings) {
     }
 
     private fun fillSavedValues() {
-        val settings = settingManager.getSettings()
-        appTokenInput.setText(settings.appToken)
-        apiUrlInput.setText(settings.apiUrl)
-        ageInput.setText(settings.age)
-        coppaSwitch.isChecked = settings.coppa
-        testModeSwitch.isChecked = settings.testMode
-        locationTrackingSwitch.isChecked = settings.locationTracking
+        val settings = settingManager.getSettings().hybidSettings
+        if (settings != null) {
+            appTokenInput.setText(settings.appToken)
+            apiUrlInput.setText(settings.apiUrl)
+            ageInput.setText(settings.age)
+            coppaSwitch.isChecked = settings.coppa == true
+            testModeSwitch.isChecked = settings.testMode == true
+            locationTrackingSwitch.isChecked =
+                settingManager.getSettings().adCustomizationSettings?.locationTracking == true
 
-        val selectedGender = when (settings.gender) {
-            "male" -> R.id.radio_gender_male
-            "female" -> R.id.radio_gender_female
-            else -> R.id.radio_gender_not_set
+            val selectedGender = when (settings.gender) {
+                "male" -> R.id.radio_gender_male
+                "female" -> R.id.radio_gender_female
+                else -> R.id.radio_gender_not_set
+            }
+
+            genderRadioGroup.check(selectedGender)
         }
-
-        genderRadioGroup.check(selectedGender)
     }
 
     private fun saveData() {

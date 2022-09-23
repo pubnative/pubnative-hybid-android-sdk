@@ -35,13 +35,15 @@ class AdmobMediationInterstitialVideoFragment :
         showButton.isEnabled = false
 
         val adUnitId = SettingsManager.getInstance(requireActivity())
-            .getSettings().admobInterstitialVideoAdUnitId
+            .getSettings().admobSettings?.interstitialVideoAdUnitId
 
         loadButton.setOnClickListener {
             loadButton.isEnabled = false
             errorView.text = ""
             val adRequest = AdRequest.Builder().build()
-            InterstitialAd.load(requireActivity(), adUnitId, adRequest, adLoadCallback)
+            if (adUnitId != null) {
+                InterstitialAd.load(requireActivity(), adUnitId, adRequest, adLoadCallback)
+            }
         }
 
         showButton.setOnClickListener {
@@ -50,8 +52,7 @@ class AdmobMediationInterstitialVideoFragment :
 
         errorView.setOnClickListener {
             ClipboardUtils.copyToClipboard(
-                requireActivity(),
-                errorView.text.toString()
+                requireActivity(), errorView.text.toString()
             )
         }
     }

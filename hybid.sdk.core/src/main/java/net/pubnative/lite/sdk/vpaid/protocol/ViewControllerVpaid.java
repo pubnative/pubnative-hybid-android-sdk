@@ -9,6 +9,9 @@ import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.analytics.Reporting;
+import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.core.R;
 import net.pubnative.lite.sdk.vpaid.VideoAdController;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
@@ -65,7 +68,13 @@ public class ViewControllerVpaid {
         mEndCardLayout.setVisibility(View.VISIBLE);
         mWebView.setVisibility(View.GONE);
         ImageUtils.setScaledImage(mEndCardView, imageUri);
+
+        ReportingEvent event = new ReportingEvent();
+        event.setEventType(Reporting.EventType.COMPANION_VIEW_END_CARD);
+        event.setCreativeType(Reporting.CreativeType.VIDEO);
+        event.setTimestamp(System.currentTimeMillis());
+        if (HyBid.getReportingController() != null) {
+            HyBid.getReportingController().reportEvent(event);
+        }
     }
-
-
 }

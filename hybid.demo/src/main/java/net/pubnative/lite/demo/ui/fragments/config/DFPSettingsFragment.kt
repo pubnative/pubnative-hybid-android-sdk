@@ -92,15 +92,17 @@ class DFPSettingsFragment : Fragment(R.layout.fragment_dfp_settings) {
     }
 
     private fun fillSavedValues() {
-        val settings = settingManager.getSettings()
-        bannerInput.setText(settings.dfpBannerAdUnitId)
-        mediumInput.setText(settings.dfpMediumAdUnitId)
-        leaderboardInput.setText(settings.dfpLeaderboardAdUnitId)
-        interstitialInput.setText(settings.dfpInterstitialAdUnitId)
-        mediationBannerInput.setText(settings.dfpMediationBannerAdUnitId)
-        mediationMediumInput.setText(settings.dfpMediationMediumAdUnitId)
-        mediationLeaderboardInput.setText(settings.dfpMediationLeaderboardAdUnitId)
-        mediationInterstitialInput.setText(settings.dfpMediationInterstitialAdUnitId)
-        mediationRewardedInput.setText(settings.dfpMediationRewardedAdUnitId)
+        val settings = settingManager.getSettings().dfpSettings
+        if (settings != null) {
+            bannerInput.setText(settings.bannerAdUnitId)
+            mediumInput.setText(settings.mediumAdUnitId)
+            leaderboardInput.setText(settings.leaderboardAdUnitId)
+            interstitialInput.setText(settings.interstitialAdUnitId)
+            mediationBannerInput.setText(settings.mediationBannerAdUnitId)
+            mediationMediumInput.setText(settings.mediationMediumAdUnitId)
+            mediationLeaderboardInput.setText(settings.mediationLeaderboardAdUnitId)
+            mediationInterstitialInput.setText(settings.mediationInterstitialAdUnitId)
+            mediationRewardedInput.setText(settings.mediationRewardedAdUnitId)
+        }
     }
 }

@@ -72,7 +72,8 @@ class GAMBannerFragment : Fragment(R.layout.fragment_dfp_banner), RequestManager
         requestManager = BannerRequestManager()
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
-        adUnitId = SettingsManager.getInstance(requireActivity()).getSettings().dfpBannerAdUnitId
+        adUnitId =
+            SettingsManager.getInstance(requireActivity()).getSettings().dfpSettings?.bannerAdUnitId
 
         gamBanner = AdManagerAdView(requireActivity())
         gamBanner.adUnitId = adUnitId!!

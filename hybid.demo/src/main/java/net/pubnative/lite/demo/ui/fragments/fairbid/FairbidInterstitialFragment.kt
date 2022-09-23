@@ -19,6 +19,7 @@ val FairbidInterstitialFragment_TAG: String = FairbidInterstitialFragment::class
 class FairbidInterstitialFragment : Fragment(R.layout.fragment_fairbid_interstitial),
     InterstitialListener {
 
+    private var adUnitId: String? = null
     private lateinit var loadButton: Button
     private lateinit var showButton: Button
     private lateinit var errorView: TextView
@@ -31,23 +32,28 @@ class FairbidInterstitialFragment : Fragment(R.layout.fragment_fairbid_interstit
         showButton = view.findViewById(R.id.button_show)
         showButton.isEnabled = false
 
-        val adUnitId =
-            SettingsManager.getInstance(requireActivity())
-                .getSettings().fairbidInterstitialAdUnitId
-
-        Interstitial.setInterstitialListener(this)
-        Interstitial.disableAutoRequesting(adUnitId)
-
-        loadButton.setOnClickListener {
-            showButton.isEnabled = false
-            Interstitial.request(adUnitId)
+        if (SettingsManager.getInstance(requireActivity())
+                .getSettings().fairbidSettings?.interstitialAdUnitId != null
+        ) {
+            adUnitId = SettingsManager.getInstance(requireActivity())
+                .getSettings().fairbidSettings?.interstitialAdUnitId
         }
 
-        showButton.setOnClickListener {
-            if (Interstitial.isAvailable(adUnitId)) {
-                Interstitial.show(adUnitId, requireActivity())
+        if (adUnitId != null) {
+            Interstitial.setInterstitialListener(this)
+            Interstitial.disableAutoRequesting(adUnitId!!)
+
+            loadButton.setOnClickListener {
+                showButton.isEnabled = false
+                Interstitial.request(adUnitId!!)
             }
-            showButton.isEnabled = false
+
+            showButton.setOnClickListener {
+                if (Interstitial.isAvailable(adUnitId!!)) {
+                    Interstitial.show(adUnitId!!, requireActivity())
+                }
+                showButton.isEnabled = false
+            }
         }
 
         errorView.setOnClickListener {

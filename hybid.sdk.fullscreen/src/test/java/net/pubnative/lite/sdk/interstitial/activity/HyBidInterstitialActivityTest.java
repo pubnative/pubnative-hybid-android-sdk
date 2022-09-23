@@ -36,6 +36,16 @@ public class HyBidInterstitialActivityTest {
         protected boolean shouldShowContentInfo() {
             return false;
         }
+
+        @Override
+        protected void resumeAd() {
+
+        }
+
+        @Override
+        protected void pauseAd() {
+
+        }
     }
 
     @Before

@@ -48,7 +48,7 @@ class GAMLeaderboardFragment : Fragment(R.layout.fragment_dfp_leaderboard),
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
         adUnitId =
-            SettingsManager.getInstance(requireActivity()).getSettings().dfpLeaderboardAdUnitId
+            SettingsManager.getInstance(requireActivity()).getSettings().dfpSettings?.leaderboardAdUnitId
 
         gamLeaderboard = AdManagerAdView(requireActivity())
         gamLeaderboard.adUnitId = adUnitId!!

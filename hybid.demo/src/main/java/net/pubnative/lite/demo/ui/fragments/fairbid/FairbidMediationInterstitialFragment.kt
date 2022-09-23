@@ -1,13 +1,11 @@
 package net.pubnative.lite.demo.ui.fragments.fairbid
 
 import android.os.Bundle
-import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.fyber.fairbid.ads.Banner
 import com.fyber.fairbid.ads.ImpressionData
 import com.fyber.fairbid.ads.Interstitial
 import com.fyber.fairbid.ads.interstitial.InterstitialListener
@@ -21,11 +19,14 @@ import net.pubnative.lite.sdk.vpaid.enums.AudioState
 class FairbidMediationInterstitialFragment :
     Fragment(R.layout.fragment_fairbid_mediation_interstitial),
     InterstitialListener {
+
+
     val TAG = FairbidMediationInterstitialFragment::class.java.simpleName
 
     private lateinit var loadButton: Button
     private lateinit var showButton: Button
     private lateinit var errorView: TextView
+    private var adUnitId: String? = null
 
     private lateinit var videoAudioStatus: AudioState
 
@@ -37,23 +38,23 @@ class FairbidMediationInterstitialFragment :
         showButton = view.findViewById(R.id.button_show)
         showButton.isEnabled = false
 
-        val adUnitId =
+        adUnitId =
             SettingsManager.getInstance(requireActivity())
-                .getSettings().fairbidMediationInterstitialAdUnitId
+                .getSettings().fairbidSettings?.mediationInterstitialAdUnitId
 
         Interstitial.setInterstitialListener(this)
-        Interstitial.disableAutoRequesting(adUnitId)
+        adUnitId?.let { Interstitial.disableAutoRequesting(it) }
 
         videoAudioStatus = HyBid.getVideoAudioStatus()
 
         loadButton.setOnClickListener {
             showButton.isEnabled = false
-            Interstitial.request(adUnitId)
+            adUnitId?.let { it1 -> Interstitial.request(it1) }
         }
 
         showButton.setOnClickListener {
-            if (Interstitial.isAvailable(adUnitId)) {
-                Interstitial.show(adUnitId, requireActivity())
+            if (adUnitId != null && Interstitial.isAvailable(adUnitId!!)) {
+                Interstitial.show(adUnitId!!, requireActivity())
             }
             showButton.isEnabled = false
         }

@@ -69,7 +69,7 @@ class GAMInterstitialFragment : Fragment(R.layout.fragment_dfp_interstitial),
         showButton.isEnabled = false
 
         adUnitId =
-            SettingsManager.getInstance(requireActivity()).getSettings().dfpInterstitialAdUnitId
+            SettingsManager.getInstance(requireActivity()).getSettings().dfpSettings?.interstitialAdUnitId
         requestManager = InterstitialRequestManager()
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)

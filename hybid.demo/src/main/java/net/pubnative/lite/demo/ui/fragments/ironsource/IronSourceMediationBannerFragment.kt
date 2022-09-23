@@ -35,7 +35,8 @@ class IronSourceMediationBannerFragment : Fragment(R.layout.fragment_ironsource_
         ironSourceBannerContainer = view.findViewById(R.id.ironsource_banner_container)
 
         val adUnitId =
-            SettingsManager.getInstance(requireActivity()).getSettings().ironSourceBannerAdUnitId
+            SettingsManager.getInstance(requireActivity())
+                .getSettings().ironSourceSettings?.bannerAdUnitId
 
         ironSourceBanner = IronSource.createBanner(requireActivity(), ISBannerSize.BANNER)
         ironSourceBanner.bannerListener = this
@@ -97,9 +98,10 @@ class IronSourceMediationBannerFragment : Fragment(R.layout.fragment_ironsource_
     }
 
     private fun initializeIronSource() {
-        val settings = SettingsManager.getInstance(requireContext()).getSettings()
-        val appKey = settings.ironSourceAppKey
-        if (!TextUtils.isEmpty(appKey)) {
+        val settings =
+            SettingsManager.getInstance(requireContext()).getSettings().ironSourceSettings
+        val appKey = settings?.appKey
+        if (appKey != null && appKey.isNotEmpty()) {
             IronSource.init(
                 requireActivity(), appKey, IronSource.AD_UNIT.BANNER,
                 IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.REWARDED_VIDEO

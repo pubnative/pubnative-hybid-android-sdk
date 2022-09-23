@@ -213,16 +213,11 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         return result;
     }
 
-    public View getContentInfo(Context context,
-                               boolean feedbackEnabled,
-                               PNAPIContentInfoView.ContentInfoListener listener) {
+    public View getContentInfo(Context context, boolean feedbackEnabled, PNAPIContentInfoView.ContentInfoListener listener) {
         return getContentInfo(context, null, feedbackEnabled, listener);
     }
 
-    public View getContentInfo(Context context,
-                               ContentInfo contentInfo,
-                               boolean feedbackEnabled,
-                               PNAPIContentInfoView.ContentInfoListener listener) {
+    public View getContentInfo(Context context, ContentInfo contentInfo, boolean feedbackEnabled, PNAPIContentInfoView.ContentInfoListener listener) {
         PNAPIContentInfoView result = null;
         AdData data = getMeta(APIMeta.CONTENT_INFO);
         if (data == null) {
@@ -241,20 +236,20 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             result.setContextText(data.getText());
             result.setContentInfoListener(listener);
             result.setAdFeedbackEnabled(feedbackEnabled);
-            result.setOnClickListener(view -> ((PNAPIContentInfoView) view).openLayout());
+            PNAPIContentInfoView finalResult = result;
+            result.setOnClickListener(v -> {
+                if (!TextUtils.isEmpty(finalResult.getIconClickURL()))
+                    ((PNAPIContentInfoView) v).openLayout();
+            });
         }
         return result;
     }
 
-    public FrameLayout getContentInfoContainer(Context context, boolean feedbackEnabled,
-                                               PNAPIContentInfoView.ContentInfoListener listener) {
+    public FrameLayout getContentInfoContainer(Context context, boolean feedbackEnabled, PNAPIContentInfoView.ContentInfoListener listener) {
         return getContentInfoContainer(context, null, feedbackEnabled, listener);
     }
 
-    public FrameLayout getContentInfoContainer(Context context,
-                                               ContentInfo contentInfo,
-                                               boolean feedbackEnabled,
-                                               PNAPIContentInfoView.ContentInfoListener listener) {
+    public FrameLayout getContentInfoContainer(Context context, ContentInfo contentInfo, boolean feedbackEnabled, PNAPIContentInfoView.ContentInfoListener listener) {
         View contentInfoView = getCustomContentInfo(context, contentInfo, feedbackEnabled, listener);
 
         if (contentInfoView == null) {
@@ -264,9 +259,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         if (contentInfoView != null) {
             FrameLayout contentInfoContainer = new FrameLayout(context);
 
-            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.WRAP_CONTENT,
-                    FrameLayout.LayoutParams.WRAP_CONTENT);
+            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
 
             contentInfoContainer.setLayoutParams(layoutParams);
             contentInfoContainer.addView(contentInfoView);
@@ -276,13 +269,8 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         }
     }
 
-    private PNAPIContentInfoView getCustomContentInfo(Context context,
-                                                      ContentInfo contentInfo,
-                                                      boolean feedbackEnabled,
-                                                      PNAPIContentInfoView.ContentInfoListener listener) {
-        if (contentInfo == null
-                || TextUtils.isEmpty(contentInfo.getIconUrl())
-                || TextUtils.isEmpty(contentInfo.getLinkUrl())) {
+    private PNAPIContentInfoView getCustomContentInfo(Context context, ContentInfo contentInfo, boolean feedbackEnabled, PNAPIContentInfoView.ContentInfoListener listener) {
+        if (contentInfo == null || TextUtils.isEmpty(contentInfo.getIconUrl())) {
             return null;
         } else {
             PNAPIContentInfoView result = new PNAPIContentInfoView(context);
@@ -298,21 +286,25 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             }
             result.setAdFeedbackEnabled(feedbackEnabled);
             result.setContentInfoListener(listener);
-            result.setOnClickListener(view -> ((PNAPIContentInfoView) view).openLayout());
+            result.setOnClickListener(v -> {
+                if (!TextUtils.isEmpty(result.getIconClickURL()))
+                    ((PNAPIContentInfoView) v).openLayout();
+            });
             return result;
         }
     }
 
-    private PNAPIContentInfoView getDefaultContentInfo(Context context,
-                                                       boolean feedbackEnabled,
-                                                       PNAPIContentInfoView.ContentInfoListener listener) {
+    private PNAPIContentInfoView getDefaultContentInfo(Context context, boolean feedbackEnabled, PNAPIContentInfoView.ContentInfoListener listener) {
         PNAPIContentInfoView result = new PNAPIContentInfoView(context);
         result.setIconUrl(CONTENT_INFO_ICON_URL);
         result.setIconClickUrl(CONTENT_INFO_LINK_URL);
         result.setContextText(CONTENT_INFO_TEXT);
         result.setContentInfoListener(listener);
         result.setAdFeedbackEnabled(feedbackEnabled);
-        result.setOnClickListener(view -> ((PNAPIContentInfoView) view).openLayout());
+        result.setOnClickListener(v -> {
+            if (!TextUtils.isEmpty(result.getIconClickURL()))
+                ((PNAPIContentInfoView) v).openLayout();
+        });
         return result;
     }
 
@@ -404,21 +396,23 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
 
         String impressionId = "";
 
-        while (index < impressionBeacons.size() && !found) {
-            AdData data = impressionBeacons.get(index);
+        if (impressionBeacons != null) {
+            while (index < impressionBeacons.size() && !found) {
+                AdData data = impressionBeacons.get(index);
 
-            if (!TextUtils.isEmpty(data.getURL())) {
-                Uri uri = Uri.parse(data.getURL());
-                if (uri.getAuthority().equals(PN_IMPRESSION_URL)) {
-                    String idParam = uri.getQueryParameter(PN_IMPRESSION_QUERY_PARAM);
-                    if (!TextUtils.isEmpty(idParam)) {
-                        impressionId = idParam;
-                        found = true;
+                if (!TextUtils.isEmpty(data.getURL())) {
+                    Uri uri = Uri.parse(data.getURL());
+                    if (uri.getAuthority().equals(PN_IMPRESSION_URL)) {
+                        String idParam = uri.getQueryParameter(PN_IMPRESSION_QUERY_PARAM);
+                        if (!TextUtils.isEmpty(idParam)) {
+                            impressionId = idParam;
+                            found = true;
+                        }
                     }
                 }
-            }
 
-            index++;
+                index++;
+            }
         }
 
         return impressionId;

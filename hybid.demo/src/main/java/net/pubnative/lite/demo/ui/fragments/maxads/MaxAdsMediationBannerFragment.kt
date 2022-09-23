@@ -30,7 +30,7 @@ class MaxAdsMediationBannerFragment : Fragment(R.layout.fragment_maxads_banner),
         adContainer = view.findViewById(R.id.ad_container)
 
         val adUnitId = SettingsManager.getInstance(requireActivity())
-            .getSettings().maxAdsBannerAdUnitId
+            .getSettings().maxAdsSettings?.bannerAdUnitId
 
         maxBanner = MaxAdView(adUnitId, requireActivity())
         maxBanner?.setListener(this)

@@ -35,6 +35,7 @@ import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenter;
 import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenterFactory;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.SkipOffset;
 import net.pubnative.lite.sdk.utils.Logger;
 
 public class HyBidDFPInterstitialCustomEvent implements CustomEventInterstitial, InterstitialPresenter.Listener {
@@ -75,12 +76,15 @@ public class HyBidDFPInterstitialCustomEvent implements CustomEventInterstitial,
             return;
         }
 
-        int htmlSkipOffset = HyBid.getHtmlInterstitialSkipOffset();
-        int videoSkipOffset = HyBid.getVideoInterstitialSkipOffset();
-        if (htmlSkipOffset > 0 || videoSkipOffset > 0) {
-            mPresenter = new InterstitialPresenterFactory(context, zoneIdKey).createInterstitialPresenter(ad, htmlSkipOffset, videoSkipOffset, this);
+        SkipOffset htmlSkipOffset = HyBid.getHtmlInterstitialSkipOffset();
+        SkipOffset videoSkipOffset = HyBid.getVideoInterstitialSkipOffset();
+        if (htmlSkipOffset.getOffset() > 0 || videoSkipOffset.getOffset() > 0) {
+            mPresenter = new InterstitialPresenterFactory(context, zoneIdKey)
+                    .createInterstitialPresenter(ad, htmlSkipOffset,
+                            videoSkipOffset, this);
         } else {
-            mPresenter = new InterstitialPresenterFactory(context, zoneIdKey).createInterstitialPresenter(ad, this);
+            mPresenter = new InterstitialPresenterFactory(context, zoneIdKey)
+                    .createInterstitialPresenter(ad, this);
         }
 
         if (mPresenter == null) {

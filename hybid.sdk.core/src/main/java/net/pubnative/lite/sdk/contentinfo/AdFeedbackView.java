@@ -8,25 +8,27 @@ import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.models.Ad;
-import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.mraid.MRAIDInterstitial;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeature;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
-import net.pubnative.lite.sdk.vpaid.macros.FeedbackMacros;
-import net.pubnative.lite.sdk.vpaid.macros.MacroHelper;
+import net.pubnative.lite.sdk.utils.UrlHandler;
 
 public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureListener {
     public interface AdFeedbackLoadListener {
         void onLoadFinished();
 
         void onLoadFailed(Throwable error);
+
+        void onFormClosed();
     }
 
     private MRAIDInterstitial mViewContainer;
     private AdFeedbackLoadListener mListener;
+    private AdFeedbackData mAdFeedbackData;
+    private UrlHandler mUrlHandlerDelegate;
     private boolean mIsReady = false;
 
     public void prepare(Context context, String url, AdFeedbackLoadListener listener) {
@@ -36,12 +38,15 @@ public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureList
     public void prepare(Context context, String url, Ad ad,
                         String adFormat, IntegrationType integrationType, AdFeedbackLoadListener listener) {
         if (!TextUtils.isEmpty(HyBid.getContentInfoUrl()) && HyBid.isAdFeedbackEnabled()) {
-            url = HyBid.getContentInfoUrl();
+            url = HyBid.getContentInfoUrl().concat("/index.html?apptoken=").concat(FeedbackMacros.MACRO_APP_TOKEN);
         }
+
+        mUrlHandlerDelegate = new UrlHandler(context);
+        mAdFeedbackData = new AdFeedbackDataCollector().collectData(ad, adFormat, integrationType);
 
         FeedbackMacros macroHelper = new FeedbackMacros();
 
-        String processedUrl = macroHelper.processUrl(url, ad, adFormat, integrationType);
+        String processedUrl = macroHelper.processUrl(url, mAdFeedbackData);
 
         if (!TextUtils.isEmpty(processedUrl)) {
             url = processedUrl;
@@ -75,7 +80,7 @@ public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureList
 
     @Override
     public void mraidNativeFeatureOpenBrowser(String url) {
-
+        mUrlHandlerDelegate.handleUrl(url);
     }
 
     @Override
@@ -90,6 +95,8 @@ public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureList
 
     @Override
     public void mraidViewLoaded(MRAIDView mraidView) {
+        FeedbackJSInterface jsInterface = new FeedbackJSInterface();
+        jsInterface.submitData(mAdFeedbackData, mraidView);
         this.mIsReady = true;
         if (mListener != null) {
             mListener.onLoadFinished();
@@ -111,7 +118,9 @@ public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureList
 
     @Override
     public void mraidViewClose(MRAIDView mraidView) {
-
+        if (mListener != null) {
+            mListener.onFormClosed();
+        }
     }
 
     @Override

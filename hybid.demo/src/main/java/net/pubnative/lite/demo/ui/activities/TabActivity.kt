@@ -26,9 +26,11 @@ package net.pubnative.lite.demo.ui.activities
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentPagerAdapter
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.tabs.TabLayout
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.fragments.DebugFragment
+import net.pubnative.lite.demo.viewmodel.DebugViewModel
 
 abstract class TabActivity : AppCompatActivity() {
 
@@ -41,6 +43,8 @@ abstract class TabActivity : AppCompatActivity() {
      * [android.support.v4.app.FragmentStatePagerAdapter].
      */
     private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
+
+    lateinit var debugViewModel: DebugViewModel
 
     private lateinit var container: androidx.viewpager.widget.ViewPager
     private lateinit var tabs: TabLayout
@@ -71,6 +75,8 @@ abstract class TabActivity : AppCompatActivity() {
         container.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabs))
         tabs.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(container))
 
+        debugViewModel = ViewModelProvider(this).get(DebugViewModel::class.java)
+
         debugFragment = DebugFragment()
         adFragment = getAdFragment()
     }
@@ -96,15 +102,19 @@ abstract class TabActivity : AppCompatActivity() {
     }
 
     fun notifyAdCleaned() {
-        debugFragment.cleanLogs()
+        debugViewModel.clearLogs()
+    }
+
+    fun clearEventList() {
+        debugViewModel.clearEventList()
     }
 
     fun cacheEventList() {
-        debugFragment.cacheEventList()
+        debugViewModel.cacheEventList()
     }
 
     fun notifyAdUpdated() {
-        debugFragment.updateLogs()
+        debugViewModel.updateLogs()
     }
 
     abstract fun getAdFragment(): androidx.fragment.app.Fragment

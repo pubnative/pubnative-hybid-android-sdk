@@ -3,7 +3,6 @@ package net.pubnative.lite.sdk.interstitial.activity;
 import android.annotation.SuppressLint;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -121,23 +120,13 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
     @Override
     protected void onResume() {
         super.onResume();
-        if (mReady) {
-            mVideoAd.resume();
-        }
-
-        if (mIsVideoFinished)
-            mVideoAd.resumeEndCardCloseButtonTimer();
+        resumeAd();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (mReady) {
-            mVideoAd.pause();
-        }
-
-        if (mIsVideoFinished)
-            mVideoAd.pauseEndCardCloseButtonTimer();
+        pauseAd();
     }
 
     @Override
@@ -151,6 +140,31 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
     @Override
     protected boolean shouldShowContentInfo() {
         return true;
+    }
+
+
+    @Override
+    protected void resumeAd() {
+        if (!mIsFeedbackFormOpen) {
+            if (mReady) {
+                mVideoAd.resume();
+            }
+
+            if (mIsVideoFinished) {
+                mVideoAd.resumeEndCardCloseButtonTimer();
+            }
+        }
+    }
+
+    @Override
+    protected void pauseAd() {
+        if (mReady) {
+            mVideoAd.pause();
+        }
+
+        if (mIsVideoFinished) {
+            mVideoAd.pauseEndCardCloseButtonTimer();
+        }
     }
 
     private final VideoAdListener mVideoAdListener = new VideoAdListener() {
@@ -198,6 +212,9 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
         @Override
         public void onAdSkipped() {
             mIsVideoFinished = true;
+            if (getBroadcastSender() != null) {
+                getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_SKIP);
+            }
         }
 
         @Override

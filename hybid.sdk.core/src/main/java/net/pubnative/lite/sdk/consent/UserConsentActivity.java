@@ -63,19 +63,12 @@ public class UserConsentActivity extends Activity {
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
-        settings.setAppCacheEnabled(true);
-        settings.setAppCachePath(this.getCacheDir().getAbsolutePath());
         settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(false);
-
         settings.setLoadWithOverviewMode(true);
         settings.setLoadsImagesAutomatically(true);
         settings.setSupportZoom(false);
         settings.setBuiltInZoomControls(false);
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
-            settings.setAllowUniversalAccessFromFileURLs(false);
-        }
 
         webView.setWebViewClient(webViewClient);
 

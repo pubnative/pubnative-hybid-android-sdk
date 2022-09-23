@@ -45,9 +45,10 @@ import net.pubnative.lite.sdk.source.pnapi.R;
 import net.pubnative.lite.sdk.utils.PNBitmapDownloader;
 import net.pubnative.lite.sdk.utils.ViewUtils;
 
-public class PNAPIContentInfoView extends FrameLayout implements View.OnClickListener {
+public class PNAPIContentInfoView extends FrameLayout {
 
     private static final String TAG = PNAPIContentInfoView.class.getSimpleName();
+    private String iconClickURL = null;
 
     public interface ContentInfoListener {
         void onIconClicked();
@@ -123,8 +124,9 @@ public class PNAPIContentInfoView extends FrameLayout implements View.OnClickLis
     }
 
     public void setIconClickUrl(final String iconClickUrl) {
+        this.iconClickURL = iconClickUrl;
         mContentInfoText.setOnClickListener(view -> {
-            if (mContentInfoListener == null || !mAdFeedbackEnabled || !(getContext() instanceof Activity)) {
+            if (mContentInfoListener == null || !mAdFeedbackEnabled || !(getContext() instanceof Activity) || iconClickUrl == null) {
                 try {
                     Intent openLink = new Intent(Intent.ACTION_VIEW);
                     openLink.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -166,11 +168,15 @@ public class PNAPIContentInfoView extends FrameLayout implements View.OnClickLis
         mContentInfoText.setLayoutParams(textLayoutParams);
     }
 
-    @Override
-    public void onClick(View v) {
-        if (mContentInfoListener != null) {
-            mContentInfoListener.onIconClicked();
-        }
-        openLayout();
+    public String getIconClickURL() {
+        return iconClickURL;
     }
+
+    //    @Override
+//    public void onClick(View v) {
+//        if (mContentInfoListener != null) {
+//            mContentInfoListener.onIconClicked();
+//        }
+//        openLayout();
+//    }
 }

@@ -41,7 +41,9 @@ import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenterFactor
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.RemoteConfigFeature;
+import net.pubnative.lite.sdk.models.SkipOffset;
 import net.pubnative.lite.sdk.network.PNHttpClient;
+import net.pubnative.lite.sdk.utils.AdRequestRegistry;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.MarkupUtils;
 import net.pubnative.lite.sdk.utils.SignalDataProcessor;
@@ -86,8 +88,8 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     private Ad mAd;
     private JSONObject mPlacementParams;
     private boolean mReady = false;
-    private int mHtmlSkipOffset;
-    private int mVideoSkipOffset;
+    private SkipOffset mHtmlSkipOffset;
+    private SkipOffset mVideoSkipOffset;
     private boolean mIsDestroyed = false;
     private long mInitialLoadTime = -1;
     private long mInitialRenderTime = -1;
@@ -238,13 +240,13 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
 
     public void setHtmlSkipOffset(int seconds) {
         if (seconds >= 0) {
-            mHtmlSkipOffset = seconds;
+            mHtmlSkipOffset = new SkipOffset(seconds, true);
         }
     }
 
     public void setVideoSkipOffset(int seconds) {
         if (seconds >= 0) {
-            mVideoSkipOffset = seconds;
+            mVideoSkipOffset = new SkipOffset(seconds, true);
         }
     }
 
@@ -267,7 +269,9 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     }
 
     private void renderAd() {
-        mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, this);
+        mPresenter = new InterstitialPresenterFactory(mContext, mZoneId)
+                .createInterstitialPresenter(mAd, mHtmlSkipOffset,
+                        mVideoSkipOffset, this);
         if (mPresenter != null) {
             mPresenter.setVideoListener(this);
             mPresenter.load();
@@ -314,7 +318,9 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
                 mZoneId = mAd.getZoneId();
                 JsonOperations.putJsonString(mPlacementParams, Reporting.Key.ZONE_ID, mZoneId);
             }
-            mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, this);
+            mPresenter = new InterstitialPresenterFactory(mContext, mZoneId)
+                    .createInterstitialPresenter(mAd, mHtmlSkipOffset,
+                            mVideoSkipOffset, this);
             if (mPresenter != null) {
                 mPresenter.setVideoListener(this);
                 mPresenter.load();
@@ -360,7 +366,9 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
                         mAd.setHasEndCard(hasEndCard);
                         HyBid.getAdCache().put(mZoneId, mAd);
                         HyBid.getVideoAdCache().put(mZoneId, adCacheItem);
-                        mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, HyBidInterstitialAd.this);
+                        mPresenter = new InterstitialPresenterFactory(mContext, mZoneId)
+                                .createInterstitialPresenter(mAd, mHtmlSkipOffset,
+                                        mVideoSkipOffset, HyBidInterstitialAd.this);
                         if (mPresenter != null) {
                             mPresenter.setVideoListener(HyBidInterstitialAd.this);
                             mPresenter.load();
@@ -415,9 +423,12 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
             headers.put("User-Agent", userAgent);
         }
 
+        final long initTime = System.currentTimeMillis();
+
         PNHttpClient.makeRequest(mContext, url, headers, null, new PNHttpClient.Listener() {
             @Override
             public void onSuccess(String response) {
+                registerAdRequest(url, response, initTime);
                 if (!TextUtils.isEmpty(response)) {
                     prepareCustomMarkup(zoneId, response);
                 }
@@ -431,6 +442,15 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         });
     }
 
+    private void registerAdRequest(String url, String response, long initTime) {
+        long responseTime = System.currentTimeMillis() - initTime;
+
+        JsonOperations.putJsonString(mPlacementParams, Reporting.Key.AD_REQUEST, url);
+        JsonOperations.putJsonString(mPlacementParams, Reporting.Key.AD_RESPONSE, response);
+        JsonOperations.putJsonLong(mPlacementParams, Reporting.Key.RESPONSE_TIME, responseTime);
+
+        AdRequestRegistry.getInstance().setLastAdRequest(url, response, responseTime);
+    }
 
     protected void invokeOnLoadFinished() {
         long loadTime = -1;

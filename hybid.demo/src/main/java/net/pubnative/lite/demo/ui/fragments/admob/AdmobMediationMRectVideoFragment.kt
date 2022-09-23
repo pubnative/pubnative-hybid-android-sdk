@@ -31,11 +31,13 @@ class AdmobMediationMRectVideoFragment : Fragment(R.layout.fragment_admob_mrect_
         admobMRectContainer = view.findViewById(R.id.admob_mrect_container)
 
         val adUnitId =
-            SettingsManager.getInstance(requireActivity()).getSettings().admobMediumVideoAdUnitId
+            SettingsManager.getInstance(requireActivity()).getSettings().admobSettings?.mediumVideoAdUnitId
 
         admobMRect = AdView(requireActivity())
         admobMRect.setAdSize(AdSize.MEDIUM_RECTANGLE)
-        admobMRect.adUnitId = adUnitId
+        if (adUnitId != null) {
+            admobMRect.adUnitId = adUnitId
+        }
         admobMRect.adListener = adListener
 
         admobMRectContainer.addView(admobMRect)

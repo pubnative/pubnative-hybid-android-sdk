@@ -5,6 +5,7 @@ import android.text.TextUtils
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.ironsource.mediationsdk.IronSource
 import net.pubnative.lite.demo.R
@@ -40,6 +41,9 @@ class IronSourceSettingsFragment : Fragment(R.layout.fragment_ironsource_setting
             settingManager.setIronSourceRewardedAdUnitId(rewardedAdUnitId)
 
             IronSource.init(requireActivity(), appKey)
+
+            Toast.makeText(activity, "IronSource settings saved successfully.", Toast.LENGTH_SHORT).show()
+            activity?.finish()
         }
 
         view.findViewById<Button>(R.id.button_init_ironsource).setOnClickListener {
@@ -50,16 +54,16 @@ class IronSourceSettingsFragment : Fragment(R.layout.fragment_ironsource_setting
     }
 
     private fun fillSavedValues() {
-        val settings = settingManager.getSettings()
-        appKeyInput.setText(settings.ironSourceAppKey)
-        mediationBannerInput.setText(settings.ironSourceBannerAdUnitId)
-        mediationInterstitialInput.setText(settings.ironSourceInterstitialAdUnitId)
-        mediationRewardedInput.setText(settings.ironSourceRewardedAdUnitId)
+        val settings = settingManager.getSettings().ironSourceSettings
+        appKeyInput.setText(settings?.appKey)
+        mediationBannerInput.setText(settings?.bannerAdUnitId)
+        mediationInterstitialInput.setText(settings?.interstitialAdUnitId)
+        mediationRewardedInput.setText(settings?.rewardedAdUnitId)
     }
 
     private fun initializeIronSource() {
-        val settings = settingManager.getSettings()
-        val appKey = settings.ironSourceAppKey
+        val settings = settingManager.getSettings().ironSourceSettings
+        val appKey = settings?.appKey
         if (!TextUtils.isEmpty(appKey)) {
             IronSource.init(
                 requireActivity(), appKey, IronSource.AD_UNIT.BANNER,

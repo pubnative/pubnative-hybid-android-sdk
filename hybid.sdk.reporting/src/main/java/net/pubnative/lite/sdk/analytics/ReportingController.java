@@ -39,9 +39,12 @@ public class ReportingController {
     public synchronized void reportEvent(ReportingEvent event) {
         new Handler(Looper.getMainLooper()).post(() -> {
             for (int i = 0; i < mListeners.size(); i++) {
-                ReportingEventCallback callback = mListeners.get(i);
-                if (callback != null) {
-                    callback.onEvent(event);
+                // Double check to handle multi-thread listener release
+                if (mListeners.size() > i) {
+                    ReportingEventCallback callback = mListeners.get(i);
+                    if (callback != null) {
+                        callback.onEvent(event);
+                    }
                 }
             }
         });

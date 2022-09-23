@@ -1,7 +1,6 @@
 package net.pubnative.lite.demo.ui.fragments.ironsource
 
 import android.os.Bundle
-import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -30,7 +29,8 @@ class IronSourceMediationRewardedFragment : Fragment(R.layout.fragment_ironsourc
         showButton = view.findViewById(R.id.button_show)
 
         val adUnitId =
-            SettingsManager.getInstance(requireActivity()).getSettings().ironSourceRewardedAdUnitId
+            SettingsManager.getInstance(requireActivity())
+                .getSettings().ironSourceSettings?.rewardedAdUnitId
 
         initializeIronSource()
 
@@ -118,9 +118,10 @@ class IronSourceMediationRewardedFragment : Fragment(R.layout.fragment_ironsourc
     }
 
     private fun initializeIronSource() {
-        val settings = SettingsManager.getInstance(requireContext()).getSettings()
-        val appKey = settings.ironSourceAppKey
-        if (!TextUtils.isEmpty(appKey)) {
+        val settings =
+            SettingsManager.getInstance(requireContext()).getSettings().ironSourceSettings
+        val appKey = settings?.appKey
+        if (appKey != null && appKey.isNotEmpty()) {
             IronSource.init(
                 requireActivity(), appKey, IronSource.AD_UNIT.BANNER,
                 IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.REWARDED_VIDEO

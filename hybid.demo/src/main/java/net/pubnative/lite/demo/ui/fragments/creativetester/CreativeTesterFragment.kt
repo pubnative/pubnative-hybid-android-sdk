@@ -24,7 +24,7 @@ import net.pubnative.lite.sdk.views.HyBidLeaderboardAdView
 import net.pubnative.lite.sdk.views.HyBidMRectAdView
 
 
-class CreativeTesterFragment : Fragment(), HyBidAdView.Listener {
+class CreativeTesterFragment : Fragment(R.layout.fragment_creative_tester), HyBidAdView.Listener {
     private val TAG = CreativeTesterFragment::class.java.simpleName
 
     private lateinit var creativeIdInput: EditText
@@ -38,14 +38,6 @@ class CreativeTesterFragment : Fragment(), HyBidAdView.Listener {
     private var selectedServer: Int = R.id.radio_server_p161
 
     private var interstitial: HyBidInterstitialAd? = null
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? = inflater.inflate(
-        R.layout.fragment_creative_tester, container, false
-    )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -91,18 +83,22 @@ class CreativeTesterFragment : Fragment(), HyBidAdView.Listener {
     }
 
     private fun updateListVisibility() {
-        if (selectedSize == R.id.radio_size_banner) {
-            bannerAdView.visibility = View.VISIBLE
-            mrectAdView.visibility = View.GONE
-            leaderboardAdView.visibility = View.GONE
-        } else if (selectedSize == R.id.radio_size_medium) {
-            bannerAdView.visibility = View.GONE
-            mrectAdView.visibility = View.VISIBLE
-            leaderboardAdView.visibility = View.GONE
-        } else if (selectedSize == R.id.radio_size_leaderboard) {
-            bannerAdView.visibility = View.GONE
-            mrectAdView.visibility = View.GONE
-            leaderboardAdView.visibility = View.VISIBLE
+        when (selectedSize) {
+            R.id.radio_size_banner -> {
+                bannerAdView.visibility = View.VISIBLE
+                mrectAdView.visibility = View.GONE
+                leaderboardAdView.visibility = View.GONE
+            }
+            R.id.radio_size_medium -> {
+                bannerAdView.visibility = View.GONE
+                mrectAdView.visibility = View.VISIBLE
+                leaderboardAdView.visibility = View.GONE
+            }
+            R.id.radio_size_leaderboard -> {
+                bannerAdView.visibility = View.GONE
+                mrectAdView.visibility = View.GONE
+                leaderboardAdView.visibility = View.VISIBLE
+            }
         }
     }
 
@@ -152,7 +148,8 @@ class CreativeTesterFragment : Fragment(), HyBidAdView.Listener {
 
         val headers: MutableMap<String, String> = HashMap()
 
-        headers["user-agent"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"
+        headers["user-agent"] =
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"
 
         PNHttpClient.makeRequest(context, url, headers, null, true,
             object : PNHttpClient.Listener {
@@ -167,7 +164,11 @@ class CreativeTesterFragment : Fragment(), HyBidAdView.Listener {
                         loadMarkup(result)
                     } else {
                         Log.d("onSuccess", "Request succeeded with an empty response")
-                        Toast.makeText(activity, "Request succeeded with an empty response", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            activity,
+                            "Request succeeded with an empty response",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
 

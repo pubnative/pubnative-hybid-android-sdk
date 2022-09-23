@@ -333,12 +333,22 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
                 IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
                     @Override
                     public void onLoadFinished() {
+                        if (mVideoAd != null && mVideoAd.isShowing()) {
+                            mVideoAd.pause();
+                        }
                         adFeedbackView.showFeedbackForm(mContext);
                     }
 
                     @Override
                     public void onLoadFailed(Throwable error) {
                         Logger.e(TAG, error.getMessage());
+                    }
+
+                    @Override
+                    public void onFormClosed() {
+                        if (mVideoAd != null && mVideoAd.isShowing()) {
+                            mVideoAd.resume();
+                        }
                     }
                 });
     }

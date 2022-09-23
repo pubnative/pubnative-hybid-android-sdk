@@ -85,8 +85,8 @@ class ZoneIdsFragment : Fragment(R.layout.fragment_zone_ids) {
     }
 
     private fun fillSavedValues() {
-        val settings = settingManager.getSettings()
+        val settings = settingManager.getSettings().hybidSettings
 
-        adapter.addZoneIds(settings.zoneIds)
+        settings?.zoneIds?.let { adapter.addZoneIds(it) }
     }
 }

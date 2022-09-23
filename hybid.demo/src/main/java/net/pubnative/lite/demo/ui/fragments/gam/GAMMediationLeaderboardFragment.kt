@@ -31,12 +31,18 @@ class GAMMediationLeaderboardFragment : Fragment(R.layout.fragment_dfp_leaderboa
         loadButton = view.findViewById(R.id.button_load)
         gamLeaderboardContainer = view.findViewById(R.id.dfp_leaderboard_container)
 
+        //It is done as leaderboardAdUnitId but it should be mediationLeaderboardAdUnitId
+//        val adUnitId =
+//            SettingsManager.getInstance(requireActivity()).getSettings().dfpSettings?.leaderboardAdUnitId
+
         val adUnitId =
-            SettingsManager.getInstance(requireActivity()).getSettings().admobLeaderboardAdUnitId
+            SettingsManager.getInstance(requireActivity()).getSettings().dfpSettings?.mediationLeaderboardAdUnitId
 
         gamLeaderboard = AdManagerAdView(requireActivity())
         gamLeaderboard.setAdSize(AdSize.LEADERBOARD)
-        gamLeaderboard.adUnitId = adUnitId
+        if (adUnitId != null) {
+            gamLeaderboard.adUnitId = adUnitId
+        }
         gamLeaderboard.adListener = adListener
 
         gamLeaderboardContainer.addView(gamLeaderboard)

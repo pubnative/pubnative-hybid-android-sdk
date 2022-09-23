@@ -2,9 +2,7 @@ package net.pubnative.lite.demo.ui.fragments.gam
 
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
@@ -32,11 +30,13 @@ class GAMMediationBannerFragment : Fragment(R.layout.fragment_dfp_banner) {
         gamBannerContainer = view.findViewById(R.id.dfp_banner_container)
 
         val adUnitId =
-            SettingsManager.getInstance(requireActivity()).getSettings().dfpMediationBannerAdUnitId
+            SettingsManager.getInstance(requireActivity()).getSettings().dfpSettings?.mediationBannerAdUnitId
 
         gamBanner = AdManagerAdView(requireActivity())
         gamBanner.setAdSize(AdSize.BANNER)
-        gamBanner.adUnitId = adUnitId
+        if (adUnitId != null) {
+            gamBanner.adUnitId = adUnitId
+        }
         gamBanner.adListener = adListener
 
         gamBannerContainer.addView(gamBanner)

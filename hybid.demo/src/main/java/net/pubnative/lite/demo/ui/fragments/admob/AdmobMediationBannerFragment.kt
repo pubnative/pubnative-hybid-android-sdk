@@ -31,11 +31,13 @@ class AdmobMediationBannerFragment : Fragment(R.layout.fragment_admob_banner) {
         admobBannerContainer = view.findViewById(R.id.admob_banner_container)
 
         val adUnitId =
-            SettingsManager.getInstance(requireActivity()).getSettings().admobBannerAdUnitId
+            SettingsManager.getInstance(requireActivity()).getSettings().admobSettings?.bannerAdUnitId
 
         admobBanner = AdView(requireActivity())
         admobBanner.setAdSize(AdSize.BANNER)
-        admobBanner.adUnitId = adUnitId
+        if (adUnitId != null) {
+            admobBanner.adUnitId = adUnitId
+        }
         admobBanner.adListener = adListener
 
         admobBannerContainer.addView(admobBanner)

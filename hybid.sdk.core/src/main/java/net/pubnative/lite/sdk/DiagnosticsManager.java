@@ -64,21 +64,6 @@ public class DiagnosticsManager implements ReportingEventCallback {
     private static final String FORMAT_REWARDED_CLASS = "net.pubnative.lite.sdk.rewarded.HyBidRewardedAd";
     private static final String FORMAT_NATIVE_CLASS = "net.pubnative.lite.sdk.request.HyBidNativeAdRequest";
 
-    //Mopub mediation classes
-    private static final String MOPUB_MEDIATION_BANNER_ADAPTER_CLASS = "net.pubnative.lite.adapters.mopub.mediation.HyBidMediationBannerCustomEvent";
-    private static final String MOPUB_MEDIATION_MRECT_ADAPTER_CLASS = "net.pubnative.lite.adapters.mopub.mediation.HyBidMediationMRectCustomEvent";
-    private static final String MOPUB_MEDIATION_LEADERBOARD_ADAPTER_CLASS = "net.pubnative.lite.adapters.mopub.mediation.HyBidMediationLeaderboardCustomEvent";
-    private static final String MOPUB_MEDIATION_INTERSTITIAL_ADAPTER_CLASS = "net.pubnative.lite.adapters.mopub.mediation.HyBidMediationInterstitialCustomEvent";
-    private static final String MOPUB_MEDIATION_REWARDED_ADAPTER_CLASS = "net.pubnative.lite.adapters.mopub.mediation.HyBidMediationRewardedVideoCustomEvent";
-    private static final String MOPUB_MEDIATION_NATIVE_ADAPTER_CLASS = "net.pubnative.lite.adapters.mopub.mediation.HyBidMediationNativeCustomEvent";
-
-    //Mopub header bidding classes
-    private static final String MOPUB_HEADER_BIDDING_BANNER_ADAPTER_CLASS = "net.pubnative.lite.adapters.mopub.headerbidding.HyBidHeaderBiddingBannerCustomEvent";
-    private static final String MOPUB_HEADER_BIDDING_MRECT_ADAPTER_CLASS = "net.pubnative.lite.adapters.mopub.headerbidding.HyBidHeaderBiddingMRectCustomEvent";
-    private static final String MOPUB_HEADER_BIDDING_LEADERBOARD_ADAPTER_CLASS = "net.pubnative.lite.adapters.mopub.headerbidding.HyBidHeaderBiddingLeaderboardCustomEvent";
-    private static final String MOPUB_HEADER_BIDDING_INTERSTITIAL_ADAPTER_CLASS = "net.pubnative.lite.adapters.mopub.headerbidding.HyBidHeaderBiddingInterstitialCustomEvent";
-    private static final String MOPUB_HEADER_BIDDING_REWARDED_ADAPTER_CLASS = "net.pubnative.lite.adapters.mopub.headerbidding.HyBidHeaderBiddingRewardedCustomEvent";
-
     //Admob mediation classes
     private static final String ADMOB_MEDIATION_BANNER_ADAPTER_CLASS = "net.pubnative.hybid.adapters.admob.mediation.HyBidMediationBannerCustomEvent";
     private static final String ADMOB_MEDIATION_MRECT_ADAPTER_CLASS = "net.pubnative.hybid.adapters.admob.mediation.HyBidMediationMRectCustomEvent";
@@ -183,41 +168,6 @@ public class DiagnosticsManager implements ReportingEventCallback {
 
     private String getAvailableAdapters() {
         StringBuilder adaptersBuilder = new StringBuilder();
-
-        if (checkAvailableClass(MOPUB_MEDIATION_BANNER_ADAPTER_CLASS)) {
-            adaptersBuilder.append("\t").append(MOPUB_MEDIATION_BANNER_ADAPTER_CLASS).append("\n");
-        }
-        if (checkAvailableClass(MOPUB_MEDIATION_MRECT_ADAPTER_CLASS)) {
-            adaptersBuilder.append("\t").append(MOPUB_MEDIATION_MRECT_ADAPTER_CLASS).append("\n");
-        }
-        if (checkAvailableClass(MOPUB_MEDIATION_LEADERBOARD_ADAPTER_CLASS)) {
-            adaptersBuilder.append("\t").append(MOPUB_MEDIATION_LEADERBOARD_ADAPTER_CLASS).append("\n");
-        }
-        if (checkAvailableClass(MOPUB_MEDIATION_INTERSTITIAL_ADAPTER_CLASS)) {
-            adaptersBuilder.append("\t").append(MOPUB_MEDIATION_INTERSTITIAL_ADAPTER_CLASS).append("\n");
-        }
-        if (checkAvailableClass(MOPUB_MEDIATION_REWARDED_ADAPTER_CLASS)) {
-            adaptersBuilder.append("\t").append(MOPUB_MEDIATION_REWARDED_ADAPTER_CLASS).append("\n");
-        }
-        if (checkAvailableClass(MOPUB_MEDIATION_NATIVE_ADAPTER_CLASS)) {
-            adaptersBuilder.append("\t").append(MOPUB_MEDIATION_NATIVE_ADAPTER_CLASS).append("\n");
-        }
-
-        if (checkAvailableClass(MOPUB_HEADER_BIDDING_BANNER_ADAPTER_CLASS)) {
-            adaptersBuilder.append("\t").append(MOPUB_HEADER_BIDDING_BANNER_ADAPTER_CLASS).append("\n");
-        }
-        if (checkAvailableClass(MOPUB_HEADER_BIDDING_MRECT_ADAPTER_CLASS)) {
-            adaptersBuilder.append("\t").append(MOPUB_HEADER_BIDDING_MRECT_ADAPTER_CLASS).append("\n");
-        }
-        if (checkAvailableClass(MOPUB_HEADER_BIDDING_LEADERBOARD_ADAPTER_CLASS)) {
-            adaptersBuilder.append("\t").append(MOPUB_HEADER_BIDDING_LEADERBOARD_ADAPTER_CLASS).append("\n");
-        }
-        if (checkAvailableClass(MOPUB_HEADER_BIDDING_INTERSTITIAL_ADAPTER_CLASS)) {
-            adaptersBuilder.append("\t").append(MOPUB_HEADER_BIDDING_INTERSTITIAL_ADAPTER_CLASS).append("\n");
-        }
-        if (checkAvailableClass(MOPUB_HEADER_BIDDING_REWARDED_ADAPTER_CLASS)) {
-            adaptersBuilder.append("\t").append(MOPUB_HEADER_BIDDING_REWARDED_ADAPTER_CLASS).append("\n");
-        }
 
         if (checkAvailableClass(ADMOB_MEDIATION_BANNER_ADAPTER_CLASS)) {
             adaptersBuilder.append("\t").append(ADMOB_MEDIATION_BANNER_ADAPTER_CLASS).append("\n");

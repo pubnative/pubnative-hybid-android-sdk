@@ -25,7 +25,6 @@ package net.pubnative.lite.sdk;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
-import android.text.TextUtils;
 import android.util.Log;
 
 import net.pubnative.lite.sdk.analytics.Reporting;
@@ -41,6 +40,7 @@ import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdRequestFactory;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.IntegrationType;
+import net.pubnative.lite.sdk.models.SkipOffset;
 import net.pubnative.lite.sdk.reporting.ReportingDelegate;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNApiUrlComposer;
@@ -80,6 +80,7 @@ public class HyBid {
     private static boolean sLocationUpdatesEnabled = true;
     private static boolean sLocationTrackingEnabled = true;
     private static boolean isCloseVideoAfterFinish = false;
+    private static boolean isCloseVideoAfterFinishForRewarded = false;
     private static boolean isDiagnosticsEnabled = true;
     private static boolean sMraidExpandEnabled = true;
     private static boolean isEndCardEnabled = false;
@@ -87,9 +88,9 @@ public class HyBid {
     private static String sGender;
     private static String sKeywords;
     private static String sBundleId;
-    private static Integer sHtmlInterstitialSkipOffset = -1;
-    private static Integer sVideoInterstitialSkipOffset = -1;
-    private static Integer sEndCardCloseButtonDelay = -1;
+    private static SkipOffset sHtmlInterstitialSkipOffset = new SkipOffset(AdConstants.Skip.HTML_SKIP_OFFSET, false);
+    private static SkipOffset sVideoInterstitialSkipOffset = new SkipOffset(AdConstants.Skip.VIDEO_WITHOUT_ENDCARD_SKIP_OFFSET, false);
+    private static SkipOffset sEndCardCloseButtonDelay = new SkipOffset(AdConstants.Skip.ENDCARD_SKIP_OFFSET, false);
     private static String sContentInfoUrl;
     private static boolean sAdFeedbackEnabled = false;
     private static String sIabCategory;
@@ -375,28 +376,28 @@ public class HyBid {
 
     public static void setHtmlInterstitialSkipOffset(Integer seconds) {
         if (seconds >= 0)
-            sHtmlInterstitialSkipOffset = seconds;
+            sHtmlInterstitialSkipOffset = new SkipOffset(seconds, true);
     }
 
     public static void setVideoInterstitialSkipOffset(Integer seconds) {
         if (seconds >= 0)
-            sVideoInterstitialSkipOffset = seconds;
+            sVideoInterstitialSkipOffset = new SkipOffset(seconds, true);
     }
 
-    public static Integer getHtmlInterstitialSkipOffset() {
+    public static SkipOffset getHtmlInterstitialSkipOffset() {
         return sHtmlInterstitialSkipOffset;
     }
 
-    public static Integer getVideoInterstitialSkipOffset() {
+    public static SkipOffset getVideoInterstitialSkipOffset() {
         return sVideoInterstitialSkipOffset;
     }
 
     public static void setEndCardCloseButtonDelay(int seconds) {
         if (seconds >= 0)
-            sEndCardCloseButtonDelay = seconds;
+            sEndCardCloseButtonDelay = new SkipOffset(seconds, true);
     }
 
-    public static Integer getEndCardCloseButtonDelay() {
+    public static SkipOffset getEndCardCloseButtonDelay() {
         return sEndCardCloseButtonDelay;
     }
 
@@ -422,6 +423,14 @@ public class HyBid {
 
     public static boolean isEndCardEnabled() {
         return isEndCardEnabled;
+    }
+
+    public static void setCloseVideoAfterFinishForRewarded(boolean autoCloseVideoRewarded) {
+        isCloseVideoAfterFinishForRewarded = autoCloseVideoRewarded;
+    }
+
+    public static boolean getCloseVideoAfterFinishForRewarded() {
+        return isCloseVideoAfterFinishForRewarded;
     }
 
     public interface InitialisationListener {

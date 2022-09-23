@@ -58,15 +58,20 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
     private static final String TAG = HyBidRewardedActivity.class.getSimpleName();
     public static final String EXTRA_ZONE_ID = "extra_pn_zone_id";
     public static final String EXTRA_BROADCAST_ID = "extra_pn_broadcast_id";
+    public static final String EXTRA_SKIP_OFFSET = "extra_pn_skip_offset";
 
     private CloseableContainer mCloseableContainer;
     private UrlHandler mUrlHandlerDelegate;
     private Ad mAd;
     private String mZoneId;
+    private boolean mIsVast = false;
     private HyBidRewardedBroadcastSender mBroadcastSender;
     private ProgressBar mProgressBar;
+    protected boolean mIsFeedbackFormOpen = false;
 
     public abstract View getAdView();
+
+    protected abstract boolean shouldShowContentInfo();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +109,13 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
 
                 mCloseableContainer.addView(adView, params);
                 mCloseableContainer.setBackgroundColor(Color.WHITE);
+
+                if (!mIsVast && shouldShowContentInfo() && getAd() != null) {
+                    View contentInfo = getAd().getContentInfoContainer(this, HyBid.isAdFeedbackEnabled(), this);
+                    if (contentInfo != null) {
+                        mCloseableContainer.addView(contentInfo);
+                    }
+                }
 
                 setContentView(mCloseableContainer);
             } else {
@@ -231,12 +243,20 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
                 IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
                     @Override
                     public void onLoadFinished() {
+                        pauseAd();
+                        mIsFeedbackFormOpen = true;
                         adFeedbackView.showFeedbackForm(HyBidRewardedActivity.this);
                     }
 
                     @Override
                     public void onLoadFailed(Throwable error) {
                         Logger.e(TAG, error.getMessage());
+                    }
+
+                    @Override
+                    public void onFormClosed() {
+                        mIsFeedbackFormOpen = false;
+                        resumeAd();
                     }
                 });
     }
@@ -245,11 +265,19 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
         return mBroadcastSender;
     }
 
+    protected abstract void resumeAd();
+
+    protected abstract void pauseAd();
+
     protected void setProgressBarVisible() {
         mProgressBar.setVisibility(View.VISIBLE);
     }
 
     protected void setProgressBarInvisible() {
         mProgressBar.setVisibility(View.INVISIBLE);
+    }
+
+    protected void setIsVast(Boolean isVast) {
+        this.mIsVast = isVast;
     }
 }

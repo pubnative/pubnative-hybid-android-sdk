@@ -435,6 +435,11 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
                         public void onLoadFailed(Throwable error) {
                             Logger.e(TAG, error.getMessage());
                         }
+
+                        @Override
+                        public void onFormClosed() {
+
+                        }
                     });
         }
     }

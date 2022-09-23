@@ -27,6 +27,7 @@ import android.content.Intent;
 
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
+import net.pubnative.lite.sdk.rewarded.activity.HyBidRewardedActivity;
 import net.pubnative.lite.sdk.rewarded.activity.VastRewardedActivity;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 
@@ -91,8 +92,8 @@ public class VastRewardedPresenter implements RewardedPresenter, HyBidRewardedBr
             mBroadcastReceiver.register();
 
             Intent intent = new Intent(mContext, VastRewardedActivity.class);
-            intent.putExtra(VastRewardedActivity.EXTRA_BROADCAST_ID, mBroadcastReceiver.getBroadcastId());
-            intent.putExtra(VastRewardedActivity.EXTRA_ZONE_ID, mZoneId);
+            intent.putExtra(HyBidRewardedActivity.EXTRA_BROADCAST_ID, mBroadcastReceiver.getBroadcastId());
+            intent.putExtra(HyBidRewardedActivity.EXTRA_ZONE_ID, mZoneId);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mContext.startActivity(intent);
         }

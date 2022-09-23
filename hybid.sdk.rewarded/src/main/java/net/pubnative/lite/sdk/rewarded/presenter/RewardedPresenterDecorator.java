@@ -23,6 +23,7 @@
 package net.pubnative.lite.sdk.rewarded.presenter;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
@@ -43,10 +44,7 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
     private final RewardedPresenter.Listener mListener;
     private boolean mIsDestroyed;
 
-    public RewardedPresenterDecorator(RewardedPresenter rewardedPresenter,
-                                      AdTracker adTrackingDelegate,
-                                      ReportingController reportingController,
-                                      RewardedPresenter.Listener listener) {
+    public RewardedPresenterDecorator(RewardedPresenter rewardedPresenter, AdTracker adTrackingDelegate, ReportingController reportingController, RewardedPresenter.Listener listener) {
         mRewardedPresenter = rewardedPresenter;
         mAdTrackingDelegate = adTrackingDelegate;
         mReportingController = reportingController;
@@ -172,7 +170,11 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
 
         if (mReportingController != null) {
             ReportingEvent reportingEvent = new ReportingEvent();
-            reportingEvent.setEventType(Reporting.EventType.VIDEO_FINISHED);
+            if (rewardedPresenter instanceof MraidRewardedPresenter) {
+                reportingEvent.setEventType(Reporting.EventType.REWARDED_CLOSED);
+            } else {
+                reportingEvent.setEventType(Reporting.EventType.VIDEO_FINISHED);
+            }
             reportingEvent.setTimestamp(System.currentTimeMillis());
             reportingEvent.setAdFormat(Reporting.AdFormat.REWARDED);
             mReportingController.reportEvent(reportingEvent);

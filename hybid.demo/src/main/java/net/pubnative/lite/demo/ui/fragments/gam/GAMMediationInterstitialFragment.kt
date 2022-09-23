@@ -32,13 +32,15 @@ class GAMMediationInterstitialFragment : Fragment(R.layout.fragment_dfp_intersti
         showButton.isEnabled = false
 
         val adUnitId = SettingsManager.getInstance(requireActivity())
-            .getSettings().dfpMediationInterstitialAdUnitId
+            .getSettings().dfpSettings?.mediationInterstitialAdUnitId
 
         loadButton.setOnClickListener {
             loadButton.isEnabled = false
             errorView.text = ""
             val adRequest = AdManagerAdRequest.Builder().build()
-            AdManagerInterstitialAd.load(requireActivity(), adUnitId, adRequest, adLoadCallback)
+            if (adUnitId != null) {
+                AdManagerInterstitialAd.load(requireActivity(), adUnitId, adRequest, adLoadCallback)
+            }
         }
 
         showButton.setOnClickListener {

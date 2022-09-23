@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.os.Message;
 
+
 public abstract class CountDownTimer {
 
     private final long mMillisInFuture;
@@ -36,15 +37,19 @@ public abstract class CountDownTimer {
     }
 
     public long pause() {
-        mPauseTime = mStopTimeInFuture - SystemClock.elapsedRealtime();
-        mPaused = true;
+        if(!mPaused){
+            mPauseTime = mStopTimeInFuture - SystemClock.elapsedRealtime();
+            mPaused = true;
+        }
         return mPauseTime;
     }
 
     public long resume() {
-        mStopTimeInFuture = mPauseTime + SystemClock.elapsedRealtime();
-        mPaused = false;
-        mHandler.sendMessage(mHandler.obtainMessage(MSG));
+        if(mPaused) {
+            mStopTimeInFuture = mPauseTime + SystemClock.elapsedRealtime();
+            mPaused = false;
+            mHandler.sendMessage(mHandler.obtainMessage(MSG));
+        }
         return mPauseTime;
     }
 

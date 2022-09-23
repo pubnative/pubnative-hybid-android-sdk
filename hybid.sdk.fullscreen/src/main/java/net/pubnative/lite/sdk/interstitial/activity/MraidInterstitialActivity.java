@@ -3,7 +3,6 @@ package net.pubnative.lite.sdk.interstitial.activity;
 import android.annotation.SuppressLint;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 
@@ -33,12 +32,12 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
     @SuppressLint("SourceLockedOrientationActivity")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-            }
-            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            }
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
         super.onCreate(savedInstanceState);
         hideInterstitialCloseButton();
     }
@@ -189,12 +188,24 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
     @Override
     protected void onPause() {
         super.onPause();
-        mView.pause();
+        pauseAd();
     }
 
     @Override
     protected void onResume() {
-        mView.resume();
+        resumeAd();
         super.onResume();
+    }
+
+    @Override
+    protected void pauseAd() {
+        mView.pause();
+    }
+
+    @Override
+    protected void resumeAd() {
+        if (!mIsFeedbackFormOpen) {
+            mView.resume();
+        }
     }
 }

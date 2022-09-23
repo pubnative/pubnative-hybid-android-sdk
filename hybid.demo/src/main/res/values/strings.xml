@@ -227,8 +227,6 @@
     <string name="p161">P161</string>
     <string name="foundry">Foundry</string>
 
-    <string name="title_numbereight_audiences">NumberEight Audiences</string>
-
     <string name="title_mediation_test_suite">Google Mediation Test Suite</string>
     <string name="open_mediation_test_suite">Open Mediation Test Suite</string>
 
@@ -266,8 +264,14 @@
     <string name="radio_sound_on">On</string>
     <string name="radio_sound_mute">Mute</string>
     <string name="radio_sound_default">Default</string>
+    <string name="feedback_settings_title">Feedback</string>
+    <string name="feedback_settings_toggle">Enable feedback form</string>
+    <string name="feedback_settings_url_hint">Feedback form url</string>
 
     <string name="hint_creative_id">Enter creative ID</string>
     <string name="sdk_and_build_versions">SDK and Build versions</string>
     <string name="sdk_and_build_version_concat">SDK Version: %s build: %s</string>
+    <string name="markup_type">Maarkup Type</string>
+    <string name="custom_markup">Custom Markup</string>
+    <string name="url">URL</string>
 </resources>

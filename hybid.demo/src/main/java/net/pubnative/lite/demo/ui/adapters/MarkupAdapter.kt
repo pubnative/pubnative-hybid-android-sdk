@@ -6,6 +6,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.models.Quote
+import net.pubnative.lite.demo.ui.fragments.markup.MarkupSize
+import net.pubnative.lite.demo.ui.fragments.markup.MarkupViewModel
 import net.pubnative.lite.demo.ui.viewholders.MarkupBannerViewHolder
 import net.pubnative.lite.demo.ui.viewholders.MarkupLeaderboardViewHolder
 import net.pubnative.lite.demo.ui.viewholders.MarkupMRectViewHolder
@@ -20,7 +22,7 @@ class MarkupAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         private const val TYPE_MARKUP_LEADERBOARD = 4
     }
 
-    private var selectedSize = R.id.radio_size_banner
+    private var selectedSize: MarkupSize = MarkupSize.BANNER
     private var markup = ""
 
     private val list: List<Quote> = SampleQuotes.list
@@ -28,13 +30,25 @@ class MarkupAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
             TYPE_MARKUP_BANNER ->
-                MarkupBannerViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_markup_banner, parent, false))
+                MarkupBannerViewHolder(
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.item_markup_banner, parent, false)
+                )
             TYPE_MARKUP_MRECT ->
-                MarkupMRectViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_markup_mrect, parent, false))
+                MarkupMRectViewHolder(
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.item_markup_mrect, parent, false)
+                )
             TYPE_MARKUP_LEADERBOARD ->
-                MarkupLeaderboardViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_markup_leaderboard, parent, false))
+                MarkupLeaderboardViewHolder(
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.item_markup_leaderboard, parent, false)
+                )
             else ->
-                SampleTextViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_sample_text, parent, false))
+                SampleTextViewHolder(
+                    LayoutInflater.from(parent.context)
+                        .inflate(R.layout.item_sample_text, parent, false)
+                )
         }
     }
 
@@ -54,11 +68,11 @@ class MarkupAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun getItemViewType(position: Int): Int {
         if (position == 2 && !TextUtils.isEmpty(markup)) {
-            if (selectedSize == R.id.radio_size_banner) {
+            if (selectedSize == MarkupSize.BANNER) {
                 return TYPE_MARKUP_BANNER
-            } else if (selectedSize == R.id.radio_size_medium) {
+            } else if (selectedSize == MarkupSize.MEDIUM) {
                 return TYPE_MARKUP_MRECT
-            } else if (selectedSize == R.id.radio_size_leaderboard) {
+            } else if (selectedSize == MarkupSize.LEADERBOARD) {
                 return TYPE_MARKUP_LEADERBOARD
             }
         }
@@ -66,7 +80,7 @@ class MarkupAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         return TYPE_TEXT
     }
 
-    fun refreshWithMarkup(markup: String, selectedSize: Int) {
+    fun refreshWithMarkup(markup: String, selectedSize: MarkupSize) {
         this.markup = markup
         this.selectedSize = selectedSize
         notifyDataSetChanged()

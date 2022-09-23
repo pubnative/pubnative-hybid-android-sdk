@@ -87,8 +87,8 @@ class BrowserPriorityFragment : Fragment(R.layout.fragment_browser_priorities) {
     }
 
     private fun fillSavedValues() {
-        val settings = settingManager.getSettings()
+        val settings = settingManager.getSettings().hybidSettings
 
-        adapter.addPackageNames(settings.browserPriorities)
+        settings?.browserPriorities?.let { adapter.addPackageNames(it) }
     }
 }

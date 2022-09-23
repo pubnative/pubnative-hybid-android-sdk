@@ -58,6 +58,9 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             }
         }
+
+        setIsVast(true);
+
         super.onCreate(savedInstanceState);
 
         try {
@@ -113,17 +116,13 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
     @Override
     protected void onResume() {
         super.onResume();
-        if (mReady) {
-            mVideoAd.resume();
-        }
+        resumeAd();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (mReady) {
-            mVideoAd.pause();
-        }
+        pauseAd();
     }
 
     @Override
@@ -131,6 +130,33 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
         if (mFinished) {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    protected void pauseAd() {
+        if (mReady) {
+            mVideoAd.pause();
+        }
+
+        if (mFinished) {
+            mVideoAd.pauseEndCardCloseButtonTimer();
+        }
+    }
+
+    @Override
+    protected void resumeAd() {
+        if (!mIsFeedbackFormOpen && mReady) {
+            mVideoAd.resume();
+        }
+
+        if (mFinished) {
+            mVideoAd.resumeEndCardCloseButtonTimer();
+        }
+    }
+
+    @Override
+    protected boolean shouldShowContentInfo() {
+        return true;
     }
 
     private final VideoAdListener mVideoAdListener = new VideoAdListener() {

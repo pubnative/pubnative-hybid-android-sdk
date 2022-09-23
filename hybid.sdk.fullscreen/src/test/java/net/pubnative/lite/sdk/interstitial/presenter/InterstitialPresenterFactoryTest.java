@@ -2,6 +2,7 @@ package net.pubnative.lite.sdk.interstitial.presenter;
 
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
+import net.pubnative.lite.sdk.models.SkipOffset;
 import net.pubnative.lite.sdk.testing.TestUtil;
 
 import org.junit.Before;
@@ -49,13 +50,13 @@ public class InterstitialPresenterFactoryTest {
 
     @Test
     public void fromCreativeType_withHTML() {
-        assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_320x480, mTestAd, 0, 0))
+        assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_320x480, mTestAd, new SkipOffset(0, true), new SkipOffset(0, true)))
                 .isInstanceOf(MraidInterstitialPresenter.class);
     }
 
     @Test
     public void fromCreativeType_withVAST() {
-        assertThat(mSubject.fromCreativeType(ApiAssetGroupType.VAST_INTERSTITIAL, mTestAd, 0, 0))
+        assertThat(mSubject.fromCreativeType(ApiAssetGroupType.VAST_INTERSTITIAL, mTestAd, new SkipOffset(0, true), new SkipOffset(0, true)))
                 .isInstanceOf(VastInterstitialPresenter.class);
     }
 }

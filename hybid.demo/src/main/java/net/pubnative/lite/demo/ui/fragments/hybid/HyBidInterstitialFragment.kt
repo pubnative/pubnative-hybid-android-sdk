@@ -23,29 +23,28 @@
 package net.pubnative.lite.demo.ui.fragments.hybid
 
 import android.os.Bundle
-import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
-import net.pubnative.lite.sdk.*
-import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd
-import java.util.*
+import net.pubnative.lite.demo.viewmodel.InterstitialViewModel
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial),
-    HyBidInterstitialAd.Listener, VideoListener, CacheListener {
+class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial) {
 
     private var isLoadingAd: Boolean = false
     val TAG = HyBidInterstitialFragment::class.java.simpleName
+
+    private val interstitialViewModel: InterstitialViewModel by viewModels()
 
     private var zoneId: String? = null
 
@@ -56,23 +55,29 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
     private lateinit var errorCodeView: TextView
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
-    private var interstitial: HyBidInterstitialAd? = null
-    private var cachingEnabled: Boolean = true
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        errorView = view.findViewById(R.id.view_error)
-        errorCodeView = view.findViewById(R.id.view_error_code)
-        creativeIdView = view.findViewById(R.id.view_creative_id)
-        loadButton = view.findViewById(R.id.button_load)
-        prepareButton = view.findViewById(R.id.button_prepare)
-        cachingCheckbox = view.findViewById(R.id.check_caching)
-        showButton = view.findViewById(R.id.button_show)
+        zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
+        initViews()
+        initListeners()
+        initObservers()
+    }
+
+    private fun initViews() {
+        errorView = requireView().findViewById(R.id.view_error)
+        errorCodeView = requireView().findViewById(R.id.view_error_code)
+        creativeIdView = requireView().findViewById(R.id.view_creative_id)
+        loadButton = requireView().findViewById(R.id.button_load)
+        prepareButton = requireView().findViewById(R.id.button_prepare)
+        cachingCheckbox = requireView().findViewById(R.id.check_caching)
+        showButton = requireView().findViewById(R.id.button_show)
         prepareButton.isEnabled = false
         showButton.isEnabled = false
+    }
 
-        zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
+    private fun initListeners() {
 
         loadButton.setOnClickListener {
             cleanLogs()
@@ -83,17 +88,19 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
         }
 
         prepareButton.setOnClickListener {
-            interstitial?.prepare(this)
+            interstitialViewModel.prepareAd()
         }
 
         showButton.setOnClickListener {
             val activity = activity as TabActivity
             activity.cacheEventList()
-            interstitial?.show()
+            interstitialViewModel.showAd()
         }
 
         cachingCheckbox.setOnCheckedChangeListener { _, isChecked ->
-            cachingEnabled = isChecked
+            if(isChecked != interstitialViewModel.cachingEnabled)
+                interstitialViewModel.reset()
+            interstitialViewModel.cachingEnabled = isChecked
             val activity = activity as TabActivity
             activity.cacheEventList()
             prepareButton.visibility = if (isChecked) View.GONE else View.VISIBLE
@@ -115,117 +122,50 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
     }
 
     private fun fireLoadClicked() {
+        isLoadingAd = true
         cleanLogs()
-        errorView.text = ""
         val activity = activity as TabActivity
         activity.notifyAdCleaned()
-        loadInterstitialAd()
+        interstitialViewModel.loadAd(activity, zoneId)
     }
 
-    override fun onDestroy() {
-        interstitial?.destroy()
-        super.onDestroy()
-    }
+    private fun initObservers() {
 
-    private fun loadInterstitialAd() {
-        interstitial = HyBidInterstitialAd(activity, zoneId, this)
-        interstitial?.isAutoCacheOnLoad = cachingEnabled
-        //Optional to track video events
-        interstitial?.setVideoListener(this)
-        interstitial?.load()
-        isLoadingAd = true
-    }
-
-    override fun onInterstitialLoaded() {
-        Log.d(TAG, "onInterstitialLoaded")
-        prepareButton.isEnabled = !cachingEnabled
-        showButton.isEnabled = cachingEnabled
-        displayLogs()
-        if (interstitial?.creativeId?.isNotEmpty() == true) {
-            creativeIdView.text = interstitial?.creativeId
+        interstitialViewModel.interstitialLoadLiveData.observe(viewLifecycleOwner) { isLoaded ->
+            if (isLoaded) {
+                Log.i("testing", interstitialViewModel.cachingEnabled.toString())
+                prepareButton.isEnabled = !interstitialViewModel.cachingEnabled
+                showButton.isEnabled = interstitialViewModel.cachingEnabled
+            } else {
+                prepareButton.isEnabled = false
+                showButton.isEnabled = false
+            }
+            if (isLoadingAd){
+                displayLogs()
+                isLoadingAd = false
+            }
         }
-        isLoadingAd = false
-    }
 
-    override fun onInterstitialLoadFailed(error: Throwable?) {
-        prepareButton.isEnabled = false
-        showButton.isEnabled = false
-        if (error != null && error is HyBidError) {
-            Log.e(TAG, error.message ?: " - ")
-            errorCodeView.text = error.errorCode.code.toString()
-            errorView.text = error.message ?: " - "
-        } else {
-            errorCodeView.text = " - "
-            errorView.text = " - "
+        interstitialViewModel.cacheLiveData.observe(viewLifecycleOwner) { isSuccess ->
+            if (isSuccess) {
+                prepareButton.isEnabled = false
+                showButton.isEnabled = true
+            } else {
+                prepareButton.isEnabled = false
+                showButton.isEnabled = true
+            }
         }
-        displayLogs()
-        creativeIdView.text = ""
-        isLoadingAd = false
-    }
 
-    override fun onInterstitialImpression() {
-        Log.d(TAG, "onInterstitialImpression")
-        if (HyBid.getDiagnosticsManager() != null) {
-            HyBid.getDiagnosticsManager().printPlacementDiagnosticsLog(
-                requireContext(),
-                interstitial?.placementParams
-            )
+        interstitialViewModel.errorCodeLiveData.observe(viewLifecycleOwner) { errorCode ->
+            errorCodeView.text = errorCode
         }
-    }
 
-    override fun onInterstitialDismissed() {
-        Log.d(TAG, "onInterstitialDismissed")
-        interstitial = null
-        prepareButton.isEnabled = false
-        showButton.isEnabled = false
-    }
+        interstitialViewModel.errorMessageLiveData.observe(viewLifecycleOwner) { errorMessage ->
+            errorView.text = errorMessage
+        }
 
-    override fun onInterstitialClick() {
-        Log.d(TAG, "onInterstitialClick")
-    }
-
-    override fun onVideoError(progressPercentage: Int) {
-        Log.d(TAG, String.format(Locale.ENGLISH, "onVideoError progress: %d", progressPercentage))
-    }
-
-    override fun onVideoStarted() {
-        Log.d(TAG, "onVideoStarted")
-    }
-
-    override fun onVideoDismissed(progressPercentage: Int) {
-        Log.d(
-            TAG,
-            String.format(Locale.ENGLISH, "onVideoDismissed progress: %d", progressPercentage)
-        )
-    }
-
-    override fun onVideoFinished() {
-        Log.d(TAG, "onVideoFinished")
-    }
-
-    override fun onVideoSkipped() {
-        Log.d(
-            TAG,
-            String.format(Locale.ENGLISH, "onVideoSkipped", "")
-        )
-    }
-
-    override fun onCacheSuccess() {
-        Log.d(TAG, "onCacheSuccess")
-        prepareButton.isEnabled = false
-        showButton.isEnabled = true
-    }
-
-    override fun onCacheFailed(error: Throwable?) {
-        prepareButton.isEnabled = false
-        showButton.isEnabled = true
-        if (error != null && error is HyBidError) {
-            Log.e(TAG, error.message ?: " - ")
-            errorCodeView.text = error.errorCode.code.toString()
-            errorView.text = error.message ?: " - "
-        } else {
-            errorCodeView.text = " - "
-            errorView.text = " - "
+        interstitialViewModel.creativeIdLiveData.observe(viewLifecycleOwner) { creativeId ->
+            creativeIdView.text = creativeId
         }
     }
 

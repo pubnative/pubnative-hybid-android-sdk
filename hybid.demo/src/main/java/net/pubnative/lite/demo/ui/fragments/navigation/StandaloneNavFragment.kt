@@ -111,10 +111,12 @@ class StandaloneNavFragment : Fragment(R.layout.fragment_nav_standalone) {
     }
 
     private fun fillSavedZoneIds() {
-        val settings = settingsManager.getSettings()
+        val settings = settingsManager.getSettings().hybidSettings
         adapter.clear()
-        val zoneIds = settings.zoneIds
-        adapter.addZoneIds(zoneIds)
+        val zoneIds = settings?.zoneIds
+        if (zoneIds != null) {
+            adapter.addZoneIds(zoneIds)
+        }
     }
 
     private fun enableZones() {
