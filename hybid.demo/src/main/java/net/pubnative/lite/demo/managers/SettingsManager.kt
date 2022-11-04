@@ -28,6 +28,7 @@ import android.preference.PreferenceManager
 import net.pubnative.lite.demo.*
 import net.pubnative.lite.demo.models.*
 import net.pubnative.lite.demo.util.SingletonHolder
+import net.pubnative.lite.sdk.CountdownStyle
 
 /**
  * Created by erosgarciaponte on 30.01.18.
@@ -71,6 +72,11 @@ class SettingsManager private constructor(context: Context) {
 
     fun setLocationUpdates(enabled: Boolean) {
         preferences.edit().putBoolean(SETTINGS_KEY_LOCATION_UPDATES, enabled).apply()
+    }
+
+    fun setCustomSkipOffsetDisabled(customSkipOffsetDisabled: Boolean) {
+        preferences.edit()
+            .putBoolean(SETTINGS_KEY_CUSTOM_SKIP_OFFSET_DISABLED, customSkipOffsetDisabled).apply()
     }
 
     fun setMraidExpanded(enabled: Boolean) {
@@ -288,6 +294,10 @@ class SettingsManager private constructor(context: Context) {
         preferences.edit().putString(SETTINGS_KEY_FEEDBACK_FORM_URL, url).apply()
     }
 
+    fun setCountdownStyle(id: String) {
+        preferences.edit().putString(SETTINGS_KEY_COUNTDOWN_STYLE, id).apply()
+    }
+
     fun setSettings(model: Settings?, asynchronously: Boolean) {
         if (model != null) {
             val editor = preferences.edit()
@@ -307,31 +317,37 @@ class SettingsManager private constructor(context: Context) {
 
             model.adCustomizationSettings?.let {
                 it.locationTracking?.let { it1 ->
-                    editor.putBoolean(SETTINGS_KEY_LOCATION_TRACKING,
-                        it1
+                    editor.putBoolean(
+                        SETTINGS_KEY_LOCATION_TRACKING, it1
+                    )
+                }
+
+                it.customSkipOffsetDisabled?.let { it1 ->
+                    editor.putBoolean(
+                        SETTINGS_KEY_CUSTOM_SKIP_OFFSET_DISABLED, it1
                     )
                 }
 
                 it.closeVideoAfterFinish?.let { it1 ->
-                    editor.putBoolean(SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH,
-                        it1
+                    editor.putBoolean(
+                        SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH, it1
                     )
                 }
 
                 it.closeVideoAfterFinishForRewardedVideo?.let { it1 ->
                     editor.putBoolean(
-                        SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH_REWARDED,
-                        it1
+                        SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH_REWARDED, it1
                     )
                 }
 
                 it.feedbackEnabled?.let { it1 ->
-                    editor.putBoolean(SETTINGS_KEY_FEEDBACK_FORM_ENABLED,
-                        it1
+                    editor.putBoolean(
+                        SETTINGS_KEY_FEEDBACK_FORM_ENABLED, it1
                     )
                 }
 
                 editor.putString(SETTINGS_KEY_FEEDBACK_FORM_URL, it.feedbackFormUrl)
+                editor.putString(SETTINGS_KEY_COUNTDOWN_STYLE, it.countdownStyle)
             }
 
             model.dfpSettings?.let {
@@ -339,8 +355,7 @@ class SettingsManager private constructor(context: Context) {
                 editor.putString(SETTINGS_KEY_DFP_MEDIUM_AD_UNIT_ID, it.mediumAdUnitId)
                 editor.putString(SETTINGS_KEY_DFP_LEADERBOARD_AD_UNIT_ID, it.leaderboardAdUnitId)
                 editor.putString(
-                    SETTINGS_KEY_DFP_INTERSTITIAL_AD_UNIT_ID,
-                    it.interstitialAdUnitId
+                    SETTINGS_KEY_DFP_INTERSTITIAL_AD_UNIT_ID, it.interstitialAdUnitId
                 )
                 editor.putString(
                     SETTINGS_KEY_DFP_MEDIATION_BANNER_AD_UNIT_ID, it.mediationBannerAdUnitId
@@ -366,20 +381,17 @@ class SettingsManager private constructor(context: Context) {
                 editor.putString(SETTINGS_KEY_ADMOB_BANNER_AD_UNIT_ID, it.bannerAdUnitId)
                 editor.putString(SETTINGS_KEY_ADMOB_MEDIUM_AD_UNIT_ID, it.mediumAdUnitId)
                 editor.putString(
-                    SETTINGS_KEY_ADMOB_MEDIUM_VIDEO_AD_UNIT_ID,
-                    it.mediumVideoAdUnitId
+                    SETTINGS_KEY_ADMOB_MEDIUM_VIDEO_AD_UNIT_ID, it.mediumVideoAdUnitId
                 )
                 editor.putString(
-                    SETTINGS_KEY_ADMOB_LEADERBOARD_AD_UNIT_ID,
-                    it.leaderboardAdUnitId
+                    SETTINGS_KEY_ADMOB_LEADERBOARD_AD_UNIT_ID, it.leaderboardAdUnitId
                 )
                 editor.putString(SETTINGS_KEY_ADMOB_REWARDED_AD_UNIT_ID, it.rewardedAdUnitId)
                 editor.putString(
                     SETTINGS_KEY_ADMOB_INTERSTITIAL_AD_UNIT_ID, it.interstitialAdUnitId
                 )
                 editor.putString(
-                    SETTINGS_KEY_ADMOB_INTERSTITIAL_VIDEO_AD_UNIT_ID,
-                    it.interstitialVideoAdUnitId
+                    SETTINGS_KEY_ADMOB_INTERSTITIAL_VIDEO_AD_UNIT_ID, it.interstitialVideoAdUnitId
                 )
                 editor.putString(SETTINGS_KEY_ADMOB_NATIVE_AD_UNIT_ID, it.nativeAdUnitId)
             }
@@ -387,12 +399,10 @@ class SettingsManager private constructor(context: Context) {
             model.ironSourceSettings?.let {
                 editor.putString(SETTINGS_KEY_IRONSOURCE_APP_KEY, it.appKey)
                 editor.putString(
-                    SETTINGS_KEY_IRONSOURCE_BANNER_AD_UNIT_ID,
-                    it.bannerAdUnitId
+                    SETTINGS_KEY_IRONSOURCE_BANNER_AD_UNIT_ID, it.bannerAdUnitId
                 )
                 editor.putString(
-                    SETTINGS_KEY_IRONSOURCE_INTERSTITIAL_AD_UNIT_ID,
-                    it.interstitialAdUnitId
+                    SETTINGS_KEY_IRONSOURCE_INTERSTITIAL_AD_UNIT_ID, it.interstitialAdUnitId
                 )
                 editor.putString(
                     SETTINGS_KEY_IRONSOURCE_REWARDED_AD_UNIT_ID, it.rewardedAdUnitId
@@ -414,16 +424,14 @@ class SettingsManager private constructor(context: Context) {
             model.fairbidSettings?.let {
                 editor.putString(SETTINGS_KEY_FAIRBID_APP_ID, it.appId)
                 editor.putString(
-                    SETTINGS_KEY_FAIRBID_MEDIATION_BANNER_AD_UNIT_ID,
-                    it.mediationBannerAdUnitId
+                    SETTINGS_KEY_FAIRBID_MEDIATION_BANNER_AD_UNIT_ID, it.mediationBannerAdUnitId
                 )
                 editor.putString(
                     SETTINGS_KEY_FAIRBID_MEDIATION_INTERSTITIAL_AD_UNIT_ID,
                     it.mediationInterstitialAdUnitId
                 )
                 editor.putString(
-                    SETTINGS_KEY_FAIRBID_MEDIATION_REWARDED_AD_UNIT_ID,
-                    it.mediationRewardedAdUnitId
+                    SETTINGS_KEY_FAIRBID_MEDIATION_REWARDED_AD_UNIT_ID, it.mediationRewardedAdUnitId
                 )
 
                 editor.putString(SETTINGS_KEY_FAIRBID_BANNER_AD_UNIT_ID, it.bannerAdUnitId)
@@ -431,8 +439,7 @@ class SettingsManager private constructor(context: Context) {
                     SETTINGS_KEY_FAIRBID_INTERSTITIAL_AD_UNIT_ID, it.interstitialAdUnitId
                 )
                 editor.putString(
-                    SETTINGS_KEY_FAIRBID_REWARDED_AD_UNIT_ID,
-                    it.rewardedAdUnitId
+                    SETTINGS_KEY_FAIRBID_REWARDED_AD_UNIT_ID, it.rewardedAdUnitId
                 )
             }
 
@@ -459,6 +466,8 @@ class SettingsManager private constructor(context: Context) {
         val testMode = preferences.getBoolean(SETTINGS_KEY_TEST_MODE, false)
         val locationTracking = preferences.getBoolean(SETTINGS_KEY_LOCATION_TRACKING, false)
         val locationUpdates = preferences.getBoolean(SETTINGS_KEY_LOCATION_UPDATES, false)
+        val customSkipOffsetDisabled =
+            preferences.getBoolean(SETTINGS_KEY_CUSTOM_SKIP_OFFSET_DISABLED, false)
         val initialAudioState = preferences.getInt(SETTINGS_KEY_INITIAL_AUDIO_STATE, 0)
         val mraidExpanded = preferences.getBoolean(SETTINGS_KEY_MRAID_EXPANDED, true)
         val closeVideoAfterFinish =
@@ -535,6 +544,8 @@ class SettingsManager private constructor(context: Context) {
         val feedbackEnabled = preferences.getBoolean(SETTINGS_KEY_FEEDBACK_FORM_ENABLED, true)
         val feedbackFormUrl =
             preferences.getString(SETTINGS_KEY_FEEDBACK_FORM_URL, Constants.FEEDBACK_FORM_URL)!!
+        val countdownStyle =
+            preferences.getString(SETTINGS_KEY_COUNTDOWN_STYLE, CountdownStyle.PIE_CHART.id)!!
 
         val settings = Settings()
 
@@ -546,16 +557,17 @@ class SettingsManager private constructor(context: Context) {
         val adCustomizationSettings =
             AdCustomizationSettings.Builder().initialAudioState(initialAudioState)
                 .closeVideoAfterFinish(closeVideoAfterFinish)
-                .enableEndcard(enableEndcard).endCardCloseButtonDelay(endcardCloseButtonDelay)
+                .customSkipOffsetDisabled(customSkipOffsetDisabled).enableEndcard(enableEndcard)
+                .endCardCloseButtonDelay(endcardCloseButtonDelay)
                 .closeVideoAfterFinishForRewardedVideo(closeVideoAfterFinishForRewarded)
                 .feedbackEnabled(feedbackEnabled).feedbackFormUrl(feedbackFormUrl)
                 .mraidExpanded(mraidExpanded).locationTracking(locationTracking)
                 .locationUpdates(locationUpdates).videoClickBehaviour(videoClickBehaviour)
-                .skipOffset(skipOffset).videoSkipOffset(videoSkipOffset).build()
+                .skipOffset(skipOffset).videoSkipOffset(videoSkipOffset)
+                .countdownStyle(countdownStyle).build()
 
         val dfpSettings = DFPSettings.Builder().bannerAdUnitId(dfpBannerAdUnitId)
-            .mediumAdUnitId(dfpMediumAdUnitId)
-            .interstitialAdUnitId(dfpInterstitialAdUnitId)
+            .mediumAdUnitId(dfpMediumAdUnitId).interstitialAdUnitId(dfpInterstitialAdUnitId)
             .leaderboardAdUnitId(dfpLeaderboardAdUnitId)
             .mediationBannerAdUnitId(dfpMediationBannerAdUnitId)
             .mediationMediumAdUnitId(dfpMediationMediumAdUnitId)
@@ -563,21 +575,19 @@ class SettingsManager private constructor(context: Context) {
             .mediationInterstitialAdUnitId(dfpMediationInterstitialAdUnitId)
             .mediationRewardedAdUnitId(dfpMediationRewardedAdUnitId).build()
 
-        val fairbidSettings = FairbidSettings.Builder().appId(fairbidAppId)
-            .bannerAdUnitId(fairbidBannerAdUnitId)
-            .interstitialAdUnitId(fairbidInterstitialAdUnitId)
-            .mediationBannerAdUnitId(fairbidMediationBannerAdUnitId)
-            .mediationInterstitialAdUnitId(fairbidMediationInterstitialAdUnitId)
-            .rewardedAdUnitId(fairbidRewardedAdUnitId)
-            .mediationRewardedAdUnitId(fairbidMediationRewardedAdUnitId).build()
+        val fairbidSettings =
+            FairbidSettings.Builder().appId(fairbidAppId).bannerAdUnitId(fairbidBannerAdUnitId)
+                .interstitialAdUnitId(fairbidInterstitialAdUnitId)
+                .mediationBannerAdUnitId(fairbidMediationBannerAdUnitId)
+                .mediationInterstitialAdUnitId(fairbidMediationInterstitialAdUnitId)
+                .rewardedAdUnitId(fairbidRewardedAdUnitId)
+                .mediationRewardedAdUnitId(fairbidMediationRewardedAdUnitId).build()
 
         val admobSettings =
             AdmobSettings.Builder().appId(admobAppId).bannerAdUnitId(admobBannerAdUnitId)
-                .interstitialAdUnitId(admobInterstitialAdUnitId)
-                .nativeAdUnitId(admobNativeAdUnitId)
+                .interstitialAdUnitId(admobInterstitialAdUnitId).nativeAdUnitId(admobNativeAdUnitId)
                 .interstitialVideoAdUnitId(admobInterstitialVideoAdUnitId)
-                .mediumAdUnitId(admobMediumAdUnitId)
-                .mediumVideoAdUnitId(admobMediumVideoAdUnitId)
+                .mediumAdUnitId(admobMediumAdUnitId).mediumVideoAdUnitId(admobMediumVideoAdUnitId)
                 .leaderboardAdUnitId(admobLeaderboardAdUnitId)
                 .rewardedAdUnitId(admobRewardedAdUnitId).build()
 
@@ -586,11 +596,11 @@ class SettingsManager private constructor(context: Context) {
             .interstitialAdUnitId(ironSourceInterstitialAdUnitId)
             .rewardedAdUnitId(ironSourceRewardedAdUnitId).build()
 
-        val maxAdsSettings = MaxAdsSettings.Builder().sdkKey(maxAdsSdkKey)
-            .bannerAdUnitId(maxAdsBannerAdUnitId)
-            .interstitialAdUnitId(maxAdsInterstitialAdUnitId)
-            .mRectAdUnitId(maxAdsMRectAdUnitId).rewardedAdUnitId(maxAdsRewardedAdUnitId)
-            .nativeAdUnitId(maxAdsNativeAdUnitId).build()
+        val maxAdsSettings =
+            MaxAdsSettings.Builder().sdkKey(maxAdsSdkKey).bannerAdUnitId(maxAdsBannerAdUnitId)
+                .interstitialAdUnitId(maxAdsInterstitialAdUnitId).mRectAdUnitId(maxAdsMRectAdUnitId)
+                .rewardedAdUnitId(maxAdsRewardedAdUnitId).nativeAdUnitId(maxAdsNativeAdUnitId)
+                .build()
 
         settings.hybidSettings = hybidSettings
         settings.adCustomizationSettings = adCustomizationSettings

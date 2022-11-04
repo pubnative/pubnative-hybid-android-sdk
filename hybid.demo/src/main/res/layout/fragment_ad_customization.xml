@@ -85,6 +85,15 @@
             android:text="@string/check_location_tracking" />
 
         <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/disable_custom_skip_offset"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/custom_skip_offset_disabled" />
+
+        <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/check_location_updates"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -175,6 +184,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/hint_video_skip_offset"
                 android:maxLines="1" />
+
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -279,6 +289,53 @@
                     android:hint="@string/feedback_settings_url_hint"
                     android:maxLines="1" />
             </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:fontFamily="@font/roboto"
+                android:text="@string/countdown_style_title"
+                android:textColor="?colorPrimaryVariant"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <RadioGroup
+                android:id="@+id/countdown_style"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="16dp"
+                android:orientation="vertical">
+
+                <RadioButton
+                    android:id="@+id/radio_countdown_style_pie_chart"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="@string/countdown_style_pie_chart"
+                    android:checked="true"/>
+
+                <RadioButton
+                    android:id="@+id/radio_countdown_style_timer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="@string/countdown_style_timer" />
+
+                <RadioButton
+                    android:id="@+id/radio_countdown_style_progress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="@string/countdown_style_progress" />
+
+            </RadioGroup>
+
         </LinearLayout>
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_save_settings"

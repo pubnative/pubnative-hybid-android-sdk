@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/closeCardLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:weightSum="2"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:id="@+id/htmlCloseCardContainer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:visibility="visible"
+            android:layout_weight="1">
+            <ImageView
+                android:id="@+id/staticCloseCardView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <RelativeLayout
+            android:id="@+id/closeCardInfo"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="#FBFBFB"
+            android:layout_weight="1"
+            android:paddingTop="50dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:orientation="vertical"
+                android:weightSum="2">
+
+                <TextView
+                    android:id="@+id/closeCardTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textColor="#474545"
+                    android:textSize="25sp"
+                    android:textStyle="bold"
+                    tools:text="Close Card Title" />
+
+                <RatingBar
+                    android:id="@+id/closeCardRaiting"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:numStars="5"
+                    android:secondaryProgressTint="#00FFC107"
+                    android:progressTint="#FFC107"
+                    android:rating="2.5" />
+
+                <LinearLayout
+                    android:id="@+id/closeCardVotesLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="0dp"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="10dp"
+                        android:src="@drawable/ic_human" />
+
+                    <TextView
+                        android:id="@+id/closeCardVoteCount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:textColor="#C3BFBF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        tools:text="( 10 000 )" />
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:id="@+id/closeCardActionButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="15dp"
+                    android:background="@drawable/close_card_button"
+                    android:paddingHorizontal="25dp"
+                    android:paddingVertical="10dp">
+
+                    <TextView
+                        android:id="@+id/closeCardActionText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Action Button"
+                        android:textColor="#fff"
+                        android:textSize="20sp" />
+                </RelativeLayout>
+
+            </LinearLayout>
+        </RelativeLayout>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/closeView"
+        android:layout_width="@dimen/close_view_size"
+        android:layout_height="@dimen/close_view_size"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:scaleType="center"
+        android:src="@mipmap/close" />
+
+    <net.pubnative.lite.sdk.views.shape.ShapeImageView
+        android:id="@+id/closeCardIconImageView"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:elevation="1dp"
+        android:layout_centerInParent="true"
+        android:adjustViewBounds="true"
+        android:orientation="vertical"
+        android:scaleType="fitXY"
+        app:siShape="@raw/shape_corner"/>
+
+</RelativeLayout>

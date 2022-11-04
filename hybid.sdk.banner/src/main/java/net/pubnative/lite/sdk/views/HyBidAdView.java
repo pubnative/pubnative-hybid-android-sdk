@@ -591,7 +591,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         PNHttpClient.makeRequest(getContext(), url, headers,
                 null, new PNHttpClient.Listener() {
                     @Override
-                    public void onSuccess(String response) {
+                    public void onSuccess(String response, Map<String, List<String>> headers) {
                         if (!TextUtils.isEmpty(response)) {
                             renderCustomMarkup(response, listener);
                         }

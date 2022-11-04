@@ -20,11 +20,10 @@
         android:visibility="gone" />
 
     <ImageView
-        android:id="@+id/closeView"
+        android:id="@+id/closeEndCardView"
         android:layout_width="@dimen/close_view_size"
         android:layout_height="@dimen/close_view_size"
         android:layout_gravity="end"
-        android:scaleType="center"
-        android:src="@drawable/close" />
+        android:scaleType="center" />
 
 </FrameLayout>

@@ -14,13 +14,11 @@ import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
-import net.pubnative.lite.sdk.CacheListener
-import net.pubnative.lite.sdk.DiagnosticsManager
-import net.pubnative.lite.sdk.HyBid
-import net.pubnative.lite.sdk.HyBidError
+import net.pubnative.lite.sdk.*
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedAd
+import java.util.*
 
-class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidRewardedAd.Listener, CacheListener {
+class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidRewardedAd.Listener, CacheListener, VideoListener {
     val TAG = HyBidRewardedFragment::class.java.simpleName
 
     private var zoneId: String? = null
@@ -89,6 +87,7 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
 
     private fun loadPNRewardedAd() {
         rewardedAd = HyBidRewardedAd(activity, zoneId, this)
+        rewardedAd?.setVideoListener(this)
         rewardedAd?.isAutoCacheOnLoad = cachingEnabled
         rewardedAd?.load()
     }
@@ -163,6 +162,26 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
             errorCodeView.text = " - "
             errorView.text = " - "
         }
+    }
+
+    override fun onVideoError(progressPercentage: Int) {
+        Log.d(TAG, String.format(Locale.ENGLISH, "onVideoError progress: %d", progressPercentage))
+    }
+
+    override fun onVideoStarted() {
+        Log.d(TAG, "onVideoStarted")
+    }
+
+    override fun onVideoDismissed(progressPercentage: Int) {
+        Log.d(TAG, String.format(Locale.ENGLISH, "onVideoDismissed progress: %d", progressPercentage))
+    }
+
+    override fun onVideoFinished() {
+        Log.d(TAG, "onVideoFinished")
+    }
+
+    override fun onVideoSkipped() {
+        Log.d(TAG, String.format(Locale.ENGLISH, "onVideoSkipped", ""))
     }
 
     private fun displayLogs() {

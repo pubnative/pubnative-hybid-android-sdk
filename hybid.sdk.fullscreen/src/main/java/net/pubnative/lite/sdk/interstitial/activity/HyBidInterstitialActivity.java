@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -47,6 +48,7 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
     private ProgressBar mProgressBar;
     private boolean mIsVast = false;
     protected boolean mIsFeedbackFormOpen = false;
+    private boolean mIsFeedbackFormLoading = false;
 
     public abstract View getAdView();
 
@@ -139,8 +141,7 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
     }
 
     private View getContentInfo(Context context, Ad ad, ContentInfo contentInfo) {
-        return contentInfo == null ? ad.getContentInfoContainer(context, HyBid.isAdFeedbackEnabled(), this)
-                : ad.getContentInfoContainer(context, contentInfo, HyBid.isAdFeedbackEnabled(), this);
+        return contentInfo == null ? ad.getContentInfoContainer(context, HyBid.isAdFeedbackEnabled(), this) : ad.getContentInfoContainer(context, contentInfo, HyBid.isAdFeedbackEnabled(), this);
     }
 
     private final CloseableContainer.OnCloseListener mCloseListener = this::dismiss;
@@ -165,8 +166,13 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
     }
 
     @Override
-    public void onBackPressed() {
-        dismiss();
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+            dismiss();
+        } else {
+            return super.onKeyDown(keyCode, event);
+        }
+        return false;
     }
 
     protected CloseableContainer getCloseableContainer() {
@@ -219,27 +225,32 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
 
     @Override
     public void onLinkClicked(String url) {
-        AdFeedbackView adFeedbackView = new AdFeedbackView();
-        adFeedbackView.prepare(this, url, mAd, Reporting.AdFormat.FULLSCREEN,
-                IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
-                    @Override
-                    public void onLoadFinished() {
-                        pauseAd();
-                        mIsFeedbackFormOpen = true;
-                        adFeedbackView.showFeedbackForm(HyBidInterstitialActivity.this);
-                    }
+        if (!mIsFeedbackFormOpen && !mIsFeedbackFormLoading) {
+            AdFeedbackView adFeedbackView = new AdFeedbackView();
+            mIsFeedbackFormLoading = true;
+            adFeedbackView.prepare(this, url, mAd, Reporting.AdFormat.REWARDED, IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
+                @Override
+                public void onLoadFinished() {
+                    mIsFeedbackFormLoading = false;
+                    pauseAd();
+                    mIsFeedbackFormOpen = true;
+                    adFeedbackView.showFeedbackForm(HyBidInterstitialActivity.this);
+                }
 
-                    @Override
-                    public void onLoadFailed(Throwable error) {
-                        Logger.e(TAG, error.getMessage());
-                    }
+                @Override
+                public void onLoadFailed(Throwable error) {
+                    mIsFeedbackFormLoading = false;
+                    Logger.e(TAG, error.getMessage());
+                }
 
-                    @Override
-                    public void onFormClosed() {
-                        mIsFeedbackFormOpen = false;
-                        resumeAd();
-                    }
-                });
+                @Override
+                public void onFormClosed() {
+                    mIsFeedbackFormOpen = false;
+                    mIsFeedbackFormLoading = false;
+                    resumeAd();
+                }
+            });
+        }
     }
 
     protected HyBidInterstitialBroadcastSender getBroadcastSender() {

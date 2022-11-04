@@ -41,6 +41,7 @@ const val SETTINGS_KEY_LOCATION_UPDATES = "location_updates"
 const val SETTINGS_KEY_INITIAL_AUDIO_STATE = "initial_audio_state"
 const val SETTINGS_KEY_MRAID_EXPANDED = "mraid_expanded"
 const val SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH = "close_video_after_finish"
+const val SETTINGS_KEY_CUSTOM_SKIP_OFFSET_DISABLED = "custom_skip_offset_disabled"
 const val SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH_REWARDED = "close_video_after_finish_rewarded"
 const val SETTINGS_KEY_ENABLE_ENDCARD = "enable_endcard"
 const val SETTINGS_KEY_SKIP_OFFSET = "skip_offset"
@@ -92,3 +93,5 @@ const val SETTINGS_KEY_FAIRBID_REWARDED_AD_UNIT_ID = "fairbid_rewarded_ad_unit_i
 
 const val SETTINGS_KEY_FEEDBACK_FORM_ENABLED = "feedback_form_enabled"
 const val SETTINGS_KEY_FEEDBACK_FORM_URL = "feedback_form_url"
+
+const val SETTINGS_KEY_COUNTDOWN_STYLE = "countdown_style"

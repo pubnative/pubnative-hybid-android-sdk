@@ -82,10 +82,10 @@ public class MraidRewardedActivity extends HyBidRewardedActivity implements MRAI
             }
 
             if (getAd().getAssetUrl(APIAsset.HTML_BANNER) != null) {
-                adView = new MRAIDBanner(this, getAd().getAssetUrl(APIAsset.HTML_BANNER), "", mSupportedNativeFeatures,
+                adView = new MRAIDBanner(this, getAd().getAssetUrl(APIAsset.HTML_BANNER), "", false, mSupportedNativeFeatures,
                         this, this, getAd().getContentInfoContainer(this, HyBid.isAdFeedbackEnabled(), this));
             } else if (getAd().getAssetHtml(APIAsset.HTML_BANNER) != null) {
-                adView = new MRAIDBanner(this, "", getAd().getAssetHtml(APIAsset.HTML_BANNER), mSupportedNativeFeatures,
+                adView = new MRAIDBanner(this, "", getAd().getAssetHtml(APIAsset.HTML_BANNER), false, mSupportedNativeFeatures,
                         this, this, getAd().getContentInfoContainer(this, HyBid.isAdFeedbackEnabled(), this));
             }
 

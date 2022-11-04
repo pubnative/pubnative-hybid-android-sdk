@@ -25,6 +25,7 @@ package net.pubnative.lite.sdk.rewarded.presenter;
 import android.text.TextUtils;
 import android.util.Log;
 
+import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
@@ -36,16 +37,18 @@ import net.pubnative.lite.sdk.utils.json.JsonOperations;
 
 import org.json.JSONObject;
 
-public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPresenter.Listener {
+public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPresenter.Listener, VideoListener{
     private static final String TAG = RewardedPresenterDecorator.class.getSimpleName();
     private final RewardedPresenter mRewardedPresenter;
     private final AdTracker mAdTrackingDelegate;
     private final ReportingController mReportingController;
     private final RewardedPresenter.Listener mListener;
+    private VideoListener mVideoListener;
     private boolean mIsDestroyed;
 
     public RewardedPresenterDecorator(RewardedPresenter rewardedPresenter, AdTracker adTrackingDelegate, ReportingController reportingController, RewardedPresenter.Listener listener) {
         mRewardedPresenter = rewardedPresenter;
+        mRewardedPresenter.setVideoListener(this);
         mAdTrackingDelegate = adTrackingDelegate;
         mReportingController = reportingController;
         mListener = listener;
@@ -181,6 +184,46 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
         }
 
         mListener.onRewardedFinished(rewardedPresenter);
+    }
+
+    @Override
+    public void setVideoListener(VideoListener listener) {
+        this.mVideoListener = listener;
+    }
+
+    @Override
+    public void onVideoError(int progressPercentage) {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoError(progressPercentage);
+        }
+    }
+
+    @Override
+    public void onVideoStarted() {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoStarted();
+        }
+    }
+
+    @Override
+    public void onVideoDismissed(int progressPercentage) {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoDismissed(progressPercentage);
+        }
+    }
+
+    @Override
+    public void onVideoFinished() {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoFinished();
+        }
+    }
+
+    @Override
+    public void onVideoSkipped() {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoSkipped();
+        }
     }
 
     @Override

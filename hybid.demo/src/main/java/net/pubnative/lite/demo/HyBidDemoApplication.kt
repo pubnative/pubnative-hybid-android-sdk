@@ -38,6 +38,7 @@ import com.ogury.sdk.OguryConfiguration
 import net.pubnative.lite.demo.managers.AnalyticsSubscriber.eventCallback
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.models.*
+import net.pubnative.lite.sdk.CountdownStyle
 import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.InterstitialActionBehaviour
 import net.pubnative.lite.sdk.api.ApiManager.setApiUrl
@@ -157,6 +158,9 @@ class HyBidDemoApplication : MultiDexApplication() {
                         )
                     )
                 }
+                settings.adCustomizationSettings!!.countdownStyle?.let {
+                    HyBid.setCountdownStyle(CountdownStyle.from(it))
+                }
             }
 
             MobileAds.initialize(this) { initializationStatus: InitializationStatus? -> }
@@ -164,6 +168,10 @@ class HyBidDemoApplication : MultiDexApplication() {
             AppLovinSdk.initializeSdk(this) { config: AppLovinSdkConfiguration? -> }
             val oguryConfigBuilder = OguryConfiguration.Builder(this, Constants.OGURY_KEY)
             Ogury.start(oguryConfigBuilder.build())
+
+            //todo : if we want to see customized skip and close button icons ,we have to decomment lines below to see one or both of them
+//            HyBid.setCloseXmlResource(R.mipmap.close_sample, R.mipmap.close_sample)
+//            HyBid.setSkipXmlResource(R.mipmap.skip_sample)
 
 //        // NumberEight SDK crashes below API level 26.
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -192,7 +200,6 @@ class HyBidDemoApplication : MultiDexApplication() {
                 .closeVideoAfterFinish(Constants.CLOSE_VIDEO_AFTER_FINISH_DEFAULT)
                 .closeVideoAfterFinishForRewardedVideo(Constants.CLOSE_VIDEO_AFTER_FINISH_DEFAULT_FOR_REWARDED)
                 .enableEndcard(Constants.ENABLE_ENDCARD_DEFAULT)
-                .endCardCloseButtonDelay(Constants.ENDCARD_CLOSE_BUTTON_DELAY_DEFAULT)
                 .feedbackEnabled(Constants.FEEDBACK_ENABLED)
                 .feedbackFormUrl(Constants.FEEDBACK_FORM_URL)
                 .mraidExpanded(Constants.MRAID_EXPANDED_DEFAULT)
@@ -200,7 +207,9 @@ class HyBidDemoApplication : MultiDexApplication() {
                 .locationUpdates(Constants.LOCATION_UPDATES_DEFAULT)
                 .videoClickBehaviour(Constants.VIDEO_CLICK_BEHAVIOUR_DEFAULT)
                 .skipOffset(Constants.SKIP_OFFSET_DEFAULT)
-                .videoSkipOffset(Constants.VIDEO_SKIP_OFFSET_DEFAULT).build()
+                .videoSkipOffset(Constants.VIDEO_SKIP_OFFSET_DEFAULT)
+                .endCardCloseButtonDelay(Constants.ENDCARD_CLOSE_BUTTON_DELAY_DEFAULT)
+                .countdownStyle(Constants.COUNTDOWN_STYLE_DEFAULT).build()
 
 
             val dfpSettings =
@@ -219,8 +228,7 @@ class HyBidDemoApplication : MultiDexApplication() {
                 .mediationBannerAdUnitId(Constants.FAIRBID_MEDIATION_BANNER_AD_UNIT)
                 .mediationInterstitialAdUnitId(Constants.FAIRBID_MEDIATION_INTERSTITIAL_AD_UNIT)
                 .rewardedAdUnitId(Constants.FAIRBID_REWARDED_AD_UNIT)
-                .mediationRewardedAdUnitId(Constants.FAIRBID_MEDIATION_REWARDED_AD_UNIT)
-                .build()
+                .mediationRewardedAdUnitId(Constants.FAIRBID_MEDIATION_REWARDED_AD_UNIT).build()
 
             val admobSettings = AdmobSettings.Builder().appId(Constants.ADMOB_APP_ID)
                 .bannerAdUnitId(Constants.ADMOB_BANNER_AD_UNIT)

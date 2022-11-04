@@ -44,6 +44,7 @@ import net.pubnative.lite.sdk.utils.json.JsonOperations;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -111,7 +112,7 @@ public class PNApiClient {
 
             PNHttpClient.makeRequest(mContext, url, headers, null, new PNHttpClient.Listener() {
                 @Override
-                public void onSuccess(String response) {
+                public void onSuccess(String response, Map<String, List<String>> headers) {
                     registerAdRequest(url, response, initTime);
                     processStream(response, listener);
                 }
@@ -145,7 +146,7 @@ public class PNApiClient {
 
         PNHttpClient.makeRequest(mContext, url, headers, null, false, true, new PNHttpClient.Listener() {
             @Override
-            public void onSuccess(String response) {
+            public void onSuccess(String response, Map<String, List<String>> headers) {
                 if (listener != null) {
                     listener.onSuccess();
                 }

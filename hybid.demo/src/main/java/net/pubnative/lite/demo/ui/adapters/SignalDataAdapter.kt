@@ -25,31 +25,30 @@ class SignalDataAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
-            TYPE_SIGNAL_DATA_BANNER ->
-                SignalDataBannerViewHolder(
-                    LayoutInflater.from(parent.context)
-                        .inflate(R.layout.item_markup_banner, parent, false)
-                )
-            TYPE_SIGNAL_DATA_MRECT ->
-                SignalDataMRectViewHolder(
-                    LayoutInflater.from(parent.context)
-                        .inflate(R.layout.item_markup_mrect, parent, false)
-                )
-            TYPE_SIGNAL_DATA_LEADERBOARD ->
-                SignalDataLeaderboardViewHolder(
-                    LayoutInflater.from(parent.context)
-                        .inflate(R.layout.item_markup_leaderboard, parent, false)
-                )
-            TYPE_SIGNAL_DATA_NATIVE ->
-                SignalDataNativeViewHolder(
-                    LayoutInflater.from(parent.context)
-                        .inflate(R.layout.item_markup_native, parent, false)
-                )
-            else ->
-                SampleTextViewHolder(
-                    LayoutInflater.from(parent.context)
-                        .inflate(R.layout.item_sample_text, parent, false)
-                )
+            TYPE_SIGNAL_DATA_BANNER -> SignalDataBannerViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_markup_banner, parent, false)
+            )
+
+            TYPE_SIGNAL_DATA_MRECT -> SignalDataMRectViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_markup_mrect, parent, false)
+            )
+
+            TYPE_SIGNAL_DATA_LEADERBOARD -> SignalDataLeaderboardViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_markup_leaderboard, parent, false)
+            )
+
+            TYPE_SIGNAL_DATA_NATIVE -> SignalDataNativeViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_markup_native, parent, false)
+            )
+
+            else -> SampleTextViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_sample_text, parent, false)
+            )
         }
     }
 
@@ -74,12 +73,15 @@ class SignalDataAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 R.id.radio_size_banner -> {
                     return TYPE_SIGNAL_DATA_BANNER
                 }
+
                 R.id.radio_size_medium -> {
                     return TYPE_SIGNAL_DATA_MRECT
                 }
+
                 R.id.radio_size_leaderboard -> {
                     return TYPE_SIGNAL_DATA_LEADERBOARD
                 }
+
                 R.id.radio_size_native -> {
                     return TYPE_SIGNAL_DATA_NATIVE
                 }
@@ -87,16 +89,6 @@ class SignalDataAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
 
         return TYPE_TEXT
-    }
-
-    override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
-        super.onViewRecycled(holder)
-        when (holder) {
-            is SignalDataBannerViewHolder -> holder.bind(signalData)
-            is SignalDataMRectViewHolder -> holder.bind(signalData)
-            is SignalDataLeaderboardViewHolder -> holder.bind(signalData)
-            is SignalDataNativeViewHolder -> holder.bind(signalData)
-        }
     }
 
     fun refreshWithSignalData(signalData: String, selectedSize: Int) {

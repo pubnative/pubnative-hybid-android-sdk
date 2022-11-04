@@ -114,10 +114,10 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
         }
 
         if (mAd.getAssetUrl(APIAsset.HTML_BANNER) != null) {
-            mMRAIDBanner = new MRAIDBanner(mContext, mAd.getAssetUrl(APIAsset.HTML_BANNER), "", mSupportedNativeFeatures,
+            mMRAIDBanner = new MRAIDBanner(mContext, mAd.getAssetUrl(APIAsset.HTML_BANNER), "", true, mSupportedNativeFeatures,
                     this, this, mAd.getContentInfoContainer(mContext, HyBid.isAdFeedbackEnabled(), this));
         } else if (mAd.getAssetHtml(APIAsset.HTML_BANNER) != null) {
-            mMRAIDBanner = new MRAIDBanner(mContext, "", mAd.getAssetHtml(APIAsset.HTML_BANNER), mSupportedNativeFeatures,
+            mMRAIDBanner = new MRAIDBanner(mContext, "", mAd.getAssetHtml(APIAsset.HTML_BANNER), true, mSupportedNativeFeatures,
                     this, this, mAd.getContentInfoContainer(mContext, HyBid.isAdFeedbackEnabled(), this));
         }
     }

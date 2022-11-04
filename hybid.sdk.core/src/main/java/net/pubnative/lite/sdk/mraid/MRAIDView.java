@@ -48,6 +48,7 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,7 +72,9 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
 
@@ -91,6 +94,10 @@ import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityWebAdSession;
 import net.pubnative.lite.sdk.views.PNWebView;
 import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
+import net.pubnative.lite.sdk.vpaid.models.CloseCardData;
+import net.pubnative.lite.sdk.vpaid.utils.ImageUtils;
+import net.pubnative.lite.sdk.vpaid.widget.CountDownView;
+import net.pubnative.lite.sdk.vpaid.widget.CountDownViewFactory;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -120,6 +127,9 @@ import java.util.Map;
 public class MRAIDView extends RelativeLayout {
     // used to differentiate logging
     private static final String MRAID_LOG_TAG = MRAIDView.class.getSimpleName();
+
+    private Boolean showTimerBeforeEndCard = false;
+
     private Integer mSkipTimeMillis = -1;
 
     private SimpleTimer mExpirationTimer;
@@ -259,12 +269,28 @@ public class MRAIDView extends RelativeLayout {
     private boolean isClosing;
     private boolean isExpanded;
 
+    // Close card
+    private CloseCardData mCloseCardData = null;
+    // Close card views
+    private boolean mCloseCardIsShown = false;
+    private View mCloseCardLayout;
+    private FrameLayout mHtmlCloseCardContainer;
+    private TextView mCloseCardTitleView;
+    private ImageView mCloseCardIconView;
+    private RatingBar mCloseCardRatingView;
+    private ImageView mStaticCloseCardView;
+    private View closeCardVotesLayout;
+    private TextView mCloseCardVoteView;
+    private View mCloseCardActionView;
+    private MRAIDBanner mHtmlCloseCardView;
+
     // used to force full-screen mode on expand and to restore original state on close
     private View titleBar;
     private boolean isFullScreen;
     private boolean isForceNotFullScreen;
     private int origTitleBarVisibility;
     private boolean isActionBarShowing;
+    private CountDownView mSkipCountdownView;
 
     // Stores the requested orientation for the Activity to which this MRAIDView belongs.
     // This is needed to restore the Activity's requested orientation in the event that
@@ -281,6 +307,7 @@ public class MRAIDView extends RelativeLayout {
             Context context,
             String baseUrl,
             String data,
+            Boolean showTimerBeforeEndCard,
             String[] supportedNativeFeatures,
             MRAIDViewListener listener,
             MRAIDNativeFeatureListener nativeFeatureListener,
@@ -306,6 +333,7 @@ public class MRAIDView extends RelativeLayout {
 
         this.listener = listener;
         this.nativeFeatureListener = nativeFeatureListener;
+        this.showTimerBeforeEndCard = showTimerBeforeEndCard;
 
         WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         if (windowManager != null) {
@@ -342,6 +370,7 @@ public class MRAIDView extends RelativeLayout {
         mraidWebChromeClient = new MRAIDWebChromeClient();
         mraidWebViewClient = new MRAIDWebViewClient();
 
+        inflateCloseCardViews();
         webView = createWebView();
 
         if (webView == null) {
@@ -360,6 +389,20 @@ public class MRAIDView extends RelativeLayout {
                 webView.loadUrl(baseUrl);
             }
         }
+    }
+
+    private void inflateCloseCardViews() {
+        mCloseCardLayout = LayoutInflater.from(context).inflate(R.layout.close_card, this, false);
+        mCloseCardLayout.setVisibility(View.GONE);
+        mStaticCloseCardView = mCloseCardLayout.findViewById(net.pubnative.lite.sdk.core.R.id.staticCloseCardView);
+        mHtmlCloseCardContainer = mCloseCardLayout.findViewById(net.pubnative.lite.sdk.core.R.id.htmlCloseCardContainer);
+        mCloseCardTitleView = mCloseCardLayout.findViewById(net.pubnative.lite.sdk.core.R.id.closeCardTitle);
+        mCloseCardRatingView = mCloseCardLayout.findViewById(net.pubnative.lite.sdk.core.R.id.closeCardRaiting);
+        mCloseCardRatingView.setIsIndicator(true);
+        mCloseCardVoteView = mCloseCardLayout.findViewById(net.pubnative.lite.sdk.core.R.id.closeCardVoteCount);
+        mCloseCardActionView = mCloseCardLayout.findViewById(net.pubnative.lite.sdk.core.R.id.closeCardActionButton);
+        mCloseCardIconView = mCloseCardLayout.findViewById(net.pubnative.lite.sdk.core.R.id.closeCardIconImageView);
+        closeCardVotesLayout = mCloseCardLayout.findViewById(net.pubnative.lite.sdk.core.R.id.closeCardVotesLayout);
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -636,7 +679,7 @@ public class MRAIDView extends RelativeLayout {
         MRAIDLog.d(MRAID_LOG_TAG + "-JS callback", "expand " + (url != null ? url : "(1-part)"));
 
         // Disable screen rotation
-        if(orientationProperties != null) {
+        if (orientationProperties != null) {
             orientationProperties.allowOrientationChange = false;
             applyOrientationProperties();
         }
@@ -788,7 +831,7 @@ public class MRAIDView extends RelativeLayout {
 
         if (resizedView == null) {
             resizedView = new RelativeLayout(context);
-            removeAllViews();
+            removeView(webView);
             resizedView.addView(webView);
             addCloseRegion(resizedView);
             FrameLayout rootView = getRootView().findViewById(android.R.id.content);
@@ -1013,7 +1056,7 @@ public class MRAIDView extends RelativeLayout {
         }
 
         // Recover default orientation configs
-        if(orientationProperties != null) {
+        if (orientationProperties != null) {
             orientationProperties.allowOrientationChange = true;
         }
         setOrientationInitialState();
@@ -1021,7 +1064,9 @@ public class MRAIDView extends RelativeLayout {
         isClosing = true;
         isExpanded = false;
 
-        expandedView.removeAllViews();
+        if (expandedView != null) {
+            expandedView.removeAllViews();
+        }
 
         if (context instanceof Activity) {
             // get the content view for the current context
@@ -1060,7 +1105,7 @@ public class MRAIDView extends RelativeLayout {
         state = STATE_DEFAULT;
         isClosing = true;
         removeResizeView();
-        addView(webView);
+        addView(webView, 0);
         handler.post(() -> {
             fireStateChangeEvent();
             if (listener != null) {
@@ -1070,12 +1115,14 @@ public class MRAIDView extends RelativeLayout {
     }
 
     private void removeResizeView() {
-        resizedView.removeAllViews();
-        if (context instanceof Activity) {
-            FrameLayout rootView = ((Activity) context).findViewById(android.R.id.content);
-            rootView.removeView(resizedView);
-            resizedView = null;
-            closeRegion = null;
+        if (resizedView != null) {
+            resizedView.removeAllViews();
+            if (context instanceof Activity) {
+                FrameLayout rootView = ((Activity) context).findViewById(android.R.id.content);
+                rootView.removeView(resizedView);
+                resizedView = null;
+                closeRegion = null;
+            }
         }
     }
 
@@ -1575,6 +1622,10 @@ public class MRAIDView extends RelativeLayout {
 
                     listener.mraidViewLoaded(MRAIDView.this);
 
+                    // Add countdown functionality for interstitial
+                    mSkipCountdownView = new CountDownViewFactory().createCountdownView(context, HyBid.getCountdownStyle(), MRAIDView.this);
+                    addView(mSkipCountdownView);
+
                     startSkipTimer();
                 }
             }
@@ -1621,6 +1672,8 @@ public class MRAIDView extends RelativeLayout {
 
         public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
             MRAIDLog.d("hz-m MRAIDView WebViewClient - onReceivedSslError");
+            if (handler != null)
+                handler.cancel();
         }
 
         public void onTooManyRedirects(WebView view, Message cancelMsg,
@@ -2013,7 +2066,7 @@ public class MRAIDView extends RelativeLayout {
         }
     }
 
-    private void setOrientationInitialState(){
+    private void setOrientationInitialState() {
         if (context != null && context instanceof Activity) {
             Activity activity = (Activity) context;
             activity.setRequestedOrientation(this.activityInitialOrientation);
@@ -2049,25 +2102,114 @@ public class MRAIDView extends RelativeLayout {
     }
 
     private void startSkipTimer() {
-        if (mSkipTimeMillis > 0) {
-            mExpirationTimer = new SimpleTimer(mSkipTimeMillis, () -> listener.mraidShowCloseButton());
+
+        if (mSkipTimeMillis > 0 && showTimerBeforeEndCard) {
+
+            mExpirationTimer = new SimpleTimer(mSkipTimeMillis, new SimpleTimer.Listener() {
+
+                @Override
+                public void onFinish() {
+                    listener.mraidShowCloseButton();
+                    if (mSkipCountdownView != null)
+                        mSkipCountdownView.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    if (mSkipCountdownView != null)
+                        mSkipCountdownView.setProgress((int) (mSkipTimeMillis - millisUntilFinished), mSkipTimeMillis);
+                }
+            }, 10);
             mExpirationTimer.start();
+
         } else {
+            if (mSkipCountdownView != null)
+                mSkipCountdownView.setVisibility(View.GONE);
             listener.mraidShowCloseButton();
         }
     }
 
     public void pause() {
         if (mExpirationTimer != null)
-            mExpirationTimer.pauseTimer();
+            mExpirationTimer.pause();
     }
 
     public void resume() {
         if (mExpirationTimer != null)
-            mExpirationTimer.resumeTimer();
+            mExpirationTimer.resume();
     }
 
     private void closeOnMainThread() {
         new Handler(Looper.getMainLooper()).post(this::close);
+    }
+
+    public void setCloseCardData(CloseCardData closeCardData) {
+        this.mCloseCardData = closeCardData;
+    }
+
+    public boolean hasValidCloseCard() {
+        return mCloseCardData != null && mCloseCardData.getTitle() != null && !mCloseCardData.getTitle().isEmpty() &&
+                mCloseCardData.getIcon() != null && mCloseCardData.getBannerImage() != null;
+    }
+
+    public boolean isCloseCardShown() {
+        return mCloseCardIsShown;
+    }
+
+    public void showCloseCard(String adUrl) {
+
+        mCloseCardIsShown = true;
+        mCloseCardLayout.setVisibility(View.VISIBLE);
+        RelativeLayout.LayoutParams closeCardParams = new RelativeLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
+        if (mCloseCardLayout.getParent() != null) {
+            ((ViewGroup) mCloseCardLayout.getParent()).removeView(mCloseCardLayout);
+        } else {
+            removeView(mCloseCardLayout);
+        }
+        this.removeView(webView);
+        this.addView(mCloseCardLayout, 0, closeCardParams);
+        mCloseCardLayout.setOnClickListener(null);
+
+        mCloseCardTitleView.setText(mCloseCardData.getTitle());
+        mCloseCardRatingView.setRating((float) mCloseCardData.getRating());
+
+        if (mCloseCardData.getVotes() > 0) {
+            closeCardVotesLayout.setVisibility(View.VISIBLE);
+            mCloseCardVoteView.setText(mCloseCardLayout.getContext().getString(net.pubnative.lite.sdk.core.R.string.close_card_votes, mCloseCardData.getVotes()));
+        } else {
+            closeCardVotesLayout.setVisibility(View.GONE);
+        }
+
+        if (mCloseCardData.getIcon() != null) {
+            mCloseCardIconView.setImageBitmap(mCloseCardData.getIcon());
+        }
+
+        mCloseCardActionView.setOnClickListener(v -> {
+            wasTouched = true;
+            if (adUrl.startsWith("mraid://")) {
+                parseCommandUrl(adUrl);
+            } else {
+                try {
+                    open(URLEncoder.encode(adUrl, "UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    closeLayoutListener.onClose();
+                }
+            }
+        });
+
+        if (mCloseCardData.getBanner() != null) {
+            // add Check if is static banner or MRAIDBanner in the feature
+            if (true) {
+                if (mCloseCardData.getBannerImage() != null) {
+                    ImageUtils.setScaledImage(mStaticCloseCardView, mCloseCardData.getBannerImage());
+                    mStaticCloseCardView.setVisibility(View.VISIBLE);
+                }
+            } else {
+                /*mStaticCloseCardView.setVisibility(View.GONE);
+                mHtmlCloseCardView = new MRAIDBanner(this, closeCardData.getBanner(), "",
+                        new String[]{}, this, this, null);
+                mHtmlCloseCardContainer.addView(mHtmlCloseCardView);*/
+            }
+        }
     }
 }

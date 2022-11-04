@@ -37,6 +37,9 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayDeque;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
@@ -54,7 +57,7 @@ public class PNHttpClient {
     private static final int CONNECT_TIMEOUT = 10000;
 
     public interface Listener {
-        void onSuccess(String response);
+        void onSuccess(String response, Map<String, List<String>> headers);
 
         void onFailure(Throwable error);
     }
@@ -63,6 +66,7 @@ public class PNHttpClient {
 
         private int responseCode;
         private String response;
+        private Map<String, List<String>> headers;
         private Exception exception;
 
         private Response() {
@@ -117,7 +121,7 @@ public class PNHttpClient {
                 final Response response = sendRequest(url, headers, postBody);
                 if (response.exception != null) {
                     if (shouldRetryIfFail && !TextUtils.isEmpty(url)) {
-                            sPendingRequests.add(new PendingRequest(url, postBody, headers));
+                        sPendingRequests.add(new PendingRequest(url, postBody, headers));
                     }
 
                     if (shouldReturnOnMainThread) {
@@ -135,12 +139,12 @@ public class PNHttpClient {
                     if (shouldReturnOnMainThread) {
                         sUiHandler.post(() -> {
                             if (listener != null) {
-                                listener.onSuccess(response.response);
+                                listener.onSuccess(response.response, response.headers);
                             }
                         });
                     } else {
                         if (listener != null) {
-                            listener.onSuccess(response.response);
+                            listener.onSuccess(response.response, response.headers);
                         }
                     }
                 }
@@ -186,6 +190,11 @@ public class PNHttpClient {
                 InputStream inputStream = urlConnection.getInputStream();
                 result.response = getStringFromStream(inputStream);
                 inputStream.close();
+                Map<String, List<String>> responseHeaders = urlConnection.getHeaderFields();
+                if (responseHeaders != null && !responseHeaders.isEmpty()) {
+                    Map<String, List<String>> responseHeadersCopy = new HashMap<>(responseHeaders);
+                    result.headers = responseHeadersCopy;
+                }
             } else {
                 result.exception = new Exception(String.format(Locale.ENGLISH, "Network request failed with code: %s", responseCode));
             }
@@ -250,7 +259,7 @@ public class PNHttpClient {
             sExecutor.submit(() -> {
                 final Response response = sendRequest(url, headers, postBody);
                 if (response.exception != null && !TextUtils.isEmpty(url)) {
-                        sPendingRequests.add(new PendingRequest(url, postBody, headers));
+                    sPendingRequests.add(new PendingRequest(url, postBody, headers));
                 }
             });
         }

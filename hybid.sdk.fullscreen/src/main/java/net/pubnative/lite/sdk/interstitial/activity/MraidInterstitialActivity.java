@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 
 import net.pubnative.lite.sdk.HyBid;
@@ -15,16 +16,11 @@ import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewCloseLayoutListener;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
+import net.pubnative.lite.sdk.vpaid.models.CloseCardData;
+import net.pubnative.lite.sdk.vpaid.utils.CloseCardUtil;
 
 public class MraidInterstitialActivity extends HyBidInterstitialActivity implements MRAIDViewListener, MRAIDNativeFeatureListener, MRAIDViewCloseLayoutListener {
-    private final String[] mSupportedNativeFeatures = new String[]{
-            MRAIDNativeFeature.CALENDAR,
-            MRAIDNativeFeature.INLINE_VIDEO,
-            MRAIDNativeFeature.SMS,
-            MRAIDNativeFeature.STORE_PICTURE,
-            MRAIDNativeFeature.TEL,
-            MRAIDNativeFeature.LOCATION
-    };
+    private final String[] mSupportedNativeFeatures = new String[]{MRAIDNativeFeature.CALENDAR, MRAIDNativeFeature.INLINE_VIDEO, MRAIDNativeFeature.SMS, MRAIDNativeFeature.STORE_PICTURE, MRAIDNativeFeature.TEL, MRAIDNativeFeature.LOCATION};
 
     private MRAIDBanner mView;
     private boolean mIsSkippable = true;
@@ -46,17 +42,16 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
     public View getAdView() {
         MRAIDBanner adView = null;
         if (getAd() != null) {
+
             int mSkipOffset = getIntent().getIntExtra(EXTRA_SKIP_OFFSET, 0);
             if (mSkipOffset > 0) {
                 mIsSkippable = false;
             }
 
             if (getAd().getAssetUrl(APIAsset.HTML_BANNER) != null) {
-                adView = new MRAIDBanner(this, getAd().getAssetUrl(APIAsset.HTML_BANNER), "", mSupportedNativeFeatures,
-                        this, this, getAd().getContentInfoContainer(this, HyBid.isAdFeedbackEnabled(), this));
+                adView = new MRAIDBanner(this, getAd().getAssetUrl(APIAsset.HTML_BANNER), "", true, mSupportedNativeFeatures, this, this, getAd().getContentInfoContainer(this, HyBid.isAdFeedbackEnabled(), this));
             } else if (getAd().getAssetHtml(APIAsset.HTML_BANNER) != null) {
-                adView = new MRAIDBanner(this, "", getAd().getAssetHtml(APIAsset.HTML_BANNER), mSupportedNativeFeatures,
-                        this, this, getAd().getContentInfoContainer(this, HyBid.isAdFeedbackEnabled(), this));
+                adView = new MRAIDBanner(this, "", getAd().getAssetHtml(APIAsset.HTML_BANNER), true, mSupportedNativeFeatures, this, this, getAd().getContentInfoContainer(this, HyBid.isAdFeedbackEnabled(), this));
             }
 
             if (adView != null) {
@@ -68,7 +63,16 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
             }
         }
         mView = adView;
+        fetchCloseCard();
         return adView;
+    }
+
+    private void fetchCloseCard(){
+        if(mView != null && getAd() != null){
+            CloseCardData data =  new CloseCardData();
+            new CloseCardUtil().fetchCloseCardData(getAd(), data);
+            mView.setCloseCardData(data);
+        }
     }
 
     @Override
@@ -87,10 +91,15 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
     }
 
     @Override
-    public void onBackPressed() {
-        if (mIsSkippable) {
-            super.onBackPressed();
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+            if (mIsSkippable) {
+                super.onKeyDown(keyCode, event);
+            }
+        } else {
+            return super.onKeyDown(keyCode, event);
         }
+        return false;
     }
 
     // ----------------------------------- MRAIDViewListener ---------------------------------------
@@ -121,8 +130,7 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
     }
 
     @Override
-    public boolean mraidViewResize(MRAIDView mraidView, int width, int height, int offsetX,
-                                   int offsetY) {
+    public boolean mraidViewResize(MRAIDView mraidView, int width, int height, int offsetX, int offsetY) {
         return true;
     }
 
@@ -183,6 +191,15 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
     @Override
     public void onClose() {
         dismiss();
+    }
+
+    @Override
+    protected void dismiss() {
+        if(mView.hasValidCloseCard() && !mView.isCloseCardShown()){
+            mView.showCloseCard(getAd().link);
+        } else {
+            super.dismiss();;
+        }
     }
 
     @Override

@@ -6,6 +6,7 @@ public class SimpleTimer extends CountDownTimer {
 
     public interface Listener {
         void onFinish();
+        void onTick(long millisUntilFinished);
     }
 
     public SimpleTimer(long millisInFuture, Listener listener) {
@@ -13,8 +14,14 @@ public class SimpleTimer extends CountDownTimer {
         mListener = listener;
     }
 
+    public SimpleTimer(long millisInFuture, Listener listener, long countDownInterval) {
+        super(millisInFuture, countDownInterval);
+        mListener = listener;
+    }
+
     @Override
     public void onTick(long millisUntilFinished) {
+        mListener.onTick(millisUntilFinished);
     }
 
     @Override

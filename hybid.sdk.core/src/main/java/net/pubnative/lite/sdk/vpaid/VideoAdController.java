@@ -6,6 +6,7 @@ import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
 
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeVideoAdSession;
+import net.pubnative.lite.sdk.vpaid.models.CloseCardData;
 import net.pubnative.lite.sdk.vpaid.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 
@@ -26,6 +27,8 @@ public interface VideoAdController {
     void setVideoFilePath(String filePath);
 
     void setEndCardData(EndCardData endCardData);
+
+    void setCloseCardData(CloseCardData closeCardData);
 
     void setEndCardFilePath(String filePath);
 
@@ -48,6 +51,8 @@ public interface VideoAdController {
     void setVolume(boolean mute);
 
     void skipVideo();
+
+    void closeEndCard();
 
     void closeSelf();
 

@@ -35,16 +35,8 @@ import android.webkit.WebView;
 @SuppressLint("ViewConstructor")
 public class MRAIDInterstitial extends MRAIDView {
 
-    public MRAIDInterstitial(
-            Context context,
-            String baseUrl,
-            String data,
-            String[] supportedNativeFeatures,
-            MRAIDViewListener viewListener,
-            MRAIDNativeFeatureListener nativeFeatureListener,
-            ViewGroup contentInfo
-    ) {
-        super(context, baseUrl, data, supportedNativeFeatures, viewListener, nativeFeatureListener, contentInfo, true);
+    public MRAIDInterstitial(Context context, String baseUrl, String data, Boolean showTimerBeforeEndCard, String[] supportedNativeFeatures, MRAIDViewListener viewListener, MRAIDNativeFeatureListener nativeFeatureListener, ViewGroup contentInfo) {
+        super(context, baseUrl, data, showTimerBeforeEndCard, supportedNativeFeatures, viewListener, nativeFeatureListener, contentInfo, true);
         webView.setBackgroundColor(Color.BLACK);
         addView(webView);
     }

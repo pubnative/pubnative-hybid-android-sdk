@@ -1,20 +1,20 @@
 package net.pubnative.lite.demo.ui.adapters
 
-import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.models.Quote
 import net.pubnative.lite.demo.ui.fragments.markup.MarkupSize
-import net.pubnative.lite.demo.ui.fragments.markup.MarkupViewModel
 import net.pubnative.lite.demo.ui.viewholders.MarkupBannerViewHolder
 import net.pubnative.lite.demo.ui.viewholders.MarkupLeaderboardViewHolder
 import net.pubnative.lite.demo.ui.viewholders.MarkupMRectViewHolder
 import net.pubnative.lite.demo.ui.viewholders.SampleTextViewHolder
 import net.pubnative.lite.demo.util.SampleQuotes
 
-class MarkupAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class MarkupAdapter(private var mListener: OnLogDisplayListener) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>(), OnLogDisplayListener {
+
     companion object {
         private const val TYPE_TEXT = 1
         private const val TYPE_MARKUP_BANNER = 2
@@ -29,26 +29,25 @@ class MarkupAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
-            TYPE_MARKUP_BANNER ->
-                MarkupBannerViewHolder(
-                    LayoutInflater.from(parent.context)
-                        .inflate(R.layout.item_markup_banner, parent, false)
-                )
-            TYPE_MARKUP_MRECT ->
-                MarkupMRectViewHolder(
-                    LayoutInflater.from(parent.context)
-                        .inflate(R.layout.item_markup_mrect, parent, false)
-                )
-            TYPE_MARKUP_LEADERBOARD ->
-                MarkupLeaderboardViewHolder(
-                    LayoutInflater.from(parent.context)
-                        .inflate(R.layout.item_markup_leaderboard, parent, false)
-                )
-            else ->
-                SampleTextViewHolder(
-                    LayoutInflater.from(parent.context)
-                        .inflate(R.layout.item_sample_text, parent, false)
-                )
+            TYPE_MARKUP_BANNER -> MarkupBannerViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_markup_banner, parent, false), mListener
+            )
+
+            TYPE_MARKUP_MRECT -> MarkupMRectViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_markup_mrect, parent, false), mListener
+            )
+
+            TYPE_MARKUP_LEADERBOARD -> MarkupLeaderboardViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_markup_leaderboard, parent, false), mListener
+            )
+
+            else -> SampleTextViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_sample_text, parent, false)
+            )
         }
     }
 
@@ -67,13 +66,23 @@ class MarkupAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     override fun getItemCount() = list.count()
 
     override fun getItemViewType(position: Int): Int {
-        if (position == 2 && !TextUtils.isEmpty(markup)) {
-            if (selectedSize == MarkupSize.BANNER) {
-                return TYPE_MARKUP_BANNER
-            } else if (selectedSize == MarkupSize.MEDIUM) {
-                return TYPE_MARKUP_MRECT
-            } else if (selectedSize == MarkupSize.LEADERBOARD) {
-                return TYPE_MARKUP_LEADERBOARD
+        if (position == 2 && markup.isNotEmpty()) {
+            when (selectedSize) {
+                MarkupSize.BANNER -> {
+                    return TYPE_MARKUP_BANNER
+                }
+
+                MarkupSize.MEDIUM -> {
+                    return TYPE_MARKUP_MRECT
+                }
+
+                MarkupSize.LEADERBOARD -> {
+                    return TYPE_MARKUP_LEADERBOARD
+                }
+
+                else -> {
+                    return TYPE_TEXT
+                }
             }
         }
 
@@ -84,5 +93,9 @@ class MarkupAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         this.markup = markup
         this.selectedSize = selectedSize
         notifyDataSetChanged()
+    }
+
+    override fun displayLogs() {
+        mListener.displayLogs()
     }
 }

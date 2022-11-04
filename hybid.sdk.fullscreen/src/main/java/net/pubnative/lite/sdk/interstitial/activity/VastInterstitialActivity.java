@@ -5,6 +5,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.KeyEvent;
 import android.view.View;
 
 import net.pubnative.lite.sdk.HyBid;
@@ -130,11 +131,16 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
     }
 
     @Override
-    public void onBackPressed() {
-        if (mIsSkippable) {
-            dismissVideo(100);
-            super.onBackPressed();
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+            if (mIsSkippable) {
+                dismissVideo(100);
+                super.onKeyDown(keyCode, event);
+            }
+        } else {
+            return super.onKeyDown(keyCode, event);
         }
+        return false;
     }
 
     @Override
@@ -199,8 +205,8 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
         @Override
         public void onAdDidReachEnd() {
             mReady = false;
-            mIsSkippable = true;
             if (!mHasEndCard) {
+                mIsSkippable = true;
                 showInterstitialCloseButton();
             }
             mIsVideoFinished = true;

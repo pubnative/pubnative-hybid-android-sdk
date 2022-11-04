@@ -14,7 +14,8 @@ import net.pubnative.lite.sdk.models.ImpressionTrackingMethod
 import net.pubnative.lite.sdk.views.HyBidAdView
 import net.pubnative.lite.sdk.views.PNAdView
 
-class HyBidBannerViewHolder(itemView: View, val adListener: InFeedAdListener) : RecyclerView.ViewHolder(itemView), PNAdView.Listener {
+class HyBidBannerViewHolder(itemView: View, val adListener: InFeedAdListener) :
+    RecyclerView.ViewHolder(itemView), PNAdView.Listener {
     private val TAG = HyBidBannerViewHolder::class.java.simpleName
 
     private val adView: HyBidAdView = itemView.findViewById(R.id.banner_view)
@@ -23,8 +24,9 @@ class HyBidBannerViewHolder(itemView: View, val adListener: InFeedAdListener) : 
         if (!TextUtils.isEmpty(zoneId) && shouldLoad) {
             adView.setAdSize(adSize)
             val layoutParams = FrameLayout.LayoutParams(
-                    convertDpToPx(itemView.context, adSize.width.toFloat()),
-                    convertDpToPx(itemView.context, adSize.height.toFloat()))
+                convertDpToPx(itemView.context, adSize.width.toFloat()),
+                convertDpToPx(itemView.context, adSize.height.toFloat())
+            )
             layoutParams.gravity = Gravity.CENTER_HORIZONTAL
 
             adView.layoutParams = layoutParams

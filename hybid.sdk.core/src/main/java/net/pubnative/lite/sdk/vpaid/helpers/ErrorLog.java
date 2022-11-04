@@ -9,6 +9,7 @@ import net.pubnative.lite.sdk.vpaid.enums.VastError;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ErrorLog {
 
@@ -53,7 +54,7 @@ public class ErrorLog {
 
                 PNHttpClient.makeRequest(context, url, null, null, new PNHttpClient.Listener() {
                     @Override
-                    public void onSuccess(String response) {
+                    public void onSuccess(String response, Map<String, List<String>> headers) {
 
                     }
 

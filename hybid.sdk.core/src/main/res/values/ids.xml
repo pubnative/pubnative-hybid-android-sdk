@@ -2,4 +2,5 @@
 <resources>
     <item name="textureView" type="id" />
     <item name="mraidCloseButton" type="id" />
+    <item name="button_fullscreen_close" type="id" />
 </resources>

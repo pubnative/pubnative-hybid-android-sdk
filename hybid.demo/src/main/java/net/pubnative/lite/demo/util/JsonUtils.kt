@@ -22,7 +22,8 @@ class JsonUtils {
             }
         }
 
-        fun isValidJson(json: String): Boolean {
+        fun isValidJson(json: String?): Boolean {
+            if (json == null) return false
             try {
                 JsonParser.parseString(json)
             } catch (e: JsonSyntaxException) {

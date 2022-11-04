@@ -245,6 +245,9 @@
     <string name="sticky_banner">Sticky Banner</string>
     <string name="zone_id_input">Zone Id</string>
 
+    <string name="title_legacy_api">Legacy API Tester</string>
+    <string name="api_tester_input_hint">Response JSON</string>
+
     <string name="custom_sdk_data">Custom SDK Data</string>
 
     <string name="ad_customization">Ad Customization</string>
@@ -267,11 +270,16 @@
     <string name="feedback_settings_title">Feedback</string>
     <string name="feedback_settings_toggle">Enable feedback form</string>
     <string name="feedback_settings_url_hint">Feedback form url</string>
+    <string name="countdown_style_title">Countdown Style</string>
+    <string name="countdown_style_pie_chart">Pie Chart</string>
+    <string name="countdown_style_timer">Timer</string>
+    <string name="countdown_style_progress">Progress</string>
 
     <string name="hint_creative_id">Enter creative ID</string>
     <string name="sdk_and_build_versions">SDK and Build versions</string>
     <string name="sdk_and_build_version_concat">SDK Version: %s build: %s</string>
-    <string name="markup_type">Maarkup Type</string>
+    <string name="markup_type">Markup Type</string>
     <string name="custom_markup">Custom Markup</string>
     <string name="url">URL</string>
+    <string name="custom_skip_offset_disabled">Custom Skip Offset Disabled</string>
 </resources>

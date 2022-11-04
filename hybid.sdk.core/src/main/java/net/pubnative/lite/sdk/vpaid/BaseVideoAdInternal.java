@@ -17,10 +17,12 @@ import net.pubnative.lite.sdk.vpaid.enums.VastError;
 import net.pubnative.lite.sdk.vpaid.helpers.AssetsLoader;
 import net.pubnative.lite.sdk.vpaid.helpers.ErrorLog;
 import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
+import net.pubnative.lite.sdk.vpaid.models.CloseCardData;
 import net.pubnative.lite.sdk.vpaid.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.AdSpotDimensions;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.response.VastProcessor;
+import net.pubnative.lite.sdk.vpaid.utils.CloseCardUtil;
 
 abstract class BaseVideoAdInternal {
 
@@ -155,7 +157,14 @@ abstract class BaseVideoAdInternal {
         if (mExpirationTimer != null) {
             return;
         }
-        mExpirationTimer = new SimpleTimer(VpaidConstants.DEFAULT_EXPIRED_TIME, this::onAdExpired);
+        mExpirationTimer = new SimpleTimer(VpaidConstants.DEFAULT_EXPIRED_TIME, new SimpleTimer.Listener() {
+            @Override
+            public void onFinish() {
+                BaseVideoAdInternal.this.onAdExpired();
+            }
+            @Override
+            public void onTick(long millisUntilFinished) {}
+        });
         mExpirationTimer.start();
         Logger.d(LOG_TAG, "Start schedule expiration");
     }
@@ -172,13 +181,19 @@ abstract class BaseVideoAdInternal {
         if (mPrepareTimer != null) {
             return;
         }
-        mPrepareTimer = new SimpleTimer(VpaidConstants.PREPARE_PLAYER_TIMEOUT, () -> {
-            mPrepareTimer = null;
-            if (mAdController != null && mAdController instanceof VideoAdControllerVpaid) {
-                ErrorLog.postError(getContext(), VastError.FILE_NOT_FOUND);
-                onAdLoadFail(new PlayerInfo("Problem with js file"));
+        mPrepareTimer = new SimpleTimer(VpaidConstants.PREPARE_PLAYER_TIMEOUT, new SimpleTimer.Listener() {
+            @Override
+            public void onFinish() {
+                mPrepareTimer = null;
+                if (mAdController != null && mAdController instanceof VideoAdControllerVpaid) {
+                    ErrorLog.postError(getContext(), VastError.FILE_NOT_FOUND);
+                    onAdLoadFail(new PlayerInfo("Problem with js file"));
+                }
+                cancelFetcher();
             }
-            cancelFetcher();
+
+            @Override
+            public void onTick(long millisUntilFinished) {}
         });
         mPrepareTimer.start();
         Logger.d(LOG_TAG, "Start prepare timer");
@@ -205,10 +220,16 @@ abstract class BaseVideoAdInternal {
         if (mFetcherTimer != null) {
             return;
         }
-        mFetcherTimer = new SimpleTimer(VpaidConstants.FETCH_TIMEOUT, () -> {
-            cancelFetcher();
-            ErrorLog.postError(getContext(), VastError.TIMEOUT);
-            onAdLoadFail(new PlayerInfo("Ad processing timeout"));
+        mFetcherTimer = new SimpleTimer(VpaidConstants.FETCH_TIMEOUT, new SimpleTimer.Listener() {
+            @Override
+            public void onFinish() {
+                cancelFetcher();
+                ErrorLog.postError(getContext(), VastError.TIMEOUT);
+                onAdLoadFail(new PlayerInfo("Ad processing timeout"));
+            }
+
+            @Override
+            public void onTick(long millisUntilFinished) {}
         });
         mFetcherTimer.start();
         Logger.d(LOG_TAG, "Start fetcher timer");
@@ -280,11 +301,18 @@ abstract class BaseVideoAdInternal {
         }
         mAdController.setVideoFilePath(videoFilePath);
         mAdController.setEndCardData(endCardData);
+        mAdController.setCloseCardData(createCloseCardData(mAd));
         mAdController.setEndCardFilePath(endCardFilePath);
         runOnUiThread(() -> {
             startPrepareTimer();
             mAdController.prepare(createOnPrepareListener());
         });
+    }
+
+    private CloseCardData createCloseCardData(Ad mAd){
+        CloseCardData closeCardData = new CloseCardData();
+        new CloseCardUtil().fetchCloseCardData(mAd, closeCardData);
+        return closeCardData;
     }
 
     private VideoAdController.OnPreparedListener createOnPrepareListener() {

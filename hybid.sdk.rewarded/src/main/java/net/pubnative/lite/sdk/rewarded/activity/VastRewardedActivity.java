@@ -84,11 +84,22 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
                 }
 
                 mVideoPlayer.postDelayed(() -> mVideoAd.load(), 1000);
+            }else{
+                if (getBroadcastSender() != null) {
+                    Bundle extras = new Bundle();
+                    getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.ERROR);
+                    extras.putInt(HyBidRewardedBroadcastReceiver.VIDEO_PROGRESS, 0);
+                    getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.VIDEO_ERROR, extras);
+                }
+                finish();
             }
         } catch (Exception exception) {
             Logger.e(TAG, exception.getMessage());
             if (getBroadcastSender() != null) {
+                Bundle extras = new Bundle();
                 getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.ERROR);
+                extras.putInt(HyBidRewardedBroadcastReceiver.VIDEO_PROGRESS, 0);
+                getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.VIDEO_ERROR, extras);
             }
             finish();
         }
@@ -174,7 +185,10 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
         public void onAdLoadFail(PlayerInfo info) {
             setProgressBarInvisible();
             if (getBroadcastSender() != null) {
+                Bundle extras = new Bundle();
                 getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.ERROR);
+                extras.putInt(HyBidRewardedBroadcastReceiver.VIDEO_PROGRESS, 0);
+                getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.VIDEO_ERROR, extras);
             }
             finish();
         }
@@ -192,17 +206,18 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
             mFinished = true;
             showRewardedCloseButton();
             if (getBroadcastSender() != null) {
-                getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.FINISH);
+                getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.VIDEO_FINISH);
             }
         }
 
         @Override
         public void onAdDismissed() {
-            dismiss();
+            onAdDismissed(-1);
         }
 
         @Override
         public void onAdDismissed(int progressPercentage) {
+            dismissVideo(progressPercentage);
             dismiss();
         }
 
@@ -214,11 +229,16 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
         @Override
         public void onAdSkipped() {
             mFinished = true;
+            if (getBroadcastSender() != null) {
+                getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.VIDEO_SKIP);
+            }
         }
 
         @Override
         public void onAdStarted() {
-
+            if (getBroadcastSender() != null) {
+                getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.VIDEO_START);
+            }
         }
     };
 
@@ -226,6 +246,14 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
     public void onImpression() {
         if (getBroadcastSender() != null) {
             getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.OPEN);
+        }
+    }
+
+    private void dismissVideo(int progressPercentage) {
+        if (getBroadcastSender() != null) {
+            Bundle extras = new Bundle();
+            extras.putInt(HyBidRewardedBroadcastReceiver.VIDEO_PROGRESS, progressPercentage);
+            getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.VIDEO_DISMISS, extras);
         }
     }
 }

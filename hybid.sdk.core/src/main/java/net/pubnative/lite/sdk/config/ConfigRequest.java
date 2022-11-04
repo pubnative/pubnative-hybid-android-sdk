@@ -11,6 +11,8 @@ import net.pubnative.lite.sdk.utils.Logger;
 import org.json.JSONObject;
 
 import java.security.GeneralSecurityException;
+import java.util.List;
+import java.util.Map;
 
 public class ConfigRequest {
     private static final String TAG = ConfigRequest.class.getSimpleName();
@@ -27,7 +29,7 @@ public class ConfigRequest {
         try {
             PNHttpClient.makeRequest(context, url, null, null, new PNHttpClient.Listener() {
                 @Override
-                public void onSuccess(String response) {
+                public void onSuccess(String response, Map<String, List<String>> headers) {
                     if (listener != null) {
                         handleResponse(response, listener, appToken);
                     }

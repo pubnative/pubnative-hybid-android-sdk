@@ -52,7 +52,7 @@ public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureList
             url = processedUrl;
         }
 
-        mViewContainer = new MRAIDInterstitial(context, url, null, new String[]{
+        mViewContainer = new MRAIDInterstitial(context, url, null, true, new String[]{
                 MRAIDNativeFeature.CALENDAR,
                 MRAIDNativeFeature.INLINE_VIDEO,
                 MRAIDNativeFeature.SMS,

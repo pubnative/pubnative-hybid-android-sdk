@@ -337,6 +337,13 @@
             android:windowSoftInputMode="stateHidden"
             tools:ignore="LockedOrientationActivity" />
         <activity
+            android:name=".ui.activities.apitester.LegacyApiTesterActivity"
+            android:label="@string/title_legacy_api"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden"
+            tools:ignore="LockedOrientationActivity" />
+        <activity
             android:name=".ui.activities.creativetester.P161CreativeTesterActivity"
             android:label="@string/title_creative_tester"
             android:screenOrientation="portrait"

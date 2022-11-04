@@ -11,11 +11,13 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.AdCustomizationActivity
 import net.pubnative.lite.demo.ui.activities.CustomSDKDataActivity
 import net.pubnative.lite.demo.ui.activities.admob.MediationTestSuiteActivity
+import net.pubnative.lite.demo.ui.activities.apitester.LegacyApiTesterActivity
 import net.pubnative.lite.demo.ui.activities.config.*
 import net.pubnative.lite.demo.ui.activities.creativetester.P161CreativeTesterActivity
 import net.pubnative.lite.demo.ui.activities.markup.MarkupActivity
 import net.pubnative.lite.demo.ui.activities.signaldata.SignalDataActivity
 import net.pubnative.lite.demo.ui.activities.vast.VastTagRequestActivity
+import net.pubnative.lite.demo.ui.fragments.vast.VastTagRequestFragment
 
 class SettingsNavFragment : Fragment(R.layout.fragment_nav_settings) {
 
@@ -73,6 +75,11 @@ class SettingsNavFragment : Fragment(R.layout.fragment_nav_settings) {
 
         view.findViewById<TextView>(R.id.button_render_vast).setOnClickListener {
             val intent = Intent(activity, VastTagRequestActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<TextView>(R.id.button_legacy_api_tester).setOnClickListener {
+            val intent = Intent(activity, LegacyApiTesterActivity::class.java)
             startActivity(intent)
         }
 

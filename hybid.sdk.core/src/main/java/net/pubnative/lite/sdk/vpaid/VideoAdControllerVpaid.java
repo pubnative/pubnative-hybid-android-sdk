@@ -23,6 +23,7 @@ import net.pubnative.lite.sdk.vpaid.enums.VastError;
 import net.pubnative.lite.sdk.vpaid.helpers.ErrorLog;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
 import net.pubnative.lite.sdk.vpaid.macros.MacroHelper;
+import net.pubnative.lite.sdk.vpaid.models.CloseCardData;
 import net.pubnative.lite.sdk.vpaid.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.models.vast.Tracking;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.AdSpotDimensions;
@@ -120,6 +121,10 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
     }
 
     @Override
+    public void setCloseCardData(CloseCardData closeCardData) {
+    }
+
+    @Override
     public void buildVideoAdView(VideoAdView bannerView) {
         mViewControllerVpaid.buildVideoAdView(bannerView, mWebView);
     }
@@ -179,6 +184,11 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
 
     @Override
     public void setVolume(boolean mute) {
+    }
+
+    @Override
+    public void closeEndCard() {
+
     }
 
     @Override

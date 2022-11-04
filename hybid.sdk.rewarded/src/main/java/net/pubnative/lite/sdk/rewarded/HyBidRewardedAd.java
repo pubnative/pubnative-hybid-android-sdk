@@ -31,6 +31,7 @@ import net.pubnative.lite.sdk.CacheListener;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
+import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.api.RequestManager;
@@ -58,7 +59,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class HyBidRewardedAd implements RequestManager.RequestListener, RewardedPresenter.Listener {
+public class HyBidRewardedAd implements RequestManager.RequestListener, RewardedPresenter.Listener, VideoListener {
     private static final String TAG = HyBidRewardedAd.class.getSimpleName();
     private static final int TIME_TO_EXPIRE = 1800000;
 
@@ -89,6 +90,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     private boolean mIsDestroyed = false;
     private long mInitialLoadTime = -1;
     private long mInitialRenderTime = -1;
+    private VideoListener mVideoListener;
 
     public HyBidRewardedAd(Activity activity, Listener listener) {
         this((Context) activity, "", listener);
@@ -231,6 +233,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
 
     private void renderAd() {
         mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, this);
+        mPresenter.setVideoListener(HyBidRewardedAd.this);
         if (mPresenter != null) {
             mPresenter.load();
         } else {
@@ -278,6 +281,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
             }
             mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, this);
             if (mPresenter != null) {
+                mPresenter.setVideoListener(HyBidRewardedAd.this);
                 mPresenter.load();
             } else {
                 invokeOnLoadFailed(new HyBidError(HyBidErrorCode.UNSUPPORTED_ASSET));
@@ -305,7 +309,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
 
         PNHttpClient.makeRequest(mContext, url, headers, null, new PNHttpClient.Listener() {
             @Override
-            public void onSuccess(String response) {
+            public void onSuccess(String response, Map<String, List<String>> headers) {
                 registerAdRequest(url, response, initTime);
                 if (!TextUtils.isEmpty(response)) {
                     prepareCustomMarkup(zoneId, response);
@@ -366,6 +370,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
                         HyBid.getAdCache().put(mZoneId, mAd);
                         HyBid.getVideoAdCache().put(mZoneId, adCacheItem);
                         mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, HyBidRewardedAd.this);
+                        mPresenter.setVideoListener(HyBidRewardedAd.this);
                         if (mPresenter != null) {
                             mPresenter.load();
                         } else {
@@ -490,6 +495,45 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     public void setAutoCacheOnLoad(boolean autoCacheOnLoad) {
         if (mRequestManager != null) {
             this.mRequestManager.setAutoCacheOnLoad(autoCacheOnLoad);
+        }
+    }
+
+    public void setVideoListener(VideoListener videoListener) {
+        this.mVideoListener = videoListener;
+    }
+
+    @Override
+    public void onVideoError(int progressPercentage) {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoError(progressPercentage);
+        }
+    }
+
+    @Override
+    public void onVideoStarted() {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoStarted();
+        }
+    }
+
+    @Override
+    public void onVideoDismissed(int progressPercentage) {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoDismissed(progressPercentage);
+        }
+    }
+
+    @Override
+    public void onVideoFinished() {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoFinished();
+        }
+    }
+
+    @Override
+    public void onVideoSkipped() {
+        if (mVideoListener != null) {
+            mVideoListener.onVideoSkipped();
         }
     }
 

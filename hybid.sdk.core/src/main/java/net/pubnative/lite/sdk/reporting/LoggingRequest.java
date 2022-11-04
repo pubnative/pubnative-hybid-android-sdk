@@ -8,6 +8,9 @@ import net.pubnative.lite.sdk.utils.Logger;
 
 import org.json.JSONObject;
 
+import java.util.List;
+import java.util.Map;
+
 public class LoggingRequest {
     private static final String TAG = LoggingRequest.class.getSimpleName();
 
@@ -29,7 +32,7 @@ public class LoggingRequest {
                 String jsonBody = report.toString();
                 PNHttpClient.makeRequest(context, url, null, jsonBody, new PNHttpClient.Listener() {
                     @Override
-                    public void onSuccess(String response) {
+                    public void onSuccess(String response, Map<String, List<String>> headers) {
                         if (listener != null) {
                             listener.onLogSubmitted();
                         }

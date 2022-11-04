@@ -8,12 +8,14 @@ import android.widget.FrameLayout
 import android.widget.RelativeLayout
 import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.ui.adapters.OnLogDisplayListener
 import net.pubnative.lite.sdk.models.AdSize
 import net.pubnative.lite.sdk.utils.Logger
 import net.pubnative.lite.sdk.views.HyBidAdView
 import net.pubnative.lite.sdk.views.PNAdView
 
-class MarkupMRectViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), PNAdView.Listener {
+class MarkupMRectViewHolder(itemView: View, var mListener: OnLogDisplayListener) :
+    RecyclerView.ViewHolder(itemView), PNAdView.Listener {
     private val TAG = MarkupBannerViewHolder::class.java.simpleName
 
     fun bind(markup: String) {
@@ -23,7 +25,9 @@ class MarkupMRectViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
 
             val mRect = HyBidAdView(itemView.context, AdSize.SIZE_300x250)
 
-            val adLayoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            val adLayoutParams = RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            )
             adLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
             container.addView(mRect, adLayoutParams)
             container.setBackgroundColor(Color.BLACK)
@@ -34,10 +38,12 @@ class MarkupMRectViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
 
     override fun onAdLoaded() {
         Logger.d(TAG, "onAdLoaded")
+        mListener.displayLogs()
     }
 
     override fun onAdLoadFailed(error: Throwable?) {
         Logger.e(TAG, "onAdLoadFailed", error)
+        mListener.displayLogs()
     }
 
     override fun onAdImpression() {

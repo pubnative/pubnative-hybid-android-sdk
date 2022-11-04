@@ -117,7 +117,7 @@ public class VastProcessor {
 
                         PNHttpClient.makeRequest(mContext, adTagUri, headers, null, new PNHttpClient.Listener() {
                             @Override
-                            public void onSuccess(String response) {
+                            public void onSuccess(String response, Map<String, List<String>> headers) {
                                 parseResponse(response, listener);
                             }
 

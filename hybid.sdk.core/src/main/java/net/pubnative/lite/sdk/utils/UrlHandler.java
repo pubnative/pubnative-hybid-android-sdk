@@ -56,8 +56,6 @@ public class UrlHandler {
         final String host = uri.getHost();
         final String uriLower = uri.toString().toLowerCase(Locale.ROOT);
 
-        final Uri processedUri = uri.buildUpon().appendQueryParameter("redirect", "false").build();
-
         // NOTE: currently these all handle the same, but we might want different behavior in the future
 
         // Play store deep links
@@ -66,17 +64,17 @@ public class UrlHandler {
                 || "market".equalsIgnoreCase(scheme)
                 || uriLower.startsWith("play.google.com")
                 || uriLower.startsWith("market.android.com/")) {
-            mIntentHandler.handleDeepLink(processedUri);
+            mIntentHandler.handleDeepLink(uri);
         }
 
         // Device browser
         else if ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme)) {
-            mIntentHandler.handleBrowserLink(processedUri);
+            mIntentHandler.handleBrowserLink(uri);
         }
 
         // App deep links
         else if (!TextUtils.isEmpty(scheme)) {
-            mIntentHandler.handleDeepLink(processedUri);
+            mIntentHandler.handleDeepLink(uri);
         }
     }
 }

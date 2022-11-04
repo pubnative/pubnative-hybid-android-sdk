@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="learn_more">Learn More</string>
+    <string name="skip_ad">Skip Ad ▶</string>
+    <string name="close_card_votes">( %1$d )</string>
 </resources>

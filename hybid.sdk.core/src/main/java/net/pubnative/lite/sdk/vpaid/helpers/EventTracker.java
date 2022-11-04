@@ -58,7 +58,7 @@ public class EventTracker {
 
         PNHttpClient.makeRequest(context, processedUrl, headers, null, false, new PNHttpClient.Listener() {
             @Override
-            public void onSuccess(String response) {
+            public void onSuccess(String response, Map<String, List<String>> headers) {
                 Log.d("onSuccess", response);
             }
 

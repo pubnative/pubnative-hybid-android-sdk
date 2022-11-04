@@ -31,6 +31,7 @@ public interface APIAsset {
     String DESCRIPTION = "description";
     String CALL_TO_ACTION = "cta";
     String RATING = "rating";
+    String VOTES = "votes";
     String ICON = "icon";
     String BANNER = "banner";
     String STANDARD_BANNER = "standardbanner";

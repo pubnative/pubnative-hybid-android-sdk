@@ -22,6 +22,8 @@
 //
 package net.pubnative.lite.demo;
 
+import net.pubnative.lite.sdk.CountdownStyle;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -111,6 +113,8 @@ public class Constants {
 
     public static final Boolean FEEDBACK_ENABLED = true;
     public static final String FEEDBACK_FORM_URL = "https://feedback-dev.verve.com";
+
+    public static final String COUNTDOWN_STYLE_DEFAULT = CountdownStyle.PIE_CHART.getId();
 
     public static final class IntentParams {
         public static final String ZONE_ID = "zone_id";

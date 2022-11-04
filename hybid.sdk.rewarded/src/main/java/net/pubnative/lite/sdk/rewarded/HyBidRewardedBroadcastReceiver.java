@@ -26,7 +26,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 
+import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.rewarded.presenter.RewardedPresenter;
 import net.pubnative.lite.sdk.utils.PNLocalBroadcastManager;
 
@@ -34,7 +36,7 @@ import java.util.Random;
 
 public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
     public interface Listener {
-        void onReceivedAction(Action action);
+        void onReceivedAction(Action action, Bundle extras);
     }
 
     public enum Action {
@@ -43,6 +45,11 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
         CLOSE("net.pubnative.hybid.rewarded.close"),
         FINISH("net.pubnative.hybid.rewarded.finish"),
         ERROR("net.pubnative.hybid.rewarded.error"),
+        VIDEO_ERROR("net.pubnative.hybid.rewarded.video_error"),
+        VIDEO_START("net.pubnative.hybid.rewarded.video_start"),
+        VIDEO_SKIP("net.pubnative.hybid.rewarded.video_skip"),
+        VIDEO_DISMISS("net.pubnative.hybid.rewarded.video_dismiss"),
+        VIDEO_FINISH("net.pubnative.hybid.rewarded.video_finish"),
         NONE("none");
 
         public static Action from(String action) {
@@ -52,9 +59,21 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
                 return CLICK;
             } else if (CLOSE.getId().equals(action)) {
                 return CLOSE;
-            } else if (FINISH.getId().equals(action)) {
-                return FINISH;
-            } else if (ERROR.getId().equals(action)) {
+            } else if (VIDEO_START.getId().equals(action)) {
+                return VIDEO_START;
+            }
+            else if (VIDEO_SKIP.getId().equals(action)) {
+                return VIDEO_SKIP;
+            }
+            else if (VIDEO_FINISH.getId().equals(action)) {
+                return VIDEO_FINISH;
+            }
+            else if (VIDEO_DISMISS.getId().equals(action)) {
+                return VIDEO_DISMISS;
+            }
+            else if (VIDEO_ERROR.getId().equals(action)) {
+                return VIDEO_ERROR;
+            }else if (ERROR.getId().equals(action)) {
                 return ERROR;
             }
 
@@ -73,6 +92,7 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
     }
 
     public static final String BROADCAST_ID = "pn_rewarded_broadcastId";
+    public static final String VIDEO_PROGRESS = "pn_video_progress";
 
     private final long mBroadcastId;
     private final PNLocalBroadcastManager mLocalBroadcastManager;
@@ -96,6 +116,11 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
         mIntentFilter.addAction(Action.CLICK.getId());
         mIntentFilter.addAction(Action.CLOSE.getId());
         mIntentFilter.addAction(Action.FINISH.getId());
+        mIntentFilter.addAction(Action.VIDEO_START.getId());
+        mIntentFilter.addAction(Action.VIDEO_SKIP.getId());
+        mIntentFilter.addAction(Action.VIDEO_FINISH.getId());
+        mIntentFilter.addAction(Action.VIDEO_DISMISS.getId());
+        mIntentFilter.addAction(Action.VIDEO_ERROR.getId());
         mIntentFilter.addAction(Action.ERROR.getId());
     }
 
@@ -131,12 +156,14 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
             return;
         }
 
-        mListener.onReceivedAction(Action.from(intent.getAction()));
+        mListener.onReceivedAction(Action.from(intent.getAction()), intent.getExtras());
     }
 
     public void handleAction(Action action,
                              RewardedPresenter presenter,
-                             RewardedPresenter.Listener listener) {
+                             Bundle extras,
+                             RewardedPresenter.Listener listener,
+                             VideoListener videoListener) {
         if (listener == null) {
             return;
         }
@@ -156,6 +183,30 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
                 break;
             case ERROR:
                 listener.onRewardedError(presenter);
+                break;
+            case VIDEO_START:
+                if (videoListener != null) {
+                    videoListener.onVideoStarted();
+                }
+                break;
+            case VIDEO_SKIP:
+                if (videoListener != null){
+                    videoListener.onVideoSkipped();
+                }
+                break;
+            case VIDEO_DISMISS:
+                if (videoListener != null) {
+                    if (extras != null) {
+                        videoListener.onVideoDismissed(extras.getInt(VIDEO_PROGRESS, -1));
+                    } else {
+                        videoListener.onVideoDismissed(-1);
+                    }
+                }
+                break;
+            case VIDEO_FINISH:
+                if (videoListener != null) {
+                    videoListener.onVideoFinished();
+                }
                 break;
             case NONE:
                 break;

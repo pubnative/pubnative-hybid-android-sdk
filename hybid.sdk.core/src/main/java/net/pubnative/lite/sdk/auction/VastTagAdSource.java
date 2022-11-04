@@ -11,6 +11,7 @@ import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.vast.VastUrlUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class VastTagAdSource implements AdSource {
@@ -38,7 +39,7 @@ public class VastTagAdSource implements AdSource {
                     headers, null, false,
                     new PNHttpClient.Listener() {
                         @Override
-                        public void onSuccess(String response) {
+                        public void onSuccess(String response, Map<String, List<String>> headers) {
                             if (TextUtils.isEmpty(response)) {
                                 int assetGroup = 4;
                                 if (mAdSize == AdSize.SIZE_INTERSTITIAL) {

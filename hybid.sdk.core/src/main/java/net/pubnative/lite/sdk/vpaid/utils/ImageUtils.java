@@ -7,6 +7,8 @@ import android.widget.ImageView;
 
 import net.pubnative.lite.sdk.utils.Logger;
 
+import java.io.ByteArrayOutputStream;
+
 public class ImageUtils {
     private static final String TAG = ImageUtils.class.getSimpleName();
 
@@ -19,6 +21,23 @@ public class ImageUtils {
                 int imageViewHeight = view.getMeasuredHeight();
                 int imageViewWidth = view.getMeasuredWidth();
                 Bitmap decoded = decodeSampledBitmap(filePath, imageViewWidth, imageViewHeight);
+                if (decoded != null) {
+                    view.setImageBitmap(decoded);
+                }
+                return true;
+            }
+        });
+    }
+
+    public static void setScaledImage(ImageView imageView, final Bitmap image) {
+        final ImageView view = imageView;
+        ViewTreeObserver viewTreeObserver = view.getViewTreeObserver();
+        viewTreeObserver.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            public boolean onPreDraw() {
+                view.getViewTreeObserver().removeOnPreDrawListener(this);
+                int imageViewHeight = view.getMeasuredHeight();
+                int imageViewWidth = view.getMeasuredWidth();
+                Bitmap decoded = decodeSampledBitmap(image, imageViewWidth, imageViewHeight);
                 if (decoded != null) {
                     view.setImageBitmap(decoded);
                 }
@@ -41,9 +60,26 @@ public class ImageUtils {
         }
     }
 
+    private static Bitmap decodeSampledBitmap(Bitmap image, int reqWidth, int reqHeight) {
+        try {
+            int inSampleSize = calculateInSampleSize(image.getWidth(), image.getHeight(), reqWidth, reqHeight);
+            int dstWidth = (int) (image.getWidth() / inSampleSize);
+            int dstHeight = (int) (image.getHeight() / inSampleSize);
+            return Bitmap.createScaledBitmap(image, dstWidth, dstHeight, false);
+        } catch (RuntimeException exception) {
+            Logger.e(TAG, exception.getMessage());
+            return null;
+        }
+    }
+
     private static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
         final int height = options.outHeight;
         final int width = options.outWidth;
+        return calculateInSampleSize(width, height, reqWidth, reqHeight);
+    }
+
+    private static int calculateInSampleSize(int width, int height, int reqWidth, int reqHeight) {
+
         int inSampleSize = 1;
 
         if (height > reqHeight || width > reqWidth) {

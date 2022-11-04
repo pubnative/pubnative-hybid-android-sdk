@@ -34,16 +34,10 @@ import android.webkit.WebView;
 @SuppressLint("ViewConstructor")
 public class MRAIDBanner extends MRAIDView {
 
-    public MRAIDBanner(
-            Context context,
-            String baseUrl,
-            String data,
-            String[] supportedNativeFeatures,
-            MRAIDViewListener viewListener,
-            MRAIDNativeFeatureListener nativeFeatureListener,
-            ViewGroup contentInfo
-    ) {
-        super(context, baseUrl, data, supportedNativeFeatures, viewListener, nativeFeatureListener, contentInfo, false);
+    public MRAIDBanner(Context context, String baseUrl, String data, Boolean showTimerBeforeEndCard, String[] supportedNativeFeatures, MRAIDViewListener viewListener, MRAIDNativeFeatureListener nativeFeatureListener, ViewGroup contentInfo) {
+
+        super(context, baseUrl, data, showTimerBeforeEndCard, supportedNativeFeatures, viewListener, nativeFeatureListener, contentInfo, false);
+
         if (webView != null) {
             webView.setBackgroundColor(Color.TRANSPARENT);
             addView(webView, new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));

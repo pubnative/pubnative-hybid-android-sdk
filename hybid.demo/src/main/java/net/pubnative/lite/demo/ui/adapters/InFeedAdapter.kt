@@ -27,7 +27,9 @@ class InFeedAdapter(val zoneId: String, val adListener: InFeedAdListener) : Recy
             TYPE_MRECT ->
                 HyBidBannerViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_hybid_banner, parent, false), adListener)
             else ->
-                SampleTextViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_sample_text, parent, false))
+                SampleTextViewHolder(
+                    LayoutInflater.from(parent.context).inflate(R.layout.item_sample_text, parent, false)
+                )
         }
     }
 

@@ -8,21 +8,25 @@ import android.widget.FrameLayout
 import android.widget.RelativeLayout
 import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.ui.adapters.OnLogDisplayListener
 import net.pubnative.lite.sdk.utils.Logger
 import net.pubnative.lite.sdk.views.HyBidBannerAdView
 import net.pubnative.lite.sdk.views.PNAdView
 
-class MarkupBannerViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), PNAdView.Listener {
+class MarkupBannerViewHolder(itemView: View, private var mListener: OnLogDisplayListener) :
+    RecyclerView.ViewHolder(itemView), PNAdView.Listener {
     private val TAG = MarkupBannerViewHolder::class.java.simpleName
 
     fun bind(markup: String) {
-        if (!TextUtils.isEmpty(markup)) {
+        if (markup.isNotEmpty()) {
             val container = itemView.findViewById<FrameLayout>(R.id.banner_container)
             container.removeAllViews()
 
             val banner = HyBidBannerAdView(itemView.context)
 
-            val adLayoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            val adLayoutParams = RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            )
             adLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
             container.addView(banner, adLayoutParams)
             container.setBackgroundColor(Color.BLACK)
@@ -32,10 +36,12 @@ class MarkupBannerViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
     }
 
     override fun onAdLoaded() {
+        mListener.displayLogs()
         Logger.d(TAG, "onAdLoaded")
     }
 
     override fun onAdLoadFailed(error: Throwable?) {
+        mListener.displayLogs()
         Logger.e(TAG, "onAdLoadFailed", error)
     }
 

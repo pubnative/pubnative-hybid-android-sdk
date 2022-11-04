@@ -100,7 +100,7 @@ public class TrackingManager {
 
                     PNHttpClient.makeRequest(context, model.url, headers, null, new PNHttpClient.Listener() {
                         @Override
-                        public void onSuccess(String response) {
+                        public void onSuccess(String response, Map<String, List<String>> headers) {
                             sIsTracking = false;
                             trackNextItem(context);
                         }

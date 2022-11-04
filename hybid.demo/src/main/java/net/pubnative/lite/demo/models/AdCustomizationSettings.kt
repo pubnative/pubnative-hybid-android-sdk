@@ -5,6 +5,7 @@ class AdCustomizationSettings private constructor(builder: Builder){
     val mraidExpanded: Boolean?
     val locationTracking: Boolean?
     val locationUpdates: Boolean?
+    val customSkipOffsetDisabled: Boolean?
     val closeVideoAfterFinish: Boolean?
     val closeVideoAfterFinishForRewardedVideo: Boolean?
     val enableEndcard: Boolean?
@@ -15,6 +16,7 @@ class AdCustomizationSettings private constructor(builder: Builder){
     val feedbackEnabled: Boolean?
     val feedbackFormUrl: String?
     val initialAudioState: Int?
+    val countdownStyle: String?
 
     init {
         this.mraidExpanded = builder.mraidExpanded
@@ -30,12 +32,16 @@ class AdCustomizationSettings private constructor(builder: Builder){
         this.feedbackEnabled = builder.feedbackEnabled
         this.feedbackFormUrl = builder.feedbackFormUrl
         this.initialAudioState = builder.initialAudioState
+        this.countdownStyle = builder.countdownStyle
+        this.customSkipOffsetDisabled = builder.customSkipOffsetDisabled
     }
 
     class Builder {
         var mraidExpanded: Boolean? = null
             private set
         var locationTracking: Boolean? = null
+            private set
+        var customSkipOffsetDisabled: Boolean? = null
             private set
         var locationUpdates: Boolean? = null
             private set
@@ -59,10 +65,15 @@ class AdCustomizationSettings private constructor(builder: Builder){
             private set
         var initialAudioState: Int? = null
             private set
+        var countdownStyle: String? = null
+            private set
 
         fun mraidExpanded(mraidExpanded: Boolean) = apply { this.mraidExpanded = mraidExpanded }
         fun locationTracking(locationTracking: Boolean) =
             apply { this.locationTracking = locationTracking }
+
+        fun customSkipOffsetDisabled(disabled: Boolean) =
+            apply { this.customSkipOffsetDisabled = disabled }
 
         fun locationUpdates(locationUpdates: Boolean) =
             apply { this.locationUpdates = locationUpdates }
@@ -98,6 +109,9 @@ class AdCustomizationSettings private constructor(builder: Builder){
 
         fun initialAudioState(initialAudioState: Int) =
             apply { this.initialAudioState = initialAudioState }
+
+        fun countdownStyle(countdownStyle: String) =
+            apply { this.countdownStyle = countdownStyle }
 
         fun build() = AdCustomizationSettings(this)
     }

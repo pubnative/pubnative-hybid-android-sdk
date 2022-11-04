@@ -35,6 +35,7 @@ import net.pubnative.lite.sdk.browser.BrowserManager;
 import net.pubnative.lite.sdk.config.ConfigManager;
 import net.pubnative.lite.sdk.core.BuildConfig;
 import net.pubnative.lite.sdk.api.PNApiClient;
+import net.pubnative.lite.sdk.core.R;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdRequestFactory;
@@ -99,8 +100,14 @@ public class HyBid {
     private static String sDeveloperDomain;
     private static String sContentAgeRating;
 
+    private static Integer skipXmlResource = R.mipmap.skip;
+
+    private static Integer normalCloseXmlResource = -1;
+    private static Integer pressedCloseXmlResource = -1;
+
     private static InterstitialActionBehaviour sInterstitialActionBehaviour =
             InterstitialActionBehaviour.HB_CREATIVE;
+    private static CountdownStyle sCountdownStyle = CountdownStyle.PIE_CHART;
 
 
     private static AudioState sVideoAudioState = AudioState.DEFAULT;
@@ -307,6 +314,14 @@ public class HyBid {
         sLocationTrackingEnabled = isEnabled;
     }
 
+    public static void setCountdownStyle(CountdownStyle countdownStyle) {
+        sCountdownStyle = countdownStyle;
+    }
+
+    public static CountdownStyle getCountdownStyle() {
+        return sCountdownStyle;
+    }
+
     public static boolean isLocationTrackingEnabled() {
         return sLocationTrackingEnabled;
     }
@@ -433,6 +448,12 @@ public class HyBid {
         return isCloseVideoAfterFinishForRewarded;
     }
 
+    public static void resetSkipOffsetValues() {
+        sHtmlInterstitialSkipOffset = new SkipOffset(AdConstants.Skip.HTML_SKIP_OFFSET, false);
+        sVideoInterstitialSkipOffset = new SkipOffset(AdConstants.Skip.VIDEO_WITHOUT_ENDCARD_SKIP_OFFSET, false);
+        sEndCardCloseButtonDelay = new SkipOffset(AdConstants.Skip.ENDCARD_SKIP_OFFSET, false);
+    }
+
     public interface InitialisationListener {
         void onInitialisationFinished(boolean success);
     }
@@ -528,5 +549,26 @@ public class HyBid {
 
     public static String getSDKVersionInfo() {
         return new DisplayManager().getDisplayManagerVersion();
+    }
+
+    public static void setSkipXmlResource(Integer skipResource) {
+        skipXmlResource = skipResource;
+    }
+
+    public static Integer getSkipXmlResource() {
+        return skipXmlResource;
+    }
+
+    public static void setCloseXmlResource(Integer normalCloseResource, Integer pressedCloseResource) {
+        normalCloseXmlResource = normalCloseResource;
+        pressedCloseXmlResource = pressedCloseResource;
+    }
+
+    public static Integer getNormalCloseXmlResource() {
+        return normalCloseXmlResource;
+    }
+
+    public static Integer getPressedCloseXmlResource() {
+        return pressedCloseXmlResource;
     }
 }

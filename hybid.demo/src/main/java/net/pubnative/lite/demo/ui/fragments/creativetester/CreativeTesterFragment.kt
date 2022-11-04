@@ -129,9 +129,12 @@ class CreativeTesterFragment : Fragment(R.layout.fragment_creative_tester), HyBi
 
         PNHttpClient.makeRequest(context, url, null, null, true,
             object : PNHttpClient.Listener {
-                override fun onSuccess(response: String) {
-                    Log.d("onSuccess", response)
-                    loadMarkup(response)
+                override fun onSuccess(
+                    response: String?,
+                    headers: MutableMap<String, MutableList<String>>?
+                ) {
+                    Log.d(TAG, response ?: "")
+                    loadMarkup(response ?: "")
                 }
 
                 override fun onFailure(error: Throwable) {
@@ -153,7 +156,10 @@ class CreativeTesterFragment : Fragment(R.layout.fragment_creative_tester), HyBi
 
         PNHttpClient.makeRequest(context, url, headers, null, true,
             object : PNHttpClient.Listener {
-                override fun onSuccess(response: String) {
+                override fun onSuccess(
+                    response: String?,
+                    headers: MutableMap<String, MutableList<String>>?
+                ) {
                     if (!response.isNullOrEmpty()) {
                         Log.d("onSuccess", response)
                         val result: String = response.substring(

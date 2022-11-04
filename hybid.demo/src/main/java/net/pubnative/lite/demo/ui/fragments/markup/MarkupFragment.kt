@@ -9,20 +9,24 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.ui.adapters.MarkupAdapter
+import net.pubnative.lite.demo.ui.adapters.OnLogDisplayListener
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd
 import net.pubnative.lite.sdk.utils.Logger
 
-class MarkupFragment : Fragment(R.layout.fragment_markup) {
+class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener {
 
     private lateinit var markupViewModel: MarkupViewModel
 
     private lateinit var markupInput: EditText
     private lateinit var adSizeGroup: RadioGroup
     private lateinit var groupMarkupType: RadioGroup
+    private lateinit var creativeIdLabel: TextView
+    private lateinit var creativeIdView: TextView
     private lateinit var markupList: RecyclerView
 
-    private val adapter = MarkupAdapter()
+    private val adapter = MarkupAdapter(this)
 
     private var interstitial: HyBidInterstitialAd? = null
 
@@ -35,6 +39,8 @@ class MarkupFragment : Fragment(R.layout.fragment_markup) {
         markupInput = view.findViewById(R.id.input_markup)
         adSizeGroup = view.findViewById(R.id.group_ad_size)
         groupMarkupType = view.findViewById(R.id.group_markup_type)
+        creativeIdLabel = view.findViewById(R.id.label_creative_id)
+        creativeIdView = view.findViewById(R.id.view_creative_id)
         markupList = view.findViewById(R.id.list_markup)
         markupList.isNestedScrollingEnabled = false
 
@@ -45,6 +51,20 @@ class MarkupFragment : Fragment(R.layout.fragment_markup) {
         markupViewModel.listVisibillity.observe(viewLifecycleOwner) {
             if (it) markupList.visibility = View.VISIBLE
             else markupList.visibility = View.GONE
+        }
+
+        markupViewModel.creativeIdVisibillity.observe(viewLifecycleOwner) {
+            if (it) {
+                creativeIdLabel.visibility = View.VISIBLE
+                creativeIdView.visibility = View.VISIBLE
+            } else {
+                creativeIdLabel.visibility = View.GONE
+                creativeIdView.visibility = View.GONE
+            }
+        }
+
+        markupViewModel.creativeId.observe(viewLifecycleOwner) {
+            creativeIdView.text = it
         }
 
         markupViewModel.loadInterstitial.observe(viewLifecycleOwner) {
@@ -60,6 +80,7 @@ class MarkupFragment : Fragment(R.layout.fragment_markup) {
         }
 
         view.findViewById<Button>(R.id.button_load).setOnClickListener {
+            cleanLogs()
             loadMarkup()
         }
 
@@ -68,12 +89,15 @@ class MarkupFragment : Fragment(R.layout.fragment_markup) {
                 R.id.radio_size_banner -> {
                     markupViewModel.setMarkupSize(MarkupSize.BANNER)
                 }
+
                 R.id.radio_size_medium -> {
                     markupViewModel.setMarkupSize(MarkupSize.MEDIUM)
                 }
+
                 R.id.radio_size_leaderboard -> {
                     markupViewModel.setMarkupSize(MarkupSize.LEADERBOARD)
                 }
+
                 R.id.radio_size_interstitial -> {
                     markupViewModel.setMarkupSize(MarkupSize.INTERSTITIAL)
                 }
@@ -105,10 +129,12 @@ class MarkupFragment : Fragment(R.layout.fragment_markup) {
             override fun onInterstitialLoaded() {
                 Logger.d(TAG, "onInterstitialLoaded")
                 interstitial?.show()
+                displayLogs()
             }
 
             override fun onInterstitialLoadFailed(error: Throwable?) {
                 Logger.e(TAG, "onInterstitialLoadFailed", error)
+                displayLogs()
             }
 
             override fun onInterstitialImpression() {
@@ -135,5 +161,20 @@ class MarkupFragment : Fragment(R.layout.fragment_markup) {
     override fun onDestroy() {
         interstitial?.destroy()
         super.onDestroy()
+    }
+
+    override fun displayLogs() {
+        if (activity != null) {
+            val activity = activity as TabActivity
+            activity.notifyAdUpdated()
+        }
+    }
+
+    private fun cleanLogs() {
+        if (activity != null) {
+            val activity = activity as TabActivity
+            activity.clearEventList()
+            activity.notifyAdCleaned()
+        }
     }
 }

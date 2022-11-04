@@ -23,6 +23,7 @@
 package net.pubnative.lite.sdk.mraid.internal;
 
 import android.util.Base64;
+import android.util.Log;
 
 import net.pubnative.lite.sdk.mraid.Assets;
 
@@ -34,6 +35,7 @@ import java.util.regex.Pattern;
  */
 
 public class MRAIDHtmlProcessor {
+
     public static String processRawHtml(String rawHtml) {
         StringBuffer processedHtml = new StringBuffer(rawHtml);
 
@@ -50,9 +52,9 @@ public class MRAIDHtmlProcessor {
         Matcher matcher = pattern.matcher(processedHtml);
 
         // Add html, head, and/or body tags as needed.
-        boolean hasHtmlTag = rawHtml.contains("<html");
-        boolean hasHeadTag = rawHtml.contains("<head");
-        boolean hasBodyTag = rawHtml.contains("<body");
+        boolean hasHtmlTag = removeAllScripts(rawHtml).contains("<html");
+        boolean hasHeadTag = removeAllScripts(rawHtml).contains("<head");
+        boolean hasBodyTag = removeAllScripts(rawHtml).contains("<body");
 
         String ls = System.getProperty("line.separator");
 
@@ -113,5 +115,10 @@ public class MRAIDHtmlProcessor {
         }
 
         return processedHtml.toString();
+    }
+
+    private static String removeAllScripts(String htmlString){
+        if(htmlString == null || htmlString.isEmpty()) return "";
+        return htmlString.replaceAll("<script[\\s\\S]*?>[\\s\\S]*?<\\/script>", "");
     }
 }

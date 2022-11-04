@@ -68,6 +68,7 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
     private HyBidRewardedBroadcastSender mBroadcastSender;
     private ProgressBar mProgressBar;
     protected boolean mIsFeedbackFormOpen = false;
+    private boolean mIsFeedbackFormLoading = false;
 
     public abstract View getAdView();
 
@@ -162,8 +163,7 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
     }
 
     private View getContentInfo(Context context, Ad ad, ContentInfo contentInfo) {
-        return contentInfo == null ? ad.getContentInfoContainer(context, HyBid.isAdFeedbackEnabled(), this)
-                : ad.getContentInfoContainer(context, contentInfo, HyBid.isAdFeedbackEnabled(), this);
+        return contentInfo == null ? ad.getContentInfoContainer(context, HyBid.isAdFeedbackEnabled(), this) : ad.getContentInfoContainer(context, contentInfo, HyBid.isAdFeedbackEnabled(), this);
     }
 
     private final CloseableContainer.OnCloseListener mCloseListener = this::dismiss;
@@ -238,27 +238,32 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
 
     @Override
     public void onLinkClicked(String url) {
-        AdFeedbackView adFeedbackView = new AdFeedbackView();
-        adFeedbackView.prepare(this, url, mAd, Reporting.AdFormat.REWARDED,
-                IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
-                    @Override
-                    public void onLoadFinished() {
-                        pauseAd();
-                        mIsFeedbackFormOpen = true;
-                        adFeedbackView.showFeedbackForm(HyBidRewardedActivity.this);
-                    }
+        if (!mIsFeedbackFormOpen && !mIsFeedbackFormLoading) {
+            AdFeedbackView adFeedbackView = new AdFeedbackView();
+            mIsFeedbackFormLoading = true;
+            adFeedbackView.prepare(this, url, mAd, Reporting.AdFormat.REWARDED, IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
+                @Override
+                public void onLoadFinished() {
+                    mIsFeedbackFormLoading = false;
+                    pauseAd();
+                    mIsFeedbackFormOpen = true;
+                    adFeedbackView.showFeedbackForm(HyBidRewardedActivity.this);
+                }
 
-                    @Override
-                    public void onLoadFailed(Throwable error) {
-                        Logger.e(TAG, error.getMessage());
-                    }
+                @Override
+                public void onLoadFailed(Throwable error) {
+                    mIsFeedbackFormLoading = false;
+                    Logger.e(TAG, error.getMessage());
+                }
 
-                    @Override
-                    public void onFormClosed() {
-                        mIsFeedbackFormOpen = false;
-                        resumeAd();
-                    }
-                });
+                @Override
+                public void onFormClosed() {
+                    mIsFeedbackFormOpen = false;
+                    mIsFeedbackFormLoading = false;
+                    resumeAd();
+                }
+            });
+        }
     }
 
     protected HyBidRewardedBroadcastSender getBroadcastSender() {

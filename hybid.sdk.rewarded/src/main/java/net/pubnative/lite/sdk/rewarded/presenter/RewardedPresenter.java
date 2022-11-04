@@ -22,6 +22,7 @@
 //
 package net.pubnative.lite.sdk.rewarded.presenter;
 
+import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.models.Ad;
 
 import org.json.JSONObject;
@@ -42,6 +43,8 @@ public interface RewardedPresenter {
     }
 
     void setListener(RewardedPresenter.Listener listener);
+
+    void setVideoListener(VideoListener listener);
 
     Ad getAd();
 
