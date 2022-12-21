@@ -76,8 +76,24 @@ public class HyBidDFPInterstitialCustomEvent implements CustomEventInterstitial,
             return;
         }
 
-        SkipOffset htmlSkipOffset = HyBid.getHtmlInterstitialSkipOffset();
-        SkipOffset videoSkipOffset = HyBid.getVideoInterstitialSkipOffset();
+        Integer remoteConfSkipOst = ad.getHtmlSkipOffset();
+        Integer remoteConfVideoSkipOst = ad.getVideoSkipOffset();
+
+        SkipOffset htmlSkipOffset;
+        SkipOffset videoSkipOffset;
+
+        if(remoteConfSkipOst != null){
+            htmlSkipOffset = new SkipOffset(remoteConfSkipOst, true);
+        }else{
+            htmlSkipOffset = HyBid.getHtmlInterstitialSkipOffset();
+        }
+
+        if(remoteConfVideoSkipOst != null){
+            videoSkipOffset = new SkipOffset(remoteConfVideoSkipOst, true);
+        }else{
+            videoSkipOffset = HyBid.getVideoInterstitialSkipOffset();
+        }
+
         if (htmlSkipOffset.getOffset() > 0 || videoSkipOffset.getOffset() > 0) {
             mPresenter = new InterstitialPresenterFactory(context, zoneIdKey)
                     .createInterstitialPresenter(ad, htmlSkipOffset,

@@ -59,6 +59,7 @@ public abstract class PresenterFactory {
         adPresenter.setListener(bannerPresenterDecorator);
         adPresenter.setImpressionListener(bannerPresenterDecorator);
         adPresenter.setVideoListener(bannerPresenterDecorator);
+        adPresenter.setMRaidListener(bannerPresenterDecorator);
         return bannerPresenterDecorator;
     }
 

@@ -99,6 +99,7 @@ class HyBidInFeedFragment : Fragment(R.layout.fragment_hybid_infeed_banner), InF
         loadButton.setOnClickListener {
             val activity = activity as TabActivity
             activity.notifyAdCleaned()
+            activity.clearEventList()
             loadPNAd()
         }
 

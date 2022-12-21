@@ -137,7 +137,7 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
             }
         }
 
-        autoShowSwitch.setOnCheckedChangeListener{_, isChecked ->
+        autoShowSwitch.setOnCheckedChangeListener { _, isChecked ->
             hybidBanner.isAutoShowOnLoad = isChecked
         }
 
@@ -224,7 +224,10 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
 
     // --------------- HyBid Video Listener --------------------
     override fun onVideoError(progressPercentage: Int) {
-        Log.d(hyBidTAG, String.format(Locale.ENGLISH, "onVideoError progress: %d", progressPercentage))
+        Log.d(
+            hyBidTAG,
+            String.format(Locale.ENGLISH, "onVideoError progress: %d", progressPercentage)
+        )
     }
 
     override fun onVideoStarted() {

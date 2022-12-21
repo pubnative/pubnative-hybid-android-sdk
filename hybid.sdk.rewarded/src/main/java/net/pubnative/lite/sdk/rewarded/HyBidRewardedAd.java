@@ -614,10 +614,16 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     }
 
     public boolean hasEndCard() {
-        if (mAd == null || !HyBid.isEndCardEnabled()) {
-            return false;
+        if (mAd != null) {
+            if (mAd.isEndCardEnabled() != null) {
+                return mAd.isEndCardEnabled();
+            } else if (!HyBid.isEndCardEnabled()) {
+                return false;
+            } else {
+                return mAd.hasEndCard();
+            }
         } else {
-            return mAd.hasEndCard();
+            return false;
         }
     }
 }

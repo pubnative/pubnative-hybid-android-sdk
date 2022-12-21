@@ -25,8 +25,8 @@ package net.pubnative.lite.sdk.rewarded.activity;
 import android.annotation.SuppressLint;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 
 import net.pubnative.lite.sdk.HyBid;
@@ -37,14 +37,7 @@ import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewCloseLayoutListener;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
-import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
-import net.pubnative.lite.sdk.utils.Logger;
-import net.pubnative.lite.sdk.vpaid.PlayerInfo;
-import net.pubnative.lite.sdk.vpaid.VideoAd;
-import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
-import net.pubnative.lite.sdk.vpaid.VideoAdListener;
-import net.pubnative.lite.sdk.vpaid.VideoAdView;
 
 public class MraidRewardedActivity extends HyBidRewardedActivity implements MRAIDViewListener, MRAIDNativeFeatureListener, MRAIDViewCloseLayoutListener {
     private final String[] mSupportedNativeFeatures = new String[]{
@@ -117,10 +110,16 @@ public class MraidRewardedActivity extends HyBidRewardedActivity implements MRAI
     }
 
     @Override
-    public void onBackPressed() {
-        if (mIsSkippable) {
-            super.onBackPressed();
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+            if (mIsSkippable) {
+                dismiss();
+                return true;
+            }
+        } else {
+            return super.onKeyDown(keyCode, event);
         }
+        return false;
     }
 
     // ----------------------------------- MRAIDViewListener ---------------------------------------
@@ -161,6 +160,11 @@ public class MraidRewardedActivity extends HyBidRewardedActivity implements MRAI
     public void mraidShowCloseButton() {
         mIsSkippable = true;
         showRewardedCloseButton();
+    }
+
+    @Override
+    public void onExpandedAdClosed() {
+
     }
 
     // ------------------------------- MRAIDNativeFeatureListener ----------------------------------

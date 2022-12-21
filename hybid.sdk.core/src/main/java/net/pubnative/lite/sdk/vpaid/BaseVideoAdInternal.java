@@ -36,6 +36,8 @@ abstract class BaseVideoAdInternal {
     private boolean mIsReady;
     private boolean mIsRewarded = false;
     private VideoAdListener mVideoAdListener;
+
+    private CloseButtonListener mCloseButtonListener;
     private long mAdLoadingStartTime;
     private SimpleTimer mExpirationTimer;
     private VideoAdController mAdController;
@@ -120,6 +122,10 @@ abstract class BaseVideoAdInternal {
         mVideoAdListener = videoAdListener;
     }
 
+    void setAdCloseButtonListener(CloseButtonListener closeButtonListener) {
+        mCloseButtonListener = closeButtonListener;
+    }
+
     public void setVideoCacheItem(VideoAdCacheItem adCacheItem) {
         this.mCacheItem = adCacheItem;
     }
@@ -162,8 +168,10 @@ abstract class BaseVideoAdInternal {
             public void onFinish() {
                 BaseVideoAdInternal.this.onAdExpired();
             }
+
             @Override
-            public void onTick(long millisUntilFinished) {}
+            public void onTick(long millisUntilFinished) {
+            }
         });
         mExpirationTimer.start();
         Logger.d(LOG_TAG, "Start schedule expiration");
@@ -193,7 +201,8 @@ abstract class BaseVideoAdInternal {
             }
 
             @Override
-            public void onTick(long millisUntilFinished) {}
+            public void onTick(long millisUntilFinished) {
+            }
         });
         mPrepareTimer.start();
         Logger.d(LOG_TAG, "Start prepare timer");
@@ -229,7 +238,8 @@ abstract class BaseVideoAdInternal {
             }
 
             @Override
-            public void onTick(long millisUntilFinished) {}
+            public void onTick(long millisUntilFinished) {
+            }
         });
         mFetcherTimer.start();
         Logger.d(LOG_TAG, "Start fetcher timer");
@@ -309,7 +319,7 @@ abstract class BaseVideoAdInternal {
         });
     }
 
-    private CloseCardData createCloseCardData(Ad mAd){
+    private CloseCardData createCloseCardData(Ad mAd) {
         CloseCardData closeCardData = new CloseCardData();
         new CloseCardUtil().fetchCloseCardData(mAd, closeCardData);
         return closeCardData;
@@ -400,5 +410,10 @@ abstract class BaseVideoAdInternal {
         if (mVideoAdListener != null) {
             mVideoAdListener.onAdSkipped();
         }
+    }
+
+    void onAdCloseButtonVisible() {
+        if (mCloseButtonListener != null)
+            mCloseButtonListener.onCloseButtonVisible();
     }
 }

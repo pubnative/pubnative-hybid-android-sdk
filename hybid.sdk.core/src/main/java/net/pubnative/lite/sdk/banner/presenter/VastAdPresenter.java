@@ -29,7 +29,6 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.Reporting;
@@ -41,6 +40,7 @@ import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.PositionX;
 import net.pubnative.lite.sdk.models.PositionY;
+import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.utils.CheckUtils;
@@ -48,22 +48,26 @@ import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.visibility.ImpressionManager;
 import net.pubnative.lite.sdk.visibility.ImpressionTracker;
+import net.pubnative.lite.sdk.vpaid.CloseButtonListener;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.VideoAd;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdListener;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
+import net.pubnative.lite.sdk.vpaid.VideoVisibilityListener;
+import net.pubnative.lite.sdk.vpaid.VideoVisibilityManager;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
 import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
 
 import org.json.JSONObject;
 
-public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener, PNAPIContentInfoView.ContentInfoListener {
+public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener, PNAPIContentInfoView.ContentInfoListener, VideoVisibilityListener {
     private static final String TAG = VastAdPresenter.class.getSimpleName();
     private final Context mContext;
     private final Ad mAd;
     private final ImpressionTrackingMethod mTrackingMethod;
+    private VideoVisibilityManager videoVisibilityManager;
 
     private Listener mListener;
     private ImpressionListener mImpressionListener;
@@ -86,6 +90,9 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
         } else {
             mTrackingMethod = ImpressionTrackingMethod.AD_RENDERED;
         }
+
+        videoVisibilityManager = VideoVisibilityManager.getInstance();
+        videoVisibilityManager.addCallback(this);
     }
 
     @Override
@@ -104,6 +111,11 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
     }
 
     @Override
+    public void setMRaidListener(MRAIDViewListener listener) {
+
+    }
+
+    @Override
     public Ad getAd() {
         return mAd;
     }
@@ -119,6 +131,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
             mVideoPlayer = new VideoAdView(mContext);
             mVideoAd.bindView(mVideoPlayer);
             mVideoAd.setAdListener(mVideoAdListener);
+            mVideoAd.setAdCloseButtonListener(mAdCloseButtonListener);
 
             if (!TextUtils.isEmpty(getAd().getZoneId())) {
                 VideoAdCacheItem adCacheItem = HyBid.getVideoAdCache().remove(getAd().getZoneId());
@@ -148,6 +161,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
         if (mVideoAd != null) {
             mVideoAd.destroy();
         }
+        videoVisibilityManager.removeCallback(this);
         mListener = null;
         mIsDestroyed = true;
     }
@@ -169,6 +183,20 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
             ImpressionManager.stopTrackingView(mVideoPlayer);
         }
         mVideoAd.dismiss();
+    }
+
+    @Override
+    public void pauseAd() {
+        if (mVideoAd != null && mVideoAd.isShowing()) {
+            mVideoAd.pause();
+        }
+    }
+
+    @Override
+    public void resumeAd() {
+        if (mVideoAd != null && mVideoAd.isShowing()) {
+            mVideoAd.resume();
+        }
     }
 
     @Override
@@ -223,8 +251,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
     }
 
     private View getContentInfo(Context context, Ad ad, ContentInfo contentInfo) {
-        return contentInfo == null ? ad.getContentInfoContainer(context, HyBid.isAdFeedbackEnabled(), this)
-                : ad.getContentInfoContainer(context, contentInfo, HyBid.isAdFeedbackEnabled(), this);
+        return contentInfo == null ? ad.getContentInfoContainer(context, HyBid.isAdFeedbackEnabled(), this) : ad.getContentInfoContainer(context, contentInfo, HyBid.isAdFeedbackEnabled(), this);
     }
 
     @Override
@@ -247,6 +274,14 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
             if (mImpressionListener != null) {
                 mImpressionListener.onImpression();
             }
+        }
+    };
+
+    private final CloseButtonListener mAdCloseButtonListener = new CloseButtonListener() {
+
+        @Override
+        public void onCloseButtonVisible() {
+
         }
     };
 
@@ -332,6 +367,11 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
         adFeedbackView.prepare(mContext, url, mAd, Reporting.AdFormat.BANNER,
                 IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
                     @Override
+                    public void onLoad() {
+                        //load simple dialog
+                    }
+
+                    @Override
                     public void onLoadFinished() {
                         if (mVideoAd != null && mVideoAd.isShowing()) {
                             mVideoAd.pause();
@@ -339,17 +379,17 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
                         adFeedbackView.showFeedbackForm(mContext);
                     }
 
-                    @Override
-                    public void onLoadFailed(Throwable error) {
-                        Logger.e(TAG, error.getMessage());
-                    }
+            @Override
+            public void onLoadFailed(Throwable error) {
+                Logger.e(TAG, error.getMessage());
+            }
 
-                    @Override
-                    public void onFormClosed() {
-                        if (mVideoAd != null && mVideoAd.isShowing()) {
-                            mVideoAd.resume();
-                        }
-                    }
-                });
+            @Override
+            public void onFormClosed() {
+                if (mVideoAd != null && mVideoAd.isShowing()) {
+                    mVideoAd.resume();
+                }
+            }
+        });
     }
 }

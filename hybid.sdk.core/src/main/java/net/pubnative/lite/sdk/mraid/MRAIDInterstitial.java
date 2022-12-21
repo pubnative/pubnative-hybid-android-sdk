@@ -35,6 +35,8 @@ import android.webkit.WebView;
 @SuppressLint("ViewConstructor")
 public class MRAIDInterstitial extends MRAIDView {
 
+    private Boolean isCreatedByFeedbackForm = false;
+
     public MRAIDInterstitial(Context context, String baseUrl, String data, Boolean showTimerBeforeEndCard, String[] supportedNativeFeatures, MRAIDViewListener viewListener, MRAIDNativeFeatureListener nativeFeatureListener, ViewGroup contentInfo) {
         super(context, baseUrl, data, showTimerBeforeEndCard, supportedNativeFeatures, viewListener, nativeFeatureListener, contentInfo, true);
         webView.setBackgroundColor(Color.BLACK);
@@ -52,13 +54,13 @@ public class MRAIDInterstitial extends MRAIDView {
 
     @Deprecated
     @Override
-    protected void expand(String url) {
+    protected void expand(String url, Boolean isCreatedByFeedbackForm) {
         // only expand interstitials from loading state
         if (state != STATE_LOADING) {
             return;
         }
 
-        super.expand(url);
+        super.expand(url, isCreatedByFeedbackForm);
     }
 
     @Override
@@ -86,6 +88,10 @@ public class MRAIDInterstitial extends MRAIDView {
     }
 
     public void show(Activity activity) {
-        this.showAsInterstitial(activity);
+        this.showAsInterstitial(activity, isCreatedByFeedbackForm);
+    }
+
+    public void markCreativeAdComingFromFeedbackForm() {
+        this.isCreatedByFeedbackForm = true;
     }
 }

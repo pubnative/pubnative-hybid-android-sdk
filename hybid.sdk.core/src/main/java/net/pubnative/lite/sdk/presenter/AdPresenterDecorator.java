@@ -31,6 +31,8 @@ import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.mraid.MRAIDView;
+import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.Logger;
@@ -42,7 +44,7 @@ import org.json.JSONObject;
  * Created by erosgarciaponte on 08.01.18.
  */
 
-public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, AdPresenter.ImpressionListener, VideoListener {
+public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, AdPresenter.ImpressionListener, VideoListener, MRAIDViewListener {
     private static final String TAG = AdPresenterDecorator.class.getSimpleName();
     private static final String ERROR_DECORATOR_DESTROYED = "AdPresenterDecorator is destroyed";
 
@@ -52,14 +54,13 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
     private final AdPresenter.Listener mListener;
     private final ImpressionListener mImpressionListener;
     private VideoListener mVideoListener;
-    private boolean mIsDestroyed = false;
-    private boolean mImpressionConfirmed = false;
 
-    public AdPresenterDecorator(AdPresenter adPresenter,
-                                AdTracker adTrackingDelegate,
-                                ReportingController reportingController,
-                                AdPresenter.Listener listener,
-                                AdPresenter.ImpressionListener impressionListener) {
+    private MRAIDViewListener mMraidListener;
+    private boolean mIsDestroyed = false;
+    private boolean mImpressionTracked = false;
+    private boolean mClickTracked = false;
+
+    public AdPresenterDecorator(AdPresenter adPresenter, AdTracker adTrackingDelegate, ReportingController reportingController, AdPresenter.Listener listener, AdPresenter.ImpressionListener impressionListener) {
         mAdPresenter = adPresenter;
         mAdTrackingDelegate = adTrackingDelegate;
         mReportingController = reportingController;
@@ -80,6 +81,11 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
     @Override
     public void setVideoListener(VideoListener listener) {
         mVideoListener = listener;
+    }
+
+    @Override
+    public void setMRaidListener(MRAIDViewListener listener) {
+        mMraidListener = listener;
     }
 
     @Override
@@ -152,6 +158,10 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
             return;
         }
 
+        if (mClickTracked) {
+            return;
+        }
+
         if (mReportingController != null) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.CLICK);
@@ -162,6 +172,7 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
 
         mAdTrackingDelegate.trackClick();
         mListener.onAdClicked(adPresenter);
+        mClickTracked = true;
     }
 
     @Override
@@ -192,7 +203,7 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
             return;
         }
 
-        if (mImpressionConfirmed) {
+        if (mImpressionTracked) {
             Log.i(TAG, "impression is already confirmed, dropping impression tracking");
             return;
         }
@@ -205,7 +216,7 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
             mReportingController.reportEvent(reportingEvent);
         }
 
-        mImpressionConfirmed = true;
+        mImpressionTracked = true;
         mAdTrackingDelegate.trackImpression();
         if (mImpressionListener != null) {
             mImpressionListener.onImpression();
@@ -245,5 +256,41 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
         if (mVideoListener != null) {
             mVideoListener.onVideoSkipped();
         }
+    }
+
+    @Override
+    public void mraidViewLoaded(MRAIDView mraidView) {
+
+    }
+
+    @Override
+    public void mraidViewError(MRAIDView mraidView) {
+
+    }
+
+    @Override
+    public void mraidViewExpand(MRAIDView mraidView) {
+
+    }
+
+    @Override
+    public void mraidViewClose(MRAIDView mraidView) {
+
+    }
+
+    @Override
+    public boolean mraidViewResize(MRAIDView mraidView, int width, int height, int offsetX, int offsetY) {
+        return false;
+    }
+
+    @Override
+    public void mraidShowCloseButton() {
+
+    }
+
+    @Override
+    public void onExpandedAdClosed() {
+        if (mMraidListener != null)
+            mMraidListener.onExpandedAdClosed();
     }
 }

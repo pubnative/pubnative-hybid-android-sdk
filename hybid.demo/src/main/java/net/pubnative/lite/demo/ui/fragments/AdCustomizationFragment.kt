@@ -38,6 +38,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
         settingManager = SettingsManager.getInstance(requireContext())
         view.findViewById<Button>(R.id.button_save_settings).setOnClickListener {
             saveData()
+            activity?.finish()
         }
         fillSavedValues()
     }

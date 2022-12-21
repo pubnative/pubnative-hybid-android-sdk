@@ -47,7 +47,9 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
     private final ReportingController mReportingController;
     private final InterstitialPresenter.Listener mListener;
     private VideoListener mVideoListener;
-    private boolean mIsDestroyed;
+    private boolean mIsDestroyed = false;
+    private boolean mImpressionTracked = false;
+    private boolean mClickTracked = false;
 
     public InterstitialPresenterDecorator(InterstitialPresenter interstitialPresenter,
                                           AdTracker adTrackingDelegate,
@@ -136,6 +138,10 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             return;
         }
 
+        if (mImpressionTracked) {
+            return;
+        }
+
         if (mReportingController != null) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.IMPRESSION);
@@ -146,11 +152,16 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
 
         mAdTrackingDelegate.trackImpression();
         mListener.onInterstitialShown(interstitialPresenter);
+        mImpressionTracked = true;
     }
 
     @Override
     public void onInterstitialClicked(InterstitialPresenter interstitialPresenter) {
         if (mIsDestroyed) {
+            return;
+        }
+
+        if (mClickTracked) {
             return;
         }
 
@@ -164,6 +175,7 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
 
         mAdTrackingDelegate.trackClick();
         mListener.onInterstitialClicked(interstitialPresenter);
+        mClickTracked = true;
     }
 
     @Override

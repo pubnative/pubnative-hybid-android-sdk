@@ -37,14 +37,16 @@ import net.pubnative.lite.sdk.utils.json.JsonOperations;
 
 import org.json.JSONObject;
 
-public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPresenter.Listener, VideoListener{
+public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPresenter.Listener, VideoListener {
     private static final String TAG = RewardedPresenterDecorator.class.getSimpleName();
     private final RewardedPresenter mRewardedPresenter;
     private final AdTracker mAdTrackingDelegate;
     private final ReportingController mReportingController;
     private final RewardedPresenter.Listener mListener;
     private VideoListener mVideoListener;
-    private boolean mIsDestroyed;
+    private boolean mIsDestroyed = false;
+    private boolean mImpressionTracked = false;
+    private boolean mClickTracked = false;
 
     public RewardedPresenterDecorator(RewardedPresenter rewardedPresenter, AdTracker adTrackingDelegate, ReportingController reportingController, RewardedPresenter.Listener listener) {
         mRewardedPresenter = rewardedPresenter;
@@ -126,6 +128,10 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             return;
         }
 
+        if (mImpressionTracked) {
+            return;
+        }
+
         if (mReportingController != null) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.IMPRESSION);
@@ -136,11 +142,16 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
 
         mAdTrackingDelegate.trackImpression();
         mListener.onRewardedOpened(rewardedPresenter);
+        mImpressionTracked = true;
     }
 
     @Override
     public void onRewardedClicked(RewardedPresenter rewardedPresenter) {
         if (mIsDestroyed) {
+            return;
+        }
+
+        if (mClickTracked) {
             return;
         }
 
@@ -154,6 +165,7 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
 
         mAdTrackingDelegate.trackClick();
         mListener.onRewardedClicked(rewardedPresenter);
+        mClickTracked = true;
     }
 
     @Override

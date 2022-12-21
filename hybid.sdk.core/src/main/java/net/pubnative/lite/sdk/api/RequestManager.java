@@ -22,6 +22,8 @@
 //
 package net.pubnative.lite.sdk.api;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.AdCache;
@@ -266,9 +268,11 @@ public class RequestManager {
                 }
 
                 Logger.w(TAG, throwable.getMessage());
-                if (mRequestListener != null) {
-                    mRequestListener.onRequestFail(throwable);
-                }
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    if (mRequestListener != null) {
+                        mRequestListener.onRequestFail(throwable);
+                    }
+                });
             }
         });
     }

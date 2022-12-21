@@ -83,8 +83,7 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
             cleanLogs()
             prepareButton.isEnabled = false
             showButton.isEnabled = false
-            if (!isLoadingAd)
-                fireLoadClicked()
+            if (!isLoadingAd) fireLoadClicked()
         }
 
         prepareButton.setOnClickListener {
@@ -95,11 +94,11 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
             val activity = activity as TabActivity
             activity.cacheEventList()
             interstitialViewModel.showAd()
+            showButton.isEnabled = false
         }
 
         cachingCheckbox.setOnCheckedChangeListener { _, isChecked ->
-            if(isChecked != interstitialViewModel.cachingEnabled)
-                interstitialViewModel.reset()
+            if (isChecked != interstitialViewModel.cachingEnabled) interstitialViewModel.reset()
             interstitialViewModel.cachingEnabled = isChecked
             val activity = activity as TabActivity
             activity.cacheEventList()
@@ -108,15 +107,13 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
 
         errorView.setOnClickListener {
             ClipboardUtils.copyToClipboard(
-                requireActivity(),
-                errorView.text.toString()
+                requireActivity(), errorView.text.toString()
             )
         }
 
         creativeIdView.setOnClickListener {
             ClipboardUtils.copyToClipboard(
-                requireActivity(),
-                creativeIdView.text.toString()
+                requireActivity(), creativeIdView.text.toString()
             )
         }
     }
@@ -140,7 +137,7 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
                 prepareButton.isEnabled = false
                 showButton.isEnabled = false
             }
-            if (isLoadingAd){
+            if (isLoadingAd) {
                 displayLogs()
                 isLoadingAd = false
             }

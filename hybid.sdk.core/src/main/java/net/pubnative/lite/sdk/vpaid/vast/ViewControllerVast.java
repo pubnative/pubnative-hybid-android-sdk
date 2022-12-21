@@ -30,8 +30,10 @@ import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.vpaid.CloseButtonListener;
 import net.pubnative.lite.sdk.vpaid.VideoAdController;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
+import net.pubnative.lite.sdk.vpaid.VideoVisibilityManager;
 import net.pubnative.lite.sdk.vpaid.helpers.BitmapHelper;
 import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
 import net.pubnative.lite.sdk.vpaid.models.CloseCardData;
@@ -77,12 +79,17 @@ public class ViewControllerVast implements View.OnClickListener {
     private View mSkipView;
     private ImageView mMuteView;
     private SimpleTimer mEndcardTimer;
+    private Integer mRemoteEndCardCloseDelay;
+
+    VideoVisibilityManager videoVisibilityManager;
 
     private InterstitialActionBehaviour interstitialClickBehaviour;
 
-    public ViewControllerVast(VideoAdController adController, boolean isFullscreen) {
+    public ViewControllerVast(VideoAdController adController, boolean isFullscreen, Integer endCardCloseDelay) {
         mAdController = adController;
         mIsFullscreen = isFullscreen;
+        videoVisibilityManager = VideoVisibilityManager.getInstance();
+        mRemoteEndCardCloseDelay = endCardCloseDelay;
     }
 
     public void buildVideoAdView(VideoAdView bannerView) {
@@ -108,15 +115,12 @@ public class ViewControllerVast implements View.OnClickListener {
             mMediaLayout = new RelativeLayout(mVideoPlayerLayout.getContext());
             mVideoPlayerLayoutTexture = new TextureView(mMediaLayout.getContext());
             mVideoPlayerLayoutTexture.setId(R.id.textureView);
-            mMediaLayout.addView(mVideoPlayerLayoutTexture,
-                    new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
-            mVideoPlayerLayout.addView(mMediaLayout, 0,
-                    new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+            mMediaLayout.addView(mVideoPlayerLayoutTexture, new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
+            mVideoPlayerLayout.addView(mMediaLayout, 0, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
         } else {
             mVideoPlayerLayoutTexture = new TextureView(mVideoPlayerLayout.getContext());
             mVideoPlayerLayoutTexture.setId(R.id.textureView);
-            mVideoPlayerLayout.addView(mVideoPlayerLayoutTexture, 0,
-                    new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+            mVideoPlayerLayout.addView(mVideoPlayerLayoutTexture, 0, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
         }
 
         mEndCardLayout = mControlsLayout.findViewById(R.id.endCardLayout);
@@ -194,18 +198,19 @@ public class ViewControllerVast implements View.OnClickListener {
         @Override
         public void onVisibilityChanged(int visibility) {
             try {
-                if (!mAdController.adFinishedPlaying()) {
-                    if (visibility == View.VISIBLE) {
-                        mAdController.setVideoVisible(true);
-                    } else {
-                        mAdController.setVideoVisible(false);
-                    }
+                if (visibility == View.VISIBLE) {
+                    mAdController.setVideoVisible(true);
+                    videoVisibilityManager.reportChange(VideoVisibilityManager.VideoAdStatus.RESUMED);
+                } else {
+                    mAdController.setVideoVisible(false);
+                    videoVisibilityManager.reportChange(VideoVisibilityManager.VideoAdStatus.PAUSED);
                 }
+
             } catch (Exception e) {
                 Logger.e(LOG_TAG, "ViewControllerVast.createVisibilityListener: Log: " + Log.getStackTraceString(e));
             }
         }
-        };
+    };
 
     private final TextureView.SurfaceTextureListener mCreateTextureListener = new TextureView.SurfaceTextureListener() {
         @Override
@@ -230,14 +235,7 @@ public class ViewControllerVast implements View.OnClickListener {
 
     public void adjustLayoutParams(int width, int height) {
         FrameLayout.LayoutParams oldParams = (FrameLayout.LayoutParams) mControlsLayout.getLayoutParams();
-        ViewGroup.LayoutParams newParams = Utils.calculateNewLayoutParams(
-                oldParams,
-                width,
-                height,
-                mBannerView.getWidth(),
-                mBannerView.getHeight(),
-                Utils.StretchOption.NO_STRETCH
-        );
+        ViewGroup.LayoutParams newParams = Utils.calculateNewLayoutParams(oldParams, width, height, mBannerView.getWidth(), mBannerView.getHeight(), Utils.StretchOption.NO_STRETCH);
         mControlsLayout.setLayoutParams(newParams);
     }
 
@@ -270,10 +268,10 @@ public class ViewControllerVast implements View.OnClickListener {
         return mMuteState;
     }
 
-    public void showEndCard(EndCardData endCardData, String imageUri) {
+    public void showEndCard(EndCardData endCardData, String imageUri, CloseButtonListener closeButtonListener) {
         mEndCardLayout.setVisibility(View.VISIBLE);
         mEndCardLayout.setOnClickListener(v -> validateOpenURLClicked());
-        SkipOffset endCardCloseDelay = HyBid.getEndCardCloseButtonDelay();
+        SkipOffset endCardCloseDelay = getEndCardCloseDelay();
         if (endCardData != null) {
             mControlsLayout.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
             if (endCardData.getType() == EndCardData.Type.STATIC_RESOURCE) {
@@ -296,7 +294,7 @@ public class ViewControllerVast implements View.OnClickListener {
         }
 
         if (mIsFullscreen) {
-            showEndCardCloseButton(endCardCloseDelay.getOffset());
+            showEndCardCloseButton(endCardCloseDelay.getOffset(), closeButtonListener);
         }
 
         ReportingEvent event = new ReportingEvent();
@@ -339,8 +337,7 @@ public class ViewControllerVast implements View.OnClickListener {
                 }
             } else {
                 mStaticCloseCardView.setVisibility(View.GONE);
-                mHtmlCloseCardView = new MRAIDBanner(mEndCardLayout.getContext(), closeCardData.getBanner(), "",
-                        false, new String[]{}, mraidViewListener, mraidNativeFeatureListener, null);
+                mHtmlCloseCardView = new MRAIDBanner(mEndCardLayout.getContext(), closeCardData.getBanner(), "", false, new String[]{}, mraidViewListener, mraidNativeFeatureListener, null);
                 mHtmlCloseCardContainer.addView(mHtmlCloseCardView);
             }
         }
@@ -375,6 +372,10 @@ public class ViewControllerVast implements View.OnClickListener {
         @Override
         public void mraidShowCloseButton() {
 
+        }
+
+        @Override
+        public void onExpandedAdClosed() {
         }
     };
 
@@ -482,7 +483,7 @@ public class ViewControllerVast implements View.OnClickListener {
         mAdController.playAd();
     }
 
-    private void showEndCardCloseButton(int endCardDelay) {
+    private void showEndCardCloseButton(int endCardDelay, CloseButtonListener closeButtonListener) {
         if (endCardDelay >= 0) {
             int endCardDelayInMillis = endCardDelay * 1000;
 
@@ -490,6 +491,7 @@ public class ViewControllerVast implements View.OnClickListener {
                 @Override
                 public void onFinish() {
                     mEndCardCloseView.setVisibility(View.VISIBLE);
+                    closeButtonListener.onCloseButtonVisible();
                 }
 
                 @Override
@@ -528,5 +530,13 @@ public class ViewControllerVast implements View.OnClickListener {
 
     public TextureView getTexture() {
         return mVideoPlayerLayoutTexture;
+    }
+
+    private SkipOffset getEndCardCloseDelay() {
+        if (mRemoteEndCardCloseDelay != null) {
+            return new SkipOffset(mRemoteEndCardCloseDelay, true);
+        } else {
+            return HyBid.getEndCardCloseButtonDelay();
+        }
     }
 }

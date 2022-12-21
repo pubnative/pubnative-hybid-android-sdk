@@ -427,6 +427,11 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
             adFeedbackView.prepare(mAdView.getContext(), url, mAd, Reporting.AdFormat.NATIVE,
                     IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
                         @Override
+                        public void onLoad() {
+                            //load simple dialog
+                        }
+
+                        @Override
                         public void onLoadFinished() {
                             adFeedbackView.showFeedbackForm(mAdView.getContext());
                         }

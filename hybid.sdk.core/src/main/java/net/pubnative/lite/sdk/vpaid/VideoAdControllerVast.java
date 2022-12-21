@@ -5,7 +5,6 @@ import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
@@ -13,10 +12,11 @@ import android.view.View;
 import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
 
 import net.pubnative.lite.sdk.HyBid;
-import net.pubnative.lite.sdk.models.SkipOffset;
-import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
+import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.SkipOffset;
+import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
@@ -68,6 +68,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
     private boolean videoVisible = false;
     private boolean finishedPlaying = false;
     private boolean isResumed = false;
+    private boolean isPendingResumeWhenVisible = false;
     private boolean isImpressionFired = false;
     private boolean isVideoSkipped = false;
     private boolean containsStartEvent = false;
@@ -85,7 +86,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
         mAdParams = adParams;
         mViewabilityAdSession = viewabilityAdSession;
         mViewabilityFriendlyObstructions = new ArrayList<>();
-        mViewControllerVast = new ViewControllerVast(this, isFullscreen);
+        mViewControllerVast = new ViewControllerVast(this, isFullscreen, getEndcardCloseDelay(baseAd));
         mMacroHelper = new MacroHelper();
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
             isAndroid6VersionDevice = true;
@@ -252,9 +253,11 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
         mDoneMillis = -1;
         initSkipTime(duration);
         createProgressPoints(duration);
+
         mTimerWithPause = new TimerWithPause(duration, 10) {
             @Override
             public void onTick(long millisUntilFinished) {
+
                 mViewControllerVast.setProgress((int) millisUntilFinished, duration);
                 mDoneMillis = duration - (int) millisUntilFinished;
 
@@ -283,6 +286,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
             @Override
             public void onFinish() {
                 mViewControllerVast.resetProgress();
+                handleMediaPlayerComplete();
             }
         }.create();
 
@@ -444,15 +448,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
             new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    if (mBaseAdInternal.isInterstitial()) {
-                        mViewControllerVast.hideSkipButton();
-                    }
-                    mViewControllerVast.hideTimerAndMuteButton();
-                    mBaseAdInternal.onAdDidReachEnd();
-                    skipVideo(false);
-                    if (!isVideoSkipped)
-                        EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(),
-                                EventConstants.COMPLETE, mMacroHelper, true);
+                    handleMediaPlayerComplete();
                 }
             };
 
@@ -517,15 +513,17 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
         if (isAutoClose) {
             closeSelf();
         } else {
-            if (mEndCardData == null || !HyBid.isEndCardEnabled() || (mEndCardData.getType() == EndCardData.Type.STATIC_RESOURCE && TextUtils.isEmpty(mImageUri))) {
+
+            if (mEndCardData == null || !isEndCardShowable() || (mEndCardData.getType() == EndCardData.Type.STATIC_RESOURCE && TextUtils.isEmpty(mImageUri))) {
                 if (hasValidCloseCard()) {
                     mViewControllerVast.showCloseCard(mCloseCardData);
+                    mBaseAdInternal.onAdCloseButtonVisible();
                 } else if (skipEvent) {
                     closeSelf();
                 }
             } else {
                 hasEndcard = true;
-                mViewControllerVast.showEndCard(mEndCardData, mImageUri);
+                mViewControllerVast.showEndCard(mEndCardData, mImageUri, mBaseAdInternal::onAdCloseButtonVisible);
             }
         }
 
@@ -715,6 +713,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
             EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.PAUSE, mMacroHelper, false);
             getViewabilityAdSession().firePause();
             isResumed = false;
+            isPendingResumeWhenVisible = false;
         }
     }
 
@@ -753,8 +752,10 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
     };
 
     private void resumeAd() {
+
         if (mMediaPlayer != null && !mMediaPlayer.isPlaying() && mViewControllerVast.isEndCard() && !isResumed && isVideoVisible()) {
             isResumed = true;
+            isPendingResumeWhenVisible = false;
             playAd();
             ReportingEvent event = new ReportingEvent();
             event.setEventType(Reporting.EventType.VIDEO_RESUME);
@@ -765,7 +766,22 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
             }
             EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.RESUME, mMacroHelper, false);
             getViewabilityAdSession().fireResume();
+        }else if(mMediaPlayer != null && !mMediaPlayer.isPlaying() && !isVideoVisible()){
+            isPendingResumeWhenVisible = true;
         }
+    }
+
+    private void handleMediaPlayerComplete() {
+
+        if (mBaseAdInternal.isInterstitial()) {
+            mViewControllerVast.hideSkipButton();
+        }
+        mViewControllerVast.hideTimerAndMuteButton();
+        mBaseAdInternal.onAdDidReachEnd();
+        skipVideo(false);
+        if (!isVideoSkipped)
+            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(),
+                    EventConstants.COMPLETE, mMacroHelper, true);
     }
 
     private void recoverMediaPlayerSurface() {
@@ -775,10 +791,35 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
         postDelayed(() -> {
             try {
                 mMediaPlayer.setSurface(mViewControllerVast.getSurface());
+                if (finishedPlaying)
+                    mMediaPlayer.seekTo(mDuration);
             } catch (IllegalStateException e) {
                 Logger.e(LOG_TAG, "mediaPlayer cant recover surface: " + e.getMessage());
             }
         });
+    }
+
+    private boolean isEndCardShowable() {
+        Ad ad = mBaseAdInternal.getAd();
+        if (ad != null) {
+            if (ad.isEndCardEnabled() != null) {
+                return ad.isEndCardEnabled();
+            } else if (!HyBid.isEndCardEnabled()) {
+                return false;
+            } else {
+                return ad.hasEndCard();
+            }
+        } else {
+            return false;
+        }
+    }
+
+    private Integer getEndcardCloseDelay(BaseVideoAdInternal baseAd) {
+        Integer endcardCloseDelay = null;
+        if (baseAd != null && baseAd.getAd() != null) {
+            endcardCloseDelay = baseAd.getAd().getEndCardCloseDelay();
+        }
+        return endcardCloseDelay;
     }
 
     @Override
@@ -827,10 +868,13 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
 
     @Override
     public void setVideoVisible(boolean videoVisible) {
-        if (mMediaPlayer != null && mMediaPlayer.isPlaying() && !this.videoVisible && videoVisible && !finishedPlaying) {
+        if (mMediaPlayer != null && !this.videoVisible && videoVisible) {
             recoverMediaPlayerSurface();
         }
         this.videoVisible = videoVisible;
+        if(isPendingResumeWhenVisible && videoVisible){
+            resumeAd();
+        }
     }
 
     @Override

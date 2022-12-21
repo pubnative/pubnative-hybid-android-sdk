@@ -17,6 +17,8 @@ import net.pubnative.lite.sdk.utils.AdRequestRegistry
 class DebugViewModel(application: Application) : AndroidViewModel(application),
     ReportingEventCallback {
 
+    private var isReportingCallbackActive: Boolean = true
+
     // Live data
     private val _requestDebugInfo: MutableLiveData<RequestDebugInfo> = MutableLiveData()
     val requestDebugInfo: LiveData<RequestDebugInfo> = _requestDebugInfo
@@ -61,7 +63,8 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
 
     override fun onEvent(event: ReportingEvent?) {
         if (event != null) {
-            if (event.eventType != null && event.eventType.equals(Reporting.EventType.REQUEST)) clearEventList()
+            if (event.eventType != null && event.eventType.equals(Reporting.EventType.REQUEST))
+                clearEventList()
 
             _eventList.add(event)
 
@@ -85,5 +88,15 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
     override fun onCleared() {
         super.onCleared()
         HyBid.getReportingController().removeCallback(this)
+    }
+
+    fun registerReportingCallback() {
+        if (!isReportingCallbackActive)
+            HyBid.getReportingController().addCallback(this)
+    }
+
+    fun removeReportingCallback() {
+        HyBid.getReportingController().removeCallback(this)
+        isReportingCallbackActive = false
     }
 }

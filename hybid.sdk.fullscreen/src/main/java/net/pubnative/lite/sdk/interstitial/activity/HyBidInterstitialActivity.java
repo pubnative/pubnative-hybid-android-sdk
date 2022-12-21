@@ -1,6 +1,8 @@
 package net.pubnative.lite.sdk.interstitial.activity;
 
 import android.app.Activity;
+import android.app.DialogFragment;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -20,6 +22,7 @@ import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.contentinfo.AdFeedbackView;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastSender;
+import net.pubnative.lite.sdk.interstitial.R;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ContentInfo;
 import net.pubnative.lite.sdk.models.IntegrationType;
@@ -29,6 +32,7 @@ import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.views.CloseableContainer;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
+import net.pubnative.lite.sdk.views.ProgressDialogFragment;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
 import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
@@ -182,10 +186,14 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
     protected void showInterstitialCloseButton() {
         boolean hasEndcard = false;
         if (getAd() != null) {
-            hasEndcard = getAd().hasEndCard() && HyBid.isEndCardEnabled();
+            if (getAd().isEndCardEnabled() != null) {
+                hasEndcard = getAd().isEndCardEnabled();
+            } else {
+                hasEndcard = getAd().hasEndCard() && HyBid.isEndCardEnabled();
+            }
         }
 
-        if (mCloseableContainer != null && !hasEndcard) {
+        if (mCloseableContainer != null && !hasEndcard && !isFinishing()) {
             mCloseableContainer.setCloseVisible(true);
             mCloseableContainer.setOnCloseListener(mCloseListener);
         }
@@ -227,10 +235,18 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
     public void onLinkClicked(String url) {
         if (!mIsFeedbackFormOpen && !mIsFeedbackFormLoading) {
             AdFeedbackView adFeedbackView = new AdFeedbackView();
-            mIsFeedbackFormLoading = true;
+
             adFeedbackView.prepare(this, url, mAd, Reporting.AdFormat.REWARDED, IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
                 @Override
+                public void onLoad() {
+                    //load simple dialog
+                    mIsFeedbackFormLoading = true;
+                    showProgressDialog(getString(R.string.feedback_form), getString(R.string.loading));
+                }
+
+                @Override
                 public void onLoadFinished() {
+                    hideProgressDialog();
                     mIsFeedbackFormLoading = false;
                     pauseAd();
                     mIsFeedbackFormOpen = true;
@@ -239,12 +255,14 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
 
                 @Override
                 public void onLoadFailed(Throwable error) {
+                    hideProgressDialog();
                     mIsFeedbackFormLoading = false;
                     Logger.e(TAG, error.getMessage());
                 }
 
                 @Override
                 public void onFormClosed() {
+                    hideProgressDialog();
                     mIsFeedbackFormOpen = false;
                     mIsFeedbackFormLoading = false;
                     resumeAd();
@@ -271,5 +289,26 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
 
     protected void setIsVast(Boolean isVast) {
         this.mIsVast = isVast;
+    }
+
+    public void showProgressDialog(String title, String message) {
+        Fragment prev = getFragmentManager().findFragmentByTag("progress dialog");
+
+        if (prev != null) {
+            getFragmentManager().beginTransaction().remove(prev).commit();
+        }
+
+        getFragmentManager().beginTransaction().addToBackStack(null).commit();
+
+        DialogFragment newFragment = ProgressDialogFragment.newInstance(title, message);
+        newFragment.show(getFragmentManager(), "progress dialog");
+    }
+
+    public void hideProgressDialog() {
+        Fragment prev = getFragmentManager().findFragmentByTag("progress dialog");
+
+        if (prev != null) {
+            getFragmentManager().beginTransaction().remove(prev).commit();
+        }
     }
 }

@@ -5,9 +5,7 @@ import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.fragment.app.Fragment
@@ -17,6 +15,7 @@ import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd
 import net.pubnative.lite.sdk.models.AdSize
 import net.pubnative.lite.sdk.network.PNHttpClient
+import net.pubnative.lite.sdk.utils.AdRequestRegistry
 import net.pubnative.lite.sdk.utils.Logger
 import net.pubnative.lite.sdk.views.HyBidAdView
 import net.pubnative.lite.sdk.views.HyBidBannerAdView
@@ -64,6 +63,7 @@ class CreativeTesterFragment : Fragment(R.layout.fragment_creative_tester), HyBi
             hideKeyboard(context, view)
             val activity = activity as TabActivity
             activity.notifyAdCleaned()
+            activity.clearEventList()
             loadCreative()
         }
 
@@ -126,7 +126,7 @@ class CreativeTesterFragment : Fragment(R.layout.fragment_creative_tester), HyBi
     private fun loadP161Creative(creativeId: String) {
         val url = "https://docker.creative-serving.com/preview?cr=$creativeId&type=adi"
         Toast.makeText(activity, "Making request to: $url", Toast.LENGTH_SHORT).show()
-
+        val initTime = System.currentTimeMillis()
         PNHttpClient.makeRequest(context, url, null, null, true,
             object : PNHttpClient.Listener {
                 override fun onSuccess(
@@ -134,12 +134,16 @@ class CreativeTesterFragment : Fragment(R.layout.fragment_creative_tester), HyBi
                     headers: MutableMap<String, MutableList<String>>?
                 ) {
                     Log.d(TAG, response ?: "")
+                    val responseTime = System.currentTimeMillis() - initTime
+                    AdRequestRegistry.getInstance().setLastAdRequest(url, response, responseTime)
                     loadMarkup(response ?: "")
                 }
 
                 override fun onFailure(error: Throwable) {
                     Log.d("onFailure", error.toString())
                     Toast.makeText(activity, "Creative request failed", Toast.LENGTH_SHORT).show()
+                    val responseTime = System.currentTimeMillis() - initTime
+                    AdRequestRegistry.getInstance().setLastAdRequest(url, error.message, responseTime)
                 }
             })
     }
@@ -153,6 +157,7 @@ class CreativeTesterFragment : Fragment(R.layout.fragment_creative_tester), HyBi
 
         headers["user-agent"] =
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"
+        val initTime = System.currentTimeMillis()
 
         PNHttpClient.makeRequest(context, url, headers, null, true,
             object : PNHttpClient.Listener {
@@ -167,6 +172,8 @@ class CreativeTesterFragment : Fragment(R.layout.fragment_creative_tester), HyBi
                             response.indexOf("]]>")
                         )
                         Log.d("result", result)
+                        val responseTime = System.currentTimeMillis() - initTime
+                        AdRequestRegistry.getInstance().setLastAdRequest(url, response, responseTime)
                         loadMarkup(result)
                     } else {
                         Log.d("onSuccess", "Request succeeded with an empty response")
@@ -175,12 +182,16 @@ class CreativeTesterFragment : Fragment(R.layout.fragment_creative_tester), HyBi
                             "Request succeeded with an empty response",
                             Toast.LENGTH_SHORT
                         ).show()
+                        val responseTime = System.currentTimeMillis() - initTime
+                        AdRequestRegistry.getInstance().setLastAdRequest(url, "Request succeeded with an empty response", responseTime)
                     }
                 }
 
                 override fun onFailure(error: Throwable) {
                     Log.d("onFailure", error.toString())
                     Toast.makeText(activity, "Creative request failed", Toast.LENGTH_SHORT).show()
+                    val responseTime = System.currentTimeMillis() - initTime
+                    AdRequestRegistry.getInstance().setLastAdRequest(url, error.message, responseTime)
                 }
             })
     }

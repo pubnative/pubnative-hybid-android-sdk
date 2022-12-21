@@ -16,8 +16,6 @@ public class RemoteConfigModel extends JsonModel {
     @BindField
     public RemoteConfigAppConfig app_config;
     @BindField
-    public RemoteConfigPlacementInfo placement_info;
-    @BindField
     public RemoteConfigMeasurement measurement;
     @BindField
     public RemoteConfigVoyager voyager;

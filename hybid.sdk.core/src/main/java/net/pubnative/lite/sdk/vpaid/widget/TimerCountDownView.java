@@ -39,14 +39,14 @@ public class TimerCountDownView extends CountDownView {
 
     @Override
     public void setProgress(int currentMs, int totalMs) {
-        if(timerContainer.getVisibility() == View.GONE){
+        if (timerContainer.getVisibility() == View.GONE) {
             timerContainer.setVisibility(View.VISIBLE);
         }
         int remainSec = (totalMs - currentMs) / 1000;
         int minutes = remainSec / 60;
         int seconds = remainSec % 60;
-        String minutesText = (minutes >= 10) ? Integer.toString(minutes) : "0"+minutes;
-        String secondsText = (seconds >= 10) ? Integer.toString(seconds) : "0"+seconds;
+        String minutesText = (minutes >= 10) ? Integer.toString(minutes) : "0" + minutes;
+        String secondsText = (seconds >= 10) ? Integer.toString(seconds) : "0" + seconds;
         String result = minutesText + ":" + secondsText;
         progressTextView.setText(result);
     }

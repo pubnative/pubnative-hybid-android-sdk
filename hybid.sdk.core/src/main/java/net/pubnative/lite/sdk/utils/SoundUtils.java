@@ -6,7 +6,7 @@ import android.media.AudioManager;
 public class SoundUtils {
     private static final String TAG = SoundUtils.class.getSimpleName();
 
-    public boolean isSoundMuted(Context context) {
+    public static boolean isSoundMuted(Context context) {
         try {
             if (context != null) {
                 AudioManager audio = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);

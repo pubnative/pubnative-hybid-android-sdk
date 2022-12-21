@@ -11,11 +11,13 @@ import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.ui.adapters.MarkupAdapter
+import net.pubnative.lite.demo.ui.adapters.OnAdRefreshListener
 import net.pubnative.lite.demo.ui.adapters.OnLogDisplayListener
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd
 import net.pubnative.lite.sdk.utils.Logger
 
-class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener {
+class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
+    OnAdRefreshListener {
 
     private lateinit var markupViewModel: MarkupViewModel
 
@@ -25,8 +27,9 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener 
     private lateinit var creativeIdLabel: TextView
     private lateinit var creativeIdView: TextView
     private lateinit var markupList: RecyclerView
+    private lateinit var urWrapCheckbox: CheckBox
 
-    private val adapter = MarkupAdapter(this)
+    private val adapter = MarkupAdapter(this, this)
 
     private var interstitial: HyBidInterstitialAd? = null
 
@@ -41,6 +44,7 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener 
         groupMarkupType = view.findViewById(R.id.group_markup_type)
         creativeIdLabel = view.findViewById(R.id.label_creative_id)
         creativeIdView = view.findViewById(R.id.view_creative_id)
+        urWrapCheckbox = view.findViewById(R.id.check_ur_wrap)
         markupList = view.findViewById(R.id.list_markup)
         markupList.isNestedScrollingEnabled = false
 
@@ -81,6 +85,10 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener 
 
         view.findViewById<Button>(R.id.button_load).setOnClickListener {
             cleanLogs()
+            if (activity != null) {
+                val activity = activity as TabActivity
+                activity.registerReportingCallback()
+            }
             loadMarkup()
         }
 
@@ -116,9 +124,15 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener 
             }
         }
 
+        urWrapCheckbox.setOnCheckedChangeListener { _, isChecked ->
+            markupViewModel.setURWrap(isChecked)
+        }
+
         markupList.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
         markupList.itemAnimator = DefaultItemAnimator()
         markupList.adapter = adapter
+
+        fetchURTemplate()
     }
 
 
@@ -176,5 +190,19 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener 
             activity.clearEventList()
             activity.notifyAdCleaned()
         }
+    }
+
+    override fun onAdRefresh() {
+        if (activity != null) {
+            val activity = activity as TabActivity
+            activity.removeReportingCallback()
+        }
+    }
+
+    private fun fetchURTemplate() {
+        val urTemplate = requireContext().assets.open("ur.html").bufferedReader().use {
+            it.readText()
+        }
+        markupViewModel.setURTemplate(urTemplate)
     }
 }

@@ -12,6 +12,7 @@ import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.vpaid.CloseButtonListener;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.VideoAd;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
@@ -51,6 +52,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
                 mVideoAd.useMobileNetworkForCaching(true);
                 mVideoAd.bindView(mVideoPlayer);
                 mVideoAd.setAdListener(mVideoAdListener);
+                mVideoAd.setAdCloseButtonListener(mCloseButtonListener);
                 setProgressBarVisible();
 
                 VideoAdCacheItem adCacheItem = HyBid.getVideoAdCache().remove(getZoneId());
@@ -134,8 +136,10 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
             if (mIsSkippable) {
-                dismissVideo(100);
-                super.onKeyDown(keyCode, event);
+                if (getBroadcastSender() != null) {
+                    getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
+                    finish();
+                }
             }
         } else {
             return super.onKeyDown(keyCode, event);
@@ -206,8 +210,8 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
         public void onAdDidReachEnd() {
             mReady = false;
             if (!mHasEndCard) {
-                mIsSkippable = true;
                 showInterstitialCloseButton();
+                mIsSkippable = true;
             }
             mIsVideoFinished = true;
             if (getBroadcastSender() != null) {
@@ -239,6 +243,14 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
             if (getBroadcastSender() != null) {
                 getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_START);
             }
+        }
+    };
+
+    private final CloseButtonListener mCloseButtonListener = new CloseButtonListener() {
+
+        @Override
+        public void onCloseButtonVisible() {
+            mIsSkippable = true;
         }
     };
 

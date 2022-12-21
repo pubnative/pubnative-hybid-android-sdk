@@ -34,4 +34,5 @@ public interface APIMeta {
     String BUNDLE_ID = "bundleid";
     String CONTENT_INFO = "contentinfo";
     String RENDERING_OPTIONS = "renderingoptions";
+    String REMOTE_CONFIGS = "remoteconfigs";
 }

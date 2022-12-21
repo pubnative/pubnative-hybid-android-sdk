@@ -12,14 +12,18 @@ import net.pubnative.lite.demo.ui.viewholders.MarkupMRectViewHolder
 import net.pubnative.lite.demo.ui.viewholders.SampleTextViewHolder
 import net.pubnative.lite.demo.util.SampleQuotes
 
-class MarkupAdapter(private var mListener: OnLogDisplayListener) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>(), OnLogDisplayListener {
+class MarkupAdapter(
+    private var mListener: OnLogDisplayListener,
+    private var mAdRefreshListener: OnAdRefreshListener
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), OnLogDisplayListener,
+    OnExpandedAdCloseListener {
 
     companion object {
         private const val TYPE_TEXT = 1
         private const val TYPE_MARKUP_BANNER = 2
         private const val TYPE_MARKUP_MRECT = 3
         private const val TYPE_MARKUP_LEADERBOARD = 4
+        private const val ATTACHED_AD_VIEW_POSITION = 2
     }
 
     private var selectedSize: MarkupSize = MarkupSize.BANNER
@@ -31,7 +35,7 @@ class MarkupAdapter(private var mListener: OnLogDisplayListener) :
         return when (viewType) {
             TYPE_MARKUP_BANNER -> MarkupBannerViewHolder(
                 LayoutInflater.from(parent.context)
-                    .inflate(R.layout.item_markup_banner, parent, false), mListener
+                    .inflate(R.layout.item_markup_banner, parent, false), mListener, this
             )
 
             TYPE_MARKUP_MRECT -> MarkupMRectViewHolder(
@@ -66,7 +70,7 @@ class MarkupAdapter(private var mListener: OnLogDisplayListener) :
     override fun getItemCount() = list.count()
 
     override fun getItemViewType(position: Int): Int {
-        if (position == 2 && markup.isNotEmpty()) {
+        if (position == ATTACHED_AD_VIEW_POSITION && markup.isNotEmpty()) {
             when (selectedSize) {
                 MarkupSize.BANNER -> {
                     return TYPE_MARKUP_BANNER
@@ -97,5 +101,10 @@ class MarkupAdapter(private var mListener: OnLogDisplayListener) :
 
     override fun displayLogs() {
         mListener.displayLogs()
+    }
+
+    override fun onExpandedAdClosed() {
+        mAdRefreshListener.onAdRefresh()
+        notifyItemChanged(ATTACHED_AD_VIEW_POSITION)
     }
 }

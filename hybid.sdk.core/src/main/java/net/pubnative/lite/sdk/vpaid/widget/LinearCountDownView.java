@@ -42,13 +42,12 @@ public class LinearCountDownView extends FrameLayout {
         progressBarView.setMax(totalMs);
         progressBarView.setSecondaryProgress(totalMs);
         int remainSec;
-        if (Build.VERSION.SDK_INT != Build.VERSION_CODES.P) {
-            progressBarView.setProgress(currentMs);
-            remainSec = (totalMs - currentMs) / 1000 + 1;
-        } else {
-            progressBarView.setProgress(currentMs + 2000);
-            remainSec = (totalMs - currentMs) / 1000 - 1;
-        }
+
+        progressBarView.setProgress(currentMs);
+        remainSec = (totalMs - currentMs) / 1000 + 1;
+        if (remainSec < 0)
+            remainSec = 0;
+
         progressTextView.setText(ProgressTimeFormatter.formatSeconds(remainSec));
     }
 

@@ -7,7 +7,9 @@ import android.widget.ImageView;
 
 import net.pubnative.lite.sdk.utils.Logger;
 
-import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 public class ImageUtils {
     private static final String TAG = ImageUtils.class.getSimpleName();
@@ -47,17 +49,36 @@ public class ImageUtils {
     }
 
     private static Bitmap decodeSampledBitmap(String filePath, int reqWidth, int reqHeight) {
+        Bitmap bitmap;
         try {
             final BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(filePath, options);
             options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
             options.inJustDecodeBounds = false;
-            return BitmapFactory.decodeFile(filePath, options);
-        } catch (RuntimeException exception) {
-            Logger.e(TAG, exception.getMessage());
-            return null;
+            bitmap = BitmapFactory.decodeFile(filePath, options);
+            return bitmap;
+        } catch (OutOfMemoryError | RuntimeException ex) {
+            bitmap = decodeFile(new File(filePath), reqWidth, reqHeight);
+            return bitmap;
         }
+    }
+
+    public static Bitmap decodeFile(File f, int reqWidth, int reqHeight) {
+        try {
+            //Decode image size
+            BitmapFactory.Options o = new BitmapFactory.Options();
+            o.inJustDecodeBounds = true;
+            o.inDither = true;
+            BitmapFactory.decodeStream(new FileInputStream(f), null, o);
+            int scale = 1;
+            while (o.outWidth / scale / 2 >= reqWidth && o.outHeight / scale / 2 >= reqHeight)
+                scale *= 2;
+            //Decode with inSampleSize
+            BitmapFactory.Options o2 = new BitmapFactory.Options();
+            o2.inSampleSize = scale;
+            return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
+        } catch (FileNotFoundException ignored) {
+        }
+        return null;
     }
 
     private static Bitmap decodeSampledBitmap(Bitmap image, int reqWidth, int reqHeight) {

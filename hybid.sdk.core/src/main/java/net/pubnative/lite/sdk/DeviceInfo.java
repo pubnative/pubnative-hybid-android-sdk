@@ -95,7 +95,6 @@ public class DeviceInfo {
     private Listener mListener;
     private String deviceHeight;
     private String deviceWidth;
-    private String soundSetting;
 
     public DeviceInfo(Context context) {
         mContext = context.getApplicationContext();
@@ -185,17 +184,6 @@ public class DeviceInfo {
         }
     }
 
-    public void checkSoundSetting() {
-        SoundUtils soundUtils = new SoundUtils();
-        boolean muted = soundUtils.isSoundMuted(mContext);
-
-        if (muted) {
-            soundSetting = "0";
-        } else {
-            soundSetting = "1";
-        }
-    }
-
     public String getModel() {
         return Build.MODEL;
     }
@@ -217,7 +205,7 @@ public class DeviceInfo {
     }
 
     public String getSoundSetting() {
-        return soundSetting;
+        return SoundUtils.isSoundMuted(mContext) ? "0" : "1";
     }
 
     public String getUserAgent() {

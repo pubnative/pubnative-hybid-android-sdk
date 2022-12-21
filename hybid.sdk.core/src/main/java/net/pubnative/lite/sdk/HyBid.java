@@ -25,6 +25,7 @@ package net.pubnative.lite.sdk;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.util.Log;
 
 import net.pubnative.lite.sdk.analytics.Reporting;
@@ -42,6 +43,7 @@ import net.pubnative.lite.sdk.models.AdRequestFactory;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.SkipOffset;
+import net.pubnative.lite.sdk.prefs.HyBidPreferences;
 import net.pubnative.lite.sdk.reporting.ReportingDelegate;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNApiUrlComposer;
@@ -105,8 +107,7 @@ public class HyBid {
     private static Integer normalCloseXmlResource = -1;
     private static Integer pressedCloseXmlResource = -1;
 
-    private static InterstitialActionBehaviour sInterstitialActionBehaviour =
-            InterstitialActionBehaviour.HB_CREATIVE;
+    private static InterstitialActionBehaviour sInterstitialActionBehaviour = InterstitialActionBehaviour.HB_CREATIVE;
     private static CountdownStyle sCountdownStyle = CountdownStyle.PIE_CHART;
 
 
@@ -114,18 +115,30 @@ public class HyBid {
 
     private static final boolean sEventLoggingEndpointEnabled = false;
 
-    public static void initialize(String appToken,
-                                  Application application) {
+    public static void initialize(String appToken, Application application) {
         initialize(appToken, application, null);
     }
 
     /**
      * This method must be called to initialize the SDK before request ads.
      */
-    public static void initialize(final String appToken,
-                                  final Application application, final InitialisationListener initialisationListener) {
+    public static void initialize(final String appToken, final Application application, final InitialisationListener initialisationListener) {
 
         sAppToken = appToken;
+
+        long installed;
+
+        try {
+            installed = application.getApplicationContext().getPackageManager()
+                    .getPackageInfo(application.getApplicationContext().getPackageName(), 0).firstInstallTime;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            installed = System.currentTimeMillis();
+        }
+
+        HyBidPreferences preferences = new HyBidPreferences(application.getApplicationContext());
+        preferences.setAppFirstInstalledTime(String.valueOf(installed));
+
         sBundleId = application.getPackageName();
         sApiClient = new PNApiClient(application);
         if (application.getSystemService(Context.LOCATION_SERVICE) != null) {
@@ -141,12 +154,10 @@ public class HyBid {
         sVideoAdCache = new VideoAdCache();
         sBrowserManager = new BrowserManager();
         sVgiIdManager = new VgiIdManager(application.getApplicationContext());
-        if (sReportingController == null)
-            sReportingController = new ReportingController();
+        if (sReportingController == null) sReportingController = new ReportingController();
         sDiagnosticsManager = new DiagnosticsManager(application.getApplicationContext(), sReportingController);
         sViewabilityManager = new ViewabilityManager(application);
-        ReportingDelegate sReportingDelegate = new ReportingDelegate(application.getApplicationContext(),
-                sReportingController, sConfigManager, appToken);
+        ReportingDelegate sReportingDelegate = new ReportingDelegate(application.getApplicationContext(), sReportingController, sConfigManager, appToken);
 
         if (sDeviceInfo == null) {
             sDeviceInfo = new DeviceInfo(application.getApplicationContext());
@@ -390,13 +401,11 @@ public class HyBid {
     }
 
     public static void setHtmlInterstitialSkipOffset(Integer seconds) {
-        if (seconds >= 0)
-            sHtmlInterstitialSkipOffset = new SkipOffset(seconds, true);
+        if (seconds >= 0) sHtmlInterstitialSkipOffset = new SkipOffset(seconds, true);
     }
 
     public static void setVideoInterstitialSkipOffset(Integer seconds) {
-        if (seconds >= 0)
-            sVideoInterstitialSkipOffset = new SkipOffset(seconds, true);
+        if (seconds >= 0) sVideoInterstitialSkipOffset = new SkipOffset(seconds, true);
     }
 
     public static SkipOffset getHtmlInterstitialSkipOffset() {
@@ -408,8 +417,7 @@ public class HyBid {
     }
 
     public static void setEndCardCloseButtonDelay(int seconds) {
-        if (seconds >= 0)
-            sEndCardCloseButtonDelay = new SkipOffset(seconds, true);
+        if (seconds >= 0) sEndCardCloseButtonDelay = new SkipOffset(seconds, true);
     }
 
     public static SkipOffset getEndCardCloseButtonDelay() {

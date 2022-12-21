@@ -311,6 +311,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     public void prepareAd(Ad ad) {
         if (ad != null) {
             mAd = ad;
+            checkRemoteConfigs();
             if (!mAd.getZoneId().equalsIgnoreCase(mZoneId)) {
                 mZoneId = mAd.getZoneId();
                 JsonOperations.putJsonString(mPlacementParams, Reporting.Key.ZONE_ID, mZoneId);
@@ -361,6 +362,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
                         mAd.setHasEndCard(hasEndCard);
                         HyBid.getAdCache().put(mZoneId, mAd);
                         HyBid.getVideoAdCache().put(mZoneId, adCacheItem);
+                        checkRemoteConfigs();
                         mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, HyBidInterstitialAd.this);
                         if (mPresenter != null) {
                             mPresenter.setVideoListener(HyBidInterstitialAd.this);
@@ -388,7 +390,8 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
                 type = Ad.AdType.HTML;
                 mAd = new Ad(assetGroupId, adValue, type);
                 HyBid.getAdCache().put(mZoneId, mAd);
-                mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, this);
+                checkRemoteConfigs();
+                mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd,  mHtmlSkipOffset, mVideoSkipOffset, HyBidInterstitialAd.this);
                 if (mPresenter != null) {
                     mPresenter.setVideoListener(this);
                     mPresenter.load();
@@ -399,6 +402,19 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
             JsonOperations.putJsonString(mPlacementParams, Reporting.Key.ZONE_ID, mZoneId);
         } else {
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ASSET));
+        }
+    }
+
+    private void checkRemoteConfigs(){
+
+        Integer remoteConfSkipOst = mAd.getHtmlSkipOffset();
+        Integer remoteConfVideoSkipOst = mAd.getVideoSkipOffset();
+
+        if(remoteConfSkipOst != null){
+            mHtmlSkipOffset = new SkipOffset(remoteConfSkipOst, true);
+        }
+        if(remoteConfVideoSkipOst != null){
+            mVideoSkipOffset = new SkipOffset(remoteConfVideoSkipOst, true);
         }
     }
 
@@ -550,6 +566,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NULL_AD));
         } else {
             mAd = ad;
+            checkRemoteConfigs();
             renderAd();
         }
     }
@@ -649,10 +666,16 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     }
 
     public boolean hasEndCard() {
-        if (mAd == null || !HyBid.isEndCardEnabled()) {
-            return false;
+        if (mAd != null) {
+            if (mAd.isEndCardEnabled() != null) {
+                return mAd.isEndCardEnabled();
+            } else if (!HyBid.isEndCardEnabled()) {
+                return false;
+            } else {
+                return mAd.hasEndCard();
+            }
         } else {
-            return mAd.hasEndCard();
+            return false;
         }
     }
 }

@@ -32,6 +32,7 @@ import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.config.ConfigManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
+import net.pubnative.lite.sdk.prefs.HyBidPreferences;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNAsyncUtils;
@@ -47,11 +48,13 @@ import java.util.Locale;
 public class AdRequestFactory {
     private static final String TAG = AdRequestFactory.class.getSimpleName();
 
+
     public interface Callback {
         void onRequestCreated(AdRequest adRequest);
     }
 
     private DeviceInfo mDeviceInfo;
+    private HyBidPreferences prefs;
     private final HyBidLocationManager mLocationManager;
     private UserDataManager mUserDataManager;
     private final ConfigManager mConfigManager;
@@ -73,28 +76,30 @@ public class AdRequestFactory {
     }
 
     public void createAdRequest(final String appToken, final String zoneid, final AdSize adSize, final boolean isRewarded, final Callback callback) {
-        if (mDeviceInfo == null) {
-            mDeviceInfo = HyBid.getDeviceInfo();
-        }
-
-        String advertisingId = null;
-        boolean limitTracking = false;
-        Context context = null;
-        if (mDeviceInfo != null) {
-            advertisingId = mDeviceInfo.getAdvertisingId();
-            limitTracking = mDeviceInfo.limitTracking();
-            context = mDeviceInfo.getContext();
-        }
-        mIsRewarded = isRewarded;
-        if (TextUtils.isEmpty(advertisingId) && context != null) {
-            try {
-                PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(context, (advertisingId1, limitTracking1) -> processAdvertisingId(appToken, zoneid, adSize, advertisingId1, limitTracking1, callback)));
-            } catch (Exception exception) {
-                Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
+        new Thread(() -> {
+            if (mDeviceInfo == null) {
+                mDeviceInfo = HyBid.getDeviceInfo();
             }
-        } else {
-            processAdvertisingId(appToken, zoneid, adSize, advertisingId, limitTracking, callback);
-        }
+
+            String advertisingId = null;
+            boolean limitTracking = false;
+            Context context = null;
+            if (mDeviceInfo != null) {
+                advertisingId = mDeviceInfo.getAdvertisingId();
+                limitTracking = mDeviceInfo.limitTracking();
+                context = mDeviceInfo.getContext();
+            }
+            mIsRewarded = isRewarded;
+            if (TextUtils.isEmpty(advertisingId) && context != null) {
+                try {
+                    PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(context, (advertisingId1, limitTracking1) -> processAdvertisingId(appToken, zoneid, adSize, advertisingId1, limitTracking1, callback)));
+                } catch (Exception exception) {
+                    Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
+                }
+            } else {
+                processAdvertisingId(appToken, zoneid, adSize, advertisingId, limitTracking, callback);
+            }
+        }).start();
     }
 
     private void processAdvertisingId(String appToken, String zoneId, AdSize adSize, String advertisingId, boolean limitTracking, Callback callback) {
@@ -122,8 +127,7 @@ public class AdRequestFactory {
         adRequest.omidpn = HyBid.OM_PARTNER_NAME;
         adRequest.omidpv = HyBid.OMSDK_VERSION;
 
-        if (HyBid.isCoppaEnabled() || limitTracking || TextUtils.isEmpty(advertisingId)
-                || isCCPAOptOut || mUserDataManager.isConsentDenied()) {
+        if (HyBid.isCoppaEnabled() || limitTracking || TextUtils.isEmpty(advertisingId) || isCCPAOptOut || mUserDataManager.isConsentDenied()) {
             adRequest.dnt = "1";
         } else {
             adRequest.gid = advertisingId;
@@ -133,14 +137,12 @@ public class AdRequestFactory {
         }
 
         String usPrivacyString = mUserDataManager.getIABUSPrivacyString();
-        if (!TextUtils.isEmpty(usPrivacyString)
-                && mConfigManager.getFeatureResolver().isUserConsentSupported(RemoteConfigFeature.UserConsent.CCPA)) {
+        if (!TextUtils.isEmpty(usPrivacyString) && mConfigManager.getFeatureResolver().isUserConsentSupported(RemoteConfigFeature.UserConsent.CCPA)) {
             adRequest.usprivacy = usPrivacyString;
         }
 
         String gdprConsentString = mUserDataManager.getIABGDPRConsentString();
-        if (!TextUtils.isEmpty(gdprConsentString)
-                && mConfigManager.getFeatureResolver().isUserConsentSupported(RemoteConfigFeature.UserConsent.GDPR)) {
+        if (!TextUtils.isEmpty(gdprConsentString) && mConfigManager.getFeatureResolver().isUserConsentSupported(RemoteConfigFeature.UserConsent.GDPR)) {
             adRequest.userconsent = gdprConsentString;
         }
 
@@ -187,8 +189,7 @@ public class AdRequestFactory {
 
         if (mLocationManager != null) {
             Location location = mLocationManager.getUserLocation();
-            if (location != null && !HyBid.isCoppaEnabled() && !limitTracking
-                    && !mUserDataManager.isConsentDenied() && !isCCPAOptOut && HyBid.isLocationTrackingEnabled()) {
+            if (location != null && !HyBid.isCoppaEnabled() && !limitTracking && !mUserDataManager.isConsentDenied() && !isCCPAOptOut && HyBid.isLocationTrackingEnabled()) {
                 adRequest.latitude = String.format(Locale.ENGLISH, "%.6f", location.getLatitude());
                 adRequest.longitude = String.format(Locale.ENGLISH, "%.6f", location.getLongitude());
             }
@@ -202,13 +203,24 @@ public class AdRequestFactory {
 
         adRequest.deviceHeight = mDeviceInfo.getDeviceHeight();
         adRequest.deviceWidth = mDeviceInfo.getDeviceWidth();
-
         adRequest.orientation = mDeviceInfo.getOrientation().toString();
-
-        mDeviceInfo.checkSoundSetting();
         adRequest.soundSetting = mDeviceInfo.getSoundSetting();
+        adRequest.timeSinceInstalled = calculateTimeSinceInstalled();
 
         return adRequest;
+    }
+
+    private String calculateTimeSinceInstalled() {
+        prefs = new HyBidPreferences(mDeviceInfo.getContext());
+        return calculateTimeSinceInstalled(System.currentTimeMillis() - Long.parseLong(prefs.getAppFirstInstalledTime()));
+    }
+
+    private String calculateTimeSinceInstalled(long milliseconds) {
+        int seconds = (int) (milliseconds / 1000) % 60;
+        int minutes = (int) ((milliseconds / (1000 * 60)) % 60);
+        int hours = (int) ((milliseconds / (1000 * 60 * 60)) % 24);
+
+        return String.format(Locale.ENGLISH, "%02d:%02d:%02d", hours, minutes, seconds);
     }
 
     public void setMediationVendor(String mediationVendor) {
@@ -220,23 +232,12 @@ public class AdRequestFactory {
     }
 
     private String getDefaultMetaFields() {
-        String[] metaFields = new String[]{
-                APIMeta.POINTS,
-                APIMeta.REVENUE_MODEL,
-                APIMeta.CONTENT_INFO,
-                APIMeta.CREATIVE_ID,
-                APIMeta.RENDERING_OPTIONS};
+        String[] metaFields = new String[]{APIMeta.POINTS, APIMeta.REVENUE_MODEL, APIMeta.CONTENT_INFO, APIMeta.CREATIVE_ID, APIMeta.RENDERING_OPTIONS};
         return TextUtils.join(",", metaFields);
     }
 
     private String getDefaultNativeAssetFields() {
-        String[] assetFields = new String[]{
-                APIAsset.ICON,
-                APIAsset.TITLE,
-                APIAsset.BANNER,
-                APIAsset.CALL_TO_ACTION,
-                APIAsset.RATING,
-                APIAsset.DESCRIPTION};
+        String[] assetFields = new String[]{APIAsset.ICON, APIAsset.TITLE, APIAsset.BANNER, APIAsset.CALL_TO_ACTION, APIAsset.RATING, APIAsset.DESCRIPTION};
         return TextUtils.join(",", assetFields);
     }
 
@@ -256,10 +257,7 @@ public class AdRequestFactory {
         supportedProtocols.add(Protocol.VAST_4_2_WRAPPER);
 
         List<String> configProtocols = new ArrayList<>();
-        if (mConfigManager != null
-                && mConfigManager.getConfig() != null
-                && mConfigManager.getConfig().app_config != null
-                && mConfigManager.getConfig().app_config.enabled_protocols != null) {
+        if (mConfigManager != null && mConfigManager.getConfig() != null && mConfigManager.getConfig().app_config != null && mConfigManager.getConfig().app_config.enabled_protocols != null) {
             List<String> protocols = mConfigManager.getConfig().app_config.enabled_protocols;
 
             for (String protocol : protocols) {
@@ -283,10 +281,7 @@ public class AdRequestFactory {
         supportedApis.add(Api.OMID_1);
 
         List<String> configApis = new ArrayList<>();
-        if (mConfigManager != null
-                && mConfigManager.getConfig() != null
-                && mConfigManager.getConfig().app_config != null
-                && mConfigManager.getConfig().app_config.enabled_apis != null) {
+        if (mConfigManager != null && mConfigManager.getConfig() != null && mConfigManager.getConfig().app_config != null && mConfigManager.getConfig().app_config.enabled_apis != null) {
             List<String> apis = mConfigManager.getConfig().app_config.enabled_apis;
 
             for (String api : apis) {

@@ -2,6 +2,7 @@ package net.pubnative.lite.demo.ui.fragments.markup
 
 import android.app.Application
 import android.text.TextUtils
+import android.util.Base64
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
@@ -12,9 +13,12 @@ import net.pubnative.lite.sdk.network.PNHttpClient
 import net.pubnative.lite.sdk.utils.AdRequestRegistry
 
 class MarkupViewModel(application: Application) : AndroidViewModel(application) {
+    private val ADM_MACRO = "{[{ .Adm | base64EncodeString | safeHTML }]}"
 
     private var customMarkup: MarkupType = MarkupType.CUSTOM_MARKUP
     private var customMarkupSize: MarkupSize = MarkupSize.BANNER
+    private var urWrap: Boolean = false
+    private var urTemplate: String = ""
 
     private val _clipboard: MutableLiveData<String> = MutableLiveData()
     val clipboard: LiveData<String> = _clipboard
@@ -42,6 +46,14 @@ class MarkupViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    fun setURWrap(wrapInUR: Boolean) {
+        this.urWrap = wrapInUR
+    }
+
+    fun setURTemplate(urTemplate: String) {
+        this.urTemplate = urTemplate
+    }
+
     fun setMarkupType(customMarkup: MarkupType) {
         this.customMarkup = customMarkup
     }
@@ -64,7 +76,6 @@ class MarkupViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     private fun loadCreativeUrl(creativeURL: String) {
-
         PNHttpClient.makeRequest(getApplication<Application>().applicationContext,
             creativeURL,
             null,
@@ -115,15 +126,22 @@ class MarkupViewModel(application: Application) : AndroidViewModel(application) 
                 Toast.LENGTH_SHORT
             ).show()
         } else {
+            val renderMarkup =
+                if (urWrap && urTemplate.isNotEmpty()) wrapInUR(markup!!) else markup!!
             if (customMarkupSize == MarkupSize.INTERSTITIAL) {
-                _loadInterstitial.value = markup!!
+                _loadInterstitial.value = renderMarkup
             } else {
-                _adapterUpdate.value = markup!!
+                _adapterUpdate.value = renderMarkup
             }
         }
     }
 
     fun getMarkupSize(): MarkupSize {
         return customMarkupSize
+    }
+
+    private fun wrapInUR(adm: String): String {
+        val encodedAdm = Base64.encodeToString(adm.toByteArray(Charsets.UTF_8), Base64.DEFAULT)
+        return urTemplate.replace(ADM_MACRO, encodedAdm, false)
     }
 }

@@ -104,6 +104,15 @@ public class AdData extends JsonModel implements Serializable {
         return (Integer) getDataField(field);
     }
 
+    public Boolean getBooleanField(String field) {
+
+        return (Boolean) getDataField(field);
+    }
+
+    public Boolean haseField(String field){
+        return data.containsKey(field);
+    }
+
     protected Object getDataField(String dataField) {
 
         Object result = null;

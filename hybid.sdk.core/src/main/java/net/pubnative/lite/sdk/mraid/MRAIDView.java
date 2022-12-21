@@ -671,10 +671,14 @@ public class MRAIDView extends RelativeLayout {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @JavascriptMRAIDCallback
     protected void expand(String url) {
-        expandCreative(url, false);
+        expandCreative(url, false, false);
     }
 
-    private void expandCreative(String url, final boolean isCustomExpand) {
+    protected void expand(String url, Boolean isCreatedByFeedbackForm) {
+        expandCreative(url, false, isCreatedByFeedbackForm);
+    }
+
+    private void expandCreative(String url, final boolean isCustomExpand, Boolean isCreatedByFeedbackForm) {
         MRAIDLog.d("hz-m MRAIDView - expand " + url);
         MRAIDLog.d(MRAID_LOG_TAG + "-JS callback", "expand " + (url != null ? url : "(1-part)"));
 
@@ -684,7 +688,7 @@ public class MRAIDView extends RelativeLayout {
             applyOrientationProperties();
         }
 
-        if (!HyBid.isMraidExpandEnabled()) {
+        if (!HyBid.isMraidExpandEnabled() && !isCreatedByFeedbackForm) {
             MRAIDLog.d(MRAID_LOG_TAG + "-JS callback", "expand disabled by the developer");
         } else {
             // 1-part expansion
@@ -980,10 +984,10 @@ public class MRAIDView extends RelativeLayout {
         return "";
     }
 
-    protected void showAsInterstitial(Activity activity) {
+    protected void showAsInterstitial(Activity activity, Boolean isCreatedByFeedbackForm) {
         MRAIDLog.d("hz-m MRAIDVIEW - showAsInterstitial");
         showActivity = activity;
-        expand(null);
+        expand(null, isCreatedByFeedbackForm);
     }
 
     protected void expandHelper(WebView webView) {
@@ -1590,7 +1594,7 @@ public class MRAIDView extends RelativeLayout {
                     setCurrentPosition();
                     setDefaultPosition();
                     if (isInterstitial) {
-                        showAsInterstitial(showActivity);
+                        showAsInterstitial(showActivity, false);
                     } else {
                         state = STATE_DEFAULT;
                         fireStateChangeEvent();
@@ -1723,7 +1727,7 @@ public class MRAIDView extends RelativeLayout {
             } else {
                 // Fix for Verve custom creatives
                 if (isVerveCustomExpand(url)) {
-                    expandCreative(url, true);
+                    expandCreative(url, true, false);
                 } else if (isCloseSignal(url)) {
                     closeOnMainThread();
                 } else {

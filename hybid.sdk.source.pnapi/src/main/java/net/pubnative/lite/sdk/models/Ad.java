@@ -28,9 +28,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
 
-import net.pubnative.lite.sdk.utils.ViewUtils;
 import net.pubnative.lite.sdk.utils.json.BindField;
 import net.pubnative.lite.sdk.utils.json.JsonModel;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
@@ -418,6 +416,56 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         return impressionId;
     }
 
+    @SuppressWarnings("unchecked")
+    public <T> T getRemoteConfig(RemoteConfig config) {
+
+        AdData data = getMeta(APIMeta.REMOTE_CONFIGS);
+        if (data == null || !data.haseField(config.fieldName)) return null;
+        T configValue = null;
+        try {
+            if (config.type == String.class) {
+                configValue = (T) data.getStringField(config.fieldName);
+            } else if (config.type == Integer.class) {
+                configValue = (T) data.getIntField(config.fieldName);
+            } else if (config.type == Double.class) {
+                configValue = (T) data.getDoubleField(config.fieldName);
+            } else if (config.type == Boolean.class) {
+                configValue = (T) data.getBooleanField(config.fieldName);
+            }
+            return configValue;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public Boolean isEndCardEnabled() {
+        return getRemoteConfig(RemoteConfig.END_CARD_ENABLED);
+    }
+
+    public String getAudioState(){
+        return getRemoteConfig(RemoteConfig.AUDIO_STATE);
+    }
+
+    public Integer getEndCardCloseDelay(){
+        return getRemoteConfig(RemoteConfig.END_CARD_CLOSE_DELAY);
+    }
+
+    public Integer getHtmlSkipOffset(){
+        return getRemoteConfig(RemoteConfig.HTML_SKIP_OFFSET);
+    }
+
+    public Integer getVideoSkipOffset(){
+        return getRemoteConfig(RemoteConfig.VIDEO_SKIP_OFFSET);
+    }
+
+    public Boolean needCloseInterAfterFinish(){
+        return getRemoteConfig(RemoteConfig.CLOSE_INTER_AFTER_FINISH);
+    }
+
+    public Boolean needCloseRewardAfterFinish(){
+        return getRemoteConfig(RemoteConfig.CLOSE_REWARD_AFTER_FINISH);
+    }
+
     public void setZoneId(String zoneId) {
         this.zoneId = zoneId;
     }
@@ -439,7 +487,11 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     }
 
     public boolean hasEndCard() {
-        return hasEndCard;
+        if (isEndCardEnabled() != null) {
+            return isEndCardEnabled();
+        } else {
+            return hasEndCard;
+        }
     }
 
     @Override

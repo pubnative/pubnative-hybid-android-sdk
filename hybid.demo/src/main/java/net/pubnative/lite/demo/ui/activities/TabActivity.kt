@@ -24,6 +24,7 @@
 package net.pubnative.lite.demo.ui.activities
 
 import android.os.Bundle
+import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.lifecycle.ViewModelProvider
@@ -82,8 +83,17 @@ abstract class TabActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        onBackPressed()
+        onKeyDown(KeyEvent.KEYCODE_BACK, null)
         return true
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        return if (keyCode == KeyEvent.KEYCODE_BACK) {
+            finish()
+            true
+        } else {
+            super.onKeyDown(keyCode, event)
+        }
     }
 
     inner class SectionsPagerAdapter(fm: androidx.fragment.app.FragmentManager) : FragmentPagerAdapter(fm) {
@@ -120,4 +130,11 @@ abstract class TabActivity : AppCompatActivity() {
     abstract fun getAdFragment(): androidx.fragment.app.Fragment
 
     abstract fun getActivityTitle(): String
+    fun removeReportingCallback() {
+        debugViewModel.removeReportingCallback()
+    }
+
+    fun registerReportingCallback() {
+        debugViewModel.registerReportingCallback()
+    }
 }

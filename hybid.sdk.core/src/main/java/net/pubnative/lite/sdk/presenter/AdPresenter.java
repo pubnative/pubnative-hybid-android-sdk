@@ -26,6 +26,7 @@ import android.view.View;
 
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 
 import org.json.JSONObject;
 
@@ -51,6 +52,8 @@ public interface AdPresenter {
     void setImpressionListener(ImpressionListener listener);
 
     void setVideoListener(VideoListener listener);
+
+    void setMRaidListener(MRAIDViewListener listener);
 
     Ad getAd();
 

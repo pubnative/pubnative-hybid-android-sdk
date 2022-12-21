@@ -9,6 +9,7 @@ import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.mraid.MRAIDBanner;
 import net.pubnative.lite.sdk.mraid.MRAIDInterstitial;
+import net.pubnative.lite.sdk.vpaid.enums.AudioState;
 
 import java.util.Locale;
 
@@ -48,7 +49,15 @@ public class AdFeedbackDataCollector {
             builder.setIntegrationType(integrationType.getCode());
         }
 
-        builder.setAudioState(HyBid.getVideoAudioStatus().getStateName());
+        String audioState;
+        String stateFromRemoteConfig = ad.getAudioState();
+        if(stateFromRemoteConfig != null){
+            audioState = stateFromRemoteConfig;
+        }else {
+            audioState = HyBid.getVideoAudioStatus().getStateName();
+        }
+
+        builder.setAudioState(audioState);
 
         if (mDeviceInfo != null && !TextUtils.isEmpty(mDeviceInfo.getModel()) && !TextUtils.isEmpty(mDeviceInfo.getOSVersion())) {
             builder.setDeviceInfo(String.format(Locale.ENGLISH, "%s Android %s",

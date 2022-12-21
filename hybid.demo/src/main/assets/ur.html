@@ -1,0 +1,473 @@
+<script src="mraid.js"></script>
+<script type="text/javascript">
+    function pnGetDebugPayload(doc) {
+        return btoa(unescape(encodeURIComponent((doc.head && doc.head.innerHTML ? doc.head.innerHTML : '')
+                .replace(/<script type="text\/javascript">;\s?\(function\s?\(omidGlobal\)\s?\{[\s\S]+call\(this,\s?this\);[\s]*<\/script>/, '')
+                .substr(0, 40000)
+            ))) + '\n\n' +
+            btoa(unescape(encodeURIComponent(doc.body && doc.body.innerHTML ? doc.body.innerHTML.substr(0, 40000) : 'missing body')));
+    }
+
+    (function () {
+        var allLogs = [],
+            logID = 'x' + Math.random().toString(16).substr(2),
+            deepcut = [Math.random() < 0.05, Math.random() < 0.2],
+            logLevel = 0,
+            origin = 'newur',
+            initts, rndts;
+
+        window.sendDebugData = function (keyword, message, logs, body) {
+            try {
+                window.pnOptions = window.pnOptions || {};
+                if ((keyword === 'winerr' || keyword === 'ctrerr') && (
+                    message === 'Script error.' ||
+                    message === 'Uncaught ReferenceError: al_onAdViewRendered is not defined' ||
+                    message.indexOf('TypeError: window.AFMA_updateActiveView is not a function') >= 0 ||
+                    message.match(/Blocked a frame with origin "[a-zA-Z0-9\-\.:\/]+" from accessing a cross-origin frame/)
+                )) return;
+                if (logLevel > 10) return;
+                logID = window.pnOptions.impID || logID;
+                if (!message) message = keyword;
+                if (!logs) logs = keyword + ':' +
+                    (window.mraid && window.mraid.isViewable ? window.mraid.isViewable() : 'n/a') + '-' +
+                    (window.mraid && window.mraid.isViewable ? (typeof window.mraid.isViewable()) : 'n/a') + '-' +
+                    (window.mraid && window.mraid.getState ? JSON.stringify(window.mraid.getState()) : 'n/a') + '-' +
+                    (window.mraid && window.mraid.getState ? (typeof window.mraid.getState()) : 'n/a');
+                allLogs.push(logs);
+                origin = (keyword === 'init') ? message : origin;
+                if ((keyword === 'init' || keyword === 'exec') && !body) {
+                    if (Math.random() < 0.05) body = 'doc\n' + pnGetDebugPayload(document);
+                    try {
+                        if (Math.random() < 0.05 && window.parent !== window && window.parent.document) body = 'parent\n' + pnGetDebugPayload(window.parent.document);
+                    } catch (e) {
+                    }
+                }
+                var data = {
+                    'authToken': '705acb186909468eb3411b97f5e4787b',
+                    'id': logID,
+                    'version': 't275',
+                    'dspId': window.pnOptions.dspID,
+                    'appId': window.pnOptions.pubAppID,
+                    'crid': window.pnOptions.crid,
+                    'origin': origin,
+                    'keyword': keyword,
+                    'msg': message,
+                    'level': logLevel,
+                    'aq': window.pnOptions.aqh ? 1 : 0,
+                    'pc': window.pnOptions.PC,
+                    'size': window.innerWidth + 'x' + window.innerHeight,
+                    'apmd': !!(window.mraid && !window.mraid.ntfnd),
+                    'ppmd': (window.parent !== window) && !!(window.parent.mraid && !window.parent.mraid.ntfnd),
+                    'logs': allLogs.join('\n'),
+                    'body': body
+                };
+                if (window.MRAID_ENV) data.sdk = window.MRAID_ENV.sdk;
+                if (window.AdviewAdTagConfig) data.sdk = 'AdviewAdTagConfig';
+                if (keyword === 'init') initts = new Date();
+                if (keyword === 'rndbgn') rndts = new Date();
+                if (keyword === 'pnimp' && initts && !data.timediff) data.timediff = (new Date()).getTime() - initts.getTime();
+                if (keyword === 'rndclt' && rndts && !data.timediff2) data.timediff2 = (new Date()).getTime() - rndts.getTime();
+                if (!deepcut[(['winerr', 'ctrerr', 'dwrerr'].indexOf(keyword) >= 0) ? 1 : 0]) return;
+                if (['init', 'pnimp', 'lgcimp', 'extmrd', 'extmvd', 'extwld', 'winerr', 'ctrerr', 'dwrerr'].indexOf(keyword) < 0) return;
+                setTimeout(function () {
+                    try {
+                        var xhr = new window.XMLHttpRequest();
+                        xhr.open('POST', 'https://api.pubnative.net/api/v3/error?apptoken=' + data.authToken, true);
+                        xhr.send(JSON.stringify(data));
+                    } catch (e) {
+                    }
+                }, 1);
+                logLevel++;
+            } catch (e) {
+                if (console && console.log) console.log(e);
+            }
+        };
+
+        window.addEventListener('error', function (e) {
+            var ctr = document.querySelector('\x23ctr');
+            if (ctr && ctr.contentWindow && Math.random() < .5) {
+                sendDebugData('winerr', e.message, 'winerr', pnGetDebugPayload(ctr.contentWindow.document));
+            } else {
+                sendDebugData('winerr', e.message, 'winerr', pnGetDebugPayload(document));
+            }
+        });
+        window.addEventListener('load', function (msg) {
+            if (window.parent.sendDebugData) {
+                window.parent.sendDebugData('extwld');
+            }
+        })
+    })();
+
+    window.pnOptions = JSON.parse(decodeURIComponent(escape(atob("{[{ .Options | base64EncodeString }]}"))));
+    sendDebugData('init', 'ur');
+</script>
+<script class="pn-ad-tag" type="text/javascript">
+    (function (beacons, trackerURL, options) {
+        var delay = 1, passed = 0, fired = false, readyBinded = false, viewableBinded = false;
+
+        function fire(url) {
+            (new Image).src = url;
+            return true
+        }
+
+        function fireAll(src) {
+            if (fired) return;
+            fired = true;
+            for (var i = 0; i < beacons.length; i++) fire(beacons[i]);
+            window.sendDebugData("lgcimp", src, "psd" + passed);
+        }
+
+        function bindToViewableChange() {
+            if (!viewableBinded) {
+                viewableBinded = true;
+                mraid.addEventListener("viewableChange", handleViewableChange)
+            }
+            handleViewableChange()
+        }
+
+        function handleViewableChange() {
+            if (typeof mraid.isViewable === "function" && (mraid.isViewable() === "true" || mraid.isViewable() === true)) fireAll("hvch")
+        }
+
+        function bindEvents() {
+            if (typeof mraid === "object" && typeof mraid.getState === "function" && typeof mraid.addEventListener === "function") {
+                if (mraid.getState() === "loading") {
+                    if (!readyBinded) {
+                        readyBinded = true;
+                        mraid.addEventListener("ready", bindToViewableChange)
+                    }
+                } else if (!viewableBinded) mraid.addEventListener("viewableChange", handleViewableChange);
+                handleViewableChange();
+            } else if (passed > 500) {
+                fireAll("tout");
+                return
+            } else {
+            }
+            if (!fired) {
+                passed += delay;
+                setTimeout(bindEvents, delay);
+                delay = 100
+            }
+        }
+
+        if (typeof window.mraid === "object") {
+            bindEvents();
+        } else {
+            fireAll("nmrd");
+        }
+        bindEvents();
+
+    })([], "", {});
+</script>
+<style id="stl">html, body, #ctr, #bgblr {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+body {
+    background: black;
+}</style>
+<div style="display:none" id="adm">{[{ .Adm | base64EncodeString | safeHTML }]}</div>
+<div id="bgblr"
+     style="z-index:0;background:center/cover;-webkit-filter:saturate(0.5) blur(15px);filter:saturate(0.5) blur(15px);"></div>
+<iframe id="ctr" frameborder="0" scrolling="no" width="100%" height="100%" style="z-index:1"></iframe>
+<script type="text/javascript">
+    (function () {
+        function MRAID() {
+            function k(b) {
+                try {
+                    if ("object" === typeof b.mraid && b.mraid.getState) var g = b.mraid
+                } catch (l) {
+                }
+                return b.parent !== b ? g || k(b.parent) : g
+            }
+
+            var h = window, e = k(h) || {ntfnd: !0},
+                c = "{offsetX:0,offsetY:0,x:0,y:0,width:" + h.innerWidth + ",height:" + h.innerHeight + ",useCustomClose:!1}",
+                L = "addEventListener", V = "isViewable", d = this, f = {
+                    removeEventListener: 0,
+                    open: "window.top.open(a)",
+                    close: 0,
+                    unload: 0,
+                    useCustomClose: 0,
+                    expand: 0,
+                    playVideo: 0,
+                    resize: 0,
+                    storePicture: 0,
+                    createCalendarEvent: 0,
+                    supports: "{sms:!1,tel:!1,calendar:!1,storePicture:!1,inlineVideo:!1,orientation:!1,vpaid:!1,location:!1}",
+                    VERSIONS: {},
+                    STATES: {LOADING: "loading", DEFAULT: "default"},
+                    PLACEMENTS: {},
+                    ORIENTATIONS: {},
+                    FEATURES: {},
+                    EVENTS: {READY: "ready", ERROR: "error"},
+                    CLOSEPOSITIONS: {}
+                };
+            c = {
+                Version: '"2.0"',
+                PlacementType: '"unknown"',
+                OrientationProperties: "{allowOrientationChange:!1}",
+                CurrentAppOrientation: '{orientation:""}',
+                CurrentPosition: c,
+                DefaultPosition: c,
+                State: '"default"',
+                ExpandProperties: c,
+                MaxSize: c,
+                ScreenSize: c,
+                ResizeProperties: c,
+                Location: "{}"
+            };
+            d._L = [];
+            d[L] = function (b, g) {
+                "ready" === b || "viewableChange" === b ? d._L.push({c: g, a: !0}) :
+                    "stateChange" === b && d._L.push({c: g, a: "default"});
+                "function" === typeof e[L] && e[L].apply(h, arguments)
+            };
+            for (var a in c) f["get" + a] = c[a], f["set" + a] = "undefined";
+            for (a in f) e[a] ? d[a] = e[a] : (d[a] = f[a] ? "object" === typeof f[a] ? f[a] : new Function("return " + f[a]) : function () {
+            }, e[a] = d[a]);
+            d[V] = function () {
+                return !!e.ntfnd || e[V]() === true || e[V]() === "true"
+            };
+            d.getState = function () {
+                var s = e.getState();
+                "object" === typeof s && s.state && (s = s.state);
+                return e.ntfnd || d[V]() && s === "loading" ? "default" : s
+            };
+            return e.ntfnd ? (setTimeout(function () {
+                d._L.forEach(function (b) {
+                    b.c.call(window, b.a)
+                })
+            }, 1), d.ntfnd = !0, d) : e
+        };
+
+        function P(s) {
+            return decodeURIComponent(escape(atob(s)));
+        }
+
+        var D = document,
+            PC = window.pnOptions.PC = true,
+            CR = false,
+            ctr, A,
+            O = window.pnOptions,
+            F = false, CF = false,
+            L = "<",
+            R = [[P("PHNjcmlwdFtePl0qIHNyYz1bJyJdPy8/bXJhaWQuanNbJyJdP1tePl0qPjwvc2NyaXB0Pg=="), ""], [P("W+KAmOKAmV0="), "'"]],
+            B = [],
+            CB = [];
+        for (var i in B) B[i] = P(B[i]).replace(new RegExp(P('JHtBVUNUSU9OX1BSSUNFfQ==')), '${AUCTION_PRICE}');
+        for (var i in CB) CB[i] = P(CB[i]);
+        window.pnOptions.adm = A;
+
+        function inject() {
+            if (window.parent.sendDebugData) window.parent.sendDebugData('rndbgn');
+            window.mraid.addEventListener('ready', function (msg) {
+                if (window.parent.sendDebugData) {
+                    if (!window.mready && window.mraid.getState && window.mraid.getState() === 'default') {
+                        window.mready = true;
+                        window.parent.sendDebugData('intmrd', msg);
+                    }
+                }
+            });
+            window.mraid.addEventListener('viewableChange', function (msg) {
+                if (window.parent.sendDebugData) {
+                    // window.parent.sendDebugData('mrvbch', msg);
+                    if (window.mraid.getState && window.mraid.getState() === 'default' && window.mraid.isViewable &&
+                        !window.mviewed && (window.mraid.isViewable() === 'true' || window.mraid.isViewable() === true)) {
+                        window.mviewed = true;
+                        window.parent.sendDebugData('intmvd', 'arg:' + msg);
+                    }
+                }
+            });
+            window.addEventListener('load', function (msg) {
+                if (window.parent.sendDebugData) {
+                    window.parent.sendDebugData('intwld');
+                }
+            })
+        }
+
+        function injectAfter() {
+            // if (window.parent.sendDebugData) window.parent.sendDebugData('rndend');
+            setTimeout(function () {
+                if (window.parent.sendDebugData) window.parent.sendDebugData('rndclt');
+            }, 1);
+        }
+
+        function run() {
+            ctr = D.querySelector('\x23ctr');
+            A = P(D.querySelector('\x23adm').innerText);
+            if (!ctr || !A) {
+                window.parent.sendDebugData('ctrnfd')
+                return;
+            }
+            // window.sendDebugData('run');
+            window.mraid = new MRAID();
+            window.mraid.addEventListener('ready', function (msg) {
+                if (window.parent.sendDebugData) {
+                    if (!window.mready && window.mraid.getState && window.mraid.getState() === 'default') {
+                        window.mready = true;
+                        window.parent.sendDebugData('extmrd', msg);
+                    }
+                }
+            });
+            window.mraid.addEventListener('viewableChange', function (msg) {
+                if (window.parent.sendDebugData) {
+                    // window.parent.sendDebugData('mrvbch', msg);
+                    if (window.mraid.getState && window.mraid.getState() === 'default' && window.mraid.isViewable &&
+                        !window.mviewed && (window.mraid.isViewable() === 'true' || window.mraid.isViewable() === true)) {
+                        window.mviewed = true;
+                        window.parent.sendDebugData('extmvd', 'arg:' + msg);
+                    }
+                }
+            });
+            for (r in R) A = A.replace(new RegExp(R[r][0], 'g'), R[r][1]);
+            A = L + 'style>html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;border:none;}' + L + '/style>' +
+                L + 'script type="text/javascript">' + MRAID.toString() + 'window.mraid=new MRAID();' +
+                inject.toString() + 'inject();' +
+                L + '/script>' +
+                A +
+                L + 'script type="text/javascript">' + injectAfter.toString() + 'injectAfter();' + L + '/script>';
+
+            if (O.aqh && O.aqf) {
+                function renderMacros(str) {
+                    return (str || '')
+                        .replace(P('JWN1c3RfaW1wIQ=='), O.impID)
+                        .replace(P('JURFTUFORF9JRCE='), O.dspID)
+                        .replace(P('JWRzcE5hbWUh'), O.dspName)
+                        .replace(P('JURFTUFORF9DUkVBVElWRV9JRCE='), O.crid)
+                        .replace(P('JVBVQkxJU0hFUl9JRCE='), O.pubID)
+                        .replace(P('JXB1Yk5hbWUh'), O.pubName)
+                        .replace(P('JSVXSURUSCUl'), (ctr.contentWindow || window).innerWidth)
+                        .replace(P('JSVIRUlHSFQlJQ=='), (ctr.contentWindow || window).innerHeight);
+                }
+
+                O.aqh = renderMacros(O.aqh);
+                O.aqf = renderMacros(O.aqf);
+                A = O.aqh + A + O.aqf;
+            }
+            A = L + '!DOCTYPE html>\n' + A;
+
+            window.mraid.addEventListener('ready', mraidReady);
+            window.mraid.addEventListener('viewableChange', mraidViewable);
+            if (CR) fireAll();
+            mraidViewable();
+            if (PC) setTimeout(execute, 1);
+            if (window.mraid.isViewable() !== 'true' && window.mraid.isViewable() !== true) {
+                setInterval(function () {
+                    if ((window.mraid.isViewable() === 'true' || window.mraid.isViewable() === true) && !window.mviewed && !window.mvdmis) {
+                        window.mvdmis = true;
+                        window.sendDebugData('mvdmis');
+                    }
+                    if ((window.mraid.isViewable() === 'true' || window.mraid.isViewable() === true) && !window.mready && !window.mrdmis) {
+                        window.mrdmis = true;
+                        window.sendDebugData('mrdmis');
+                    }
+                }, 100);
+            }
+        }
+
+        function fireAll() {
+            if (!F) {
+                window.sendDebugData('pnimp');
+                for (var i in B) (new Image()).src = B[i];
+                F = true;
+            }
+        }
+
+        function mraidReady() {
+            window.mraid.addEventListener('viewableChange', mraidViewable);
+            mraidViewable();
+        }
+
+        function mraidViewable() {
+            if (window.mraid.isViewable() === 'true' || window.mraid.isViewable() === true) {
+                if (!CR) fireAll();
+                if (!PC) setTimeout(execute, 1);
+                setInterval(fixSize, 100);
+            } else {
+                setTimeout(mraidViewable, 100);
+            }
+        }
+
+        function fixSize() {
+            var win = ctr.contentWindow;
+            if (!win) return;
+            var width = window.innerWidth, height = window.innerHeight,
+                ctrStyle = ctr.style,
+                i, w, h, scale, found = false,
+                bgimg, tmp, maxw = 10, maxh = 10,
+                els = win.document.querySelectorAll('body,div,span,p,section,article,a,img,canvas,video,iframe');
+            for (i = 0; i < els.length; i++) {
+                w = els[i].offsetWidth;
+                h = els[i].offsetHeight;
+                if ((w === 320 && h === 480 || w === 480 && h === 320 ||
+                    (w === 300 && h === 250 && width !== 300 && height !== 250) ||
+                    ((w === 300 || w === 320) && h === 50 && height === 50 && w !== width)
+                ) && !found) {
+                    scale = (h * width / w > height) ? height / h : width / w;
+                    if (scale !== 0) {
+                        found = true;
+                        ctrStyle.width = w + 'px';
+                        ctrStyle.height = h + 'px';
+                        ctrStyle.transform = "scale(" + scale + "," + scale + ")";
+                        if (h * width / w > height) {
+                            ctrStyle.top = ((scale - 1) * h / 2) + 'px';
+                            ctrStyle.left = ((width - w) / 2) + 'px';
+                        } else {
+                            ctrStyle.top = ((height - h) / 2) + 'px';
+                            ctrStyle.left = ((scale - 1) * w / 2) + 'px';
+                        }
+                    }
+                }
+                tmp = (els[i].style.backgroundImage || '').match(P('XnVybFwoIihodHRwLispIlwpJA=='));
+                if (found && (els[i].nodeName === 'IMG' && els[i].src || tmp && tmp[1]) && w > maxw && h > maxh) {
+                    maxw = w;
+                    maxh = h;
+                    bgimg = els[i].src ? els[i].src : tmp[1];
+                }
+            }
+            if (bgimg) {
+                document.querySelector('\x23bgblr').style.backgroundImage = 'url(' + bgimg + ')';
+            }
+        }
+
+        function execute() {
+            if (A) {
+                window.sendDebugData('exec');
+                try {
+                    var win = ctr.contentWindow, doc = win.document;
+                    doc.open();
+                    win.addEventListener('error', function (e) {
+                        sendDebugData('ctrerr', e.message, 'ctrerr',
+                            btoa(unescape(encodeURIComponent(win.document.head.innerHTML.substr(0, 20000)))) + '\n\n' +
+                            btoa(unescape(encodeURIComponent(win.document.body.innerHTML.substr(0, 40000))))
+                        );
+                    });
+                    win.addEventListener('click', function (e) {
+                        if (!CF) {
+                            window.sendDebugData('clck');
+                            for (var i in CB) (new Image()).src = CB[i];
+                            CF = true;
+                        }
+                    }, true);
+                    win.addEventListener('load', fixSize);
+                    doc.write(A);
+                    doc.close();
+                } catch (e) {
+                    sendDebugData('dwrerr', e.message);
+                }
+                A = '';
+            }
+        }
+
+        run();
+    })();
+</script>

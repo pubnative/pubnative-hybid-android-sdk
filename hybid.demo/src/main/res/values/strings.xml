@@ -223,6 +223,8 @@
     <string name="title_creative_tester">Creative Tester</string>
     <string name="title_signal_data_tester">Signal data tester</string>
     <string name="ad_size">Ad size:</string>
+    <string name="universal_rendering">Universal rendering:</string>
+    <string name="wrap_universal_rendering">Wrap in UR</string>
     <string name="creative_server">Creative server:</string>
     <string name="p161">P161</string>
     <string name="foundry">Foundry</string>

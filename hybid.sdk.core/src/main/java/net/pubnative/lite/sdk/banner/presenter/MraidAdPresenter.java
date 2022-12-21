@@ -22,12 +22,17 @@
 //
 package net.pubnative.lite.sdk.banner.presenter;
 
+import android.app.Activity;
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.view.View;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.contentinfo.AdFeedbackView;
+import net.pubnative.lite.sdk.core.R;
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdSize;
@@ -44,6 +49,7 @@ import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
+import net.pubnative.lite.sdk.views.ProgressDialogFragment;
 import net.pubnative.lite.sdk.visibility.ImpressionManager;
 import net.pubnative.lite.sdk.visibility.ImpressionTracker;
 
@@ -66,6 +72,8 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
     private ImpressionListener mImpressionListener;
     private MRAIDBanner mMRAIDBanner;
     private boolean mIsDestroyed = false;
+
+    private MRAIDViewListener mRaidListener;
 
     public MraidAdPresenter(Context context, Ad ad, AdSize adSize, ImpressionTrackingMethod trackingMethod) {
         mContext = context;
@@ -100,6 +108,11 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
     @Override
     public void setVideoListener(VideoListener listener) {
         //Do nothing. No need for video listener in the MRAID presenter
+    }
+
+    @Override
+    public void setMRaidListener(MRAIDViewListener listener) {
+        mRaidListener = listener;
     }
 
     @Override
@@ -188,7 +201,8 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
 
     @Override
     public void mraidViewClose(MRAIDView mraidView) {
-
+        if (mRaidListener != null)
+            mRaidListener.onExpandedAdClosed();
     }
 
     @Override
@@ -198,6 +212,11 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
 
     @Override
     public void mraidShowCloseButton() {
+    }
+
+    @Override
+    public void onExpandedAdClosed() {
+
     }
 
     @Override
@@ -256,24 +275,70 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
         adFeedbackView.prepare(mContext, url, mAd, Reporting.AdFormat.BANNER,
                 IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
                     @Override
+                    public void onLoad() {
+                        //load simple dialog
+                        Logger.e(TAG, "onLoad");
+                        if (mContext instanceof Activity) {
+                            showProgressDialog(((Activity) mContext).getFragmentManager(), mContext.getString(R.string.feedback_form),
+                                    mContext.getString(R.string.loading));
+                        }
+                    }
+
+                    @Override
                     public void onLoadFinished() {
+                        Logger.e(TAG, "onLoadFinished");
+                        if (mContext instanceof Activity) {
+                            hideProgressDialog(((Activity) mContext).getFragmentManager());
+                        }
                         if (mMRAIDBanner != null) {
                             mMRAIDBanner.pause();
                         }
                         adFeedbackView.showFeedbackForm(mContext);
+
                     }
 
                     @Override
                     public void onLoadFailed(Throwable error) {
+                        Logger.e(TAG, "onLoadFailed");
+                        if (mContext instanceof Activity) {
+                            hideProgressDialog(((Activity) mContext).getFragmentManager());
+                        }
                         Logger.e(TAG, error.getMessage());
                     }
 
                     @Override
                     public void onFormClosed() {
+                        Logger.e(TAG, "onFormClosed");
+                        if (mContext instanceof Activity) {
+                            hideProgressDialog(((Activity) mContext).getFragmentManager());
+                        }
                         if (mMRAIDBanner != null) {
                             mMRAIDBanner.resume();
                         }
                     }
                 });
+    }
+
+
+    /*todo : to be enhanced : presenter should not have reference to view progress*/
+    public void showProgressDialog(FragmentManager fragmentManager, String title, String message) {
+        Fragment prev = fragmentManager.findFragmentByTag("progress dialog");
+
+        if (prev != null) {
+            fragmentManager.beginTransaction().remove(prev).commit();
+        }
+
+        fragmentManager.beginTransaction().addToBackStack(null).commit();
+
+        DialogFragment newFragment = ProgressDialogFragment.newInstance(title, message);
+        newFragment.show(fragmentManager, "progress dialog");
+    }
+
+    public void hideProgressDialog(FragmentManager fragmentManager) {
+        Fragment prev = fragmentManager.findFragmentByTag("progress dialog");
+
+        if (prev != null) {
+            fragmentManager.beginTransaction().remove(prev).commit();
+        }
     }
 }

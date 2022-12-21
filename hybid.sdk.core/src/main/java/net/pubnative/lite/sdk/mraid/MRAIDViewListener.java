@@ -42,4 +42,6 @@ public interface MRAIDViewListener {
     boolean mraidViewResize(MRAIDView mraidView, int width, int height, int offsetX, int offsetY);
 
     void mraidShowCloseButton();
+
+    void onExpandedAdClosed();
 }

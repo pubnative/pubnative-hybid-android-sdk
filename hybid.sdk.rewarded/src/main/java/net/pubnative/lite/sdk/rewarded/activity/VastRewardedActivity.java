@@ -27,12 +27,14 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.vpaid.CloseButtonListener;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.VideoAd;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
@@ -69,6 +71,7 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
                 mVideoAd.setRewarded(true);
                 mVideoAd.bindView(mVideoPlayer);
                 mVideoAd.setAdListener(mVideoAdListener);
+                mVideoAd.setAdCloseButtonListener(mAdCloseButtonListener);
                 setProgressBarVisible();
 
                 VideoAdCacheItem adCacheItem = HyBid.getVideoAdCache().remove(getZoneId());
@@ -84,7 +87,7 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
                 }
 
                 mVideoPlayer.postDelayed(() -> mVideoAd.load(), 1000);
-            }else{
+            } else {
                 if (getBroadcastSender() != null) {
                     Bundle extras = new Bundle();
                     getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.ERROR);
@@ -137,10 +140,16 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
     }
 
     @Override
-    public void onBackPressed() {
-        if (mFinished) {
-            super.onBackPressed();
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+            if (mFinished) {
+                dismiss();
+                return true;
+            }
+        } else {
+            return super.onKeyDown(keyCode, event);
         }
+        return false;
     }
 
     @Override
@@ -175,7 +184,6 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
         public void onAdLoadSuccess() {
             if (!mReady) {
                 mReady = true;
-
                 setProgressBarInvisible();
                 mVideoAd.show();
             }
@@ -228,7 +236,6 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
 
         @Override
         public void onAdSkipped() {
-            mFinished = true;
             if (getBroadcastSender() != null) {
                 getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.VIDEO_SKIP);
             }
@@ -241,6 +248,8 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
             }
         }
     };
+
+    private final CloseButtonListener mAdCloseButtonListener = () -> mFinished = true;
 
     @Override
     public void onImpression() {

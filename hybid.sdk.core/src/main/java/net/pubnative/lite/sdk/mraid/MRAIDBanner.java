@@ -64,14 +64,14 @@ public class MRAIDBanner extends MRAIDView {
 
     @Deprecated
     @Override
-    protected void expand(String url) {
+    protected void expand(String url, Boolean isCreatedByFeedbackForm) {
         // The only time it is valid to call expand on a banner ad is
         // when the ad is currently in either default or resized state.
         if (state != STATE_DEFAULT && state != STATE_RESIZED) {
             return;
         }
 
-        super.expand(url);
+        super.expand(url, isCreatedByFeedbackForm);
     }
 
     @Override

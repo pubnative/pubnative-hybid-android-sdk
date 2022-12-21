@@ -34,8 +34,6 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
-
 import net.pubnative.lite.sdk.CacheListener;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
@@ -44,22 +42,16 @@ import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.api.RequestManager;
-import net.pubnative.lite.sdk.auction.AdSource;
-import net.pubnative.lite.sdk.auction.AdSourceConfig;
-import net.pubnative.lite.sdk.auction.Auction;
-import net.pubnative.lite.sdk.auction.HyBidAdSource;
-import net.pubnative.lite.sdk.auction.VastTagAdSource;
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
-import net.pubnative.lite.sdk.config.ConfigManager;
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
 import net.pubnative.lite.sdk.models.IntegrationType;
-import net.pubnative.lite.sdk.models.RemoteConfigAdSource;
 import net.pubnative.lite.sdk.models.RemoteConfigFeature;
-import net.pubnative.lite.sdk.models.RemoteConfigPlacement;
+import net.pubnative.lite.sdk.mraid.MRAIDView;
+import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
@@ -75,13 +67,11 @@ import net.pubnative.lite.sdk.vpaid.vast.VastUrlUtils;
 
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.PriorityQueue;
 
-public class HyBidAdView extends FrameLayout implements RequestManager.RequestListener, AdPresenter.Listener, AdPresenter.ImpressionListener, VideoListener, Auction.Listener {
+public class HyBidAdView extends FrameLayout implements RequestManager.RequestListener, AdPresenter.Listener, AdPresenter.ImpressionListener, VideoListener, MRAIDViewListener {
 
     private static final String TAG = HyBidAdView.class.getSimpleName();
     private static final int TIME_TO_EXPIRE = 1800000;
@@ -105,14 +95,14 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     private RequestManager mRequestManager;
     protected HyBidAdView.Listener mListener;
     protected VideoListener mVideoListener;
+
+    protected MRAIDViewListener mRaidListener;
     private AdPresenter mPresenter;
     protected Ad mAd;
 
-    protected PriorityQueue<Ad> mAuctionResponses;
     private boolean mAutoShowOnLoad = true;
     private boolean mIsDestroyed;
     private final String mAdFormat = Reporting.AdFormat.BANNER;
-    private Auction mAuction;
     private SignalDataProcessor mSignalDataProcessor;
     private JSONObject mPlacementParams;
     private long mInitialLoadTime = -1;
@@ -162,7 +152,6 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         mRequestManager = requestManager;
         mRequestManager.setIntegrationType(IntegrationType.STANDALONE);
         mPlacementParams = new JSONObject();
-        mAuctionResponses = new PriorityQueue<>();
     }
 
     public void setAdSize(AdSize adSize) {
@@ -194,48 +183,12 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                 } else {
                     addReportingKey(Reporting.Key.ZONE_ID, zoneId);
 
-                    ConfigManager configManager = HyBid.getConfigManager();
-                    if (configManager != null && configManager.getConfig() != null
-                            && configManager.getConfig().placement_info != null
-                            && configManager.getConfig().placement_info.placements != null
-                            && !configManager.getConfig().placement_info.placements.isEmpty()
-                            && configManager.getConfig().placement_info.placements.get(zoneId) != null
-                            && !TextUtils.isEmpty(configManager.getConfig().placement_info.placements.get(zoneId).type)
-                            && configManager.getConfig().placement_info.placements.get(zoneId).type.equals("auction")
-                            && configManager.getConfig().placement_info.placements.get(zoneId).ad_sources != null) {
-
-                        RemoteConfigPlacement placement = configManager.getConfig().placement_info.placements.get(zoneId);
-                        long timeout = placement.timeout != null ? placement.timeout : 5000;
-                        List<AdSource> adSources = new ArrayList<>();
-
-                        AdSourceConfig hyBidAdSourceConfig = new AdSourceConfig();
-                        hyBidAdSourceConfig.setZoneId(zoneId);
-                        HyBidAdSource hyBidAdSource = new HyBidAdSource(getContext(), hyBidAdSourceConfig, mRequestManager.getAdSize());
-                        adSources.add(hyBidAdSource);
-
-                        for (RemoteConfigAdSource remoteAdSource : placement.ad_sources) {
-                            if (!TextUtils.isEmpty(remoteAdSource.type) && remoteAdSource.type.equals("vast_tag")) {
-                                AdSourceConfig adSourceConfig = new AdSourceConfig();
-                                adSourceConfig.setName(remoteAdSource.name);
-                                adSourceConfig.setECPM(remoteAdSource.eCPM != null ? remoteAdSource.eCPM : 0);
-                                adSourceConfig.setVastTagUrl(remoteAdSource.vastTagUrl);
-
-                                VastTagAdSource adSource = new VastTagAdSource(getContext(), adSourceConfig, mRequestManager.getAdSize());
-                                adSources.add(adSource);
-                            }
-                        }
-
-                        mAuctionResponses.clear();
-                        mAuction = new Auction(adSources, timeout, HyBid.getReportingController(), this, mAdFormat);
-                        mAuction.runAuction();
-                    } else {
-                        if (!TextUtils.isEmpty(appToken)) {
-                            mRequestManager.setAppToken(appToken);
-                        }
-                        mRequestManager.setZoneId(zoneId);
-                        mRequestManager.setRequestListener(this);
-                        mRequestManager.requestAd();
+                    if (!TextUtils.isEmpty(appToken)) {
+                        mRequestManager.setAppToken(appToken);
                     }
+                    mRequestManager.setZoneId(zoneId);
+                    mRequestManager.setRequestListener(this);
+                    mRequestManager.requestAd();
                 }
             }
         } else {
@@ -691,6 +644,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         mPresenter = createPresenter();
         if (mPresenter != null) {
             mPresenter.setVideoListener(this);
+            mPresenter.setMRaidListener(this);
             mPresenter.load();
         } else {
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.UNSUPPORTED_ASSET));
@@ -853,6 +807,10 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         mVideoListener = videoListener;
     }
 
+    public void setMraidListener(MRAIDViewListener listener) {
+        mRaidListener = listener;
+    }
+
     public void setTrackingMethod(ImpressionTrackingMethod trackingMethod) {
         if (trackingMethod != null) {
             this.mTrackingMethod = trackingMethod;
@@ -912,15 +870,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
 
     @Override
     public void onAdError(AdPresenter adPresenter) {
-        mAd = mAuctionResponses.poll();
-        if (mAd != null) {
-            renderAd();
-            if (mAuction != null) {
-                mAuction.reportAuctionNextItem(mAuctionResponses.peek());
-            }
-        } else {
-            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.ERROR_RENDERING_BANNER));
-        }
+        invokeOnLoadFailed(new HyBidError(HyBidErrorCode.ERROR_RENDERING_BANNER));
     }
 
     @Override
@@ -932,28 +882,6 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     public void onImpression() {
         reportAdRender(mAdFormat, getPlacementParams());
         invokeOnImpression();
-    }
-
-    //------------------------------ Auction Callbacks --------------------------------------
-
-    @Override
-    public void onAuctionSuccess(PriorityQueue<Ad> auctionResult) {
-        if (auctionResult == null || auctionResult.isEmpty()) {
-            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.AUCTION_NO_AD));
-        } else {
-            mAuctionResponses.addAll(auctionResult);
-            mAd = mAuctionResponses.poll();
-            if (mAutoShowOnLoad) {
-                renderAd();
-            } else {
-                invokeOnLoadFinished();
-            }
-        }
-    }
-
-    @Override
-    public void onAuctionFailure(Throwable error) {
-        invokeOnLoadFailed(error);
     }
 
     //------------------------------ Video Callbacks --------------------------------------
@@ -1016,10 +944,47 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     }
 
     public boolean hasEndCard() {
-        if (mAd == null || !HyBid.isEndCardEnabled()) {
-            return false;
+        if (mAd != null) {
+            if (mAd.isEndCardEnabled() != null) {
+                return mAd.isEndCardEnabled();
+            } else if (!HyBid.isEndCardEnabled()) {
+                return false;
+            } else {
+                return mAd.hasEndCard();
+            }
         } else {
-            return mAd.hasEndCard();
+            return false;
         }
+    }
+
+    @Override
+    public void mraidViewLoaded(MRAIDView mraidView) {
+    }
+
+    @Override
+    public void mraidViewError(MRAIDView mraidView) {
+    }
+
+    @Override
+    public void mraidViewExpand(MRAIDView mraidView) {
+    }
+
+    @Override
+    public void mraidViewClose(MRAIDView mraidView) {
+    }
+
+    @Override
+    public boolean mraidViewResize(MRAIDView mraidView, int width, int height, int offsetX, int offsetY) {
+        return false;
+    }
+
+    @Override
+    public void mraidShowCloseButton() {
+    }
+
+    @Override
+    public void onExpandedAdClosed() {
+        if (mRaidListener != null)
+            mRaidListener.onExpandedAdClosed();
     }
 }

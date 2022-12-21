@@ -52,7 +52,7 @@ public class CountDownViewFactory {
             piChartLp.setMargins(margin, margin, margin, margin);
             piChartLp.gravity = Gravity.TOP | Gravity.END;
             return  piChartLp;
-        }else {
+        } else {
             ViewGroup.LayoutParams piChartLp = new ViewGroup.LayoutParams(
                     (int) ViewUtils.convertDpToPixel(40, context),
                     (int) ViewUtils.convertDpToPixel(40, context)
@@ -78,7 +78,7 @@ public class CountDownViewFactory {
             );
             timerLp.gravity = Gravity.TOP | Gravity.END;
             return  timerLp;
-        }else {
+        } else {
             ViewGroup.LayoutParams timerLp = new RelativeLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     (int) ViewUtils.convertDpToPixel(35, context)
@@ -106,7 +106,7 @@ public class CountDownViewFactory {
             progressLp.gravity = Gravity.BOTTOM | Gravity.END;
             progressLp.setMargins(0, 0, 0,  (int) ViewUtils.convertDpToPixel(40, context));
             return progressLp;
-        }else {
+        } else {
             ViewGroup.LayoutParams progressLp = new ViewGroup.LayoutParams(
                     RelativeLayout.LayoutParams.WRAP_CONTENT,
                     RelativeLayout.LayoutParams.WRAP_CONTENT

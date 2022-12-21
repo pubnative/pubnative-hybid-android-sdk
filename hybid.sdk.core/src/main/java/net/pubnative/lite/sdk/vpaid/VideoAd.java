@@ -10,6 +10,7 @@ import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
 import net.pubnative.lite.sdk.vpaid.enums.AdFormat;
 import net.pubnative.lite.sdk.vpaid.enums.AdState;
+import net.pubnative.lite.sdk.vpaid.enums.AudioState;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.AdSpotDimensions;
 
 import static net.pubnative.lite.sdk.vpaid.utils.Utils.isPhoneMuted;
@@ -97,7 +98,14 @@ public class VideoAd extends BaseVideoAd {
 
     private void validateAudioState() {
         boolean isMuted = false;
-        switch (HyBid.getVideoAudioStatus()) {
+        AudioState audioState;
+        String stateFromRemoteConfig = getAd().getAudioState();
+        if(stateFromRemoteConfig != null){
+            audioState = AudioState.fromString(stateFromRemoteConfig);
+        }else {
+            audioState = HyBid.getVideoAudioStatus();
+        }
+        switch (audioState) {
             case DEFAULT:
             case MUTED:
                 isMuted = true;
@@ -186,4 +194,5 @@ public class VideoAd extends BaseVideoAd {
             getAdController().pause();
         }
     }
+
 }

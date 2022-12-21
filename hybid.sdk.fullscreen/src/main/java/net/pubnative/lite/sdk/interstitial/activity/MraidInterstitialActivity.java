@@ -140,6 +140,11 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
         showInterstitialCloseButton();
     }
 
+    @Override
+    public void onExpandedAdClosed() {
+
+    }
+
     // ------------------------------- MRAIDNativeFeatureListener ----------------------------------
 
     @Override

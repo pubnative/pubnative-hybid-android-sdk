@@ -73,6 +73,10 @@ abstract class BaseVideoAd extends BaseVideoAdInternal {
         super.setAdListener(videoAdListener);
     }
 
+    public void setAdCloseButtonListener(CloseButtonListener closeButtonListener) {
+        super.setAdCloseButtonListener(closeButtonListener);
+    }
+
     /**
      * Defines, should use mobile network for caching video or not.
      * By default, video will not cache on mobile network (only on wi-fi)

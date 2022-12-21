@@ -63,4 +63,5 @@ public class AdRequest {
     public String rv;
     public String protocol;
     public String api;
+    public String timeSinceInstalled;
 }

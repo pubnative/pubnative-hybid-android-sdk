@@ -46,12 +46,9 @@ public class ViewControllerVpaid {
 
         mEndCardView = mEndCardLayout.findViewById(R.id.staticEndCardView);
         ImageView closeView = mEndCardLayout.findViewById(R.id.closeView);
-        closeView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mAdController.closeSelf();
-            }
-        });
+        if (closeView != null) {
+            closeView.setOnClickListener(v -> mAdController.closeSelf());
+        }
 
         bannerView.addView(mEndCardLayout, params);
         bannerView.addView(webView, params);

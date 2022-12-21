@@ -1,5 +1,7 @@
 package net.pubnative.lite.sdk.models;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.location.Location;
 
 import net.pubnative.lite.sdk.DeviceInfo;
@@ -17,10 +19,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.robolectric.RobolectricTestRunner;
 
 import java.util.Locale;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -43,9 +48,23 @@ public class AdRequestFactoryTest {
     @InjectMocks
     private AdRequestFactory mSubject;
 
+    @Mock
+    Context mockContext;
+    @Mock
+    SharedPreferences mockPrefs;
+    @Mock
+    SharedPreferences.Editor mockEditor;
+
+
     @Before
     public void setup() {
         initMocks(this);
+
+        Mockito.when(mockContext.getSharedPreferences(anyString(), anyInt())).thenReturn(mockPrefs);
+        Mockito.when(mockContext.getSharedPreferences(anyString(), anyInt()).edit()).thenReturn(mockEditor);
+
+        Mockito.when(mockPrefs.getString(anyString(), anyString())).thenReturn("1234567");
+
         when(mMockDeviceInfo.getModel()).thenReturn("Nexus5X");
         when(mMockDeviceInfo.getOSVersion()).thenReturn("8.1.0");
         when(mMockDeviceInfo.getAdvertisingId()).thenReturn("aabbccdd");
@@ -55,6 +74,7 @@ public class AdRequestFactoryTest {
         when(mMockDeviceInfo.getDeviceHeight()).thenReturn("1080");
         when(mMockDeviceInfo.getDeviceWidth()).thenReturn("1920");
         when(mMockDeviceInfo.getOrientation()).thenReturn(DeviceInfo.Orientation.PORTRAIT);
+        when(mMockDeviceInfo.getContext()).thenReturn(mockContext);
 
         Location mockLocation = new Location("");
         mockLocation.setLatitude(12.126543);
@@ -69,8 +89,9 @@ public class AdRequestFactoryTest {
 
     @Test
     public void createAdRequest() {
+
 //        AdRequest request = mSubject.buildRequest("aabbcc112233", "2", AdSize.SIZE_320x50, "aabbccdd", false, IntegrationType.HEADER_BIDDING,"m");
-        AdRequest request = mSubject.buildRequest("aabbcc112233", "2", AdSize.SIZE_320x50, "aabbccdd", false, IntegrationType.HEADER_BIDDING,"b");
+        AdRequest request = mSubject.buildRequest("aabbcc112233", "2", AdSize.SIZE_320x50, "aabbccdd", false, IntegrationType.HEADER_BIDDING, "b");
         Assert.assertEquals("aabbccdd", request.gid);
         Assert.assertEquals(PNCrypto.md5("aabbccdd"), request.gidmd5);
         Assert.assertEquals(PNCrypto.sha1("aabbccdd"), request.gidsha1);
@@ -93,6 +114,7 @@ public class AdRequestFactoryTest {
         Assert.assertEquals("1920", request.deviceWidth);
         Assert.assertEquals("1080", request.deviceHeight);
         Assert.assertEquals("portrait", request.orientation);
+        Assert.assertEquals("1234567", mockPrefs.getString("", ""));
         Assert.assertEquals(HyBid.OMSDK_VERSION, request.omidpv);
         Assert.assertEquals(HyBid.OM_PARTNER_NAME, request.omidpn);
 

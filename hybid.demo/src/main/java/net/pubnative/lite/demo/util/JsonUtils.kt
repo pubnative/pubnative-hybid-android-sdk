@@ -2,8 +2,10 @@ package net.pubnative.lite.demo.util
 
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
-import com.google.gson.JsonSyntaxException
 import net.pubnative.lite.sdk.utils.Logger
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
 
 
 class JsonUtils {
@@ -23,11 +25,16 @@ class JsonUtils {
         }
 
         fun isValidJson(json: String?): Boolean {
-            if (json == null) return false
+            if (json == null || json.isEmpty()) return false
+
             try {
-                JsonParser.parseString(json)
-            } catch (e: JsonSyntaxException) {
-                return false
+                JSONObject(json)
+            } catch (ex: Exception) {
+                try {
+                    JSONArray(json)
+                } catch (ex1: JSONException) {
+                    return false
+                }
             }
             return true
         }

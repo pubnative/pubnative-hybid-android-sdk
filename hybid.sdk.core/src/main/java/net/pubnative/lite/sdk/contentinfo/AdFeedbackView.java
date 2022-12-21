@@ -18,6 +18,9 @@ import net.pubnative.lite.sdk.utils.UrlHandler;
 
 public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureListener {
     public interface AdFeedbackLoadListener {
+
+        void onLoad();
+
         void onLoadFinished();
 
         void onLoadFailed(Throwable error);
@@ -60,7 +63,12 @@ public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureList
                 MRAIDNativeFeature.TEL,
                 MRAIDNativeFeature.LOCATION
         }, this, this, null);
+
+        mViewContainer.markCreativeAdComingFromFeedbackForm();
+
         mListener = listener;
+
+        mListener.onLoad();
     }
 
     @Override
@@ -130,6 +138,11 @@ public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureList
 
     @Override
     public void mraidShowCloseButton() {
+
+    }
+
+    @Override
+    public void onExpandedAdClosed() {
 
     }
 

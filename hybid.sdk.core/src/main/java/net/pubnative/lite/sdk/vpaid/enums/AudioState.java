@@ -14,4 +14,13 @@ public enum AudioState {
     public String getStateName() {
         return stateName;
     }
+
+    public static AudioState fromString(String stateName) {
+
+        if (stateName.equals(MUTED.stateName))
+            return MUTED;
+        if (stateName.equals(ON.stateName))
+            return ON;
+        return DEFAULT;
+    }
 }

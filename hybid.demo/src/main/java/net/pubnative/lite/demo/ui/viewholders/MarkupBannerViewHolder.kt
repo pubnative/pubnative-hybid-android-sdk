@@ -1,20 +1,26 @@
 package net.pubnative.lite.demo.ui.viewholders
 
 import android.graphics.Color
-import android.text.TextUtils
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.RelativeLayout
 import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.ui.adapters.OnExpandedAdCloseListener
 import net.pubnative.lite.demo.ui.adapters.OnLogDisplayListener
+import net.pubnative.lite.sdk.mraid.MRAIDView
+import net.pubnative.lite.sdk.mraid.MRAIDViewListener
 import net.pubnative.lite.sdk.utils.Logger
 import net.pubnative.lite.sdk.views.HyBidBannerAdView
 import net.pubnative.lite.sdk.views.PNAdView
 
-class MarkupBannerViewHolder(itemView: View, private var mListener: OnLogDisplayListener) :
-    RecyclerView.ViewHolder(itemView), PNAdView.Listener {
+class MarkupBannerViewHolder(
+    itemView: View,
+    private var mListener: OnLogDisplayListener,
+    private var onExpandedAdCloseListener: OnExpandedAdCloseListener
+) :
+    RecyclerView.ViewHolder(itemView), PNAdView.Listener, MRAIDViewListener {
     private val TAG = MarkupBannerViewHolder::class.java.simpleName
 
     fun bind(markup: String) {
@@ -30,7 +36,7 @@ class MarkupBannerViewHolder(itemView: View, private var mListener: OnLogDisplay
             adLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
             container.addView(banner, adLayoutParams)
             container.setBackgroundColor(Color.BLACK)
-
+            banner.setMraidListener(this)
             banner.renderCustomMarkup(markup, this)
         }
     }
@@ -51,5 +57,34 @@ class MarkupBannerViewHolder(itemView: View, private var mListener: OnLogDisplay
 
     override fun onAdClick() {
         Logger.d(TAG, "onAdClick")
+    }
+
+    override fun onExpandedAdClosed() {
+        onExpandedAdCloseListener.onExpandedAdClosed()
+    }
+
+    override fun mraidViewLoaded(mraidView: MRAIDView?) {
+    }
+
+    override fun mraidViewError(mraidView: MRAIDView?) {
+    }
+
+    override fun mraidViewExpand(mraidView: MRAIDView?) {
+    }
+
+    override fun mraidViewClose(mraidView: MRAIDView?) {
+    }
+
+    override fun mraidViewResize(
+        mraidView: MRAIDView?,
+        width: Int,
+        height: Int,
+        offsetX: Int,
+        offsetY: Int
+    ): Boolean {
+        return false
+    }
+
+    override fun mraidShowCloseButton() {
     }
 }
