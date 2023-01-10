@@ -79,11 +79,20 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
         mContext = context;
         mAdSize = adSize;
         mAd = ad;
-        if (trackingMethod != null) {
-            mTrackingMethod = trackingMethod;
+
+        ImpressionTrackingMethod trackingMethodFinal = trackingMethod;
+
+        if(ad != null && ad.getImpressionTrackingMethod() != null &&
+                ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod()) != null){
+            trackingMethodFinal = ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod());
+        }
+
+        if (trackingMethodFinal != null) {
+            mTrackingMethod = trackingMethodFinal;
         } else {
             mTrackingMethod = ImpressionTrackingMethod.AD_RENDERED;
         }
+
         mUrlHandlerDelegate = new UrlHandler(context);
         mSupportedNativeFeatures = new String[]{
                 MRAIDNativeFeature.CALENDAR,
@@ -147,7 +156,11 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
     @Override
     public void startTracking() {
         if (mMRAIDBanner != null && mTrackingMethod == ImpressionTrackingMethod.AD_VIEWABLE) {
-            ImpressionManager.startTrackingView(mMRAIDBanner, mAdSize, this);
+            ImpressionManager.startTrackingView(mMRAIDBanner,
+                    mAdSize,
+                    mAd.getImpressionMinVisibleTime(),
+                    mAd.getImpressionVisiblePercent(),
+                    this);
         }
     }
 

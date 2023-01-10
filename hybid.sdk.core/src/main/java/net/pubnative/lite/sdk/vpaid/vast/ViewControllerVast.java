@@ -31,6 +31,7 @@ import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.CloseButtonListener;
+import net.pubnative.lite.sdk.vpaid.VastActivityInteractor;
 import net.pubnative.lite.sdk.vpaid.VideoAdController;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
 import net.pubnative.lite.sdk.vpaid.VideoVisibilityManager;
@@ -82,106 +83,119 @@ public class ViewControllerVast implements View.OnClickListener {
     private Integer mRemoteEndCardCloseDelay;
 
     VideoVisibilityManager videoVisibilityManager;
+    VastActivityInteractor interactor;
 
     private InterstitialActionBehaviour interstitialClickBehaviour;
+    private InterstitialActionBehaviour remoteConfigInterstitialClickBehaviour = null;
 
-    public ViewControllerVast(VideoAdController adController, boolean isFullscreen, Integer endCardCloseDelay) {
+    public ViewControllerVast(VideoAdController adController, boolean isFullscreen, Integer endCardCloseDelay, Boolean fullScreenClickability) {
         mAdController = adController;
         mIsFullscreen = isFullscreen;
         videoVisibilityManager = VideoVisibilityManager.getInstance();
         mRemoteEndCardCloseDelay = endCardCloseDelay;
+        if (fullScreenClickability != null) {
+            if (fullScreenClickability)
+                remoteConfigInterstitialClickBehaviour = InterstitialActionBehaviour.HB_CREATIVE;
+            else
+                remoteConfigInterstitialClickBehaviour = InterstitialActionBehaviour.HB_ACTION_BUTTON;
+        }
+        interactor = VastActivityInteractor.getInstance();
     }
 
     public void buildVideoAdView(VideoAdView bannerView) {
-        Context context = bannerView.getContext();
-        mBannerView = bannerView;
-        bannerView.setVisibilityListener(mCreateVisibilityListener);
-        bannerView.removeAllViews();
+        if (interactor.isActivityVisible()) {
+            Context context = bannerView.getContext();
+            mBannerView = bannerView;
+            bannerView.setVisibilityListener(mCreateVisibilityListener);
+            bannerView.removeAllViews();
 
-        mControlsLayout = LayoutInflater.from(context).inflate(R.layout.controls, bannerView, false);
+            mControlsLayout = LayoutInflater.from(context).inflate(R.layout.controls, bannerView, false);
 
-        interstitialClickBehaviour = HyBid.getInterstitialClickBehaviour();
+            interstitialClickBehaviour = HyBid.getInterstitialClickBehaviour();
+            if (remoteConfigInterstitialClickBehaviour != null)
+                interstitialClickBehaviour = remoteConfigInterstitialClickBehaviour;
 
-        if (interstitialClickBehaviour == InterstitialActionBehaviour.HB_CREATIVE) {
-            mControlsLayout.setOnClickListener(v -> validateOpenURLClicked());
-            mControlsLayout.findViewById(R.id.openURL).setVisibility(View.GONE);
-        } else {
-            mControlsLayout.findViewById(R.id.openURL).setVisibility(View.VISIBLE);
-        }
+            if (interstitialClickBehaviour == InterstitialActionBehaviour.HB_CREATIVE) {
+                mControlsLayout.setOnClickListener(v -> validateOpenURLClicked());
+                mControlsLayout.findViewById(R.id.openURL).setVisibility(View.GONE);
+            } else {
+                mControlsLayout.findViewById(R.id.openURL).setVisibility(View.VISIBLE);
+            }
 
-        mVideoPlayerLayout = mControlsLayout.findViewById(R.id.videoPlayerLayout);
+            mVideoPlayerLayout = mControlsLayout.findViewById(R.id.videoPlayerLayout);
 
-        if (hasCTAExtension(mAdController.getAdParams())) {
-            mMediaLayout = new RelativeLayout(mVideoPlayerLayout.getContext());
-            mVideoPlayerLayoutTexture = new TextureView(mMediaLayout.getContext());
-            mVideoPlayerLayoutTexture.setId(R.id.textureView);
-            mMediaLayout.addView(mVideoPlayerLayoutTexture, new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
-            mVideoPlayerLayout.addView(mMediaLayout, 0, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-        } else {
-            mVideoPlayerLayoutTexture = new TextureView(mVideoPlayerLayout.getContext());
-            mVideoPlayerLayoutTexture.setId(R.id.textureView);
-            mVideoPlayerLayout.addView(mVideoPlayerLayoutTexture, 0, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-        }
+            if (hasCTAExtension(mAdController.getAdParams())) {
+                mMediaLayout = new RelativeLayout(mVideoPlayerLayout.getContext());
+                mVideoPlayerLayoutTexture = new TextureView(mMediaLayout.getContext());
+                mVideoPlayerLayoutTexture.setId(R.id.textureView);
+                mMediaLayout.addView(mVideoPlayerLayoutTexture, new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
+                mVideoPlayerLayout.addView(mMediaLayout, 0, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+            } else {
+                mVideoPlayerLayoutTexture = new TextureView(mVideoPlayerLayout.getContext());
+                mVideoPlayerLayoutTexture.setId(R.id.textureView);
+                mVideoPlayerLayout.addView(mVideoPlayerLayoutTexture, 0, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+            }
 
-        mEndCardLayout = mControlsLayout.findViewById(R.id.endCardLayout);
-        mEndCardLayout.setVisibility(View.GONE);
-        mStaticEndCardView = mControlsLayout.findViewById(R.id.staticEndCardView);
-        mHtmlEndCardContainer = mControlsLayout.findViewById(R.id.htmlEndCardContainer);
+            mEndCardLayout = mControlsLayout.findViewById(R.id.endCardLayout);
+            mEndCardLayout.setVisibility(View.GONE);
+            mStaticEndCardView = mControlsLayout.findViewById(R.id.staticEndCardView);
+            mHtmlEndCardContainer = mControlsLayout.findViewById(R.id.htmlEndCardContainer);
 
-        mEndCardCloseView = mControlsLayout.findViewById(R.id.closeEndCardView);
-        mEndCardCloseView.setOnClickListener(this);
-        mEndCardCloseView.setVisibility(View.GONE);
+            mEndCardCloseView = mControlsLayout.findViewById(R.id.closeEndCardView);
+            mEndCardCloseView.setOnClickListener(this);
+            mEndCardCloseView.setVisibility(View.GONE);
 
-        Bitmap closeBitmap = BitmapHelper.toBitmap(mEndCardCloseView.getContext(), HyBid.getNormalCloseXmlResource(), R.mipmap.close);
-        if (closeBitmap != null) ((ImageView) mEndCardCloseView).setImageBitmap(closeBitmap);
-        else
-            ((ImageView) mEndCardCloseView).setImageBitmap(BitmapHelper.decodeResource(mEndCardCloseView.getContext(), R.mipmap.close));
+            Bitmap closeBitmap = BitmapHelper.toBitmap(mEndCardCloseView.getContext(), HyBid.getNormalCloseXmlResource(), R.mipmap.close);
+            if (closeBitmap != null) ((ImageView) mEndCardCloseView).setImageBitmap(closeBitmap);
+            else
+                ((ImageView) mEndCardCloseView).setImageBitmap(BitmapHelper.decodeResource(mEndCardCloseView.getContext(), R.mipmap.close));
 
-        mCloseCardLayout = mControlsLayout.findViewById(R.id.closeCardLayout);
-        mCloseCardLayout.setVisibility(View.GONE);
-        mCloseCardCloseView = mCloseCardLayout.findViewById(R.id.closeView);
-        mStaticCloseCardView = mCloseCardLayout.findViewById(R.id.staticCloseCardView);
-        mHtmlCloseCardContainer = mCloseCardLayout.findViewById(R.id.htmlCloseCardContainer);
-        mCloseCardTitleView = mCloseCardLayout.findViewById(R.id.closeCardTitle);
-        mCloseCardRatingView = mCloseCardLayout.findViewById(R.id.closeCardRaiting);
-        mCloseCardRatingView.setIsIndicator(true);
-        mCloseCardVoteView = mCloseCardLayout.findViewById(R.id.closeCardVoteCount);
-        mCloseCardActionView = mCloseCardLayout.findViewById(R.id.closeCardActionButton);
-        mCloseCardIconView = mCloseCardLayout.findViewById(R.id.closeCardIconImageView);
-        closeCardVotesLayout = mCloseCardLayout.findViewById(R.id.closeCardVotesLayout);
-        mCloseCardCloseView.setOnClickListener(this);
+            mCloseCardLayout = mControlsLayout.findViewById(R.id.closeCardLayout);
+            mCloseCardLayout.setVisibility(View.GONE);
+            mCloseCardCloseView = mCloseCardLayout.findViewById(R.id.closeView);
+            mStaticCloseCardView = mCloseCardLayout.findViewById(R.id.staticCloseCardView);
+            mHtmlCloseCardContainer = mCloseCardLayout.findViewById(R.id.htmlCloseCardContainer);
+            mCloseCardTitleView = mCloseCardLayout.findViewById(R.id.closeCardTitle);
+            mCloseCardRatingView = mCloseCardLayout.findViewById(R.id.closeCardRaiting);
+            mCloseCardRatingView.setIsIndicator(true);
+            mCloseCardVoteView = mCloseCardLayout.findViewById(R.id.closeCardVoteCount);
+            mCloseCardActionView = mCloseCardLayout.findViewById(R.id.closeCardActionButton);
+            mCloseCardIconView = mCloseCardLayout.findViewById(R.id.closeCardIconImageView);
+            closeCardVotesLayout = mCloseCardLayout.findViewById(R.id.closeCardVotesLayout);
+            mCloseCardCloseView.setOnClickListener(this);
 
-        mControlsLayout.findViewById(R.id.openURL).setOnClickListener(this);
+            mControlsLayout.findViewById(R.id.openURL).setOnClickListener(this);
 
-        mSkipCountdownView = new CountDownViewFactory().createCountdownView(context, HyBid.getCountdownStyle(), mVideoPlayerLayout);
-        mVideoPlayerLayout.addView(mSkipCountdownView);
-        mLinearCountdownView = mControlsLayout.findViewById(R.id.linear_count_down);
-        if (mVideoPlayerLayoutTexture != null) {
-            mVideoPlayerLayoutTexture.setSurfaceTextureListener(mCreateTextureListener);
-        }
+            mSkipCountdownView = new CountDownViewFactory().createCountdownView(context, HyBid.getCountdownStyle(), mVideoPlayerLayout);
+            mVideoPlayerLayout.addView(mSkipCountdownView);
+            mLinearCountdownView = mControlsLayout.findViewById(R.id.linear_count_down);
+            if (mVideoPlayerLayoutTexture != null) {
+                mVideoPlayerLayoutTexture.setSurfaceTextureListener(mCreateTextureListener);
+            }
 
-        mMuteView = mControlsLayout.findViewById(R.id.muteView);
-        mMuteView.setOnClickListener(this);
+            mMuteView = mControlsLayout.findViewById(R.id.muteView);
+            mMuteView.setOnClickListener(this);
 
-        if (HyBid.getCountdownStyle() == CountdownStyle.PROGRESS) {
-            mSkipView = mControlsLayout.findViewById(R.id.progressSkipView);
-        } else {
-            mSkipView = mControlsLayout.findViewById(R.id.skipView);
-        }
+            if (HyBid.getCountdownStyle() == CountdownStyle.PROGRESS) {
+                mSkipView = mControlsLayout.findViewById(R.id.progressSkipView);
+            } else {
+                mSkipView = mControlsLayout.findViewById(R.id.skipView);
+            }
 
-        Bitmap skipBitmap = BitmapHelper.toBitmap(mSkipView.getContext(), HyBid.getSkipXmlResource(), R.mipmap.skip);
-        if (skipBitmap != null) ((ImageView) mSkipView).setImageBitmap(skipBitmap);
-        else
-            ((ImageView) mSkipView).setImageBitmap(BitmapHelper.decodeResource(mSkipView.getContext(), R.mipmap.skip));
+            Bitmap skipBitmap = BitmapHelper.toBitmap(mSkipView.getContext(), HyBid.getSkipXmlResource(), R.mipmap.skip);
+            if (skipBitmap != null) ((ImageView) mSkipView).setImageBitmap(skipBitmap);
+            else
+                ((ImageView) mSkipView).setImageBitmap(BitmapHelper.decodeResource(mSkipView.getContext(), R.mipmap.skip));
 
-        mSkipView.setOnClickListener(this);
+            mSkipView.setOnClickListener(this);
 
-        mAdController.addViewabilityFriendlyObstruction(mControlsLayout, FriendlyObstructionPurpose.VIDEO_CONTROLS, "Video controls");
+            mAdController.addViewabilityFriendlyObstruction(mControlsLayout, FriendlyObstructionPurpose.VIDEO_CONTROLS, "Video controls");
 
-        bannerView.addView(mControlsLayout);
+            bannerView.addView(mControlsLayout);
 
-        if (mAdController.isRewarded()) {
-            mSkipCountdownView.setVisibility(View.GONE);
+            if (mAdController.isRewarded()) {
+                mSkipCountdownView.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -240,7 +254,9 @@ public class ViewControllerVast implements View.OnClickListener {
     }
 
     public void postDelayed(Runnable action, long delayMillis) {
-        mBannerView.postDelayed(action, delayMillis);
+        if (mBannerView != null) {
+            mBannerView.postDelayed(action, delayMillis);
+        }
     }
 
     public Surface getSurface() {
@@ -521,10 +537,12 @@ public class ViewControllerVast implements View.OnClickListener {
     public void muteVideo() {
         mMuteState = !mMuteState;
         mAdController.setVolume(mMuteState);
-        if (mMuteState) {
-            mMuteView.setImageResource(R.mipmap.mute);
-        } else {
-            mMuteView.setImageResource(R.mipmap.unmute);
+        if (mMuteView != null) {
+            if (mMuteState) {
+                mMuteView.setImageResource(R.mipmap.mute);
+            } else {
+                mMuteView.setImageResource(R.mipmap.unmute);
+            }
         }
     }
 

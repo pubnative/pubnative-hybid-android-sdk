@@ -64,8 +64,8 @@ public class ImpressionManager {
      * @param view     view that we want to start tracking
      * @param listener valid listener for impressions
      */
-    public static void startTrackingView(View view, ImpressionTracker.Listener listener) {
-        startTrackingView(view, null, listener);
+    public static void startTrackingView(View view, Integer visibleTimeMillisecond, Double visiblePercent, ImpressionTracker.Listener listener) {
+        startTrackingView(view, null, visibleTimeMillisecond, visiblePercent, listener);
     }
 
     /**
@@ -76,8 +76,8 @@ public class ImpressionManager {
      * @param adSize    size of the view to be tracked
      * @param listener  valid listener for impressions
      */
-    public static void startTrackingView(View view, AdSize adSize, ImpressionTracker.Listener listener) {
-        getInstance().addView(view, adSize, listener);
+    public static void startTrackingView(View view, AdSize adSize, Integer visibleTimeMillisecond, Double visiblePercent, ImpressionTracker.Listener listener) {
+        getInstance().addView(view, adSize, visibleTimeMillisecond, visiblePercent, listener);
     }
 
     /**
@@ -101,7 +101,7 @@ public class ImpressionManager {
     //==============================================================================================
     // PRIVATE
     //==============================================================================================
-    protected void addView(View view, AdSize adSize, ImpressionTracker.Listener listener) {
+    protected void addView(View view, AdSize adSize, Integer visibleTimeMillisecond, Double visiblePercent, ImpressionTracker.Listener listener) {
         // Adds view to tracker, removing any previous instance of the view on other trackers
         // This should also create an independent tracker for each listener
         if (view == null) {
@@ -127,9 +127,9 @@ public class ImpressionManager {
                 int trackerIndex = indexOfTracker(view);
                 tracker = mTrackers.get(trackerIndex);
             } else {
-                tracker = new ImpressionTracker();
+                tracker = new ImpressionTracker(visibleTimeMillisecond, visiblePercent);
                 if (adSize != null) {
-                    tracker.setAdSize(adSize);
+                    tracker.setAdSize(adSize, visiblePercent);
                 }
                 tracker.setListener(listener);
                 mTrackers.add(tracker);

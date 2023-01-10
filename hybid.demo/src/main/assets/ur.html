@@ -443,11 +443,11 @@ body {
             if (A) {
                 window.sendDebugData('exec');
                 try {
-                    var win = ctr.contentWindow, doc = win.document;
-                    doc.open();
+                    var win = ctr.contentWindow;
+                    ctr.srcdoc = A;
                     win.addEventListener('error', function (e) {
                         sendDebugData('ctrerr', e.message, 'ctrerr',
-                            btoa(unescape(encodeURIComponent(win.document.head.innerHTML.substr(0, 20000)))) + '\n\n' +
+                                      btoa(unescape(encodeURIComponent(win.document.head.innerHTML.substr(0, 20000)))) + '\n\n' +
                             btoa(unescape(encodeURIComponent(win.document.body.innerHTML.substr(0, 40000))))
                         );
                     });
@@ -459,8 +459,6 @@ body {
                         }
                     }, true);
                     win.addEventListener('load', fixSize);
-                    doc.write(A);
-                    doc.close();
                 } catch (e) {
                     sendDebugData('dwrerr', e.message);
                 }

@@ -197,11 +197,11 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
 
     protected void showRewardedCloseButton() {
         boolean hasEndcard = false;
-        if (getAd() != null) {
+        if (getAd() != null && getAd().hasEndCard()) {
             if (getAd().isEndCardEnabled() != null) {
                 hasEndcard = getAd().isEndCardEnabled();
             } else {
-                hasEndcard = getAd().hasEndCard() && HyBid.isEndCardEnabled();
+                hasEndcard = HyBid.isEndCardEnabled();
             }
         }
 

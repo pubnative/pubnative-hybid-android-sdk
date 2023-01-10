@@ -119,6 +119,10 @@ abstract class TabActivity : AppCompatActivity() {
         debugViewModel.clearEventList()
     }
 
+    fun clearTrackerList(){
+        debugViewModel.clearTrackerList()
+    }
+
     fun cacheEventList() {
         debugViewModel.cacheEventList()
     }
@@ -131,10 +135,10 @@ abstract class TabActivity : AppCompatActivity() {
 
     abstract fun getActivityTitle(): String
     fun removeReportingCallback() {
-        debugViewModel.removeReportingCallback()
+        debugViewModel.removeReportingCallbacks()
     }
 
     fun registerReportingCallback() {
-        debugViewModel.registerReportingCallback()
+        debugViewModel.registerReportingCallbacks()
     }
 }

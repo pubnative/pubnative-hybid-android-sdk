@@ -193,6 +193,18 @@ public final class PNApiUrlComposer {
             uriBuilder.appendQueryParameter("api", adRequest.api);
         }
 
+        if (!TextUtils.isEmpty(adRequest.impdepth)) {
+            uriBuilder.appendQueryParameter("impdepth", adRequest.impdepth);
+        }
+
+        if (!TextUtils.isEmpty(adRequest.ageofapp)) {
+            uriBuilder.appendQueryParameter("ageofapp", adRequest.ageofapp);
+        }
+
+        if (!TextUtils.isEmpty(adRequest.sessionduration)) {
+            uriBuilder.appendQueryParameter("sessionduration", adRequest.sessionduration);
+        }
+
         return uriBuilder.build();
     }
 }

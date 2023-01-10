@@ -185,11 +185,11 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
 
     protected void showInterstitialCloseButton() {
         boolean hasEndcard = false;
-        if (getAd() != null) {
+        if (getAd() != null && getAd().hasEndCard()) {
             if (getAd().isEndCardEnabled() != null) {
                 hasEndcard = getAd().isEndCardEnabled();
             } else {
-                hasEndcard = getAd().hasEndCard() && HyBid.isEndCardEnabled();
+                hasEndcard = HyBid.isEndCardEnabled();
             }
         }
 

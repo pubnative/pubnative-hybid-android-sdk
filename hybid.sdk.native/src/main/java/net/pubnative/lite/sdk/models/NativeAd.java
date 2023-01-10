@@ -278,7 +278,10 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
             Log.i(TAG, "impression is already confirmed, dropping impression tracking");
         } else {
             mAdView = view;
-            ImpressionManager.startTrackingView(view, this);
+            ImpressionManager.startTrackingView(view,
+                    mAd.getImpressionMinVisibleTime(),
+                    mAd.getImpressionVisiblePercent(),
+                    this);
         }
     }
 

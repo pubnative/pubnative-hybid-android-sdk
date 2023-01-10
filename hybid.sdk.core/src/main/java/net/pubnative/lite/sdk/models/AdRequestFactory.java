@@ -31,9 +31,11 @@ import net.pubnative.lite.sdk.DisplayManager;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.config.ConfigManager;
+import net.pubnative.lite.sdk.db.DBManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.prefs.HyBidPreferences;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
+import net.pubnative.lite.sdk.utils.HyBidTimeUtils;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNAsyncUtils;
 
@@ -92,27 +94,25 @@ public class AdRequestFactory {
             mIsRewarded = isRewarded;
             if (TextUtils.isEmpty(advertisingId) && context != null) {
                 try {
-                    PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(context, (advertisingId1, limitTracking1) -> processAdvertisingId(appToken, zoneid, adSize, advertisingId1, limitTracking1, callback)));
+                    Integer impDepth = new DBManager(context).getSessionImpressionSizeForZoneId(zoneid);
+                    PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(context, (advertisingId1, limitTracking1) -> processAdvertisingId(appToken, zoneid, adSize, advertisingId1, limitTracking1, callback, impDepth)));
                 } catch (Exception exception) {
                     Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
                 }
             } else {
-                processAdvertisingId(appToken, zoneid, adSize, advertisingId, limitTracking, callback);
+                int impDepth = new DBManager(context).getSessionImpressionSizeForZoneId(zoneid);
+                processAdvertisingId(appToken, zoneid, adSize, advertisingId, limitTracking, callback, impDepth);
             }
         }).start();
     }
 
-    private void processAdvertisingId(String appToken, String zoneId, AdSize adSize, String advertisingId, boolean limitTracking, Callback callback) {
+    private void processAdvertisingId(String appToken, String zoneId, AdSize adSize, String advertisingId, boolean limitTracking, Callback callback, int impDepth) {
         if (callback != null) {
-            callback.onRequestCreated(buildRequest(appToken, zoneId, adSize, advertisingId, limitTracking, mIntegrationType, mMediationVendor));
+            callback.onRequestCreated(buildRequest(appToken, zoneId, adSize, advertisingId, limitTracking, mIntegrationType, mMediationVendor, impDepth));
         }
     }
 
-    public AdRequest buildRequest(final String appToken, final String zoneid, AdSize adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType) {
-        return buildRequest(appToken, zoneid, adSize, advertisingId, limitTracking, integrationType, null);
-    }
-
-    public AdRequest buildRequest(final String appToken, final String zoneid, AdSize adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType, final String mediationVendor) {
+    public AdRequest buildRequest(final String appToken, final String zoneid, AdSize adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType, final String mediationVendor, Integer impDepth) {
         if (mUserDataManager == null) {
             mUserDataManager = HyBid.getUserDataManager();
         }
@@ -205,22 +205,28 @@ public class AdRequestFactory {
         adRequest.deviceWidth = mDeviceInfo.getDeviceWidth();
         adRequest.orientation = mDeviceInfo.getOrientation().toString();
         adRequest.soundSetting = mDeviceInfo.getSoundSetting();
-        adRequest.timeSinceInstalled = calculateTimeSinceInstalled();
+
+        adRequest.impdepth = String.valueOf(impDepth);
+        adRequest.ageofapp = new HyBidTimeUtils().getDaysSince(Long.parseLong(getAgeOfApp()));
+        adRequest.sessionduration = new HyBidTimeUtils().getSeconds(calculateSessionDuration());
+
+        new Thread(() -> {
+            long incrementValue = new DBManager(mDeviceInfo.getContext()).increment(adRequest);
+            Logger.d("Increment Value", Long.toString(incrementValue));
+        }).start();
 
         return adRequest;
     }
 
-    private String calculateTimeSinceInstalled() {
-        prefs = new HyBidPreferences(mDeviceInfo.getContext());
-        return calculateTimeSinceInstalled(System.currentTimeMillis() - Long.parseLong(prefs.getAppFirstInstalledTime()));
+    private String getAgeOfApp() {
+        if (prefs == null) prefs = new HyBidPreferences(mDeviceInfo.getContext());
+        return prefs.getAppFirstInstalledTime();
     }
 
-    private String calculateTimeSinceInstalled(long milliseconds) {
-        int seconds = (int) (milliseconds / 1000) % 60;
-        int minutes = (int) ((milliseconds / (1000 * 60)) % 60);
-        int hours = (int) ((milliseconds / (1000 * 60 * 60)) % 24);
+    private long calculateSessionDuration() {
+        if (prefs == null) prefs = new HyBidPreferences(mDeviceInfo.getContext());
 
-        return String.format(Locale.ENGLISH, "%02d:%02d:%02d", hours, minutes, seconds);
+        return System.currentTimeMillis() - prefs.getSessionTimeStamp();
     }
 
     public void setMediationVendor(String mediationVendor) {

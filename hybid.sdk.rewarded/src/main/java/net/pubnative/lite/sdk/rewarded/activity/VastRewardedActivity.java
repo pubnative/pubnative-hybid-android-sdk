@@ -27,6 +27,8 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.KeyEvent;
 import android.view.View;
 
@@ -36,6 +38,7 @@ import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.CloseButtonListener;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
+import net.pubnative.lite.sdk.vpaid.VastActivityInteractor;
 import net.pubnative.lite.sdk.vpaid.VideoAd;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdListener;
@@ -48,6 +51,8 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
 
     private VideoAdView mVideoPlayer;
     private VideoAd mVideoAd;
+
+    VastActivityInteractor vastActivityInteractor;
 
     @SuppressLint("SourceLockedOrientationActivity")
     @Override
@@ -64,6 +69,9 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
         setIsVast(true);
 
         super.onCreate(savedInstanceState);
+
+        vastActivityInteractor = VastActivityInteractor.getInstance();
+        vastActivityInteractor.activityStarted();
 
         try {
             if (getAd() != null) {
@@ -120,6 +128,7 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
 
     @Override
     protected void onDestroy() {
+        vastActivityInteractor.activityDestroyed();
         super.onDestroy();
         if (mVideoAd != null) {
             mVideoAd.destroy();
@@ -129,12 +138,14 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
 
     @Override
     protected void onResume() {
+        vastActivityInteractor.activityResumed();
         super.onResume();
         resumeAd();
     }
 
     @Override
     protected void onPause() {
+        vastActivityInteractor.activityPaused();
         super.onPause();
         pauseAd();
     }
@@ -166,7 +177,12 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
     @Override
     protected void resumeAd() {
         if (!mIsFeedbackFormOpen && mReady) {
-            mVideoAd.resume();
+            if (mVideoAd.isAdStarted()) {
+                mVideoAd.resume();
+            } else {
+                setProgressBarInvisible();
+                mVideoAd.show();
+            }
         }
 
         if (mFinished) {
@@ -212,7 +228,9 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
         public void onAdDidReachEnd() {
             mReady = false;
             mFinished = true;
-            showRewardedCloseButton();
+            new Handler(Looper.getMainLooper()).postDelayed(() ->
+                    showRewardedCloseButton(),600);
+
             if (getBroadcastSender() != null) {
                 getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.VIDEO_FINISH);
             }

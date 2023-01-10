@@ -420,17 +420,22 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     public <T> T getRemoteConfig(RemoteConfig config) {
 
         AdData data = getMeta(APIMeta.REMOTE_CONFIGS);
-        if (data == null || !data.haseField(config.fieldName)) return null;
+
+        if(data == null || !data.haseField("jsondata")) return null;
+
+        JSONObject jsonObject = data.getJSONObjectField("jsondata");
+
+        if (jsonObject == null || !jsonObject.has(config.fieldName)) return null;
         T configValue = null;
         try {
             if (config.type == String.class) {
-                configValue = (T) data.getStringField(config.fieldName);
+                configValue = (T) jsonObject.getString(config.fieldName);
             } else if (config.type == Integer.class) {
-                configValue = (T) data.getIntField(config.fieldName);
+                configValue = (T) Integer.valueOf(jsonObject.getInt(config.fieldName));
             } else if (config.type == Double.class) {
-                configValue = (T) data.getDoubleField(config.fieldName);
+                configValue = (T) Double.valueOf(jsonObject.getDouble(config.fieldName));
             } else if (config.type == Boolean.class) {
-                configValue = (T) data.getBooleanField(config.fieldName);
+                configValue = (T) Boolean.valueOf(jsonObject.getBoolean(config.fieldName));
             }
             return configValue;
         } catch (Exception e) {
@@ -442,28 +447,44 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         return getRemoteConfig(RemoteConfig.END_CARD_ENABLED);
     }
 
-    public String getAudioState(){
+    public String getAudioState() {
         return getRemoteConfig(RemoteConfig.AUDIO_STATE);
     }
 
-    public Integer getEndCardCloseDelay(){
+    public Integer getEndCardCloseDelay() {
         return getRemoteConfig(RemoteConfig.END_CARD_CLOSE_DELAY);
     }
 
-    public Integer getHtmlSkipOffset(){
+    public Integer getHtmlSkipOffset() {
         return getRemoteConfig(RemoteConfig.HTML_SKIP_OFFSET);
     }
 
-    public Integer getVideoSkipOffset(){
+    public Integer getVideoSkipOffset() {
         return getRemoteConfig(RemoteConfig.VIDEO_SKIP_OFFSET);
     }
 
-    public Boolean needCloseInterAfterFinish(){
+    public Boolean needCloseInterAfterFinish() {
         return getRemoteConfig(RemoteConfig.CLOSE_INTER_AFTER_FINISH);
     }
 
-    public Boolean needCloseRewardAfterFinish(){
+    public Boolean needCloseRewardAfterFinish() {
         return getRemoteConfig(RemoteConfig.CLOSE_REWARD_AFTER_FINISH);
+    }
+
+    public Boolean getFullScreenClickability() {
+        return getRemoteConfig(RemoteConfig.FULL_SCREEN_CLICKABILITY);
+    }
+
+    public String getImpressionTrackingMethod(){
+        return getRemoteConfig(RemoteConfig.IMP_TRACKING_METHOD);
+    }
+
+    public Integer getImpressionMinVisibleTime(){
+        return getRemoteConfig(RemoteConfig.IMP_TRACKING_VISIBLE_TIME);
+    }
+
+    public Double getImpressionVisiblePercent(){
+        return getRemoteConfig(RemoteConfig.IMP_TRACKING_VISIBLE_PERCENT);
     }
 
     public void setZoneId(String zoneId) {
@@ -487,11 +508,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     }
 
     public boolean hasEndCard() {
-        if (isEndCardEnabled() != null) {
-            return isEndCardEnabled();
-        } else {
-            return hasEndCard;
-        }
+        return hasEndCard;
     }
 
     @Override

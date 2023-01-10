@@ -63,5 +63,7 @@ public class AdRequest {
     public String rv;
     public String protocol;
     public String api;
-    public String timeSinceInstalled;
+    public String impdepth;
+    public String ageofapp;
+    public String sessionduration;
 }

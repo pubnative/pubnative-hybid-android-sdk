@@ -4,6 +4,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import net.pubnative.lite.sdk.analytics.tracker.ReportingTracker;
+import net.pubnative.lite.sdk.analytics.tracker.ReportingTrackerCallback;
 import net.pubnative.lite.sdk.utils.Logger;
 
 import java.util.ArrayList;
@@ -15,8 +17,12 @@ public class ReportingController {
     private final List<ReportingEventCallback> mListeners;
     private List<ReportingEvent> adEventList;
 
+    private final List<ReportingTrackerCallback> mTrackerListeners;
+    private List<ReportingTracker> adFiredTrackers;
+
     public ReportingController() {
         mListeners = new ArrayList<>();
+        mTrackerListeners = new ArrayList<>();
     }
 
     public void addCallback(ReportingEventCallback callback) {
@@ -72,5 +78,56 @@ public class ReportingController {
 
     public void clearAdEventList() {
         if (this.adEventList != null) this.adEventList.clear();
+    }
+
+    public synchronized void reportFiredTracker(ReportingTracker firedTracker){
+        new Handler(Looper.getMainLooper()).post(() -> {
+            for (int i = 0; i < mTrackerListeners.size(); i++) {
+                // Double check to handle multi-thread listener release
+                try {
+                    if (i < mTrackerListeners.size()) {
+                        ReportingTrackerCallback callback = mTrackerListeners.get(i);
+                        if (callback != null) {
+                            callback.onFire(firedTracker);
+                        }
+                    }
+                } catch (Exception e) {
+                    //Just to catch exception while
+                    Logger.d("exception - " + ReportingController.class.getSimpleName(), e.toString());
+                }
+            }
+        });
+    }
+
+    public void addTrackerCallback(ReportingTrackerCallback callback) {
+        synchronized (this) {
+            if (callback != null && !mTrackerListeners.contains(callback)) {
+                mTrackerListeners.add(callback);
+            }
+        }
+    }
+
+    public boolean removeTrackerCallback(ReportingTrackerCallback callback) {
+        synchronized (this) {
+            if (callback == null) {
+                return false;
+            }
+
+            int index = mTrackerListeners.indexOf(callback);
+            if (index == -1) {
+                return false;
+            } else {
+                mTrackerListeners.remove(index);
+                return true;
+            }
+        }
+    }
+
+    public List<ReportingTracker> getFiredTrackersList() {
+        return adFiredTrackers;
+    }
+
+    public void clearFiredTrackerstList() {
+        if (this.adFiredTrackers != null) this.adFiredTrackers.clear();
     }
 }

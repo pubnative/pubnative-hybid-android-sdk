@@ -89,7 +89,7 @@ dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
 
     implementation 'com.ironsource.sdk:mediationsdk:7.2.4.1'
-    implementation 'com.applovin:applovin-sdk:11.4.4'
+    implementation 'com.applovin:applovin-sdk:11.6.1'
 
     implementation 'com.google.android.gms:play-services-ads:21.1.0'
     implementation 'com.google.android.ads:mediation-test-suite:3.0.0'

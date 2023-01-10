@@ -151,6 +151,7 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester), O
         if (activity != null) {
             val activity = activity as TabActivity
             activity.clearEventList()
+            activity.clearTrackerList()
             activity.notifyAdCleaned()
         }
     }

@@ -169,6 +169,30 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.VAST);
     }
 
+    public void setSessionDuration(String sessionDuration) {
+        setCustomString(Reporting.Key.SESSION_DURATION, sessionDuration);
+    }
+
+    public String getSessionDuration() {
+        return getCustomString(Reporting.Key.SESSION_DURATION);
+    }
+
+    public void setImpDepth(String impDepth) {
+        setCustomString(Reporting.Key.IMP_DEPTH, impDepth);
+    }
+
+    public String getImpDepth() {
+        return getCustomString(Reporting.Key.IMP_DEPTH);
+    }
+
+    public void setAgeOfApp(String ageOfApp) {
+        setCustomString(Reporting.Key.AGE_OF_APP, ageOfApp);
+    }
+
+    public String getAgeOfApp() {
+        return getCustomString(Reporting.Key.AGE_OF_APP);
+    }
+
     public void setCustomString(String key, String value) {
         try {
             if (!TextUtils.isEmpty(value)) {

@@ -1,5 +1,7 @@
 package net.pubnative.lite.sdk.vpaid.enums;
 
+import java.util.Locale;
+
 public enum AudioState {
     MUTED("muted"),
     ON("on"),
@@ -16,11 +18,13 @@ public enum AudioState {
     }
 
     public static AudioState fromString(String stateName) {
-
-        if (stateName.equals(MUTED.stateName))
+        String stateNameLowerCase = stateName.toLowerCase(Locale.ROOT);
+        if (stateNameLowerCase.equals(MUTED.stateName))
             return MUTED;
-        if (stateName.equals(ON.stateName))
+        if (stateNameLowerCase.equals(ON.stateName))
             return ON;
-        return DEFAULT;
+        if (stateNameLowerCase.equals(DEFAULT.stateName))
+            return DEFAULT;
+        return null;
     }
 }

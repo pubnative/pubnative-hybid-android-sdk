@@ -37,6 +37,7 @@ import net.pubnative.lite.sdk.config.ConfigManager;
 import net.pubnative.lite.sdk.core.BuildConfig;
 import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.core.R;
+import net.pubnative.lite.sdk.db.DBManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdRequestFactory;
@@ -129,8 +130,7 @@ public class HyBid {
         long installed;
 
         try {
-            installed = application.getApplicationContext().getPackageManager()
-                    .getPackageInfo(application.getApplicationContext().getPackageName(), 0).firstInstallTime;
+            installed = application.getApplicationContext().getPackageManager().getPackageInfo(application.getApplicationContext().getPackageName(), 0).firstInstallTime;
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
             installed = System.currentTimeMillis();
@@ -138,6 +138,8 @@ public class HyBid {
 
         HyBidPreferences preferences = new HyBidPreferences(application.getApplicationContext());
         preferences.setAppFirstInstalledTime(String.valueOf(installed));
+
+        new Thread(() -> preferences.setSessionTimeStamp(System.currentTimeMillis(), () -> new DBManager(application.getApplicationContext()).nukeTable(), HyBidPreferences.TIMESTAMP.NORMAL)).start();
 
         sBundleId = application.getPackageName();
         sApiClient = new PNApiClient(application);
@@ -551,7 +553,7 @@ public class HyBid {
             return "";
         }
         AdRequestFactory adRequestFactory = new AdRequestFactory();
-        AdRequest adRequest = adRequestFactory.buildRequest("", "", AdSize.SIZE_INTERSTITIAL, "", true, IntegrationType.IN_APP_BIDDING, mediationVendorName);
+        AdRequest adRequest = adRequestFactory.buildRequest("", "", AdSize.SIZE_INTERSTITIAL, "", true, IntegrationType.IN_APP_BIDDING, mediationVendorName, 0);
         return PNApiUrlComposer.getUrlQuery(HyBid.getApiClient().getApiUrl(), adRequest);
     }
 

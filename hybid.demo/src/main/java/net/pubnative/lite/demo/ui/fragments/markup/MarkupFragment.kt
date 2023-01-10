@@ -1,6 +1,9 @@
 package net.pubnative.lite.demo.ui.fragments.markup
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.View
 import android.widget.*
 import androidx.fragment.app.Fragment
@@ -61,9 +64,13 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
             if (it) {
                 creativeIdLabel.visibility = View.VISIBLE
                 creativeIdView.visibility = View.VISIBLE
+                creativeIdView.setOnClickListener {
+                    openUrlInExternalBrowser()
+                }
             } else {
                 creativeIdLabel.visibility = View.GONE
                 creativeIdView.visibility = View.GONE
+                creativeIdView.setOnClickListener(null)
             }
         }
 
@@ -204,5 +211,34 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
             it.readText()
         }
         markupViewModel.setURTemplate(urTemplate)
+    }
+
+    private fun openUrlInExternalBrowser() {
+        if (groupMarkupType.checkedRadioButtonId == R.id.radio_url) {
+            val url = markupInput.text.toString()
+            val creativeId = creativeIdView.text.toString()
+            if (url.isNotEmpty() && creativeId.isNotEmpty()) {
+                val creativeIdQueryParam = "crid"
+                val uri = Uri.parse(url)
+                val param = uri.getQueryParameter(creativeIdQueryParam)
+                val finalUrl = if (param != null) {
+                    uri
+                } else {
+                    uri.buildUpon().appendQueryParameter(creativeIdQueryParam, creativeId)
+                        .build()
+                }
+
+                finalUrl?.let {
+                    openWebPage(it)
+                }
+            }
+        }
+    }
+
+    private fun openWebPage(uri: Uri) {
+        val intent = Intent(Intent.ACTION_VIEW, uri)
+        if (intent.resolveActivity(requireActivity().packageManager) != null) {
+            startActivity(intent)
+        }
     }
 }

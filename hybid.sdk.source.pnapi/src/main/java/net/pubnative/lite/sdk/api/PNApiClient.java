@@ -65,6 +65,8 @@ public class PNApiClient {
         void onSuccess();
 
         void onFailure(Throwable throwable);
+
+        void onFinally(String requestUrl, String trackTypeName, int responseCode);
     }
 
     public interface TrackJSListener {
@@ -134,11 +136,11 @@ public class PNApiClient {
         return mContext;
     }
 
-    public void trackUrl(String url, String userAgent, final TrackUrlListener listener) {
-        sendTrackingRequest(url, userAgent, listener);
+    public void trackUrl(String url, String userAgent, String trackTypeName, final TrackUrlListener listener) {
+        sendTrackingRequest(url, userAgent, trackTypeName, listener);
     }
 
-    private void sendTrackingRequest(String url, String userAgent, final TrackUrlListener listener) {
+    private void sendTrackingRequest(String url, String userAgent, String trackTypeName, final TrackUrlListener listener) {
         Map<String, String> headers = new HashMap<>();
         if (!TextUtils.isEmpty(userAgent)) {
             headers.put("User-Agent", userAgent);
@@ -157,6 +159,11 @@ public class PNApiClient {
                 if (listener != null) {
                     listener.onFailure(new HyBidError(HyBidErrorCode.ERROR_TRACKING_URL, error));
                 }
+            }
+
+            @Override
+            public void onFinally(String requestUrl, int responseCode) {
+                listener.onFinally(requestUrl, trackTypeName, responseCode);
             }
         });
     }

@@ -91,7 +91,7 @@ public class AdRequestFactoryTest {
     public void createAdRequest() {
 
 //        AdRequest request = mSubject.buildRequest("aabbcc112233", "2", AdSize.SIZE_320x50, "aabbccdd", false, IntegrationType.HEADER_BIDDING,"m");
-        AdRequest request = mSubject.buildRequest("aabbcc112233", "2", AdSize.SIZE_320x50, "aabbccdd", false, IntegrationType.HEADER_BIDDING, "b");
+        AdRequest request = mSubject.buildRequest("aabbcc112233", "2", AdSize.SIZE_320x50, "aabbccdd", false, IntegrationType.HEADER_BIDDING, "b", 0);
         Assert.assertEquals("aabbccdd", request.gid);
         Assert.assertEquals(PNCrypto.md5("aabbccdd"), request.gidmd5);
         Assert.assertEquals(PNCrypto.sha1("aabbccdd"), request.gidsha1);
@@ -114,6 +114,7 @@ public class AdRequestFactoryTest {
         Assert.assertEquals("1920", request.deviceWidth);
         Assert.assertEquals("1080", request.deviceHeight);
         Assert.assertEquals("portrait", request.orientation);
+        Assert.assertEquals("0", request.impdepth);
         Assert.assertEquals("1234567", mockPrefs.getString("", ""));
         Assert.assertEquals(HyBid.OMSDK_VERSION, request.omidpv);
         Assert.assertEquals(HyBid.OM_PARTNER_NAME, request.omidpn);

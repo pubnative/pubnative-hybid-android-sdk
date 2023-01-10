@@ -40,7 +40,7 @@ public class AdTrackerTest {
         mSubject.trackClick();
         mSubject.trackClick();
 
-        verify(mMockApiClient, times(1)).trackUrl("https://got.pubnative.net/click/rtb?aid=1036637", null, mListener);
+        verify(mMockApiClient, times(1)).trackUrl("https://got.pubnative.net/click/rtb?aid=1036637",  null, "CLICK", mListener);
     }
 
     @Test
@@ -48,6 +48,6 @@ public class AdTrackerTest {
         mSubject.trackImpression();
         mSubject.trackImpression();
 
-        verify(mMockApiClient, times(1)).trackUrl("https://mock-dsp.pubnative.net/tracker/nurl?app_id=1036637&p=0.01", null, mListener);
+        verify(mMockApiClient, times(1)).trackUrl("https://mock-dsp.pubnative.net/tracker/nurl?app_id=1036637&p=0.01",  null, "IMPRESSION", mListener);
     }
 }

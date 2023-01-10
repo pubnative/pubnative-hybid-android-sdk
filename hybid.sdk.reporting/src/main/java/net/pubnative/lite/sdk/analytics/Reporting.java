@@ -36,6 +36,9 @@ public class Reporting {
         public static final String RENDER_TIME = "render_time";
         public static final String FIRED_IMPRESSION_BEACONS = "fired_impressions";
         public static final String FIRED_CLICK_BEACONS = "fired_clicks";
+        public static final String SESSION_DURATION = "session_duration";
+        public static final String IMP_DEPTH = "imp_depth";
+        public static final String AGE_OF_APP = "age_of_app";
     }
 
     public static final class EventType {

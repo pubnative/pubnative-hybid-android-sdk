@@ -85,7 +85,16 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
         mContext = context;
         mAdSize = adSize;
         mAd = ad;
-        if (trackingMethod != null) {
+
+        ImpressionTrackingMethod remoteConfigTrackingMethod = null;
+        if(ad != null && ad.getImpressionTrackingMethod() != null &&
+                ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod()) != null){
+            remoteConfigTrackingMethod = ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod());
+        }
+
+        if(remoteConfigTrackingMethod != null){
+            mTrackingMethod = remoteConfigTrackingMethod;
+        }else if (trackingMethod != null) {
             mTrackingMethod = trackingMethod;
         } else {
             mTrackingMethod = ImpressionTrackingMethod.AD_RENDERED;
@@ -169,7 +178,11 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
     @Override
     public void startTracking() {
         if (mTrackingMethod == ImpressionTrackingMethod.AD_VIEWABLE) {
-            ImpressionManager.startTrackingView(mVideoPlayer, mAdSize, mNativeTrackerListener);
+            ImpressionManager.startTrackingView(mVideoPlayer,
+                    mAdSize,
+                    mAd.getImpressionMinVisibleTime(),
+                    mAd.getImpressionVisiblePercent(),
+                    mNativeTrackerListener);
         } else {
             if (mVideoAd != null) {
                 mVideoAd.show();

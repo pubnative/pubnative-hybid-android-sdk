@@ -37,7 +37,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayDeque;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -60,6 +59,8 @@ public class PNHttpClient {
         void onSuccess(String response, Map<String, List<String>> headers);
 
         void onFailure(Throwable error);
+
+        default void onFinally(String requestUrl, int responseCode){};
     }
 
     private static class Response {
@@ -147,6 +148,9 @@ public class PNHttpClient {
                             listener.onSuccess(response.response, response.headers);
                         }
                     }
+                }
+                if (listener != null) {
+                    listener.onFinally(url, response.responseCode);
                 }
                 performPendingRequests(context);
             });

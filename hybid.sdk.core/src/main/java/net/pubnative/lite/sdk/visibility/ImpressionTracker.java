@@ -38,8 +38,12 @@ import java.util.Map;
 public class ImpressionTracker {
 
     private static final int VISIBILITY_CHECK_MILLIS = 250;
-    private static final int VISIBILITY_TIME_MILLIS = 1000;
-    private static final double DEFAULT_MIN_VISIBLE_PERCENT = 0.5;
+    //private static final int VISIBILITY_TIME_MILLIS = 1000;
+    private static final int VISIBILITY_TIME_MILLIS = 0;
+    //private static final double DEFAULT_MIN_VISIBLE_PERCENT = 0.5;
+    private static final double DEFAULT_MIN_VISIBLE_PERCENT = 0.0;
+    //private static final double DEFAULT_BIG_MIN_VISIBLE_PERCENT = 0.3;
+    private static final double DEFAULT_BIG_MIN_VISIBLE_PERCENT = 0.0;
 
     protected WeakReference<Listener> mImpressionListener = null;
     protected final List<View> mTrackingViews = new ArrayList<>();
@@ -48,6 +52,7 @@ public class ImpressionTracker {
     protected final Runnable mImpressionRunnable = new ImpressionRunnable();
     protected VisibilityTracker mVisibilityTracker = null;
     protected double mVisiblePercent = DEFAULT_MIN_VISIBLE_PERCENT;
+    protected int mVisibleTimeMiliseconds = VISIBILITY_TIME_MILLIS;
 
     protected VisibilityTracker.Listener mVisibilityListener = (visibleViews, invisibleViews) -> {
         if (mImpressionListener == null || mImpressionListener.get() == null) {
@@ -72,6 +77,14 @@ public class ImpressionTracker {
             }
         }
     };
+
+    public ImpressionTracker(){}
+
+    public ImpressionTracker(Integer visibleTimeMillisecond, Double visiblePercent){
+
+        if(visibleTimeMillisecond != null) mVisibleTimeMiliseconds = visibleTimeMillisecond;
+        if(visiblePercent != null) mVisiblePercent = visiblePercent;
+    }
 
     //==============================================================================================
     // LISTENER
@@ -112,8 +125,10 @@ public class ImpressionTracker {
         mImpressionListener = new WeakReference<>(listener);
     }
 
-    public void setAdSize(AdSize adSize) {
-        if (adSize != null) {
+    public void setAdSize(AdSize adSize, Double visiblePercent) {
+        if(visiblePercent != null){
+            mVisiblePercent = visiblePercent;
+        } else if (adSize != null) {
             switch (adSize) {
                 case SIZE_160x600:
                 case SIZE_300x600:
@@ -121,7 +136,7 @@ public class ImpressionTracker {
                 case SIZE_480x320:
                 case SIZE_768x1024:
                 case SIZE_1024x768:
-                    mVisiblePercent = 0.3;
+                    mVisiblePercent = DEFAULT_BIG_MIN_VISIBLE_PERCENT;
                     break;
                 default:
                     mVisiblePercent = DEFAULT_MIN_VISIBLE_PERCENT;
@@ -218,7 +233,7 @@ public class ImpressionTracker {
                 View visibleView = entry.getKey();
                 Long addedTimestamp = entry.getValue();
 
-                if (!(SystemClock.uptimeMillis() - addedTimestamp >= VISIBILITY_TIME_MILLIS)) {
+                if (!(SystemClock.uptimeMillis() - addedTimestamp >= mVisibleTimeMiliseconds)) {
                     continue;
                 }
 

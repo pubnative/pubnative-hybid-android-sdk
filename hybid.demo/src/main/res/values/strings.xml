@@ -206,6 +206,10 @@
     <string name="response">PubNative response:</string>
     <string name="latency">PubNative latency (milliseconds):</string>
     <string name="sdk_event_report">SDK event report</string>
+    <string name="tracker_report">Fired tracker report</string>
+    <string name="tracker_report_type">Tracker type:</string>
+    <string name="tracker_report_response">Response code:</string>
+    <string name="tracker_report_url">Tracker url:</string>
     <string name="action_dismiss">Dismiss</string>
     <string name="event_details">Event details</string>
 

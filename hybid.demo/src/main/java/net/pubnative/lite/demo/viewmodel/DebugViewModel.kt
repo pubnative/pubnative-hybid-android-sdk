@@ -12,10 +12,12 @@ import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.analytics.Reporting
 import net.pubnative.lite.sdk.analytics.ReportingEvent
 import net.pubnative.lite.sdk.analytics.ReportingEventCallback
+import net.pubnative.lite.sdk.analytics.tracker.ReportingTracker
+import net.pubnative.lite.sdk.analytics.tracker.ReportingTrackerCallback
 import net.pubnative.lite.sdk.utils.AdRequestRegistry
 
 class DebugViewModel(application: Application) : AndroidViewModel(application),
-    ReportingEventCallback {
+    ReportingEventCallback, ReportingTrackerCallback {
 
     private var isReportingCallbackActive: Boolean = true
 
@@ -23,6 +25,7 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
     private val _requestDebugInfo: MutableLiveData<RequestDebugInfo> = MutableLiveData()
     val requestDebugInfo: LiveData<RequestDebugInfo> = _requestDebugInfo
     private var _eventList: ArrayList<ReportingEvent> = arrayListOf()
+    private var _trackerList: ArrayList<ReportingTracker> = arrayListOf()
 
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
 
@@ -30,6 +33,7 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(application)
         mFirebaseAnalytics!!.setAnalyticsCollectionEnabled(true)
         HyBid.getReportingController().addCallback(this)
+        HyBid.getReportingController().addTrackerCallback(this)
     }
 
     fun updateLogs() {
@@ -57,14 +61,20 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
         _eventList = arrayListOf()
     }
 
+    fun clearTrackerList(){
+        _trackerList = arrayListOf()
+    }
+
     fun clearLogs() {
         _requestDebugInfo.value = RequestDebugInfo("", 0, "")
     }
 
     override fun onEvent(event: ReportingEvent?) {
         if (event != null) {
-            if (event.eventType != null && event.eventType.equals(Reporting.EventType.REQUEST))
+            if (event.eventType != null && event.eventType.equals(Reporting.EventType.REQUEST)){
                 clearEventList()
+                clearTrackerList()
+            }
 
             _eventList.add(event)
 
@@ -79,9 +89,19 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
         }
     }
 
+    override fun onFire(firedTracker: ReportingTracker?) {
+        firedTracker?.let { _trackerList.add(it) }
+    }
+
     fun getEventList(): MutableLiveData<List<ReportingEvent>> {
         val liveData: MutableLiveData<List<ReportingEvent>> = MutableLiveData()
         liveData.value = _eventList
+        return liveData
+    }
+
+    fun getFiredTrackersList(): MutableLiveData<List<ReportingTracker>>{
+        val liveData: MutableLiveData<List<ReportingTracker>> = MutableLiveData()
+        liveData.value = _trackerList
         return liveData
     }
 
@@ -90,13 +110,16 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
         HyBid.getReportingController().removeCallback(this)
     }
 
-    fun registerReportingCallback() {
-        if (!isReportingCallbackActive)
+    fun registerReportingCallbacks() {
+        if (!isReportingCallbackActive){
             HyBid.getReportingController().addCallback(this)
+            HyBid.getReportingController().addTrackerCallback(this)
+        }
     }
 
-    fun removeReportingCallback() {
+    fun removeReportingCallbacks() {
         HyBid.getReportingController().removeCallback(this)
+        HyBid.getReportingController().removeTrackerCallback(this)
         isReportingCallbackActive = false
     }
 }

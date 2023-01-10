@@ -52,6 +52,14 @@ public class BannerPresenterFactory extends PresenterFactory {
 
     @Override
     protected AdPresenter fromCreativeType(int assetGroupId, Ad ad, AdSize adSize, ImpressionTrackingMethod trackingMethod) {
+
+
+        ImpressionTrackingMethod trackingMethodFinal = trackingMethod;
+        if(ad != null && ad.getImpressionTrackingMethod() != null &&
+                ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod()) != null){
+            trackingMethodFinal = ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod());;
+        }
+
         switch (assetGroupId) {
             case ApiAssetGroupType.MRAID_160x600:
             case ApiAssetGroupType.MRAID_250x250:
@@ -68,13 +76,13 @@ public class BannerPresenterFactory extends PresenterFactory {
                 return HyBid.getConfigManager() != null
                         && !HyBid.getConfigManager().getFeatureResolver()
                         .isRenderingSupported(RemoteConfigFeature.Rendering.MRAID) ?
-                        null : new MraidAdPresenter(getContext(), ad, adSize, trackingMethod);
+                        null : new MraidAdPresenter(getContext(), ad, adSize, trackingMethodFinal);
             }
             case ApiAssetGroupType.VAST_MRECT: {
                 return HyBid.getConfigManager() != null
                         && !HyBid.getConfigManager().getFeatureResolver()
                         .isRenderingSupported(RemoteConfigFeature.Rendering.VAST) ?
-                        null : new VastAdPresenter(getContext(), ad, adSize, trackingMethod);
+                        null : new VastAdPresenter(getContext(), ad, adSize, trackingMethodFinal);
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for banner ad format.");

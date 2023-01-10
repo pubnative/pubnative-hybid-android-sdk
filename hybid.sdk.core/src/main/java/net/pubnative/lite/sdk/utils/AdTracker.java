@@ -27,6 +27,7 @@ import android.text.TextUtils;
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.Reporting;
+import net.pubnative.lite.sdk.analytics.tracker.ReportingTracker;
 import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.models.AdData;
 import net.pubnative.lite.sdk.utils.json.JsonOperations;
@@ -50,7 +51,6 @@ public class AdTracker {
         Type(String type) {
             mType = type;
         }
-
 
         @Override
         public String toString() {
@@ -94,6 +94,15 @@ public class AdTracker {
             @Override
             public void onFailure(Throwable throwable) {
 
+            }
+
+            @Override
+            public void onFinally(String requestUrl, String trackTypeName, int responseCode) {
+                if(HyBid.getReportingController() != null){
+                    HyBid.getReportingController().reportFiredTracker(
+                            new ReportingTracker(trackTypeName, requestUrl, responseCode)
+                    );
+                }
             }
         };
 
@@ -139,7 +148,7 @@ public class AdTracker {
                 if (!TextUtils.isEmpty(url.getURL())) {
                     Logger.d(TAG, "Tracking " + type.toString() + " url: " + url.getURL());
                     JsonOperations.putJsonString(beaconsArray, url.getURL());
-                    mApiClient.trackUrl(url.getURL(), mDeviceInfo.getUserAgent(), mTrackUrlListener);
+                    mApiClient.trackUrl(url.getURL(), mDeviceInfo.getUserAgent(), type.name(), mTrackUrlListener);
                 }
 
                 if (!TextUtils.isEmpty(url.getJS())) {

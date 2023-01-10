@@ -3,4 +3,5 @@
     <item name="textureView" type="id" />
     <item name="mraidCloseButton" type="id" />
     <item name="button_fullscreen_close" type="id" />
+    <item name="mraid_ad_view" type="id" />
 </resources>

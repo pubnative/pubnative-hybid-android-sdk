@@ -944,13 +944,11 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     }
 
     public boolean hasEndCard() {
-        if (mAd != null) {
+        if (mAd != null && mAd.hasEndCard()) {
             if (mAd.isEndCardEnabled() != null) {
                 return mAd.isEndCardEnabled();
-            } else if (!HyBid.isEndCardEnabled()) {
-                return false;
             } else {
-                return mAd.hasEndCard();
+                return HyBid.isEndCardEnabled();
             }
         } else {
             return false;

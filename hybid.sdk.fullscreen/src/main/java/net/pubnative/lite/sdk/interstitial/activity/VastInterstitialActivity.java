@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -14,6 +16,7 @@ import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.CloseButtonListener;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
+import net.pubnative.lite.sdk.vpaid.VastActivityInteractor;
 import net.pubnative.lite.sdk.vpaid.VideoAd;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdListener;
@@ -29,6 +32,8 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
     private boolean mHasEndCard = false;
     private boolean mIsVideoFinished = false;
 
+    VastActivityInteractor vastActivityInteractor;
+
     @SuppressLint("SourceLockedOrientationActivity")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +46,9 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
         setIsVast(true);
 
         super.onCreate(savedInstanceState);
+
+        vastActivityInteractor = VastActivityInteractor.getInstance();
+        vastActivityInteractor.activityStarted();
 
         try {
             hideInterstitialCloseButton();
@@ -61,9 +69,12 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
                         adCacheItem.getAdParams().setPublisherSkipSeconds(mSkipOffset);
 
                         if (adCacheItem.getEndCardData() != null
-                                && !TextUtils.isEmpty(adCacheItem.getEndCardData().getContent())
-                                && HyBid.isEndCardEnabled()) {
-                            mHasEndCard = true;
+                                && !TextUtils.isEmpty(adCacheItem.getEndCardData().getContent())) {
+                            if(getAd().isEndCardEnabled() != null){
+                                mHasEndCard = getAd().isEndCardEnabled();
+                            }else{
+                                mHasEndCard = HyBid.isEndCardEnabled();
+                            }
                         }
 
                         if (adCacheItem.getAdParams().getAdIcon() != null) {
@@ -113,6 +124,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
 
     @Override
     protected void onDestroy() {
+        vastActivityInteractor.activityDestroyed();
         super.onDestroy();
         if (mVideoAd != null) {
             mVideoAd.destroy();
@@ -122,12 +134,14 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
 
     @Override
     protected void onResume() {
+        vastActivityInteractor.activityResumed();
         super.onResume();
         resumeAd();
     }
 
     @Override
     protected void onPause() {
+        vastActivityInteractor.activityPaused();
         super.onPause();
         pauseAd();
     }
@@ -157,7 +171,12 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
     protected void resumeAd() {
         if (!mIsFeedbackFormOpen) {
             if (mReady) {
-                mVideoAd.resume();
+                if (mVideoAd.isAdStarted()) {
+                    mVideoAd.resume();
+                } else {
+                    setProgressBarInvisible();
+                    mVideoAd.show();
+                }
             }
 
             if (mIsVideoFinished) {
@@ -182,7 +201,6 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
         public void onAdLoadSuccess() {
             if (!mReady) {
                 mReady = true;
-
                 setProgressBarInvisible();
                 mVideoAd.show();
             }
@@ -210,7 +228,12 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
         public void onAdDidReachEnd() {
             mReady = false;
             if (!mHasEndCard) {
-                showInterstitialCloseButton();
+                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        showInterstitialCloseButton();
+                    }
+                },100);
                 mIsSkippable = true;
             }
             mIsVideoFinished = true;

@@ -90,6 +90,11 @@ public class AdData extends JsonModel implements Serializable {
         return (String) getDataField(field);
     }
 
+    public JSONObject getJSONObjectField(String field){
+
+        return (JSONObject) getDataField(field);
+    }
+
     public Double getDoubleField(String field) {
         Object value = getDataField(field);
         if (value instanceof Number) {

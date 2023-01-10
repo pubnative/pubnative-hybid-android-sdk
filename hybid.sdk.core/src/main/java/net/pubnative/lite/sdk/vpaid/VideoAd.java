@@ -1,6 +1,8 @@
 package net.pubnative.lite.sdk.vpaid;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 
 import net.pubnative.lite.sdk.HyBid;
@@ -21,8 +23,12 @@ public class VideoAd extends BaseVideoAd {
 
     private volatile VideoAdView mBannerView;
 
+    private boolean mIsAdStarted = false;
+
+    VastActivityInteractor vastActivityInteractor;
+
     public VideoAd(Context context, Ad ad, boolean isInterstitial, boolean isFullscreen, AdPresenter.ImpressionListener impressionListener) throws Exception {
-        super(context, ad, isInterstitial, isFullscreen,impressionListener);
+        super(context, ad, isInterstitial, isFullscreen, impressionListener);
     }
 
     @Override
@@ -48,61 +54,84 @@ public class VideoAd extends BaseVideoAd {
     }
 
     public void show() {
-        runOnUiThread(new Runnable() {
+
+        Handler handler = new Handler(Looper.getMainLooper());
+        vastActivityInteractor = VastActivityInteractor.getInstance();
+
+        handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                Logger.d(LOG_TAG, "Banner did start showing ad");
-                if (getAdState() == AdState.SHOWING) {
-                    Logger.d(LOG_TAG, "Banner already displays on screen");
-                    return;
-                }
-                if (isReady() && mBannerView != null) {
-                    setAdState(AdState.SHOWING);
-                    stopExpirationTimer();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        boolean isDependentOnActivityLifecycle = vastActivityInteractor.isDependentOnActivityLifecycle();
 
-                    if (getAdController() != null) {
-                        synchronized (this) {
-                            if (getAdController() != null && getAdController().getAdParams() != null) {
-                                getViewabilityAdSession().initAdSession(mBannerView, getAdController().getAdParams().getVerificationScriptResources());
-
-                                getAdController().buildVideoAdView(mBannerView);
-
-                                for (HyBidViewabilityFriendlyObstruction obstruction : getAdController().getViewabilityFriendlyObstructions()) {
-                                    getViewabilityAdSession().addFriendlyObstruction(
-                                            obstruction.getView(),
-                                            obstruction.getPurpose(),
-                                            obstruction.getReason());
-                                }
-
-                                getAdController().setVideoVisible(mBannerView.getVisibility() == View.VISIBLE);
-
-                                getViewabilityAdSession().fireLoaded();
-                                getAdController().playAd();
-
-                                validateAudioState();
+                        if (isDependentOnActivityLifecycle) {
+                            if (vastActivityInteractor.isActivityVisible()) {
+                                showAd();
                             }
-                        }
-                    } else {
-                        Logger.e(LOG_TAG, "getAdController() is null and can not set attributes to banner view ");
-                        if (getAdListener() != null) {
-                            PlayerInfo info = new PlayerInfo("getAdController() is null and can not set attributes to banner view ");
-                            getAdListener().onAdLoadFail(info);
+                        } else {
+                            showAd();
                         }
                     }
-                } else {
-                    Logger.e(LOG_TAG, "Banner is not ready");
-                }
+
+                    private void showAd() {
+                        Logger.d(LOG_TAG, "Banner did start showing ad");
+                        if (getAdState() == AdState.SHOWING) {
+                            Logger.d(LOG_TAG, "Banner already displays on screen");
+                            return;
+                        }
+                        if (isReady() && mBannerView != null) {
+                            setAdState(AdState.SHOWING);
+                            stopExpirationTimer();
+
+                            if (getAdController() != null) {
+                                synchronized (this) {
+                                    if (getAdController() != null && getAdController().getAdParams() != null) {
+                                        getViewabilityAdSession().initAdSession(mBannerView, getAdController().getAdParams().getVerificationScriptResources());
+
+                                        getAdController().buildVideoAdView(mBannerView);
+
+                                        for (HyBidViewabilityFriendlyObstruction obstruction : getAdController().getViewabilityFriendlyObstructions()) {
+                                            getViewabilityAdSession().addFriendlyObstruction(
+                                                    obstruction.getView(),
+                                                    obstruction.getPurpose(),
+                                                    obstruction.getReason());
+                                        }
+
+                                        getAdController().setVideoVisible(mBannerView.getVisibility() == View.VISIBLE);
+
+                                        getViewabilityAdSession().fireLoaded();
+                                        getAdController().playAd();
+
+                                        validateAudioState();
+                                    }
+                                }
+                            } else {
+                                Logger.e(LOG_TAG, "getAdController() is null and can not set attributes to banner view ");
+                                if (getAdListener() != null) {
+                                    PlayerInfo info = new PlayerInfo("getAdController() is null and can not set attributes to banner view ");
+                                    getAdListener().onAdLoadFail(info);
+                                }
+                            }
+                        } else {
+                            Logger.e(LOG_TAG, "Banner is not ready");
+                        }
+
+                        mIsAdStarted = true;
+                    }
+                });
             }
-        });
+        }, 500);
     }
 
     private void validateAudioState() {
         boolean isMuted = false;
         AudioState audioState;
         String stateFromRemoteConfig = getAd().getAudioState();
-        if(stateFromRemoteConfig != null){
+        if(stateFromRemoteConfig != null && AudioState.fromString(stateFromRemoteConfig) != null){
             audioState = AudioState.fromString(stateFromRemoteConfig);
-        }else {
+        } else {
             audioState = HyBid.getVideoAudioStatus();
         }
         switch (audioState) {
@@ -195,4 +224,7 @@ public class VideoAd extends BaseVideoAd {
         }
     }
 
+    public boolean isAdStarted() {
+        return mIsAdStarted;
+    }
 }

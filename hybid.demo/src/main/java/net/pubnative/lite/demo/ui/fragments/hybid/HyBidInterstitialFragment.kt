@@ -130,7 +130,6 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
 
         interstitialViewModel.interstitialLoadLiveData.observe(viewLifecycleOwner) { isLoaded ->
             if (isLoaded) {
-                Log.i("testing", interstitialViewModel.cachingEnabled.toString())
                 prepareButton.isEnabled = !interstitialViewModel.cachingEnabled
                 showButton.isEnabled = interstitialViewModel.cachingEnabled
             } else {

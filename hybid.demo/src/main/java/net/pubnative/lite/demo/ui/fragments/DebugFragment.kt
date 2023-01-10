@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.ui.adapters.ReportingEventAdapter
+import net.pubnative.lite.demo.ui.adapters.ReportingTrackerAdapter
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.analytics.ReportingEvent
@@ -24,12 +25,16 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
     private var latencyView: TextView? = null
     private var responseView: TextView? = null
     private var eventReportButton: Button? = null
+    private var trackerReportButton: Button? = null
 
     private var eventReportDialog: AlertDialog? = null
+    private var trackersReportDialog: AlertDialog? = null
     private var eventReportAdapter: ReportingEventAdapter? = null
+    private var trackerReportAdapter: ReportingTrackerAdapter? = null
 
     private var eventList: ArrayList<ReportingEvent>? = ArrayList()
     private var isOpenedEventReport: Boolean = false
+    private var isOpenedTrackerReport: Boolean = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -42,10 +47,12 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
 
     private fun initViews(){
         initEventReportDialog()
+        initTrackersReportDialog()
         requestView = requireView().findViewById(R.id.view_request_url)
         latencyView = requireView().findViewById(R.id.view_latency)
         responseView = requireView().findViewById(R.id.view_response)
         eventReportButton = requireView().findViewById(R.id.button_event_report)
+        trackerReportButton = requireView().findViewById(R.id.button_tracker_report)
     }
 
     private fun setOnClickListeners(){
@@ -71,6 +78,9 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
         eventReportButton?.setOnClickListener {
             displayEventReport()
         }
+        trackerReportButton?.setOnClickListener {
+            displayTrackerReport()
+        }
     }
 
     private fun initObservers(){
@@ -88,6 +98,10 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
             eventList = HyBid.getReportingController().adEventList as ArrayList<ReportingEvent>?
             if(this.isOpenedEventReport){
                 displayEventReport()
+            }
+            this.isOpenedTrackerReport = it.getBoolean("isOpenedTrackerReport", false)
+            if(this.isOpenedTrackerReport){
+                displayTrackerReport()
             }
         }
     }
@@ -122,6 +136,36 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
         this.eventReportDialog = builder.create()
     }
 
+    private fun initTrackersReportDialog() {
+
+        val builder = AlertDialog.Builder(requireActivity())
+            .setOnDismissListener {
+                isOpenedEventReport = false
+            }
+        trackerReportAdapter = ReportingTrackerAdapter()
+        val view = LayoutInflater.from(requireActivity())
+            .inflate(R.layout.dialog_fired_trackers, null, false)
+        val recyclerView = view.findViewById<RecyclerView>(R.id.list_trackers)
+        recyclerView.apply {
+            setHasFixedSize(true)
+            layoutManager = LinearLayoutManager(requireActivity(), RecyclerView.VERTICAL, false)
+            addItemDecoration(
+                DividerItemDecoration(
+                    requireActivity(),
+                    DividerItemDecoration.VERTICAL
+                )
+            )
+            itemAnimator = DefaultItemAnimator()
+            adapter = trackerReportAdapter
+        }
+        builder.setTitle(R.string.tracker_report)
+        builder.setView(view)
+        builder.setPositiveButton(R.string.action_dismiss) { dialog, _ ->
+            dialog?.dismiss()
+        }
+        this.trackersReportDialog = builder.create()
+    }
+
     private fun displayEventReport(){
         (requireActivity() as? TabActivity)?.debugViewModel?.getEventList()?.observe(viewLifecycleOwner){
             eventReportAdapter?.submitData(it)
@@ -130,9 +174,18 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
         }
     }
 
+    private fun displayTrackerReport(){
+        (requireActivity() as? TabActivity)?.debugViewModel?.getFiredTrackersList()?.observe(viewLifecycleOwner){
+            trackerReportAdapter?.submitData(it)
+            trackersReportDialog?.show()
+            isOpenedTrackerReport = true
+        }
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putBoolean("isOpenedEventReport", isOpenedEventReport)
+        outState.putBoolean("isOpenedTrackerReport", isOpenedTrackerReport)
         HyBid.getReportingController().cacheAdEventList(eventList)
     }
 }

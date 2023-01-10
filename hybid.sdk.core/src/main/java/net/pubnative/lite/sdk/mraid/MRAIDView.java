@@ -372,6 +372,7 @@ public class MRAIDView extends RelativeLayout {
 
         inflateCloseCardViews();
         webView = createWebView();
+        webView.setId(R.id.mraid_ad_view);
 
         if (webView == null) {
             if (listener != null) {
