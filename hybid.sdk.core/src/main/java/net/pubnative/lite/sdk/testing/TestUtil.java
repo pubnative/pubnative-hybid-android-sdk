@@ -1,5 +1,6 @@
 package net.pubnative.lite.sdk.testing;
 
+import net.pubnative.lite.sdk.db.SessionImpression;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdData;
 import net.pubnative.lite.sdk.models.AdRequest;
@@ -151,5 +152,15 @@ public class TestUtil {
         clickBeacons.add(clickBeacon);
 
         return clickBeacons;
+    }
+
+    public static SessionImpression createTestSessionImpression() {
+        SessionImpression sessionImpression = new SessionImpression();
+        sessionImpression.setZoneId("4");
+        sessionImpression.setSessionDuration(System.currentTimeMillis() - 100000);
+        sessionImpression.setAgeOfApp(21323243L);
+        sessionImpression.setEventType("ad_type");
+
+        return sessionImpression;
     }
 }

@@ -1,7 +1,10 @@
 package net.pubnative.lite.sdk.contentinfo;
 
+import static net.pubnative.lite.sdk.models.Ad.CONTENT_INFO_LINK_URL;
+
 import android.app.Activity;
 import android.content.Context;
+import android.net.Uri;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.HyBid;
@@ -14,12 +17,14 @@ import net.pubnative.lite.sdk.mraid.MRAIDNativeFeature;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
+import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 
 public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureListener {
+    private static final String TAG = AdFeedbackView.class.getSimpleName();
     public interface AdFeedbackLoadListener {
 
-        void onLoad();
+        void onLoad(String url);
 
         void onLoadFinished();
 
@@ -40,8 +45,21 @@ public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureList
 
     public void prepare(Context context, String url, Ad ad,
                         String adFormat, IntegrationType integrationType, AdFeedbackLoadListener listener) {
-        if (!TextUtils.isEmpty(HyBid.getContentInfoUrl()) && HyBid.isAdFeedbackEnabled()) {
-            url = HyBid.getContentInfoUrl().concat("/index.html?apptoken=").concat(FeedbackMacros.MACRO_APP_TOKEN);
+
+        if (!TextUtils.isEmpty(url)) {
+            try {
+                Uri uri = Uri.parse(url);
+                if (uri != null && TextUtils.isEmpty(uri.getQueryParameter("apptoken"))) {
+                    String appTokenMacroPlaceholder = "token_macro";
+                    uri = uri.buildUpon().appendQueryParameter("apptoken", appTokenMacroPlaceholder).build();
+                    url = uri.toString();
+                    // Workaround for uri encoding of the macro
+                    url = url.replace(appTokenMacroPlaceholder, FeedbackMacros.MACRO_APP_TOKEN);
+                }
+            } catch (RuntimeException exception) {
+                Logger.e(TAG, exception.getMessage());
+                HyBid.reportException(exception);
+            }
         }
 
         mUrlHandlerDelegate = new UrlHandler(context);
@@ -68,7 +86,7 @@ public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureList
 
         mListener = listener;
 
-        mListener.onLoad();
+        mListener.onLoad(url);
     }
 
     @Override
@@ -146,10 +164,10 @@ public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureList
 
     }
 
-    public void showFeedbackForm(Context context) {
+    public void showFeedbackForm(Context context, String url) {
         if (context instanceof Activity) {
             Activity activity = (Activity) context;
-            showFeedbackForm(activity);
+            showFeedbackForm(activity, url);
         } else {
             if (mListener != null) {
                 mListener.onLoadFailed(new HyBidError(HyBidErrorCode.ERROR_LOADING_FEEDBACK, "The feedback form requires an Activity context"));
@@ -157,9 +175,12 @@ public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureList
         }
     }
 
-    public void showFeedbackForm(Activity activity) {
+    public void showFeedbackForm(Activity activity, String url) {
         if (mViewContainer != null && mViewContainer.isLoaded() && mIsReady) {
-            mViewContainer.show(activity);
+            mViewContainer.show(activity, () -> {
+                mViewContainer.showDefaultContentInfoURL(CONTENT_INFO_LINK_URL);
+                mListener.onLoadFailed(new HyBidError(HyBidErrorCode.ERROR_LOADING_FEEDBACK));
+            }, url);
         } else {
             if (mListener != null) {
                 mListener.onLoadFailed(new HyBidError(HyBidErrorCode.ERROR_LOADING_FEEDBACK));

@@ -101,7 +101,8 @@ public class DiagnosticsManager implements ReportingEventCallback {
             logBuilder.append("Video Audio State: ").append(HyBid.getVideoAudioStatus().getStateName()).append("\n");
             logBuilder.append("Location tracking (if permission): ").append(HyBid.isLocationTrackingEnabled() ? "true" : "false").append("\n");
             logBuilder.append("Location updates (if permission): ").append(HyBid.areLocationUpdatesEnabled() ? "true" : "false").append("\n");
-            logBuilder.append("Time: ").append(Calendar.getInstance(Locale.ENGLISH).getTime().toString()).append("\n");
+            logBuilder.append("Time: ").append(System.currentTimeMillis()
+            ).append("\n");
             logBuilder.append("Device OS: ").append("Android").append("\n");
             logBuilder.append("Device OS Version: ").append(Build.VERSION.SDK_INT).append("\n");
             logBuilder.append("Device Model: ").append(Build.MODEL).append("\n");
@@ -133,6 +134,7 @@ public class DiagnosticsManager implements ReportingEventCallback {
                 Logger.e(TAG, "Error parsing placement params: ", jsonException);
                 logBuilder.append("Placement data could not be loaded");
                 logBuilder.append("\n-----------------------------------------------------------------");
+                HyBid.reportException(jsonException);
             }
         }
         return logBuilder.toString();
@@ -213,6 +215,7 @@ public class DiagnosticsManager implements ReportingEventCallback {
             Class.forName(className);
             return true;
         } catch (ClassNotFoundException ignored) {
+            HyBid.reportException(ignored);
             return false;
         }
     }
@@ -226,6 +229,7 @@ public class DiagnosticsManager implements ReportingEventCallback {
                 return "";
             }
         } catch (PackageManager.NameNotFoundException exception) {
+            HyBid.reportException(exception);
             return "";
         }
     }

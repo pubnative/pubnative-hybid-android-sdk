@@ -139,6 +139,10 @@ public class MRAIDView extends RelativeLayout {
     public @interface MRAIDState {
     }
 
+    public interface OnExpandCreativeFailListener {
+        void onExpandFailed();
+    }
+
     private static final String MRAID_VERSION = "3.0";
 
     // nothing is displayed, ad is currently loading assets or making other requests
@@ -372,19 +376,23 @@ public class MRAIDView extends RelativeLayout {
 
         inflateCloseCardViews();
         webView = createWebView();
-        webView.setId(R.id.mraid_ad_view);
 
         if (webView == null) {
             if (listener != null) {
                 listener.mraidViewError(this);
             }
         } else {
+            webView.setId(R.id.mraid_ad_view);
             currentWebView = webView;
             if (!TextUtils.isEmpty(data)) {
-                String processedHtml = MRAIDHtmlProcessor.processRawHtml(data);
-                MRAIDLog.d("hz-m loading mraid " + processedHtml);
-
-                webView.loadDataWithBaseURL(this.baseUrl, processedHtml, "text/html", "UTF-8", null);
+                try {
+                    String processedHtml = MRAIDHtmlProcessor.processRawHtml(data);
+                    MRAIDLog.d("hz-m loading mraid " + processedHtml);
+                    webView.loadDataWithBaseURL(this.baseUrl, processedHtml, "text/html", "UTF-8", null);
+                } catch (Throwable e) {
+                    HyBid.reportException(e);
+                    this.listener.mraidViewError(this);
+                }
             } else {
                 MRAIDLog.d("hz-m loading mraid from url: " + baseUrl);
                 webView.loadUrl(baseUrl);
@@ -510,6 +518,7 @@ public class MRAIDView extends RelativeLayout {
             }
         } catch (RuntimeException exception) {
             wv = null;
+            HyBid.reportException(exception);
         }
 
         return wv;
@@ -613,6 +622,7 @@ public class MRAIDView extends RelativeLayout {
                 }
             }
         } catch (Exception e) {
+            HyBid.reportException(e);
             e.printStackTrace();
         }
     }
@@ -675,11 +685,15 @@ public class MRAIDView extends RelativeLayout {
         expandCreative(url, false, false);
     }
 
-    protected void expand(String url, Boolean isCreatedByFeedbackForm) {
-        expandCreative(url, false, isCreatedByFeedbackForm);
+    private void expandCreative(String url, final boolean isCustomExpand, Boolean isCreatedByFeedbackForm) {
+        expandCreative(url, isCustomExpand, isCreatedByFeedbackForm, null);
     }
 
-    private void expandCreative(String url, final boolean isCustomExpand, Boolean isCreatedByFeedbackForm) {
+    protected void expand(String url, Boolean isCreatedByFeedbackForm, OnExpandCreativeFailListener listener) {
+        expandCreative(url, false, isCreatedByFeedbackForm, listener);
+    }
+
+    private void expandCreative(String url, final boolean isCustomExpand, Boolean isCreatedByFeedbackForm, OnExpandCreativeFailListener listener) {
         MRAIDLog.d("hz-m MRAIDView - expand " + url);
         MRAIDLog.d(MRAID_LOG_TAG + "-JS callback", "expand " + (url != null ? url : "(1-part)"));
 
@@ -706,80 +720,87 @@ public class MRAIDView extends RelativeLayout {
                 }
                 expandHelper(webView);
                 MRAIDLog.d("hz-m MRAIDView - expand - empty url");
+                if (listener != null)
+                    listener.onExpandFailed();
                 return;
             }
 
             // 2-part expansion
 
             // First, try to get the content of the second (expanded) part of the creative.
-            try {
-                url = URLDecoder.decode(url, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                MRAIDLog.d("hz-m MRAIDView - expand - UnsupportedEncodingException " + e);
-                return;
-            }
-
-            // Check to see whether we've been given an absolute or relative URL.
-            // If it's relative, prepend the base URL.
-            if (!url.startsWith("http://") && !url.startsWith("https://")) {
-                url = baseUrl + url;
-            }
-
-            final String finalUrl = url;
-
-            // Go onto a background thread to read the content from the URL.
-            new Thread(() -> {
-                MRAIDLog.d("hz-m MRAIDView - expand - url loading thread");
-                if (isCustomExpand) {
-                    if (context instanceof Activity) {
-                        // Get back onto the main thread to create and load a new WebView.
-                        ((Activity) context).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (state == STATE_RESIZED) {
-                                    removeResizeView();
-                                    addView(webView);
-                                }
-                                webView.setWebChromeClient(null);
-                                webView.setWebViewClient(null);
-                                webViewPart2 = createWebView();
-                                webViewPart2.loadUrl(finalUrl);
-                                MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for " + webViewPart2);
-                                currentWebView = webViewPart2;
-                                isExpandingPart2 = true;
-                                expandHelper(currentWebView);
-                            }
-                        });
-                    } else {
-                        MRAIDLog.e("Could not load part 2 expanded content for URL: " + finalUrl);
-                    }
-                } else {
-                    final String content = getStringFromUrl(finalUrl);
-                    if (!TextUtils.isEmpty(content) && context instanceof Activity) {
-                        // Get back onto the main thread to create and load a new WebView.
-                        ((Activity) context).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (state == STATE_RESIZED) {
-                                    removeResizeView();
-                                    addView(webView);
-                                }
-                                webView.setWebChromeClient(null);
-                                webView.setWebViewClient(null);
-                                webViewPart2 = createWebView();
-                                webViewPart2.loadDataWithBaseURL(baseUrl, content, "text/html", "UTF-8", null);
-                                MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for " + webViewPart2);
-                                currentWebView = webViewPart2;
-                                isExpandingPart2 = true;
-                                expandHelper(currentWebView);
-                            }
-                        });
-                    } else {
-                        MRAIDLog.e("Could not load part 2 expanded content for URL: " + finalUrl);
-                    }
-                }
-            }, "2-part-content").start();
+            decodeURL(url, isCustomExpand);
         }
+    }
+
+    private void decodeURL(String url, boolean isCustomExpand) {
+        try {
+            url = URLDecoder.decode(url, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            HyBid.reportException(e);
+            MRAIDLog.d("hz-m MRAIDView - expand - UnsupportedEncodingException " + e);
+            return;
+        }
+
+        // Check to see whether we've been given an absolute or relative URL.
+        // If it's relative, prepend the base URL.
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            url = baseUrl + url;
+        }
+
+        final String finalUrl = url;
+
+        // Go onto a background thread to read the content from the URL.
+        new Thread(() -> {
+            MRAIDLog.d("hz-m MRAIDView - expand - url loading thread");
+            if (isCustomExpand) {
+                if (context instanceof Activity) {
+                    // Get back onto the main thread to create and load a new WebView.
+                    ((Activity) context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (state == STATE_RESIZED) {
+                                removeResizeView();
+                                addView(webView);
+                            }
+                            webView.setWebChromeClient(null);
+                            webView.setWebViewClient(null);
+                            webViewPart2 = createWebView();
+                            webViewPart2.loadUrl(finalUrl);
+                            MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for " + webViewPart2);
+                            currentWebView = webViewPart2;
+                            isExpandingPart2 = true;
+                            expandHelper(currentWebView);
+                        }
+                    });
+                } else {
+                    MRAIDLog.e("Could not load part 2 expanded content for URL: " + finalUrl);
+                }
+            } else {
+                final String content = getStringFromUrl(finalUrl);
+                if (!TextUtils.isEmpty(content) && context instanceof Activity) {
+                    // Get back onto the main thread to create and load a new WebView.
+                    ((Activity) context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (state == STATE_RESIZED) {
+                                removeResizeView();
+                                addView(webView);
+                            }
+                            webView.setWebChromeClient(null);
+                            webView.setWebViewClient(null);
+                            webViewPart2 = createWebView();
+                            webViewPart2.loadDataWithBaseURL(baseUrl, content, "text/html", "UTF-8", null);
+                            MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for " + webViewPart2);
+                            currentWebView = webViewPart2;
+                            isExpandingPart2 = true;
+                            expandHelper(currentWebView);
+                        }
+                    });
+                } else {
+                    MRAIDLog.e("Could not load part 2 expanded content for URL: " + finalUrl);
+                }
+            }
+        }, "2-part-content").start();
     }
 
     @JavascriptMRAIDCallback
@@ -801,6 +822,7 @@ public class MRAIDView extends RelativeLayout {
                 }
             }
         } catch (UnsupportedEncodingException e) {
+            HyBid.reportException(e);
             e.printStackTrace();
         }
     }
@@ -814,6 +836,7 @@ public class MRAIDView extends RelativeLayout {
                 nativeFeatureListener.mraidNativeFeaturePlayVideo(url);
             }
         } catch (UnsupportedEncodingException e) {
+            HyBid.reportException(e);
             e.printStackTrace();
         }
     }
@@ -896,6 +919,7 @@ public class MRAIDView extends RelativeLayout {
                 nativeFeatureListener.mraidNativeFeatureStorePicture(url);
             }
         } catch (UnsupportedEncodingException e) {
+            HyBid.reportException(e);
             e.printStackTrace();
         }
     }
@@ -945,6 +969,7 @@ public class MRAIDView extends RelativeLayout {
             }
             conn.disconnect();
         } catch (IOException e) {
+            HyBid.reportException(e);
             MRAIDLog.e(MRAID_LOG_TAG, "getStringFromUrl failed " + e.getLocalizedMessage());
         } finally {
             try {
@@ -953,6 +978,7 @@ public class MRAIDView extends RelativeLayout {
                 }
             } catch (IOException e) {
                 // do nothing
+                HyBid.reportException(e);
             }
         }
         return content;
@@ -975,6 +1001,7 @@ public class MRAIDView extends RelativeLayout {
 
             } catch (IOException e) {
                 MRAIDLog.e("Error fetching file: " + e.getMessage());
+                HyBid.reportException(e);
             }
 
             return mLine.toString();
@@ -985,10 +1012,16 @@ public class MRAIDView extends RelativeLayout {
         return "";
     }
 
-    protected void showAsInterstitial(Activity activity, Boolean isCreatedByFeedbackForm) {
+    protected void showAsInterstitial(Activity activity, Boolean isCreatedByFeedbackForm, OnExpandCreativeFailListener listener) {
         MRAIDLog.d("hz-m MRAIDVIEW - showAsInterstitial");
         showActivity = activity;
-        expand(null, isCreatedByFeedbackForm);
+        expand(null, isCreatedByFeedbackForm, listener);
+    }
+
+    protected void showAsInterstitial(Activity activity, Boolean isCreatedByFeedbackForm, OnExpandCreativeFailListener listener, String url) {
+        MRAIDLog.d("hz-m MRAIDVIEW - showAsInterstitial");
+        showActivity = activity;
+        expand(url, isCreatedByFeedbackForm, listener);
     }
 
     protected void expandHelper(WebView webView) {
@@ -1009,6 +1042,10 @@ public class MRAIDView extends RelativeLayout {
         showActivity.addContentView(expandedView, new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         isExpandingFromDefault = true;
         isExpanded = true;
+    }
+
+    public void expandContentInfo(String url) {
+        decodeURL(url, false);
     }
 
     private void setResizedViewSize() {
@@ -1076,33 +1113,38 @@ public class MRAIDView extends RelativeLayout {
         if (context instanceof Activity) {
             // get the content view for the current context
             FrameLayout rootView = ((Activity) context).findViewById(android.R.id.content);
-            rootView.removeView(expandedView);
-            expandedView = null;
-            closeRegion = null;
+            if (rootView != null) {
+                rootView.removeView(expandedView);
+                expandedView = null;
+                closeRegion = null;
 
-            handler.post(() -> {
-                restoreOriginalOrientation();
-                restoreOriginalScreenState();
-            });
-            if (webViewPart2 == null) {
-                // close from 1-part expansion
-                addView(webView, 0, new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-            } else {
-                // close from 2-part expansion
-                webViewPart2.destroy();
-                webView.setWebChromeClient(mraidWebChromeClient);
-                webView.setWebViewClient(mraidWebViewClient);
-                MRAIDLog.d("hz-m MRAIDView - closeFromExpanded - setting currentwebview to " + webView);
-                currentWebView = webView;
-                currentWebView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-            }
-
-            handler.post(() -> {
-                fireStateChangeEvent();
-                if (listener != null) {
-                    listener.mraidViewClose(MRAIDView.this);
+                handler.post(() -> {
+                    restoreOriginalOrientation();
+                    restoreOriginalScreenState();
+                });
+                if (webViewPart2 == null) {
+                    // close from 1-part expansion
+                    if (findViewById(R.id.mraid_ad_view) != null) {
+                        removeView(webView);
+                    }
+                    addView(webView, 0, new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                } else {
+                    // close from 2-part expansion
+                    webViewPart2.destroy();
+                    webView.setWebChromeClient(mraidWebChromeClient);
+                    webView.setWebViewClient(mraidWebViewClient);
+                    MRAIDLog.d("hz-m MRAIDView - closeFromExpanded - setting currentwebview to " + webView);
+                    currentWebView = webView;
+                    currentWebView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                 }
-            });
+
+                handler.post(() -> {
+                    fireStateChangeEvent();
+                    if (listener != null) {
+                        listener.mraidViewClose(MRAIDView.this);
+                    }
+                });
+            }
         }
     }
 
@@ -1157,8 +1199,11 @@ public class MRAIDView extends RelativeLayout {
                 // http://stackoverflow.com/questions/6872376/how-to-hide-the-title-bar-through-code-in-android
                 titleBar = null;
                 try {
-                    titleBar = (View) activity.findViewById(android.R.id.title).getParent();
+                    if(activity.findViewById(android.R.id.title) != null){
+                        titleBar = (View) activity.findViewById(android.R.id.title).getParent();
+                    }
                 } catch (NullPointerException npe) {
+                    HyBid.reportException(npe);
                     // do nothing
                 }
                 if (titleBar != null) {
@@ -1388,6 +1433,7 @@ public class MRAIDView extends RelativeLayout {
             jsonVisibleRectangle.put("width", getWidth() * exposure / 100);
             jsonVisibleRectangle.put("height", getHeight() * exposure / 100);
         } catch (JSONException e) {
+            HyBid.reportException(e);
             e.printStackTrace();
         }
         injectJavaScript("mraid.fireExposureChangeEvent(" + exposure + "," + jsonVisibleRectangle.toString() + "," + "null" + ");");
@@ -1480,6 +1526,7 @@ public class MRAIDView extends RelativeLayout {
                     locationJson.put("lastfix", elapsedNanos / 1000000000L);
                     injectJavaScript("mraid.setLocation(" + locationJson.toString() + ");");
                 } catch (JSONException exception) {
+                    HyBid.reportException(exception);
                     Logger.e(MRAID_LOG_TAG, "Error passing location to MRAID interface");
                     injectJavaScript("mraid.setLocation(-1);");
                 }
@@ -1589,13 +1636,12 @@ public class MRAIDView extends RelativeLayout {
                 setSupportedServices();
                 setLocation();
                 if (isLaidOut) {
-                    initSkipTime();
                     setScreenSize();
                     setMaxSize();
                     setCurrentPosition();
                     setDefaultPosition();
                     if (isInterstitial) {
-                        showAsInterstitial(showActivity, false);
+                        showAsInterstitial(showActivity, false, null);
                     } else {
                         state = STATE_DEFAULT;
                         fireStateChangeEvent();
@@ -1728,7 +1774,7 @@ public class MRAIDView extends RelativeLayout {
             } else {
                 // Fix for Verve custom creatives
                 if (isVerveCustomExpand(url)) {
-                    expandCreative(url, true, false);
+                    expandCreative(url, true, false, null);
                 } else if (isCloseSignal(url)) {
                     closeOnMainThread();
                 } else {
@@ -1782,12 +1828,6 @@ public class MRAIDView extends RelativeLayout {
     }
 
     private boolean isCloseSignal(String url) {
-        if (TextUtils.isEmpty(url)
-                || !HyBid.isAdFeedbackEnabled()
-                || TextUtils.isEmpty(HyBid.getContentInfoUrl())) {
-            return false;
-        }
-
         // This url needs to be hardcoded until production website is released
         if (url.contains("https://feedback.verve.com")) {
             Uri uri = Uri.parse(url);
@@ -2099,16 +2139,9 @@ public class MRAIDView extends RelativeLayout {
         this.mSkipTimeMillis = skipOffset * 1000;
     }
 
-    private void initSkipTime() {
-        int globalSkipMilliseconds = HyBid.getHtmlInterstitialSkipOffset().getOffset() * 1000;
-
-        if (this.mSkipTimeMillis <= 0 && globalSkipMilliseconds > 0)
-            mSkipTimeMillis = globalSkipMilliseconds;
-    }
-
     private void startSkipTimer() {
 
-        if (mSkipTimeMillis > 0 && showTimerBeforeEndCard) {
+         if (mSkipTimeMillis > 0 && showTimerBeforeEndCard) {
 
             mExpirationTimer = new SimpleTimer(mSkipTimeMillis, new SimpleTimer.Listener() {
 

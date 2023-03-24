@@ -17,6 +17,8 @@
 
 package net.pubnative.lite.sdk.utils.string;
 
+import net.pubnative.lite.sdk.HyBid;
+
 import java.io.IOException;
 import java.io.Writer;
 
@@ -53,6 +55,7 @@ public class UnicodeUnescaper extends CharSequenceTranslator {
                     final int value = Integer.parseInt(unicode.toString(), 16);
                     writer.write((char) value);
                 } catch (final NumberFormatException nfe) {
+                    HyBid.reportException(nfe);
                     throw new IllegalArgumentException("Unable to parse unicode value: " + unicode, nfe);
                 }
                 return i + 4;

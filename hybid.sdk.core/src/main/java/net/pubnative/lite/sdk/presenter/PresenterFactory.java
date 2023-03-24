@@ -49,6 +49,10 @@ public abstract class PresenterFactory {
 
     public AdPresenter createPresenter(Ad ad, AdSize adSize, ImpressionTrackingMethod trackingMethod,
                                        AdPresenter.Listener bannerPresenterListener, AdPresenter.ImpressionListener impressionListener) {
+        if (ad == null) {
+            return null;
+        }
+
         final AdPresenter adPresenter = fromCreativeType(ad.assetgroupid, ad, adSize, trackingMethod);
         if (adPresenter == null) {
             return null;

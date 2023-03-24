@@ -46,6 +46,7 @@ public class UserAgentProvider {
                     }
                 } catch (RuntimeException runtimeException) {
                     Logger.e(TAG, runtimeException.getMessage());
+                    HyBid.reportException(runtimeException);
                 }
             });
         }

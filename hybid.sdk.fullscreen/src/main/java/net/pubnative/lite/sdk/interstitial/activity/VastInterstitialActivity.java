@@ -187,7 +187,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
 
     @Override
     protected void pauseAd() {
-        if (mReady) {
+        if (mReady && mVideoAd.isAdStarted()) {
             mVideoAd.pause();
         }
 

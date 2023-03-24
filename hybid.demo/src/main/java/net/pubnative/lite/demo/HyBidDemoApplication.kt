@@ -23,7 +23,6 @@
 package net.pubnative.lite.demo
 
 import android.content.Context
-import android.os.Build
 import android.text.TextUtils
 import android.util.Log
 import android.webkit.WebView
@@ -55,6 +54,7 @@ class HyBidDemoApplication : MultiDexApplication() {
             initSettings()
         } catch (exception: Exception) {
             Log.d("Exception", exception.toString())
+            HyBid.reportException(exception)
         }
     }
 
@@ -145,12 +145,6 @@ class HyBidDemoApplication : MultiDexApplication() {
                 settings.adCustomizationSettings!!.endCardCloseButtonDelay?.let {
                     HyBid.setEndCardCloseButtonDelay(it)
                 }
-                settings.adCustomizationSettings!!.feedbackEnabled?.let {
-                    HyBid.setAdFeedbackEnabled(it)
-                }
-                settings.adCustomizationSettings!!.feedbackFormUrl?.let {
-                    HyBid.setContentInfoUrl(it)
-                }
                 settings.adCustomizationSettings!!.videoClickBehaviour?.let {
                     HyBid.setInterstitialClickBehaviour(
                         getInterstitialActionBehaviourFromSettings(
@@ -200,8 +194,6 @@ class HyBidDemoApplication : MultiDexApplication() {
                 .closeVideoAfterFinish(Constants.CLOSE_VIDEO_AFTER_FINISH_DEFAULT)
                 .closeVideoAfterFinishForRewardedVideo(Constants.CLOSE_VIDEO_AFTER_FINISH_DEFAULT_FOR_REWARDED)
                 .enableEndcard(Constants.ENABLE_ENDCARD_DEFAULT)
-                .feedbackEnabled(Constants.FEEDBACK_ENABLED)
-                .feedbackFormUrl(Constants.FEEDBACK_FORM_URL)
                 .mraidExpanded(Constants.MRAID_EXPANDED_DEFAULT)
                 .locationTracking(Constants.LOCATION_TRACKING_DEFAULT)
                 .locationUpdates(Constants.LOCATION_UPDATES_DEFAULT)

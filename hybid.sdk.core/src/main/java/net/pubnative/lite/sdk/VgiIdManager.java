@@ -74,6 +74,7 @@ public class VgiIdManager {
                 vgiIdModel = new IdModel(vgiIdJson);
             } catch (Exception e) {
                 Logger.e(TAG, e.getMessage());
+                HyBid.reportException(e);
             }
         }
         return vgiIdModel;
@@ -91,6 +92,7 @@ public class VgiIdManager {
                 editor.apply();
             } catch (Exception e) {
                 Logger.e(TAG, e.getMessage());
+                HyBid.reportException(e);
             }
         }
     }

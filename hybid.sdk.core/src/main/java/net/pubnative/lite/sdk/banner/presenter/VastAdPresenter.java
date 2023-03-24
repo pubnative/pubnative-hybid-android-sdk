@@ -81,20 +81,22 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
     private VideoAd mVideoAd;
     private View mContentInfo;
 
+    private boolean isFeedbackFormVisible = false;
+
     public VastAdPresenter(Context context, Ad ad, AdSize adSize, ImpressionTrackingMethod trackingMethod) {
         mContext = context;
         mAdSize = adSize;
         mAd = ad;
 
         ImpressionTrackingMethod remoteConfigTrackingMethod = null;
-        if(ad != null && ad.getImpressionTrackingMethod() != null &&
-                ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod()) != null){
+        if (ad != null && ad.getImpressionTrackingMethod() != null &&
+                ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod()) != null) {
             remoteConfigTrackingMethod = ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod());
         }
 
-        if(remoteConfigTrackingMethod != null){
+        if (remoteConfigTrackingMethod != null) {
             mTrackingMethod = remoteConfigTrackingMethod;
-        }else if (trackingMethod != null) {
+        } else if (trackingMethod != null) {
             mTrackingMethod = trackingMethod;
         } else {
             mTrackingMethod = ImpressionTrackingMethod.AD_RENDERED;
@@ -207,7 +209,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
 
     @Override
     public void resumeAd() {
-        if (mVideoAd != null && mVideoAd.isShowing()) {
+        if (mVideoAd != null && mVideoAd.isShowing() && !isFeedbackFormVisible) {
             mVideoAd.resume();
         }
     }
@@ -264,7 +266,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
     }
 
     private View getContentInfo(Context context, Ad ad, ContentInfo contentInfo) {
-        return contentInfo == null ? ad.getContentInfoContainer(context, HyBid.isAdFeedbackEnabled(), this) : ad.getContentInfoContainer(context, contentInfo, HyBid.isAdFeedbackEnabled(), this);
+        return contentInfo == null ? ad.getContentInfoContainer(context, this) : ad.getContentInfoContainer(context, contentInfo, this);
     }
 
     @Override
@@ -374,35 +376,42 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
         //TODO report content info icon clicked
     }
 
+
+    String processedURL = "";
+
     @Override
     public void onLinkClicked(String url) {
         AdFeedbackView adFeedbackView = new AdFeedbackView();
         adFeedbackView.prepare(mContext, url, mAd, Reporting.AdFormat.BANNER,
                 IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
+
                     @Override
-                    public void onLoad() {
+                    public void onLoad(String url) {
                         //load simple dialog
+                        processedURL = url;
                     }
 
                     @Override
                     public void onLoadFinished() {
+                        isFeedbackFormVisible = true;
                         if (mVideoAd != null && mVideoAd.isShowing()) {
                             mVideoAd.pause();
                         }
-                        adFeedbackView.showFeedbackForm(mContext);
+                        adFeedbackView.showFeedbackForm(mContext, processedURL);
                     }
 
-            @Override
-            public void onLoadFailed(Throwable error) {
-                Logger.e(TAG, error.getMessage());
-            }
+                    @Override
+                    public void onLoadFailed(Throwable error) {
+                        Logger.e(TAG, error.getMessage());
+                    }
 
-            @Override
-            public void onFormClosed() {
-                if (mVideoAd != null && mVideoAd.isShowing()) {
-                    mVideoAd.resume();
-                }
-            }
-        });
+                    @Override
+                    public void onFormClosed() {
+                        isFeedbackFormVisible = false;
+                        if (mVideoAd != null && mVideoAd.isShowing()) {
+                            mVideoAd.resume();
+                        }
+                    }
+                });
     }
 }

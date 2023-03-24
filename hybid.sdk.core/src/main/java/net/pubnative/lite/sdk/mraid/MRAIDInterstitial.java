@@ -26,8 +26,14 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.text.TextUtils;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+
+import net.pubnative.lite.sdk.mraid.internal.MRAIDLog;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
@@ -54,13 +60,13 @@ public class MRAIDInterstitial extends MRAIDView {
 
     @Deprecated
     @Override
-    protected void expand(String url, Boolean isCreatedByFeedbackForm) {
+    protected void expand(String url, Boolean isCreatedByFeedbackForm, OnExpandCreativeFailListener listener) {
         // only expand interstitials from loading state
         if (state != STATE_LOADING) {
             return;
         }
 
-        super.expand(url, isCreatedByFeedbackForm);
+        super.expand(url, isCreatedByFeedbackForm, listener);
     }
 
     @Override
@@ -87,8 +93,16 @@ public class MRAIDInterstitial extends MRAIDView {
         super.closeFromExpanded();
     }
 
-    public void show(Activity activity) {
-        this.showAsInterstitial(activity, isCreatedByFeedbackForm);
+    public void show(Activity activity, OnExpandCreativeFailListener listener) {
+        this.showAsInterstitial(activity, isCreatedByFeedbackForm, listener);
+    }
+
+    public void show(Activity activity, OnExpandCreativeFailListener listener, String url) {
+        this.showAsInterstitial(activity, isCreatedByFeedbackForm, listener, url);
+    }
+
+    public void showDefaultContentInfoURL(String url) {
+        expandContentInfo(url);
     }
 
     public void markCreativeAdComingFromFeedbackForm() {

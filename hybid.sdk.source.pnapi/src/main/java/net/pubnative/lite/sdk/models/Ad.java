@@ -51,9 +51,11 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     private static final String PN_IMPRESSION_QUERY_PARAM = "t";
     private static final int MIN_POINTS = 10;
 
-    private static final String CONTENT_INFO_LINK_URL = "https://pubnative.net/content-info";
-    private static final String CONTENT_INFO_ICON_URL = "https://cdn.pubnative.net/static/adserver/contentinfo.png";
-    private static final String CONTENT_INFO_TEXT = "Learn about this ad";
+    public static final String CONTENT_INFO_LINK_URL = "https://pubnative.net/content-info";
+    public static final String CONTENT_INFO_ICON_URL = "https://cdn.pubnative.net/static/adserver/contentinfo.png";
+    public static final String CONTENT_INFO_TEXT = "Learn about this ad";
+
+    public static final Integer HTML_REWARDED_DEFAULT_SKIP_OFFSET = 3;
 
     //==============================================================================================
     // Fields
@@ -211,47 +213,69 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         return result;
     }
 
-    public View getContentInfo(Context context, boolean feedbackEnabled, PNAPIContentInfoView.ContentInfoListener listener) {
-        return getContentInfo(context, null, feedbackEnabled, listener);
-    }
+    public View getContentInfo(Context context, PNAPIContentInfoView.ContentInfoListener listener) {
+        String configClickUrl = getRemoteConfig(RemoteConfig.CONTENT_INFO_URL);
+        String configIconUrl = getRemoteConfig(RemoteConfig.CONTENT_INFO_ICON_URL);
+        String contentInfoText = getRemoteConfig(RemoteConfig.CONTENT_INFO_TEXT);
+        ContentInfoIconAction iconAction = getContentInfoIconAction();
+        ContentInfoDisplay display = getContentInfoDisplay();
 
-    public View getContentInfo(Context context, ContentInfo contentInfo, boolean feedbackEnabled, PNAPIContentInfoView.ContentInfoListener listener) {
-        PNAPIContentInfoView result = null;
         AdData data = getMeta(APIMeta.CONTENT_INFO);
-        if (data == null) {
-            Log.e(TAG, "getContentInfo - contentInfo data not found");
-            return getDefaultContentInfo(context, feedbackEnabled, listener);
-        } else if (TextUtils.isEmpty(data.getStringField(DATA_CONTENTINFO_ICON_KEY))) {
-            Log.e(TAG, "getContentInfo - contentInfo icon not found");
-        } else if (TextUtils.isEmpty(data.getStringField(DATA_CONTENTINFO_LINK_KEY))) {
-            Log.e(TAG, "getContentInfo - contentInfo link not found");
-        } else if (TextUtils.isEmpty(data.getText())) {
-            Log.e(TAG, "getContentInfo - contentInfo text not found");
+        String clickUrl;
+        String iconUrl;
+        String contextText;
+
+        if (!TextUtils.isEmpty(configClickUrl)) {
+            clickUrl = configClickUrl;
+        } else if (data != null && !TextUtils.isEmpty(data.getStringField(DATA_CONTENTINFO_LINK_KEY))) {
+            clickUrl = data.getStringField(DATA_CONTENTINFO_LINK_KEY);
         } else {
-            result = new PNAPIContentInfoView(context);
-            result.setIconUrl(data.getStringField(DATA_CONTENTINFO_ICON_KEY));
-            result.setIconClickUrl(data.getStringField(DATA_CONTENTINFO_LINK_KEY));
-            result.setContextText(data.getText());
-            result.setContentInfoListener(listener);
-            result.setAdFeedbackEnabled(feedbackEnabled);
-            PNAPIContentInfoView finalResult = result;
-            result.setOnClickListener(v -> {
-                if (!TextUtils.isEmpty(finalResult.getIconClickURL()))
-                    ((PNAPIContentInfoView) v).openLayout();
-            });
+            clickUrl = CONTENT_INFO_LINK_URL;
         }
+
+        if (!TextUtils.isEmpty(configIconUrl)) {
+            iconUrl = configIconUrl;
+        } else if (data != null && !TextUtils.isEmpty(data.getStringField(DATA_CONTENTINFO_ICON_KEY))) {
+            iconUrl = data.getStringField(DATA_CONTENTINFO_ICON_KEY);
+        } else {
+            iconUrl = CONTENT_INFO_ICON_URL;
+        }
+
+        if (!TextUtils.isEmpty(contentInfoText)) {
+            contextText = contentInfoText;
+        } else if (data != null && !TextUtils.isEmpty(data.getText())) {
+            contextText = data.getText();
+        } else {
+            contextText = CONTENT_INFO_TEXT;
+        }
+
+        final PNAPIContentInfoView result = new PNAPIContentInfoView(context);
+        result.setIconUrl(iconUrl);
+        result.setIconClickUrl(clickUrl);
+        result.setContextText(contextText);
+        result.setContentInfoListener(listener);
+        result.setContentInfoDisplay(display);
+        result.setOnClickListener(v -> {
+            if (!TextUtils.isEmpty(result.getIconClickURL()))
+                if (iconAction == ContentInfoIconAction.OPEN) {
+                    ((PNAPIContentInfoView) v).openLink();
+                } else {
+                    ((PNAPIContentInfoView) v).openLayout();
+                }
+        });
+
         return result;
     }
 
-    public FrameLayout getContentInfoContainer(Context context, boolean feedbackEnabled, PNAPIContentInfoView.ContentInfoListener listener) {
-        return getContentInfoContainer(context, null, feedbackEnabled, listener);
+    public FrameLayout getContentInfoContainer(Context context, PNAPIContentInfoView.ContentInfoListener listener) {
+        return getContentInfoContainer(context, null, listener);
     }
 
-    public FrameLayout getContentInfoContainer(Context context, ContentInfo contentInfo, boolean feedbackEnabled, PNAPIContentInfoView.ContentInfoListener listener) {
-        View contentInfoView = getCustomContentInfo(context, contentInfo, feedbackEnabled, listener);
+    public FrameLayout getContentInfoContainer(Context context, ContentInfo contentInfo, PNAPIContentInfoView.ContentInfoListener listener) {
+        View contentInfoView = getCustomContentInfo(context, contentInfo, listener);
 
         if (contentInfoView == null) {
-            contentInfoView = getContentInfo(context, feedbackEnabled, listener);
+            contentInfoView = getContentInfo(context, listener);
         }
 
         if (contentInfoView != null) {
@@ -267,7 +291,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         }
     }
 
-    private PNAPIContentInfoView getCustomContentInfo(Context context, ContentInfo contentInfo, boolean feedbackEnabled, PNAPIContentInfoView.ContentInfoListener listener) {
+    private PNAPIContentInfoView getCustomContentInfo(Context context, ContentInfo contentInfo, PNAPIContentInfoView.ContentInfoListener listener) {
         if (contentInfo == null || TextUtils.isEmpty(contentInfo.getIconUrl())) {
             return null;
         } else {
@@ -282,11 +306,20 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             if (contentInfo.getWidth() != -1 && contentInfo.getHeight() != -1) {
                 result.setDpDimensions(contentInfo);
             }
-            result.setAdFeedbackEnabled(feedbackEnabled);
+
+            ContentInfoIconAction iconAction = getContentInfoIconAction();
+            ContentInfoDisplay display = getContentInfoDisplay();
+
+            result.setContentInfoDisplay(display);
             result.setContentInfoListener(listener);
             result.setOnClickListener(v -> {
-                if (!TextUtils.isEmpty(result.getIconClickURL()))
-                    ((PNAPIContentInfoView) v).openLayout();
+                if (!TextUtils.isEmpty(result.getIconClickURL())) {
+                    if (iconAction == ContentInfoIconAction.OPEN) {
+                        ((PNAPIContentInfoView) v).openLink();
+                    } else {
+                        ((PNAPIContentInfoView) v).openLayout();
+                    }
+                }
             });
             return result;
         }
@@ -294,14 +327,28 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
 
     private PNAPIContentInfoView getDefaultContentInfo(Context context, boolean feedbackEnabled, PNAPIContentInfoView.ContentInfoListener listener) {
         PNAPIContentInfoView result = new PNAPIContentInfoView(context);
-        result.setIconUrl(CONTENT_INFO_ICON_URL);
+        result.setIconUrl(CONTENT_INFO_ICON_URL, true);
         result.setIconClickUrl(CONTENT_INFO_LINK_URL);
         result.setContextText(CONTENT_INFO_TEXT);
         result.setContentInfoListener(listener);
-        result.setAdFeedbackEnabled(feedbackEnabled);
+
+        ContentInfoIconAction iconAction = getContentInfoIconAction();
+        ContentInfoDisplay display = getContentInfoDisplay();
+
+        result.setContentInfoDisplay(display);
         result.setOnClickListener(v -> {
-            if (!TextUtils.isEmpty(result.getIconClickURL()))
-                ((PNAPIContentInfoView) v).openLayout();
+            if (!TextUtils.isEmpty(result.getIconClickURL())) {
+                ((PNAPIContentInfoView) v).openLink();
+            }
+        });
+        result.setOnClickListener(v -> {
+            if (!TextUtils.isEmpty(result.getIconClickURL())) {
+                if (iconAction == ContentInfoIconAction.OPEN) {
+                    ((PNAPIContentInfoView) v).openLink();
+                } else {
+                    ((PNAPIContentInfoView) v).openLayout();
+                }
+            }
         });
         return result;
     }
@@ -312,8 +359,13 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
      * @return icon url of content info
      */
     public String getContentInfoIconUrl() {
-        AdData data = getMeta(APIMeta.CONTENT_INFO);
-        return data.getStringField(DATA_CONTENTINFO_ICON_KEY);
+        String configUrl = getRemoteConfig(RemoteConfig.CONTENT_INFO_ICON_URL);
+        if (!TextUtils.isEmpty(configUrl)) {
+            return configUrl;
+        } else {
+            AdData data = getMeta(APIMeta.CONTENT_INFO);
+            return data.getStringField(DATA_CONTENTINFO_ICON_KEY);
+        }
     }
 
     /**
@@ -322,8 +374,13 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
      * @return click url of content info
      */
     public String getContentInfoClickUrl() {
-        AdData data = getMeta(APIMeta.CONTENT_INFO);
-        return data.getStringField(DATA_CONTENTINFO_LINK_KEY);
+        String configClickUrl = getRemoteConfig(RemoteConfig.CONTENT_INFO_URL);
+        if (!TextUtils.isEmpty(configClickUrl)) {
+            return configClickUrl;
+        } else {
+            AdData data = getMeta(APIMeta.CONTENT_INFO);
+            return data.getStringField(DATA_CONTENTINFO_LINK_KEY);
+        }
     }
 
     public Integer getECPM() {
@@ -421,7 +478,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
 
         AdData data = getMeta(APIMeta.REMOTE_CONFIGS);
 
-        if(data == null || !data.haseField("jsondata")) return null;
+        if (data == null || !data.haseField("jsondata")) return null;
 
         JSONObject jsonObject = data.getJSONObjectField("jsondata");
 
@@ -456,7 +513,11 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     }
 
     public Integer getHtmlSkipOffset() {
-        return getRemoteConfig(RemoteConfig.HTML_SKIP_OFFSET);
+        Integer skipOffset = getRemoteConfig(RemoteConfig.HTML_SKIP_OFFSET);
+        if (skipOffset == null || skipOffset < 0) {
+            skipOffset = AdConstants.Skip.HTML_SKIP_OFFSET;
+        }
+        return skipOffset;
     }
 
     public Integer getVideoSkipOffset() {
@@ -475,16 +536,56 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         return getRemoteConfig(RemoteConfig.FULL_SCREEN_CLICKABILITY);
     }
 
-    public String getImpressionTrackingMethod(){
+    public String getContentInfoText() {
+        String content_info_text = getRemoteConfig(RemoteConfig.CONTENT_INFO_TEXT);
+        if (!TextUtils.isEmpty(content_info_text)) {
+            return content_info_text;
+        } else {
+            AdData data = getMeta(APIMeta.CONTENT_INFO);
+            if (!TextUtils.isEmpty(data.getText())) {
+                return data.getText();
+            } else {
+                return CONTENT_INFO_TEXT;
+            }
+        }
+    }
+
+    public String getImpressionTrackingMethod() {
         return getRemoteConfig(RemoteConfig.IMP_TRACKING_METHOD);
     }
 
-    public Integer getImpressionMinVisibleTime(){
+    public Integer getImpressionMinVisibleTime() {
         return getRemoteConfig(RemoteConfig.IMP_TRACKING_VISIBLE_TIME);
     }
 
-    public Double getImpressionVisiblePercent(){
+    public Double getImpressionVisiblePercent() {
         return getRemoteConfig(RemoteConfig.IMP_TRACKING_VISIBLE_PERCENT);
+    }
+
+    public ContentInfoIconAction getContentInfoIconAction() {
+        String action = getRemoteConfig(RemoteConfig.CONTENT_INFO_ICON_CLICK_ACTION);
+        if (TextUtils.isEmpty(action)) {
+            return ContentInfoIconAction.EXPAND;
+        } else {
+            return ContentInfoIconAction.fromString(action);
+        }
+    }
+
+    public Integer getMraidRewardedSkipOffset() {
+        Integer skipOffset = getRemoteConfig(RemoteConfig.REWARDED_HTML_SKIP_OFFSET);
+        if (skipOffset == null || skipOffset == -1) {
+            skipOffset = HTML_REWARDED_DEFAULT_SKIP_OFFSET;
+        }
+        return skipOffset;
+    }
+
+    public ContentInfoDisplay getContentInfoDisplay() {
+        String display = getRemoteConfig(RemoteConfig.CONTENT_INFO_DISPLAY);
+        if (TextUtils.isEmpty(display)) {
+            return ContentInfoDisplay.SYSTEM_BROWSER;
+        } else {
+            return ContentInfoDisplay.fromString(display);
+        }
     }
 
     public void setZoneId(String zoneId) {

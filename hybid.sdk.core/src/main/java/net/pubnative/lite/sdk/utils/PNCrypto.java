@@ -25,6 +25,8 @@ package net.pubnative.lite.sdk.utils;
 import android.text.TextUtils;
 import android.util.Base64;
 
+import net.pubnative.lite.sdk.HyBid;
+
 import java.nio.charset.StandardCharsets;
 
 import java.security.MessageDigest;
@@ -64,6 +66,7 @@ public class PNCrypto {
                 }
                 result = stringBuilder.toString().toLowerCase(Locale.US);
             } catch (Exception e) {
+                HyBid.reportException(e);
                 e.printStackTrace();
             }
         }
@@ -96,6 +99,7 @@ public class PNCrypto {
                 }
                 result = hexString.toString();
             } catch (NoSuchAlgorithmException e) {
+                HyBid.reportException(e);
                 e.printStackTrace();
             }
         }
@@ -112,6 +116,7 @@ public class PNCrypto {
             byte[] ivAndCipherText = getCombinedArray(iv, cipherText);
             return Base64.encodeToString(ivAndCipherText, Base64.NO_WRAP);
         } catch (Exception e) {
+            HyBid.reportException(e);
             e.printStackTrace();
             return null;
         }
@@ -127,6 +132,7 @@ public class PNCrypto {
             cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES"), new IvParameterSpec(iv));
             return new String(cipher.doFinal(cipherText), StandardCharsets.UTF_8);
         } catch (Exception e) {
+            HyBid.reportException(e);
             e.printStackTrace();
             return null;
         }

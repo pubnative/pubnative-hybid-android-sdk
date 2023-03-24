@@ -2,6 +2,7 @@ package net.pubnative.lite.sdk.vpaid.utils;
 
 import android.graphics.Bitmap;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdData;
@@ -42,7 +43,7 @@ public class CloseCardUtil {
                 }
                 @Override
                 public void onDownloadFailed(String url, Exception exception) {
-
+                    HyBid.reportException(exception);
                 }
             });
         }
@@ -58,7 +59,7 @@ public class CloseCardUtil {
                 }
                 @Override
                 public void onDownloadFailed(String url, Exception exception) {
-
+                    HyBid.reportException(exception);
                 }
             });
         }

@@ -1,4 +1,4 @@
-package net.pubnative.lite.sdk;
+package net.pubnative.lite.sdk.models;
 
 public final class AdConstants {
     public final class Skip {

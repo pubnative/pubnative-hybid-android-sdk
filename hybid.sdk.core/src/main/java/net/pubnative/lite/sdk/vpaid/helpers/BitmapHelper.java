@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import net.pubnative.lite.sdk.HyBid;
+
 public class BitmapHelper {
 
     public static Bitmap toBitmap(Context context, Integer resId, Integer defaultResource) {
@@ -14,6 +16,7 @@ public class BitmapHelper {
         try {
             return BitmapFactory.decodeResource(context.getResources(), resId);
         } catch (Exception ex) {
+            HyBid.reportException(ex);
             return BitmapFactory.decodeResource(context.getResources(), defaultResource);
         }
     }

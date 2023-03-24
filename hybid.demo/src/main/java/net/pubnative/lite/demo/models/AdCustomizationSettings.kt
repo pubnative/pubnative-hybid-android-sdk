@@ -13,8 +13,6 @@ class AdCustomizationSettings private constructor(builder: Builder){
     val videoSkipOffset: Int?
     val endCardCloseButtonDelay: Int?
     val videoClickBehaviour: Boolean?
-    val feedbackEnabled: Boolean?
-    val feedbackFormUrl: String?
     val initialAudioState: Int?
     val countdownStyle: String?
 
@@ -29,8 +27,6 @@ class AdCustomizationSettings private constructor(builder: Builder){
         this.videoSkipOffset = builder.videoSkipOffset
         this.endCardCloseButtonDelay = builder.endCardCloseButtonDelay
         this.videoClickBehaviour = builder.videoClickBehaviour
-        this.feedbackEnabled = builder.feedbackEnabled
-        this.feedbackFormUrl = builder.feedbackFormUrl
         this.initialAudioState = builder.initialAudioState
         this.countdownStyle = builder.countdownStyle
         this.customSkipOffsetDisabled = builder.customSkipOffsetDisabled
@@ -58,10 +54,6 @@ class AdCustomizationSettings private constructor(builder: Builder){
         var endCardCloseButtonDelay: Int? = null
             private set
         var videoClickBehaviour: Boolean? = null
-            private set
-        var feedbackEnabled: Boolean? = null
-            private set
-        var feedbackFormUrl: String? = null
             private set
         var initialAudioState: Int? = null
             private set
@@ -100,12 +92,6 @@ class AdCustomizationSettings private constructor(builder: Builder){
 
         fun videoClickBehaviour(videoClickBehaviour: Boolean) =
             apply { this.videoClickBehaviour = videoClickBehaviour }
-
-        fun feedbackEnabled(feedbackEnabled: Boolean) =
-            apply { this.feedbackEnabled = feedbackEnabled }
-
-        fun feedbackFormUrl(feedbackFormUrl: String) =
-            apply { this.feedbackFormUrl = feedbackFormUrl }
 
         fun initialAudioState(initialAudioState: Int) =
             apply { this.initialAudioState = initialAudioState }

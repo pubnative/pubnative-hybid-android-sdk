@@ -71,7 +71,7 @@ class LegacyApiAdapter(private var mListener: OnLogDisplayListener) :
     override fun getItemCount() = list.count()
 
     override fun getItemViewType(position: Int): Int {
-        if (position == 2 && ad != null) {
+        if (position == 7 && ad != null) {
             when (selectedSize) {
                 LegacyApiTesterSize.BANNER -> {
                     return TYPE_API_BANNER

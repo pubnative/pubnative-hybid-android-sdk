@@ -127,6 +127,7 @@ public class DeviceInfo {
             if (mListener != null) {
                 mListener.onInfoLoaded();
             }
+            HyBid.reportException(exception);
         }
     }
 

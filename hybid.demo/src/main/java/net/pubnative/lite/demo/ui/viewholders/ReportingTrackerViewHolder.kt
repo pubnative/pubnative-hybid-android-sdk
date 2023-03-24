@@ -1,14 +1,10 @@
 package net.pubnative.lite.demo.ui.viewholders
 
-import android.content.Intent
-import android.text.TextUtils
 import android.view.View
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
-import net.pubnative.lite.demo.ui.activities.ReportingEventDetailsActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
-import net.pubnative.lite.sdk.analytics.ReportingEvent
 import net.pubnative.lite.sdk.analytics.tracker.ReportingTracker
 
 class ReportingTrackerViewHolder(view: View) : RecyclerView.ViewHolder(view) {

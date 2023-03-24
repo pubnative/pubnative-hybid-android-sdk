@@ -9,6 +9,8 @@ public class VideoAdView extends FrameLayout {
 
     private VisibilityListener mVisibilityListener;
 
+    private int visibilityLastTrackedValue = 0;
+
     public interface VisibilityListener {
         void onVisibilityChanged(int visibility);
     }
@@ -28,6 +30,7 @@ public class VideoAdView extends FrameLayout {
     @Override
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
+        visibilityLastTrackedValue = visibility;
         if (mVisibilityListener != null) {
             mVisibilityListener.onVisibilityChanged(visibility);
         }
@@ -36,6 +39,7 @@ public class VideoAdView extends FrameLayout {
     public void setVisibilityListener(VisibilityListener visibilityListener) {
         if (visibilityListener != null) {
             this.mVisibilityListener = visibilityListener;
+            this.mVisibilityListener.onVisibilityChanged(visibilityLastTrackedValue);
         }
     }
 

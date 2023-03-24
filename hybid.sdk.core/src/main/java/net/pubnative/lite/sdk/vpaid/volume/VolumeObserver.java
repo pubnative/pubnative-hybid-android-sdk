@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.receiver.VolumeChangedActionReceiver;
 import net.pubnative.lite.sdk.utils.Logger;
 
@@ -66,6 +67,7 @@ public class VolumeObserver {
                 context.unregisterReceiver(receiver);
                 receiver = null;
             } catch (RuntimeException exception) {
+                HyBid.reportException(exception);
                 Logger.e(TAG, exception.getMessage());
             }
         }

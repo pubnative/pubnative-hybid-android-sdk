@@ -99,8 +99,6 @@ public class VideoAd extends BaseVideoAd {
                                                     obstruction.getReason());
                                         }
 
-                                        getAdController().setVideoVisible(mBannerView.getVisibility() == View.VISIBLE);
-
                                         getViewabilityAdSession().fireLoaded();
                                         getAdController().playAd();
 

@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.utils.Logger;
 
 import java.io.File;
@@ -57,6 +58,7 @@ public class ImageUtils {
             bitmap = BitmapFactory.decodeFile(filePath, options);
             return bitmap;
         } catch (OutOfMemoryError | RuntimeException ex) {
+            HyBid.reportException(ex);
             bitmap = decodeFile(new File(filePath), reqWidth, reqHeight);
             return bitmap;
         }
@@ -77,6 +79,7 @@ public class ImageUtils {
             o2.inSampleSize = scale;
             return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
         } catch (FileNotFoundException ignored) {
+            HyBid.reportException(ignored);
         }
         return null;
     }
@@ -88,6 +91,7 @@ public class ImageUtils {
             int dstHeight = (int) (image.getHeight() / inSampleSize);
             return Bitmap.createScaledBitmap(image, dstWidth, dstHeight, false);
         } catch (RuntimeException exception) {
+            HyBid.reportException(exception);
             Logger.e(TAG, exception.getMessage());
             return null;
         }

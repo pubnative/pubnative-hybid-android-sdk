@@ -340,13 +340,6 @@ class SettingsManager private constructor(context: Context) {
                     )
                 }
 
-                it.feedbackEnabled?.let { it1 ->
-                    editor.putBoolean(
-                        SETTINGS_KEY_FEEDBACK_FORM_ENABLED, it1
-                    )
-                }
-
-                editor.putString(SETTINGS_KEY_FEEDBACK_FORM_URL, it.feedbackFormUrl)
                 editor.putString(SETTINGS_KEY_COUNTDOWN_STYLE, it.countdownStyle)
             }
 
@@ -541,9 +534,6 @@ class SettingsManager private constructor(context: Context) {
         val fairbidRewardedAdUnitId =
             preferences.getString(SETTINGS_KEY_FAIRBID_REWARDED_AD_UNIT_ID, "")!!
 
-        val feedbackEnabled = preferences.getBoolean(SETTINGS_KEY_FEEDBACK_FORM_ENABLED, true)
-        val feedbackFormUrl =
-            preferences.getString(SETTINGS_KEY_FEEDBACK_FORM_URL, Constants.FEEDBACK_FORM_URL)!!
         val countdownStyle =
             preferences.getString(SETTINGS_KEY_COUNTDOWN_STYLE, CountdownStyle.PIE_CHART.id)!!
 
@@ -560,7 +550,6 @@ class SettingsManager private constructor(context: Context) {
                 .customSkipOffsetDisabled(customSkipOffsetDisabled).enableEndcard(enableEndcard)
                 .endCardCloseButtonDelay(endcardCloseButtonDelay)
                 .closeVideoAfterFinishForRewardedVideo(closeVideoAfterFinishForRewarded)
-                .feedbackEnabled(feedbackEnabled).feedbackFormUrl(feedbackFormUrl)
                 .mraidExpanded(mraidExpanded).locationTracking(locationTracking)
                 .locationUpdates(locationUpdates).videoClickBehaviour(videoClickBehaviour)
                 .skipOffset(skipOffset).videoSkipOffset(videoSkipOffset)

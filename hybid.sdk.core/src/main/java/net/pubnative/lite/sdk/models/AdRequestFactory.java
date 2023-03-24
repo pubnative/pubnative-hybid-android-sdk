@@ -78,32 +78,38 @@ public class AdRequestFactory {
     }
 
     public void createAdRequest(final String appToken, final String zoneid, final AdSize adSize, final boolean isRewarded, final Callback callback) {
-        new Thread(() -> {
-            if (mDeviceInfo == null) {
-                mDeviceInfo = HyBid.getDeviceInfo();
-            }
+        if (mDeviceInfo == null) {
+            mDeviceInfo = HyBid.getDeviceInfo();
+        }
 
-            String advertisingId = null;
-            boolean limitTracking = false;
-            Context context = null;
-            if (mDeviceInfo != null) {
-                advertisingId = mDeviceInfo.getAdvertisingId();
-                limitTracking = mDeviceInfo.limitTracking();
-                context = mDeviceInfo.getContext();
+        String advertisingId = null;
+        boolean limitTracking = false;
+        Context context = null;
+        if (mDeviceInfo != null) {
+            advertisingId = mDeviceInfo.getAdvertisingId();
+            limitTracking = mDeviceInfo.limitTracking();
+            context = mDeviceInfo.getContext();
+        }
+        mIsRewarded = isRewarded;
+        if (TextUtils.isEmpty(advertisingId) && context != null) {
+            try {
+                DBManager dbManager = new DBManager(mDeviceInfo.getContext());
+                dbManager.open();
+                int impDepth = dbManager.getImpressionDepth(zoneid);
+                dbManager.close();
+                PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(context, (advertisingId1, limitTracking1) -> processAdvertisingId(appToken, zoneid, adSize, advertisingId1, limitTracking1, callback, impDepth)));
+            } catch (Exception exception) {
+                Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
             }
-            mIsRewarded = isRewarded;
-            if (TextUtils.isEmpty(advertisingId) && context != null) {
-                try {
-                    Integer impDepth = new DBManager(context).getSessionImpressionSizeForZoneId(zoneid);
-                    PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(context, (advertisingId1, limitTracking1) -> processAdvertisingId(appToken, zoneid, adSize, advertisingId1, limitTracking1, callback, impDepth)));
-                } catch (Exception exception) {
-                    Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
-                }
-            } else {
-                int impDepth = new DBManager(context).getSessionImpressionSizeForZoneId(zoneid);
+        } else {
+            if (mDeviceInfo != null && mDeviceInfo.getContext() != null) {
+                DBManager dbManager = new DBManager(mDeviceInfo.getContext());
+                dbManager.open();
+                int impDepth = dbManager.getImpressionDepth(zoneid);
+                dbManager.close();
                 processAdvertisingId(appToken, zoneid, adSize, advertisingId, limitTracking, callback, impDepth);
             }
-        }).start();
+        }
     }
 
     private void processAdvertisingId(String appToken, String zoneId, AdSize adSize, String advertisingId, boolean limitTracking, Callback callback, int impDepth) {
@@ -209,11 +215,6 @@ public class AdRequestFactory {
         adRequest.impdepth = String.valueOf(impDepth);
         adRequest.ageofapp = new HyBidTimeUtils().getDaysSince(Long.parseLong(getAgeOfApp()));
         adRequest.sessionduration = new HyBidTimeUtils().getSeconds(calculateSessionDuration());
-
-        new Thread(() -> {
-            long incrementValue = new DBManager(mDeviceInfo.getContext()).increment(adRequest);
-            Logger.d("Increment Value", Long.toString(incrementValue));
-        }).start();
 
         return adRequest;
     }

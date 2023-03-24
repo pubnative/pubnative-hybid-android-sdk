@@ -18,6 +18,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import net.pubnative.lite.sdk.HyBid;
+
 /**
  * Created by erosgarciaponte on 24.01.18.
  */
@@ -66,6 +68,7 @@ public class PNBitmapDownloaderTest {
         try {
             latch.await(2, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
+            HyBid.reportException(e);
             e.printStackTrace();
         }
 

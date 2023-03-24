@@ -69,17 +69,20 @@ public class MraidRewardedActivity extends HyBidRewardedActivity implements MRAI
     public View getAdView() {
         MRAIDBanner adView = null;
         if (getAd() != null) {
-            int mSkipOffset = getIntent().getIntExtra(EXTRA_SKIP_OFFSET, 0);
+            int mSkipOffset = getAd().getMraidRewardedSkipOffset();
+            boolean showTimerBeforeEndCard = false;
+
             if (mSkipOffset > 0) {
                 mIsSkippable = false;
+                showTimerBeforeEndCard = true;
             }
 
             if (getAd().getAssetUrl(APIAsset.HTML_BANNER) != null) {
-                adView = new MRAIDBanner(this, getAd().getAssetUrl(APIAsset.HTML_BANNER), "", false, mSupportedNativeFeatures,
-                        this, this, getAd().getContentInfoContainer(this, HyBid.isAdFeedbackEnabled(), this));
+                adView = new MRAIDBanner(this, getAd().getAssetUrl(APIAsset.HTML_BANNER), "", showTimerBeforeEndCard, mSupportedNativeFeatures,
+                        this, this, getAd().getContentInfoContainer(this, this));
             } else if (getAd().getAssetHtml(APIAsset.HTML_BANNER) != null) {
-                adView = new MRAIDBanner(this, "", getAd().getAssetHtml(APIAsset.HTML_BANNER), false, mSupportedNativeFeatures,
-                        this, this, getAd().getContentInfoContainer(this, HyBid.isAdFeedbackEnabled(), this));
+                adView = new MRAIDBanner(this, "", getAd().getAssetHtml(APIAsset.HTML_BANNER), showTimerBeforeEndCard, mSupportedNativeFeatures,
+                        this, this, getAd().getContentInfoContainer(this, this));
             }
 
             if (adView != null) {

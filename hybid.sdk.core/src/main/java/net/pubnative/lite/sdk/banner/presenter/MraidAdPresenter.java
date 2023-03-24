@@ -82,8 +82,8 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
 
         ImpressionTrackingMethod trackingMethodFinal = trackingMethod;
 
-        if(ad != null && ad.getImpressionTrackingMethod() != null &&
-                ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod()) != null){
+        if (ad != null && ad.getImpressionTrackingMethod() != null &&
+                ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod()) != null) {
             trackingMethodFinal = ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod());
         }
 
@@ -137,10 +137,10 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
 
         if (mAd.getAssetUrl(APIAsset.HTML_BANNER) != null) {
             mMRAIDBanner = new MRAIDBanner(mContext, mAd.getAssetUrl(APIAsset.HTML_BANNER), "", true, mSupportedNativeFeatures,
-                    this, this, mAd.getContentInfoContainer(mContext, HyBid.isAdFeedbackEnabled(), this));
+                    this, this, mAd.getContentInfoContainer(mContext, this));
         } else if (mAd.getAssetHtml(APIAsset.HTML_BANNER) != null) {
             mMRAIDBanner = new MRAIDBanner(mContext, "", mAd.getAssetHtml(APIAsset.HTML_BANNER), true, mSupportedNativeFeatures,
-                    this, this, mAd.getContentInfoContainer(mContext, HyBid.isAdFeedbackEnabled(), this));
+                    this, this, mAd.getContentInfoContainer(mContext, this));
         }
     }
 
@@ -282,15 +282,18 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
         //TODO report content info icon clicked
     }
 
+    String processedURL = "";
+
     @Override
     public void onLinkClicked(String url) {
         AdFeedbackView adFeedbackView = new AdFeedbackView();
         adFeedbackView.prepare(mContext, url, mAd, Reporting.AdFormat.BANNER,
                 IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
                     @Override
-                    public void onLoad() {
+                    public void onLoad(String url) {
                         //load simple dialog
                         Logger.e(TAG, "onLoad");
+                        processedURL = url;
                         if (mContext instanceof Activity) {
                             showProgressDialog(((Activity) mContext).getFragmentManager(), mContext.getString(R.string.feedback_form),
                                     mContext.getString(R.string.loading));
@@ -306,8 +309,7 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
                         if (mMRAIDBanner != null) {
                             mMRAIDBanner.pause();
                         }
-                        adFeedbackView.showFeedbackForm(mContext);
-
+                        adFeedbackView.showFeedbackForm(mContext, processedURL);
                     }
 
                     @Override

@@ -17,6 +17,8 @@
 
 package net.pubnative.lite.sdk.utils.string;
 
+import net.pubnative.lite.sdk.HyBid;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -62,6 +64,7 @@ public abstract class CharSequenceTranslator {
             translate(input, writer);
             return writer.toString();
         } catch (final IOException ioe) {
+            HyBid.reportException(ioe);
             // this should never ever happen while writing to a StringWriter
             throw new RuntimeException(ioe);
         }

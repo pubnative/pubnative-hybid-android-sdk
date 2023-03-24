@@ -34,6 +34,8 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
 
+import net.pubnative.lite.sdk.HyBid;
+
 import java.util.concurrent.LinkedBlockingQueue;
 
 
@@ -71,11 +73,13 @@ public class PNAdvertisingIdClient {
                             adInfo = new AdInfo(adInterface.getId(), adInterface.isLimitAdTrackingEnabled(true));
                         }
                     } catch (Exception exception) {
+                        HyBid.reportException(exception);
                         Log.e(TAG, "getAdvertisingIdInfo - Error: " + exception);
                     } finally {
                         context.unbindService(connection);
                     }
                 } catch (Exception exception) {
+                    HyBid.reportException(exception);
                     Log.e(TAG, "getAdvertisingIdInfo - Error: " + exception);
                 }
 
@@ -147,6 +151,7 @@ public class PNAdvertisingIdClient {
             try {
                 this.queue.put(service);
             } catch (InterruptedException localInterruptedException) {
+                HyBid.reportException(localInterruptedException);
                 Log.e(TAG, "Error: can't connect to AdvertisingId service", localInterruptedException);
             }
         }
@@ -192,6 +197,7 @@ public class PNAdvertisingIdClient {
                 reply.readException();
                 id = reply.readString();
             } catch (Exception ex) {
+                HyBid.reportException(ex);
                 Log.e(TAG, "Error: Can't read AdvertisingId from the service", ex);
             } finally {
                 reply.recycle();
@@ -212,6 +218,7 @@ public class PNAdvertisingIdClient {
                 reply.readException();
                 limitAdTracking = 0 != reply.readInt();
             } catch (Exception ex) {
+                HyBid.reportException(ex);
                 Log.e(TAG, "Error: Can't get is limit Ad tracking enabled", ex);
             } finally {
                 reply.recycle();

@@ -1,5 +1,7 @@
 package net.pubnative.lite.sdk.utils.reflection;
 
+import net.pubnative.lite.sdk.HyBid;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,6 +83,7 @@ public class ReflectionUtils {
             try {
                 return currentClass.getDeclaredMethod(methodName, parameterTypes);
             } catch (NoSuchMethodException e) {
+                HyBid.reportException(e);
                 currentClass = currentClass.getSuperclass();
             }
         }

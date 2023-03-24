@@ -28,8 +28,6 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
     private lateinit var endCardCloseButtonDelayInput: EditText
     private lateinit var clickBehaviourGroup: RadioGroup
     private lateinit var settingManager: SettingsManager
-    private lateinit var feedbackFormSwitch: SwitchCompat
-    private lateinit var feedbackFormUrlInput: EditText
     private lateinit var countdownStyleGroup: RadioGroup
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -57,8 +55,6 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
         endCardCloseButtonDelayInput =
             requireView().findViewById(R.id.input_endcard_close_button_delay)
         clickBehaviourGroup = requireView().findViewById(R.id.group_click_behaviour)
-        feedbackFormSwitch = requireView().findViewById(R.id.feedback_form_switch)
-        feedbackFormUrlInput = requireView().findViewById(R.id.feedback_form_url_input)
         countdownStyleGroup = requireView().findViewById(R.id.countdown_style)
     }
 
@@ -95,8 +91,6 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
         htmlSkipOffsetInput.setText(settings?.skipOffset.toString())
         videoSkipOffsetInput.setText(settings?.videoSkipOffset.toString())
         endCardCloseButtonDelayInput.setText(settings?.endCardCloseButtonDelay.toString())
-        feedbackFormSwitch.isChecked = settings?.feedbackEnabled == true
-        feedbackFormUrlInput.setText(settings?.feedbackFormUrl)
 
         val selectedClickBehaviour = when (settings?.videoClickBehaviour) {
             true -> R.id.radio_creative
@@ -151,8 +145,6 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
             R.id.radio_action_button -> InterstitialActionBehaviour.HB_ACTION_BUTTON
             else -> InterstitialActionBehaviour.HB_CREATIVE
         }
-        val feedbackFormEnabled = feedbackFormSwitch.isChecked
-        val feedbackFormUrl = feedbackFormUrlInput.text.toString()
 
         val skipOffsetInt: Int
         val videoSkipOffsetInt: Int
@@ -188,12 +180,6 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
             }
         }
 
-        if (feedbackFormEnabled && feedbackFormUrl.isBlank()) {
-            Toast.makeText(context, "Feedback can not be enabled with blank url", Toast.LENGTH_LONG)
-                .show()
-            return
-        }
-
         val countdownStyle = when (countdownStyleGroup?.checkedRadioButtonId) {
             R.id.radio_countdown_style_pie_chart -> CountdownStyle.PIE_CHART
             R.id.radio_countdown_style_timer -> CountdownStyle.TIMER
@@ -213,8 +199,6 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
         settingManager.setVideoSkipOffset(videoSkipOffsetInt)
         settingManager.setEndCardCloseButtonDelay(endCardCloseButtonDelayInt)
         settingManager.setVideoClickBehaviour(getVideoClickBehaviourBoolean(videoClickBehaviour))
-        settingManager.setFeedbackFormEnabled(feedbackFormEnabled)
-        settingManager.setFeedbackFormUrl(feedbackFormUrl)
         settingManager.setCountdownStyle(countdownStyle.id)
 
         HyBid.setVideoAudioStatus(initialAudioState)
@@ -224,8 +208,6 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
         HyBid.setCloseVideoAfterFinish(autoCloseVideo)
         HyBid.setCloseVideoAfterFinishForRewarded(autoCloseVideoRewarded)
         HyBid.setEndCardEnabled(enableEndcard)
-        HyBid.setAdFeedbackEnabled(feedbackFormEnabled)
-        HyBid.setContentInfoUrl(feedbackFormUrl)
         if (!customSkipOffsetDisabled) {
             HyBid.setHtmlInterstitialSkipOffset(skipOffsetInt)
             HyBid.setVideoInterstitialSkipOffset(videoSkipOffsetInt)

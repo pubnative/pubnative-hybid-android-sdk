@@ -169,6 +169,7 @@ public class HyBidMediationNativeCustomEvent implements CustomEventNative, HyBid
             @Override
             public void onDownloadFailed(String url, Exception exception) {
                 Logger.e(TAG, exception.getMessage());
+                HyBid.reportException(exception);
                 if (!TextUtils.isEmpty(mNativeAd.getBannerUrl())) {
                     PNBitmapDownloader bannerDownloader = new PNBitmapDownloader();
                     bannerDownloader.download(mNativeAd.getBannerUrl(), mBannerDownloadListener);
@@ -195,6 +196,7 @@ public class HyBidMediationNativeCustomEvent implements CustomEventNative, HyBid
             @Override
             public void onDownloadFailed(String url, Exception exception) {
                 Logger.e(TAG, exception.getMessage());
+                HyBid.reportException(exception);
                 if (mMapperListener != null) {
                     mMapperListener.onAdLoaded(HyBidNativeAdMapper.this);
                 }

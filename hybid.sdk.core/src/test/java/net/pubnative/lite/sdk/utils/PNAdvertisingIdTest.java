@@ -13,6 +13,8 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import net.pubnative.lite.sdk.HyBid;
+
 /**
  * Created by erosgarciaponte on 24.01.18.
  */
@@ -23,7 +25,6 @@ public class PNAdvertisingIdTest {
         PNAdvertisingIdClient advertisingId = new PNAdvertisingIdClient();
         PNAdvertisingIdClient.Listener listener = mock(PNAdvertisingIdClient.Listener.class);
         advertisingId.request(null, listener);
-
         CountDownLatch latch = new CountDownLatch(1);
         try {
             latch.await(2, TimeUnit.SECONDS);

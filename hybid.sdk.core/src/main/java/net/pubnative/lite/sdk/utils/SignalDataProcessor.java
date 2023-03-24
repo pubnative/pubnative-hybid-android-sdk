@@ -132,11 +132,13 @@ public class SignalDataProcessor {
                 }
             }
         } catch (OutOfMemoryError e) {
+            HyBid.reportException(e);
             Logger.e(TAG, e.getMessage());
             if (mListener != null) {
                 mListener.onError(new HyBidError(HyBidErrorCode.OUT_OF_MEMORY));
             }
         } catch (RuntimeException e) {
+            HyBid.reportException(e);
             Logger.e(TAG, e.getMessage());
             if (e instanceof AndroidRuntimeException) {
                 if (mListener != null) {
@@ -144,6 +146,7 @@ public class SignalDataProcessor {
                 }
             }
         } catch (Exception e) {
+            HyBid.reportException(e);
             Logger.e(TAG, e.getMessage());
             if (mListener != null) {
                 mListener.onError(new HyBidError(HyBidErrorCode.INVALID_SIGNAL_DATA));

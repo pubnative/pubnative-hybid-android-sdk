@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
 
-import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.mraid.MRAIDBanner;
@@ -42,23 +41,15 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
     public View getAdView() {
         MRAIDBanner adView = null;
         if (getAd() != null) {
-
-            int mSkipOffset = getIntent().getIntExtra(EXTRA_SKIP_OFFSET, 0);
-            if (mSkipOffset > 0) {
-                mIsSkippable = false;
-            }
-
             if (getAd().getAssetUrl(APIAsset.HTML_BANNER) != null) {
-                adView = new MRAIDBanner(this, getAd().getAssetUrl(APIAsset.HTML_BANNER), "", true, mSupportedNativeFeatures, this, this, getAd().getContentInfoContainer(this, HyBid.isAdFeedbackEnabled(), this));
+                adView = new MRAIDBanner(this, getAd().getAssetUrl(APIAsset.HTML_BANNER), "", true, mSupportedNativeFeatures, this, this, getAd().getContentInfoContainer(this, this));
             } else if (getAd().getAssetHtml(APIAsset.HTML_BANNER) != null) {
-                adView = new MRAIDBanner(this, "", getAd().getAssetHtml(APIAsset.HTML_BANNER), true, mSupportedNativeFeatures, this, this, getAd().getContentInfoContainer(this, HyBid.isAdFeedbackEnabled(), this));
+                adView = new MRAIDBanner(this, "", getAd().getAssetHtml(APIAsset.HTML_BANNER), true, mSupportedNativeFeatures, this, this, getAd().getContentInfoContainer(this, this));
             }
-
             if (adView != null) {
+                int mSkipOffset = getAd().getHtmlSkipOffset();
                 adView.setCloseLayoutListener(this);
-            }
-
-            if (mSkipOffset > 0 && adView != null) {
+                mIsSkippable = mSkipOffset == 0;
                 adView.setSkipOffset(mSkipOffset);
             }
         }
@@ -67,9 +58,9 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
         return adView;
     }
 
-    private void fetchCloseCard(){
-        if(mView != null && getAd() != null){
-            CloseCardData data =  new CloseCardData();
+    private void fetchCloseCard() {
+        if (mView != null && getAd() != null) {
+            CloseCardData data = new CloseCardData();
             new CloseCardUtil().fetchCloseCardData(getAd(), data);
             mView.setCloseCardData(data);
         }
@@ -200,10 +191,11 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
 
     @Override
     protected void dismiss() {
-        if(mView.hasValidCloseCard() && !mView.isCloseCardShown()){
+        if (mView != null && mView.hasValidCloseCard() && !mView.isCloseCardShown()) {
             mView.showCloseCard(getAd().link);
         } else {
-            super.dismiss();;
+            super.dismiss();
+            ;
         }
     }
 

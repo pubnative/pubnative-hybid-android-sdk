@@ -1,8 +1,10 @@
 package net.pubnative.lite.sdk.models;
 
+import android.text.TextUtils;
+
 import java.util.Locale;
 
-public enum ImpressionTrackingMethod{
+public enum ImpressionTrackingMethod {
 
     AD_RENDERED("rendered"),
     AD_VIEWABLE("viewable");
@@ -13,16 +15,16 @@ public enum ImpressionTrackingMethod{
 
     public final String methodName;
 
-    public static ImpressionTrackingMethod fromString(String name){
-        if(name == null) return null;
+    public static ImpressionTrackingMethod fromString(String name) {
+        if (TextUtils.isEmpty(name)) return AD_RENDERED;
 
-        String lowercaseName = name.toLowerCase(Locale.ROOT);
+        String lowercaseName = name.toLowerCase(Locale.ENGLISH);
 
-        if(lowercaseName.equals(AD_RENDERED.methodName))
+        if (lowercaseName.equals(AD_RENDERED.methodName))
             return AD_RENDERED;
-        else if(lowercaseName.equals(AD_VIEWABLE.methodName))
+        else if (lowercaseName.equals(AD_VIEWABLE.methodName))
             return AD_VIEWABLE;
 
-        return null;
+        return AD_RENDERED;
     }
 }

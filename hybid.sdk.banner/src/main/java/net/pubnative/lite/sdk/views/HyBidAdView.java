@@ -34,6 +34,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+
 import net.pubnative.lite.sdk.CacheListener;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
@@ -43,6 +44,7 @@ import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
+import net.pubnative.lite.sdk.db.DBManager;
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdSize;
@@ -721,6 +723,15 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     }
 
     protected void invokeOnImpression() {
+        if (mZoneId != null && !TextUtils.isEmpty(mZoneId)) {
+            if (getContext() != null) {
+                DBManager dbManager = new DBManager(getContext());
+                dbManager.open();
+                dbManager.insert(mZoneId);
+                dbManager.close();
+            }
+        }
+
         if (mListener != null) {
             mListener.onAdImpression();
         }
@@ -818,11 +829,15 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     }
 
     private void refresh() {
-        mHandler.removeCallbacksAndMessages(null);
-        if (mAutoRefreshTime > 0) {
-            mHandler.postDelayed(() ->
-                    load(mAppToken, mZoneId, mListener), mAutoRefreshTime);
-        }
+        postDelayed(() -> {
+            if (mHandler != null) {
+                mHandler.removeCallbacksAndMessages(null);
+                if (mAutoRefreshTime > 0) {
+                    mHandler.postDelayed(() ->
+                            load(mAppToken, mZoneId, mListener), mAutoRefreshTime);
+                }
+            }
+        }, 100);
     }
 
     public void setAutoRefreshTimeInSeconds(int seconds) {

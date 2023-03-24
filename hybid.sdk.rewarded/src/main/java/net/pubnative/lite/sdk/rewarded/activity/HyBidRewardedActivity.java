@@ -116,7 +116,7 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
                 mCloseableContainer.setBackgroundColor(Color.WHITE);
 
                 if (!mIsVast && shouldShowContentInfo() && getAd() != null) {
-                    View contentInfo = getAd().getContentInfoContainer(this, HyBid.isAdFeedbackEnabled(), this);
+                    View contentInfo = getAd().getContentInfoContainer(this, this);
                     if (contentInfo != null) {
                         mCloseableContainer.addView(contentInfo);
                     }
@@ -167,7 +167,7 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
     }
 
     private View getContentInfo(Context context, Ad ad, ContentInfo contentInfo) {
-        return contentInfo == null ? ad.getContentInfoContainer(context, HyBid.isAdFeedbackEnabled(), this) : ad.getContentInfoContainer(context, contentInfo, HyBid.isAdFeedbackEnabled(), this);
+        return contentInfo == null ? ad.getContentInfoContainer(context, this) : ad.getContentInfoContainer(context, contentInfo, this);
     }
 
     private final CloseableContainer.OnCloseListener mCloseListener = this::dismiss;
@@ -239,14 +239,17 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
         //TODO report content info icon clicked
     }
 
+    String processedURL = "";
+
     @Override
     public void onLinkClicked(String url) {
         if (!mIsFeedbackFormOpen && !mIsFeedbackFormLoading) {
             AdFeedbackView adFeedbackView = new AdFeedbackView();
             adFeedbackView.prepare(this, url, mAd, Reporting.AdFormat.REWARDED, IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
                 @Override
-                public void onLoad() {
+                public void onLoad(String url) {
                     mIsFeedbackFormLoading = true;
+                    processedURL = url;
                     showProgressDialog(getString(R.string.feedback_form), getString(R.string.loading));
                 }
 
@@ -256,7 +259,7 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
                     mIsFeedbackFormLoading = false;
                     pauseAd();
                     mIsFeedbackFormOpen = true;
-                    adFeedbackView.showFeedbackForm(HyBidRewardedActivity.this);
+                    adFeedbackView.showFeedbackForm(HyBidRewardedActivity.this, processedURL);
                 }
 
                 @Override

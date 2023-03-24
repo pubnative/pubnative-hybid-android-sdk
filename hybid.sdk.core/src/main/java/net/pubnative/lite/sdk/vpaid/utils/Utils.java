@@ -11,6 +11,7 @@ import android.text.TextUtils;
 import android.view.Gravity;
 import android.widget.FrameLayout;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.ContentInfo;
 import net.pubnative.lite.sdk.models.PositionX;
 import net.pubnative.lite.sdk.models.PositionY;
@@ -59,6 +60,7 @@ public class Utils {
             NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
             return activeNetwork != null && activeNetwork.isConnected() && activeNetwork.isAvailable();
         } catch (Exception e) {
+            HyBid.reportException(e);
             e.printStackTrace();
             return false;
         }
@@ -207,6 +209,7 @@ public class Utils {
             int seconds = Double.valueOf(data[2]).intValue();
             return seconds + 60 * minutes + 3600 * hours;
         } catch (RuntimeException e) {
+            HyBid.reportException(e);
             Logger.e(TAG, "Error while parsing ad duration");
         }
         return 10;
@@ -266,7 +269,7 @@ public class Utils {
                 tempWidth = Integer.parseInt(icon.getWidth());
                 tempHeight = Integer.parseInt(icon.getHeight());
             } catch (RuntimeException ignored) {
-
+                HyBid.reportException(ignored);
             }
 
             // Only use the values if both could be parsed

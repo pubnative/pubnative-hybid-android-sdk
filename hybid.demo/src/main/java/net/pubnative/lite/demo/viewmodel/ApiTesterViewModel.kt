@@ -2,12 +2,15 @@ package net.pubnative.lite.demo.viewmodel
 
 import android.app.Application
 import android.text.TextUtils
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import net.pubnative.lite.demo.ui.fragments.apitester.LegacyApiTesterSize
 import net.pubnative.lite.demo.ui.fragments.apitester.LegacyApiTesterSize.*
+import net.pubnative.lite.demo.ui.fragments.markup.MarkupSize
+import net.pubnative.lite.demo.ui.fragments.markup.MarkupType
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.demo.util.JsonUtils
 import net.pubnative.lite.sdk.HyBid
@@ -15,6 +18,7 @@ import net.pubnative.lite.sdk.api.PNApiClient
 import net.pubnative.lite.sdk.models.APIAsset
 import net.pubnative.lite.sdk.models.Ad
 import net.pubnative.lite.sdk.models.AdResponse
+import net.pubnative.lite.sdk.network.PNHttpClient
 import net.pubnative.lite.sdk.utils.AdRequestRegistry
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor
@@ -25,12 +29,16 @@ import org.json.JSONObject
 class ApiTesterViewModel(application: Application) : AndroidViewModel(application) {
 
     private var adSize: LegacyApiTesterSize = BANNER
+    private var customMarkup: MarkupType = MarkupType.CUSTOM_MARKUP
 
     private val _clipboard: MutableLiveData<String> = MutableLiveData()
     val clipboard: LiveData<String> = _clipboard
 
     private val _loadInterstitial: MutableLiveData<Ad?> = MutableLiveData()
     val loadInterstitial: LiveData<Ad?> = _loadInterstitial
+
+    private val _loadReworded: MutableLiveData<Ad?> = MutableLiveData()
+    val loadReworded: LiveData<Ad?> = _loadReworded
 
     private val _adapterUpdate: MutableLiveData<Ad?> = MutableLiveData()
     val adapterUpdate: LiveData<Ad?> = _adapterUpdate
@@ -54,10 +62,26 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun setAdSize(adSize: LegacyApiTesterSize) {
         this.adSize = adSize
-        _listVisibillity.value = adSize != LegacyApiTesterSize.INTERSTITIAL
+        _listVisibillity.value = adSize != INTERSTITIAL && adSize != REWARDED
     }
 
-    fun loadAdFromResponse(response: String) {
+    fun setMarkupType(customMarkup: MarkupType) {
+        this.customMarkup = customMarkup
+    }
+
+    fun loadApiAd(apiAd: String) {
+        when (customMarkup) {
+            MarkupType.CUSTOM_MARKUP -> {
+                loadAdFromResponse(apiAd)
+            }
+
+            MarkupType.URL -> {
+                loadAdFromUrl(apiAd)
+            }
+        }
+    }
+
+    private fun loadAdFromResponse(response: String?) {
 
         if (!isValidResponse(response)) {
             Toast.makeText(
@@ -70,6 +94,32 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
 
         AdRequestRegistry.getInstance().setLastAdRequest("", response, 0)
         processAd(response)
+    }
+
+    private fun loadAdFromUrl(adUrl: String) {
+        PNHttpClient.makeRequest(getApplication<Application>().applicationContext,
+            adUrl,
+            null,
+            null,
+            true,
+            object : PNHttpClient.Listener {
+                override fun onSuccess(
+                    response: String?, headers: MutableMap<String?, MutableList<String>?>?
+                ) {
+                    AdRequestRegistry.getInstance().setLastAdRequest(adUrl, response, 0)
+                    Log.d("onSuccess", response ?: "")
+                    loadAdFromResponse(response)
+                }
+
+                override fun onFailure(error: Throwable) {
+                    Log.d("onFailure", error.toString())
+                    Toast.makeText(
+                        getApplication<Application>().applicationContext,
+                        "Ad request failed",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            })
     }
 
     private fun processAd(response: String?) {
@@ -94,15 +144,15 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
 
         if (ad == null) return
 
-        if (adSize == LegacyApiTesterSize.INTERSTITIAL) {
+        if (adSize == INTERSTITIAL || adSize == REWARDED) {
             ad.zoneId = getZoneIdForInterstitial(ad)
+            val livedata = if(adSize == INTERSTITIAL) _loadInterstitial else _loadReworded
             if (isVideoAd(ad)) {
-                runCacheProcessForVideoAd(ad, _loadInterstitial)
+                runCacheProcessForVideoAd(ad, livedata)
             } else {
                 HyBid.getAdCache().put(ad.zoneId, ad)
-                _loadInterstitial.value = ad
+                livedata.value = ad
             }
-
         } else {
             ad.zoneId = getZoneIdBySize(ad)
             if (isVideoAd(ad)) {

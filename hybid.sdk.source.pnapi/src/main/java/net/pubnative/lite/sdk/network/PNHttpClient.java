@@ -46,7 +46,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class PNHttpClient {
-    private static final ExecutorService sExecutor = Executors.newCachedThreadPool();
+    private static final ExecutorService sExecutor = Executors.newFixedThreadPool(16);
     private static final Handler sUiHandler = new Handler(Looper.getMainLooper());
 
     private static final Queue<PendingRequest> sPendingRequests = new ArrayDeque<>();

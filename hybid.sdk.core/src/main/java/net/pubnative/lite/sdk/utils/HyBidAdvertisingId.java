@@ -25,6 +25,7 @@ package net.pubnative.lite.sdk.utils;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.AdvertisingInfo;
 import net.pubnative.lite.sdk.utils.reflection.MethodBuilderFactory;
 import net.pubnative.lite.sdk.utils.reflection.ReflectionUtils;
@@ -64,6 +65,7 @@ public class HyBidAdvertisingId extends AsyncTask<Void, Void, AdvertisingInfo> {
                 advertisingId = reflectedGetAdvertisingId(adInfo, advertisingId);
                 isLimitAdTrackingEnabled = reflectedIsLimitAdTrackingEnabled(adInfo, isLimitAdTrackingEnabled);
             } catch (Exception e) {
+                HyBid.reportException(e);
                 Logger.e(TAG, "Unable to obtain Advertising ID.");
             }
         }
@@ -83,6 +85,7 @@ public class HyBidAdvertisingId extends AsyncTask<Void, Void, AdvertisingInfo> {
         try {
             return (String) MethodBuilderFactory.create(adInfo, "getId").execute();
         } catch (Exception exception) {
+            HyBid.reportException(exception);
             return defaultValue;
         }
     }
@@ -92,6 +95,7 @@ public class HyBidAdvertisingId extends AsyncTask<Void, Void, AdvertisingInfo> {
             Boolean result = (Boolean) MethodBuilderFactory.create(adInfo, "isLimitAdTrackingEnabled").execute();
             return (result != null) ? result : defaultValue;
         } catch (Exception exception) {
+            HyBid.reportException(exception);
             return defaultValue;
         }
     }

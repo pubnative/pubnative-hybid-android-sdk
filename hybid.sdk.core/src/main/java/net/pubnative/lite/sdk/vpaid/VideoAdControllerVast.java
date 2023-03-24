@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.view.Surface;
 import android.view.TextureView;
@@ -39,7 +41,11 @@ import net.pubnative.lite.sdk.vpaid.volume.VolumeObserver;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
 
@@ -64,11 +70,8 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
     private int mDuration = -1;
     private int mDoneMillis = -1;
 
-    private boolean videoStarted = false;
     private boolean videoVisible = false;
     private boolean finishedPlaying = false;
-    private boolean isResumed = false;
-    private boolean isPendingResumeWhenVisible = false;
     private boolean isImpressionFired = false;
     private boolean isVideoSkipped = false;
     private boolean isVideoCompleted = false;
@@ -81,6 +84,12 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
     private Boolean isAndroid6VersionDevice = false;
 
     private final VolumeObserver observer;
+
+    private final Map<Action, List<Action>> mPendingActions = new LinkedHashMap<>();
+    private final List<Action> mActions = new Vector<>();
+    private final Handler mActionsProcessingHandler = new Handler(Looper.getMainLooper());
+    private Boolean isActionsProcessingRun = false;
+    private Action currentAction = Action.INITIAL;
 
     VideoAdControllerVast(BaseVideoAdInternal baseAd, AdParams adParams, HyBidViewabilityNativeVideoAdSession viewabilityAdSession, boolean isFullscreen, AdPresenter.ImpressionListener impressionListener) {
         mBaseAdInternal = baseAd;
@@ -99,6 +108,189 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
         observer = VolumeObserver.getInstance();
         observer.registerVolumeObserver(this, mBaseAdInternal.getContext());
         this.mImpressionListener = impressionListener;
+    }
+
+    private synchronized void addAction(Action action) {
+
+        if(mActions.isEmpty() || !mActions.get(mActions.size() - 1).equals(action))
+            mActions.add(action);
+
+        if(!mPendingActions.isEmpty() && mPendingActions.containsKey(action)){
+            List<Action> pendingActions = mPendingActions.get(action);
+            if(pendingActions != null && !pendingActions.isEmpty()){
+                mActions.addAll(pendingActions);
+            }
+            mPendingActions.remove(action);
+        }
+    }
+
+    private synchronized void addPendingAction(Action action, Action waitingAction) {
+        if(mPendingActions.containsKey(waitingAction) && mPendingActions.get(waitingAction) != null){
+            mPendingActions.get(waitingAction).add(action);
+        }else{
+            LinkedList<Action> newList = new LinkedList<>();
+            newList.add(action);
+            mPendingActions.put(waitingAction, newList);
+        }
+    }
+
+    private synchronized void cancelPendingPauseAction(){
+
+        if(!mActions.isEmpty() && mActions.get(mActions.size() -1) == Action.PAUSE){
+            mActions.remove(mActions.size() -1);
+        }
+
+        if(mPendingActions.containsKey(Action.PLAY)){
+            List<Action> pendingActions = mPendingActions.get(Action.PLAY);
+            if(pendingActions != null && !pendingActions.isEmpty() &&
+                    pendingActions.get(pendingActions.size() - 1).equals(Action.PAUSE)){
+                mPendingActions.get(Action.PLAY).remove(pendingActions.size() - 1);
+            }
+        }
+    }
+
+    private void clearAllActions(){
+        mActions.clear();
+        mPendingActions.clear();
+    }
+
+    private synchronized void processActions() {
+
+        if (mActions.isEmpty() || isActionsProcessingRun) return;
+        isActionsProcessingRun = true;
+        mActionsProcessingHandler.post(() -> {
+            while (!mActions.isEmpty()) {
+                Action currentAction = mActions.get(0);
+                executeAction(currentAction);
+                this.currentAction = currentAction;
+                if(!mActions.isEmpty()) mActions.remove(0);
+                if(!mPendingActions.isEmpty() && mPendingActions.containsKey(currentAction)){
+                    List<Action> pendingActions = mPendingActions.get(currentAction);
+                    if(pendingActions != null && !pendingActions.isEmpty()){
+                        mActions.addAll(0, pendingActions);
+                    }
+                    mPendingActions.remove(currentAction);
+                }
+            }
+            isActionsProcessingRun = false;
+        });
+    }
+
+    private synchronized void executeAction(Action action) {
+        switch (action) {
+            case PREPARE:
+                try {
+                    processPrepareAction();
+                } catch (IOException e) {
+                    tryReInitMediaPlayer();
+                }
+                break;
+            case PLAY:
+                processPlayAction();
+                break;
+            case PAUSE:
+                processPauseAction();
+                break;
+            case RESUME:
+                processResumeAction();
+                break;
+        }
+    }
+
+    private void tryReInitMediaPlayer() {
+
+        postDelayed(() -> {
+            try {
+                processPrepareAction();
+            } catch (Exception e) {
+                Logger.e(LOG_TAG, "mediaPlayer re-init: " + e.getMessage());
+                closeSelf();
+            }
+        });
+    }
+
+    private void processPrepareAction() throws IOException, IllegalStateException {
+
+        if (mMediaPlayer != null) {
+            mMediaPlayer.release();
+        }
+        mMediaPlayer = new MediaPlayer();
+        try {
+            mMediaPlayer.setDataSource(mVideoUri);
+            mMediaPlayer.setOnCompletionListener(mOnCompletionListener);
+            mMediaPlayer.setOnErrorListener(mOnErrorListener);
+            mMediaPlayer.setLooping(false);
+            mMediaPlayer.prepare();
+        } catch (IOException e) {
+            Logger.e(LOG_TAG, "startMediaPlayer: " + e.getMessage());
+            mBaseAdInternal.onAdLoadFailInternal(new PlayerInfo("Error loading media file"));
+        }
+    }
+
+    private void processPlayAction() {
+
+        if (mMediaPlayer == null) return;
+        muteVideo(mViewControllerVast.isMute(), false);
+        mViewControllerVast.adjustLayoutParams(mMediaPlayer.getVideoWidth(), mMediaPlayer.getVideoHeight());
+        mMediaPlayer.setSurface(mViewControllerVast.getSurface());
+        createTimer(mMediaPlayer.getDuration());
+        getViewabilityAdSession().fireImpression();
+        if (mBaseAdInternal != null && mBaseAdInternal.getAdListener() != null) {
+            mBaseAdInternal.getAdListener().onAdStarted();
+        }
+        mMediaPlayer.start();
+    }
+
+    private void processPauseAction() {
+
+        if (mTimerWithPause != null) {
+            mTimerWithPause.pause();
+        }
+
+        if (mSkipTimerWithPause != null) {
+            mSkipTimerWithPause.pause();
+        }
+
+        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+            mMediaPlayer.pause();
+            ReportingEvent event = new ReportingEvent();
+            event.setEventType(Reporting.EventType.VIDEO_PAUSE);
+            event.setCreativeType(Reporting.CreativeType.VIDEO);
+            event.setTimestamp(System.currentTimeMillis());
+            if (HyBid.getReportingController() != null) {
+                HyBid.getReportingController().reportEvent(event);
+            }
+            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.PAUSE, mMacroHelper, false);
+            getViewabilityAdSession().firePause();
+        }
+    }
+
+    private void processResumeAction() {
+
+        if (mMediaPlayer != null) {
+            mMediaPlayer.setSurface(mViewControllerVast.getSurface());
+            mMediaPlayer.start();
+        }
+
+        if (mTimerWithPause != null && mTimerWithPause.isPaused()) {
+            mTimerWithPause.resume();
+        }
+
+        if (mSkipTimerWithPause != null && mSkipTimerWithPause.isPaused()) {
+            mSkipTimerWithPause.resume();
+        }
+
+        if (!isVideoCompleted) {
+            ReportingEvent event = new ReportingEvent();
+            event.setEventType(Reporting.EventType.VIDEO_RESUME);
+            event.setCreativeType(Reporting.CreativeType.VIDEO);
+            event.setTimestamp(System.currentTimeMillis());
+            if (HyBid.getReportingController() != null) {
+                HyBid.getReportingController().reportEvent(event);
+            }
+        }
+        EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.RESUME, mMacroHelper, false);
+        getViewabilityAdSession().fireResume();
     }
 
     @Override
@@ -143,68 +335,29 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
 
     @Override
     public void playAd() {
-        if (isVideoVisible()) {
-            postDelayed(() -> {
-                try {
-                    if (!videoStarted && !finishedPlaying) {
-                        videoStarted = true;
-                        startMediaPlayer();
-                        if (mTimerWithPause != null) {
-                            mTimerWithPause.create();
-                        }
-                        if (mSkipTimerWithPause != null) {
-                            mSkipTimerWithPause.create();
-                        }
-                    } else {
-                        if (mMediaPlayer != null) {
-                            mMediaPlayer.setSurface(mViewControllerVast.getSurface());
-                            mMediaPlayer.start();
-                        }
-                        if (mTimerWithPause != null && mTimerWithPause.isPaused()) {
-                            mTimerWithPause.resume();
-                        }
-                        if (mSkipTimerWithPause != null && mSkipTimerWithPause.isPaused()) {
-                            mSkipTimerWithPause.resume();
-                        }
-                    }
-                } catch (IllegalStateException e) {
-                    Logger.e(LOG_TAG, "mediaPlayer IllegalStateException: " + e.getMessage());
-                    tryReInitMediaPlayer();
-                } catch (IOException e) {
-                    Logger.e(LOG_TAG, "mediaPlayer IOException: " + e.getMessage());
-                    closeSelf();
-                }
-            });
-        }
+        addAction(Action.PREPARE);
+        addAction(Action.PLAY);
+        processActions();
     }
 
-    private void tryReInitMediaPlayer() {
-        postDelayed(() -> {
-            try {
-                startMediaPlayer();
-            } catch (Exception e) {
-                Logger.e(LOG_TAG, "mediaPlayer re-init: " + e.getMessage());
-                closeSelf();
-            }
-        });
+    @Override
+    public void pause() {
+        if(currentAction == Action.INITIAL){
+            addPendingAction(Action.PAUSE, Action.PLAY);
+        }else{
+            addAction(Action.PAUSE);
+        }
+        processActions();
     }
 
-    private void startMediaPlayer() throws IOException, IllegalStateException {
-        if (mMediaPlayer != null) {
-            mMediaPlayer.release();
+    private void resumeAd() {
+
+        if (currentAction == Action.PAUSE){
+            addAction(Action.RESUME);
+        }else if(isVideoVisible()){
+            cancelPendingPauseAction();
         }
-        mMediaPlayer = new MediaPlayer();
-        try {
-            mMediaPlayer.setDataSource(mVideoUri);
-            mMediaPlayer.setOnPreparedListener(mOnPreparedListener);
-            mMediaPlayer.setOnCompletionListener(mOnCompletionListener);
-            mMediaPlayer.setOnErrorListener(mOnErrorListener);
-            mMediaPlayer.setLooping(false);
-            mMediaPlayer.prepareAsync();
-        } catch (IOException e) {
-            Logger.e(LOG_TAG, "startMediaPlayer: " + e.getMessage());
-            mBaseAdInternal.onAdLoadFailInternal(new PlayerInfo("Error loading media file"));
-        }
+        processActions();
     }
 
     private final MediaPlayer.OnErrorListener mOnErrorListener = new MediaPlayer.OnErrorListener() {
@@ -215,36 +368,6 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
             ErrorLog.postError(mBaseAdInternal.getContext(), VastError.MEDIA_FILE_UNSUPPORTED);
             mBaseAdInternal.onAdLoadFailInternal(new PlayerInfo("Error loading media file"));
             return true;
-        }
-    };
-
-    private final MediaPlayer.OnPreparedListener mOnPreparedListener = new MediaPlayer.OnPreparedListener() {
-        @Override
-        public void onPrepared(final MediaPlayer mp) {
-            postDelayed(() -> {
-                try {
-                    mViewControllerVast.adjustLayoutParams(mp.getVideoWidth(), mp.getVideoHeight());
-                    mMediaPlayer.setSurface(mViewControllerVast.getSurface());
-                    if (mTimerWithPause != null && mTimerWithPause.isPaused()) {
-                        mMediaPlayer.seekTo((int) mTimerWithPause.timePassed());
-                    } else {
-                        createTimer(mp.getDuration());
-                        getViewabilityAdSession().fireImpression();
-                        Logger.d(LOG_TAG, "Ad appeared on screen");
-                        if (mBaseAdInternal != null && mBaseAdInternal.getAdListener() != null) {
-                            mBaseAdInternal.getAdListener().onAdStarted();
-                        }
-                    }
-
-                    muteVideo(mViewControllerVast.isMute(), false);
-                    mMediaPlayer.start();
-                } catch (RuntimeException runtimeException) {
-                    Logger.w(LOG_TAG, "Error preparing HyBid media player", runtimeException);
-                    if (mBaseAdInternal != null && mBaseAdInternal.getAdListener() != null) {
-                        mBaseAdInternal.getAdListener().onAdLoadFail(new PlayerInfo("Error preparing HyBid media player"));
-                    }
-                }
-            });
         }
     };
 
@@ -442,12 +565,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
         }
     }
 
-    private final MediaPlayer.OnCompletionListener mOnCompletionListener = new MediaPlayer.OnCompletionListener() {
-        @Override
-        public void onCompletion(MediaPlayer mp) {
-            handleMediaPlayerComplete();
-        }
-    };
+    private final MediaPlayer.OnCompletionListener mOnCompletionListener = mp -> handleMediaPlayerComplete();
 
     private void postDelayed(Runnable action) {
         mViewControllerVast.postDelayed(action, VideoAdControllerVast.DELAY_UNTIL_EXECUTE);
@@ -482,6 +600,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
             return;
 
         finishedPlaying = true;
+        clearAllActions();
 
         if (skipEvent) {
             getViewabilityAdSession().fireSkipped();
@@ -515,7 +634,6 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
             }
 
             EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.SKIP, mMacroHelper, true);
-            if (!TextUtils.isEmpty(mImageUri)) return;
         }
 
         if (isRewarded()) {
@@ -607,6 +725,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
                 }
             }
         } catch (RuntimeException runtimeException) {
+            HyBid.reportException(runtimeException);
             Logger.w(LOG_TAG, runtimeException.getMessage());
         }
     }
@@ -673,6 +792,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
 
     @Override
     public void destroy() {
+
         if (mMediaPlayer != null) {
             try {
                 mMediaPlayer.release();
@@ -680,7 +800,8 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
                 Logger.e(LOG_TAG, "Error releasing HyBid video player");
             }
         }
-        if (!videoStarted) {
+
+        if (currentAction == Action.INITIAL) {
             EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.NOT_USED, mMacroHelper, true);
         }
 
@@ -698,34 +819,11 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
 
         mViewControllerVast.destroy();
 
+        clearAllActions();
+
         observer.unregisterVolumeObserver(this, mBaseAdInternal.getContext());
     }
 
-    @Override
-    public void pause() {
-        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
-            mMediaPlayer.pause();
-            if (mTimerWithPause != null) {
-                mTimerWithPause.pause();
-            }
-
-            if (mSkipTimerWithPause != null) {
-                mSkipTimerWithPause.pause();
-            }
-
-            ReportingEvent event = new ReportingEvent();
-            event.setEventType(Reporting.EventType.VIDEO_PAUSE);
-            event.setCreativeType(Reporting.CreativeType.VIDEO);
-            event.setTimestamp(System.currentTimeMillis());
-            if (HyBid.getReportingController() != null) {
-                HyBid.getReportingController().reportEvent(event);
-            }
-            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.PAUSE, mMacroHelper, false);
-            getViewabilityAdSession().firePause();
-            isResumed = false;
-            isPendingResumeWhenVisible = false;
-        }
-    }
 
     @Override
     public void resume() {
@@ -758,28 +856,6 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
         public void onSurfaceTextureUpdated(SurfaceTexture surface) {
         }
     };
-
-    private void resumeAd() {
-
-        if (mMediaPlayer != null && !mMediaPlayer.isPlaying() && mViewControllerVast.isEndCard() && !isResumed && isVideoVisible()) {
-            isResumed = true;
-            isPendingResumeWhenVisible = false;
-            playAd();
-            ReportingEvent event = new ReportingEvent();
-            if (!isVideoCompleted) {
-                event.setEventType(Reporting.EventType.VIDEO_RESUME);
-                event.setCreativeType(Reporting.CreativeType.VIDEO);
-                event.setTimestamp(System.currentTimeMillis());
-                if (HyBid.getReportingController() != null) {
-                    HyBid.getReportingController().reportEvent(event);
-                }
-            }
-            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.RESUME, mMacroHelper, false);
-            getViewabilityAdSession().fireResume();
-        } else if (mMediaPlayer != null && !mMediaPlayer.isPlaying() && !isVideoVisible()) {
-            isPendingResumeWhenVisible = true;
-        }
-    }
 
     private void handleMediaPlayerComplete() {
         if (isVideoCompleted)
@@ -886,17 +962,22 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
 
     @Override
     public void setVideoVisible(boolean videoVisible) {
-        if (mMediaPlayer != null && !this.videoVisible && videoVisible) {
+        if (this.videoVisible && videoVisible) {
             recoverMediaPlayerSurface();
         }
         this.videoVisible = videoVisible;
-        if (isPendingResumeWhenVisible && videoVisible) {
-            resumeAd();
-        }
     }
 
     @Override
     public void onSystemVolumeChanged() {
         muteVideo(mViewControllerVast.isMute(), false);
+    }
+
+    private enum Action {
+        PREPARE,
+        PLAY,
+        PAUSE,
+        RESUME,
+        INITIAL,
     }
 }

@@ -137,6 +137,7 @@ public class RequestManager {
             jsonCacheParams.put(Reporting.Key.APP_TOKEN, mAppToken);
         } catch (JSONException e) {
             e.printStackTrace();
+            HyBid.reportException(e);
         }
     }
 
@@ -185,6 +186,10 @@ public class RequestManager {
             return;
         }
 
+        if (HyBid.isTestMode()) {
+            Logger.w(TAG, "You are using Verve HyBid SDK on test mode. Please disable test mode before submitting your application for production.");
+        }
+
         if (!isFormatEnabled()) {
             if (mRequestListener != null) {
                 mRequestListener.onRequestFail(new HyBidError(HyBidErrorCode.DISABLED_FORMAT));
@@ -203,9 +208,9 @@ public class RequestManager {
                                     jsonCacheParams.put(Reporting.Key.AD_REQUEST, adRequest.toString());
                                 } catch (JSONException e) {
                                     e.printStackTrace();
+                                    HyBid.reportException(e);
                                 }
                             }
-
                         }
                     });
         }
@@ -245,6 +250,7 @@ public class RequestManager {
             jsonCacheParams.put(Reporting.Key.TIMESTAMP, String.valueOf(System.currentTimeMillis()));
         } catch (JSONException e) {
             e.printStackTrace();
+            HyBid.reportException(e);
         }
 
         Logger.d(TAG, "Requesting ad for zone id: " + adRequest.zoneid);
@@ -320,6 +326,7 @@ public class RequestManager {
                 jsonCacheParams.put(Reporting.Key.VAST, ad.getVast());
             } catch (JSONException e) {
                 e.printStackTrace();
+                HyBid.reportException(e);
             }
 
             mRequestTimeMilliseconds = System.currentTimeMillis();
@@ -341,6 +348,7 @@ public class RequestManager {
                         jsonCacheParams.put(Reporting.Key.CACHE_TIME, String.valueOf(mCacheTimeMilliseconds - mRequestTimeMilliseconds));
                     } catch (JSONException e) {
                         Logger.w(TAG, e.getMessage());
+                        HyBid.reportException(e);
                     }
 
                     reportAdCache();

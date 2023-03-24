@@ -33,6 +33,7 @@ import android.view.View;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.contentinfo.AdFeedbackView;
+import net.pubnative.lite.sdk.db.DBManager;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.views.PNBeaconWebView;
@@ -204,8 +205,12 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
         return mAd.getContentInfoClickUrl();
     }
 
+    public String getContentInfoText() {
+        return mAd.getContentInfoText();
+    }
+
     public View getContentInfo(Context context) {
-        return mAd.getContentInfo(context, HyBid.isAdFeedbackEnabled(), this);
+        return mAd.getContentInfo(context, this);
     }
 
     public String getImpressionId() {
@@ -223,9 +228,7 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
     // Used to inject extra data in urls
     private String injectExtras(String url) {
         String result = url;
-        if (!TextUtils.isEmpty(url)
-                && mTrackingExtras != null
-                && mTrackingExtras.size() > 0) {
+        if (!TextUtils.isEmpty(url) && mTrackingExtras != null && mTrackingExtras.size() > 0) {
             Uri.Builder builder = Uri.parse(url).buildUpon();
             for (Map.Entry<String, String> entry : mTrackingExtras.entrySet()) {
                 builder.appendQueryParameter(entry.getKey(), entry.getKey());
@@ -278,10 +281,7 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
             Log.i(TAG, "impression is already confirmed, dropping impression tracking");
         } else {
             mAdView = view;
-            ImpressionManager.startTrackingView(view,
-                    mAd.getImpressionMinVisibleTime(),
-                    mAd.getImpressionVisiblePercent(),
-                    this);
+            ImpressionManager.startTrackingView(view, mAd.getImpressionMinVisibleTime(), mAd.getImpressionVisiblePercent(), this);
         }
     }
 
@@ -381,10 +381,17 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
     // Listener helpers
     //==============================================================================================
 
-    public void invokeOnImpression(View view) {
+    public synchronized void invokeOnImpression(View view) {
         mIsImpressionConfirmed = true;
-        if (mListener != null) {
-            mListener.onAdImpression(NativeAd.this, view);
+        if (view.getContext() != null) {
+            DBManager dbManager = new DBManager(view.getContext());
+            dbManager.open();
+            dbManager.insert(mAd.getZoneId());
+            dbManager.close();
+
+            if (mListener != null) {
+                mListener.onAdImpression(NativeAd.this, view);
+            }
         }
     }
 
@@ -423,32 +430,34 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
         //TODO report content info icon clicked
     }
 
+    String processedURL = "";
+
     @Override
     public void onLinkClicked(String url) {
         if (mAdView != null && mAdView.getContext() != null) {
             AdFeedbackView adFeedbackView = new AdFeedbackView();
-            adFeedbackView.prepare(mAdView.getContext(), url, mAd, Reporting.AdFormat.NATIVE,
-                    IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
-                        @Override
-                        public void onLoad() {
-                            //load simple dialog
-                        }
+            adFeedbackView.prepare(mAdView.getContext(), url, mAd, Reporting.AdFormat.NATIVE, IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
+                @Override
+                public void onLoad(String url) {
+                    //load simple dialog
+                    processedURL = url;
+                }
 
-                        @Override
-                        public void onLoadFinished() {
-                            adFeedbackView.showFeedbackForm(mAdView.getContext());
-                        }
+                @Override
+                public void onLoadFinished() {
+                    adFeedbackView.showFeedbackForm(mAdView.getContext(), processedURL);
+                }
 
-                        @Override
-                        public void onLoadFailed(Throwable error) {
-                            Logger.e(TAG, error.getMessage());
-                        }
+                @Override
+                public void onLoadFailed(Throwable error) {
+                    Logger.e(TAG, error.getMessage());
+                }
 
-                        @Override
-                        public void onFormClosed() {
+                @Override
+                public void onFormClosed() {
 
-                        }
-                    });
+                }
+            });
         }
     }
 }

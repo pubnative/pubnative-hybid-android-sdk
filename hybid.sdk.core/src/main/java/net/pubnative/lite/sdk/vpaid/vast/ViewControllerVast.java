@@ -103,7 +103,7 @@ public class ViewControllerVast implements View.OnClickListener {
     }
 
     public void buildVideoAdView(VideoAdView bannerView) {
-        if (interactor.isActivityVisible()) {
+        if (interactor.isActivityVisible() || !mIsFullscreen) {
             Context context = bannerView.getContext();
             mBannerView = bannerView;
             bannerView.setVisibilityListener(mCreateVisibilityListener);
@@ -180,12 +180,11 @@ public class ViewControllerVast implements View.OnClickListener {
                 mSkipView = mControlsLayout.findViewById(R.id.progressSkipView);
             } else {
                 mSkipView = mControlsLayout.findViewById(R.id.skipView);
+                Bitmap skipBitmap = BitmapHelper.toBitmap(mSkipView.getContext(), HyBid.getSkipXmlResource(), R.mipmap.skip);
+                if (skipBitmap != null) ((ImageView) mSkipView).setImageBitmap(skipBitmap);
+                else
+                    ((ImageView) mSkipView).setImageBitmap(BitmapHelper.decodeResource(mSkipView.getContext(), R.mipmap.skip));
             }
-
-            Bitmap skipBitmap = BitmapHelper.toBitmap(mSkipView.getContext(), HyBid.getSkipXmlResource(), R.mipmap.skip);
-            if (skipBitmap != null) ((ImageView) mSkipView).setImageBitmap(skipBitmap);
-            else
-                ((ImageView) mSkipView).setImageBitmap(BitmapHelper.decodeResource(mSkipView.getContext(), R.mipmap.skip));
 
             mSkipView.setOnClickListener(this);
 
@@ -221,6 +220,7 @@ public class ViewControllerVast implements View.OnClickListener {
                 }
 
             } catch (Exception e) {
+                HyBid.reportException(e);
                 Logger.e(LOG_TAG, "ViewControllerVast.createVisibilityListener: Log: " + Log.getStackTraceString(e));
             }
         }
@@ -248,6 +248,10 @@ public class ViewControllerVast implements View.OnClickListener {
     };
 
     public void adjustLayoutParams(int width, int height) {
+        if(mControlsLayout == null){
+            Logger.e(LOG_TAG, "ViewControllerVast.adjustLayoutParams: Log: mControlsLayout is null");
+            return;
+        }
         FrameLayout.LayoutParams oldParams = (FrameLayout.LayoutParams) mControlsLayout.getLayoutParams();
         ViewGroup.LayoutParams newParams = Utils.calculateNewLayoutParams(oldParams, width, height, mBannerView.getWidth(), mBannerView.getHeight(), Utils.StretchOption.NO_STRETCH);
         mControlsLayout.setLayoutParams(newParams);

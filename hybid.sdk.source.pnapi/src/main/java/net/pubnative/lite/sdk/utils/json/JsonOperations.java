@@ -89,7 +89,7 @@ public class JsonOperations {
         }
     }
 
-    public static void mergeJsonObjects(JSONObject target, JSONObject source) {
+    public static synchronized void mergeJsonObjects(JSONObject target, JSONObject source) {
         if (target == null || source == null || source.length() == 0) {
             return;
         }
@@ -103,6 +103,7 @@ public class JsonOperations {
                 }
             }
         } catch (JSONException ignored) {
+
         }
     }
 }

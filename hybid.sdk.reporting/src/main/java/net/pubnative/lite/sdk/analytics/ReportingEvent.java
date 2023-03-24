@@ -20,7 +20,7 @@ public class ReportingEvent {
         eventObject = new JSONObject();
     }
 
-    public void setCategoryId(String categoryId) {
+    public synchronized void setCategoryId(String categoryId) {
         setCustomString(Reporting.Key.CATEGORY_ID, categoryId);
     }
 
@@ -28,7 +28,7 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.CATEGORY_ID);
     }
 
-    public void setCampaignId(String campaignId) {
+    public synchronized void setCampaignId(String campaignId) {
         setCustomString(Reporting.Key.CAMPAIGN_ID, campaignId);
     }
 
@@ -36,7 +36,7 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.CAMPAIGN_ID);
     }
 
-    public void setCreativeId(String creativeId) {
+    public synchronized void setCreativeId(String creativeId) {
         setCustomString(Reporting.Key.CREATIVE_ID, creativeId);
     }
 
@@ -44,7 +44,7 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.CREATIVE_ID);
     }
 
-    public void setCreativeType(String creativeType) {
+    public synchronized void setCreativeType(String creativeType) {
         setCustomString(Reporting.Key.CREATIVE_TYPE, creativeType);
     }
 
@@ -52,7 +52,7 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.CREATIVE_TYPE);
     }
 
-    public void setCreative(String creative) {
+    public synchronized void setCreative(String creative) {
         setCustomString(Reporting.Key.CREATIVE, creative);
     }
 
@@ -60,11 +60,11 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.CREATIVE);
     }
 
-    public void setTimestamp(long date) {
+    public synchronized void setTimestamp(long date) {
         setCustomString(Reporting.Key.TIMESTAMP, String.valueOf(date));
     }
 
-    public void setTimestamp(String timestamp) {
+    public synchronized void setTimestamp(String timestamp) {
         setCustomString(Reporting.Key.TIMESTAMP, timestamp);
     }
 
@@ -72,7 +72,7 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.TIMESTAMP);
     }
 
-    public void setEventType(String eventType) {
+    public synchronized void setEventType(String eventType) {
         setCustomString(Reporting.Key.EVENT_TYPE, eventType);
     }
 
@@ -80,7 +80,7 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.EVENT_TYPE);
     }
 
-    public void setErrorCode(int errorCode) {
+    public synchronized void setErrorCode(int errorCode) {
         setCustomInteger(Reporting.Key.ERROR_CODE, errorCode);
     }
 
@@ -88,7 +88,7 @@ public class ReportingEvent {
         return getCustomInteger(Reporting.Key.ERROR_CODE);
     }
 
-    public void setErrorMessage(String errorMessage) {
+    public synchronized void setErrorMessage(String errorMessage) {
         setCustomString(Reporting.Key.ERROR_MESSAGE, errorMessage);
     }
 
@@ -96,7 +96,7 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.ERROR_MESSAGE);
     }
 
-    public void setAdFormat(String adFormat) {
+    public synchronized void setAdFormat(String adFormat) {
         setCustomString(Reporting.Key.AD_FORMAT, adFormat);
     }
 
@@ -104,7 +104,7 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.AD_FORMAT);
     }
 
-    public void setAdSize(String adSize) {
+    public synchronized void setAdSize(String adSize) {
         setCustomString(Reporting.Key.AD_SIZE, adSize);
     }
 
@@ -112,7 +112,7 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.AD_SIZE);
     }
 
-    public void setHasEndCard(boolean hasEndCard) {
+    public synchronized void setHasEndCard(boolean hasEndCard) {
         setCustomBoolean(Reporting.Key.HAS_END_CARD, hasEndCard);
     }
 
@@ -120,7 +120,7 @@ public class ReportingEvent {
         return getCustomBoolean(Reporting.Key.HAS_END_CARD);
     }
 
-    public void setZoneId(String zoneId) {
+    public synchronized void setZoneId(String zoneId) {
         setCustomString(Reporting.Key.ZONE_ID, zoneId);
     }
 
@@ -128,7 +128,7 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.ZONE_ID);
     }
 
-    public void setAdType(String adType) {
+    public  synchronized void setAdType(String adType) {
         setCustomString(Reporting.Key.AD_TYPE, adType);
     }
 
@@ -136,7 +136,7 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.AD_TYPE);
     }
 
-    public void setAppToken(String appToken) {
+    public synchronized void setAppToken(String appToken) {
         setCustomString(Reporting.Key.APP_TOKEN, appToken);
     }
 
@@ -144,7 +144,7 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.APP_TOKEN);
     }
 
-    public void setPlacementId(String placementId) {
+    public synchronized void setPlacementId(String placementId) {
         setCustomString(Reporting.Key.PLACEMENT_ID, placementId);
     }
 
@@ -153,7 +153,7 @@ public class ReportingEvent {
     }
 
 
-    public void setIntegrationType(String integrationType) {
+    public synchronized void setIntegrationType(String integrationType) {
         setCustomString(Reporting.Key.INTEGRATION_TYPE, integrationType);
     }
 
@@ -161,7 +161,7 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.INTEGRATION_TYPE);
     }
 
-    public void setVast(String vast) {
+    public synchronized void setVast(String vast) {
         setCustomString(Reporting.Key.VAST, vast);
     }
 
@@ -169,7 +169,7 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.VAST);
     }
 
-    public void setSessionDuration(String sessionDuration) {
+    public synchronized void setSessionDuration(String sessionDuration) {
         setCustomString(Reporting.Key.SESSION_DURATION, sessionDuration);
     }
 
@@ -177,7 +177,7 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.SESSION_DURATION);
     }
 
-    public void setImpDepth(String impDepth) {
+    public synchronized void setImpDepth(String impDepth) {
         setCustomString(Reporting.Key.IMP_DEPTH, impDepth);
     }
 
@@ -185,7 +185,7 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.IMP_DEPTH);
     }
 
-    public void setAgeOfApp(String ageOfApp) {
+    public synchronized void setAgeOfApp(String ageOfApp) {
         setCustomString(Reporting.Key.AGE_OF_APP, ageOfApp);
     }
 
@@ -193,7 +193,7 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.AGE_OF_APP);
     }
 
-    public void setCustomString(String key, String value) {
+    public synchronized void setCustomString(String key, String value) {
         try {
             if (!TextUtils.isEmpty(value)) {
                 eventObject.put(key, value);
@@ -229,7 +229,7 @@ public class ReportingEvent {
         }
     }
 
-    public void setCustomDecimal(String key, double value) {
+    public synchronized void setCustomDecimal(String key, double value) {
         try {
             eventObject.put(key, value);
         } catch (JSONException e) {
@@ -246,7 +246,7 @@ public class ReportingEvent {
         }
     }
 
-    public void setCustomBoolean(String key, boolean value) {
+    public synchronized void setCustomBoolean(String key, boolean value) {
         try {
             eventObject.put(key, value);
         } catch (JSONException e) {
@@ -263,7 +263,7 @@ public class ReportingEvent {
         }
     }
 
-    public void setCustomJSONObject(String key, JSONObject jsonObject) {
+    public synchronized void setCustomJSONObject(String key, JSONObject jsonObject) {
         try {
             eventObject.put(key, jsonObject);
         } catch (JSONException e) {
@@ -280,7 +280,7 @@ public class ReportingEvent {
         }
     }
 
-    public void mergeJSONObject(JSONObject source) {
+    public synchronized void mergeJSONObject(JSONObject source) {
         if (source == null || source.length() == 0) {
             return;
         }
@@ -297,7 +297,7 @@ public class ReportingEvent {
         }
     }
 
-    public void setCustomJSONArray(String key, JSONArray jsonArray) {
+    public synchronized void setCustomJSONArray(String key, JSONArray jsonArray) {
         try {
             eventObject.put(key, jsonArray);
         } catch (JSONException e) {

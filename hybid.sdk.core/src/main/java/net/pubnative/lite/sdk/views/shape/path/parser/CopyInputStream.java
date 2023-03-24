@@ -2,6 +2,8 @@ package net.pubnative.lite.sdk.views.shape.path.parser;
 
 import android.util.Log;
 
+import net.pubnative.lite.sdk.HyBid;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -19,6 +21,7 @@ class CopyInputStream {
         try {
             copy();
         } catch (IOException ex) {
+            HyBid.reportException(ex);
             Log.w(TAG, "IOException in CopyInputStream " + ex.toString());
         }
     }

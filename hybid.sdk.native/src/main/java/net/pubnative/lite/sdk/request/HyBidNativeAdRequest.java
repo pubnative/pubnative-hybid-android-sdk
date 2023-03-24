@@ -162,6 +162,7 @@ public class HyBidNativeAdRequest implements RequestManager.RequestListener {
 
                 @Override
                 public void onDownloadFailed(String url, Exception exception) {
+                    HyBid.reportException(exception);
                     fetchIcon(nativeAd);
                 }
             });
@@ -188,6 +189,7 @@ public class HyBidNativeAdRequest implements RequestManager.RequestListener {
 
                 @Override
                 public void onDownloadFailed(String url, Exception exception) {
+                    HyBid.reportException(exception);
                     if (mListener != null) {
                         mListener.onRequestSuccess(nativeAd);
                     }

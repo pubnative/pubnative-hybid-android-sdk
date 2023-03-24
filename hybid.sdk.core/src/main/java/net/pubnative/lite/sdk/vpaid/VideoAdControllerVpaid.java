@@ -14,6 +14,7 @@ import android.webkit.WebViewClient;
 
 import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
@@ -104,6 +105,7 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
             String finalHtml = html.replace(VPAID_CREATIVE_URL_STRING, mAdParams.getVpaidJsUrl());
             mWebView.loadDataWithBaseURL(BASE_URL, finalHtml, MIME_TYPE, "UTF-8", null);
         } catch (Exception e) {
+            HyBid.reportException(e);
             Logger.e(LOG_TAG, "Can't read assets: " + e.getMessage());
         }
     }

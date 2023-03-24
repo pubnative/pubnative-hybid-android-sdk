@@ -4,11 +4,10 @@ public class SessionImpression {
 
     private Long timestamp;
     private Long age_of_app;
-    private Integer zone_id;
+    private String zone_id;
     private String event_type;
 //    private String ad_format;
     private Long session_duration;
-    private Integer count;
 
     public Long getTimestamp() {
         return timestamp;
@@ -26,11 +25,11 @@ public class SessionImpression {
         this.age_of_app = age_of_app;
     }
 
-    public Integer getZoneId() {
+    public String getZoneId() {
         return zone_id;
     }
 
-    public void setZoneId(Integer zone_id) {
+    public void setZoneId(String zone_id) {
         this.zone_id = zone_id;
     }
 
@@ -48,13 +47,5 @@ public class SessionImpression {
 
     public void setSessionDuration(Long session_duration) {
         this.session_duration = session_duration;
-    }
-
-    public Integer getCount() {
-        return count;
-    }
-
-    public void setCount(Integer count) {
-        this.count = count;
     }
 }

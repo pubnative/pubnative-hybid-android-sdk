@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
+import net.pubnative.lite.sdk.analytics.CrashController;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
@@ -38,7 +39,9 @@ import net.pubnative.lite.sdk.core.BuildConfig;
 import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.core.R;
 import net.pubnative.lite.sdk.db.DBManager;
+import net.pubnative.lite.sdk.db.OnDatabaseResetListener;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
+import net.pubnative.lite.sdk.models.AdConstants;
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdRequestFactory;
 import net.pubnative.lite.sdk.models.AdSize;
@@ -73,6 +76,8 @@ public class HyBid {
     @SuppressLint("StaticFieldLeak")
     private static HyBidLocationManager sLocationManager;
     private static ReportingController sReportingController;
+
+    private static CrashController sCrashController;
     private static DiagnosticsManager sDiagnosticsManager;
     private static AdCache sAdCache;
     private static VideoAdCache sVideoAdCache;
@@ -95,8 +100,6 @@ public class HyBid {
     private static SkipOffset sHtmlInterstitialSkipOffset = new SkipOffset(AdConstants.Skip.HTML_SKIP_OFFSET, false);
     private static SkipOffset sVideoInterstitialSkipOffset = new SkipOffset(AdConstants.Skip.VIDEO_WITHOUT_ENDCARD_SKIP_OFFSET, false);
     private static SkipOffset sEndCardCloseButtonDelay = new SkipOffset(AdConstants.Skip.ENDCARD_SKIP_OFFSET, false);
-    private static String sContentInfoUrl;
-    private static boolean sAdFeedbackEnabled = false;
     private static String sIabCategory;
     private static String sIabSubcategory;
     private static String sAppVersion;
@@ -139,7 +142,12 @@ public class HyBid {
         HyBidPreferences preferences = new HyBidPreferences(application.getApplicationContext());
         preferences.setAppFirstInstalledTime(String.valueOf(installed));
 
-        new Thread(() -> preferences.setSessionTimeStamp(System.currentTimeMillis(), () -> new DBManager(application.getApplicationContext()).nukeTable(), HyBidPreferences.TIMESTAMP.NORMAL)).start();
+        preferences.setSessionTimeStamp(System.currentTimeMillis(), () -> {
+            DBManager dbManager = new DBManager(application.getApplicationContext());
+            dbManager.open();
+            dbManager.nukeTable();
+            dbManager.close();
+        }, HyBidPreferences.TIMESTAMP.NORMAL);
 
         sBundleId = application.getPackageName();
         sApiClient = new PNApiClient(application);
@@ -160,7 +168,7 @@ public class HyBid {
         sDiagnosticsManager = new DiagnosticsManager(application.getApplicationContext(), sReportingController);
         sViewabilityManager = new ViewabilityManager(application);
         ReportingDelegate sReportingDelegate = new ReportingDelegate(application.getApplicationContext(), sReportingController, sConfigManager, appToken);
-
+        if (sCrashController == null) sCrashController = new CrashController();
         if (sDeviceInfo == null) {
             sDeviceInfo = new DeviceInfo(application.getApplicationContext());
             sDeviceInfo.initialize(() -> {
@@ -172,18 +180,6 @@ public class HyBid {
                 if (initialisationListener != null) {
                     initialisationListener.onInitialisationFinished(true);
                 }
-                //Remote config is disabled
-            /*sConfigManager.initialize(new ConfigManager.ConfigListener() {
-                @Override
-                public void onConfigFetched() {
-                    // The fetched config will be optionally used during the ad request
-                }
-
-                @Override
-                public void onConfigFetchFailed(Throwable error) {
-                    Logger.d(TAG, "Error fetching config: ", error);
-                }
-            });*/
             });
         } else {
             if (initialisationListener != null) {
@@ -307,10 +303,18 @@ public class HyBid {
         return sTestMode;
     }
 
+    /**
+     * @Deprecated Please note this method will no longer be supported from HyBid SDK v3.0. While we do not recommend changes to this setting, you can reach out to your account managers for customisations.
+     */
+    @Deprecated
     public static void setInterstitialClickBehaviour(InterstitialActionBehaviour interstitialActionBehaviour) {
         sInterstitialActionBehaviour = interstitialActionBehaviour;
     }
 
+    /**
+     * @Deprecated Please note this method will no longer be supported from HyBid SDK v3.0. While we do not recommend changes to this setting, you can reach out to your account managers for customisations.
+     */
+    @Deprecated
     public static InterstitialActionBehaviour getInterstitialClickBehaviour() {
         return sInterstitialActionBehaviour;
     }
@@ -327,10 +331,18 @@ public class HyBid {
         sLocationTrackingEnabled = isEnabled;
     }
 
+    /**
+     * @Deprecated Please note this method will no longer be supported from HyBid SDK v3.0. While we do not recommend changes to this setting, you can reach out to your account managers for customisations.
+     */
+    @Deprecated
     public static void setCountdownStyle(CountdownStyle countdownStyle) {
         sCountdownStyle = countdownStyle;
     }
 
+    /**
+     * @Deprecated Please note this method will no longer be supported from HyBid SDK v3.0. While we do not recommend changes to this setting, you can reach out to your account managers for customisations.
+     */
+    @Deprecated
     public static CountdownStyle getCountdownStyle() {
         return sCountdownStyle;
     }
@@ -385,7 +397,8 @@ public class HyBid {
 
     /**
      * @param seconds amount of seconds until the interstitial ad can be dismissed
-     * @deprecated This method is not recommended. Use instead setHtmlInterstitialSkipOffset or
+     * @deprecated Please note this method will no longer be supported from HyBid SDK v3.0. While we do not recommend changes to this setting, you can reach out to your account managers for customisations.
+     * This method is not recommended. Use instead setHtmlInterstitialSkipOffset or
      * setVideoInterstitialSkipOffset to define the offset per ad type
      */
     @Deprecated
@@ -402,58 +415,114 @@ public class HyBid {
         return isDiagnosticsEnabled;
     }
 
+    /**
+     * @Deprecated Please note this method will no longer be supported from HyBid SDK v3.0. While we do not recommend changes to this setting, you can reach out to your account managers for customisations.
+     */
+    @Deprecated
     public static void setHtmlInterstitialSkipOffset(Integer seconds) {
         if (seconds >= 0) sHtmlInterstitialSkipOffset = new SkipOffset(seconds, true);
     }
 
+    /**
+     * @Deprecated Please note this method will no longer be supported from HyBid SDK v3.0. While we do not recommend changes to this setting, you can reach out to your account managers for customisations.
+     */
+    @Deprecated
     public static void setVideoInterstitialSkipOffset(Integer seconds) {
         if (seconds >= 0) sVideoInterstitialSkipOffset = new SkipOffset(seconds, true);
     }
 
+    /**
+     * @Deprecated Please note this method will no longer be supported from HyBid SDK v3.0. While we do not recommend changes to this setting, you can reach out to your account managers for customisations.
+     */
+    @Deprecated
     public static SkipOffset getHtmlInterstitialSkipOffset() {
         return sHtmlInterstitialSkipOffset;
     }
 
+    /**
+     * @Deprecated Please note this method will no longer be supported from HyBid SDK v3.0. While we do not recommend changes to this setting, you can reach out to your account managers for customisations.
+     */
+    @Deprecated
     public static SkipOffset getVideoInterstitialSkipOffset() {
         return sVideoInterstitialSkipOffset;
     }
 
+    /**
+     * @Deprecated Please note this method will no longer be supported from HyBid SDK v3.0. While we do not recommend changes to this setting, you can reach out to your account managers for customisations.
+     */
+    @Deprecated
     public static void setEndCardCloseButtonDelay(int seconds) {
         if (seconds >= 0) sEndCardCloseButtonDelay = new SkipOffset(seconds, true);
     }
 
+    /**
+     * @Deprecated Please note this method will no longer be supported from HyBid SDK v3.0. While we do not recommend changes to this setting, you can reach out to your account managers for customisations.
+     */
+    @Deprecated
     public static SkipOffset getEndCardCloseButtonDelay() {
         return sEndCardCloseButtonDelay;
     }
 
+    /**
+     * @Deprecated Please note this method will no longer be supported from HyBid SDK v3.0. While we do not recommend changes to this setting, you can reach out to your account managers for customisations.
+     */
+    @Deprecated
     public static void setCloseVideoAfterFinish(boolean isClosing) {
         isCloseVideoAfterFinish = isClosing;
     }
 
+    /**
+     * @Deprecated Please note this method will no longer be supported from HyBid SDK v3.0. While we do not recommend changes to this setting, you can reach out to your account managers for customisations.
+     */
+    @Deprecated
     public static boolean getCloseVideoAfterFinish() {
         return isCloseVideoAfterFinish;
     }
 
+    /**
+     * @Deprecated Please note this method will no longer be supported from HyBid SDK v3.0. While we do not recommend changes to this setting, you can reach out to your account managers for customisations.
+     */
+    @Deprecated
     public static void setMraidExpandEnabled(boolean mraidExpandEnabled) {
         sMraidExpandEnabled = mraidExpandEnabled;
     }
 
+    /**
+     * @Deprecated Please note this method will no longer be supported from HyBid SDK v3.0. While we do not recommend changes to this setting, you can reach out to your account managers for customisations.
+     */
+    @Deprecated
     public static boolean isMraidExpandEnabled() {
         return sMraidExpandEnabled;
     }
 
+    /**
+     * @Deprecated Please note this method will no longer be supported from HyBid SDK v3.0. While we do not recommend changes to this setting, you can reach out to your account managers for customisations.
+     */
+    @Deprecated
     public static void setEndCardEnabled(boolean endCardEnabled) {
         isEndCardEnabled = endCardEnabled;
     }
 
+    /**
+     * @Deprecated Please note this method will no longer be supported from HyBid SDK v3.0. While we do not recommend changes to this setting, you can reach out to your account managers for customisations.
+     */
+    @Deprecated
     public static boolean isEndCardEnabled() {
         return isEndCardEnabled;
     }
 
+    /**
+     * @Deprecated Please note this method will no longer be supported from HyBid SDK v3.0. While we do not recommend changes to this setting, you can reach out to your account managers for customisations.
+     */
+    @Deprecated
     public static void setCloseVideoAfterFinishForRewarded(boolean autoCloseVideoRewarded) {
         isCloseVideoAfterFinishForRewarded = autoCloseVideoRewarded;
     }
 
+    /**
+     * @Deprecated Please note this method will no longer be supported from HyBid SDK v3.0. While we do not recommend changes to this setting, you can reach out to your account managers for customisations.
+     */
+    @Deprecated
     public static boolean getCloseVideoAfterFinishForRewarded() {
         return isCloseVideoAfterFinishForRewarded;
     }
@@ -462,6 +531,18 @@ public class HyBid {
         sHtmlInterstitialSkipOffset = new SkipOffset(AdConstants.Skip.HTML_SKIP_OFFSET, false);
         sVideoInterstitialSkipOffset = new SkipOffset(AdConstants.Skip.VIDEO_WITHOUT_ENDCARD_SKIP_OFFSET, false);
         sEndCardCloseButtonDelay = new SkipOffset(AdConstants.Skip.ENDCARD_SKIP_OFFSET, false);
+    }
+
+    public static void reportException(Exception exception) {
+        if (sCrashController != null) {
+            ReportingEvent event = sCrashController.formatException(exception);
+            if (sReportingController != null) sReportingController.reportEvent(event);
+        }
+    }
+
+    public static void reportException(Throwable exception) {
+        ReportingEvent event = sCrashController.formatException(exception);
+        sReportingController.reportEvent(event);
     }
 
     public interface InitialisationListener {
@@ -492,22 +573,6 @@ public class HyBid {
         return sAppVersion;
     }
 
-    public static void setContentInfoUrl(String url) {
-        sContentInfoUrl = url;
-    }
-
-    public static String getContentInfoUrl() {
-        return sContentInfoUrl;
-    }
-
-    public static void setAdFeedbackEnabled(boolean feedbackEnabled) {
-        sAdFeedbackEnabled = feedbackEnabled;
-    }
-
-    public static boolean isAdFeedbackEnabled() {
-        return sAdFeedbackEnabled;
-    }
-
     public static void setDeveloperDomain(String developerDomain) {
         sDeveloperDomain = developerDomain;
     }
@@ -529,7 +594,10 @@ public class HyBid {
      * MUTED
      * ON
      * Default
+     *
+     * @Deprecated Please note this method will no longer be supported from HyBid SDK v3.0. While we do not recommend changes to this setting, you can reach out to your account managers for customisations.
      */
+    @Deprecated
     public static void setVideoAudioStatus(AudioState audioState) {
         sVideoAudioState = audioState;
     }
@@ -538,8 +606,11 @@ public class HyBid {
      * This method used to get audio state
      * MUTED
      * ON
-     * Default
+     * Default*
+     *
+     * @Deprecated Please note this method will no longer be supported from HyBid SDK v3.0. While we do not recommend changes to this setting, you can reach out to your account managers for customisations.
      */
+    @Deprecated
     public static AudioState getVideoAudioStatus() {
         return sVideoAudioState;
     }

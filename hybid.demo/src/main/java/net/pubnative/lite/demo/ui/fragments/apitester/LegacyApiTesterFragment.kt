@@ -15,9 +15,11 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.ui.adapters.LegacyApiAdapter
 import net.pubnative.lite.demo.ui.adapters.OnLogDisplayListener
+import net.pubnative.lite.demo.ui.fragments.markup.MarkupType
 import net.pubnative.lite.demo.viewmodel.ApiTesterViewModel
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd
 import net.pubnative.lite.sdk.models.Ad
+import net.pubnative.lite.sdk.rewarded.HyBidRewardedAd
 import net.pubnative.lite.sdk.utils.Logger
 
 class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester), OnLogDisplayListener {
@@ -26,11 +28,13 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester), O
 
     private lateinit var responseInput: EditText
     private lateinit var adSizeGroup: RadioGroup
+    private lateinit var responseSourceGroup: RadioGroup
     private lateinit var markupList: RecyclerView
 
     private val adapter = LegacyApiAdapter(this)
 
     private var interstitial: HyBidInterstitialAd? = null
+    private var rewardedAd: HyBidRewardedAd? = null
 
     private val TAG = LegacyApiTesterFragment::class.java.simpleName
 
@@ -40,6 +44,7 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester), O
 
         responseInput = view.findViewById(R.id.input_response)
         adSizeGroup = view.findViewById(R.id.group_ad_size)
+        responseSourceGroup = view.findViewById(R.id.group_response_source)
         markupList = view.findViewById(R.id.list_markup)
         markupList.isNestedScrollingEnabled = false
 
@@ -54,6 +59,10 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester), O
 
         mViewModel.loadInterstitial.observe(viewLifecycleOwner) {
             loadInterstitial(it)
+        }
+
+        mViewModel.loadReworded.observe(viewLifecycleOwner) {
+            loadReworded(it)
         }
 
         mViewModel.adapterUpdate.observe(viewLifecycleOwner) {
@@ -89,6 +98,22 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester), O
 
                 R.id.radio_size_interstitial -> {
                     mViewModel.setAdSize(LegacyApiTesterSize.INTERSTITIAL)
+                }
+
+                R.id.radio_size_rewarded -> {
+                    mViewModel.setAdSize(LegacyApiTesterSize.REWARDED)
+                }
+            }
+        }
+
+        responseSourceGroup.setOnCheckedChangeListener { _, checkedId ->
+            when (checkedId) {
+                R.id.radio_markup -> {
+                    mViewModel.setMarkupType(MarkupType.CUSTOM_MARKUP)
+                }
+
+                R.id.radio_url -> {
+                    mViewModel.setMarkupType(MarkupType.URL)
                 }
             }
         }
@@ -131,12 +156,50 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester), O
         interstitial?.prepareAd(ad)
     }
 
+    private fun loadReworded(ad: Ad?) {
+        rewardedAd?.destroy()
+
+        val rewardelListener = object : HyBidRewardedAd.Listener {
+
+            override fun onRewardedLoaded() {
+                Logger.d(TAG, "onRewardedLoaded")
+                rewardedAd?.show()
+                displayLogs()
+            }
+
+            override fun onRewardedLoadFailed(error: Throwable?) {
+                Logger.e(TAG, "onRewardedLoadFailed", error)
+                displayLogs()
+            }
+
+            override fun onRewardedOpened() {
+                Logger.d(TAG, "onRewardedOpened")
+            }
+
+            override fun onRewardedClosed() {
+                Logger.d(TAG, "onRewardedClosed")
+            }
+
+            override fun onRewardedClick() {
+                Logger.d(TAG, "onRewardedClick")
+            }
+
+            override fun onReward() {
+                Logger.d(TAG, "onReward")
+            }
+        }
+
+        rewardedAd = HyBidRewardedAd(requireActivity(), rewardelListener)
+        rewardedAd?.prepareAd(ad)
+    }
+
     private fun loadAd() {
-        mViewModel.loadAdFromResponse(response = responseInput.text.toString())
+        mViewModel.loadApiAd(responseInput.text.toString())
     }
 
     override fun onDestroy() {
         interstitial?.destroy()
+        rewardedAd?.destroy()
         super.onDestroy()
     }
 

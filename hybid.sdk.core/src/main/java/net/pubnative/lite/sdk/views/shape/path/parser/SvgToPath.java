@@ -5,6 +5,8 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.util.Log;
 
+import net.pubnative.lite.sdk.HyBid;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -88,6 +90,7 @@ public class SvgToPath {
 
             return svgHandler.pathInfo;
         } catch (Exception e) {
+            HyBid.reportException(e);
             Log.w(TAG, "Parse error: " + e);
             throw new RuntimeException(e);
         }

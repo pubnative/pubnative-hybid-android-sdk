@@ -1,5 +1,7 @@
 package net.pubnative.lite.sdk.views.shape.path.parser;
 
+import net.pubnative.lite.sdk.HyBid;
+
 import org.xmlpull.v1.XmlPullParser;
 
 import java.util.ArrayList;
@@ -93,6 +95,7 @@ class NumberParse {
             try {
                 numbers.add(Float.parseFloat(last));
             } catch (NumberFormatException nfe) {
+                HyBid.reportException(nfe);
                 //ignore
             }
             p = s.length();

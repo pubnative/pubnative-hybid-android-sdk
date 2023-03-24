@@ -161,6 +161,7 @@ public class UserDataManager {
                 }));
             } catch (Exception exception) {
                 Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
+                HyBid.reportException(exception);
             }
         }
     }
@@ -177,6 +178,7 @@ public class UserDataManager {
             gdprApplies = Integer.parseInt(gdprAppliesString);
         } catch (Exception e) {
             gdprApplies = mAppPreferences.getInt(KEY_GDPR_APPLIES, 0);
+            HyBid.reportException(e);
         }
 
         return gdprApplies == 1;

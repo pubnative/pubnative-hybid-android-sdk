@@ -36,6 +36,7 @@ import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.api.InterstitialRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
+import net.pubnative.lite.sdk.db.DBManager;
 import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenter;
 import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenterFactory;
 import net.pubnative.lite.sdk.models.Ad;
@@ -391,7 +392,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
                 mAd = new Ad(assetGroupId, adValue, type);
                 HyBid.getAdCache().put(mZoneId, mAd);
                 checkRemoteConfigs();
-                mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd,  mHtmlSkipOffset, mVideoSkipOffset, HyBidInterstitialAd.this);
+                mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, HyBidInterstitialAd.this);
                 if (mPresenter != null) {
                     mPresenter.setVideoListener(this);
                     mPresenter.load();
@@ -405,15 +406,15 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         }
     }
 
-    private void checkRemoteConfigs(){
+    private void checkRemoteConfigs() {
 
         Integer remoteConfSkipOst = mAd.getHtmlSkipOffset();
         Integer remoteConfVideoSkipOst = mAd.getVideoSkipOffset();
 
-        if(remoteConfSkipOst != null){
+        if (remoteConfSkipOst != null) {
             mHtmlSkipOffset = new SkipOffset(remoteConfSkipOst, true);
         }
-        if(remoteConfVideoSkipOst != null){
+        if (remoteConfVideoSkipOst != null) {
             mVideoSkipOffset = new SkipOffset(remoteConfVideoSkipOst, true);
         }
     }
@@ -594,6 +595,16 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
             addReportingKey(Reporting.Key.RENDER_TIME, System.currentTimeMillis() - mInitialRenderTime);
         }
         reportAdRender(Reporting.AdFormat.FULLSCREEN, getPlacementParams());
+
+        if (mZoneId != null && !TextUtils.isEmpty(mZoneId)) {
+            if (mContext != null) {
+                DBManager dbManager = new DBManager(mContext);
+                dbManager.open();
+                dbManager.insert(mZoneId);
+                dbManager.close();
+            }
+        }
+
         invokeOnImpression();
     }
 

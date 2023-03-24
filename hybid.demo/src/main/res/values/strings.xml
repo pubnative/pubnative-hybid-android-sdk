@@ -288,4 +288,5 @@
     <string name="custom_markup">Custom Markup</string>
     <string name="url">URL</string>
     <string name="custom_skip_offset_disabled">Custom Skip Offset Disabled</string>
+    <string name="response_source">Response source</string>
 </resources>

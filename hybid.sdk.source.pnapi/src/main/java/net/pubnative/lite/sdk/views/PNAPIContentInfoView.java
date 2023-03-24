@@ -29,6 +29,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -39,7 +40,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import net.pubnative.lite.sdk.HyBidError;
+import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ContentInfo;
+import net.pubnative.lite.sdk.models.ContentInfoDisplay;
 import net.pubnative.lite.sdk.models.PositionX;
 import net.pubnative.lite.sdk.source.pnapi.R;
 import net.pubnative.lite.sdk.utils.PNBitmapDownloader;
@@ -60,7 +63,7 @@ public class PNAPIContentInfoView extends FrameLayout {
     private TextView mContentInfoText;
     private ImageView mContentInfoIcon;
     private ContentInfoListener mContentInfoListener;
-    private boolean mAdFeedbackEnabled = false;
+    private ContentInfoDisplay mContentInfoDisplay = ContentInfoDisplay.SYSTEM_BROWSER;
 
     private Handler mHandler;
 
@@ -96,8 +99,10 @@ public class PNAPIContentInfoView extends FrameLayout {
         }
     }
 
-    public void setAdFeedbackEnabled(boolean feedbackEnabled) {
-        this.mAdFeedbackEnabled = feedbackEnabled;
+    public void setContentInfoDisplay(ContentInfoDisplay contentInfoDisplay) {
+        if (contentInfoDisplay != null) {
+            mContentInfoDisplay = contentInfoDisplay;
+        }
     }
 
     public void openLayout() {
@@ -110,15 +115,25 @@ public class PNAPIContentInfoView extends FrameLayout {
     }
 
     public void setIconUrl(String iconUrl) {
+        setIconUrl(iconUrl, false);
+    }
+
+    public void setIconUrl(String iconUrl, boolean isDefault) {
         new PNBitmapDownloader().download(iconUrl, mContentInfoIcon.getWidth(), mContentInfoIcon.getHeight(), new PNBitmapDownloader.DownloadListener() {
             @Override
             public void onDownloadFinish(String url, Bitmap bitmap) {
-                mContentInfoIcon.setImageBitmap(bitmap);
+                if (bitmap != null) {
+                    mContentInfoIcon.setImageBitmap(bitmap);
+                } else if (!isDefault) {
+                    setIconUrl(Ad.CONTENT_INFO_ICON_URL, true);
+                }
             }
 
             @Override
             public void onDownloadFailed(String url, Exception ex) {
-
+                if (!isDefault) {
+                    setIconUrl(Ad.CONTENT_INFO_ICON_URL, true);
+                }
             }
         });
     }
@@ -126,19 +141,24 @@ public class PNAPIContentInfoView extends FrameLayout {
     public void setIconClickUrl(final String iconClickUrl) {
         this.iconClickURL = iconClickUrl;
         mContentInfoText.setOnClickListener(view -> {
-            if (mContentInfoListener == null || !mAdFeedbackEnabled || !(getContext() instanceof Activity) || iconClickUrl == null) {
-                try {
-                    Intent openLink = new Intent(Intent.ACTION_VIEW);
-                    openLink.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    openLink.setData(Uri.parse(iconClickUrl));
-                    view.getContext().startActivity(openLink);
-                } catch (Exception e) {
-                    Log.e(TAG, "error on click content info text", e);
-                }
-            } else {
-                mContentInfoListener.onLinkClicked(iconClickUrl);
-            }
+            openLink();
         });
+    }
+
+    public void openLink() {
+        if (mContentInfoListener == null || mContentInfoDisplay == ContentInfoDisplay.SYSTEM_BROWSER
+                || !(getContext() instanceof Activity) || TextUtils.isEmpty(iconClickURL)) {
+            try {
+                Intent openLink = new Intent(Intent.ACTION_VIEW);
+                openLink.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                openLink.setData(Uri.parse(iconClickURL));
+                getContext().startActivity(openLink);
+            } catch (Exception e) {
+                Log.e(TAG, "error on click content info text", e);
+            }
+        } else {
+            mContentInfoListener.onLinkClicked(iconClickURL);
+        }
     }
 
     public void setContextText(String text) {
@@ -171,12 +191,4 @@ public class PNAPIContentInfoView extends FrameLayout {
     public String getIconClickURL() {
         return iconClickURL;
     }
-
-    //    @Override
-//    public void onClick(View v) {
-//        if (mContentInfoListener != null) {
-//            mContentInfoListener.onIconClicked();
-//        }
-//        openLayout();
-//    }
 }

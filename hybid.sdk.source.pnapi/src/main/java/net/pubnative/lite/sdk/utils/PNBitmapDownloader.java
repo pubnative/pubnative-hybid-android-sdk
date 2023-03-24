@@ -150,7 +150,7 @@ public class PNBitmapDownloader {
     //==============================================================================================
     // Private methods
     //==============================================================================================
-    private void downloadImage() {
+    private synchronized void downloadImage() {
         new Thread(downloadTask).start();
     }
 
