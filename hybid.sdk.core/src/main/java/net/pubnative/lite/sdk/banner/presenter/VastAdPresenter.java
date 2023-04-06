@@ -36,6 +36,8 @@ import net.pubnative.lite.sdk.contentinfo.AdFeedbackView;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.ContentInfo;
+import net.pubnative.lite.sdk.models.ContentInfoIconXPosition;
+import net.pubnative.lite.sdk.models.ContentInfoIconYPosition;
 import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.PositionX;
@@ -243,12 +245,26 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
                     int horizontalAlign = Gravity.START;
                     int verticalAlign = Gravity.TOP;
 
-                    if (contentInfo.getPositionX() == PositionX.RIGHT) {
-                        horizontalAlign = Gravity.END;
+                    if (getAd().getContentInfoIconXPosition() != null) {
+                        ContentInfoIconXPosition remoteIconXPosition = getAd().getContentInfoIconXPosition();
+                        if (remoteIconXPosition == ContentInfoIconXPosition.RIGHT) {
+                            horizontalAlign = Gravity.END;
+                        }
+                    } else {
+                        if (contentInfo.getPositionX() == PositionX.RIGHT) {
+                            horizontalAlign = Gravity.END;
+                        }
                     }
 
-                    if (contentInfo.getPositionY() == PositionY.BOTTOM) {
-                        verticalAlign = Gravity.BOTTOM;
+                    if (getAd().getContentInfoIconYPosition() != null) {
+                        ContentInfoIconYPosition remoteIconYPosition = getAd().getContentInfoIconYPosition();
+                        if (remoteIconYPosition == ContentInfoIconYPosition.BOTTOM) {
+                            verticalAlign = Gravity.BOTTOM;
+                        }
+                    } else {
+                        if (contentInfo.getPositionY() == PositionY.BOTTOM) {
+                            verticalAlign = Gravity.BOTTOM;
+                        }
                     }
 
                     layoutParams.gravity = horizontalAlign | verticalAlign;

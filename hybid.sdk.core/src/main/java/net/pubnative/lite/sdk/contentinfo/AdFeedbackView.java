@@ -126,6 +126,7 @@ public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureList
         this.mIsReady = true;
         if (mListener != null) {
             mListener.onLoadFinished();
+            Logger.d(TAG, "Feedback form loaded");
         }
     }
 
@@ -175,7 +176,7 @@ public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureList
         }
     }
 
-    public void showFeedbackForm(Activity activity, String url) {
+    public synchronized void showFeedbackForm(Activity activity, String url) {
         if (mViewContainer != null && mViewContainer.isLoaded() && mIsReady) {
             mViewContainer.show(activity, () -> {
                 mViewContainer.showDefaultContentInfoURL(CONTENT_INFO_LINK_URL);

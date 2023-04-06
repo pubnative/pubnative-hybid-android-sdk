@@ -33,7 +33,7 @@ import android.view.View;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.contentinfo.AdFeedbackView;
-import net.pubnative.lite.sdk.db.DBManager;
+import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.views.PNBeaconWebView;
@@ -384,10 +384,13 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
     public synchronized void invokeOnImpression(View view) {
         mIsImpressionConfirmed = true;
         if (view.getContext() != null) {
-            DBManager dbManager = new DBManager(view.getContext());
-            dbManager.open();
-            dbManager.insert(mAd.getZoneId());
-            dbManager.close();
+//            DBManager dbManager = new DBManager(view.getContext());
+//            dbManager.open();
+//            dbManager.insert(mAd.getZoneId());
+//            dbManager.close();
+
+            SessionImpressionPrefs prefs = new SessionImpressionPrefs(view.getContext());
+            prefs.insert(mAd.getZoneId());
 
             if (mListener != null) {
                 mListener.onAdImpression(NativeAd.this, view);

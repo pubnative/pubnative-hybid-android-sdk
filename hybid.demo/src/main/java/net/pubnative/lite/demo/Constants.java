@@ -71,15 +71,17 @@ public class Constants {
     public static final String DFP_MEDIATION_LEADERBOARD_AD_UNIT = "";
     public static final String DFP_MEDIATION_REWARDED_AD_UNIT = "";
 
-    public static final String ADMOB_APP_ID = "ca-app-pub-9763601123242224~7761163696";
-    public static final String ADMOB_BANNER_AD_UNIT = "ca-app-pub-9763601123242224/5027189140";
-    public static final String ADMOB_INTERSTITIAL_AD_UNIT = "ca-app-pub-9763601123242224/6994876935";
-    public static final String ADMOB_INTERSTITIAL_VIDEO_AD_UNIT = "ca-app-pub-9763601123242224/5439389087";
-    public static final String ADMOB_MEDIUM_AD_UNIT = "ca-app-pub-9763601123242224/9033705159";
-    public static final String ADMOB_MEDIUM_VIDEO_AD_UNIT = "ca-app-pub-9763601123242224/4028543995";
-    public static final String ADMOB_LEADERBOARD_AD_UNIT = "ca-app-pub-9763601123242224/4902888458";
-    public static final String ADMOB_REWARDED_AD_UNIT = "ca-app-pub-9763601123242224/1139038306";
-    public static final String ADMOB_NATIVE_AD_UNIT = "ca-app-pub-9763601123242224/2966644429";
+    public static final String ADMOB_APP_ID = "ca-app-pub-8741261465579918~1379849443";
+    public static final String ADMOB_BANNER_AD_UNIT = "ca-app-pub-8741261465579918/6124360926";
+    public static final String ADMOB_INTERSTITIAL_AD_UNIT = "ca-app-pub-8741261465579918/7945828611";
+    public static final String ADMOB_INTERSTITIAL_VIDEO_AD_UNIT = "ca-app-pub-8741261465579918/9849937224";
+    public static final String ADMOB_MEDIUM_AD_UNIT = "ca-app-pub-8741261465579918/9021987007";
+    public static final String ADMOB_MEDIUM_VIDEO_AD_UNIT = "ca-app-pub-8741261465579918/9550554321";
+    public static final String ADMOB_LEADERBOARD_AD_UNIT = "ca-app-pub-8741261465579918/5172325610";
+    public static final String ADMOB_REWARDED_AD_UNIT = "ca-app-pub-8741261465579918/1951265901";
+
+    public static final String ADMOB_REWARDED_HTML_AD_UNIT = "ca-app-pub-8741261465579918/1097349235";
+    public static final String ADMOB_NATIVE_AD_UNIT = "ca-app-pub-8741261465579918/3727382007";
 
     public static final String IRONSOURCE_APP_KEY = "120ac03ad";
     public static final String IRONSOURCE_BANNER_AD_UNIT = "HyBid_Banner";

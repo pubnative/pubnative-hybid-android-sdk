@@ -108,10 +108,16 @@ public class PNAPIContentInfoView extends FrameLayout {
     public void openLayout() {
         mContentInfoText.setVisibility(VISIBLE);
         mHandler.postDelayed(mCloseTask, 3000);
+        mContentInfoIcon.setOnClickListener(view -> {
+            openLink();
+        });
     }
 
     public void closeLayout() {
         mContentInfoText.setVisibility(GONE);
+        mContentInfoIcon.setOnClickListener(view -> {
+            openLayout();
+        });
     }
 
     public void setIconUrl(String iconUrl) {
@@ -126,6 +132,7 @@ public class PNAPIContentInfoView extends FrameLayout {
                     mContentInfoIcon.setImageBitmap(bitmap);
                 } else if (!isDefault) {
                     setIconUrl(Ad.CONTENT_INFO_ICON_URL, true);
+                    setIconClickUrl(Ad.CONTENT_INFO_LINK_URL);
                 }
             }
 
@@ -133,6 +140,7 @@ public class PNAPIContentInfoView extends FrameLayout {
             public void onDownloadFailed(String url, Exception ex) {
                 if (!isDefault) {
                     setIconUrl(Ad.CONTENT_INFO_ICON_URL, true);
+                    setIconClickUrl(Ad.CONTENT_INFO_LINK_URL);
                 }
             }
         });

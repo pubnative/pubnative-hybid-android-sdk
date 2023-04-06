@@ -43,7 +43,6 @@ public class DBManager {
         contentValue.put(DatabaseHelper.TIMESTAMP, sessionImpression.getTimestamp());
         contentValue.put(DatabaseHelper.AGE_OF_APP, sessionImpression.getAgeOfApp());
         contentValue.put(DatabaseHelper.ZONE_ID, sessionImpression.getZoneId());
-        contentValue.put(DatabaseHelper.EVENT_TYPE, sessionImpression.getEventType());
         contentValue.put(DatabaseHelper.SESSION_DURATION, sessionImpression.getSessionDuration());
         database.insert(DatabaseHelper.TABLE_NAME, null, contentValue);
     }

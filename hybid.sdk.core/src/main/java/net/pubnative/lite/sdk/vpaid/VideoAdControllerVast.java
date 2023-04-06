@@ -408,8 +408,10 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
 
             @Override
             public void onFinish() {
-                mViewControllerVast.resetProgress();
-                handleMediaPlayerComplete();
+                if (mViewControllerVast != null) {
+                    mViewControllerVast.resetProgress();
+                    handleMediaPlayerComplete();
+                }
             }
         }.create();
 
@@ -422,7 +424,9 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
 
                 @Override
                 public void onFinish() {
-                    mViewControllerVast.endSkip();
+                    if (mViewControllerVast != null) {
+                        mViewControllerVast.endSkip();
+                    }
                 }
             }.create();
         }

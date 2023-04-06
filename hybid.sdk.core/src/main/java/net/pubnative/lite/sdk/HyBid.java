@@ -38,8 +38,6 @@ import net.pubnative.lite.sdk.config.ConfigManager;
 import net.pubnative.lite.sdk.core.BuildConfig;
 import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.core.R;
-import net.pubnative.lite.sdk.db.DBManager;
-import net.pubnative.lite.sdk.db.OnDatabaseResetListener;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.models.AdConstants;
 import net.pubnative.lite.sdk.models.AdRequest;
@@ -48,6 +46,7 @@ import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.SkipOffset;
 import net.pubnative.lite.sdk.prefs.HyBidPreferences;
+import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
 import net.pubnative.lite.sdk.reporting.ReportingDelegate;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNApiUrlComposer;
@@ -143,10 +142,12 @@ public class HyBid {
         preferences.setAppFirstInstalledTime(String.valueOf(installed));
 
         preferences.setSessionTimeStamp(System.currentTimeMillis(), () -> {
-            DBManager dbManager = new DBManager(application.getApplicationContext());
-            dbManager.open();
-            dbManager.nukeTable();
-            dbManager.close();
+//            DBManager dbManager = new DBManager(application.getApplicationContext());
+//            dbManager.open();
+//            dbManager.nukeTable();
+//            dbManager.close();
+            SessionImpressionPrefs prefs = new SessionImpressionPrefs(application.getApplicationContext());
+            prefs.nukePrefs();
         }, HyBidPreferences.TIMESTAMP.NORMAL);
 
         sBundleId = application.getPackageName();

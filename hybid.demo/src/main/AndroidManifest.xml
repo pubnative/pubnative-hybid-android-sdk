@@ -448,7 +448,7 @@
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-9763601123242224~7761163696" />
+            android:value="ca-app-pub-8741261465579918~1379849443" />
 
         <meta-data
             android:name="applovin.sdk.key"

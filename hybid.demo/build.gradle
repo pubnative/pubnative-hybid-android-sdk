@@ -2,7 +2,7 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-parcelize'
-    id 'com.fyber.fairbid-sdk-plugin' version '3.29.1'
+    id 'com.fyber.fairbid-sdk-plugin' version '3.36.0'
     id 'com.google.firebase.appdistribution'
     id 'com.google.firebase.firebase-perf'
     id 'com.google.firebase.crashlytics'
@@ -83,27 +83,27 @@ dependencies {
     implementation project(':hybid.sdk.logger')
     implementation project(':hybid.sdk.source.pnapi')
 
-    implementation 'androidx.appcompat:appcompat:1.5.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'com.google.android.material:material:1.8.0'
     implementation 'androidx.multidex:multidex:2.0.1'
 
     implementation 'com.ironsource.sdk:mediationsdk:7.3.0'
-    implementation 'com.applovin:applovin-sdk:11.6.1'
+    implementation 'com.applovin:applovin-sdk:11.8.2'
 
-    implementation 'com.google.android.gms:play-services-ads:21.1.0'
+    implementation 'com.google.android.gms:play-services-ads:21.5.0'
     implementation 'com.google.android.ads:mediation-test-suite:3.0.0'
-    implementation "androidx.navigation:navigation-fragment-ktx:2.5.1"
-    implementation "androidx.navigation:navigation-ui-ktx:2.5.1"
+    implementation "androidx.navigation:navigation-fragment-ktx:2.5.3"
+    implementation "androidx.navigation:navigation-ui-ktx:2.5.3"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation 'com.squareup.picasso:picasso:2.8'
     implementation 'com.google.code.gson:gson:2.9.1'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
-    implementation 'co.ogury:ogury-sdk:5.3.0'
+    implementation 'co.ogury:ogury-sdk:5.5.0'
     implementation 'com.google.android.ump:user-messaging-platform:2.0.0'
 
-    implementation platform('com.google.firebase:firebase-bom:30.3.1')
+    implementation platform('com.google.firebase:firebase-bom:31.2.3')
     implementation 'com.google.firebase:firebase-perf'
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'

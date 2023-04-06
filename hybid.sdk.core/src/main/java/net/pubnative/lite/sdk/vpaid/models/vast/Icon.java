@@ -1,5 +1,7 @@
 package net.pubnative.lite.sdk.vpaid.models.vast;
 
+import net.pubnative.lite.sdk.models.PositionX;
+import net.pubnative.lite.sdk.models.PositionY;
 import net.pubnative.lite.sdk.vpaid.xml.Attribute;
 import net.pubnative.lite.sdk.vpaid.xml.Tag;
 

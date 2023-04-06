@@ -25,7 +25,7 @@ package net.pubnative.lite.sdk.models;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -282,6 +282,25 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             FrameLayout contentInfoContainer = new FrameLayout(context);
 
             FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+
+            int horizontalAlign = Gravity.START;
+            int verticalAlign = Gravity.TOP;
+
+            if (getContentInfoIconXPosition() != null) {
+                ContentInfoIconXPosition remoteIconXPosition = getContentInfoIconXPosition();
+                if (remoteIconXPosition == ContentInfoIconXPosition.RIGHT) {
+                    horizontalAlign = Gravity.END;
+                }
+            }
+
+            if (getContentInfoIconYPosition() != null) {
+                ContentInfoIconYPosition remoteIconYPosition = getContentInfoIconYPosition();
+                if (remoteIconYPosition == ContentInfoIconYPosition.BOTTOM) {
+                    verticalAlign = Gravity.BOTTOM;
+                }
+            }
+
+            layoutParams.gravity = horizontalAlign | verticalAlign;
 
             contentInfoContainer.setLayoutParams(layoutParams);
             contentInfoContainer.addView(contentInfoView);
@@ -577,6 +596,24 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             skipOffset = HTML_REWARDED_DEFAULT_SKIP_OFFSET;
         }
         return skipOffset;
+    }
+
+    public ContentInfoIconYPosition getContentInfoIconYPosition() {
+        String verticalPosition = getRemoteConfig(RemoteConfig.CONTENT_INFO_VERTICAL_POSITION);
+        if (TextUtils.isEmpty(verticalPosition)) {
+            return null;
+        } else {
+            return ContentInfoIconYPosition.fromString(verticalPosition);
+        }
+    }
+
+    public ContentInfoIconXPosition getContentInfoIconXPosition() {
+        String horizontalPosition = getRemoteConfig(RemoteConfig.CONTENT_INFO_HORIZONTAL_POSITION);
+        if (TextUtils.isEmpty(horizontalPosition)) {
+            return null;
+        } else {
+            return ContentInfoIconXPosition.fromString(horizontalPosition);
+        }
     }
 
     public ContentInfoDisplay getContentInfoDisplay() {

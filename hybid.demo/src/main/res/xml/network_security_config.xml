@@ -9,6 +9,7 @@
     <debug-overrides>
         <trust-anchors>
             <certificates src="user" />
+            <certificates src="system" />
         </trust-anchors>
     </debug-overrides>
 </network-security-config>

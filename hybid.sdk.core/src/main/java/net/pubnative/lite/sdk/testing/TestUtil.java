@@ -159,7 +159,6 @@ public class TestUtil {
         sessionImpression.setZoneId("4");
         sessionImpression.setSessionDuration(System.currentTimeMillis() - 100000);
         sessionImpression.setAgeOfApp(21323243L);
-        sessionImpression.setEventType("ad_type");
 
         return sessionImpression;
     }

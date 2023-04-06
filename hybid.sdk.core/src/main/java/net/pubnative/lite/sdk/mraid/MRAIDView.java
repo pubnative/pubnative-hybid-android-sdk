@@ -124,7 +124,7 @@ import java.util.Map;
  * Created by erosgarciaponte on 05.01.18.
  */
 @SuppressLint("ViewConstructor")
-public class MRAIDView extends RelativeLayout {
+public class MRAIDView extends FrameLayout {
     // used to differentiate logging
     private static final String MRAID_LOG_TAG = MRAIDView.class.getSimpleName();
 

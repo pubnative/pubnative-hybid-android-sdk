@@ -43,6 +43,8 @@ import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.contentinfo.AdFeedbackView;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ContentInfo;
+import net.pubnative.lite.sdk.models.ContentInfoIconXPosition;
+import net.pubnative.lite.sdk.models.ContentInfoIconYPosition;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.PositionX;
 import net.pubnative.lite.sdk.models.PositionY;
@@ -144,13 +146,28 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
                     int xGravity = Gravity.START;
                     int yGravity = Gravity.TOP;
 
-                    if (contentInfo.getPositionX() == PositionX.RIGHT) {
-                        xGravity = Gravity.END;
+                    if (getAd().getContentInfoIconXPosition() != null) {
+                        ContentInfoIconXPosition remoteIconXPosition = getAd().getContentInfoIconXPosition();
+                        if (remoteIconXPosition == ContentInfoIconXPosition.RIGHT) {
+                            xGravity = Gravity.END;
+                        }
+                    } else {
+                        if (contentInfo.getPositionX() == PositionX.RIGHT) {
+                            xGravity = Gravity.END;
+                        }
                     }
 
-                    if (contentInfo.getPositionY() == PositionY.BOTTOM) {
-                        yGravity = Gravity.BOTTOM;
+                    if (getAd().getContentInfoIconYPosition() != null) {
+                        ContentInfoIconYPosition remoteIconYPosition = getAd().getContentInfoIconYPosition();
+                        if (remoteIconYPosition == ContentInfoIconYPosition.BOTTOM) {
+                            yGravity = Gravity.BOTTOM;
+                        }
+                    } else {
+                        if (contentInfo.getPositionY() == PositionY.BOTTOM) {
+                            yGravity = Gravity.BOTTOM;
+                        }
                     }
+
                     FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                     layoutParams.gravity = xGravity | yGravity;
                     mCloseableContainer.addView(contentInfoView, layoutParams);

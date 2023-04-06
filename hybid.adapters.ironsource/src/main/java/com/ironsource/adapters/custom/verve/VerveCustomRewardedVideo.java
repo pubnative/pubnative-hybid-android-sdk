@@ -92,6 +92,7 @@ public class VerveCustomRewardedVideo extends BaseRewardedVideo<VerveCustomAdapt
     @Override
     public void onRewardedOpened() {
         if (mRewardedVideoAdListener != null) {
+            mRewardedVideoAdListener.onAdOpened();
             mRewardedVideoAdListener.onAdShowSuccess();
             mRewardedVideoAdListener.onAdVisible();
             mRewardedVideoAdListener.onAdStarted();

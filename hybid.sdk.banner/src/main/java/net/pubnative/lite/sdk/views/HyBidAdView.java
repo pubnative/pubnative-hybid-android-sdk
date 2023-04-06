@@ -44,7 +44,6 @@ import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
-import net.pubnative.lite.sdk.db.DBManager;
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdSize;
@@ -55,6 +54,7 @@ import net.pubnative.lite.sdk.models.RemoteConfigFeature;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.network.PNHttpClient;
+import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.MarkupUtils;
@@ -264,7 +264,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                     System.currentTimeMillis() - mInitialRenderTime);
         }
 
-        invokeOnImpression();
+//        invokeOnImpression();
     }
 
     public void destroy() {
@@ -300,7 +300,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         }
 
         if (mWindowManager != null && mContainer.isShown()) {
-            mWindowManager.removeView(mContainer);
+            mWindowManager.removeViewImmediate(mContainer);
             mWindowManager = null;
             mContainer = null;
         }
@@ -725,10 +725,12 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     protected void invokeOnImpression() {
         if (mZoneId != null && !TextUtils.isEmpty(mZoneId)) {
             if (getContext() != null) {
-                DBManager dbManager = new DBManager(getContext());
-                dbManager.open();
-                dbManager.insert(mZoneId);
-                dbManager.close();
+//                DBManager dbManager = new DBManager(getContext());
+//                dbManager.open();
+//                dbManager.insert(mZoneId);
+//                dbManager.close();
+                SessionImpressionPrefs prefs = new SessionImpressionPrefs(getContext());
+                prefs.insert(mZoneId);
             }
         }
 

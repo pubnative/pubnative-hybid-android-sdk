@@ -268,20 +268,28 @@ public class ViewControllerVast implements View.OnClickListener {
     }
 
     public void setProgress(int progress, int total) {
-        mLinearCountdownView.setProgress(total - progress, total);
+        if (mLinearCountdownView != null) {
+            mLinearCountdownView.setProgress(total - progress, total);
+        }
     }
 
     public void setSkipProgress(int millisUntilFinished, int mSkipTimeMillis) {
-        mSkipCountdownView.setProgress(mSkipTimeMillis - millisUntilFinished, mSkipTimeMillis);
+        if (mSkipCountdownView != null) {
+            mSkipCountdownView.setProgress(mSkipTimeMillis - millisUntilFinished, mSkipTimeMillis);
+        }
     }
 
     public void endSkip() {
-        mSkipCountdownView.setVisibility(View.GONE);
-        showSkipButton();
+        if (mSkipCountdownView != null) {
+            mSkipCountdownView.setVisibility(View.GONE);
+            showSkipButton();
+        }
     }
 
     public void resetProgress() {
-        mLinearCountdownView.reset();
+        if (mLinearCountdownView != null) {
+            mLinearCountdownView.reset();
+        }
     }
 
     public boolean isMute() {
@@ -289,40 +297,42 @@ public class ViewControllerVast implements View.OnClickListener {
     }
 
     public void showEndCard(EndCardData endCardData, String imageUri, CloseButtonListener closeButtonListener) {
-        mEndCardLayout.setVisibility(View.VISIBLE);
-        mEndCardLayout.setOnClickListener(v -> validateOpenURLClicked());
-        SkipOffset endCardCloseDelay = getEndCardCloseDelay();
-        if (endCardData != null) {
-            mControlsLayout.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-            if (endCardData.getType() == EndCardData.Type.STATIC_RESOURCE) {
-                mHtmlEndCardContainer.setVisibility(View.GONE);
-                mStaticEndCardView.setVisibility(View.VISIBLE);
-                mVideoPlayerLayout.setVisibility(View.GONE);
-                ImageUtils.setScaledImage(mStaticEndCardView, imageUri);
-            } else if (!TextUtils.isEmpty(endCardData.getContent())) {
-                mStaticEndCardView.setVisibility(View.GONE);
-                mHtmlEndCardContainer.setVisibility(View.VISIBLE);
-                mVideoPlayerLayout.setVisibility(View.GONE);
-                if (endCardData.getType() == EndCardData.Type.IFRAME_RESOURCE) {
-                    mHtmlEndCardView = new MRAIDBanner(mEndCardLayout.getContext(), endCardData.getContent(), "", false, new String[]{}, mraidViewListener, mraidNativeFeatureListener, null);
-                } else {
-                    mHtmlEndCardView = new MRAIDBanner(mEndCardLayout.getContext(), "", endCardData.getContent(), false, new String[]{}, mraidViewListener, mraidNativeFeatureListener, null);
+        if (mEndCardLayout != null) {
+            mEndCardLayout.setVisibility(View.VISIBLE);
+            mEndCardLayout.setOnClickListener(v -> validateOpenURLClicked());
+            SkipOffset endCardCloseDelay = getEndCardCloseDelay();
+            if (endCardData != null) {
+                mControlsLayout.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+                if (endCardData.getType() == EndCardData.Type.STATIC_RESOURCE) {
+                    mHtmlEndCardContainer.setVisibility(View.GONE);
+                    mStaticEndCardView.setVisibility(View.VISIBLE);
+                    mVideoPlayerLayout.setVisibility(View.GONE);
+                    ImageUtils.setScaledImage(mStaticEndCardView, imageUri);
+                } else if (!TextUtils.isEmpty(endCardData.getContent())) {
+                    mStaticEndCardView.setVisibility(View.GONE);
+                    mHtmlEndCardContainer.setVisibility(View.VISIBLE);
+                    mVideoPlayerLayout.setVisibility(View.GONE);
+                    if (endCardData.getType() == EndCardData.Type.IFRAME_RESOURCE) {
+                        mHtmlEndCardView = new MRAIDBanner(mEndCardLayout.getContext(), endCardData.getContent(), "", false, new String[]{}, mraidViewListener, mraidNativeFeatureListener, null);
+                    } else {
+                        mHtmlEndCardView = new MRAIDBanner(mEndCardLayout.getContext(), "", endCardData.getContent(), false, new String[]{}, mraidViewListener, mraidNativeFeatureListener, null);
+                    }
+                    mHtmlEndCardView.setSkipOffset(endCardCloseDelay.getOffset());
+                    mHtmlEndCardContainer.addView(mHtmlEndCardView);
                 }
-                mHtmlEndCardView.setSkipOffset(endCardCloseDelay.getOffset());
-                mHtmlEndCardContainer.addView(mHtmlEndCardView);
             }
-        }
 
-        if (mIsFullscreen) {
-            showEndCardCloseButton(endCardCloseDelay.getOffset(), closeButtonListener);
-        }
+            if (mIsFullscreen) {
+                showEndCardCloseButton(endCardCloseDelay.getOffset(), closeButtonListener);
+            }
 
-        ReportingEvent event = new ReportingEvent();
-        event.setEventType(Reporting.EventType.COMPANION_VIEW_END_CARD);
-        event.setCreativeType(Reporting.CreativeType.VIDEO);
-        event.setTimestamp(System.currentTimeMillis());
-        if (HyBid.getReportingController() != null) {
-            HyBid.getReportingController().reportEvent(event);
+            ReportingEvent event = new ReportingEvent();
+            event.setEventType(Reporting.EventType.COMPANION_VIEW_END_CARD);
+            event.setCreativeType(Reporting.CreativeType.VIDEO);
+            event.setTimestamp(System.currentTimeMillis());
+            if (HyBid.getReportingController() != null) {
+                HyBid.getReportingController().reportEvent(event);
+            }
         }
     }
 
@@ -440,12 +450,18 @@ public class ViewControllerVast implements View.OnClickListener {
     }
 
     public void hideSkipButton() {
-        mSkipView.setVisibility(View.GONE);
+        if (mSkipView != null) {
+            mSkipView.setVisibility(View.GONE);
+        }
     }
 
     public void hideTimerAndMuteButton() {
-        mLinearCountdownView.setVisibility(View.GONE);
-        mMuteView.setVisibility(View.GONE);
+        if (mLinearCountdownView != null) {
+            mLinearCountdownView.setVisibility(View.GONE);
+        }
+        if (mMuteView != null) {
+            mMuteView.setVisibility(View.GONE);
+        }
     }
 
     public boolean isEndCard() {

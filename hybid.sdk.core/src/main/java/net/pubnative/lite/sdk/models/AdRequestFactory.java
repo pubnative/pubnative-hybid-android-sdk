@@ -31,9 +31,9 @@ import net.pubnative.lite.sdk.DisplayManager;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.config.ConfigManager;
-import net.pubnative.lite.sdk.db.DBManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.prefs.HyBidPreferences;
+import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.HyBidTimeUtils;
 import net.pubnative.lite.sdk.utils.Logger;
@@ -93,20 +93,27 @@ public class AdRequestFactory {
         mIsRewarded = isRewarded;
         if (TextUtils.isEmpty(advertisingId) && context != null) {
             try {
-                DBManager dbManager = new DBManager(mDeviceInfo.getContext());
-                dbManager.open();
-                int impDepth = dbManager.getImpressionDepth(zoneid);
-                dbManager.close();
+//                DBManager dbManager = new DBManager(mDeviceInfo.getContext());
+//                dbManager.open();
+//                int impDepth = dbManager.getImpressionDepth(zoneid);
+//                dbManager.close();
+
+                SessionImpressionPrefs prefs = new SessionImpressionPrefs(mDeviceInfo.getContext());
+                int impDepth = prefs.getImpressionDepth(zoneid);
                 PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(context, (advertisingId1, limitTracking1) -> processAdvertisingId(appToken, zoneid, adSize, advertisingId1, limitTracking1, callback, impDepth)));
             } catch (Exception exception) {
                 Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
             }
         } else {
             if (mDeviceInfo != null && mDeviceInfo.getContext() != null) {
-                DBManager dbManager = new DBManager(mDeviceInfo.getContext());
-                dbManager.open();
-                int impDepth = dbManager.getImpressionDepth(zoneid);
-                dbManager.close();
+//                DBManager dbManager = new DBManager(mDeviceInfo.getContext());
+//                dbManager.open();
+//                int impDepth = dbManager.getImpressionDepth(zoneid);
+//                dbManager.close();
+
+                SessionImpressionPrefs prefs = new SessionImpressionPrefs(mDeviceInfo.getContext());
+                int impDepth = prefs.getImpressionDepth(zoneid);
+
                 processAdvertisingId(appToken, zoneid, adSize, advertisingId, limitTracking, callback, impDepth);
             }
         }

@@ -16,6 +16,8 @@ public enum RemoteConfig {
     CONTENT_INFO_URL("content_info_url", String.class),
     CONTENT_INFO_ICON_URL("content_info_icon_url", String.class),
     CONTENT_INFO_ICON_CLICK_ACTION("content_info_icon_click_action", String.class),
+    CONTENT_INFO_HORIZONTAL_POSITION("content_info_horizontal_position", String.class),
+    CONTENT_INFO_VERTICAL_POSITION("content_info_vertical_position", String.class),
     CONTENT_INFO_DISPLAY("content_info_display", String.class),
     CONTENT_INFO_TEXT("content_info_text", String.class),
     FULL_SCREEN_CLICKABILITY("fullscreen_clickability", Boolean.class);

@@ -94,6 +94,7 @@ public class VerveCustomInterstitial extends BaseInterstitial<VerveCustomAdapter
     @Override
     public void onInterstitialImpression() {
         if (mInterstitialAdListener != null) {
+            mInterstitialAdListener.onAdOpened();
             mInterstitialAdListener.onAdShowSuccess();
             mInterstitialAdListener.onAdVisible();
         }

@@ -217,6 +217,7 @@ public class VideoAd extends BaseVideoAd {
      * Needs to be triggered on appropriate Activity life-cycle method "onPause()".
      */
     public void pause() {
+        Logger.d(LOG_TAG, "pause");
         if (getAdController() != null) {
             getAdController().pause();
         }

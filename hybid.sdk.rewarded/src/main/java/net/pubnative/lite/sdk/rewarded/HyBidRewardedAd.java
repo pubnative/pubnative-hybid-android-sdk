@@ -36,11 +36,11 @@ import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.api.RewardedRequestManager;
-import net.pubnative.lite.sdk.db.DBManager;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.RemoteConfigFeature;
 import net.pubnative.lite.sdk.network.PNHttpClient;
+import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
 import net.pubnative.lite.sdk.rewarded.presenter.RewardedPresenter;
 import net.pubnative.lite.sdk.rewarded.presenter.RewardedPresenterFactory;
 import net.pubnative.lite.sdk.utils.AdRequestRegistry;
@@ -454,10 +454,13 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
 
     protected void invokeOnOpened() {
         if (mContext != null) {
-            DBManager dbManager = new DBManager(mContext);
-            dbManager.open();
-            dbManager.insert(mZoneId);
-            dbManager.close();
+//            DBManager dbManager = new DBManager(mContext);
+//            dbManager.open();
+//            dbManager.insert(mZoneId);
+//            dbManager.close();
+
+            SessionImpressionPrefs prefs = new SessionImpressionPrefs(mContext);
+            prefs.insert(mAd.getZoneId());
 
             if (mListener != null) {
                 mListener.onRewardedOpened();
