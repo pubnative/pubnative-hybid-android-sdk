@@ -1,6 +1,8 @@
 package net.pubnative.lite.sdk.contentinfo;
 
-public class AdFeedbackData {
+import java.io.Serializable;
+
+public class AdFeedbackData implements Serializable {
     private final String appToken;
     private final String zoneId;
     private final String audioState;

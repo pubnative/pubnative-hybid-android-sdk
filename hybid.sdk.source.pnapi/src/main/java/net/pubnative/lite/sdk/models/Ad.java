@@ -29,6 +29,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import net.pubnative.lite.sdk.source.pnapi.R;
 import net.pubnative.lite.sdk.utils.json.BindField;
 import net.pubnative.lite.sdk.utils.json.JsonModel;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
@@ -233,7 +234,9 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             clickUrl = CONTENT_INFO_LINK_URL;
         }
 
+        boolean isRemoteConfigIcon = false;
         if (!TextUtils.isEmpty(configIconUrl)) {
+            isRemoteConfigIcon = true;
             iconUrl = configIconUrl;
         } else if (data != null && !TextUtils.isEmpty(data.getStringField(DATA_CONTENTINFO_ICON_KEY))) {
             iconUrl = data.getStringField(DATA_CONTENTINFO_ICON_KEY);
@@ -249,8 +252,8 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             contextText = CONTENT_INFO_TEXT;
         }
 
-        final PNAPIContentInfoView result = new PNAPIContentInfoView(context);
-        result.setIconUrl(iconUrl);
+        final PNAPIContentInfoView result = new PNAPIContentInfoView(context, getContentInfoIconXPosition());
+        result.setIconUrl(iconUrl, false, isRemoteConfigIcon);
         result.setIconClickUrl(clickUrl);
         result.setContextText(contextText);
         result.setContentInfoListener(listener);
@@ -285,11 +288,14 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
 
             int horizontalAlign = Gravity.START;
             int verticalAlign = Gravity.TOP;
+            String horizontalAlignString = "left";
+            String verticalAlignString = "top";
 
             if (getContentInfoIconXPosition() != null) {
                 ContentInfoIconXPosition remoteIconXPosition = getContentInfoIconXPosition();
                 if (remoteIconXPosition == ContentInfoIconXPosition.RIGHT) {
                     horizontalAlign = Gravity.END;
+                    horizontalAlignString = "right";
                 }
             }
 
@@ -297,10 +303,14 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
                 ContentInfoIconYPosition remoteIconYPosition = getContentInfoIconYPosition();
                 if (remoteIconYPosition == ContentInfoIconYPosition.BOTTOM) {
                     verticalAlign = Gravity.BOTTOM;
+                    verticalAlignString = "bottom";
                 }
             }
 
             layoutParams.gravity = horizontalAlign | verticalAlign;
+
+            String contentInfoString = context.getResources().getString(R.string.content_info_icon);
+            contentInfoContainer.setContentDescription(contentInfoString + " - " + verticalAlignString + " " + horizontalAlignString);
 
             contentInfoContainer.setLayoutParams(layoutParams);
             contentInfoContainer.addView(contentInfoView);
@@ -314,7 +324,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         if (contentInfo == null || TextUtils.isEmpty(contentInfo.getIconUrl())) {
             return null;
         } else {
-            PNAPIContentInfoView result = new PNAPIContentInfoView(context);
+            PNAPIContentInfoView result = new PNAPIContentInfoView(context, getContentInfoIconXPosition());
             result.setIconUrl(contentInfo.getIconUrl());
             result.setIconClickUrl(contentInfo.getLinkUrl());
             if (TextUtils.isEmpty(contentInfo.getText())) {
@@ -345,7 +355,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     }
 
     private PNAPIContentInfoView getDefaultContentInfo(Context context, boolean feedbackEnabled, PNAPIContentInfoView.ContentInfoListener listener) {
-        PNAPIContentInfoView result = new PNAPIContentInfoView(context);
+        PNAPIContentInfoView result = new PNAPIContentInfoView(context, getContentInfoIconXPosition());
         result.setIconUrl(CONTENT_INFO_ICON_URL, true);
         result.setIconClickUrl(CONTENT_INFO_LINK_URL);
         result.setContextText(CONTENT_INFO_TEXT);
@@ -426,42 +436,6 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         return TextUtils.isEmpty(creativeId) ? "" : creativeId;
     }
 
-    public Integer getUnskippableVideoDuration() {
-        AdData adData = getMeta(APIMeta.RENDERING_OPTIONS);
-
-        if (adData == null) {
-            return 0;
-        }
-
-        Integer unskippableVideoDuration = adData.getIntField("unskippableVideoDuration");
-
-        return unskippableVideoDuration == null ? 0 : unskippableVideoDuration;
-    }
-
-    public Integer getMinimumSkipOffset() {
-        AdData adData = getMeta(APIMeta.RENDERING_OPTIONS);
-
-        if (adData == null) {
-            return 0;
-        }
-
-        Integer minimumSkipOffset = adData.getIntField("minimumSkipOffset");
-
-        return minimumSkipOffset == null ? 0 : minimumSkipOffset;
-    }
-
-    public Integer getMaximumSkipOffset() {
-        AdData adData = getMeta(APIMeta.RENDERING_OPTIONS);
-
-        if (adData == null) {
-            return 0;
-        }
-
-        Integer maximumSkipOffset = adData.getIntField("maximumSkipOffset");
-
-        return maximumSkipOffset == null ? 0 : maximumSkipOffset;
-    }
-
     public String getImpressionId() {
         List<AdData> impressionBeacons = getBeacons(Beacon.IMPRESSION);
 
@@ -523,24 +497,30 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         return getRemoteConfig(RemoteConfig.END_CARD_ENABLED);
     }
 
+    public Boolean isCustomEndCardEnabled() {
+        Boolean isEnabled = getRemoteConfig(RemoteConfig.CUSTOM_END_CARD_ENABLED);
+        if (isEnabled == null) isEnabled = false;
+        return isEnabled;
+    }
+
     public String getAudioState() {
         return getRemoteConfig(RemoteConfig.AUDIO_STATE);
     }
 
     public Integer getEndCardCloseDelay() {
-        return getRemoteConfig(RemoteConfig.END_CARD_CLOSE_DELAY);
-    }
-
-    public Integer getHtmlSkipOffset() {
-        Integer skipOffset = getRemoteConfig(RemoteConfig.HTML_SKIP_OFFSET);
-        if (skipOffset == null || skipOffset < 0) {
-            skipOffset = AdConstants.Skip.HTML_SKIP_OFFSET;
+        Integer endCardCloseDelay = getRemoteConfig(RemoteConfig.END_CARD_CLOSE_DELAY);
+        if (endCardCloseDelay == null || endCardCloseDelay < 0) {
+            endCardCloseDelay = null;
         }
-        return skipOffset;
+        return endCardCloseDelay;
     }
 
-    public Integer getVideoSkipOffset() {
-        return getRemoteConfig(RemoteConfig.VIDEO_SKIP_OFFSET);
+    public Integer getNativeCloseButtonDelay() {
+        return getRemoteConfig(RemoteConfig.NATIVE_CLOSE_BUTTON_DELAY);
+    }
+
+    public Integer getBackButtonDelay() {
+        return getRemoteConfig(RemoteConfig.BACK_BUTTON_DELAY);
     }
 
     public Boolean needCloseInterAfterFinish() {
@@ -553,6 +533,10 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
 
     public Boolean getFullScreenClickability() {
         return getRemoteConfig(RemoteConfig.FULL_SCREEN_CLICKABILITY);
+    }
+
+    public Boolean getMraidExpand() {
+        return getRemoteConfig(RemoteConfig.MRAID_EXPAND);
     }
 
     public String getContentInfoText() {
@@ -574,11 +558,19 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     }
 
     public Integer getImpressionMinVisibleTime() {
-        return getRemoteConfig(RemoteConfig.IMP_TRACKING_VISIBLE_TIME);
+        Integer impressionMinVisibleTime = getRemoteConfig(RemoteConfig.IMP_TRACKING_VISIBLE_TIME);
+        if (impressionMinVisibleTime == null || impressionMinVisibleTime < 0) {
+            impressionMinVisibleTime = null;
+        }
+        return impressionMinVisibleTime;
     }
 
     public Double getImpressionVisiblePercent() {
-        return getRemoteConfig(RemoteConfig.IMP_TRACKING_VISIBLE_PERCENT);
+        Double impressionVisiblePercent = getRemoteConfig(RemoteConfig.IMP_TRACKING_VISIBLE_PERCENT);
+        if (impressionVisiblePercent == null || impressionVisiblePercent < 0.0) {
+            impressionVisiblePercent = null;
+        }
+        return impressionVisiblePercent;
     }
 
     public ContentInfoIconAction getContentInfoIconAction() {
@@ -590,30 +582,50 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         }
     }
 
+    public Integer getHtmlSkipOffset() {
+        return getSkipOffset(RemoteConfig.HTML_SKIP_OFFSET);
+    }
+
+    public Integer getVideoSkipOffset() {
+        return getSkipOffset(RemoteConfig.VIDEO_SKIP_OFFSET);
+    }
+
     public Integer getMraidRewardedSkipOffset() {
-        Integer skipOffset = getRemoteConfig(RemoteConfig.REWARDED_HTML_SKIP_OFFSET);
-        if (skipOffset == null || skipOffset == -1) {
-            skipOffset = HTML_REWARDED_DEFAULT_SKIP_OFFSET;
-        }
-        return skipOffset;
+        return getSkipOffset(RemoteConfig.REWARDED_HTML_SKIP_OFFSET);
+    }
+
+    public Integer getVideoRewardedSkipOffset() {
+        return getSkipOffset(RemoteConfig.REWARDED_VIDEO_SKIP_OFFSET);
+    }
+
+    private Integer getSkipOffset(RemoteConfig remoteConfigSkipOffset) {
+//        Integer skipOffset = ;
+//        if (skipOffset == null || skipOffset < 0) return skipOffset;
+//
+//        if (skipOffset > 30) {
+//            return 30;
+//        }
+        return getRemoteConfig(remoteConfigSkipOffset);
     }
 
     public ContentInfoIconYPosition getContentInfoIconYPosition() {
-        String verticalPosition = getRemoteConfig(RemoteConfig.CONTENT_INFO_VERTICAL_POSITION);
-        if (TextUtils.isEmpty(verticalPosition)) {
-            return null;
-        } else {
-            return ContentInfoIconYPosition.fromString(verticalPosition);
-        }
+//        String verticalPosition = getRemoteConfig(RemoteConfig.CONTENT_INFO_VERTICAL_POSITION);
+//        if (TextUtils.isEmpty(verticalPosition)) {
+//            return null;
+//        } else {
+//            return ContentInfoIconYPosition.fromString(verticalPosition);
+//        }
+        return ContentInfoIconYPosition.getDefaultYPosition();
     }
 
     public ContentInfoIconXPosition getContentInfoIconXPosition() {
-        String horizontalPosition = getRemoteConfig(RemoteConfig.CONTENT_INFO_HORIZONTAL_POSITION);
-        if (TextUtils.isEmpty(horizontalPosition)) {
-            return null;
-        } else {
-            return ContentInfoIconXPosition.fromString(horizontalPosition);
-        }
+//        String horizontalPosition = getRemoteConfig(RemoteConfig.CONTENT_INFO_HORIZONTAL_POSITION);
+//        if (TextUtils.isEmpty(horizontalPosition)) {
+//            return null;
+//        } else {
+//            return ContentInfoIconXPosition.fromString(horizontalPosition);
+//        }
+        return ContentInfoIconXPosition.getDefaultXPosition();
     }
 
     public ContentInfoDisplay getContentInfoDisplay() {
@@ -647,6 +659,19 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
 
     public boolean hasEndCard() {
         return hasEndCard;
+    }
+
+    public EndCardData getCustomEndCard() {
+        EndCardData result = null;
+        AdData data = getAsset(APIAsset.CUSTOM_END_CARD);
+        if (data != null) {
+            result = new EndCardData(EndCardData.Type.HTML_RESOURCE, data.getStringField("html"), true);
+        }
+        return result;
+    }
+
+    public boolean hasCustomEndCard() {
+        return getAsset(APIAsset.CUSTOM_END_CARD) != null;
     }
 
     @Override

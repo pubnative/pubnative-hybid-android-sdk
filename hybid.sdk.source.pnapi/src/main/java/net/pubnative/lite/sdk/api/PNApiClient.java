@@ -32,9 +32,9 @@ import android.webkit.WebView;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.analytics.Reporting;
-import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdResponse;
+import net.pubnative.lite.sdk.models.PNAdRequest;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.source.pnapi.BuildConfig;
 import net.pubnative.lite.sdk.utils.AdRequestRegistry;
@@ -51,39 +51,20 @@ import java.util.Map;
  * Created by erosgarciaponte on 17.01.18.
  */
 
-public class PNApiClient {
+public class PNApiClient implements ApiClient{
     private static final String TAG = PNApiClient.class.getSimpleName();
-
-
-    public interface AdRequestListener {
-        void onSuccess(Ad ad);
-
-        void onFailure(Throwable exception);
-    }
-
-    public interface TrackUrlListener {
-        void onSuccess();
-
-        void onFailure(Throwable throwable);
-
-        void onFinally(String requestUrl, String trackTypeName, int responseCode);
-    }
-
-    public interface TrackJSListener {
-        void onSuccess();
-
-        void onFailure(Throwable throwable);
-    }
 
     private final Context mContext;
     private String mApiUrl = BuildConfig.BASE_URL;
     private JSONObject mPlacementParams;
 
+    @Override
     public String getApiUrl() {
         return mApiUrl;
     }
 
-    void setApiUrl(String url) {
+    @Override
+    public void setApiUrl(String url) {
         if (!TextUtils.isEmpty(url)) {
             mApiUrl = url;
         }
@@ -93,11 +74,13 @@ public class PNApiClient {
         this.mContext = context;
     }
 
+    @Override
     public void getAd(AdRequest request, String userAgent, final AdRequestListener listener) {
         final String url = getAdRequestURL(request);
         getAd(url, userAgent, listener);
     }
 
+    @Override
     public void getAd(final String url, String userAgent, final AdRequestListener listener) {
         mPlacementParams = new JSONObject();
         if (TextUtils.isEmpty(url)) {
@@ -136,6 +119,7 @@ public class PNApiClient {
         return mContext;
     }
 
+    @Override
     public void trackUrl(String url, String userAgent, String trackTypeName, final TrackUrlListener listener) {
         sendTrackingRequest(url, userAgent, trackTypeName, listener);
     }
@@ -208,9 +192,10 @@ public class PNApiClient {
     }
 
     protected String getAdRequestURL(AdRequest adRequest) {
-        return PNApiUrlComposer.buildUrl(mApiUrl, adRequest);
+        return PNApiUrlComposer.buildUrl(mApiUrl, (PNAdRequest) adRequest);
     }
 
+    @Override
     public void processStream(String result, AdRequestListener listener) {
         AdResponse apiResponseModel = null;
         Exception parseException = null;
@@ -225,6 +210,12 @@ public class PNApiClient {
         processStream(apiResponseModel, parseException, listener);
     }
 
+    @Override
+    public void processStream(String result, AdRequest request, Integer width, Integer height, AdRequestListener listener) {
+        processStream(result, listener);
+    }
+
+    @Override
     public void processStream(AdResponse apiResponseModel, Exception parseException, AdRequestListener listener) {
         if (parseException != null) {
             listener.onFailure(new HyBidError(HyBidErrorCode.PARSER_ERROR, parseException));
@@ -244,6 +235,11 @@ public class PNApiClient {
         }
     }
 
+    @Override
+    public void setCustomUrl(String url) {
+        // Ignore for this class
+    }
+
     private void registerAdRequest(String url, String response, long initTime) {
         long responseTime = System.currentTimeMillis() - initTime;
 
@@ -254,6 +250,7 @@ public class PNApiClient {
         AdRequestRegistry.getInstance().setLastAdRequest(url, response, responseTime);
     }
 
+    @Override
     public JSONObject getPlacementParams() {
         return mPlacementParams;
     }

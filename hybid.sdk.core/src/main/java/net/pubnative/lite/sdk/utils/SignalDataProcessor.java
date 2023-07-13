@@ -2,23 +2,20 @@ package net.pubnative.lite.sdk.utils;
 
 import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
-import android.view.Surface;
 
 import net.pubnative.lite.sdk.AdCache;
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
-import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.models.SignalData;
-import net.pubnative.lite.sdk.utils.json.JsonOperations;
 import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
-import net.pubnative.lite.sdk.vpaid.models.EndCardData;
+import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 
 import org.json.JSONObject;

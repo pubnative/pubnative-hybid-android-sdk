@@ -25,32 +25,11 @@ package net.pubnative.lite.demo
 import android.os.Parcel
 import android.os.Parcelable
 
-//
-//import android.os.Parcel
-//import android.os.Parcelable
-//import android.widget.Toast
-//import androidx.fragment.app.Fragment
-
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
 inline fun <reified T : Parcelable> createParcel(crossinline createFromParcel: (Parcel) -> T?): Parcelable.Creator<T> =
-        object : Parcelable.Creator<T> {
-            override fun createFromParcel(source: Parcel?): T? = createFromParcel(source)
-            override fun newArray(size: Int): Array<out T?> = arrayOfNulls(size)
-        }
-
-
-//fun Fragment.getPackageName(): String? {
-//    context?.let {
-//        return it.packageName
-//    }
-//    return ""
-//}
-//
-//fun Fragment.showToast(message: String) {
-//    context?.let {
-//        Toast.makeText(it, message, Toast.LENGTH_SHORT).show()
-//    }
-//
-//}
+    object : Parcelable.Creator<T> {
+        override fun createFromParcel(source: Parcel?): T? = createFromParcel(source)
+        override fun newArray(size: Int): Array<out T?> = arrayOfNulls(size)
+    }

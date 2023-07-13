@@ -18,13 +18,14 @@ import net.pubnative.lite.sdk.views.PNAdView
 class LegacyApiMRectViewHolder(itemView: View, var mListener: OnLogDisplayListener) :
     RecyclerView.ViewHolder(itemView), PNAdView.Listener {
     private val TAG = LegacyApiMRectViewHolder::class.java.simpleName
+    private lateinit var mRect: HyBidAdView
 
     fun bind(ad: Ad?) {
         ad?.let {
             val container = itemView.findViewById<FrameLayout>(R.id.mrect_container)
             container.removeAllViews()
 
-            val mRect = HyBidAdView(itemView.context, AdSize.SIZE_300x250)
+            mRect = HyBidAdView(itemView.context, AdSize.SIZE_300x250)
 
             val adLayoutParams = RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT

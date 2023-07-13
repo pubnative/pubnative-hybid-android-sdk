@@ -1,8 +1,8 @@
 package net.pubnative.lite.sdk.views;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.StateListDrawable;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.SoundEffectConstants;
@@ -12,8 +12,8 @@ import android.widget.ImageView;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.core.R;
-import net.pubnative.lite.sdk.utils.DrawableResources;
 import net.pubnative.lite.sdk.utils.ViewUtils;
+import net.pubnative.lite.sdk.vpaid.helpers.BitmapHelper;
 
 import java.util.Random;
 
@@ -49,10 +49,10 @@ public class CloseableContainer extends FrameLayout {
     }
 
     private static final float CLOSE_REGION_SIZE_DP = 50.0f;
-    static final float CLOSE_BUTTON_PADDING_DP = 8.0f;
+    static final float CLOSE_BUTTON_PADDING_DP = 20.0f;
+    static final float CLOSE_BUTTON_PADDING_BORDER_DP = 0.0f;
 
     private OnCloseListener mOnCloseListener;
-    private final StateListDrawable mCloseDrawable;
     private final ImageButton mCloseButton;
     private ClosePosition mClosePosition;
 
@@ -67,26 +67,20 @@ public class CloseableContainer extends FrameLayout {
     public CloseableContainer(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        mCloseDrawable = new StateListDrawable();
         mClosePosition = ClosePosition.TOP_RIGHT;
-        DrawableResources drawableResources = new DrawableResources();
-        mCloseDrawable.addState(SELECTED_STATE_SET,
-                drawableResources.createDrawable(context, HyBid.getPressedCloseXmlResource(),
-                        DrawableResources.DrawableState.PRESSED));
-        mCloseDrawable.addState(EMPTY_STATE_SET,
-                drawableResources.createDrawable(context, HyBid.getNormalCloseXmlResource(),
-                        DrawableResources.DrawableState.NORMAL));
-        mCloseDrawable.setState(EMPTY_STATE_SET);
-        mCloseDrawable.setCallback(this);
 
         int paddingPixels = (int) ViewUtils.convertDpToPixel(CLOSE_BUTTON_PADDING_DP, context);
+        int paddingBorderPixels = (int) ViewUtils.convertDpToPixel(CLOSE_BUTTON_PADDING_BORDER_DP, context);
 
         mCloseButton = new ImageButton(context);
-        mCloseButton.setImageDrawable(mCloseDrawable);
+        Bitmap closeBitmap = BitmapHelper.toBitmap(context, HyBid.getNormalCloseXmlResource(), R.mipmap.close);
+        if (closeBitmap != null) ((ImageView) mCloseButton).setImageBitmap(closeBitmap);
+        else
+            ((ImageView) mCloseButton).setImageBitmap(BitmapHelper.decodeResource(mCloseButton.getContext(), R.mipmap.close));
         mCloseButton.setId(R.id.button_fullscreen_close);
         mCloseButton.setBackgroundColor(Color.TRANSPARENT);
         mCloseButton.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        mCloseButton.setPadding(paddingPixels, paddingPixels, paddingPixels, paddingPixels);
+        mCloseButton.setPadding(paddingPixels, paddingBorderPixels, paddingBorderPixels, paddingPixels);
         mCloseButton.setOnClickListener(v -> {
             playSoundEffect(SoundEffectConstants.CLICK);
             if (mOnCloseListener != null) {
@@ -113,6 +107,11 @@ public class CloseableContainer extends FrameLayout {
         if (closePosition != null) {
             if (closePosition == ClosePosition.RANDOM) {
                 mClosePosition = ClosePosition.getRandomPosition();
+            } else if (closePosition == ClosePosition.TOP_LEFT) {
+                int paddingPixels = (int) ViewUtils.convertDpToPixel(CLOSE_BUTTON_PADDING_DP, getContext());
+                int paddingBorderPixels = (int) ViewUtils.convertDpToPixel(CLOSE_BUTTON_PADDING_BORDER_DP, getContext());
+                mClosePosition = closePosition;
+                mCloseButton.setPadding(paddingBorderPixels, paddingBorderPixels, paddingPixels, paddingPixels);
             } else {
                 mClosePosition = closePosition;
             }

@@ -29,13 +29,17 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
+import net.pubnative.lite.sdk.utils.AdEndCardManager;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.views.CloseableContainer;
+import net.pubnative.lite.sdk.vpaid.AdCloseButtonListener;
 import net.pubnative.lite.sdk.vpaid.CloseButtonListener;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.VastActivityInteractor;
@@ -44,9 +48,10 @@ import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdListener;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
 
-public class VastRewardedActivity extends HyBidRewardedActivity implements AdPresenter.ImpressionListener {
+public class VastRewardedActivity extends HyBidRewardedActivity implements AdPresenter.ImpressionListener, AdCloseButtonListener {
     private static final String TAG = VastRewardedActivity.class.getSimpleName();
     private boolean mReady = false;
+    private boolean mHasEndCard = false;
     private boolean mFinished = false;
 
     private VideoAdView mVideoPlayer;
@@ -75,7 +80,7 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
 
         try {
             if (getAd() != null) {
-                mVideoAd = new VideoAd(this, getAd(), false, true, this);
+                mVideoAd = new VideoAd(this, getAd(), false, true, this, this);
                 mVideoAd.setRewarded(true);
                 mVideoAd.bindView(mVideoPlayer);
                 mVideoAd.setAdListener(mVideoAdListener);
@@ -92,6 +97,10 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
                     }
                 } else {
                     setupContentInfo();
+                }
+                if (adCacheItem != null && adCacheItem.getEndCardData() != null
+                        && !TextUtils.isEmpty(adCacheItem.getEndCardData().getContent())) {
+                    mHasEndCard = AdEndCardManager.isEndCardEnabled(getAd(), getAd().isEndCardEnabled(), HyBid.isEndCardEnabled(), null);
                 }
 
                 mVideoPlayer.postDelayed(() -> mVideoAd.load(), 1000);
@@ -153,7 +162,7 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            if (mFinished) {
+            if (mFinished && mIsSkippable) {
                 dismiss();
                 return true;
             }
@@ -228,9 +237,10 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
         public void onAdDidReachEnd() {
             mReady = false;
             mFinished = true;
-            new Handler(Looper.getMainLooper()).postDelayed(() ->
-                    showRewardedCloseButton(),600);
-
+            if (!mHasEndCard) {
+                new Handler(Looper.getMainLooper()).postDelayed(() ->
+                        showRewardedCloseButton(), 600);
+            }
             if (getBroadcastSender() != null) {
                 getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.VIDEO_FINISH);
             }
@@ -267,7 +277,10 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
         }
     };
 
-    private final CloseButtonListener mAdCloseButtonListener = () -> mFinished = true;
+    private final CloseButtonListener mAdCloseButtonListener = () -> {
+        mFinished = true;
+        mIsSkippable = true;
+    };
 
     @Override
     public void onImpression() {
@@ -281,6 +294,19 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
             Bundle extras = new Bundle();
             extras.putInt(HyBidRewardedBroadcastReceiver.VIDEO_PROGRESS, progressPercentage);
             getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.VIDEO_DISMISS, extras);
+        }
+    }
+
+    @Override
+    public void showButton() {
+        showRewardedCloseButton();
+    }
+
+    @Override
+    public void hideButton() {
+        CloseableContainer closeableContainer = getCloseableContainer();
+        if (closeableContainer != null) {
+            closeableContainer.setCloseVisible(true);
         }
     }
 }

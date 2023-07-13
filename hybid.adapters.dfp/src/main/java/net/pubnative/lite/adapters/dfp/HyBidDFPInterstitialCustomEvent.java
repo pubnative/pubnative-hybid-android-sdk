@@ -37,6 +37,7 @@ import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenterFactor
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.SkipOffset;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.SkipOffsetManager;
 
 public class HyBidDFPInterstitialCustomEvent implements CustomEventInterstitial, InterstitialPresenter.Listener {
     private static final String TAG = HyBidDFPInterstitialCustomEvent.class.getSimpleName();
@@ -76,23 +77,14 @@ public class HyBidDFPInterstitialCustomEvent implements CustomEventInterstitial,
             return;
         }
 
-        Integer remoteConfSkipOst = ad.getHtmlSkipOffset();
-        Integer remoteConfVideoSkipOst = ad.getVideoSkipOffset();
 
+        Integer htmlSkipOffsetInt = SkipOffsetManager.getInterstitialHTMLSkipOffset(ad.getHtmlSkipOffset(), HyBid.getHtmlInterstitialSkipOffset().getOffset());
         SkipOffset htmlSkipOffset;
+        Integer videoSkipOffsetInt = SkipOffsetManager.getInterstitialVideoSkipOffset(ad.getVideoSkipOffset(), HyBid.getVideoInterstitialSkipOffset().getOffset(), HyBid.getVideoInterstitialSkipOffset().isCustom(), null, null, false);
         SkipOffset videoSkipOffset;
 
-        if(remoteConfSkipOst != null){
-            htmlSkipOffset = new SkipOffset(remoteConfSkipOst, true);
-        }else{
-            htmlSkipOffset = HyBid.getHtmlInterstitialSkipOffset();
-        }
-
-        if(remoteConfVideoSkipOst != null){
-            videoSkipOffset = new SkipOffset(remoteConfVideoSkipOst, true);
-        }else{
-            videoSkipOffset = HyBid.getVideoInterstitialSkipOffset();
-        }
+        htmlSkipOffset = new SkipOffset(htmlSkipOffsetInt, SkipOffsetManager.isCustomInterstitialHTMLSkipOffset());
+        videoSkipOffset = new SkipOffset(videoSkipOffsetInt, SkipOffsetManager.isCustomInterstitialVideoSkipOffset());
 
         if (htmlSkipOffset.getOffset() > 0 || videoSkipOffset.getOffset() > 0) {
             mPresenter = new InterstitialPresenterFactory(context, zoneIdKey)

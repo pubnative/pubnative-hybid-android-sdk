@@ -42,12 +42,13 @@ android {
             includeAndroidResources = true
         }
     }
+    namespace 'net.pubnative.hybid.adapters.admob'
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':hybid.sdk')
-    compileOnly 'com.google.android.gms:play-services-ads:21.5.0'
+    compileOnly 'com.google.android.gms:play-services-ads:22.1.0'
 
     implementation project(':hybid.sdk.core')
     implementation project(':hybid.sdk.logger')

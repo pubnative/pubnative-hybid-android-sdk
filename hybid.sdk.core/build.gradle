@@ -35,11 +35,13 @@ android {
             buildConfigField "String", "OMIDPV", "\"$omid_version\""
             buildConfigField "String", "OMIDPN", "\"pubnativenet\""
             buildConfigField "String", "SDK_VERSION", "\"$version_name\""
+            buildConfigField "String", "BASE_RTB_URL", "\"https://dsp.pubnative.net/\""
         }
         debug {
             buildConfigField "String", "OMIDPV", "\"$omid_version\""
             buildConfigField "String", "OMIDPN", "\"pubnativenet\""
             buildConfigField "String", "SDK_VERSION", "\"$version_name\""
+            buildConfigField "String", "BASE_RTB_URL", "\"https://dsp.pubnative.net/\""
         }
     }
 
@@ -47,6 +49,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+    namespace 'net.pubnative.lite.sdk.core'
 }
 
 dependencies {

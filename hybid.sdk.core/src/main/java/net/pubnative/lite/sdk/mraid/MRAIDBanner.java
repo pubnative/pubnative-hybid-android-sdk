@@ -34,9 +34,9 @@ import android.webkit.WebView;
 @SuppressLint("ViewConstructor")
 public class MRAIDBanner extends MRAIDView {
 
-    public MRAIDBanner(Context context, String baseUrl, String data, Boolean showTimerBeforeEndCard, String[] supportedNativeFeatures, MRAIDViewListener viewListener, MRAIDNativeFeatureListener nativeFeatureListener, ViewGroup contentInfo) {
+    public MRAIDBanner(Context context, String baseUrl, String data, Boolean showTimerBeforeEndCard, Boolean isExpandEnabled, String[] supportedNativeFeatures, MRAIDViewListener viewListener, MRAIDNativeFeatureListener nativeFeatureListener, ViewGroup contentInfo) {
 
-        super(context, baseUrl, data, showTimerBeforeEndCard, supportedNativeFeatures, viewListener, nativeFeatureListener, contentInfo, false);
+        super(context, baseUrl, data, showTimerBeforeEndCard, supportedNativeFeatures, viewListener, nativeFeatureListener, contentInfo, false, isExpandEnabled);
 
         if (webView != null) {
             webView.setBackgroundColor(Color.TRANSPARENT);
@@ -54,13 +54,13 @@ public class MRAIDBanner extends MRAIDView {
         return state != STATE_DEFAULT && super.onBackPressed();
     }
 
-    @Override
-    protected void close() {
-        if (state == STATE_LOADING || state == STATE_DEFAULT || state == STATE_HIDDEN) {
-            return;
-        }
-        super.close();
-    }
+//    @Override
+//    protected void close() {
+//        if (state == STATE_LOADING || state == STATE_DEFAULT || state == STATE_HIDDEN) {
+//            return;
+//        }
+//        super.close();
+//    }
 
     @Deprecated
     @Override

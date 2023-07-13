@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="net.pubnative.lite.demo">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -76,6 +75,10 @@
             android:label="@string/hybid_rewarded"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
+            tools:ignore="LockedOrientationActivity" />
+        <activity
+            android:name="net.pubnative.lite.sdk.contentinfo.AdFeedbackActivity"
+            android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".ui.activities.maxads.MaxAdsMediationBannerActivity"

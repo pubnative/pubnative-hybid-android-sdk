@@ -30,6 +30,8 @@ import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.views.endcard.HyBidEndCardView;
+import net.pubnative.lite.sdk.vpaid.AdCloseButtonListener;
 import net.pubnative.lite.sdk.vpaid.CloseButtonListener;
 import net.pubnative.lite.sdk.vpaid.VastActivityInteractor;
 import net.pubnative.lite.sdk.vpaid.VideoAdController;
@@ -38,7 +40,7 @@ import net.pubnative.lite.sdk.vpaid.VideoVisibilityManager;
 import net.pubnative.lite.sdk.vpaid.helpers.BitmapHelper;
 import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
 import net.pubnative.lite.sdk.vpaid.models.CloseCardData;
-import net.pubnative.lite.sdk.vpaid.models.EndCardData;
+import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.utils.ImageUtils;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
@@ -56,15 +58,10 @@ public class ViewControllerVast implements View.OnClickListener {
     private LinearCountDownView mLinearCountdownView;
     private FrameLayout mVideoPlayerLayout;
     private TextureView mVideoPlayerLayoutTexture;
-    private ImageView mStaticEndCardView;
-    private FrameLayout mHtmlEndCardContainer;
-    private MRAIDBanner mHtmlEndCardView;
     private View mControlsLayout;
-    private View mEndCardLayout;
-    private ImageView mEndCardCloseView;
+    private HyBidEndCardView mEndCardView;
     private View mCloseCardLayout;
     private FrameLayout mHtmlCloseCardContainer;
-    private ImageView mCloseCardCloseView;
     private TextView mCloseCardTitleView;
     private ImageView mCloseCardIconView;
     private RatingBar mCloseCardRatingView;
@@ -81,6 +78,8 @@ public class ViewControllerVast implements View.OnClickListener {
     private ImageView mMuteView;
     private SimpleTimer mEndcardTimer;
     private Integer mRemoteEndCardCloseDelay;
+    private Integer mRemoteNativeCloseButtonDelay;
+    private AdCloseButtonListener mAdCloseButtonListener;
 
     VideoVisibilityManager videoVisibilityManager;
     VastActivityInteractor interactor;
@@ -88,11 +87,13 @@ public class ViewControllerVast implements View.OnClickListener {
     private InterstitialActionBehaviour interstitialClickBehaviour;
     private InterstitialActionBehaviour remoteConfigInterstitialClickBehaviour = null;
 
-    public ViewControllerVast(VideoAdController adController, boolean isFullscreen, Integer endCardCloseDelay, Boolean fullScreenClickability) {
+    public ViewControllerVast(VideoAdController adController, boolean isFullscreen, Integer endCardCloseDelay, Integer nativeCloseButtonDelay, Boolean fullScreenClickability, AdCloseButtonListener adCloseButtonListener) {
         mAdController = adController;
         mIsFullscreen = isFullscreen;
         videoVisibilityManager = VideoVisibilityManager.getInstance();
         mRemoteEndCardCloseDelay = endCardCloseDelay;
+        mRemoteNativeCloseButtonDelay = nativeCloseButtonDelay;
+        mAdCloseButtonListener = adCloseButtonListener;
         if (fullScreenClickability != null) {
             if (fullScreenClickability)
                 remoteConfigInterstitialClickBehaviour = InterstitialActionBehaviour.HB_CREATIVE;
@@ -136,23 +137,12 @@ public class ViewControllerVast implements View.OnClickListener {
                 mVideoPlayerLayout.addView(mVideoPlayerLayoutTexture, 0, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
             }
 
-            mEndCardLayout = mControlsLayout.findViewById(R.id.endCardLayout);
-            mEndCardLayout.setVisibility(View.GONE);
-            mStaticEndCardView = mControlsLayout.findViewById(R.id.staticEndCardView);
-            mHtmlEndCardContainer = mControlsLayout.findViewById(R.id.htmlEndCardContainer);
-
-            mEndCardCloseView = mControlsLayout.findViewById(R.id.closeEndCardView);
-            mEndCardCloseView.setOnClickListener(this);
-            mEndCardCloseView.setVisibility(View.GONE);
-
-            Bitmap closeBitmap = BitmapHelper.toBitmap(mEndCardCloseView.getContext(), HyBid.getNormalCloseXmlResource(), R.mipmap.close);
-            if (closeBitmap != null) ((ImageView) mEndCardCloseView).setImageBitmap(closeBitmap);
-            else
-                ((ImageView) mEndCardCloseView).setImageBitmap(BitmapHelper.decodeResource(mEndCardCloseView.getContext(), R.mipmap.close));
+            mEndCardView = new HyBidEndCardView(context); //mControlsLayout.findViewById(R.id.endCardView);
+            mEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            mEndCardView.setVisibility(View.GONE);
 
             mCloseCardLayout = mControlsLayout.findViewById(R.id.closeCardLayout);
             mCloseCardLayout.setVisibility(View.GONE);
-            mCloseCardCloseView = mCloseCardLayout.findViewById(R.id.closeView);
             mStaticCloseCardView = mCloseCardLayout.findViewById(R.id.staticCloseCardView);
             mHtmlCloseCardContainer = mCloseCardLayout.findViewById(R.id.htmlCloseCardContainer);
             mCloseCardTitleView = mCloseCardLayout.findViewById(R.id.closeCardTitle);
@@ -162,7 +152,6 @@ public class ViewControllerVast implements View.OnClickListener {
             mCloseCardActionView = mCloseCardLayout.findViewById(R.id.closeCardActionButton);
             mCloseCardIconView = mCloseCardLayout.findViewById(R.id.closeCardIconImageView);
             closeCardVotesLayout = mCloseCardLayout.findViewById(R.id.closeCardVotesLayout);
-            mCloseCardCloseView.setOnClickListener(this);
 
             mControlsLayout.findViewById(R.id.openURL).setOnClickListener(this);
 
@@ -191,10 +180,7 @@ public class ViewControllerVast implements View.OnClickListener {
             mAdController.addViewabilityFriendlyObstruction(mControlsLayout, FriendlyObstructionPurpose.VIDEO_CONTROLS, "Video controls");
 
             bannerView.addView(mControlsLayout);
-
-            if (mAdController.isRewarded()) {
-                mSkipCountdownView.setVisibility(View.GONE);
-            }
+            bannerView.addView(mEndCardView);
         }
     }
 
@@ -248,7 +234,7 @@ public class ViewControllerVast implements View.OnClickListener {
     };
 
     public void adjustLayoutParams(int width, int height) {
-        if(mControlsLayout == null){
+        if (mControlsLayout == null) {
             Logger.e(LOG_TAG, "ViewControllerVast.adjustLayoutParams: Log: mControlsLayout is null");
             return;
         }
@@ -297,33 +283,26 @@ public class ViewControllerVast implements View.OnClickListener {
     }
 
     public void showEndCard(EndCardData endCardData, String imageUri, CloseButtonListener closeButtonListener) {
-        if (mEndCardLayout != null) {
-            mEndCardLayout.setVisibility(View.VISIBLE);
-            mEndCardLayout.setOnClickListener(v -> validateOpenURLClicked());
-            SkipOffset endCardCloseDelay = getEndCardCloseDelay();
-            if (endCardData != null) {
-                mControlsLayout.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-                if (endCardData.getType() == EndCardData.Type.STATIC_RESOURCE) {
-                    mHtmlEndCardContainer.setVisibility(View.GONE);
-                    mStaticEndCardView.setVisibility(View.VISIBLE);
-                    mVideoPlayerLayout.setVisibility(View.GONE);
-                    ImageUtils.setScaledImage(mStaticEndCardView, imageUri);
-                } else if (!TextUtils.isEmpty(endCardData.getContent())) {
-                    mStaticEndCardView.setVisibility(View.GONE);
-                    mHtmlEndCardContainer.setVisibility(View.VISIBLE);
-                    mVideoPlayerLayout.setVisibility(View.GONE);
-                    if (endCardData.getType() == EndCardData.Type.IFRAME_RESOURCE) {
-                        mHtmlEndCardView = new MRAIDBanner(mEndCardLayout.getContext(), endCardData.getContent(), "", false, new String[]{}, mraidViewListener, mraidNativeFeatureListener, null);
-                    } else {
-                        mHtmlEndCardView = new MRAIDBanner(mEndCardLayout.getContext(), "", endCardData.getContent(), false, new String[]{}, mraidViewListener, mraidNativeFeatureListener, null);
-                    }
-                    mHtmlEndCardView.setSkipOffset(endCardCloseDelay.getOffset());
-                    mHtmlEndCardContainer.addView(mHtmlEndCardView);
+        if (mEndCardView != null) {
+            mEndCardView.setEndCardViewListener(new HyBidEndCardView.EndCardViewListener(){
+                @Override
+                public void onClick(Boolean isCustomEndCard, String openUrl) {
+                    validateOpenURLClicked();
                 }
-            }
+            });
 
+            SkipOffset endCardCloseDelay = getEndCardCloseDelay();
+            mEndCardView.setSkipOffset(endCardCloseDelay);
+            mEndCardView.show(endCardData, imageUri);
             if (mIsFullscreen) {
-                showEndCardCloseButton(endCardCloseDelay.getOffset(), closeButtonListener);
+                mEndCardView.showCloseButton(() -> {
+                    if (closeButtonListener != null) {
+                        closeButtonListener.onCloseButtonVisible();
+                    }
+                    if (mAdCloseButtonListener != null) {
+                        mAdCloseButtonListener.showButton();
+                    }
+                });
             }
 
             ReportingEvent event = new ReportingEvent();
@@ -359,7 +338,7 @@ public class ViewControllerVast implements View.OnClickListener {
         mCloseCardActionView.setOnClickListener(v -> validateOpenURLClicked());
 
         if (closeCardData.getBanner() != null) {
-            // add Check if is static banner or MRAIDBanne in the feature
+            // add Check if is static banner or MRAIDBanner in the feature
             if (true) {
                 if (closeCardData.getBannerImage() != null) {
                     ImageUtils.setScaledImage(mStaticCloseCardView, closeCardData.getBannerImage());
@@ -367,7 +346,7 @@ public class ViewControllerVast implements View.OnClickListener {
                 }
             } else {
                 mStaticCloseCardView.setVisibility(View.GONE);
-                mHtmlCloseCardView = new MRAIDBanner(mEndCardLayout.getContext(), closeCardData.getBanner(), "", false, new String[]{}, mraidViewListener, mraidNativeFeatureListener, null);
+                mHtmlCloseCardView = new MRAIDBanner(mCloseCardLayout.getContext(), closeCardData.getBanner(), "", false, false, new String[]{}, mraidViewListener, mraidNativeFeatureListener, null);
                 mHtmlCloseCardContainer.addView(mHtmlCloseCardView);
             }
         }
@@ -437,11 +416,9 @@ public class ViewControllerVast implements View.OnClickListener {
     };
 
     public void showSkipButton() {
-        if (!mAdController.isRewarded()) {
-            if (mSkipView != null) {
-                mSkipView.setVisibility(View.VISIBLE);
-                mSkipView.setClickable(true);
-            }
+        if (mSkipView != null) {
+            mSkipView.setVisibility(View.VISIBLE);
+            mSkipView.setClickable(true);
         }
     }
 
@@ -465,7 +442,7 @@ public class ViewControllerVast implements View.OnClickListener {
     }
 
     public boolean isEndCard() {
-        return mEndCardLayout != null && mEndCardLayout.getVisibility() != View.VISIBLE;
+        return mEndCardView != null && mEndCardView.getVisibility() != View.VISIBLE;
     }
 
     public void dismiss() {
@@ -475,14 +452,8 @@ public class ViewControllerVast implements View.OnClickListener {
     }
 
     public void destroy() {
-        if (mStaticEndCardView != null) {
-            mStaticEndCardView.setImageDrawable(null);
-        }
-        if (mHtmlEndCardView != null) {
-            mHtmlEndCardView.destroy();
-        }
-        if (mEndcardTimer != null) {
-            mEndcardTimer.cancel();
+        if (mEndCardView != null) {
+            mEndCardView.destroy();
         }
     }
 
@@ -490,8 +461,6 @@ public class ViewControllerVast implements View.OnClickListener {
     public void onClick(View v) {
         if (v.getId() == R.id.closeView) {
             closeSelf();
-        } else if (v.getId() == R.id.closeEndCardView) {
-            closeEndCard();
         } else if (v.getId() == R.id.skipView || v.getId() == R.id.progressSkipView) {
             skipVideo();
         } else if (v.getId() == R.id.muteView) {
@@ -509,49 +478,18 @@ public class ViewControllerVast implements View.OnClickListener {
         mAdController.closeSelf();
     }
 
-    private void closeEndCard() {
-        mAdController.closeEndCard();
-    }
-
     private void replayVideo() {
-        mEndCardLayout.setVisibility(View.GONE);
+        mEndCardView.hide();
         mVideoPlayerLayout.setVisibility(View.VISIBLE);
         mAdController.playAd();
     }
 
-    private void showEndCardCloseButton(int endCardDelay, CloseButtonListener closeButtonListener) {
-        if (endCardDelay >= 0) {
-            int endCardDelayInMillis = endCardDelay * 1000;
-
-            mEndcardTimer = new SimpleTimer(endCardDelayInMillis, new SimpleTimer.Listener() {
-                @Override
-                public void onFinish() {
-                    mEndCardCloseView.setVisibility(View.VISIBLE);
-                    closeButtonListener.onCloseButtonVisible();
-                }
-
-                @Override
-                public void onTick(long millisUntilFinished) {
-                }
-            });
-            mEndcardTimer.start();
-        } else {
-            mEndCardCloseView.setVisibility(View.VISIBLE);
-        }
-    }
-
     public void pauseEndCardCloseButtonTimer() {
-        if (mEndcardTimer != null)
-            mEndcardTimer.pause();
-        if (mHtmlEndCardView != null)
-            mHtmlEndCardView.pause();
+        if (mEndCardView != null) mEndCardView.pause();
     }
 
     public void resumeEndCardCloseButtonTimer() {
-        if (mEndcardTimer != null)
-            mEndcardTimer.resume();
-        if (mHtmlEndCardView != null)
-            mHtmlEndCardView.resume();
+        if (mEndCardView != null) mEndCardView.resume();
     }
 
     public void muteVideo() {

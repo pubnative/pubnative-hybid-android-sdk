@@ -37,12 +37,13 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    namespace 'com.ironsource.adapters.custom.verve'
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':hybid.sdk')
-    compileOnly 'com.ironsource.sdk:mediationsdk:7.3.0'
+    compileOnly 'com.ironsource.sdk:mediationsdk:7.3.1.1'
 
     implementation project(':hybid.sdk.core')
     implementation project(':hybid.sdk.logger')

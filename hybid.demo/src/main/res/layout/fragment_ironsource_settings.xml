@@ -85,11 +85,20 @@
             android:text="@string/init_ironsouce" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_ironsource_mediation_test"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/mediation_test_suite" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_save_ironsource_settings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="20dp"
             android:text="@string/save_ironsouce_settings" />

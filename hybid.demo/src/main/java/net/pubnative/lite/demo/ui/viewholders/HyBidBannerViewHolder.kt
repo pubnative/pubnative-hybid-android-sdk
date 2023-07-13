@@ -4,13 +4,12 @@ import android.text.TextUtils
 import android.util.Log
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.listeners.InFeedAdListener
-import net.pubnative.lite.demo.util.convertDpToPx
 import net.pubnative.lite.sdk.models.AdSize
-import net.pubnative.lite.sdk.models.ImpressionTrackingMethod
 import net.pubnative.lite.sdk.views.HyBidAdView
 import net.pubnative.lite.sdk.views.PNAdView
 
@@ -18,19 +17,25 @@ class HyBidBannerViewHolder(itemView: View, val adListener: InFeedAdListener) :
     RecyclerView.ViewHolder(itemView), PNAdView.Listener {
     private val TAG = HyBidBannerViewHolder::class.java.simpleName
 
-    private val adView: HyBidAdView = itemView.findViewById(R.id.banner_view)
+    private lateinit var adView: HyBidAdView
 
     fun bind(zoneId: String, adSize: AdSize, shouldLoad: Boolean, autoRefresh: Boolean) {
         if (!TextUtils.isEmpty(zoneId) && shouldLoad) {
-            adView.setAdSize(adSize)
-            val layoutParams = FrameLayout.LayoutParams(
-                convertDpToPx(itemView.context, adSize.width.toFloat()),
-                convertDpToPx(itemView.context, adSize.height.toFloat())
-            )
-            layoutParams.gravity = Gravity.CENTER_HORIZONTAL
+            val container = itemView.findViewById<FrameLayout>(R.id.banner_view)
+            container.removeAllViews()
 
-            adView.layoutParams = layoutParams
-            adView.visibility = View.VISIBLE
+            adView = HyBidAdView(itemView.context, adSize)
+
+            val layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            layoutParams.gravity = Gravity.CENTER
+
+            container.layoutParams = layoutParams
+            container.visibility = View.VISIBLE
+            container.addView(adView)
+
             autoRefreshCheck(autoRefresh)
             adView.load(zoneId, this)
         }

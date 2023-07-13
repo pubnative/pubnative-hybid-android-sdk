@@ -148,9 +148,6 @@ public class VastRewardedPresenter implements RewardedPresenter, HyBidRewardedBr
         if (mVideoListener != null) {
             mVideoListener.onVideoFinished();
         }
-        if (mListener != null) {
-            mListener.onRewardedFinished(this);
-        }
     }
 
     @Override

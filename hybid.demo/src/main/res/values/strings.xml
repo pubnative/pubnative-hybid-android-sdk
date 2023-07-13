@@ -66,6 +66,7 @@
     <string name="hint_ironsource_rewarded_ad_unit_id">Rewarded Ad Unit ID</string>
     <string name="save_ironsouce_settings">Save IronSource settings</string>
     <string name="init_ironsouce">Initialize IronSource SDK</string>
+    <string name="mediation_test_suite">Integration test suite</string>
 
     <string name="hint_pn_apptoken">App token</string>
     <string name="hint_pn_age">Age</string>
@@ -289,4 +290,5 @@
     <string name="url">URL</string>
     <string name="custom_skip_offset_disabled">Custom Skip Offset Disabled</string>
     <string name="response_source">Response source</string>
+    <string name="post_body">Pubnative Request Body:</string>
 </resources>

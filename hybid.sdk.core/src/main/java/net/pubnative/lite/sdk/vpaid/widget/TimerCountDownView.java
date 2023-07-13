@@ -42,7 +42,7 @@ public class TimerCountDownView extends CountDownView {
         if (timerContainer.getVisibility() == View.GONE) {
             timerContainer.setVisibility(View.VISIBLE);
         }
-        int remainSec = (totalMs - currentMs) / 1000;
+        int remainSec = (totalMs - currentMs) / 1000 + 1;
         int minutes = remainSec / 60;
         int seconds = remainSec % 60;
         String minutesText = (minutes >= 10) ? Integer.toString(minutes) : "0" + minutes;

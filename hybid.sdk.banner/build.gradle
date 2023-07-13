@@ -41,6 +41,7 @@ android {
     lint {
         abortOnError false
     }
+    namespace 'net.pubnative.lite.sdk.banner'
 
 }
 

@@ -16,9 +16,6 @@ import net.pubnative.lite.sdk.utils.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Calendar;
-import java.util.Locale;
-
 public class DiagnosticsManager implements ReportingEventCallback {
     private static final String TAG = DiagnosticsManager.class.getSimpleName();
 
@@ -46,12 +43,7 @@ public class DiagnosticsManager implements ReportingEventCallback {
     }
 
     private Boolean isDiagnosticsEnabled() {
-        Boolean isEnabled = HyBid.isDiagnosticsEnabled();
-
-        if (!isEnabled)
-            isEnabled = HyBid.getConfigManager().getFeatureResolver().isDiagnosticsModeEnabled(RemoteConfigFeature.Reporting.DIAGNOSTIC_REPORT);
-
-        return isEnabled;
+        return HyBid.isDiagnosticsEnabled();
     }
 
     private void reportInitialisation(ReportingEvent event) {

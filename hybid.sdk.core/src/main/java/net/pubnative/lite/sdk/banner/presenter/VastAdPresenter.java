@@ -31,8 +31,10 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.analytics.Reporting;
-import net.pubnative.lite.sdk.contentinfo.AdFeedbackView;
+import net.pubnative.lite.sdk.contentinfo.AdFeedbackFormHelper;
+import net.pubnative.lite.sdk.contentinfo.listeners.AdFeedbackLoadListener;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.ContentInfo;
@@ -44,9 +46,9 @@ import net.pubnative.lite.sdk.models.PositionX;
 import net.pubnative.lite.sdk.models.PositionY;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
-import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.URLValidator;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.visibility.ImpressionManager;
 import net.pubnative.lite.sdk.visibility.ImpressionTracker;
@@ -91,8 +93,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
         mAd = ad;
 
         ImpressionTrackingMethod remoteConfigTrackingMethod = null;
-        if (ad != null && ad.getImpressionTrackingMethod() != null &&
-                ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod()) != null) {
+        if (ad != null && ad.getImpressionTrackingMethod() != null && ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod()) != null) {
             remoteConfigTrackingMethod = ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod());
         }
 
@@ -182,11 +183,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
     @Override
     public void startTracking() {
         if (mTrackingMethod == ImpressionTrackingMethod.AD_VIEWABLE) {
-            ImpressionManager.startTrackingView(mVideoPlayer,
-                    mAdSize,
-                    mAd.getImpressionMinVisibleTime(),
-                    mAd.getImpressionVisiblePercent(),
-                    mNativeTrackerListener);
+            ImpressionManager.startTrackingView(mVideoPlayer, mAdSize, mAd.getImpressionMinVisibleTime(), mAd.getImpressionVisiblePercent(), mNativeTrackerListener);
         } else {
             if (mVideoAd != null) {
                 mVideoAd.show();
@@ -396,38 +393,43 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
     String processedURL = "";
 
     @Override
-    public void onLinkClicked(String url) {
-        AdFeedbackView adFeedbackView = new AdFeedbackView();
-        adFeedbackView.prepare(mContext, url, mAd, Reporting.AdFormat.BANNER,
-                IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
+    public synchronized void onLinkClicked(String url) {
+        if (!isLinkClickRunning) {
+            isLinkClickRunning = true;
+            AdFeedbackFormHelper adFeedbackFormHelper = new AdFeedbackFormHelper();
+            URLValidator.isValidURL(url, isValid -> {
+                if (isValid) {
+                    adFeedbackFormHelper.showFeedbackForm(mContext, url, mAd, Reporting.AdFormat.BANNER, IntegrationType.STANDALONE, new AdFeedbackLoadListener() {
 
-                    @Override
-                    public void onLoad(String url) {
-                        //load simple dialog
-                        processedURL = url;
-                    }
+                        @Override
+                        public void onLoad(String url1) {}
 
-                    @Override
-                    public void onLoadFinished() {
-                        isFeedbackFormVisible = true;
-                        if (mVideoAd != null && mVideoAd.isShowing()) {
-                            mVideoAd.pause();
+                        @Override
+                        public void onLoadFinished() {
+                            isFeedbackFormVisible = true;
+                            isLinkClickRunning = false;
                         }
-                        adFeedbackView.showFeedbackForm(mContext, processedURL);
-                    }
 
-                    @Override
-                    public void onLoadFailed(Throwable error) {
-                        Logger.e(TAG, error.getMessage());
-                    }
-
-                    @Override
-                    public void onFormClosed() {
-                        isFeedbackFormVisible = false;
-                        if (mVideoAd != null && mVideoAd.isShowing()) {
-                            mVideoAd.resume();
+                        @Override
+                        public void onLoadFailed(Throwable error) {
+                            Logger.e(TAG, error.getMessage());
+                            isLinkClickRunning = false;
                         }
-                    }
-                });
+
+                        @Override
+                        public void onFormClosed() {
+                            isFeedbackFormVisible = false;
+                            isLinkClickRunning = false;
+                        }
+                    });
+                } else {
+                    Logger.e(TAG, "URL is invalid");
+                    isLinkClickRunning = false;
+                }
+            });
+        }
     }
+
+
+    public boolean isLinkClickRunning = false;
 }

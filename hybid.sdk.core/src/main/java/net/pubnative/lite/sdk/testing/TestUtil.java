@@ -6,6 +6,7 @@ import net.pubnative.lite.sdk.models.AdData;
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdResponse;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
+import net.pubnative.lite.sdk.models.PNAdRequest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,15 +27,15 @@ public class TestUtil {
     }
 
     public static AdRequest createTestAdRequest() {
-        AdRequest request = new AdRequest();
-        request.apptoken = "dde3c298b47648459f8ada4a982fa92d";
+        PNAdRequest request = new PNAdRequest();
+        request.appToken = "dde3c298b47648459f8ada4a982fa92d";
         request.os = "android";
         request.osver = "8.1.0";
         request.dnt = "0";
         request.mf = "points,revenuemodel,contentinfo";
         request.al = "s";
         request.gid = "d98374d3-3b69-4a4b-a2c1-9dcb4c588849";
-        request.zoneid = "2";
+        request.zoneId = "2";
         request.bundleid = "net.pubnative.lite.demo";
         request.testMode = "0";
         request.locale = "en";

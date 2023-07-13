@@ -23,14 +23,13 @@
 package net.pubnative.lite.sdk.rewarded.activity;
 
 import android.app.Activity;
-import android.app.DialogFragment;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -40,7 +39,8 @@ import android.widget.ProgressBar;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.Reporting;
-import net.pubnative.lite.sdk.contentinfo.AdFeedbackView;
+import net.pubnative.lite.sdk.contentinfo.AdFeedbackFormHelper;
+import net.pubnative.lite.sdk.contentinfo.listeners.AdFeedbackLoadListener;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ContentInfo;
 import net.pubnative.lite.sdk.models.ContentInfoIconXPosition;
@@ -50,13 +50,14 @@ import net.pubnative.lite.sdk.models.PositionX;
 import net.pubnative.lite.sdk.models.PositionY;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastSender;
-import net.pubnative.lite.sdk.rewarded.R;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.SkipOffsetManager;
+import net.pubnative.lite.sdk.utils.URLValidator;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.views.CloseableContainer;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
-import net.pubnative.lite.sdk.views.ProgressDialogFragment;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
+import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
 import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
 
@@ -75,6 +76,10 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
     private ProgressBar mProgressBar;
     protected boolean mIsFeedbackFormOpen = false;
     private boolean mIsFeedbackFormLoading = false;
+    private AdFeedbackFormHelper adFeedbackFormHelper;
+
+    protected Integer backButtonDelay = -1;
+    protected boolean mIsSkippable = false;
 
     public abstract View getAdView();
 
@@ -97,6 +102,9 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
             mBroadcastSender = new HyBidRewardedBroadcastSender(this, broadcastId);
 
             View adView = getAdView();
+            if (getAd() != null) {
+                backButtonDelay = SkipOffsetManager.getBackButtonDelay(getAd().getBackButtonDelay());
+            }
 
             if (adView != null) {
 
@@ -131,6 +139,27 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
         } else {
             finish();
         }
+    }
+
+    SimpleTimer backTimer;
+
+    protected void handleBackClickability() {
+        int delay = backButtonDelay * 1000;
+
+        backTimer = new SimpleTimer(delay, new SimpleTimer.Listener() {
+
+            @Override
+            public void onFinish() {
+                mIsSkippable = true;
+            }
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+                mIsSkippable = false;
+            }
+        }, 1000);
+
+        backTimer.start();
     }
 
     protected void setupContentInfo() {
@@ -168,11 +197,18 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
                         }
                     }
 
+                    if (yGravity == Gravity.TOP && xGravity == Gravity.END) {
+                        mCloseableContainer.setClosePosition(CloseableContainer.ClosePosition.TOP_LEFT);
+                    }
+
                     FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                     layoutParams.gravity = xGravity | yGravity;
                     mCloseableContainer.addView(contentInfoView, layoutParams);
                 } else {
                     mCloseableContainer.addView(contentInfoView);
+                    if (getAd().getContentInfoIconYPosition() == ContentInfoIconYPosition.TOP && getAd().getContentInfoIconXPosition() == ContentInfoIconXPosition.RIGHT) {
+                        mCloseableContainer.setClosePosition(CloseableContainer.ClosePosition.TOP_LEFT);
+                    }
                 }
                 if (contentInfo != null && contentInfo.getViewTrackers() != null && !contentInfo.getViewTrackers().isEmpty()) {
                     for (String tracker : contentInfo.getViewTrackers()) {
@@ -213,16 +249,7 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
     }
 
     protected void showRewardedCloseButton() {
-        boolean hasEndcard = false;
-        if (getAd() != null && getAd().hasEndCard()) {
-            if (getAd().isEndCardEnabled() != null) {
-                hasEndcard = getAd().isEndCardEnabled();
-            } else {
-                hasEndcard = HyBid.isEndCardEnabled();
-            }
-        }
-
-        if (mCloseableContainer != null && !hasEndcard) {
+        if (mCloseableContainer != null) {
             mCloseableContainer.setCloseVisible(true);
             mCloseableContainer.setOnCloseListener(mCloseListener);
         }
@@ -259,43 +286,47 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
     String processedURL = "";
 
     @Override
-    public void onLinkClicked(String url) {
-        if (!mIsFeedbackFormOpen && !mIsFeedbackFormLoading) {
-            AdFeedbackView adFeedbackView = new AdFeedbackView();
-            adFeedbackView.prepare(this, url, mAd, Reporting.AdFormat.REWARDED, IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
-                @Override
-                public void onLoad(String url) {
-                    mIsFeedbackFormLoading = true;
-                    processedURL = url;
-                    showProgressDialog(getString(R.string.feedback_form), getString(R.string.loading));
-                }
+    public synchronized void onLinkClicked(String url) {
+        if (!mIsFeedbackFormOpen && !mIsFeedbackFormLoading && !isLinkClickRunning) {
+            isLinkClickRunning = true;
+            adFeedbackFormHelper = new AdFeedbackFormHelper();
+            URLValidator.isValidURL(url, isValid -> {
+                if (isValid) {
+                    adFeedbackFormHelper.showFeedbackForm(HyBidRewardedActivity.this, url, mAd, Reporting.AdFormat.REWARDED, IntegrationType.STANDALONE, new AdFeedbackLoadListener() {
+                        @Override
+                        public void onLoad(String url1) {
+                            mIsFeedbackFormLoading = true;
+                        }
 
-                @Override
-                public void onLoadFinished() {
-                    hideProgressDialog();
-                    mIsFeedbackFormLoading = false;
-                    pauseAd();
-                    mIsFeedbackFormOpen = true;
-                    adFeedbackView.showFeedbackForm(HyBidRewardedActivity.this, processedURL);
-                }
+                        @Override
+                        public void onLoadFinished() {
+                            isLinkClickRunning = false;
+                            mIsFeedbackFormLoading = false;
+                            mIsFeedbackFormOpen = true;
+                        }
 
-                @Override
-                public void onLoadFailed(Throwable error) {
-                    hideProgressDialog();
-                    mIsFeedbackFormLoading = false;
-                    Logger.e(TAG, error.getMessage());
-                }
+                        @Override
+                        public void onLoadFailed(Throwable error) {
+                            isLinkClickRunning = false;
+                            mIsFeedbackFormLoading = false;
+                            Logger.e(TAG, error.getMessage());
+                        }
 
-                @Override
-                public void onFormClosed() {
-                    hideProgressDialog();
-                    mIsFeedbackFormOpen = false;
-                    mIsFeedbackFormLoading = false;
-                    resumeAd();
+                        @Override
+                        public void onFormClosed() {
+                            isLinkClickRunning = false;
+                            mIsFeedbackFormOpen = false;
+                            mIsFeedbackFormLoading = false;
+                        }
+                    });
+                } else {
+                    isLinkClickRunning = false;
                 }
             });
         }
     }
+
+    public boolean isLinkClickRunning = false;
 
     protected HyBidRewardedBroadcastSender getBroadcastSender() {
         return mBroadcastSender;
@@ -317,24 +348,41 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
         this.mIsVast = isVast;
     }
 
-    public void showProgressDialog(String title, String message) {
-        Fragment prev = getFragmentManager().findFragmentByTag("progress dialog");
-
-        if (prev != null) {
-            getFragmentManager().beginTransaction().remove(prev).commit();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (backTimer != null) {
+            backTimer.resumeTimer();
         }
-
-        getFragmentManager().beginTransaction().addToBackStack(null).commit();
-
-        DialogFragment newFragment = ProgressDialogFragment.newInstance(title, message);
-        newFragment.show(getFragmentManager(), "progress dialog");
     }
 
-    public void hideProgressDialog() {
-        Fragment prev = getFragmentManager().findFragmentByTag("progress dialog");
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+            if (mIsSkippable) {
+                dismiss();
+                return true;
+            }
+        } else {
+            return super.onKeyDown(keyCode, event);
+        }
+        return false;
+    }
 
-        if (prev != null) {
-            getFragmentManager().beginTransaction().remove(prev).commit();
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (backTimer != null) {
+            backTimer.pauseTimer();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (backTimer != null) {
+            backTimer.onFinish();
+            backTimer = null;
         }
     }
 }

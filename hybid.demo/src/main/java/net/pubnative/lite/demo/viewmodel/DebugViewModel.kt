@@ -2,6 +2,7 @@ package net.pubnative.lite.demo.viewmodel
 
 import android.app.Application
 import android.os.Bundle
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -45,7 +46,10 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
                 ) else registryItem.response.toString()
 
             val debugInfo = RequestDebugInfo(
-                registryItem.url ?: "", registryItem.latency ?: 0, response
+                registryItem.url ?: "",
+                registryItem.postParams ?: "",
+                registryItem.latency ?: 0,
+                response
             )
 
             _requestDebugInfo.value = debugInfo
@@ -61,17 +65,19 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
         _eventList = arrayListOf()
     }
 
-    fun clearTrackerList(){
+    fun clearTrackerList() {
         _trackerList = arrayListOf()
     }
 
     fun clearLogs() {
-        _requestDebugInfo.value = RequestDebugInfo("", 0, "")
+        _requestDebugInfo.value = RequestDebugInfo("", "", 0, "")
     }
 
     override fun onEvent(event: ReportingEvent?) {
+
         if (event != null) {
-            if (event.eventType != null && event.eventType.equals(Reporting.EventType.REQUEST)){
+            if (isRefreshingEvent(event)) return
+            if (event.eventType != null && event.eventType.equals(Reporting.EventType.REQUEST)) {
                 clearEventList()
                 clearTrackerList()
             }
@@ -89,6 +95,13 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
         }
     }
 
+    private fun isRefreshingEvent(event: ReportingEvent): Boolean {
+        return (event.eventType.equals(Reporting.EventType.LOAD) ||
+                event.eventType.equals(Reporting.EventType.IMPRESSION) ||
+                event.eventType.equals(Reporting.EventType.RENDER)) &&
+                _eventList.find { it.eventType.equals(event.eventType) } != null
+    }
+
     override fun onFire(firedTracker: ReportingTracker?) {
         firedTracker?.let { _trackerList.add(it) }
     }
@@ -99,7 +112,7 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
         return liveData
     }
 
-    fun getFiredTrackersList(): MutableLiveData<List<ReportingTracker>>{
+    fun getFiredTrackersList(): MutableLiveData<List<ReportingTracker>> {
         val liveData: MutableLiveData<List<ReportingTracker>> = MutableLiveData()
         liveData.value = _trackerList
         return liveData
@@ -111,7 +124,7 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
     }
 
     fun registerReportingCallbacks() {
-        if (!isReportingCallbackActive){
+        if (!isReportingCallbackActive) {
             HyBid.getReportingController().addCallback(this)
             HyBid.getReportingController().addTrackerCallback(this)
         }

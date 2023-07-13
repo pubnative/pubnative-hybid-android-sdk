@@ -73,16 +73,10 @@ public class BannerPresenterFactory extends PresenterFactory {
             case ApiAssetGroupType.MRAID_728x90:
             case ApiAssetGroupType.MRAID_768x1024:
             case ApiAssetGroupType.MRAID_1024x768: {
-                return HyBid.getConfigManager() != null
-                        && !HyBid.getConfigManager().getFeatureResolver()
-                        .isRenderingSupported(RemoteConfigFeature.Rendering.MRAID) ?
-                        null : new MraidAdPresenter(getContext(), ad, adSize, trackingMethodFinal);
+                return new MraidAdPresenter(getContext(), ad, adSize, trackingMethodFinal);
             }
             case ApiAssetGroupType.VAST_MRECT: {
-                return HyBid.getConfigManager() != null
-                        && !HyBid.getConfigManager().getFeatureResolver()
-                        .isRenderingSupported(RemoteConfigFeature.Rendering.VAST) ?
-                        null : new VastAdPresenter(getContext(), ad, adSize, trackingMethodFinal);
+                return new VastAdPresenter(getContext(), ad, adSize, trackingMethodFinal);
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for banner ad format.");

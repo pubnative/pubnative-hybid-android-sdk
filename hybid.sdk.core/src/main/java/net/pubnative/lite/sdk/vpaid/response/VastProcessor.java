@@ -11,7 +11,7 @@ import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.enums.VastError;
 import net.pubnative.lite.sdk.vpaid.helpers.ErrorLog;
-import net.pubnative.lite.sdk.vpaid.models.EndCardData;
+import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.models.vast.Ad;
 import net.pubnative.lite.sdk.vpaid.models.vast.AdVerifications;
 import net.pubnative.lite.sdk.vpaid.models.vast.ClickThrough;
@@ -75,7 +75,25 @@ public class VastProcessor {
     public void parseResponse(String response, final Listener listener) {
         try {
             Vast vast = XmlParser.parse(response, Vast.class);
-            if ((vast.getAds() == null || vast.getAds().isEmpty())
+            if (vast.getErrors() != null && !vast.getErrors().isEmpty() && vast.getAds() != null
+                    && !vast.getAds().isEmpty()) {
+                if (vast.getErrors() != null) {
+                    List<String> errorLogs = new ArrayList<>();
+                    for (Error error : vast.getErrors()) {
+                        if (!TextUtils.isEmpty(error.getText())) {
+                            errorLogs.add(error.getText().trim());
+                        }
+                    }
+                    ErrorLog.initErrorLog(errorLogs);
+                    ErrorLog.postError(mContext, VastError.XML_PARSING);
+                }
+                if (listener != null) {
+                    PlayerInfo info = new PlayerInfo("No ads found - An error has been detected on the root of the VAST response");
+                    info.setNoAdsFound();
+                    listener.onParseError(info);
+                }
+            }
+            else if ((vast.getAds() == null || vast.getAds().isEmpty())
                     || (vast.getErrors() != null && !vast.getErrors().isEmpty())) {
                 if (vast.getErrors() != null) {
                     List<String> errorLogs = new ArrayList<>();

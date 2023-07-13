@@ -29,6 +29,7 @@ public class HyBidInterstitialActivityTest {
             if (view == null) {
                 view = new View(this);
             }
+            backButtonDelay = 3;
             return view;
         }
 

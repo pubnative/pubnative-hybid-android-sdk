@@ -30,6 +30,7 @@ import com.applovin.sdk.AppLovinSdkUtils;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
+import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
@@ -45,7 +46,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AppLovinMediationVerveCustomNetworkAdapter extends MediationAdapterBase implements MaxAdViewAdapter,
         MaxInterstitialAdapter, MaxRewardedAdapter, MaxNativeAdAdapter {
     public static final String MAX_MEDIATION_VENDOR = "m";
-    public static final String MAX_ADAPTER_VERSION = "2.18.1.0";
+    public static final String MAX_ADAPTER_VERSION = "2.19.0.0";
     public static final String PARAM_APP_TOKEN = "pn_app_token";
     public static final String DUMMY_TOKEN = "dummytoken";
 
@@ -332,12 +333,21 @@ public class AppLovinMediationVerveCustomNetworkAdapter extends MediationAdapter
 
     protected void updateUserConsent(final MaxAdapterResponseParameters parameters) {
         if (getWrappingSdk().getConfiguration().getConsentDialogState() == AppLovinSdkConfiguration.ConsentDialogState.APPLIES) {
+            UserDataManager userDataManager = HyBid.getUserDataManager();
             Boolean hasUserConsent = parameters.hasUserConsent();
-            if (hasUserConsent != null && HyBid.getUserDataManager() != null) {
-                if (TextUtils.isEmpty(HyBid.getUserDataManager().getIABGDPRConsentString())) {
-                    HyBid.getUserDataManager().setIABGDPRConsentString(hasUserConsent ? "1" : "0");
-                }
-            } else { /* Don't do anything if huc value not set */ }
+
+            // 1. AppLovin revokes consent
+            if (hasUserConsent != null && userDataManager != null && !hasUserConsent) {
+                userDataManager.setIABGDPRConsentString("0");
+            }
+
+            // 2. AppLovin grants consent and Verve doesn't have binary nor CMP consent yet
+            if ((hasUserConsent != null && userDataManager != null && hasUserConsent)
+                    && (TextUtils.isEmpty(userDataManager.getIABGDPRConsentString()) || userDataManager.getIABGDPRConsentString().equals("0"))) {
+                userDataManager.setIABGDPRConsentString("1");
+            }
+
+            // 3. all other cases -> no change
         }
 
         Boolean isAgeRestrictedUser = parameters.isAgeRestrictedUser();

@@ -7,7 +7,7 @@ import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeVideoAdSession;
 import net.pubnative.lite.sdk.vpaid.models.CloseCardData;
-import net.pubnative.lite.sdk.vpaid.models.EndCardData;
+import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 
 import java.util.List;

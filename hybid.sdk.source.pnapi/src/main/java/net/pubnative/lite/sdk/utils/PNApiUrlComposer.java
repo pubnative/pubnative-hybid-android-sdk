@@ -26,6 +26,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.models.AdRequest;
+import net.pubnative.lite.sdk.models.PNAdRequest;
 
 /**
  * Created by erosgarciaponte on 22.01.18.
@@ -33,24 +34,24 @@ import net.pubnative.lite.sdk.models.AdRequest;
 
 public final class PNApiUrlComposer {
 
-    public static String getUrlQuery(String baseUrl, AdRequest adRequest) {
+    public static String getUrlQuery(String baseUrl, PNAdRequest adRequest) {
         Uri uri = buildUri(baseUrl, adRequest);
         return uri.getQuery();
     }
 
-    public static String buildUrl(String baseUrl, AdRequest adRequest) {
+    public static String buildUrl(String baseUrl, PNAdRequest adRequest) {
         return buildUri(baseUrl, adRequest).toString();
     }
 
-    private static Uri buildUri(String baseUrl, AdRequest adRequest) {
+    private static Uri buildUri(String baseUrl, PNAdRequest adRequest) {
         Uri.Builder uriBuilder = Uri.parse(baseUrl).buildUpon();
         uriBuilder.appendPath("api");
         uriBuilder.appendPath("v3");
         uriBuilder.appendPath("native");
 
         // Appending parameters
-        if (!TextUtils.isEmpty(adRequest.apptoken)) {
-            uriBuilder.appendQueryParameter("apptoken", adRequest.apptoken);
+        if (!TextUtils.isEmpty(adRequest.appToken)) {
+            uriBuilder.appendQueryParameter("apptoken", adRequest.appToken);
         }
 
         if (!TextUtils.isEmpty(adRequest.os)) {
@@ -105,8 +106,8 @@ public final class PNApiUrlComposer {
             uriBuilder.appendQueryParameter("af", adRequest.af);
         }
 
-        if (!TextUtils.isEmpty(adRequest.zoneid)) {
-            uriBuilder.appendQueryParameter("zoneid", adRequest.zoneid);
+        if (!TextUtils.isEmpty(adRequest.zoneId)) {
+            uriBuilder.appendQueryParameter("zoneid", adRequest.zoneId);
         }
 
         if (!TextUtils.isEmpty(adRequest.testMode)) {

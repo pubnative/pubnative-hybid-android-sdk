@@ -24,6 +24,8 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
     private var requestView: TextView? = null
     private var latencyView: TextView? = null
     private var responseView: TextView? = null
+    private var postBodyView: TextView? = null
+    private var postBodyViewLabel: TextView? = null
     private var eventReportButton: Button? = null
     private var trackerReportButton: Button? = null
 
@@ -45,17 +47,19 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
         handleSaveInstanse(savedInstanceState)
     }
 
-    private fun initViews(){
+    private fun initViews() {
         initEventReportDialog()
         initTrackersReportDialog()
         requestView = requireView().findViewById(R.id.view_request_url)
         latencyView = requireView().findViewById(R.id.view_latency)
         responseView = requireView().findViewById(R.id.view_response)
+        postBodyView = requireView().findViewById(R.id.view_post_body)
+        postBodyViewLabel = requireView().findViewById(R.id.view_post_body_label)
         eventReportButton = requireView().findViewById(R.id.button_event_report)
         trackerReportButton = requireView().findViewById(R.id.button_tracker_report)
     }
 
-    private fun setOnClickListeners(){
+    private fun setOnClickListeners() {
 
         requestView?.setOnClickListener {
             ClipboardUtils.copyToClipboard(
@@ -83,12 +87,22 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
         }
     }
 
-    private fun initObservers(){
+    private fun initObservers() {
         // Observe request debug info
-        (requireActivity() as? TabActivity)?.debugViewModel?.requestDebugInfo?.observe(viewLifecycleOwner) {
+        (requireActivity() as? TabActivity)?.debugViewModel?.requestDebugInfo?.observe(
+            viewLifecycleOwner
+        ) {
             requestView?.text = it.requestUrl
             latencyView?.text = it.latencyMls.toString()
             responseView?.text = it.response
+            if (it.requestPostBody.isNullOrEmpty()) {
+                postBodyView!!.visibility = View.GONE
+                postBodyViewLabel!!.visibility = View.GONE
+            } else {
+                postBodyView!!.visibility = View.VISIBLE
+                postBodyViewLabel!!.visibility = View.VISIBLE
+                postBodyView!!.text = it.requestPostBody
+            }
         }
     }
 
@@ -96,11 +110,11 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
         savedInstanceState?.let {
             this.isOpenedEventReport = it.getBoolean("isOpenedEventReport", false)
             eventList = HyBid.getReportingController().adEventList as ArrayList<ReportingEvent>?
-            if(this.isOpenedEventReport){
+            if (this.isOpenedEventReport) {
                 displayEventReport()
             }
             this.isOpenedTrackerReport = it.getBoolean("isOpenedTrackerReport", false)
-            if(this.isOpenedTrackerReport){
+            if (this.isOpenedTrackerReport) {
                 displayTrackerReport()
             }
         }
@@ -166,20 +180,22 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
         this.trackersReportDialog = builder.create()
     }
 
-    private fun displayEventReport(){
-        (requireActivity() as? TabActivity)?.debugViewModel?.getEventList()?.observe(viewLifecycleOwner){
-            eventReportAdapter?.submitData(it)
-            eventReportDialog?.show()
-            isOpenedEventReport = true
-        }
+    private fun displayEventReport() {
+        (requireActivity() as? TabActivity)?.debugViewModel?.getEventList()
+            ?.observe(viewLifecycleOwner) {
+                eventReportAdapter?.submitData(it)
+                eventReportDialog?.show()
+                isOpenedEventReport = true
+            }
     }
 
-    private fun displayTrackerReport(){
-        (requireActivity() as? TabActivity)?.debugViewModel?.getFiredTrackersList()?.observe(viewLifecycleOwner){
-            trackerReportAdapter?.submitData(it)
-            trackersReportDialog?.show()
-            isOpenedTrackerReport = true
-        }
+    private fun displayTrackerReport() {
+        (requireActivity() as? TabActivity)?.debugViewModel?.getFiredTrackersList()
+            ?.observe(viewLifecycleOwner) {
+                trackerReportAdapter?.submitData(it)
+                trackersReportDialog?.show()
+                isOpenedTrackerReport = true
+            }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

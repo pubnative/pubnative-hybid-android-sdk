@@ -2,7 +2,7 @@ package net.pubnative.lite.sdk.vpaid.response;
 
 import com.iab.omid.library.pubnativenet.adsession.VerificationScriptResource;
 
-import net.pubnative.lite.sdk.vpaid.models.EndCardData;
+import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.models.vast.AdServingId;
 import net.pubnative.lite.sdk.vpaid.models.vast.Category;
 import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
@@ -23,7 +23,7 @@ public class AdParams {
     private String ctaExtensionHtml;
     private String skipTime;
     private Icon adIcon;
-    private int publisherSkipSeconds = 0;
+    private int publisherSkipSeconds = -1;
 
     private final List<String> videoFileUrlsList = new ArrayList<>();
     private final List<EndCardData> endCardList = new ArrayList<>();

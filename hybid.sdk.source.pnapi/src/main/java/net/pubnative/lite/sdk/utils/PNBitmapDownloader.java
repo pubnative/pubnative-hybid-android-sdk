@@ -119,11 +119,11 @@ public class PNBitmapDownloader {
         void onDownloadFailed(String url, Exception exception);
     }
 
-    public void download(String url, DownloadListener listener) {
+    public synchronized void download(String url, DownloadListener listener) {
         download(url, 0, 0, listener);
     }
 
-    public void download(String url, int width, int height, DownloadListener listener) {
+    public synchronized void download(String url, int width, int height, DownloadListener listener) {
 
         mHandler = new Handler(Looper.getMainLooper());
 
@@ -151,11 +151,11 @@ public class PNBitmapDownloader {
     // Private methods
     //==============================================================================================
     private synchronized void downloadImage() {
-        new Thread(downloadTask).start();
+        BitmapDownloaderExecutor.getExecutor().submit(downloadTask);
     }
 
     private void loadCachedImage() {
-        new Thread(loadFromFileSystemTask).start();
+        BitmapDownloaderExecutor.getExecutor().submit(loadFromFileSystemTask);
     }
 
     private BitmapFactory.Options getBitmapOptionsDecodingBounds(boolean decodeBounds) {

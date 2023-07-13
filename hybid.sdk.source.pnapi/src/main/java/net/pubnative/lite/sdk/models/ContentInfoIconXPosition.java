@@ -11,6 +11,7 @@ public enum ContentInfoIconXPosition {
     ContentInfoIconXPosition(String position) {
         this.horizontalPosition = position;
     }
+
     public final String horizontalPosition;
 
     public static ContentInfoIconXPosition fromString(String name) {
@@ -23,6 +24,10 @@ public enum ContentInfoIconXPosition {
         else if (lowercaseName.equals(RIGHT.horizontalPosition))
             return RIGHT;
 
+        return LEFT;
+    }
+
+    public static ContentInfoIconXPosition getDefaultXPosition() {
         return LEFT;
     }
 }

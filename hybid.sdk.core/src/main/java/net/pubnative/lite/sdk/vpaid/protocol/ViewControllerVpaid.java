@@ -2,28 +2,24 @@ package net.pubnative.lite.sdk.vpaid.protocol;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
-import net.pubnative.lite.sdk.core.R;
+import net.pubnative.lite.sdk.views.endcard.HyBidEndCardView;
 import net.pubnative.lite.sdk.vpaid.VideoAdController;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
-import net.pubnative.lite.sdk.vpaid.utils.ImageUtils;
 
 public class ViewControllerVpaid {
 
     private final VideoAdController mAdController;
 
     private WebView mWebView;
-    private View mEndCardLayout;
-    private ImageView mEndCardView;
+    private HyBidEndCardView mEndCardView;
 
     public ViewControllerVpaid(VideoAdController adController) {
         mAdController = adController;
@@ -41,30 +37,22 @@ public class ViewControllerVpaid {
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
 
-        mEndCardLayout = LayoutInflater.from(context).inflate(R.layout.end_card, bannerView, false);
-        mEndCardLayout.setVisibility(View.GONE);
+        mEndCardView = new HyBidEndCardView(mWebView.getContext());
 
-        mEndCardView = mEndCardLayout.findViewById(R.id.staticEndCardView);
-        ImageView closeView = mEndCardLayout.findViewById(R.id.closeView);
-        if (closeView != null) {
-            closeView.setOnClickListener(v -> mAdController.closeSelf());
-        }
-
-        bannerView.addView(mEndCardLayout, params);
+        bannerView.addView(mEndCardView, params);
         bannerView.addView(webView, params);
         webView.setBackgroundColor(Color.TRANSPARENT);
         bannerView.setBackgroundColor(Color.BLACK);
     }
 
     private void showControls() {
-        mEndCardLayout.setVisibility(View.GONE);
+        mEndCardView.hide();
         mWebView.setVisibility(View.VISIBLE);
     }
 
     public void showEndCard(String imageUri) {
-        mEndCardLayout.setVisibility(View.VISIBLE);
+        mEndCardView.show(imageUri);
         mWebView.setVisibility(View.GONE);
-        ImageUtils.setScaledImage(mEndCardView, imageUri);
 
         ReportingEvent event = new ReportingEvent();
         event.setEventType(Reporting.EventType.COMPANION_VIEW_END_CARD);

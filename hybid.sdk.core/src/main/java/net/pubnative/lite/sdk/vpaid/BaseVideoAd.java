@@ -16,8 +16,9 @@ abstract class BaseVideoAd extends BaseVideoAdInternal {
 
     private static final String LOG_TAG = BaseVideoAd.class.getSimpleName();
 
-    BaseVideoAd(Context context, Ad ad, boolean isInterstitial, boolean isFullscreen, AdPresenter.ImpressionListener impressionListener) throws Exception {
-        super(context, ad, isInterstitial, isFullscreen, impressionListener);
+    BaseVideoAd(Context context, Ad ad, boolean isInterstitial, boolean isFullscreen, AdPresenter.ImpressionListener impressionListener,
+                AdCloseButtonListener adCloseButtonListener) throws Exception {
+        super(context, ad, isInterstitial, isFullscreen, impressionListener, adCloseButtonListener);
     }
 
     public boolean isRewarded() {

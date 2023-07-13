@@ -27,7 +27,9 @@ import android.content.Context;
 import android.util.AttributeSet;
 
 import net.pubnative.lite.sdk.api.LeaderboardRequestManager;
+import net.pubnative.lite.sdk.api.OpenRTBApiClient;
 import net.pubnative.lite.sdk.api.RequestManager;
+import net.pubnative.lite.sdk.models.OpenRTBAdRequestFactory;
 
 public class HyBidLeaderboardAdView extends HyBidAdView {
 
@@ -56,5 +58,10 @@ public class HyBidLeaderboardAdView extends HyBidAdView {
     @Override
     RequestManager getRequestManager() {
         return new LeaderboardRequestManager();
+    }
+
+    @Override
+    RequestManager getORTBRequestManager(){
+        return new LeaderboardRequestManager(new OpenRTBApiClient(getContext()), new OpenRTBAdRequestFactory());
     }
 }

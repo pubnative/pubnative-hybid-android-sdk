@@ -4,17 +4,21 @@ import android.annotation.SuppressLint;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.View;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.models.APIAsset;
+import net.pubnative.lite.sdk.models.ContentInfoIconXPosition;
+import net.pubnative.lite.sdk.models.ContentInfoIconYPosition;
 import net.pubnative.lite.sdk.mraid.MRAIDBanner;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeature;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewCloseLayoutListener;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
+import net.pubnative.lite.sdk.utils.SkipOffsetManager;
+import net.pubnative.lite.sdk.views.CloseableContainer;
 import net.pubnative.lite.sdk.vpaid.models.CloseCardData;
 import net.pubnative.lite.sdk.vpaid.utils.CloseCardUtil;
 
@@ -22,7 +26,6 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
     private final String[] mSupportedNativeFeatures = new String[]{MRAIDNativeFeature.CALENDAR, MRAIDNativeFeature.INLINE_VIDEO, MRAIDNativeFeature.SMS, MRAIDNativeFeature.STORE_PICTURE, MRAIDNativeFeature.TEL, MRAIDNativeFeature.LOCATION};
 
     private MRAIDBanner mView;
-    private boolean mIsSkippable = true;
 
     @SuppressLint("SourceLockedOrientationActivity")
     @Override
@@ -42,19 +45,25 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
         MRAIDBanner adView = null;
         if (getAd() != null) {
             if (getAd().getAssetUrl(APIAsset.HTML_BANNER) != null) {
-                adView = new MRAIDBanner(this, getAd().getAssetUrl(APIAsset.HTML_BANNER), "", true, mSupportedNativeFeatures, this, this, getAd().getContentInfoContainer(this, this));
+                adView = new MRAIDBanner(this, getAd().getAssetUrl(APIAsset.HTML_BANNER), "", true, false, mSupportedNativeFeatures, this, this, getAd().getContentInfoContainer(this, this));
             } else if (getAd().getAssetHtml(APIAsset.HTML_BANNER) != null) {
-                adView = new MRAIDBanner(this, "", getAd().getAssetHtml(APIAsset.HTML_BANNER), true, mSupportedNativeFeatures, this, this, getAd().getContentInfoContainer(this, this));
+                adView = new MRAIDBanner(this, "", getAd().getAssetHtml(APIAsset.HTML_BANNER), true, false, mSupportedNativeFeatures, this, this, getAd().getContentInfoContainer(this, this));
             }
             if (adView != null) {
-                int mSkipOffset = getAd().getHtmlSkipOffset();
+                Integer renderingSkipOffset = HyBid.getHtmlInterstitialSkipOffset() != null ? HyBid.getHtmlInterstitialSkipOffset().getOffset() : null;
+                Integer mSkipOffset = SkipOffsetManager.getInterstitialHTMLSkipOffset(getAd().getHtmlSkipOffset(), renderingSkipOffset);
+                Integer nativeCloseButtonDelay = SkipOffsetManager.getNativeCloseButtonDelay(getAd().getNativeCloseButtonDelay());
+                Integer backButtonDelay = SkipOffsetManager.getBackButtonDelay(getAd().getBackButtonDelay());
                 adView.setCloseLayoutListener(this);
-                mIsSkippable = mSkipOffset == 0;
+                mIsSkippable = mSkipOffset != null && mSkipOffset == 0;
                 adView.setSkipOffset(mSkipOffset);
+                adView.setNativeCloseButtonDelay(nativeCloseButtonDelay);
+                adView.setBackButtonDelay(backButtonDelay);
             }
         }
         mView = adView;
         fetchCloseCard();
+        defineBackButtonClickableityhandler();
         return adView;
     }
 
@@ -64,6 +73,11 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
             new CloseCardUtil().fetchCloseCardData(getAd(), data);
             mView.setCloseCardData(data);
         }
+    }
+
+    private void defineBackButtonClickableityhandler() {
+        if (mView != null)
+            mView.setBackButtonClickableityhandler(this::handleBackClickability);
     }
 
     @Override
@@ -77,20 +91,7 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
             mView.stopAdSession();
             mView.destroy();
         }
-
         super.onDestroy();
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            if (mIsSkippable) {
-                super.onKeyDown(keyCode, event);
-            }
-        } else {
-            return super.onKeyDown(keyCode, event);
-        }
-        return false;
     }
 
     // ----------------------------------- MRAIDViewListener ---------------------------------------
@@ -195,7 +196,6 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
             mView.showCloseCard(getAd().link);
         } else {
             super.dismiss();
-            ;
         }
     }
 

@@ -1,4 +1,4 @@
-package net.pubnative.lite.sdk.vpaid.models;
+package net.pubnative.lite.sdk.models;
 
 public class EndCardData {
     public enum Type {
@@ -8,9 +8,18 @@ public class EndCardData {
     private final String content;
     private final Type type;
 
+    private final Boolean isCustom;
+
     public EndCardData(Type type, String content) {
         this.content = content;
         this.type = type;
+        this.isCustom = false;
+    }
+
+    public EndCardData(Type type, String content, Boolean isCustom) {
+        this.content = content;
+        this.type = type;
+        this.isCustom = isCustom;
     }
 
     public String getContent() {
@@ -20,4 +29,6 @@ public class EndCardData {
     public Type getType() {
         return type;
     }
+
+    public Boolean isCustom() { return isCustom; }
 }

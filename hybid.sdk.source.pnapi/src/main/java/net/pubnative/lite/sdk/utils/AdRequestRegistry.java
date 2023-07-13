@@ -24,6 +24,10 @@ public class AdRequestRegistry {
         this.mLastAdRequest = new RequestItem(url, response, latency);
     }
 
+    public void setLastAdRequest(String url, String response, String postParams, long latency) {
+        this.mLastAdRequest = new RequestItem(url, postParams, response, latency);
+    }
+
     public RequestItem getLastAdRequest() {
         return mLastAdRequest;
     }

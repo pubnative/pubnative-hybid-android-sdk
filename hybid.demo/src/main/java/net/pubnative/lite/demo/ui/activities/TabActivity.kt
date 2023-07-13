@@ -24,6 +24,7 @@
 package net.pubnative.lite.demo.ui.activities
 
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentPagerAdapter
@@ -134,11 +135,4 @@ abstract class TabActivity : AppCompatActivity() {
     abstract fun getAdFragment(): androidx.fragment.app.Fragment
 
     abstract fun getActivityTitle(): String
-    fun removeReportingCallback() {
-        debugViewModel.removeReportingCallbacks()
-    }
-
-    fun registerReportingCallback() {
-        debugViewModel.registerReportingCallbacks()
-    }
 }

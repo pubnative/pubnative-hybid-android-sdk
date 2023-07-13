@@ -54,13 +54,16 @@ public class PNHttpClient {
 
     private static final int READ_TIMEOUT = 10000;
     private static final int CONNECT_TIMEOUT = 10000;
+    private static final int MAX_RETRIES = 5;
+    private static final int RETRY_MULTIPLIER = 2;
 
     public interface Listener {
         void onSuccess(String response, Map<String, List<String>> headers);
 
         void onFailure(Throwable error);
 
-        default void onFinally(String requestUrl, int responseCode){};
+        default void onFinally(String requestUrl, int responseCode) {
+        }
     }
 
     private static class Response {
@@ -122,7 +125,7 @@ public class PNHttpClient {
                 final Response response = sendRequest(url, headers, postBody);
                 if (response.exception != null) {
                     if (shouldRetryIfFail && !TextUtils.isEmpty(url)) {
-                        sPendingRequests.add(new PendingRequest(url, postBody, headers));
+                        sPendingRequests.add(new PendingRequest(url, postBody, headers, MAX_RETRIES, RETRY_MULTIPLIER));
                     }
 
                     if (shouldReturnOnMainThread) {
@@ -196,8 +199,7 @@ public class PNHttpClient {
                 inputStream.close();
                 Map<String, List<String>> responseHeaders = urlConnection.getHeaderFields();
                 if (responseHeaders != null && !responseHeaders.isEmpty()) {
-                    Map<String, List<String>> responseHeadersCopy = new HashMap<>(responseHeaders);
-                    result.headers = responseHeadersCopy;
+                    result.headers = new HashMap<>(responseHeaders);
                 }
             } else {
                 result.exception = new Exception(String.format(Locale.ENGLISH, "Network request failed with code: %s", responseCode));
@@ -245,27 +247,33 @@ public class PNHttpClient {
         if (!sCurrentRequests.isEmpty()) {
             for (PendingRequest pendingRequest : sCurrentRequests) {
                 makePendingRequest(context,
-                        pendingRequest.getUrl(),
-                        pendingRequest.getHeaders(),
-                        pendingRequest.getPostBody());
+                        pendingRequest);
             }
             sCurrentRequests.clear();
         }
     }
 
     public static void makePendingRequest(final Context context,
-                                          final String url,
-                                          final Map<String, String> headers,
-                                          final String postBody) {
-        NetworkInfo networkInfo = getActiveNetworkInfo(context);
-        if (networkInfo != null && networkInfo.isConnected()
-                && (networkInfo.getType() == ConnectivityManager.TYPE_WIFI || networkInfo.getType() == ConnectivityManager.TYPE_MOBILE)) {
-            sExecutor.submit(() -> {
-                final Response response = sendRequest(url, headers, postBody);
-                if (response.exception != null && !TextUtils.isEmpty(url)) {
-                    sPendingRequests.add(new PendingRequest(url, postBody, headers));
+                                          final PendingRequest pendingRequest) {
+        if (pendingRequest != null) {
+            if (pendingRequest.shouldRetry()) {
+                NetworkInfo networkInfo = getActiveNetworkInfo(context);
+                if (networkInfo != null && networkInfo.isConnected()
+                        && (networkInfo.getType() == ConnectivityManager.TYPE_WIFI || networkInfo.getType() == ConnectivityManager.TYPE_MOBILE)) {
+                    sExecutor.submit(() -> {
+                        pendingRequest.countRetry();
+                        final Response response = sendRequest(pendingRequest.getUrl(), pendingRequest.getHeaders(), pendingRequest.getPostBody());
+                        if (response.exception != null
+                                && !pendingRequest.isLimitReached()
+                                && !TextUtils.isEmpty(pendingRequest.getUrl())) {
+                            sPendingRequests.add(pendingRequest);
+                        }
+                    });
                 }
-            });
+            } else {
+                pendingRequest.countAttempt();
+                sPendingRequests.add(pendingRequest);
+            }
         }
     }
 }

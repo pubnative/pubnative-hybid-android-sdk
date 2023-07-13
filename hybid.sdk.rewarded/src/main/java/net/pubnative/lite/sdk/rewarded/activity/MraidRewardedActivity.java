@@ -26,11 +26,11 @@ import android.annotation.SuppressLint;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.View;
 
-import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.APIAsset;
+import net.pubnative.lite.sdk.models.ContentInfoIconXPosition;
+import net.pubnative.lite.sdk.models.ContentInfoIconYPosition;
 import net.pubnative.lite.sdk.mraid.MRAIDBanner;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeature;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
@@ -38,19 +38,13 @@ import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewCloseLayoutListener;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
+import net.pubnative.lite.sdk.utils.SkipOffsetManager;
+import net.pubnative.lite.sdk.views.CloseableContainer;
 
 public class MraidRewardedActivity extends HyBidRewardedActivity implements MRAIDViewListener, MRAIDNativeFeatureListener, MRAIDViewCloseLayoutListener {
-    private final String[] mSupportedNativeFeatures = new String[]{
-            MRAIDNativeFeature.CALENDAR,
-            MRAIDNativeFeature.INLINE_VIDEO,
-            MRAIDNativeFeature.SMS,
-            MRAIDNativeFeature.STORE_PICTURE,
-            MRAIDNativeFeature.TEL,
-            MRAIDNativeFeature.LOCATION
-    };
+    private final String[] mSupportedNativeFeatures = new String[]{MRAIDNativeFeature.CALENDAR, MRAIDNativeFeature.INLINE_VIDEO, MRAIDNativeFeature.SMS, MRAIDNativeFeature.STORE_PICTURE, MRAIDNativeFeature.TEL, MRAIDNativeFeature.LOCATION};
 
     private MRAIDBanner mView;
-    private boolean mIsSkippable = true;
 
     @SuppressLint("SourceLockedOrientationActivity")
     @Override
@@ -65,35 +59,54 @@ public class MraidRewardedActivity extends HyBidRewardedActivity implements MRAI
         hideRewardedCloseButton();
     }
 
+    private void defineBackButtonClickableityhandler() {
+        if (mView != null)
+            mView.setBackButtonClickableityhandler(this::handleBackClickability);
+    }
+
     @Override
     public View getAdView() {
         MRAIDBanner adView = null;
         if (getAd() != null) {
-            int mSkipOffset = getAd().getMraidRewardedSkipOffset();
+            Integer mSkipOffset = SkipOffsetManager.getRewardedHTMLSkipOffset(getAd().getMraidRewardedSkipOffset());
+
             boolean showTimerBeforeEndCard = false;
 
-            if (mSkipOffset > 0) {
+            if (mSkipOffset != null && mSkipOffset > 0) {
                 mIsSkippable = false;
                 showTimerBeforeEndCard = true;
+            } else {
+                mIsSkippable = true;
+                showRewardedCloseButton();
             }
 
             if (getAd().getAssetUrl(APIAsset.HTML_BANNER) != null) {
-                adView = new MRAIDBanner(this, getAd().getAssetUrl(APIAsset.HTML_BANNER), "", showTimerBeforeEndCard, mSupportedNativeFeatures,
-                        this, this, getAd().getContentInfoContainer(this, this));
+                adView = new MRAIDBanner(this, getAd().getAssetUrl(APIAsset.HTML_BANNER), "", showTimerBeforeEndCard, false, mSupportedNativeFeatures, this, this, getAd().getContentInfoContainer(this, this));
             } else if (getAd().getAssetHtml(APIAsset.HTML_BANNER) != null) {
-                adView = new MRAIDBanner(this, "", getAd().getAssetHtml(APIAsset.HTML_BANNER), showTimerBeforeEndCard, mSupportedNativeFeatures,
-                        this, this, getAd().getContentInfoContainer(this, this));
+                adView = new MRAIDBanner(this, "", getAd().getAssetHtml(APIAsset.HTML_BANNER), showTimerBeforeEndCard, false, mSupportedNativeFeatures, this, this, getAd().getContentInfoContainer(this, this));
             }
 
             if (adView != null) {
                 adView.setCloseLayoutListener(this);
             }
 
-            if (mSkipOffset > 0 && adView != null) {
+            if (mSkipOffset != null && mSkipOffset > 0 && adView != null) {
                 adView.setSkipOffset(mSkipOffset);
+            }
+
+            Integer closeButtonDelay = SkipOffsetManager.getNativeCloseButtonDelay(getAd().getNativeCloseButtonDelay());
+            Integer backButtonDelay = SkipOffsetManager.getBackButtonDelay(getAd().getBackButtonDelay());
+
+            if (closeButtonDelay != null && closeButtonDelay > 0 && adView != null) {
+                adView.setNativeCloseButtonDelay(closeButtonDelay);
+            }
+
+            if (backButtonDelay != null && backButtonDelay > 0 && adView != null) {
+                adView.setBackButtonDelay(backButtonDelay);
             }
         }
         mView = adView;
+        defineBackButtonClickableityhandler();
         return adView;
     }
 
@@ -112,26 +125,12 @@ public class MraidRewardedActivity extends HyBidRewardedActivity implements MRAI
         super.onDestroy();
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            if (mIsSkippable) {
-                dismiss();
-                return true;
-            }
-        } else {
-            return super.onKeyDown(keyCode, event);
-        }
-        return false;
-    }
-
     // ----------------------------------- MRAIDViewListener ---------------------------------------
 
     @Override
     public void mraidViewLoaded(MRAIDView mraidView) {
         if (getBroadcastSender() != null) {
             getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.OPEN);
-            getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.FINISH);
         }
     }
 
@@ -154,8 +153,7 @@ public class MraidRewardedActivity extends HyBidRewardedActivity implements MRAI
     }
 
     @Override
-    public boolean mraidViewResize(MRAIDView mraidView, int width, int height, int offsetX,
-                                   int offsetY) {
+    public boolean mraidViewResize(MRAIDView mraidView, int width, int height, int offsetX, int offsetY) {
         return true;
     }
 

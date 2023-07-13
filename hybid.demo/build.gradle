@@ -2,7 +2,7 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-parcelize'
-    id 'com.fyber.fairbid-sdk-plugin' version '3.36.0'
+    id 'com.fyber.fairbid-sdk-plugin' version '3.39.0'
     id 'com.google.firebase.appdistribution'
     id 'com.google.firebase.firebase-perf'
     id 'com.google.firebase.crashlytics'
@@ -37,6 +37,8 @@ android {
             minifyEnabled false
             firebaseAppDistribution {
                 appId = "1:786277539067:android:6bb4032ad6f571ab"
+                artifactPath = "/root/hybid.sdk/hybid.demo/build/outputs/apk/debug/hybid.demo-debug.apk"
+                artifactType = "APK"
             }
             buildConfigField "String", "BASE_URL", "\"https://api.pubnative.net/\""
         }
@@ -60,6 +62,7 @@ android {
             includeAndroidResources = true
         }
     }
+    namespace 'net.pubnative.lite.demo'
 }
 
 dependencies {
@@ -85,20 +88,20 @@ dependencies {
 
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.multidex:multidex:2.0.1'
 
-    implementation 'com.ironsource.sdk:mediationsdk:7.3.0'
-    implementation 'com.applovin:applovin-sdk:11.8.2'
+    implementation 'com.ironsource.sdk:mediationsdk:7.3.1.1'
+    implementation 'com.applovin:applovin-sdk:11.10.1'
 
-    implementation 'com.google.android.gms:play-services-ads:21.5.0'
+    implementation 'com.google.android.gms:play-services-ads:22.1.0'
     implementation 'com.google.android.ads:mediation-test-suite:3.0.0'
-    implementation "androidx.navigation:navigation-fragment-ktx:2.5.3"
-    implementation "androidx.navigation:navigation-ui-ktx:2.5.3"
+    implementation "androidx.navigation:navigation-fragment-ktx:2.6.0"
+    implementation "androidx.navigation:navigation-ui-ktx:2.6.0"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation 'com.squareup.picasso:picasso:2.8'
-    implementation 'com.google.code.gson:gson:2.9.1'
+    implementation 'com.google.code.gson:gson:2.10'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
     implementation 'co.ogury:ogury-sdk:5.5.0'
     implementation 'com.google.android.ump:user-messaging-platform:2.0.0'

@@ -11,7 +11,7 @@ import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.helpers.AssetsLoader;
-import net.pubnative.lite.sdk.vpaid.models.EndCardData;
+import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.AdSpotDimensions;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.response.VastProcessor;

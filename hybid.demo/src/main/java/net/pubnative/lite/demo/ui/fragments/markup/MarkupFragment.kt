@@ -36,6 +36,8 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
 
     private var interstitial: HyBidInterstitialAd? = null
 
+    private var loadButtonClicked = false
+
     private val TAG = MarkupFragment::class.java.simpleName
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -79,7 +81,10 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
         }
 
         markupViewModel.loadInterstitial.observe(viewLifecycleOwner) {
-            loadInterstitial(it)
+            if (loadButtonClicked) {
+                loadInterstitial(it)
+                loadButtonClicked = false
+            }
         }
 
         markupViewModel.adapterUpdate.observe(viewLifecycleOwner) {
@@ -91,11 +96,8 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
         }
 
         view.findViewById<Button>(R.id.button_load).setOnClickListener {
+            loadButtonClicked = true
             cleanLogs()
-            if (activity != null) {
-                val activity = activity as TabActivity
-                activity.registerReportingCallback()
-            }
             loadMarkup()
         }
 
@@ -200,10 +202,7 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
     }
 
     override fun onAdRefresh() {
-        if (activity != null) {
-            val activity = activity as TabActivity
-            activity.removeReportingCallback()
-        }
+
     }
 
     private fun fetchURTemplate() {

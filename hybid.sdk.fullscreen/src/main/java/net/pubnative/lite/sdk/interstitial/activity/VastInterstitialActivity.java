@@ -13,7 +13,10 @@ import android.view.View;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
+import net.pubnative.lite.sdk.utils.AdEndCardManager;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.views.CloseableContainer;
+import net.pubnative.lite.sdk.vpaid.AdCloseButtonListener;
 import net.pubnative.lite.sdk.vpaid.CloseButtonListener;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.VastActivityInteractor;
@@ -22,13 +25,12 @@ import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdListener;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
 
-public class VastInterstitialActivity extends HyBidInterstitialActivity implements AdPresenter.ImpressionListener {
+public class VastInterstitialActivity extends HyBidInterstitialActivity implements AdPresenter.ImpressionListener, AdCloseButtonListener {
     private static final String TAG = VastInterstitialActivity.class.getSimpleName();
     private boolean mReady = false;
 
     private VideoAdView mVideoPlayer;
     private VideoAd mVideoAd;
-    private boolean mIsSkippable = true;
     private boolean mHasEndCard = false;
     private boolean mIsVideoFinished = false;
 
@@ -56,7 +58,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
             if (getAd() != null) {
                 int mSkipOffset = getIntent().getIntExtra(EXTRA_SKIP_OFFSET, -1);
                 mIsSkippable = mSkipOffset == 0;
-                mVideoAd = new VideoAd(this, getAd(), true, true, this);
+                mVideoAd = new VideoAd(this, getAd(), true, true, this, this);
                 mVideoAd.useMobileNetworkForCaching(true);
                 mVideoAd.bindView(mVideoPlayer);
                 mVideoAd.setAdListener(mVideoAdListener);
@@ -67,14 +69,14 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
                 if (adCacheItem != null) {
                     if (adCacheItem.getAdParams() != null) {
                         adCacheItem.getAdParams().setPublisherSkipSeconds(mSkipOffset);
-
                         if (adCacheItem.getEndCardData() != null
                                 && !TextUtils.isEmpty(adCacheItem.getEndCardData().getContent())) {
-                            if(getAd().isEndCardEnabled() != null){
-                                mHasEndCard = getAd().isEndCardEnabled();
-                            }else{
-                                mHasEndCard = HyBid.isEndCardEnabled();
-                            }
+                            mHasEndCard = AdEndCardManager.isEndCardEnabled(getAd(), getAd().isEndCardEnabled(), HyBid.isEndCardEnabled(), null);
+                        } else if (getAd().isEndCardEnabled() != null
+                                && getAd().isEndCardEnabled()
+                                && getAd().isCustomEndCardEnabled()
+                                && getAd().hasCustomEndCard()) {
+                            mHasEndCard = true;
                         }
 
                         if (adCacheItem.getAdParams().getAdIcon() != null) {
@@ -118,7 +120,6 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
             mVideoPlayer = new VideoAdView(this);
             return mVideoPlayer;
         }
-
         return null;
     }
 
@@ -144,21 +145,6 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
         vastActivityInteractor.activityPaused();
         super.onPause();
         pauseAd();
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            if (mIsSkippable) {
-                if (getBroadcastSender() != null) {
-                    getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
-                    finish();
-                }
-            }
-        } else {
-            return super.onKeyDown(keyCode, event);
-        }
-        return false;
     }
 
     @Override
@@ -233,7 +219,8 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
                     public void run() {
                         showInterstitialCloseButton();
                     }
-                },100);
+                }, 100);
+
                 mIsSkippable = true;
             }
             mIsVideoFinished = true;
@@ -269,13 +256,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
         }
     };
 
-    private final CloseButtonListener mCloseButtonListener = new CloseButtonListener() {
-
-        @Override
-        public void onCloseButtonVisible() {
-            mIsSkippable = true;
-        }
-    };
+    private final CloseButtonListener mCloseButtonListener = () -> mIsSkippable = true;
 
     private void dismissVideo(int progressPercentage) {
         if (getBroadcastSender() != null) {
@@ -289,6 +270,19 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
     public void onImpression() {
         if (getBroadcastSender() != null) {
             getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.SHOW);
+        }
+    }
+
+    @Override
+    public void showButton() {
+        showInterstitialCloseButton();
+    }
+
+    @Override
+    public void hideButton() {
+        CloseableContainer closeableContainer = getCloseableContainer();
+        if (closeableContainer != null) {
+            closeableContainer.setCloseVisible(true);
         }
     }
 }

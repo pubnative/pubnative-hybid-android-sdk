@@ -8,6 +8,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.ironsource.mediationsdk.IronSource
+import com.ironsource.mediationsdk.sdk.InitializationListener
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 
@@ -29,6 +30,16 @@ class IronSourceSettingsFragment : Fragment(R.layout.fragment_ironsource_setting
 
         settingManager = SettingsManager.getInstance(requireContext())
 
+        view.findViewById<Button>(R.id.button_ironsource_mediation_test).setOnClickListener {
+            val appKey = appKeyInput.text.toString()
+            IronSource.setMetaData("is_test_suite", "enable")
+            IronSource.init(requireActivity(), appKey, object : InitializationListener {
+                override fun onInitializationComplete() {
+                    IronSource.launchTestSuite(requireActivity())
+                }
+            })
+        }
+
         view.findViewById<Button>(R.id.button_save_ironsource_settings).setOnClickListener {
             val appKey = appKeyInput.text.toString()
             val bannerAdUnitId = mediationBannerInput.text.toString()
@@ -40,6 +51,7 @@ class IronSourceSettingsFragment : Fragment(R.layout.fragment_ironsource_setting
             settingManager.setIronSourceInterstitialAdUnitId(interstitialAdUnitId)
             settingManager.setIronSourceRewardedAdUnitId(rewardedAdUnitId)
 
+            IronSource.setMetaData("is_test_suite", "enable")
             IronSource.init(requireActivity(), appKey)
 
             Toast.makeText(activity, "IronSource settings saved successfully.", Toast.LENGTH_SHORT).show()
@@ -65,6 +77,7 @@ class IronSourceSettingsFragment : Fragment(R.layout.fragment_ironsource_setting
         val settings = settingManager.getSettings().ironSourceSettings
         val appKey = settings?.appKey
         if (!TextUtils.isEmpty(appKey)) {
+            IronSource.setMetaData("is_test_suite", "enable")
             IronSource.init(
                 requireActivity(), appKey, IronSource.AD_UNIT.BANNER,
                 IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.REWARDED_VIDEO

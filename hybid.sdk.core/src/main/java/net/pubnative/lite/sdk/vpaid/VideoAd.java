@@ -26,9 +26,15 @@ public class VideoAd extends BaseVideoAd {
     private boolean mIsAdStarted = false;
 
     VastActivityInteractor vastActivityInteractor;
+    public VideoAd(Context context, Ad ad, boolean isInterstitial, boolean isFullscreen,
+                   AdPresenter.ImpressionListener impressionListener) throws Exception {
+        super(context, ad, isInterstitial, isFullscreen, impressionListener, null);
+    }
 
-    public VideoAd(Context context, Ad ad, boolean isInterstitial, boolean isFullscreen, AdPresenter.ImpressionListener impressionListener) throws Exception {
-        super(context, ad, isInterstitial, isFullscreen, impressionListener);
+    public VideoAd(Context context, Ad ad, boolean isInterstitial, boolean isFullscreen,
+                   AdPresenter.ImpressionListener impressionListener,
+                   AdCloseButtonListener adCloseButtonListener) throws Exception {
+        super(context, ad, isInterstitial, isFullscreen, impressionListener, adCloseButtonListener);
     }
 
     @Override
@@ -192,7 +198,6 @@ public class VideoAd extends BaseVideoAd {
     }
 
     public void resume() {
-        Logger.d(LOG_TAG, "resume");
         if (getAdController() != null && isReady()) {
             getAdController().resume();
         }
@@ -217,7 +222,6 @@ public class VideoAd extends BaseVideoAd {
      * Needs to be triggered on appropriate Activity life-cycle method "onPause()".
      */
     public void pause() {
-        Logger.d(LOG_TAG, "pause");
         if (getAdController() != null) {
             getAdController().pause();
         }

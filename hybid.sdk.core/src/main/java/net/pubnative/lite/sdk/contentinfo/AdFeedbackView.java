@@ -12,16 +12,19 @@ import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.IntegrationType;
+import net.pubnative.lite.sdk.models.RemoteConfig;
 import net.pubnative.lite.sdk.mraid.MRAIDInterstitial;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeature;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.URLValidator;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 
 public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureListener {
     private static final String TAG = AdFeedbackView.class.getSimpleName();
+
     public interface AdFeedbackLoadListener {
 
         void onLoad(String url);
@@ -73,14 +76,15 @@ public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureList
             url = processedUrl;
         }
 
-        mViewContainer = new MRAIDInterstitial(context, url, null, true, new String[]{
-                MRAIDNativeFeature.CALENDAR,
-                MRAIDNativeFeature.INLINE_VIDEO,
-                MRAIDNativeFeature.SMS,
-                MRAIDNativeFeature.STORE_PICTURE,
-                MRAIDNativeFeature.TEL,
-                MRAIDNativeFeature.LOCATION
-        }, this, this, null);
+        mViewContainer = new MRAIDInterstitial(context, url, null, true, true,
+                new String[]{
+                        MRAIDNativeFeature.CALENDAR,
+                        MRAIDNativeFeature.INLINE_VIDEO,
+                        MRAIDNativeFeature.SMS,
+                        MRAIDNativeFeature.STORE_PICTURE,
+                        MRAIDNativeFeature.TEL,
+                        MRAIDNativeFeature.LOCATION
+                }, this, this, null);
 
         mViewContainer.markCreativeAdComingFromFeedbackForm();
 
@@ -178,10 +182,18 @@ public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureList
 
     public synchronized void showFeedbackForm(Activity activity, String url) {
         if (mViewContainer != null && mViewContainer.isLoaded() && mIsReady) {
-            mViewContainer.show(activity, () -> {
-                mViewContainer.showDefaultContentInfoURL(CONTENT_INFO_LINK_URL);
-                mListener.onLoadFailed(new HyBidError(HyBidErrorCode.ERROR_LOADING_FEEDBACK));
-            }, url);
+            URLValidator.isValidURL(url, isValid -> {
+                if (isValid) {
+                    mViewContainer.show(activity, () -> {
+                        mViewContainer.showDefaultContentInfoURL(CONTENT_INFO_LINK_URL);
+                        mListener.onLoadFailed(new HyBidError(HyBidErrorCode.ERROR_LOADING_FEEDBACK));
+                    }, url);
+                } else {
+                    if (mListener != null) {
+                        mListener.onLoadFailed(new HyBidError(HyBidErrorCode.ERROR_LOADING_FEEDBACK));
+                    }
+                }
+            });
         } else {
             if (mListener != null) {
                 mListener.onLoadFailed(new HyBidError(HyBidErrorCode.ERROR_LOADING_FEEDBACK));

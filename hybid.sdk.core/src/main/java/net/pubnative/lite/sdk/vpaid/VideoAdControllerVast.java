@@ -17,9 +17,10 @@ import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.models.Ad;
-import net.pubnative.lite.sdk.models.SkipOffset;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
+import net.pubnative.lite.sdk.utils.AdEndCardManager;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.SkipOffsetManager;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeVideoAdSession;
@@ -30,7 +31,7 @@ import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
 import net.pubnative.lite.sdk.vpaid.helpers.TimerWithPause;
 import net.pubnative.lite.sdk.vpaid.macros.MacroHelper;
 import net.pubnative.lite.sdk.vpaid.models.CloseCardData;
-import net.pubnative.lite.sdk.vpaid.models.EndCardData;
+import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.models.vast.Tracking;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.TrackingEvent;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
@@ -77,7 +78,8 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
     private boolean isVideoCompleted = false;
     private boolean containsStartEvent = false;
 
-    private boolean hasEndcard = false;
+    private Boolean hasEndcard;
+    private boolean isFullscreen = false;
 
     private final HyBidViewabilityNativeVideoAdSession mViewabilityAdSession;
     private final List<HyBidViewabilityFriendlyObstruction> mViewabilityFriendlyObstructions;
@@ -91,12 +93,12 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
     private Boolean isActionsProcessingRun = false;
     private Action currentAction = Action.INITIAL;
 
-    VideoAdControllerVast(BaseVideoAdInternal baseAd, AdParams adParams, HyBidViewabilityNativeVideoAdSession viewabilityAdSession, boolean isFullscreen, AdPresenter.ImpressionListener impressionListener) {
+    VideoAdControllerVast(BaseVideoAdInternal baseAd, AdParams adParams, HyBidViewabilityNativeVideoAdSession viewabilityAdSession, boolean isFullscreen, AdPresenter.ImpressionListener impressionListener, AdCloseButtonListener adCloseButtonListener) {
         mBaseAdInternal = baseAd;
         mAdParams = adParams;
         mViewabilityAdSession = viewabilityAdSession;
         mViewabilityFriendlyObstructions = new ArrayList<>();
-        mViewControllerVast = new ViewControllerVast(this, isFullscreen, getEndcardCloseDelay(baseAd), getFullScreenClickability(baseAd));
+        mViewControllerVast = new ViewControllerVast(this, isFullscreen, getEndcardCloseDelay(baseAd), getNativeCloseButtonDelay(baseAd), getFullScreenClickability(baseAd), adCloseButtonListener);
         mMacroHelper = new MacroHelper();
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
             isAndroid6VersionDevice = true;
@@ -104,20 +106,22 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
         if (isFullscreen) {
             this.videoVisible = true;
         }
-
+        this.isFullscreen = isFullscreen;
         observer = VolumeObserver.getInstance();
         observer.registerVolumeObserver(this, mBaseAdInternal.getContext());
         this.mImpressionListener = impressionListener;
+
+        hasEndcard = AdEndCardManager.getDefaultEndCard();
     }
 
     private synchronized void addAction(Action action) {
 
-        if(mActions.isEmpty() || !mActions.get(mActions.size() - 1).equals(action))
+        if (mActions.isEmpty() || !mActions.get(mActions.size() - 1).equals(action))
             mActions.add(action);
 
-        if(!mPendingActions.isEmpty() && mPendingActions.containsKey(action)){
+        if (!mPendingActions.isEmpty() && mPendingActions.containsKey(action)) {
             List<Action> pendingActions = mPendingActions.get(action);
-            if(pendingActions != null && !pendingActions.isEmpty()){
+            if (pendingActions != null && !pendingActions.isEmpty()) {
                 mActions.addAll(pendingActions);
             }
             mPendingActions.remove(action);
@@ -125,31 +129,30 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
     }
 
     private synchronized void addPendingAction(Action action, Action waitingAction) {
-        if(mPendingActions.containsKey(waitingAction) && mPendingActions.get(waitingAction) != null){
+        if (mPendingActions.containsKey(waitingAction) && mPendingActions.get(waitingAction) != null) {
             mPendingActions.get(waitingAction).add(action);
-        }else{
+        } else {
             LinkedList<Action> newList = new LinkedList<>();
             newList.add(action);
             mPendingActions.put(waitingAction, newList);
         }
     }
 
-    private synchronized void cancelPendingPauseAction(){
+    private synchronized void cancelPendingPauseAction() {
 
-        if(!mActions.isEmpty() && mActions.get(mActions.size() -1) == Action.PAUSE){
-            mActions.remove(mActions.size() -1);
+        if (!mActions.isEmpty() && mActions.get(mActions.size() - 1) == Action.PAUSE) {
+            mActions.remove(mActions.size() - 1);
         }
 
-        if(mPendingActions.containsKey(Action.PLAY)){
+        if (mPendingActions.containsKey(Action.PLAY)) {
             List<Action> pendingActions = mPendingActions.get(Action.PLAY);
-            if(pendingActions != null && !pendingActions.isEmpty() &&
-                    pendingActions.get(pendingActions.size() - 1).equals(Action.PAUSE)){
+            if (pendingActions != null && !pendingActions.isEmpty() && pendingActions.get(pendingActions.size() - 1).equals(Action.PAUSE)) {
                 mPendingActions.get(Action.PLAY).remove(pendingActions.size() - 1);
             }
         }
     }
 
-    private void clearAllActions(){
+    private void clearAllActions() {
         mActions.clear();
         mPendingActions.clear();
     }
@@ -163,10 +166,10 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
                 Action currentAction = mActions.get(0);
                 executeAction(currentAction);
                 this.currentAction = currentAction;
-                if(!mActions.isEmpty()) mActions.remove(0);
-                if(!mPendingActions.isEmpty() && mPendingActions.containsKey(currentAction)){
+                if (!mActions.isEmpty()) mActions.remove(0);
+                if (!mPendingActions.isEmpty() && mPendingActions.containsKey(currentAction)) {
                     List<Action> pendingActions = mPendingActions.get(currentAction);
-                    if(pendingActions != null && !pendingActions.isEmpty()){
+                    if (pendingActions != null && !pendingActions.isEmpty()) {
                         mActions.addAll(0, pendingActions);
                     }
                     mPendingActions.remove(currentAction);
@@ -253,6 +256,10 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
 
         if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
             mMediaPlayer.pause();
+            getViewabilityAdSession().firePause();
+        }
+
+        if (!isVideoCompleted && !isVideoSkipped) {
             ReportingEvent event = new ReportingEvent();
             event.setEventType(Reporting.EventType.VIDEO_PAUSE);
             event.setCreativeType(Reporting.CreativeType.VIDEO);
@@ -261,15 +268,18 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
                 HyBid.getReportingController().reportEvent(event);
             }
             EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.PAUSE, mMacroHelper, false);
-            getViewabilityAdSession().firePause();
         }
     }
 
     private void processResumeAction() {
 
-        if (mMediaPlayer != null) {
+        if (!isVideoCompleted && mMediaPlayer != null) {
             mMediaPlayer.setSurface(mViewControllerVast.getSurface());
             mMediaPlayer.start();
+        }
+
+        if (isVideoCompleted) {
+            recoverMediaPlayerSurface();
         }
 
         if (mTimerWithPause != null && mTimerWithPause.isPaused()) {
@@ -280,7 +290,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
             mSkipTimerWithPause.resume();
         }
 
-        if (!isVideoCompleted) {
+        if (!isVideoCompleted && !isVideoSkipped) {
             ReportingEvent event = new ReportingEvent();
             event.setEventType(Reporting.EventType.VIDEO_RESUME);
             event.setCreativeType(Reporting.CreativeType.VIDEO);
@@ -288,9 +298,9 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
             if (HyBid.getReportingController() != null) {
                 HyBid.getReportingController().reportEvent(event);
             }
+            getViewabilityAdSession().fireResume();
+            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.RESUME, mMacroHelper, false);
         }
-        EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.RESUME, mMacroHelper, false);
-        getViewabilityAdSession().fireResume();
     }
 
     @Override
@@ -342,19 +352,18 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
 
     @Override
     public void pause() {
-        if(currentAction == Action.INITIAL){
+        if (currentAction == Action.INITIAL) {
             addPendingAction(Action.PAUSE, Action.PLAY);
-        }else{
+        } else {
             addAction(Action.PAUSE);
         }
         processActions();
     }
 
     private void resumeAd() {
-
-        if (currentAction == Action.PAUSE){
+        if (currentAction == Action.PAUSE && !isVideoSkipped) {
             addAction(Action.RESUME);
-        }else if(isVideoVisible()){
+        } else if (isVideoVisible()) {
             cancelPendingPauseAction();
         }
         processActions();
@@ -415,7 +424,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
             }
         }.create();
 
-        if (mSkipTimeMillis > 0) {
+        if (mSkipTimeMillis > 0 && isFullscreen) {
             mSkipTimerWithPause = new TimerWithPause(mSkipTimeMillis, 1) {
                 @Override
                 public void onTick(long millisUntilFinished) {
@@ -429,6 +438,10 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
                     }
                 }
             }.create();
+        } else if (mSkipTimeMillis == 0) {
+            if (mViewControllerVast != null) {
+                mViewControllerVast.endSkip();
+            }
         }
     }
 
@@ -452,77 +465,52 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
     }
 
     private void initSkipTime(int duration) {
-        int unskippableVideoDurationMillis = mBaseAdInternal.getAd().getUnskippableVideoDuration() * 1000;
-        int minimumSkipOffsetMillis = mBaseAdInternal.getAd().getMinimumSkipOffset() * 1000;
-        int maximumSkipOffsetMillis = mBaseAdInternal.getAd().getMaximumSkipOffset() * 1000;
-        int publisherSkipMilliseconds = mAdParams.getPublisherSkipSeconds() * 1000;
-        SkipOffset globalSkip = HyBid.getVideoInterstitialSkipOffset();
-        int globalSkipMilliseconds = globalSkip.getOffset() * 1000;
-        int lowerLimit = 0;
-        int upperLimit = 0;
+        if (mBaseAdInternal == null || mBaseAdInternal.getAd() == null) return;
 
-        if (unskippableVideoDurationMillis >= duration) {
-            mSkipTimeMillis = -1;
-            return;
-        } else {
-            if (publisherSkipMilliseconds > 0) {
-                lowerLimit = publisherSkipMilliseconds;
-                upperLimit = publisherSkipMilliseconds;
-            }
+        int adParamsSkipTime = -1;
+        int publisherSkipTime = -1;
 
-            if (minimumSkipOffsetMillis > 0) {
-                lowerLimit = minimumSkipOffsetMillis;
-                if (upperLimit > 0 && upperLimit < lowerLimit) {
-                    upperLimit = lowerLimit;
-                }
-            }
-
-            if (maximumSkipOffsetMillis > 0) {
-                upperLimit = maximumSkipOffsetMillis;
-                if (upperLimit < lowerLimit) {
-                    upperLimit = lowerLimit;
-                }
-            }
-
-            if (lowerLimit > 0 && lowerLimit > mSkipTimeMillis) {
-                mSkipTimeMillis = lowerLimit;
-            }
-
-            if (upperLimit > 0 && mSkipTimeMillis > upperLimit) {
-                mSkipTimeMillis = upperLimit;
-            }
-        }
-
-        if (publisherSkipMilliseconds > 0 && publisherSkipMilliseconds > minimumSkipOffsetMillis && publisherSkipMilliseconds < maximumSkipOffsetMillis) {
-            mSkipTimeMillis = publisherSkipMilliseconds;
-        }
-
-        if (globalSkipMilliseconds > 0 && globalSkipMilliseconds > minimumSkipOffsetMillis && globalSkipMilliseconds < maximumSkipOffsetMillis) {
-            mSkipTimeMillis = globalSkipMilliseconds;
-        }
-
-        if (mSkipTimeMillis > duration) {
-            mSkipTimeMillis = -1;
-            return;
-        }
-
-        if (mSkipTimeMillis <= 0) {
-            if (TextUtils.isEmpty(mAdParams.getSkipTime())) {
-                mSkipTimeMillis = -1;
-            } else {
+        if (mAdParams != null) {
+            publisherSkipTime = mAdParams.getPublisherSkipSeconds();
+            if (!TextUtils.isEmpty(mAdParams.getSkipTime())) {
                 if (mAdParams.getSkipTime().contains("%")) {
-                    mSkipTimeMillis = duration * Utils.parsePercent(mAdParams.getSkipTime()) / 100;
+                    adParamsSkipTime = duration * Utils.parsePercent(mAdParams.getSkipTime()) / 100;
                 } else {
-                    mSkipTimeMillis = Utils.parseDuration(mAdParams.getSkipTime()) * 1000;
+                    adParamsSkipTime = Utils.parseDuration(mAdParams.getSkipTime()) * 1000;
                 }
             }
+        }
+
+        hasEndcard = AdEndCardManager.isEndCardEnabled(mBaseAdInternal.getAd(), mBaseAdInternal.getAd().isEndCardEnabled(), HyBid.isEndCardEnabled(), null);
+
+        Integer renderingSkipOffset = null;
+        Boolean isRenderingSkipOffsetCustom = null;
+        if (HyBid.getVideoInterstitialSkipOffset() != null) {
+            renderingSkipOffset = HyBid.getVideoInterstitialSkipOffset().getOffset();
+            isRenderingSkipOffsetCustom = HyBid.getVideoInterstitialSkipOffset().isCustom();
+        }
+
+        if (isRewarded()) {
+            mSkipTimeMillis = SkipOffsetManager.getRewardedSkipOffset(mBaseAdInternal.getAd().getVideoRewardedSkipOffset(), publisherSkipTime, adParamsSkipTime, hasEndcard) * 1000;
+            int validatedMaxSkipOffset = SkipOffsetManager.getMaximumRewardedSkipOffset();
+            // Add 500 to account for millisecond rounding
+            if (duration < validatedMaxSkipOffset * 1000 + 500)
+                mSkipTimeMillis = -1;
+        } else {
+            mSkipTimeMillis = SkipOffsetManager.getInterstitialVideoSkipOffset(mBaseAdInternal.getAd().getVideoSkipOffset(), renderingSkipOffset, isRenderingSkipOffsetCustom, publisherSkipTime, adParamsSkipTime, hasEndcard) * 1000;
+            if (mSkipTimeMillis > duration)
+                mSkipTimeMillis = -1;
         }
     }
 
     private void createProgressPoints(int duration) {
         mTrackingEventsList.clear();
-        for (String url : mAdParams.getImpressions()) {
-            mTrackingEventsList.add(new TrackingEvent(url));
+
+        if (mAdParams == null) return;
+        if (mAdParams.getImpressions() != null) {
+            for (String url : mAdParams.getImpressions()) {
+                mTrackingEventsList.add(new TrackingEvent(url));
+            }
         }
 
         if (mAdParams.getEvents() != null) {
@@ -600,8 +588,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
 
     private void skipVideo(boolean skipEvent) {
 
-        if (finishedPlaying)
-            return;
+        if (finishedPlaying) return;
 
         finishedPlaying = true;
         clearAllActions();
@@ -650,8 +637,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
                 isAutoCloseRemoteConfig = mBaseAdInternal.getAd().needCloseInterAfterFinish();
         }
 
-        if (isAutoCloseRemoteConfig != null)
-            isAutoClose = isAutoCloseRemoteConfig;
+        if (isAutoCloseRemoteConfig != null) isAutoClose = isAutoCloseRemoteConfig;
 
         if (isAutoClose) {
             hasEndcard = false;
@@ -661,11 +647,12 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
             if (mEndCardData == null || !isEndCardShowable() || (mEndCardData.getType() == EndCardData.Type.STATIC_RESOURCE && TextUtils.isEmpty(mImageUri))) {
                 if (hasValidCloseCard()) {
                     mViewControllerVast.showCloseCard(mCloseCardData);
+                } else if (skipEvent) {
+                    closeSelf();
+                } else {
                     if (mBaseAdInternal != null) {
                         mBaseAdInternal.onAdCloseButtonVisible();
                     }
-                } else if (skipEvent) {
-                    closeSelf();
                 }
             } else {
                 hasEndcard = true;
@@ -862,12 +849,8 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
     };
 
     private void handleMediaPlayerComplete() {
-        if (isVideoCompleted)
-            return;
-
-        if (mBaseAdInternal.isInterstitial()) {
-            mViewControllerVast.hideSkipButton();
-        }
+        if (isVideoCompleted) return;
+        mViewControllerVast.hideSkipButton();
         isVideoCompleted = true;
         mViewControllerVast.hideTimerAndMuteButton();
         mBaseAdInternal.onAdDidReachEnd();
@@ -892,16 +875,10 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
 
     private boolean isEndCardShowable() {
         Ad ad = mBaseAdInternal.getAd();
-
-        if (ad != null && ad.hasEndCard()) {
-            if (ad.isEndCardEnabled() != null) {
-                return ad.isEndCardEnabled();
-            } else {
-                return HyBid.isEndCardEnabled();
-            }
-        } else {
-            return false;
+        if (ad != null) {
+            return AdEndCardManager.isEndCardEnabled(ad, ad.isEndCardEnabled(), HyBid.isEndCardEnabled(), ad.hasEndCard());
         }
+        return false;
     }
 
     private Integer getEndcardCloseDelay(BaseVideoAdInternal baseAd) {
@@ -910,6 +887,18 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
             endcardCloseDelay = baseAd.getAd().getEndCardCloseDelay();
         }
         return endcardCloseDelay;
+    }
+
+    private Integer getNativeCloseButtonDelay(BaseVideoAdInternal baseAd) {
+        Integer nativeCloseButtonDelay = null;
+        if (baseAd != null && baseAd.getAd() != null) {
+            nativeCloseButtonDelay = getCloseButtonDelay(baseAd.getAd());
+        }
+        return nativeCloseButtonDelay;
+    }
+
+    public Integer getCloseButtonDelay(Ad ad) {
+        return SkipOffsetManager.getNativeCloseButtonDelay(ad.getNativeCloseButtonDelay());
     }
 
     private Boolean getFullScreenClickability(BaseVideoAdInternal baseAd) {
@@ -978,10 +967,6 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
     }
 
     private enum Action {
-        PREPARE,
-        PLAY,
-        PAUSE,
-        RESUME,
-        INITIAL,
+        PREPARE, PLAY, PAUSE, RESUME, INITIAL,
     }
 }

@@ -18,7 +18,7 @@ import net.pubnative.lite.sdk.vpaid.helpers.AssetsLoader;
 import net.pubnative.lite.sdk.vpaid.helpers.ErrorLog;
 import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
 import net.pubnative.lite.sdk.vpaid.models.CloseCardData;
-import net.pubnative.lite.sdk.vpaid.models.EndCardData;
+import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.AdSpotDimensions;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.response.VastProcessor;
@@ -36,7 +36,7 @@ abstract class BaseVideoAdInternal {
     private boolean mIsReady;
     private boolean mIsRewarded = false;
     private VideoAdListener mVideoAdListener;
-
+    private AdCloseButtonListener mAdCloseButtonListener;
     private CloseButtonListener mCloseButtonListener;
     private long mAdLoadingStartTime;
     private SimpleTimer mExpirationTimer;
@@ -55,7 +55,7 @@ abstract class BaseVideoAdInternal {
 
     AdPresenter.ImpressionListener mImpressionListener;
 
-    BaseVideoAdInternal(Context context, Ad ad, boolean isInterstitial, boolean isFullscreen, AdPresenter.ImpressionListener impressionListener) throws Exception {
+    BaseVideoAdInternal(Context context, Ad ad, boolean isInterstitial, boolean isFullscreen, AdPresenter.ImpressionListener impressionListener, AdCloseButtonListener adCloseButtonListener) throws Exception {
         String data = ad.getVast();
         if (context == null || TextUtils.isEmpty(data)) {
             throw new HyBidError(HyBidErrorCode.VAST_PLAYER_ERROR);
@@ -70,6 +70,7 @@ abstract class BaseVideoAdInternal {
 
         mViewabilityAdSession = new HyBidViewabilityNativeVideoAdSession(HyBid.getViewabilityManager());
         this.mImpressionListener = impressionListener;
+        this.mAdCloseButtonListener = adCloseButtonListener;
     }
 
     abstract void dismiss();
@@ -279,7 +280,7 @@ abstract class BaseVideoAdInternal {
         if (adParams.isVpaid()) {
             mAdController = new VideoAdControllerVpaid(this, adParams, getAdSpotDimensions(), vastFileContent, getViewabilityAdSession());
         } else {
-            mAdController = new VideoAdControllerVast(this, adParams, getViewabilityAdSession(), isFullscreen, this.mImpressionListener);
+            mAdController = new VideoAdControllerVast(this, adParams, getViewabilityAdSession(), isFullscreen, this.mImpressionListener, mAdCloseButtonListener);
         }
         if (mCacheItem != null) {
             prepareAdController(mCacheItem.getVideoFilePath(), mCacheItem.getEndCardData(), mCacheItem.getEndCardFilePath());
@@ -310,7 +311,13 @@ abstract class BaseVideoAdInternal {
             return;
         }
         mAdController.setVideoFilePath(videoFilePath);
-        mAdController.setEndCardData(endCardData);
+
+        if(endCardData == null && getAd().isCustomEndCardEnabled() && getAd().hasCustomEndCard()){
+            mAdController.setEndCardData(getAd().getCustomEndCard());
+        } else {
+            mAdController.setEndCardData(endCardData);
+        }
+
         mAdController.setCloseCardData(createCloseCardData(mAd));
         mAdController.setEndCardFilePath(endCardFilePath);
         runOnUiThread(() -> {

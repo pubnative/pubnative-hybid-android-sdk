@@ -4,12 +4,10 @@
     android:layout_height="wrap_content"
     android:animateLayoutChanges="true">
 
-    <net.pubnative.lite.sdk.views.HyBidAdView
+    <FrameLayout
         android:id="@+id/banner_view"
         android:layout_width="300dp"
         android:layout_height="250dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
         android:visibility="gone" />
 </FrameLayout>

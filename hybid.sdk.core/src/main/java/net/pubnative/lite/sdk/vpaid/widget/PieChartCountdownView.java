@@ -15,6 +15,7 @@ public class PieChartCountdownView extends CountDownView {
 
     private ProgressBar progressBarView;
     private TextView progressTextView;
+    private boolean isBackgroundOn = false;
 
     public PieChartCountdownView(Context context) {
         super(context);
@@ -41,10 +42,18 @@ public class PieChartCountdownView extends CountDownView {
     }
 
     public void setProgress(int currentMs, int totalMs) {
+        initBackground();
         progressBarView.setMax(totalMs);
         progressBarView.setSecondaryProgress(totalMs);
         progressBarView.setProgress(currentMs);
         int remainSec = (totalMs - currentMs) / 1000 + 1;
         progressTextView.setText(String.valueOf(remainSec));
+    }
+
+    private void initBackground() {
+        if (!isBackgroundOn) {
+            isBackgroundOn = true;
+            progressBarView.setBackground(getResources().getDrawable(R.drawable.circle_progress_background));
+        }
     }
 }

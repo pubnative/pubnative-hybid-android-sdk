@@ -9,20 +9,22 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import net.pubnative.lite.demo.ui.fragments.apitester.LegacyApiTesterSize
 import net.pubnative.lite.demo.ui.fragments.apitester.LegacyApiTesterSize.*
-import net.pubnative.lite.demo.ui.fragments.markup.MarkupSize
 import net.pubnative.lite.demo.ui.fragments.markup.MarkupType
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.demo.util.JsonUtils
 import net.pubnative.lite.sdk.HyBid
+import net.pubnative.lite.sdk.api.ApiClient
+import net.pubnative.lite.sdk.api.OpenRTBApiClient
 import net.pubnative.lite.sdk.api.PNApiClient
 import net.pubnative.lite.sdk.models.APIAsset
 import net.pubnative.lite.sdk.models.Ad
 import net.pubnative.lite.sdk.models.AdResponse
+import net.pubnative.lite.sdk.models.AdSize
 import net.pubnative.lite.sdk.network.PNHttpClient
 import net.pubnative.lite.sdk.utils.AdRequestRegistry
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor
-import net.pubnative.lite.sdk.vpaid.models.EndCardData
+import net.pubnative.lite.sdk.models.EndCardData
 import net.pubnative.lite.sdk.vpaid.response.AdParams
 import org.json.JSONObject
 
@@ -47,9 +49,11 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
     val listVisibillity: LiveData<Boolean> = _listVisibillity
 
     private lateinit var apiClient: PNApiClient
+    private lateinit var oRtbApiClient: OpenRTBApiClient
 
     init {
         apiClient = PNApiClient(application)
+        oRtbApiClient = OpenRTBApiClient(application)
     }
 
     fun pasteFromClipboard() {
@@ -124,18 +128,39 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
 
     private fun processAd(response: String?) {
 
-        apiClient.processStream(response, object : PNApiClient.AdRequestListener {
+        apiClient.processStream(response, object : ApiClient.AdRequestListener {
 
             override fun onSuccess(ad: Ad?) {
                 handleAdResult(ad)
             }
 
             override fun onFailure(exception: Throwable?) {
-                Toast.makeText(
-                    getApplication<Application>().applicationContext,
-                    "Can't parse ad response",
-                    Toast.LENGTH_SHORT
-                ).show()
+                val size = when (adSize) {
+                    BANNER -> AdSize.SIZE_320x50
+                    MEDIUM -> AdSize.SIZE_300x250
+                    LEADERBOARD -> AdSize.SIZE_728x90
+                    INTERSTITIAL -> AdSize.SIZE_320x480
+                    REWARDED -> AdSize.SIZE_320x480
+                    else -> AdSize.SIZE_320x50
+                }
+                oRtbApiClient.processStream(
+                    response,
+                    null,
+                    size.width,
+                    size.height,
+                    object : ApiClient.AdRequestListener {
+                        override fun onSuccess(ad: Ad?) {
+                            handleAdResult(ad)
+                        }
+
+                        override fun onFailure(exception: Throwable?) {
+                            Toast.makeText(
+                                getApplication<Application>().applicationContext,
+                                "Can't parse ad response",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    })
             }
         })
     }
@@ -146,7 +171,7 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
 
         if (adSize == INTERSTITIAL || adSize == REWARDED) {
             ad.zoneId = getZoneIdForInterstitial(ad)
-            val livedata = if(adSize == INTERSTITIAL) _loadInterstitial else _loadReworded
+            val livedata = if (adSize == INTERSTITIAL) _loadInterstitial else _loadReworded
             if (isVideoAd(ad)) {
                 runCacheProcessForVideoAd(ad, livedata)
             } else {
@@ -214,7 +239,7 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
                     endCardFilePath: String?,
                     omidVendors: List<String>
                 ) {
-                    val hasEndCard = adParams.endCardList != null && !adParams.endCardList.isEmpty()
+                    val hasEndCard = adParams.endCardList != null && adParams.endCardList.isNotEmpty()
                     val adCacheItem =
                         VideoAdCacheItem(adParams, videoFilePath, endCardData, endCardFilePath)
                     ad.setHasEndCard(hasEndCard)

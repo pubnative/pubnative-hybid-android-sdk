@@ -43,7 +43,6 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
         OPEN("net.pubnative.hybid.rewarded.open"),
         CLICK("net.pubnative.hybid.rewarded.click"),
         CLOSE("net.pubnative.hybid.rewarded.close"),
-        FINISH("net.pubnative.hybid.rewarded.finish"),
         ERROR("net.pubnative.hybid.rewarded.error"),
         VIDEO_ERROR("net.pubnative.hybid.rewarded.video_error"),
         VIDEO_START("net.pubnative.hybid.rewarded.video_start"),
@@ -115,7 +114,6 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
         mIntentFilter.addAction(Action.OPEN.getId());
         mIntentFilter.addAction(Action.CLICK.getId());
         mIntentFilter.addAction(Action.CLOSE.getId());
-        mIntentFilter.addAction(Action.FINISH.getId());
         mIntentFilter.addAction(Action.VIDEO_START.getId());
         mIntentFilter.addAction(Action.VIDEO_SKIP.getId());
         mIntentFilter.addAction(Action.VIDEO_FINISH.getId());
@@ -177,8 +175,6 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
                 break;
             case CLOSE:
                 listener.onRewardedClosed(presenter);
-                break;
-            case FINISH:
                 listener.onRewardedFinished(presenter);
                 break;
             case ERROR:

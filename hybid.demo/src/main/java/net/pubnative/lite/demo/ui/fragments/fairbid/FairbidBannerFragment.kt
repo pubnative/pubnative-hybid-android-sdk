@@ -70,10 +70,10 @@ class FairbidBannerFragment : Fragment(R.layout.fragment_fairbid_banner), Banner
     }
 
     // Fairbid Banner Listeners
-    override fun onError(p0: String, error: BannerError?) {
+    override fun onError(placementId: String, error: BannerError) {
         Log.d(FairbidBannerFragment_TAG, "onError")
         displayLogs()
-        errorView.text = error?.errorMessage
+        errorView.text = error.errorMessage
     }
 
     override fun onLoad(placementId: String) {

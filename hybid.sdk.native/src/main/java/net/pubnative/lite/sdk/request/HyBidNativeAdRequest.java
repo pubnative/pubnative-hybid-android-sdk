@@ -69,19 +69,12 @@ public class HyBidNativeAdRequest implements RequestManager.RequestListener {
     }
 
     public void load(String appToken, String zoneId, RequestListener listener) {
-        if (HyBid.getConfigManager() != null
-                && !HyBid.getConfigManager().getFeatureResolver().isAdFormatEnabled(RemoteConfigFeature.AdFormat.NATIVE)) {
-            if (listener != null) {
-                listener.onRequestFail(new HyBidError(HyBidErrorCode.DISABLED_FORMAT));
-            }
-        } else {
-            mListener = listener;
-            if (!TextUtils.isEmpty(appToken)) {
-                mRequestManager.setAppToken(appToken);
-            }
-            mRequestManager.setZoneId(zoneId);
-            mRequestManager.requestAd();
+        mListener = listener;
+        if (!TextUtils.isEmpty(appToken)) {
+            mRequestManager.setAppToken(appToken);
         }
+        mRequestManager.setZoneId(zoneId);
+        mRequestManager.requestAd();
     }
 
     public void prepareAd(String adValue, RequestListener listener) {

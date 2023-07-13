@@ -34,22 +34,21 @@ import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.analytics.ReportingEventCallback;
 import net.pubnative.lite.sdk.browser.BrowserManager;
-import net.pubnative.lite.sdk.config.ConfigManager;
 import net.pubnative.lite.sdk.core.BuildConfig;
 import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.core.R;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
-import net.pubnative.lite.sdk.models.AdConstants;
 import net.pubnative.lite.sdk.models.AdRequest;
-import net.pubnative.lite.sdk.models.AdRequestFactory;
+import net.pubnative.lite.sdk.models.PNAdRequestFactory;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.IntegrationType;
+import net.pubnative.lite.sdk.models.PNAdRequest;
 import net.pubnative.lite.sdk.models.SkipOffset;
 import net.pubnative.lite.sdk.prefs.HyBidPreferences;
 import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
-import net.pubnative.lite.sdk.reporting.ReportingDelegate;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNApiUrlComposer;
+import net.pubnative.lite.sdk.utils.SkipOffsetManager;
 import net.pubnative.lite.sdk.viewability.ViewabilityManager;
 import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 import net.pubnative.lite.sdk.vpaid.enums.AudioState;
@@ -68,8 +67,6 @@ public class HyBid {
     private static DeviceInfo sDeviceInfo;
     @SuppressLint("StaticFieldLeak")
     private static UserDataManager sUserDataManager;
-    @SuppressLint("StaticFieldLeak")
-    private static ConfigManager sConfigManager;
     @SuppressLint("StaticFieldLeak")
     private static ViewabilityManager sViewabilityManager;
     @SuppressLint("StaticFieldLeak")
@@ -91,14 +88,14 @@ public class HyBid {
     private static boolean isCloseVideoAfterFinishForRewarded = false;
     private static boolean isDiagnosticsEnabled = true;
     private static boolean sMraidExpandEnabled = true;
-    private static boolean isEndCardEnabled = false;
+    private static Boolean isEndCardEnabled = null;
     private static String sAge;
     private static String sGender;
     private static String sKeywords;
     private static String sBundleId;
-    private static SkipOffset sHtmlInterstitialSkipOffset = new SkipOffset(AdConstants.Skip.HTML_SKIP_OFFSET, false);
-    private static SkipOffset sVideoInterstitialSkipOffset = new SkipOffset(AdConstants.Skip.VIDEO_WITHOUT_ENDCARD_SKIP_OFFSET, false);
-    private static SkipOffset sEndCardCloseButtonDelay = new SkipOffset(AdConstants.Skip.ENDCARD_SKIP_OFFSET, false);
+    private static SkipOffset sHtmlInterstitialSkipOffset = new SkipOffset(SkipOffsetManager.getDefaultHtmlInterstitialSkipOffset(), false);
+    private static SkipOffset sVideoInterstitialSkipOffset = new SkipOffset(SkipOffsetManager.getDefaultVideoWithoutEndCardSkipOffset(), false);
+    private static SkipOffset sEndCardCloseButtonDelay = new SkipOffset(SkipOffsetManager.getDefaultEndcardSkipOffset(), false);
     private static String sIabCategory;
     private static String sIabSubcategory;
     private static String sAppVersion;
@@ -159,7 +156,6 @@ public class HyBid {
             }
         }
         sUserDataManager = new UserDataManager(application.getApplicationContext());
-        sConfigManager = new ConfigManager(application.getApplicationContext(), appToken);
         sAdCache = new AdCache();
 
         sVideoAdCache = new VideoAdCache();
@@ -168,7 +164,6 @@ public class HyBid {
         if (sReportingController == null) sReportingController = new ReportingController();
         sDiagnosticsManager = new DiagnosticsManager(application.getApplicationContext(), sReportingController);
         sViewabilityManager = new ViewabilityManager(application);
-        ReportingDelegate sReportingDelegate = new ReportingDelegate(application.getApplicationContext(), sReportingController, sConfigManager, appToken);
         if (sCrashController == null) sCrashController = new CrashController();
         if (sDeviceInfo == null) {
             sDeviceInfo = new DeviceInfo(application.getApplicationContext());
@@ -229,13 +224,6 @@ public class HyBid {
             Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before using getUserDataManager()");
         }
         return sUserDataManager;
-    }
-
-    public static ConfigManager getConfigManager() {
-        if (!isInitialized()) {
-            Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before using getConfigManager()");
-        }
-        return sConfigManager;
     }
 
     public static ViewabilityManager getViewabilityManager() {
@@ -508,7 +496,7 @@ public class HyBid {
      * @Deprecated Please note this method will no longer be supported from HyBid SDK v3.0. While we do not recommend changes to this setting, you can reach out to your account managers for customisations.
      */
     @Deprecated
-    public static boolean isEndCardEnabled() {
+    public static Boolean isEndCardEnabled() {
         return isEndCardEnabled;
     }
 
@@ -529,9 +517,9 @@ public class HyBid {
     }
 
     public static void resetSkipOffsetValues() {
-        sHtmlInterstitialSkipOffset = new SkipOffset(AdConstants.Skip.HTML_SKIP_OFFSET, false);
-        sVideoInterstitialSkipOffset = new SkipOffset(AdConstants.Skip.VIDEO_WITHOUT_ENDCARD_SKIP_OFFSET, false);
-        sEndCardCloseButtonDelay = new SkipOffset(AdConstants.Skip.ENDCARD_SKIP_OFFSET, false);
+        sHtmlInterstitialSkipOffset = new SkipOffset(SkipOffsetManager.getDefaultHtmlInterstitialSkipOffset(), false);
+        sVideoInterstitialSkipOffset = new SkipOffset(SkipOffsetManager.getDefaultVideoWithoutEndCardSkipOffset(), false);
+        sEndCardCloseButtonDelay = new SkipOffset(SkipOffsetManager.getDefaultEndcardSkipOffset(), false);
     }
 
     public static void reportException(Exception exception) {
@@ -624,9 +612,9 @@ public class HyBid {
         if (!HyBid.isInitialized()) {
             return "";
         }
-        AdRequestFactory adRequestFactory = new AdRequestFactory();
-        AdRequest adRequest = adRequestFactory.buildRequest("", "", AdSize.SIZE_INTERSTITIAL, "", true, IntegrationType.IN_APP_BIDDING, mediationVendorName, 0);
-        return PNApiUrlComposer.getUrlQuery(HyBid.getApiClient().getApiUrl(), adRequest);
+        PNAdRequestFactory PNAdRequestFactory = new PNAdRequestFactory();
+        AdRequest adRequest = PNAdRequestFactory.buildRequest("", "", AdSize.SIZE_INTERSTITIAL, "", true, IntegrationType.IN_APP_BIDDING, mediationVendorName, 0);
+        return PNApiUrlComposer.getUrlQuery(HyBid.getApiClient().getApiUrl(), (PNAdRequest) adRequest);
     }
 
     public static String getSDKVersionInfo() {

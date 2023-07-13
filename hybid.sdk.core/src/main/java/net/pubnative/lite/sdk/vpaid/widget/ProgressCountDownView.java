@@ -39,7 +39,7 @@ public class ProgressCountDownView extends CountDownView {
         if(timerContainer.getVisibility() == View.GONE){
             timerContainer.setVisibility(View.VISIBLE);
         }
-        int remainSec = (totalMs - currentMs) / 1000;
+        int remainSec = (totalMs - currentMs) / 1000 + 1;
         String result = "You can skip\nad in "+remainSec+"s";
         progressTextView.setText(result);
     }

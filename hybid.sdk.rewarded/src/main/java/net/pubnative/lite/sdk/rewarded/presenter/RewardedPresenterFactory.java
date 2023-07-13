@@ -67,16 +67,10 @@ public class RewardedPresenterFactory {
             case ApiAssetGroupType.MRAID_480x320:
             case ApiAssetGroupType.MRAID_1024x768:
             case ApiAssetGroupType.MRAID_768x1024: {
-                return HyBid.getConfigManager() != null
-                        && !HyBid.getConfigManager().getFeatureResolver()
-                        .isRenderingSupported(RemoteConfigFeature.Rendering.MRAID) ?
-                        null : new MraidRewardedPresenter(mContext, ad, mZoneId);
+                return new MraidRewardedPresenter(mContext, ad, mZoneId);
             }
             case ApiAssetGroupType.VAST_INTERSTITIAL: {
-                return HyBid.getConfigManager() != null
-                        && !HyBid.getConfigManager().getFeatureResolver()
-                        .isRenderingSupported(RemoteConfigFeature.Rendering.VAST) ?
-                        null : new VastRewardedPresenter(mContext, ad, mZoneId);
+                return new VastRewardedPresenter(mContext, ad, mZoneId);
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for rewarded ad format.");

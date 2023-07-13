@@ -33,6 +33,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNPermissionUtil;
 
 /**
@@ -41,6 +42,7 @@ import net.pubnative.lite.sdk.utils.PNPermissionUtil;
 
 @SuppressLint("MissingPermission")
 public class HyBidLocationManager implements LocationListener {
+    private static final String TAG = HyBidLocationManager.class.getSimpleName();
 
     private static final int TWO_MINUTES = 1000 * 60 * 2;
     private static final int LOCATION_UPDATE_TIMEOUT = 10000;
@@ -88,18 +90,24 @@ public class HyBidLocationManager implements LocationListener {
      */
     public void startLocationUpdates() {
         Handler mainHandler = new Handler(Looper.getMainLooper());
-        if (hasFinePermission()) {
-            if (hasGPSProvider()) {
-                mainHandler.post(() -> mManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, HyBidLocationManager.this));
+
+        try {
+            if (hasFinePermission()) {
+                if (hasGPSProvider()) {
+                    mainHandler.post(() -> mManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, HyBidLocationManager.this));
+                }
+                if (hasNetworkProvider()) {
+                    mainHandler.post(() -> mManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, HyBidLocationManager.this));
+                }
+            } else if (hasCoarsePermission()) {
+                if (hasNetworkProvider()) {
+                    mainHandler.post(() -> mManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, HyBidLocationManager.this));
+                }
             }
-            if (hasNetworkProvider()) {
-                mainHandler.post(() -> mManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, HyBidLocationManager.this));
-            }
-        } else if (hasCoarsePermission()) {
-            if (hasNetworkProvider()) {
-                mainHandler.post(() -> mManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, HyBidLocationManager.this));
-            }
+        }catch (Exception exception){
+            Logger.e(TAG, "Can't request location updates: ".concat(String.valueOf(exception.getMessage())));
         }
+
         mainHandler.postDelayed(mStopUpdatesRunnable, LOCATION_UPDATE_TIMEOUT);
     }
 

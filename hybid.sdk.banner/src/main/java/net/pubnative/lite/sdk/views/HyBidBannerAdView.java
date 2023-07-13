@@ -27,7 +27,9 @@ import android.content.Context;
 import android.util.AttributeSet;
 
 import net.pubnative.lite.sdk.api.BannerRequestManager;
+import net.pubnative.lite.sdk.api.OpenRTBApiClient;
 import net.pubnative.lite.sdk.api.RequestManager;
+import net.pubnative.lite.sdk.models.OpenRTBAdRequestFactory;
 
 public class HyBidBannerAdView extends HyBidAdView {
 
@@ -56,5 +58,10 @@ public class HyBidBannerAdView extends HyBidAdView {
     @Override
     RequestManager getRequestManager() {
         return new BannerRequestManager();
+    }
+
+    @Override
+    RequestManager getORTBRequestManager(){
+        return new BannerRequestManager(new OpenRTBApiClient(getContext()), new OpenRTBAdRequestFactory());
     }
 }

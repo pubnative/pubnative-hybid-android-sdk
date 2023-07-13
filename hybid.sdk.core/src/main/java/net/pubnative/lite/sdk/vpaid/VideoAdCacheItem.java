@@ -1,6 +1,6 @@
 package net.pubnative.lite.sdk.vpaid;
 
-import net.pubnative.lite.sdk.vpaid.models.EndCardData;
+import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 
 public class VideoAdCacheItem {

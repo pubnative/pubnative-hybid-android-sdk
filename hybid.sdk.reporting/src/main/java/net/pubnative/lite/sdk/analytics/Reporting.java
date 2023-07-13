@@ -55,6 +55,7 @@ public class Reporting {
         public static final String CLICK = "click";
         public static final String INTERSTITIAL_CLOSED = "interstitial_closed";
         public static final String REWARDED_CLOSED = "rewarded_closed";
+        public static final String REWARD = "reward";
         public static final String VIDEO_STARTED = "video_started";
         public static final String VIDEO_DISMISSED = "video_dismissed";
         public static final String VIDEO_FINISHED = "video_finished";

@@ -8,7 +8,6 @@ import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.DisplayManager;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.UserDataManager;
-import net.pubnative.lite.sdk.config.ConfigManager;
 import net.pubnative.lite.sdk.core.BuildConfig;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.utils.PNCrypto;
@@ -41,12 +40,9 @@ public class AdRequestFactoryTest {
     @Mock
     private UserDataManager mMockUserDataManager;
     @Mock
-    private ConfigManager mMockConfigManager;
-    @Mock
     private DisplayManager mMockDisplayManager;
-
     @InjectMocks
-    private AdRequestFactory mSubject;
+    private PNAdRequestFactory mSubject;
 
     @Mock
     Context mockContext;
@@ -91,11 +87,11 @@ public class AdRequestFactoryTest {
     public void createAdRequest() {
 
 //        AdRequest request = mSubject.buildRequest("aabbcc112233", "2", AdSize.SIZE_320x50, "aabbccdd", false, IntegrationType.HEADER_BIDDING,"m");
-        AdRequest request = mSubject.buildRequest("aabbcc112233", "2", AdSize.SIZE_320x50, "aabbccdd", false, IntegrationType.HEADER_BIDDING, "b", 0);
+        PNAdRequest request = (PNAdRequest) mSubject.buildRequest("aabbcc112233", "2", AdSize.SIZE_320x50, "aabbccdd", false, IntegrationType.HEADER_BIDDING, "b", 0);
         Assert.assertEquals("aabbccdd", request.gid);
         Assert.assertEquals(PNCrypto.md5("aabbccdd"), request.gidmd5);
         Assert.assertEquals(PNCrypto.sha1("aabbccdd"), request.gidsha1);
-        Assert.assertEquals("2", request.zoneid);
+        Assert.assertEquals("2", request.zoneId);
         Assert.assertEquals("s", request.al);
         Assert.assertEquals("320", request.width);
         Assert.assertEquals("50", request.height);
@@ -107,7 +103,7 @@ public class AdRequestFactoryTest {
         Assert.assertEquals("0", request.coppa);
         Assert.assertEquals("12.126543", request.latitude);
         Assert.assertEquals("15.151534", request.longitude);
-        Assert.assertEquals("points,revenuemodel,contentinfo,creativeid,renderingoptions", request.mf);
+        Assert.assertEquals("points,revenuemodel,contentinfo,creativeid", request.mf);
         Assert.assertEquals("1,2,3,4,5,6,7,8,11,12,13,14", request.protocol);
         Assert.assertEquals("3,5,6,7", request.api);
         Assert.assertEquals("HyBid", request.displaymanager);

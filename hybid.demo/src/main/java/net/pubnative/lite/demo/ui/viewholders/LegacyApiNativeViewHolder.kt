@@ -10,18 +10,19 @@ import net.pubnative.lite.sdk.models.Ad
 import net.pubnative.lite.sdk.models.NativeAd
 import net.pubnative.lite.sdk.utils.Logger
 
-class LegacyApiNativeViewHolder(itemView: View, val mListener: OnLogDisplayListener) : RecyclerView.ViewHolder(itemView), NativeAd.Listener {
+class LegacyApiNativeViewHolder(itemView: View, val mListener: OnLogDisplayListener) :
+    RecyclerView.ViewHolder(itemView), NativeAd.Listener {
     private val TAG = LegacyApiNativeViewHolder::class.java.simpleName
 
     private var nativeAd: NativeAd? = null
 
     fun bind(ad: Ad?) {
         ad?.let {
-            nativeAd?.stopTracking()
+            destroy()
             try {
                 nativeAd = NativeAd(ad)
                 renderAd(nativeAd)
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 mListener.displayLogs()
             }
         }

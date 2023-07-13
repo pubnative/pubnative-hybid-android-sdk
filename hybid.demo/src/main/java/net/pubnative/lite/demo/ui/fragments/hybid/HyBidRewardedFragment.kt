@@ -18,7 +18,8 @@ import net.pubnative.lite.sdk.*
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedAd
 import java.util.*
 
-class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidRewardedAd.Listener, CacheListener, VideoListener {
+class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidRewardedAd.Listener,
+    CacheListener, VideoListener {
     val TAG = HyBidRewardedFragment::class.java.simpleName
 
     private var zoneId: String? = null
@@ -173,7 +174,10 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
     }
 
     override fun onVideoDismissed(progressPercentage: Int) {
-        Log.d(TAG, String.format(Locale.ENGLISH, "onVideoDismissed progress: %d", progressPercentage))
+        Log.d(
+            TAG,
+            String.format(Locale.ENGLISH, "onVideoDismissed progress: %d", progressPercentage)
+        )
     }
 
     override fun onVideoFinished() {

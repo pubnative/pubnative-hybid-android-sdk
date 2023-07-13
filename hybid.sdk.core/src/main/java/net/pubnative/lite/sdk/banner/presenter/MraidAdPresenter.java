@@ -22,15 +22,16 @@
 //
 package net.pubnative.lite.sdk.banner.presenter;
 
-import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.view.View;
+
+import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.analytics.Reporting;
-import net.pubnative.lite.sdk.contentinfo.AdFeedbackView;
-import net.pubnative.lite.sdk.core.R;
+import net.pubnative.lite.sdk.contentinfo.AdFeedbackFormHelper;
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdSize;
@@ -42,9 +43,7 @@ import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
-import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.utils.CheckUtils;
-import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.views.ProgressDialogFragment;
@@ -80,8 +79,7 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
 
         ImpressionTrackingMethod trackingMethodFinal = trackingMethod;
 
-        if (ad != null && ad.getImpressionTrackingMethod() != null &&
-                ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod()) != null) {
+        if (ad != null && ad.getImpressionTrackingMethod() != null && ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod()) != null) {
             trackingMethodFinal = ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod());
         }
 
@@ -92,14 +90,7 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
         }
 
         mUrlHandlerDelegate = new UrlHandler(context);
-        mSupportedNativeFeatures = new String[]{
-                MRAIDNativeFeature.CALENDAR,
-                MRAIDNativeFeature.INLINE_VIDEO,
-                MRAIDNativeFeature.SMS,
-                MRAIDNativeFeature.STORE_PICTURE,
-                MRAIDNativeFeature.TEL,
-                MRAIDNativeFeature.LOCATION
-        };
+        mSupportedNativeFeatures = new String[]{MRAIDNativeFeature.CALENDAR, MRAIDNativeFeature.INLINE_VIDEO, MRAIDNativeFeature.SMS, MRAIDNativeFeature.STORE_PICTURE, MRAIDNativeFeature.TEL, MRAIDNativeFeature.LOCATION};
     }
 
     @Override
@@ -133,12 +124,14 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
             return;
         }
 
+        Boolean isExpandEnabled = mAd.getMraidExpand();
+        if (isExpandEnabled == null) {
+            isExpandEnabled = HyBid.isMraidExpandEnabled();
+        }
         if (mAd.getAssetUrl(APIAsset.HTML_BANNER) != null) {
-            mMRAIDBanner = new MRAIDBanner(mContext, mAd.getAssetUrl(APIAsset.HTML_BANNER), "", true, mSupportedNativeFeatures,
-                    this, this, mAd.getContentInfoContainer(mContext, this));
+            mMRAIDBanner = new MRAIDBanner(mContext, mAd.getAssetUrl(APIAsset.HTML_BANNER), "", true, isExpandEnabled, mSupportedNativeFeatures, this, this, mAd.getContentInfoContainer(mContext, this));
         } else if (mAd.getAssetHtml(APIAsset.HTML_BANNER) != null) {
-            mMRAIDBanner = new MRAIDBanner(mContext, "", mAd.getAssetHtml(APIAsset.HTML_BANNER), true, mSupportedNativeFeatures,
-                    this, this, mAd.getContentInfoContainer(mContext, this));
+            mMRAIDBanner = new MRAIDBanner(mContext, "", mAd.getAssetHtml(APIAsset.HTML_BANNER), true, isExpandEnabled, mSupportedNativeFeatures, this, this, mAd.getContentInfoContainer(mContext, this));
         }
     }
 
@@ -154,11 +147,7 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
     @Override
     public void startTracking() {
         if (mMRAIDBanner != null && mTrackingMethod == ImpressionTrackingMethod.AD_VIEWABLE) {
-            ImpressionManager.startTrackingView(mMRAIDBanner,
-                    mAdSize,
-                    mAd.getImpressionMinVisibleTime(),
-                    mAd.getImpressionVisiblePercent(),
-                    this);
+            ImpressionManager.startTrackingView(mMRAIDBanner, mAdSize, mAd.getImpressionMinVisibleTime(), mAd.getImpressionVisiblePercent(), this);
         }
     }
 
@@ -185,8 +174,7 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
 
         if (mListener != null) {
             mListener.onAdLoaded(this, mMRAIDBanner);
-            if (mTrackingMethod == ImpressionTrackingMethod.AD_RENDERED
-                    && mImpressionListener != null) {
+            if (mTrackingMethod == ImpressionTrackingMethod.AD_RENDERED && mImpressionListener != null) {
                 mImpressionListener.onImpression();
             }
         }
@@ -212,8 +200,7 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
 
     @Override
     public void mraidViewClose(MRAIDView mraidView) {
-        if (mRaidListener != null)
-            mRaidListener.onExpandedAdClosed();
+        if (mRaidListener != null) mRaidListener.onExpandedAdClosed();
     }
 
     @Override
@@ -284,52 +271,8 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
 
     @Override
     public void onLinkClicked(String url) {
-        AdFeedbackView adFeedbackView = new AdFeedbackView();
-        adFeedbackView.prepare(mContext, url, mAd, Reporting.AdFormat.BANNER,
-                IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
-                    @Override
-                    public void onLoad(String url) {
-                        //load simple dialog
-                        Logger.e(TAG, "onLoad");
-                        processedURL = url;
-                        if (mContext instanceof Activity) {
-                            showProgressDialog(((Activity) mContext).getFragmentManager(), mContext.getString(R.string.feedback_form),
-                                    mContext.getString(R.string.loading));
-                        }
-                    }
-
-                    @Override
-                    public void onLoadFinished() {
-                        Logger.e(TAG, "onLoadFinished");
-                        if (mContext instanceof Activity) {
-                            hideProgressDialog(((Activity) mContext).getFragmentManager());
-                        }
-                        if (mMRAIDBanner != null) {
-                            mMRAIDBanner.pause();
-                        }
-                        adFeedbackView.showFeedbackForm(mContext, processedURL);
-                    }
-
-                    @Override
-                    public void onLoadFailed(Throwable error) {
-                        Logger.e(TAG, "onLoadFailed");
-                        if (mContext instanceof Activity) {
-                            hideProgressDialog(((Activity) mContext).getFragmentManager());
-                        }
-                        Logger.e(TAG, error.getMessage());
-                    }
-
-                    @Override
-                    public void onFormClosed() {
-                        Logger.e(TAG, "onFormClosed");
-                        if (mContext instanceof Activity) {
-                            hideProgressDialog(((Activity) mContext).getFragmentManager());
-                        }
-                        if (mMRAIDBanner != null) {
-                            mMRAIDBanner.resume();
-                        }
-                    }
-                });
+        AdFeedbackFormHelper adFeedbackFormHelper = new AdFeedbackFormHelper();
+        adFeedbackFormHelper.showFeedbackForm(mContext, url, mAd, Reporting.AdFormat.BANNER, IntegrationType.STANDALONE);
     }
 
 

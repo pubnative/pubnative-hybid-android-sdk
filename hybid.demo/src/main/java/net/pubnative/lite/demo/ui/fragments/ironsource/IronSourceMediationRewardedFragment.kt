@@ -122,6 +122,7 @@ class IronSourceMediationRewardedFragment : Fragment(R.layout.fragment_ironsourc
             SettingsManager.getInstance(requireContext()).getSettings().ironSourceSettings
         val appKey = settings?.appKey
         if (appKey != null && appKey.isNotEmpty()) {
+            IronSource.setMetaData("is_test_suite", "enable")
             IronSource.init(
                 requireActivity(), appKey, IronSource.AD_UNIT.BANNER,
                 IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.REWARDED_VIDEO

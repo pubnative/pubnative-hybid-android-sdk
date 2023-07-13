@@ -32,6 +32,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
@@ -42,6 +43,7 @@ import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
+import net.pubnative.lite.sdk.api.OpenRTBApiClient;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
 import net.pubnative.lite.sdk.models.APIAsset;
@@ -50,20 +52,23 @@ import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
 import net.pubnative.lite.sdk.models.IntegrationType;
+import net.pubnative.lite.sdk.models.OpenRTBAdRequestFactory;
 import net.pubnative.lite.sdk.models.RemoteConfigFeature;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
+import net.pubnative.lite.sdk.utils.AdEndCardManager;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.MarkupUtils;
 import net.pubnative.lite.sdk.utils.SignalDataProcessor;
 import net.pubnative.lite.sdk.utils.ViewUtils;
 import net.pubnative.lite.sdk.utils.json.JsonOperations;
+import net.pubnative.lite.sdk.views.endcard.HyBidEndCardView;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
-import net.pubnative.lite.sdk.vpaid.models.EndCardData;
+import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.vast.VastUrlUtils;
 
@@ -80,6 +85,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     private Position mPosition;
     private WindowManager mWindowManager;
     private FrameLayout mContainer;
+    private HyBidEndCardView mEndCardView;
     private String mScreenIabCategory;
     private String mScreenKeywords;
     private String mUserIntent;
@@ -95,6 +101,8 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     }
 
     private RequestManager mRequestManager;
+    private RequestManager mORTBRequestManager;
+
     protected HyBidAdView.Listener mListener;
     protected VideoListener mVideoListener;
 
@@ -119,45 +127,56 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
 
     public HyBidAdView(Context context) {
         super(context);
-        init(getRequestManager());
+        init(getRequestManager(), getORTBRequestManager());
     }
 
     public HyBidAdView(Context context, AdSize adSize) {
         super(context);
         if (adSize == null) {
-            init(getRequestManager());
+            init(getRequestManager(), getORTBRequestManager());
         } else {
-            init(getRequestManager(adSize));
+            init(getRequestManager(adSize), getORTBRequestManager(adSize));
         }
     }
 
     public HyBidAdView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(getRequestManager());
+        init(getRequestManager(), getORTBRequestManager());
     }
 
     public HyBidAdView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(getRequestManager());
+        init(getRequestManager(), getORTBRequestManager());
     }
 
     @TargetApi(21)
     public HyBidAdView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init(getRequestManager());
+        init(getRequestManager(), getORTBRequestManager());
     }
 
-    private void init(RequestManager requestManager) {
+    private void init(RequestManager requestManager, RequestManager openRTBRequestManager) {
         if (!HyBid.isInitialized()) {
             Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before creating an AdView");
         }
         mRequestManager = requestManager;
+        mORTBRequestManager = openRTBRequestManager;
         mRequestManager.setIntegrationType(IntegrationType.STANDALONE);
+        mORTBRequestManager.setIntegrationType(IntegrationType.STANDALONE);
         mPlacementParams = new JSONObject();
+        initEndCardView();
+    }
+
+    private void initEndCardView() {
+        mEndCardView = new HyBidEndCardView(getContext());
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        mEndCardView.setLayoutParams(lp);
+        this.addView(mEndCardView);
     }
 
     public void setAdSize(AdSize adSize) {
         mRequestManager.setAdSize(adSize);
+        mORTBRequestManager.setAdSize(adSize);
     }
 
     public void load(String zoneId, Position position, HyBidAdView.Listener listener) {
@@ -176,22 +195,70 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         if (HyBid.isInitialized()) {
             cleanup();
             mInitialLoadTime = System.currentTimeMillis();
-            if (HyBid.getConfigManager() != null
-                    && !HyBid.getConfigManager().getFeatureResolver().isAdFormatEnabled(RemoteConfigFeature.AdFormat.BANNER)) {
-                invokeOnLoadFailed(new HyBidError(HyBidErrorCode.DISABLED_FORMAT));
+
+            if (TextUtils.isEmpty(zoneId)) {
+                invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ZONE_ID));
             } else {
+                addReportingKey(Reporting.Key.ZONE_ID, zoneId);
+
+                if (!TextUtils.isEmpty(appToken)) {
+                    mRequestManager.setAppToken(appToken);
+                }
+                mRequestManager.setZoneId(zoneId);
+                mRequestManager.setRequestListener(this);
+                mRequestManager.requestAd();
+            }
+        } else {
+            mInitialLoadTime = System.currentTimeMillis();
+            Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before attempting a request");
+            invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NOT_INITIALISED));
+        }
+    }
+
+    public void loadExchangeAd(String zoneId, Position position, HyBidAdView.Listener listener) {
+        mPosition = position;
+        loadExchangeAd(zoneId, listener);
+    }
+
+    public void loadExchangeAd(String zoneId, HyBidAdView.Listener listener) {
+        loadExchangeAd(null, zoneId, listener);
+    }
+
+    public void loadExchangeAd(String appToken, String zoneId, HyBidAdView.Listener listener) {
+        loadExchangeAd(null, appToken, zoneId, listener);
+    }
+
+    public void loadCustomExchangeAd(String customUrl, HyBidAdView.Listener listener) {
+        loadExchangeAd(customUrl, "", "", listener);
+    }
+
+    public void loadExchangeAd(String customUrl, String appToken, String zoneId, HyBidAdView.Listener listener) {
+
+        mAppToken = appToken;
+        mZoneId = zoneId;
+        mListener = listener;
+        if (HyBid.isInitialized()) {
+            cleanup();
+            mInitialLoadTime = System.currentTimeMillis();
+
+            if (TextUtils.isEmpty(customUrl)) {
                 if (TextUtils.isEmpty(zoneId)) {
                     invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ZONE_ID));
                 } else {
                     addReportingKey(Reporting.Key.ZONE_ID, zoneId);
 
                     if (!TextUtils.isEmpty(appToken)) {
-                        mRequestManager.setAppToken(appToken);
+                        mORTBRequestManager.setAppToken(appToken);
                     }
-                    mRequestManager.setZoneId(zoneId);
-                    mRequestManager.setRequestListener(this);
-                    mRequestManager.requestAd();
+                    mORTBRequestManager.setZoneId(zoneId);
+                    mORTBRequestManager.setRequestListener(this);
+                    mORTBRequestManager.requestAd();
                 }
+            } else {
+                mORTBRequestManager.setCustomUrl(customUrl);
+                mORTBRequestManager.setZoneId(zoneId);
+                mORTBRequestManager.setRequestListener(this);
+                mORTBRequestManager.requestAd();
             }
         } else {
             mInitialLoadTime = System.currentTimeMillis();
@@ -273,6 +340,10 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         if (mRequestManager != null) {
             mRequestManager.destroy();
             mRequestManager = null;
+        }
+        if (mORTBRequestManager != null) {
+            mORTBRequestManager.destroy();
+            mORTBRequestManager = null;
         }
         mIsDestroyed = true;
         mListener = null;
@@ -359,6 +430,9 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         if (mRequestManager != null) {
             this.mRequestManager.setAutoCacheOnLoad(autoCacheOnLoad);
         }
+        if (mORTBRequestManager != null) {
+            this.mORTBRequestManager.setAutoCacheOnLoad(autoCacheOnLoad);
+        }
     }
 
     protected String getLogTag() {
@@ -369,8 +443,16 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         return new RequestManager();
     }
 
+    RequestManager getORTBRequestManager() {
+        return new RequestManager(new OpenRTBApiClient(getContext()), new OpenRTBAdRequestFactory());
+    }
+
     RequestManager getRequestManager(AdSize adSize) {
         return new RequestManager(adSize);
+    }
+
+    RequestManager getORTBRequestManager(AdSize adSize) {
+        return new RequestManager(adSize, new OpenRTBApiClient(getContext()), new OpenRTBAdRequestFactory());
     }
 
     protected AdPresenter createPresenter() {
@@ -405,12 +487,16 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                         renderErrorEvent.setErrorCode(HyBidErrorCode.UNSUPPORTED_ASSET.getCode());
                         renderErrorEvent.setErrorMessage(HyBidErrorCode.UNSUPPORTED_ASSET.getMessage());
                         renderErrorEvent.setTimestamp(System.currentTimeMillis());
-                        renderErrorEvent.setZoneId(mAd.getZoneId());
                         renderErrorEvent.setAdFormat(mAdFormat);
                         renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
                         renderErrorEvent.setIntegrationType(mIntegrationType);
-                        if (mAd != null && !TextUtils.isEmpty(mAd.getVast())) {
-                            renderErrorEvent.setVast(mAd.getVast());
+                        if (mAd != null) {
+                            if (!TextUtils.isEmpty(mAd.getVast())) {
+                                renderErrorEvent.setVast(mAd.getVast());
+                            }
+                            if (!TextUtils.isEmpty(mAd.getZoneId())) {
+                                renderErrorEvent.setZoneId(mAd.getZoneId());
+                            }
                         }
                         renderErrorEvent.mergeJSONObject(getPlacementParams());
 
@@ -446,12 +532,16 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                 renderErrorEvent.setErrorCode(HyBidErrorCode.INVALID_AD.getCode());
                 renderErrorEvent.setErrorMessage(HyBidErrorCode.INVALID_AD.getMessage());
                 renderErrorEvent.setTimestamp(System.currentTimeMillis());
-                renderErrorEvent.setZoneId(mAd.getZoneId());
                 renderErrorEvent.setAdFormat(mAdFormat);
                 renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
                 renderErrorEvent.setIntegrationType(mIntegrationType);
-                if (mAd != null && !TextUtils.isEmpty(mAd.getVast())) {
-                    renderErrorEvent.setVast(mAd.getVast());
+                if (mAd != null) {
+                    if (!TextUtils.isEmpty(mAd.getVast())) {
+                        renderErrorEvent.setVast(mAd.getVast());
+                    }
+                    if (!TextUtils.isEmpty(mAd.getZoneId())) {
+                        renderErrorEvent.setZoneId(mAd.getZoneId());
+                    }
                 }
                 renderErrorEvent.mergeJSONObject(getPlacementParams());
 
@@ -487,12 +577,16 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                             renderErrorEvent.setErrorCode(HyBidErrorCode.NULL_AD.getCode());
                             renderErrorEvent.setErrorMessage(HyBidErrorCode.NULL_AD.getMessage());
                             renderErrorEvent.setTimestamp(System.currentTimeMillis());
-                            renderErrorEvent.setZoneId(mAd.getZoneId());
                             renderErrorEvent.setAdFormat(mAdFormat);
                             renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
                             renderErrorEvent.setIntegrationType(mIntegrationType);
-                            if (mAd != null && !TextUtils.isEmpty(mAd.getVast())) {
-                                renderErrorEvent.setVast(mAd.getVast());
+                            if (mAd != null) {
+                                if (!TextUtils.isEmpty(mAd.getVast())) {
+                                    renderErrorEvent.setVast(mAd.getVast());
+                                }
+                                if (!TextUtils.isEmpty(mAd.getZoneId())) {
+                                    renderErrorEvent.setZoneId(mAd.getZoneId());
+                                }
                             }
                             renderErrorEvent.mergeJSONObject(getPlacementParams());
 
@@ -518,12 +612,16 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                 renderErrorEvent.setErrorCode(HyBidErrorCode.INVALID_SIGNAL_DATA.getCode());
                 renderErrorEvent.setErrorMessage(HyBidErrorCode.INVALID_SIGNAL_DATA.getMessage());
                 renderErrorEvent.setTimestamp(System.currentTimeMillis());
-                renderErrorEvent.setZoneId(mAd.getZoneId());
                 renderErrorEvent.setAdFormat(mAdFormat);
                 renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
                 renderErrorEvent.setIntegrationType(mIntegrationType);
-                if (mAd != null && !TextUtils.isEmpty(mAd.getVast())) {
-                    renderErrorEvent.setVast(mAd.getVast());
+                if (mAd != null) {
+                    if (!TextUtils.isEmpty(mAd.getVast())) {
+                        renderErrorEvent.setVast(mAd.getVast());
+                    }
+                    if (!TextUtils.isEmpty(mAd.getZoneId())) {
+                        renderErrorEvent.setZoneId(mAd.getZoneId());
+                    }
                 }
                 renderErrorEvent.mergeJSONObject(getPlacementParams());
 
@@ -766,16 +864,22 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         if (mRequestManager != null) {
             mRequestManager.setMediationVendor(mediationVendor);
         }
+        if (mORTBRequestManager != null) {
+            mORTBRequestManager.setMediationVendor(mediationVendor);
+        }
     }
 
     public void setMediation(boolean isMediation) {
         if (mRequestManager != null) {
             mRequestManager.setIntegrationType(isMediation ? IntegrationType.MEDIATION : IntegrationType.STANDALONE);
-            if (isMediation) {
-                mIntegrationType = IntegrationType.MEDIATION.getCode();
-            } else {
-                mIntegrationType = IntegrationType.STANDALONE.getCode();
-            }
+        }
+        if (mORTBRequestManager != null) {
+            mORTBRequestManager.setIntegrationType(isMediation ? IntegrationType.MEDIATION : IntegrationType.STANDALONE);
+        }
+        if (isMediation) {
+            mIntegrationType = IntegrationType.MEDIATION.getCode();
+        } else {
+            mIntegrationType = IntegrationType.STANDALONE.getCode();
         }
     }
 
@@ -961,15 +1065,9 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     }
 
     public boolean hasEndCard() {
-        if (mAd != null && mAd.hasEndCard()) {
-            if (mAd.isEndCardEnabled() != null) {
-                return mAd.isEndCardEnabled();
-            } else {
-                return HyBid.isEndCardEnabled();
-            }
-        } else {
-            return false;
-        }
+        if (mAd != null)
+            return AdEndCardManager.isEndCardEnabled(mAd, mAd.isEndCardEnabled(), HyBid.isEndCardEnabled(), mAd.hasEndCard());
+        return false;
     }
 
     @Override

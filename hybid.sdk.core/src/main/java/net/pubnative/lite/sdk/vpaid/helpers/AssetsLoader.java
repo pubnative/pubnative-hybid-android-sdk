@@ -5,7 +5,7 @@ import android.content.Context;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.enums.VastError;
-import net.pubnative.lite.sdk.vpaid.models.EndCardData;
+import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 
 import java.util.Locale;

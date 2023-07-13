@@ -118,7 +118,8 @@
         android:layout_height="@dimen/close_view_size"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:scaleType="center"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
         android:src="@mipmap/close" />
 
     <net.pubnative.lite.sdk.views.shape.ShapeImageView

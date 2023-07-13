@@ -43,8 +43,8 @@ public class MRAIDInterstitial extends MRAIDView {
 
     private Boolean isCreatedByFeedbackForm = false;
 
-    public MRAIDInterstitial(Context context, String baseUrl, String data, Boolean showTimerBeforeEndCard, String[] supportedNativeFeatures, MRAIDViewListener viewListener, MRAIDNativeFeatureListener nativeFeatureListener, ViewGroup contentInfo) {
-        super(context, baseUrl, data, showTimerBeforeEndCard, supportedNativeFeatures, viewListener, nativeFeatureListener, contentInfo, true);
+    public MRAIDInterstitial(Context context, String baseUrl, String data, Boolean showTimerBeforeEndCard, Boolean isExpandEnabled, String[] supportedNativeFeatures, MRAIDViewListener viewListener, MRAIDNativeFeatureListener nativeFeatureListener, ViewGroup contentInfo) {
+        super(context, baseUrl, data, showTimerBeforeEndCard, supportedNativeFeatures, viewListener, nativeFeatureListener, contentInfo, true, isExpandEnabled);
         webView.setBackgroundColor(Color.BLACK);
         addView(webView);
     }
@@ -78,7 +78,7 @@ public class MRAIDInterstitial extends MRAIDView {
     }
 
     @Override
-    protected void closeFromExpanded() {
+    public void closeFromExpanded() {
         if (state == STATE_DEFAULT) {
             state = STATE_HIDDEN;
             clearView();

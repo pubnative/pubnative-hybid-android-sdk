@@ -32,8 +32,6 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.StateListDrawable;
 import android.location.Location;
 import android.net.Uri;
 import android.net.http.SslError;
@@ -93,6 +91,7 @@ import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityWebAdSession;
 import net.pubnative.lite.sdk.views.PNWebView;
+import net.pubnative.lite.sdk.vpaid.helpers.BitmapHelper;
 import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
 import net.pubnative.lite.sdk.vpaid.models.CloseCardData;
 import net.pubnative.lite.sdk.vpaid.utils.ImageUtils;
@@ -127,12 +126,49 @@ import java.util.Map;
 public class MRAIDView extends FrameLayout {
     // used to differentiate logging
     private static final String MRAID_LOG_TAG = MRAIDView.class.getSimpleName();
+    private boolean isExpandEnabled;
 
     private Boolean showTimerBeforeEndCard = false;
 
     private Integer mSkipTimeMillis = -1;
 
+    private Integer mNativeCloseButtonDelay = -1;
+
+    private Integer mBackButtonDelay = -1;
+    private Boolean isBackClickable = false;
+
+    private SimpleTimer mBackButtonTimer;
+
     private SimpleTimer mExpirationTimer;
+    private SimpleTimer mNativeCloseButtonTimer;
+
+    private Runnable backButtonClickableityhandler = null;
+
+    public void setBackButtonClickableityhandler(Runnable handler){
+        this.backButtonClickableityhandler = handler;
+    }
+
+    public void handleNativeCloseButtonDelay() {
+        mNativeCloseButtonTimer = new SimpleTimer(mNativeCloseButtonDelay, new SimpleTimer.Listener() {
+
+            @Override
+            public void onFinish() {
+                if (listener != null)
+                    listener.mraidShowCloseButton();
+                showDefaultCloseButton();
+            }
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+            }
+        }, 1000);
+
+        mNativeCloseButtonTimer.start();
+    }
+
+    public void setBackButtonDelay(Integer backButtonDelay) {
+        this.mBackButtonDelay = backButtonDelay;
+    }
 
     // used to define state of the MRAID advertisement
     @Retention(RetentionPolicy.SOURCE)
@@ -163,24 +199,11 @@ public class MRAIDView extends FrameLayout {
     // default size of close region in dip
     private static final int CLOSE_REGION_SIZE = 50;
 
-    private static final String[] COMMANDS_WITH_NO_PARAM = {
-            "close",
-            "resize",
-    };
+    private static final String[] COMMANDS_WITH_NO_PARAM = {"close", "resize",};
 
-    private static final String[] COMMANDS_WITH_STRING = {
-            "createCalendarEvent",
-            "expand",
-            "open",
-            "playVideo",
-            "storePicture",
-            "useCustomClose",
-    };
+    private static final String[] COMMANDS_WITH_STRING = {"createCalendarEvent", "expand", "open", "playVideo", "storePicture", "useCustomClose",};
 
-    private static final String[] COMMANDS_WITH_MAP = {
-            "setOrientationProperties",
-            "setResizeProperties"
-    };
+    private static final String[] COMMANDS_WITH_MAP = {"setOrientationProperties", "setResizeProperties"};
 
     // UI elements
 
@@ -307,16 +330,7 @@ public class MRAIDView extends FrameLayout {
 
     protected final Handler handler;
 
-    public MRAIDView(
-            Context context,
-            String baseUrl,
-            String data,
-            Boolean showTimerBeforeEndCard,
-            String[] supportedNativeFeatures,
-            MRAIDViewListener listener,
-            MRAIDNativeFeatureListener nativeFeatureListener,
-            ViewGroup contentInfo,
-            boolean isInterstitial) {
+    public MRAIDView(Context context, String baseUrl, String data, Boolean showTimerBeforeEndCard, String[] supportedNativeFeatures, MRAIDViewListener listener, MRAIDNativeFeatureListener nativeFeatureListener, ViewGroup contentInfo, boolean isInterstitial, boolean isExpandEnabled) {
         super(context);
         this.context = context;
         if (context instanceof Activity) {
@@ -325,6 +339,7 @@ public class MRAIDView extends FrameLayout {
         }
         this.baseUrl = baseUrl == null ? "http://example.com/" : baseUrl;
         this.isInterstitial = isInterstitial;
+        this.isExpandEnabled = isExpandEnabled;
 
         this.contentInfo = contentInfo;
 
@@ -457,8 +472,7 @@ public class MRAIDView extends FrameLayout {
                 protected void onWindowVisibilityChanged(int visibility) {
                     super.onWindowVisibilityChanged(visibility);
                     int actualVisibility = getVisibility();
-                    MRAIDLog.d(TAG, "onWindowVisibilityChanged " + getVisibilityString(visibility) +
-                            " (actual " + getVisibilityString(actualVisibility) + ')');
+                    MRAIDLog.d(TAG, "onWindowVisibilityChanged " + getVisibilityString(visibility) + " (actual " + getVisibilityString(actualVisibility) + ')');
                     if (isInterstitial) {
                         setViewable(actualVisibility);
                     }
@@ -570,6 +584,16 @@ public class MRAIDView extends FrameLayout {
 
         currentWebView = null;
         contentInfoAdded = false;
+
+        if (mExpirationTimer != null) {
+            mExpirationTimer.onFinish();
+            mExpirationTimer = null;
+        }
+
+        if (mNativeCloseButtonTimer != null) {
+            mNativeCloseButtonTimer.onFinish();
+            mNativeCloseButtonTimer = null;
+        }
     }
 
     /**************************************************************************
@@ -634,7 +658,9 @@ public class MRAIDView extends FrameLayout {
             MRAIDLog.d("hz-m MRAIDView - onBackPressed - loading or hidden");
             return false;
         }
-        close();
+
+        if (isBackClickable)
+            close();
         return true;
     }
 
@@ -682,7 +708,7 @@ public class MRAIDView extends FrameLayout {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @JavascriptMRAIDCallback
     protected void expand(String url) {
-        expandCreative(url, false, false);
+        if (isExpandEnabled) expandCreative(url, false, false);
     }
 
     private void expandCreative(String url, final boolean isCustomExpand, Boolean isCreatedByFeedbackForm) {
@@ -720,8 +746,7 @@ public class MRAIDView extends FrameLayout {
                 }
                 expandHelper(webView);
                 MRAIDLog.d("hz-m MRAIDView - expand - empty url");
-                if (listener != null)
-                    listener.onExpandFailed();
+                if (listener != null) listener.onExpandFailed();
                 return;
             }
 
@@ -849,8 +874,7 @@ public class MRAIDView extends FrameLayout {
         if (listener == null) {
             return;
         }
-        boolean isResizeOK = listener.mraidViewResize(this,
-                resizeProperties.width, resizeProperties.height, resizeProperties.offsetX, resizeProperties.offsetY);
+        boolean isResizeOK = listener.mraidViewResize(this, resizeProperties.width, resizeProperties.height, resizeProperties.offsetX, resizeProperties.offsetY);
         if (!isResizeOK) {
             return;
         }
@@ -877,8 +901,7 @@ public class MRAIDView extends FrameLayout {
         boolean allowOrientationChange = Boolean.parseBoolean(properties.get("allowOrientationChange"));
         String forceOrientation = properties.get("forceOrientation");
 
-        MRAIDLog.d(MRAID_LOG_TAG + "-JS callback", "setOrientationProperties "
-                + allowOrientationChange + " " + forceOrientation);
+        MRAIDLog.d(MRAID_LOG_TAG + "-JS callback", "setOrientationProperties " + allowOrientationChange + " " + forceOrientation);
 
         orientationProperties.allowOrientationChange = allowOrientationChange;
         orientationProperties.forceOrientation = MRAIDOrientationProperties.forceOrientationFromString(forceOrientation);
@@ -897,16 +920,12 @@ public class MRAIDView extends FrameLayout {
         int offsetY = Integer.parseInt(properties.get("offsetY"));
         String customClosePosition = properties.get("customClosePosition");
         boolean allowOffscreen = Boolean.parseBoolean(properties.get("allowOffscreen"));
-        MRAIDLog.d(MRAID_LOG_TAG + "-JS callback", "setResizeProperties "
-                + width + " " + height + " "
-                + offsetX + " " + offsetY + " "
-                + customClosePosition + " " + allowOffscreen);
+        MRAIDLog.d(MRAID_LOG_TAG + "-JS callback", "setResizeProperties " + width + " " + height + " " + offsetX + " " + offsetY + " " + customClosePosition + " " + allowOffscreen);
         resizeProperties.width = width;
         resizeProperties.height = height;
         resizeProperties.offsetX = offsetX;
         resizeProperties.offsetY = offsetY;
-        resizeProperties.customClosePosition =
-                MRAIDResizeProperties.customClosePositionFromString(customClosePosition);
+        resizeProperties.customClosePosition = MRAIDResizeProperties.customClosePositionFromString(customClosePosition);
         resizeProperties.allowOffscreen = allowOffscreen;
     }
 
@@ -1061,6 +1080,12 @@ public class MRAIDView extends FrameLayout {
         }
     }
 
+    public void setUseCustomClose(Boolean useCustomClose) {
+        if (this.useCustomClose != useCustomClose) {
+            this.useCustomClose = useCustomClose;
+        }
+    }
+
     private void setResizedViewPosition() {
         if (displayMetrics != null) {
             MRAIDLog.d(MRAID_LOG_TAG, "setResizedViewPosition");
@@ -1199,7 +1224,7 @@ public class MRAIDView extends FrameLayout {
                 // http://stackoverflow.com/questions/6872376/how-to-hide-the-title-bar-through-code-in-android
                 titleBar = null;
                 try {
-                    if(activity.findViewById(android.R.id.title) != null){
+                    if (activity.findViewById(android.R.id.title) != null) {
                         titleBar = (View) activity.findViewById(android.R.id.title).getParent();
                     }
                 } catch (NullPointerException npe) {
@@ -1283,15 +1308,11 @@ public class MRAIDView extends FrameLayout {
 
     private void showDefaultCloseButton() {
         if (closeRegion != null) {
-            Drawable closeButtonNormalDrawable = Assets.getDrawableFromBase64(getResources(), Assets.new_close);
-            Drawable closeButtonPressedDrawable = Assets.getDrawableFromBase64(getResources(), Assets.new_close_pressed);
-
-            StateListDrawable states = new StateListDrawable();
-            states.addState(new int[]{-android.R.attr.state_pressed}, closeButtonNormalDrawable);
-            states.addState(new int[]{android.R.attr.state_pressed}, closeButtonPressedDrawable);
-
-            closeRegion.setImageDrawable(states);
-            closeRegion.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            Bitmap closeBitmap = BitmapHelper.toBitmap(closeRegion.getContext(), HyBid.getNormalCloseXmlResource(), R.mipmap.close);
+            if (closeBitmap != null) ((ImageView) closeRegion).setImageBitmap(closeBitmap);
+            else
+                ((ImageView) closeRegion).setImageBitmap(BitmapHelper.decodeResource(closeRegion.getContext(), R.mipmap.close));
+            closeRegion.setScaleType(ImageView.ScaleType.FIT_CENTER);
         }
     }
 
@@ -1422,8 +1443,7 @@ public class MRAIDView extends FrameLayout {
         //TODO: We should validate it later in terms of exposure
 
         double exposure = 0.0;
-        if (isViewable)
-            exposure = 100.0;
+        if (isViewable) exposure = 100.0;
 
         MRAIDLog.d(MRAID_LOG_TAG, "fireExposureChangeEvent");
         JSONObject jsonVisibleRectangle = new JSONObject();
@@ -1495,9 +1515,7 @@ public class MRAIDView extends FrameLayout {
     private void setEnvironmentVariables() {
         DeviceInfo deviceInfo = HyBid.getDeviceInfo();
 
-        if (getContext() != null
-                && getContext().getApplicationContext() != null
-                && !TextUtils.isEmpty(getContext().getApplicationContext().getPackageName())) {
+        if (getContext() != null && getContext().getApplicationContext() != null && !TextUtils.isEmpty(getContext().getApplicationContext().getPackageName())) {
             injectJavaScript("mraid.setAppId(\"" + getContext().getApplicationContext().getPackageName() + "\");");
         }
         injectJavaScript("mraid.setSdkVersion(\"" + BuildConfig.SDK_VERSION + "\");");
@@ -1550,9 +1568,7 @@ public class MRAIDView extends FrameLayout {
                 return false;
             }
 
-            MRAIDLog.i("JS console", cm.message()
-                    + (cm.sourceId() == null ? "" : " at " + cm.sourceId())
-                    + ":" + cm.lineNumber());
+            MRAIDLog.i("JS console", cm.message() + (cm.sourceId() == null ? "" : " at " + cm.sourceId()) + ":" + cm.lineNumber());
             return true;
         }
 
@@ -1597,17 +1613,14 @@ public class MRAIDView extends FrameLayout {
             MRAIDLog.d("hz-m MRAIDView ChromeClient - onCloseWindow");
         }
 
-        public void onExceededDatabaseQuota(String url, String databaseIdentifier,
-                                            long quota, long estimatedDatabaseSize, long totalQuota,
-                                            WebStorage.QuotaUpdater quotaUpdater) {
+        public void onExceededDatabaseQuota(String url, String databaseIdentifier, long quota, long estimatedDatabaseSize, long totalQuota, WebStorage.QuotaUpdater quotaUpdater) {
             // This default implementation passes the current quota back to WebCore.
             // WebCore will interpret this that new quota was declined.
             MRAIDLog.d("hz-m MRAIDView WebViewClient - onExceededDatabaseQuota");
             quotaUpdater.updateQuota(quota);
         }
 
-        public void onReachedMaxAppCacheSize(long requiredStorage, long quota,
-                                             WebStorage.QuotaUpdater quotaUpdater) {
+        public void onReachedMaxAppCacheSize(long requiredStorage, long quota, WebStorage.QuotaUpdater quotaUpdater) {
             MRAIDLog.d("hz-m MRAIDView WebViewClient - onReachedMaxAppCacheSize");
             quotaUpdater.updateQuota(quota);
         }
@@ -1631,7 +1644,11 @@ public class MRAIDView extends FrameLayout {
             MRAIDLog.d(MRAID_LOG_TAG, "onPageFinished: " + url);
             if (state == STATE_LOADING) {
                 isPageFinished = true;
-                injectJavaScript("mraid.setPlacementType('" + (isInterstitial ? "interstitial" : "inline") + "');");
+                if (isExpandEnabled) {
+                    injectJavaScript("mraid.setPlacementType('" + (isInterstitial ? "interstitial" : "inline") + "');");
+                } else {
+                    injectJavaScript("mraid.setPlacementType('" + (isInterstitial ? "interstitial" : "") + "');");
+                }
                 setEnvironmentVariables();
                 setSupportedServices();
                 setLocation();
@@ -1661,10 +1678,7 @@ public class MRAIDView extends FrameLayout {
                     if (contentInfo != null && contentInfoAdded) {
                         addViewabilityFriendlyObstruction(contentInfo, FriendlyObstructionPurpose.OTHER, "Content info description for the ad");
                         for (HyBidViewabilityFriendlyObstruction obstruction : mViewabilityFriendlyObstructions) {
-                            mViewabilityAdSession.addFriendlyObstruction(
-                                    obstruction.getView(),
-                                    obstruction.getPurpose(),
-                                    obstruction.getReason());
+                            mViewabilityAdSession.addFriendlyObstruction(obstruction.getView(), obstruction.getPurpose(), obstruction.getReason());
                         }
                     }
                     webViewLoaded = true;
@@ -1677,7 +1691,9 @@ public class MRAIDView extends FrameLayout {
                     mSkipCountdownView = new CountDownViewFactory().createCountdownView(context, HyBid.getCountdownStyle(), MRAIDView.this);
                     addView(mSkipCountdownView);
 
-                    startSkipTimer();
+                    mSkipCountdownView.setVisibility(View.GONE);
+
+                    postDelayed(MRAIDView.this::startSkipTimer, 500);
                 }
             }
             if (isExpandingPart2) {
@@ -1723,12 +1739,10 @@ public class MRAIDView extends FrameLayout {
 
         public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
             MRAIDLog.d("hz-m MRAIDView WebViewClient - onReceivedSslError");
-            if (handler != null)
-                handler.cancel();
+            if (handler != null) handler.cancel();
         }
 
-        public void onTooManyRedirects(WebView view, Message cancelMsg,
-                                       Message continueMsg) {
+        public void onTooManyRedirects(WebView view, Message cancelMsg, Message continueMsg) {
             cancelMsg.sendToTarget();
             MRAIDLog.d("hz-m MRAIDView WebViewClient - onTooManyRedirects");
         }
@@ -1738,8 +1752,7 @@ public class MRAIDView extends FrameLayout {
             MRAIDLog.d("hz-m MRAIDView WebViewClient - onReceivedClientCertRequest");
         }
 
-        public void onReceivedHttpAuthRequest(WebView view,
-                                              HttpAuthHandler handler, String host, String realm) {
+        public void onReceivedHttpAuthRequest(WebView view, HttpAuthHandler handler, String host, String realm) {
             MRAIDLog.d("hz-m MRAIDView WebViewClient - onReceivedHttpAuthRequest");
             handler.cancel();
         }
@@ -1754,8 +1767,7 @@ public class MRAIDView extends FrameLayout {
             MRAIDLog.d("hz-m MRAIDView WebViewClient - onScaleChanged");
         }
 
-        public void onReceivedLoginRequest(WebView view, String realm,
-                                           String account, String args) {
+        public void onReceivedLoginRequest(WebView view, String realm, String account, String args) {
             MRAIDLog.d("hz-m MRAIDView WebViewClient - onReceivedLoginRequest");
         }
 
@@ -1879,8 +1891,7 @@ public class MRAIDView extends FrameLayout {
     protected void onWindowVisibilityChanged(int visibility) {
         super.onWindowVisibilityChanged(visibility);
         int actualVisibility = getVisibility();
-        MRAIDLog.d(MRAID_LOG_TAG, "onWindowVisibilityChanged " + getVisibilityString(visibility) +
-                " (actual " + getVisibilityString(actualVisibility) + ")");
+        MRAIDLog.d(MRAID_LOG_TAG, "onWindowVisibilityChanged " + getVisibilityString(visibility) + " (actual " + getVisibilityString(actualVisibility) + ")");
         setViewable(actualVisibility);
     }
 
@@ -1899,8 +1910,7 @@ public class MRAIDView extends FrameLayout {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        MRAIDLog.w(MRAID_LOG_TAG, "onLayout (" + state + ") " +
-                changed + " " + left + " " + top + " " + right + " " + bottom);
+        MRAIDLog.w(MRAID_LOG_TAG, "onLayout (" + state + ") " + changed + " " + left + " " + top + " " + right + " " + bottom);
         if (isForcingFullScreen) {
             MRAIDLog.d(MRAID_LOG_TAG, "onLayout ignored");
             return;
@@ -1928,8 +1938,7 @@ public class MRAIDView extends FrameLayout {
 
     private void onLayoutWebView(WebView wv, boolean changed, int left, int top, int right, int bottom) {
         boolean isCurrent = (wv == currentWebView);
-        MRAIDLog.w(MRAID_LOG_TAG, "onLayoutWebView " + (wv == webView ? "1 " : "2 ") + isCurrent + " (" + state + ") " +
-                changed + " " + left + " " + top + " " + right + " " + bottom);
+        MRAIDLog.w(MRAID_LOG_TAG, "onLayoutWebView " + (wv == webView ? "1 " : "2 ") + isCurrent + " (" + state + ") " + changed + " " + left + " " + top + " " + right + " " + bottom);
         if (!isCurrent) {
             MRAIDLog.d(MRAID_LOG_TAG, "onLayoutWebView ignored, not current");
             return;
@@ -2083,8 +2092,7 @@ public class MRAIDView extends FrameLayout {
 
     protected void applyOrientationProperties() {
         if (context instanceof Activity) {
-            MRAIDLog.d(MRAID_LOG_TAG, "applyOrientationProperties " +
-                    orientationProperties.allowOrientationChange + " " + orientationProperties.forceOrientationString());
+            MRAIDLog.d(MRAID_LOG_TAG, "applyOrientationProperties " + orientationProperties.allowOrientationChange + " " + orientationProperties.forceOrientationString());
 
             Activity activity = (Activity) context;
 
@@ -2139,42 +2147,73 @@ public class MRAIDView extends FrameLayout {
         this.mSkipTimeMillis = skipOffset * 1000;
     }
 
+    public void setNativeCloseButtonDelay(Integer nativeCloseButtonDelay) {
+        this.mNativeCloseButtonDelay = nativeCloseButtonDelay * 1000;
+    }
+
     private void startSkipTimer() {
+        Integer skipTimerDelay;
 
-         if (mSkipTimeMillis > 0 && showTimerBeforeEndCard) {
+        if (useCustomClose) {
+            handleNativeCloseButtonDelay();
+            if(backButtonClickableityhandler != null){
+                backButtonClickableityhandler.run();
+            }
+            skipTimerDelay = mNativeCloseButtonDelay;
+            if (mSkipCountdownView != null) mSkipCountdownView.setVisibility(View.GONE);
+        } else {
+            skipTimerDelay = mSkipTimeMillis;
+            if (mSkipCountdownView != null) mSkipCountdownView.setVisibility(View.VISIBLE);
+        }
 
-            mExpirationTimer = new SimpleTimer(mSkipTimeMillis, new SimpleTimer.Listener() {
+        if (skipTimerDelay > 0 && showTimerBeforeEndCard) {
+
+            mExpirationTimer = new SimpleTimer(skipTimerDelay, new SimpleTimer.Listener() {
 
                 @Override
                 public void onFinish() {
                     listener.mraidShowCloseButton();
-                    if (mSkipCountdownView != null)
-                        mSkipCountdownView.setVisibility(View.GONE);
+                    if (mSkipCountdownView != null) mSkipCountdownView.setVisibility(View.GONE);
                 }
 
                 @Override
                 public void onTick(long millisUntilFinished) {
-                    if (mSkipCountdownView != null)
+                    if (mSkipCountdownView != null) {
                         mSkipCountdownView.setProgress((int) (mSkipTimeMillis - millisUntilFinished), mSkipTimeMillis);
+                    }
                 }
             }, 10);
             mExpirationTimer.start();
-
-        } else {
-            if (mSkipCountdownView != null)
-                mSkipCountdownView.setVisibility(View.GONE);
+        } else if (skipTimerDelay == 0) {
             listener.mraidShowCloseButton();
+        }
+
+        if (mBackButtonDelay > 0) {
+            mBackButtonTimer = new SimpleTimer(mBackButtonDelay, new SimpleTimer.Listener() {
+
+                @Override
+                public void onFinish() {
+                    isBackClickable = true;
+                }
+
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    isBackClickable = false;
+                }
+            }, 10);
+
+            mBackButtonTimer.start();
         }
     }
 
     public void pause() {
-        if (mExpirationTimer != null)
-            mExpirationTimer.pause();
+        if (mExpirationTimer != null) mExpirationTimer.pause();
+        if (mNativeCloseButtonTimer != null) mNativeCloseButtonTimer.pause();
     }
 
     public void resume() {
-        if (mExpirationTimer != null)
-            mExpirationTimer.resume();
+        if (mExpirationTimer != null) mExpirationTimer.resume();
+        if (mNativeCloseButtonTimer != null) mNativeCloseButtonTimer.resume();
     }
 
     private void closeOnMainThread() {
@@ -2186,8 +2225,7 @@ public class MRAIDView extends FrameLayout {
     }
 
     public boolean hasValidCloseCard() {
-        return mCloseCardData != null && mCloseCardData.getTitle() != null && !mCloseCardData.getTitle().isEmpty() &&
-                mCloseCardData.getIcon() != null && mCloseCardData.getBannerImage() != null;
+        return mCloseCardData != null && mCloseCardData.getTitle() != null && !mCloseCardData.getTitle().isEmpty() && mCloseCardData.getIcon() != null && mCloseCardData.getBannerImage() != null;
     }
 
     public boolean isCloseCardShown() {

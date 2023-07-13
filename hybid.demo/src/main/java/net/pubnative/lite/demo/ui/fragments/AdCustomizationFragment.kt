@@ -150,11 +150,11 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
         val videoSkipOffsetInt: Int
         val endCardCloseButtonDelayInt: Int
 
-        if (skipOffset.isEmpty() || videoSkipOffset.isEmpty() || skipOffset.contains(" ") || videoSkipOffset.contains(
-                " "
-            ) || endCardCloseButtonDelay.isEmpty() || endCardCloseButtonDelay.contains(
-                " "
-            )
+        if (skipOffset.isEmpty() || videoSkipOffset.isEmpty()
+            || skipOffset.contains(" ")
+            || videoSkipOffset.contains(" ")
+            || endCardCloseButtonDelay.isEmpty()
+            || endCardCloseButtonDelay.contains(" ")
         ) {
             Toast.makeText(
                 context,
@@ -180,7 +180,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
             }
         }
 
-        val countdownStyle = when (countdownStyleGroup?.checkedRadioButtonId) {
+        val countdownStyle = when (countdownStyleGroup.checkedRadioButtonId) {
             R.id.radio_countdown_style_pie_chart -> CountdownStyle.PIE_CHART
             R.id.radio_countdown_style_timer -> CountdownStyle.TIMER
             R.id.radio_countdown_style_progress -> CountdownStyle.PROGRESS

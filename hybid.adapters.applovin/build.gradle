@@ -41,13 +41,14 @@ android {
             includeAndroidResources = true
         }
     }
+    namespace 'com.applovin.mediation.adapters'
 
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':hybid.sdk')
-    compileOnly 'com.applovin:applovin-sdk:11.8.2'
+    compileOnly 'com.applovin:applovin-sdk:11.10.1'
 
     implementation project(':hybid.sdk.core')
     implementation project(':hybid.sdk.logger')

@@ -30,11 +30,12 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 
-import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.Reporting;
-import net.pubnative.lite.sdk.contentinfo.AdFeedbackView;
+import net.pubnative.lite.sdk.contentinfo.AdFeedbackFormHelper;
+import net.pubnative.lite.sdk.contentinfo.listeners.AdFeedbackLoadListener;
 import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.URLValidator;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.views.PNBeaconWebView;
 import net.pubnative.lite.sdk.visibility.ImpressionManager;
@@ -436,31 +437,42 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
     String processedURL = "";
 
     @Override
-    public void onLinkClicked(String url) {
-        if (mAdView != null && mAdView.getContext() != null) {
-            AdFeedbackView adFeedbackView = new AdFeedbackView();
-            adFeedbackView.prepare(mAdView.getContext(), url, mAd, Reporting.AdFormat.NATIVE, IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
-                @Override
-                public void onLoad(String url) {
-                    //load simple dialog
-                    processedURL = url;
-                }
+    public synchronized void onLinkClicked(String url) {
+        if (mAdView != null && mAdView.getContext() != null && !isLinkClickRunning) {
+            isLinkClickRunning = true;
+            AdFeedbackFormHelper adFeedbackFormHelper = new AdFeedbackFormHelper();
+            URLValidator.isValidURL(url, isValid -> {
+                if (isValid) {
+                    adFeedbackFormHelper.showFeedbackForm(mAdView.getContext(), url, mAd, Reporting.AdFormat.NATIVE, IntegrationType.STANDALONE, new AdFeedbackLoadListener() {
+                        @Override
+                        public void onLoad(String url1) {
+                            //load simple dialog
+                            processedURL = url1;
+                        }
 
-                @Override
-                public void onLoadFinished() {
-                    adFeedbackView.showFeedbackForm(mAdView.getContext(), processedURL);
-                }
+                        @Override
+                        public void onLoadFinished() {
+                            isLinkClickRunning = false;
+                        }
 
-                @Override
-                public void onLoadFailed(Throwable error) {
-                    Logger.e(TAG, error.getMessage());
-                }
+                        @Override
+                        public void onLoadFailed(Throwable error) {
+                            isLinkClickRunning = false;
+                            Logger.e(TAG, error.getMessage());
+                        }
 
-                @Override
-                public void onFormClosed() {
-
+                        @Override
+                        public void onFormClosed() {
+                            isLinkClickRunning = false;
+                        }
+                    });
+                } else {
+                    Logger.e(TAG, "Content info url is invalid");
+                    isLinkClickRunning = false;
                 }
             });
         }
     }
+
+    public boolean isLinkClickRunning = false;
 }

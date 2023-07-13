@@ -17,7 +17,7 @@ public class Tracking {
     private String text;
 
     public String getEvent() {
-        return event;
+        return TextUtils.isEmpty(event) ? "" : event;
     }
 
     public String getOffset() {

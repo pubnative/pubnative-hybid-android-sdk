@@ -25,7 +25,7 @@ import net.pubnative.lite.sdk.vpaid.helpers.ErrorLog;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
 import net.pubnative.lite.sdk.vpaid.macros.MacroHelper;
 import net.pubnative.lite.sdk.vpaid.models.CloseCardData;
-import net.pubnative.lite.sdk.vpaid.models.EndCardData;
+import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.models.vast.Tracking;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.AdSpotDimensions;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.CreativeParams;

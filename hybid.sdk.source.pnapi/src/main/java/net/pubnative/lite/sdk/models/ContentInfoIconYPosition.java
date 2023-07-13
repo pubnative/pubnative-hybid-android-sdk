@@ -11,6 +11,7 @@ public enum ContentInfoIconYPosition {
     ContentInfoIconYPosition(String position) {
         this.verticalPosition = position;
     }
+
     public final String verticalPosition;
 
     public static ContentInfoIconYPosition fromString(String name) {
@@ -24,6 +25,10 @@ public enum ContentInfoIconYPosition {
             return BOTTOM;
 
         return TOP;
+    }
+
+    public static ContentInfoIconYPosition getDefaultYPosition() {
+        return BOTTOM;
     }
 }
 

@@ -1,8 +1,6 @@
 package net.pubnative.lite.sdk.interstitial.activity;
 
 import android.app.Activity;
-import android.app.DialogFragment;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -19,10 +17,10 @@ import android.widget.ProgressBar;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.Reporting;
-import net.pubnative.lite.sdk.contentinfo.AdFeedbackView;
+import net.pubnative.lite.sdk.contentinfo.AdFeedbackFormHelper;
+import net.pubnative.lite.sdk.contentinfo.listeners.AdFeedbackLoadListener;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastSender;
-import net.pubnative.lite.sdk.interstitial.R;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ContentInfo;
 import net.pubnative.lite.sdk.models.ContentInfoIconXPosition;
@@ -31,11 +29,13 @@ import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.PositionX;
 import net.pubnative.lite.sdk.models.PositionY;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.SkipOffsetManager;
+import net.pubnative.lite.sdk.utils.URLValidator;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.views.CloseableContainer;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
-import net.pubnative.lite.sdk.views.ProgressDialogFragment;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
+import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
 import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
 
@@ -45,6 +45,8 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
     public static final String EXTRA_ZONE_ID = "extra_pn_zone_id";
     public static final String EXTRA_BROADCAST_ID = "extra_pn_broadcast_id";
     public static final String EXTRA_SKIP_OFFSET = "extra_pn_skip_offset";
+
+    protected Integer backButtonDelay = -1;
 
     private CloseableContainer mCloseableContainer;
     private UrlHandler mUrlHandlerDelegate;
@@ -56,9 +58,13 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
     protected boolean mIsFeedbackFormOpen = false;
     private boolean mIsFeedbackFormLoading = false;
 
+    protected Boolean mIsSkippable = false;
+
     public abstract View getAdView();
 
     protected abstract boolean shouldShowContentInfo();
+
+    protected AdFeedbackFormHelper adFeedbackFormHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +83,10 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
             mBroadcastSender = new HyBidInterstitialBroadcastSender(this, broadcastId);
 
             View adView = getAdView();
+
+            if (getAd() != null) {
+                backButtonDelay = SkipOffsetManager.getBackButtonDelay(getAd().getBackButtonDelay());
+            }
 
             if (adView != null) {
 
@@ -109,6 +119,27 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
         } else {
             finish();
         }
+    }
+
+    SimpleTimer backButtonTimer;
+
+    protected void handleBackClickability() {
+        int delay = backButtonDelay * 1000;
+
+        backButtonTimer = new SimpleTimer(delay, new SimpleTimer.Listener() {
+
+            @Override
+            public void onFinish() {
+                mIsSkippable = true;
+            }
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+                mIsSkippable = false;
+            }
+        }, 1000);
+
+        backButtonTimer.start();
     }
 
     protected void setupContentInfo() {
@@ -146,11 +177,18 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
                         }
                     }
 
+                    if (yGravity == Gravity.TOP && xGravity == Gravity.END) {
+                        mCloseableContainer.setClosePosition(CloseableContainer.ClosePosition.TOP_LEFT);
+                    }
+
                     FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                     layoutParams.gravity = xGravity | yGravity;
                     mCloseableContainer.addView(contentInfoView, layoutParams);
                 } else {
                     mCloseableContainer.addView(contentInfoView);
+                    if (getAd().getContentInfoIconYPosition() == ContentInfoIconYPosition.TOP && getAd().getContentInfoIconXPosition() == ContentInfoIconXPosition.RIGHT) {
+                        mCloseableContainer.setClosePosition(CloseableContainer.ClosePosition.TOP_LEFT);
+                    }
                 }
                 if (contentInfo != null && contentInfo.getViewTrackers() != null && !contentInfo.getViewTrackers().isEmpty()) {
                     for (String tracker : contentInfo.getViewTrackers()) {
@@ -189,7 +227,8 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            dismiss();
+            if (mIsSkippable)
+                dismiss();
         } else {
             return super.onKeyDown(keyCode, event);
         }
@@ -201,16 +240,7 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
     }
 
     protected void showInterstitialCloseButton() {
-        boolean hasEndcard = false;
-        if (getAd() != null && getAd().hasEndCard()) {
-            if (getAd().isEndCardEnabled() != null) {
-                hasEndcard = getAd().isEndCardEnabled();
-            } else {
-                hasEndcard = HyBid.isEndCardEnabled();
-            }
-        }
-
-        if (mCloseableContainer != null && !hasEndcard && !isFinishing()) {
+        if (mCloseableContainer != null && !isFinishing()) {
             mCloseableContainer.setCloseVisible(true);
             mCloseableContainer.setOnCloseListener(mCloseListener);
         }
@@ -251,45 +281,55 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
     String processedURL = "";
 
     @Override
-    public void onLinkClicked(String url) {
-        if (!mIsFeedbackFormOpen && !mIsFeedbackFormLoading) {
-            AdFeedbackView adFeedbackView = new AdFeedbackView();
+    public synchronized void onLinkClicked(String url) {
+        if (!isLinkClickRunning) {
+            isLinkClickRunning = true;
+            if (!mIsFeedbackFormOpen && !mIsFeedbackFormLoading) {
+                adFeedbackFormHelper = new AdFeedbackFormHelper();
+                URLValidator.isValidURL(url, isValid -> {
+                    if (isValid) {
+                        adFeedbackFormHelper.showFeedbackForm(HyBidInterstitialActivity.this, url, mAd, Reporting.AdFormat.REWARDED, IntegrationType.STANDALONE, new AdFeedbackLoadListener() {
+                            @Override
+                            public void onLoad(String url1) {
+                                mIsFeedbackFormLoading = true;
+                            }
 
-            adFeedbackView.prepare(this, url, mAd, Reporting.AdFormat.REWARDED, IntegrationType.STANDALONE, new AdFeedbackView.AdFeedbackLoadListener() {
-                @Override
-                public void onLoad(String url) {
-                    //load simple dialog
-                    processedURL = url;
-                    mIsFeedbackFormLoading = true;
-                    showProgressDialog(getString(R.string.feedback_form), getString(R.string.loading));
-                }
+                            @Override
+                            public void onLoadFinished() {
+                                isLinkClickRunning = false;
+                                mIsFeedbackFormLoading = false;
+                                mIsFeedbackFormOpen = true;
+                            }
 
-                @Override
-                public void onLoadFinished() {
-                    hideProgressDialog();
-                    mIsFeedbackFormLoading = false;
-                    pauseAd();
-                    mIsFeedbackFormOpen = true;
-                    adFeedbackView.showFeedbackForm(HyBidInterstitialActivity.this, processedURL);
-                }
+                            @Override
+                            public void onLoadFailed(Throwable error) {
+                                isLinkClickRunning = false;
+                                mIsFeedbackFormLoading = false;
+                                if (mIsFeedbackFormOpen) {
+                                    mIsFeedbackFormOpen = false;
+                                }
+                                Logger.e(TAG, error.getMessage());
+                            }
 
-                @Override
-                public void onLoadFailed(Throwable error) {
-                    hideProgressDialog();
-                    mIsFeedbackFormLoading = false;
-                    Logger.e(TAG, error.getMessage());
-                }
-
-                @Override
-                public void onFormClosed() {
-                    hideProgressDialog();
-                    mIsFeedbackFormOpen = false;
-                    mIsFeedbackFormLoading = false;
-                    resumeAd();
-                }
-            });
+                            @Override
+                            public void onFormClosed() {
+                                isLinkClickRunning = false;
+                                mIsFeedbackFormOpen = false;
+                                mIsFeedbackFormLoading = false;
+                            }
+                        });
+                    } else {
+                        isLinkClickRunning = false;
+                        mIsFeedbackFormOpen = false;
+                        mIsFeedbackFormLoading = false;
+                        Logger.e(TAG, "Content Info URL is invalid");
+                    }
+                });
+            }
         }
     }
+
+    public boolean isLinkClickRunning = false;
 
     protected HyBidInterstitialBroadcastSender getBroadcastSender() {
         return mBroadcastSender;
@@ -311,24 +351,28 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
         this.mIsVast = isVast;
     }
 
-    public void showProgressDialog(String title, String message) {
-        Fragment prev = getFragmentManager().findFragmentByTag("progress dialog");
-
-        if (prev != null) {
-            getFragmentManager().beginTransaction().remove(prev).commit();
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (backButtonTimer != null) {
+            backButtonTimer.pauseTimer();
         }
-
-        getFragmentManager().beginTransaction().addToBackStack(null).commit();
-
-        DialogFragment newFragment = ProgressDialogFragment.newInstance(title, message);
-        newFragment.show(getFragmentManager(), "progress dialog");
     }
 
-    public void hideProgressDialog() {
-        Fragment prev = getFragmentManager().findFragmentByTag("progress dialog");
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (backButtonTimer != null) {
+            backButtonTimer.resumeTimer();
+        }
+    }
 
-        if (prev != null) {
-            getFragmentManager().beginTransaction().remove(prev).commit();
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (backButtonTimer != null) {
+            backButtonTimer.onFinish();
+            backButtonTimer = null;
         }
     }
 }
