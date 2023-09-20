@@ -62,6 +62,8 @@ public class AdRequestFactoryTest {
         Mockito.when(mockPrefs.getString(anyString(), anyString())).thenReturn("1234567");
 
         when(mMockDeviceInfo.getModel()).thenReturn("Nexus5X");
+        when(mMockDeviceInfo.getMake()).thenReturn("Google");
+        when(mMockDeviceInfo.getCarrier()).thenReturn("Movistar");
         when(mMockDeviceInfo.getOSVersion()).thenReturn("8.1.0");
         when(mMockDeviceInfo.getAdvertisingId()).thenReturn("aabbccdd");
         when(mMockDeviceInfo.getAdvertisingIdMd5()).thenReturn(PNCrypto.md5("aabbccdd"));
@@ -69,6 +71,11 @@ public class AdRequestFactoryTest {
         when(mMockDeviceInfo.getLocale()).thenReturn(new Locale("EN", "US"));
         when(mMockDeviceInfo.getDeviceHeight()).thenReturn("1080");
         when(mMockDeviceInfo.getDeviceWidth()).thenReturn("1920");
+        when(mMockDeviceInfo.getPpi()).thenReturn("440");
+        when(mMockDeviceInfo.getPxratio()).thenReturn("2.75");
+        when(mMockDeviceInfo.getConnectionType()).thenReturn(2);
+        when(mMockDeviceInfo.getMccmnc()).thenReturn("321123");
+        when(mMockDeviceInfo.getMccmncsim()).thenReturn("123321");
         when(mMockDeviceInfo.getOrientation()).thenReturn(DeviceInfo.Orientation.PORTRAIT);
         when(mMockDeviceInfo.getContext()).thenReturn(mockContext);
 
@@ -96,9 +103,11 @@ public class AdRequestFactoryTest {
         Assert.assertEquals("320", request.width);
         Assert.assertEquals("50", request.height);
         Assert.assertEquals("en", request.locale);
+        Assert.assertEquals("en", request.language);
         Assert.assertEquals("android", request.os);
         Assert.assertEquals("8.1.0", request.osver);
         Assert.assertEquals("Nexus5X", request.devicemodel);
+        Assert.assertEquals("Google", request.make);
         Assert.assertEquals("0", request.testMode);
         Assert.assertEquals("0", request.coppa);
         Assert.assertEquals("12.126543", request.latitude);
@@ -111,6 +120,13 @@ public class AdRequestFactoryTest {
         Assert.assertEquals("1080", request.deviceHeight);
         Assert.assertEquals("portrait", request.orientation);
         Assert.assertEquals("0", request.impdepth);
+        Assert.assertEquals("440", request.ppi);
+        Assert.assertEquals("2.75", request.pxratio);
+        Assert.assertEquals("2", request.connectiontype);
+        Assert.assertEquals("Movistar", request.carrier);
+        Assert.assertEquals("321123", request.mccmnc);
+        Assert.assertEquals("123321", request.mccmncsim);
+        Assert.assertEquals("1", request.js);
         Assert.assertEquals("1234567", mockPrefs.getString("", ""));
         Assert.assertEquals(HyBid.OMSDK_VERSION, request.omidpv);
         Assert.assertEquals(HyBid.OM_PARTNER_NAME, request.omidpn);

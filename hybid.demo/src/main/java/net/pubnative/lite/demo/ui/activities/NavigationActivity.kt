@@ -1,7 +1,6 @@
 package net.pubnative.lite.demo.ui.activities
 
 import android.Manifest
-import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
@@ -13,6 +12,7 @@ import com.fyber.FairBid
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.databinding.ActivityNavigationBinding
+import net.pubnative.lite.demo.util.OneTrustManager
 
 class NavigationActivity : AppCompatActivity() {
 
@@ -35,6 +35,8 @@ class NavigationActivity : AppCompatActivity() {
         FairBid.start(Constants.FAIRBID_APP_ID, this)
 
         checkPermissions()
+
+        initializeOpenTrustSDK()
     }
 
     private fun checkPermissions() {
@@ -67,6 +69,10 @@ class NavigationActivity : AppCompatActivity() {
             }
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
+    }
+
+    private fun initializeOpenTrustSDK() {
+        OneTrustManager.getInstance(this).initializeOpenTrustSDK()
     }
 
 }

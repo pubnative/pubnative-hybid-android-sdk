@@ -69,13 +69,14 @@ public class InterstitialPresenterFactory {
         }
 
         final InterstitialPresenterDecorator interstitialPresenterDecorator =
-                new InterstitialPresenterDecorator(interstitialPresenter, new AdTracker(
-                        ad.getBeacons(Ad.Beacon.IMPRESSION),
-                        ad.getBeacons(Ad.Beacon.CLICK)),
+                new InterstitialPresenterDecorator(interstitialPresenter,
+                        new AdTracker(ad.getBeacons(Ad.Beacon.IMPRESSION), ad.getBeacons(Ad.Beacon.CLICK)),
+                        new AdTracker(ad.getBeacons(Ad.Beacon.CUSTOM_END_CARD_IMPRESSION), ad.getBeacons(Ad.Beacon.CUSTOM_END_CARD_CLICK)),
                         HyBid.getReportingController(),
                         interstitialPresenterListener);
         interstitialPresenter.setListener(interstitialPresenterDecorator);
         interstitialPresenter.setVideoListener(interstitialPresenterDecorator);
+        interstitialPresenter.setCustomEndCardListener(interstitialPresenterDecorator);
         return interstitialPresenterDecorator;
     }
 
@@ -91,7 +92,7 @@ public class InterstitialPresenterFactory {
             case ApiAssetGroupType.VAST_INTERSTITIAL: {
                 int videoOffset = videoSkipOffset.getOffset();
                 if (!videoSkipOffset.isCustom()) {
-                    Boolean hasEndCard = AdEndCardManager.isEndCardEnabled(ad, ad.isEndCardEnabled(), HyBid.isEndCardEnabled(), null);
+                    Boolean hasEndCard = AdEndCardManager.isEndCardEnabled(ad, null);
                     if (ad.hasEndCard() && hasEndCard) {
                         videoOffset = SkipOffsetManager.getDefaultVideoWithEndCardSkipOffset();
                     } else {

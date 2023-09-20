@@ -61,4 +61,10 @@ public abstract class VideoAdListener {
     }
 
     public abstract void onAdSkipped();
+    public void onCustomEndCardShow() {
+    }
+    public void onCustomEndCardClicked() {
+    }
+
+    public abstract void onAdCustomEndCardFound() ;
 }

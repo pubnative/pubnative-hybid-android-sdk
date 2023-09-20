@@ -92,8 +92,7 @@ public class VastProcessor {
                     info.setNoAdsFound();
                     listener.onParseError(info);
                 }
-            }
-            else if ((vast.getAds() == null || vast.getAds().isEmpty())
+            } else if ((vast.getAds() == null || vast.getAds().isEmpty())
                     || (vast.getErrors() != null && !vast.getErrors().isEmpty())) {
                 if (vast.getErrors() != null) {
                     List<String> errorLogs = new ArrayList<>();
@@ -119,10 +118,25 @@ public class VastProcessor {
                 if (inLine != null) {
                     fillAdParams(mContext, inLine, adParams, mParseParams, response);
                     if (listener != null) {
-                        listener.onParseSuccess(adParams, response);
+                        if(adParams.isVpaid()){
+                            PlayerInfo info = new PlayerInfo("No ads found - Unsupported ad format");
+                            info.setNoAdsFound();
+                            listener.onParseError(info);
+                        } else {
+                            listener.onParseSuccess(adParams, response);
+                        }
                     }
                 } else if (wrapper != null) {
                     fillAdParams(mContext, wrapper, adParams, mParseParams, response);
+
+                    if(adParams.isVpaid()){
+                        if(listener != null){
+                            PlayerInfo info = new PlayerInfo("No ads found - Unsupported ad format");
+                            info.setNoAdsFound();
+                            listener.onParseError(info);
+                        }
+                        return;
+                    }
 
                     if (unwrapAttempt < UNWRAP_DEPTH) {
                         String adTagUri = wrapper.getVastAdTagURI().getText();
@@ -552,25 +566,39 @@ public class VastProcessor {
 
     private Comparator<Companion> createCompanionComparator(final AdSpotDimensions adSpotDimensions) {
         return (companion1, companion2) -> {
-            int width1 = 0;
-            int height1 = 0;
-            int width2 = 0;
-            int height2 = 0;
+            double width1 = 0;
+            double height1 = 0;
+            double width2 = 0;
+            double height2 = 0;
 
             try {
-                width1 = Integer.parseInt(companion1.getWidth());
-                height1 = Integer.parseInt(companion1.getHeight());
-                width2 = Integer.parseInt(companion2.getWidth());
-                height2 = Integer.parseInt(companion2.getHeight());
+                width1 = Double.parseDouble(companion1.getWidth());
+                height1 = Double.parseDouble(companion1.getHeight());
+                width2 = Double.parseDouble(companion2.getWidth());
+                height2 = Double.parseDouble(companion2.getHeight());
             } catch (RuntimeException e) {
                 Logger.w(LOG_TAG, e.getMessage());
             }
 
-            int delta1 = Math.abs(adSpotDimensions.getWidth() - width1) +
-                    Math.abs(adSpotDimensions.getHeight() - height1);
-            int delta2 = Math.abs(adSpotDimensions.getWidth() - width2) +
-                    Math.abs(adSpotDimensions.getHeight() - height2);
-            return Integer.compare(delta1, delta2);
+            double image1Ratio = width1 / height1;
+            double image2Ratio = width2 / height2;
+
+            double containerRatio = (double) adSpotDimensions.getWidth() / adSpotDimensions.getHeight();
+
+            double fitRatio1 = Math.min((double) adSpotDimensions.getWidth() / width1, (double) adSpotDimensions.getHeight() / height1);
+            double fitRatio2 = Math.min((double) adSpotDimensions.getWidth() / width2, (double) adSpotDimensions.getHeight() / height2);
+
+            boolean image1Fits = image1Ratio <= containerRatio;
+            boolean image2Fits = image2Ratio <= containerRatio;
+
+            if (image1Fits && !image2Fits) {
+                return -1;
+            } else if (!image1Fits && image2Fits) {
+                return 1;
+            } else {
+                // Both images fit or both do not fit, compare fit ratios
+                return Double.compare(fitRatio2, fitRatio1);
+            }
         };
     }
 }

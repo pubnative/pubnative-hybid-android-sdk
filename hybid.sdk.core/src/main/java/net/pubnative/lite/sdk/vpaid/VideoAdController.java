@@ -26,7 +26,7 @@ public interface VideoAdController {
 
     void setVideoFilePath(String filePath);
 
-    void setEndCardData(EndCardData endCardData);
+    void addEndCardData(EndCardData endCardData);
 
     void setCloseCardData(CloseCardData closeCardData);
 
@@ -35,6 +35,9 @@ public interface VideoAdController {
     void buildVideoAdView(VideoAdView bannerView);
 
     void openUrl(String url);
+
+    void onCustomEndCardShow();
+    void onCustomEndCardClick();
 
     AdParams getAdParams();
 
@@ -51,6 +54,8 @@ public interface VideoAdController {
     void setVolume(boolean mute);
 
     void skipVideo();
+
+    void skipEndCard();
 
     void closeEndCard();
 

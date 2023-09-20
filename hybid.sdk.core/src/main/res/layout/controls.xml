@@ -18,6 +18,8 @@
             android:id="@+id/muteView"
             android:layout_width="@dimen/mute_view_size"
             android:layout_height="@dimen/mute_view_size"
+            android:layout_gravity="end"
+            android:contentDescription="@string/unmute_button"
             android:padding="8dp"
             android:scaleType="fitCenter"
             android:src="@mipmap/unmute" />
@@ -26,8 +28,8 @@
             android:id="@+id/skipView"
             android:layout_width="@dimen/skip_view_size"
             android:layout_height="@dimen/skip_view_size"
+            android:layout_gravity="start"
             android:padding="8dp"
-            android:layout_gravity="end"
             android:scaleType="fitCenter"
             android:visibility="gone" />
 
@@ -63,7 +65,5 @@
         android:textAllCaps="false"
         android:textColor="#FFFFFF"
         android:textSize="16sp" />
-
-    <include layout="@layout/close_card" />
 
 </FrameLayout>

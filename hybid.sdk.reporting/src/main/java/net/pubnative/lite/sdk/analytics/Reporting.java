@@ -39,6 +39,7 @@ public class Reporting {
         public static final String SESSION_DURATION = "session_duration";
         public static final String IMP_DEPTH = "imp_depth";
         public static final String AGE_OF_APP = "age_of_app";
+        public static final String REQUEST_TYPE = "request_type";
     }
 
     public static final class EventType {
@@ -56,6 +57,8 @@ public class Reporting {
         public static final String INTERSTITIAL_CLOSED = "interstitial_closed";
         public static final String REWARDED_CLOSED = "rewarded_closed";
         public static final String REWARD = "reward";
+        public static final String CUSTOM_END_CARD_IMPRESSION = "custom_end_card_impression";
+        public static final String CUSTOM_END_CARD_CLICK = "custom_end_card_click";
         public static final String VIDEO_STARTED = "video_started";
         public static final String VIDEO_DISMISSED = "video_dismissed";
         public static final String VIDEO_FINISHED = "video_finished";

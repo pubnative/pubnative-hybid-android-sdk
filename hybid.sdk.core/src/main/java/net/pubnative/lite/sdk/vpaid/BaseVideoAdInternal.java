@@ -9,6 +9,8 @@ import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.CustomEndCardDisplay;
+import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeVideoAdSession;
@@ -18,7 +20,6 @@ import net.pubnative.lite.sdk.vpaid.helpers.AssetsLoader;
 import net.pubnative.lite.sdk.vpaid.helpers.ErrorLog;
 import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
 import net.pubnative.lite.sdk.vpaid.models.CloseCardData;
-import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.AdSpotDimensions;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.response.VastProcessor;
@@ -277,11 +278,15 @@ abstract class BaseVideoAdInternal {
     }
 
     private void prepare(AdParams adParams, String vastFileContent) {
+
         if (adParams.isVpaid()) {
-            mAdController = new VideoAdControllerVpaid(this, adParams, getAdSpotDimensions(), vastFileContent, getViewabilityAdSession());
-        } else {
-            mAdController = new VideoAdControllerVast(this, adParams, getViewabilityAdSession(), isFullscreen, this.mImpressionListener, mAdCloseButtonListener);
+            ErrorLog.postError(getContext(), VastError.VAST_VERSION_NOT_SUPPORTED);
+            onAdLoadFail(new PlayerInfo("Unsupported ad format"));
+            return;
         }
+
+        mAdController = new VideoAdControllerVast(this, adParams, getViewabilityAdSession(), isFullscreen, this.mImpressionListener, mAdCloseButtonListener);
+
         if (mCacheItem != null) {
             prepareAdController(mCacheItem.getVideoFilePath(), mCacheItem.getEndCardData(), mCacheItem.getEndCardFilePath());
         } else {
@@ -312,10 +317,17 @@ abstract class BaseVideoAdInternal {
         }
         mAdController.setVideoFilePath(videoFilePath);
 
-        if(endCardData == null && getAd().isCustomEndCardEnabled() && getAd().hasCustomEndCard()){
-            mAdController.setEndCardData(getAd().getCustomEndCard());
-        } else {
-            mAdController.setEndCardData(endCardData);
+        if(((getAd().isEndCardEnabled() != null && getAd().isEndCardEnabled())
+                || (getAd().isEndCardEnabled() == null && HyBid.isEndCardEnabled() != null && HyBid.isEndCardEnabled()))
+                && getAd().hasEndCard()){
+            mAdController.addEndCardData(endCardData);
+            if(getAd().isCustomEndCardEnabled() != null && getAd().isCustomEndCardEnabled() && getAd().hasCustomEndCard() && getAd().getCustomEndCardDisplay().equals(CustomEndCardDisplay.EXTENSION)){
+                mAdController.addEndCardData(getAd().getCustomEndCard());
+                mVideoAdListener.onAdCustomEndCardFound();
+            }
+        } else if(getAd().isCustomEndCardEnabled() != null && getAd().isCustomEndCardEnabled() && getAd().hasCustomEndCard()){
+            mAdController.addEndCardData(getAd().getCustomEndCard());
+            mVideoAdListener.onAdCustomEndCardFound();
         }
 
         mAdController.setCloseCardData(createCloseCardData(mAd));
@@ -409,6 +421,20 @@ abstract class BaseVideoAdInternal {
         Logger.d(LOG_TAG, "Ad received click event");
         if (mVideoAdListener != null) {
             mVideoAdListener.onAdClicked();
+        }
+    }
+
+    void onCustomEndCardShow(){
+        Logger.d(LOG_TAG, "Ad received custom end card impression event");
+        if (mVideoAdListener != null) {
+            mVideoAdListener.onCustomEndCardShow();
+        }
+    }
+
+    void onCustomEndCardClick(){
+        Logger.d(LOG_TAG, "Ad received custom end card click event");
+        if (mVideoAdListener != null) {
+            mVideoAdListener.onCustomEndCardClicked();
         }
     }
 

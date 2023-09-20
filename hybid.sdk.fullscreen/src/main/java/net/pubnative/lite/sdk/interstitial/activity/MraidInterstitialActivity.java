@@ -9,8 +9,6 @@ import android.view.View;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.models.APIAsset;
-import net.pubnative.lite.sdk.models.ContentInfoIconXPosition;
-import net.pubnative.lite.sdk.models.ContentInfoIconYPosition;
 import net.pubnative.lite.sdk.mraid.MRAIDBanner;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeature;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
@@ -18,9 +16,6 @@ import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewCloseLayoutListener;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.utils.SkipOffsetManager;
-import net.pubnative.lite.sdk.views.CloseableContainer;
-import net.pubnative.lite.sdk.vpaid.models.CloseCardData;
-import net.pubnative.lite.sdk.vpaid.utils.CloseCardUtil;
 
 public class MraidInterstitialActivity extends HyBidInterstitialActivity implements MRAIDViewListener, MRAIDNativeFeatureListener, MRAIDViewCloseLayoutListener {
     private final String[] mSupportedNativeFeatures = new String[]{MRAIDNativeFeature.CALENDAR, MRAIDNativeFeature.INLINE_VIDEO, MRAIDNativeFeature.SMS, MRAIDNativeFeature.STORE_PICTURE, MRAIDNativeFeature.TEL, MRAIDNativeFeature.LOCATION};
@@ -62,22 +57,13 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
             }
         }
         mView = adView;
-        fetchCloseCard();
-        defineBackButtonClickableityhandler();
+        defineBackButtonClickabilityHandler();
         return adView;
     }
 
-    private void fetchCloseCard() {
-        if (mView != null && getAd() != null) {
-            CloseCardData data = new CloseCardData();
-            new CloseCardUtil().fetchCloseCardData(getAd(), data);
-            mView.setCloseCardData(data);
-        }
-    }
-
-    private void defineBackButtonClickableityhandler() {
+    private void defineBackButtonClickabilityHandler() {
         if (mView != null)
-            mView.setBackButtonClickableityhandler(this::handleBackClickability);
+            mView.setBackButtonClickabilityHandler(this::handleBackClickability);
     }
 
     @Override
@@ -192,11 +178,7 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
 
     @Override
     protected void dismiss() {
-        if (mView != null && mView.hasValidCloseCard() && !mView.isCloseCardShown()) {
-            mView.showCloseCard(getAd().link);
-        } else {
-            super.dismiss();
-        }
+        super.dismiss();
     }
 
     @Override

@@ -12,11 +12,12 @@ import net.pubnative.lite.demo.ui.viewholders.MarkupMRectViewHolder
 import net.pubnative.lite.demo.ui.viewholders.SampleTextViewHolder
 import net.pubnative.lite.demo.util.SampleQuotes
 
+
 class MarkupAdapter(
-    private var mListener: OnLogDisplayListener,
-    private var mAdRefreshListener: OnAdRefreshListener
+        private var mListener: OnLogDisplayListener,
+        private var mAdRefreshListener: OnAdRefreshListener
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), OnLogDisplayListener,
-    OnExpandedAdCloseListener {
+        OnExpandedAdCloseListener {
 
     companion object {
         private const val TYPE_TEXT = 1
@@ -26,6 +27,7 @@ class MarkupAdapter(
         private const val ATTACHED_AD_VIEW_POSITION = 2
     }
 
+    private var isClosingExpandedAd: Boolean = false
     private var selectedSize: MarkupSize = MarkupSize.BANNER
     private var markup = ""
 
@@ -34,23 +36,23 @@ class MarkupAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
             TYPE_MARKUP_BANNER -> MarkupBannerViewHolder(
-                LayoutInflater.from(parent.context)
-                    .inflate(R.layout.item_markup_banner, parent, false), mListener, this
+                    LayoutInflater.from(parent.context)
+                            .inflate(R.layout.item_markup_banner, parent, false), mListener, this
             )
 
             TYPE_MARKUP_MRECT -> MarkupMRectViewHolder(
-                LayoutInflater.from(parent.context)
-                    .inflate(R.layout.item_markup_mrect, parent, false), mListener
+                    LayoutInflater.from(parent.context)
+                            .inflate(R.layout.item_markup_mrect, parent, false), mListener
             )
 
             TYPE_MARKUP_LEADERBOARD -> MarkupLeaderboardViewHolder(
-                LayoutInflater.from(parent.context)
-                    .inflate(R.layout.item_markup_leaderboard, parent, false), mListener
+                    LayoutInflater.from(parent.context)
+                            .inflate(R.layout.item_markup_leaderboard, parent, false), mListener
             )
 
             else -> SampleTextViewHolder(
-                LayoutInflater.from(parent.context)
-                    .inflate(R.layout.item_sample_text, parent, false)
+                    LayoutInflater.from(parent.context)
+                            .inflate(R.layout.item_sample_text, parent, false)
             )
         }
     }

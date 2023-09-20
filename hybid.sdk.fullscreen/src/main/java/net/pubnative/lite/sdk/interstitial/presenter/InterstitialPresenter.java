@@ -22,6 +22,7 @@
 //
 package net.pubnative.lite.sdk.interstitial.presenter;
 
+import net.pubnative.lite.sdk.CustomEndCardListener;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.models.Ad;
 
@@ -47,6 +48,8 @@ public interface InterstitialPresenter {
     void setListener(Listener listener);
 
     void setVideoListener(VideoListener listener);
+
+    void setCustomEndCardListener(CustomEndCardListener listener);
 
     Ad getAd();
 

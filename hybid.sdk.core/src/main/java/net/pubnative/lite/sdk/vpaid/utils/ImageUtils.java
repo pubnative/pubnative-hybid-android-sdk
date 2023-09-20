@@ -72,8 +72,11 @@ public class ImageUtils {
             o.inDither = true;
             BitmapFactory.decodeStream(new FileInputStream(f), null, o);
             int scale = 1;
-            while (o.outWidth / scale / 2 >= reqWidth && o.outHeight / scale / 2 >= reqHeight)
-                scale *= 2;
+            if (o.outWidth != 0 && o.outHeight != 0) {
+                while (o.outWidth / scale / 2 >= reqWidth && o.outHeight / scale / 2 >= reqHeight) {
+                    scale *= 2;
+                }
+            }
             //Decode with inSampleSize
             BitmapFactory.Options o2 = new BitmapFactory.Options();
             o2.inSampleSize = scale;

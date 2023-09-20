@@ -22,7 +22,11 @@
 //
 package net.pubnative.lite.sdk.models;
 
+import net.pubnative.lite.sdk.models.bidstream.Signal;
 import net.pubnative.lite.sdk.utils.json.JsonModel;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Created by erosgarciaponte on 10.01.18.
@@ -32,4 +36,11 @@ public class AdRequest extends JsonModel {
     public String appToken;
     public String zoneId;
     public Boolean isInterstitial = false;
+    private final Collection<Signal> signals = new ArrayList<>();
+    public void addSignal(Signal signal){
+        signals.add(signal);
+    }
+    public Collection<Signal> getSignals(){
+        return signals;
+    }
 }

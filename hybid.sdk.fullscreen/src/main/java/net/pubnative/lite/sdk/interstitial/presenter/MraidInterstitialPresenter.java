@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import net.pubnative.lite.sdk.CustomEndCardListener;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.interstitial.activity.HyBidInterstitialActivity;
@@ -71,6 +72,11 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, HyBidI
     @Override
     public void setVideoListener(VideoListener listener) {
         //Do nothing. Video listener is not needed for MRAID
+    }
+
+    @Override
+    public void setCustomEndCardListener(CustomEndCardListener listener) {
+
     }
 
     @Override

@@ -100,7 +100,11 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
                 }
                 if (adCacheItem != null && adCacheItem.getEndCardData() != null
                         && !TextUtils.isEmpty(adCacheItem.getEndCardData().getContent())) {
-                    mHasEndCard = AdEndCardManager.isEndCardEnabled(getAd(), getAd().isEndCardEnabled(), HyBid.isEndCardEnabled(), null);
+                    mHasEndCard = AdEndCardManager.isEndCardEnabled(getAd(), null);
+                } else if (getAd().isEndCardEnabled() != null && getAd().isEndCardEnabled()
+                        && getAd().isCustomEndCardEnabled() != null &&
+                        getAd().isCustomEndCardEnabled() && getAd().hasCustomEndCard()) {
+                    mHasEndCard = true;
                 }
 
                 mVideoPlayer.postDelayed(() -> mVideoAd.load(), 1000);
@@ -247,6 +251,20 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
         }
 
         @Override
+        public void onCustomEndCardShow() {
+            if (getBroadcastSender() != null) {
+                getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CUSTOM_END_CARD_SHOW);
+            }
+        }
+
+        @Override
+        public void onCustomEndCardClicked() {
+            if (getBroadcastSender() != null) {
+                getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CUSTOM_END_CARD_CLICK);
+            }
+        }
+
+        @Override
         public void onAdDismissed() {
             onAdDismissed(-1);
         }
@@ -265,8 +283,14 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
         @Override
         public void onAdSkipped() {
             if (getBroadcastSender() != null) {
+                mFinished = true;
                 getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.VIDEO_SKIP);
             }
+        }
+
+        @Override
+        public void onAdCustomEndCardFound() {
+            mHasEndCard = true;
         }
 
         @Override

@@ -56,6 +56,7 @@ import net.pubnative.lite.sdk.models.OpenRTBAdRequestFactory;
 import net.pubnative.lite.sdk.models.RemoteConfigFeature;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
+import net.pubnative.lite.sdk.mraid.utils.MraidCloseAdRepo;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
@@ -78,7 +79,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class HyBidAdView extends FrameLayout implements RequestManager.RequestListener, AdPresenter.Listener, AdPresenter.ImpressionListener, VideoListener, MRAIDViewListener {
+public class HyBidAdView extends FrameLayout implements RequestManager.RequestListener, AdPresenter.Listener, AdPresenter.ImpressionListener, VideoListener, MRAIDViewListener, MraidCloseAdRepo.ICloseAdObserver {
 
     private static final String TAG = HyBidAdView.class.getSimpleName();
     private static final int TIME_TO_EXPIRE = 1800000;
@@ -89,6 +90,15 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     private String mScreenIabCategory;
     private String mScreenKeywords;
     private String mUserIntent;
+
+    public void setIsAdSticky(boolean isAdSticky) {
+        MraidCloseAdRepo.getInstance().setIsAdSticky(isAdSticky);
+    }
+
+    @Override
+    public void onCloseExpandedAd() {
+        destroy();
+    }
 
     public interface Listener {
         void onAdLoaded();
@@ -206,6 +216,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                 }
                 mRequestManager.setZoneId(zoneId);
                 mRequestManager.setRequestListener(this);
+
                 mRequestManager.requestAd();
             }
         } else {
@@ -213,6 +224,8 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
             Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before attempting a request");
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NOT_INITIALISED));
         }
+
+        MraidCloseAdRepo.getInstance().registerExpandedAdCloseObserver(this);
     }
 
     public void loadExchangeAd(String zoneId, Position position, HyBidAdView.Listener listener) {
@@ -488,7 +501,9 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                         renderErrorEvent.setErrorMessage(HyBidErrorCode.UNSUPPORTED_ASSET.getMessage());
                         renderErrorEvent.setTimestamp(System.currentTimeMillis());
                         renderErrorEvent.setAdFormat(mAdFormat);
-                        renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
+                        if (mRequestManager != null && mRequestManager.getAdSize() != null) {
+                            renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
+                        }
                         renderErrorEvent.setIntegrationType(mIntegrationType);
                         if (mAd != null) {
                             if (!TextUtils.isEmpty(mAd.getVast())) {
@@ -533,7 +548,9 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                 renderErrorEvent.setErrorMessage(HyBidErrorCode.INVALID_AD.getMessage());
                 renderErrorEvent.setTimestamp(System.currentTimeMillis());
                 renderErrorEvent.setAdFormat(mAdFormat);
-                renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
+                if (mRequestManager != null && mRequestManager.getAdSize() != null) {
+                    renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
+                }
                 renderErrorEvent.setIntegrationType(mIntegrationType);
                 if (mAd != null) {
                     if (!TextUtils.isEmpty(mAd.getVast())) {
@@ -578,7 +595,9 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                             renderErrorEvent.setErrorMessage(HyBidErrorCode.NULL_AD.getMessage());
                             renderErrorEvent.setTimestamp(System.currentTimeMillis());
                             renderErrorEvent.setAdFormat(mAdFormat);
-                            renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
+                            if (mRequestManager != null && mRequestManager.getAdSize() != null) {
+                                renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
+                            }
                             renderErrorEvent.setIntegrationType(mIntegrationType);
                             if (mAd != null) {
                                 if (!TextUtils.isEmpty(mAd.getVast())) {
@@ -613,7 +632,11 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                 renderErrorEvent.setErrorMessage(HyBidErrorCode.INVALID_SIGNAL_DATA.getMessage());
                 renderErrorEvent.setTimestamp(System.currentTimeMillis());
                 renderErrorEvent.setAdFormat(mAdFormat);
-                renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
+
+                if (mRequestManager != null && mRequestManager.getAdSize() != null) {
+                    renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
+                }
+
                 renderErrorEvent.setIntegrationType(mIntegrationType);
                 if (mAd != null) {
                     if (!TextUtils.isEmpty(mAd.getVast())) {
@@ -884,6 +907,9 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     }
 
     private void getAdTypeAndCreative(ReportingEvent reportingEvent) {
+        if (reportingEvent == null || mAd == null) {
+            return;
+        }
         switch (mAd.assetgroupid) {
             case ApiAssetGroupType.VAST_INTERSTITIAL:
             case ApiAssetGroupType.VAST_MRECT: {
@@ -1066,7 +1092,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
 
     public boolean hasEndCard() {
         if (mAd != null)
-            return AdEndCardManager.isEndCardEnabled(mAd, mAd.isEndCardEnabled(), HyBid.isEndCardEnabled(), mAd.hasEndCard());
+            return AdEndCardManager.isEndCardEnabled(mAd, mAd.hasEndCard());
         return false;
     }
 
@@ -1080,6 +1106,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
 
     @Override
     public void mraidViewExpand(MRAIDView mraidView) {
+        Log.d("mraidview", "expanded");
     }
 
     @Override

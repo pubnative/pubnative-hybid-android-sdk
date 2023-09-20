@@ -8,7 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import net.pubnative.lite.demo.Constants
+import com.google.android.material.button.MaterialButton
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.adapters.SignalDataAdapter
 import net.pubnative.lite.demo.util.ClipboardUtils
@@ -23,6 +23,8 @@ class SignalDataFragment : Fragment(R.layout.fragment_signal_data) {
     private lateinit var signalDataInput: EditText
     private lateinit var adSizeGroup: RadioGroup
     private lateinit var signalDataList: RecyclerView
+    private lateinit var loadButton: MaterialButton
+    private lateinit var showButton: MaterialButton
     private val adapter = SignalDataAdapter()
 
     private var selectedSize: Int = R.id.radio_size_banner
@@ -37,18 +39,32 @@ class SignalDataFragment : Fragment(R.layout.fragment_signal_data) {
         signalDataInput = view.findViewById(R.id.input_signal_data)
         adSizeGroup = view.findViewById(R.id.group_ad_size)
         signalDataList = view.findViewById(R.id.list_signal_data)
+        loadButton = view.findViewById(R.id.button_load)
+        showButton = view.findViewById(R.id.button_show)
 
         view.findViewById<ImageButton>(R.id.button_paste_clipboard).setOnClickListener {
             pasteFromClipboard()
         }
 
-        view.findViewById<Button>(R.id.button_load).setOnClickListener {
+        loadButton.setOnClickListener {
             loadSignalData()
+        }
+
+        showButton.setOnClickListener {
+            when (selectedSize) {
+                R.id.radio_size_interstitial -> {
+                    interstitial?.show()
+                }
+
+                R.id.radio_size_rewarded -> {
+                    rewarded?.show()
+                }
+            }
         }
 
         adSizeGroup.setOnCheckedChangeListener { _, checkedId ->
             selectedSize = checkedId
-            updateListVisibility()
+            updateVisibility()
         }
 
         signalDataList.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
@@ -62,15 +78,19 @@ class SignalDataFragment : Fragment(R.layout.fragment_signal_data) {
         super.onDestroy()
     }
 
-    private fun updateListVisibility() {
+    private fun updateVisibility() {
         if (selectedSize == R.id.radio_size_banner
             || selectedSize == R.id.radio_size_medium
             || selectedSize == R.id.radio_size_leaderboard
             || selectedSize == R.id.radio_size_native
         ) {
             signalDataList.visibility = View.VISIBLE
+            showButton.visibility = View.GONE
+            showButton.isEnabled = false
         } else {
             signalDataList.visibility = View.GONE
+            showButton.visibility = View.VISIBLE
+            showButton.isEnabled = false
         }
     }
 
@@ -82,6 +102,7 @@ class SignalDataFragment : Fragment(R.layout.fragment_signal_data) {
     }
 
     private fun loadSignalData() {
+        showButton.isEnabled = false
         var signalData = signalDataInput.text.toString()
         if (TextUtils.isEmpty(signalData)) {
             Toast.makeText(activity, "Please input some signal data", Toast.LENGTH_SHORT).show()
@@ -90,9 +111,11 @@ class SignalDataFragment : Fragment(R.layout.fragment_signal_data) {
                 R.id.radio_size_interstitial -> {
                     loadInterstitial(signalData)
                 }
+
                 R.id.radio_size_rewarded -> {
                     loadRewarded(signalData)
                 }
+
                 else -> {
                     adapter.refreshWithSignalData(signalData, selectedSize)
                 }
@@ -106,12 +129,13 @@ class SignalDataFragment : Fragment(R.layout.fragment_signal_data) {
         val interstitialListener = object : HyBidInterstitialAd.Listener {
             override fun onInterstitialLoaded() {
                 Logger.d(TAG, "onInterstitialLoaded")
-                interstitial?.show()
+                showButton.isEnabled = true
             }
 
             override fun onInterstitialLoadFailed(error: Throwable?) {
                 Logger.e(TAG, "onInterstitialLoadFailed", error)
                 Toast.makeText(requireContext(), error?.message, Toast.LENGTH_LONG).show()
+                showButton.isEnabled = false
             }
 
             override fun onInterstitialImpression() {
@@ -124,6 +148,7 @@ class SignalDataFragment : Fragment(R.layout.fragment_signal_data) {
 
             override fun onInterstitialDismissed() {
                 Logger.d(TAG, "onInterstitialDismissed")
+                showButton.isEnabled = false
             }
         }
 
@@ -137,12 +162,13 @@ class SignalDataFragment : Fragment(R.layout.fragment_signal_data) {
         val rewardedListener = object : HyBidRewardedAd.Listener {
             override fun onRewardedLoaded() {
                 Logger.d(TAG, "onRewardedLoaded")
-                rewarded?.show()
+                showButton.isEnabled = true
             }
 
             override fun onRewardedLoadFailed(error: Throwable?) {
                 Logger.d(TAG, "onRewardedLoadFailed")
                 Toast.makeText(requireContext(), error?.message, Toast.LENGTH_LONG).show()
+                showButton.isEnabled = false
             }
 
             override fun onRewardedOpened() {
@@ -151,6 +177,7 @@ class SignalDataFragment : Fragment(R.layout.fragment_signal_data) {
 
             override fun onRewardedClosed() {
                 Logger.d(TAG, "onRewardedClosed")
+                showButton.isEnabled = false
             }
 
             override fun onRewardedClick() {

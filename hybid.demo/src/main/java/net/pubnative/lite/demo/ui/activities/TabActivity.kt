@@ -33,6 +33,7 @@ import com.google.android.material.tabs.TabLayout
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.fragments.DebugFragment
 import net.pubnative.lite.demo.viewmodel.DebugViewModel
+import net.pubnative.lite.sdk.mraid.utils.MraidCloseAdRepo
 
 abstract class TabActivity : AppCompatActivity() {
 
@@ -76,7 +77,19 @@ abstract class TabActivity : AppCompatActivity() {
 
         container.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabs))
         tabs.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(container))
+        tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                MraidCloseAdRepo.getInstance().notifyTabChanged()
+            }
 
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+                // Tab unselected
+            }
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+                // Tab reselected
+            }
+        })
         debugViewModel = ViewModelProvider(this).get(DebugViewModel::class.java)
 
         debugFragment = DebugFragment()
@@ -97,7 +110,8 @@ abstract class TabActivity : AppCompatActivity() {
         }
     }
 
-    inner class SectionsPagerAdapter(fm: androidx.fragment.app.FragmentManager) : FragmentPagerAdapter(fm) {
+    inner class SectionsPagerAdapter(fm: androidx.fragment.app.FragmentManager) :
+        FragmentPagerAdapter(fm) {
 
         override fun getItem(position: Int): androidx.fragment.app.Fragment {
             val fragment = when (position) {
@@ -120,7 +134,7 @@ abstract class TabActivity : AppCompatActivity() {
         debugViewModel.clearEventList()
     }
 
-    fun clearTrackerList(){
+    fun clearTrackerList() {
         debugViewModel.clearTrackerList()
     }
 

@@ -1,3 +1,25 @@
+// The MIT License (MIT)
+//
+// Copyright (c) 2023 PubNative GmbH
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
 package net.pubnative.hybid.adapters.admob.mediation;
 
 import android.app.Application;
@@ -10,11 +32,15 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.mediation.NativeMediationAdRequest;
+import com.google.android.gms.ads.mediation.MediationAdLoadCallback;
+import com.google.android.gms.ads.mediation.MediationConfiguration;
+import com.google.android.gms.ads.mediation.MediationNativeAdCallback;
+import com.google.android.gms.ads.mediation.MediationNativeAdConfiguration;
 import com.google.android.gms.ads.mediation.UnifiedNativeAdMapper;
-import com.google.android.gms.ads.mediation.customevent.CustomEventNative;
-import com.google.android.gms.ads.mediation.customevent.CustomEventNativeListener;
 
 import net.pubnative.hybid.adapters.admob.HyBidAdmobUtils;
 import net.pubnative.lite.sdk.HyBid;
@@ -27,104 +53,106 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class HyBidMediationNativeCustomEvent implements CustomEventNative, HyBidNativeAdRequest.RequestListener {
+public class HyBidMediationNativeCustomEvent extends HyBidMediationBaseCustomEvent {
     private static final String TAG = HyBidMediationNativeCustomEvent.class.getSimpleName();
     private static final double IMAGE_SCALE = 1.0;
 
-    private CustomEventNativeListener mNativeListener;
-    private Context mContext;
-    private HyBidNativeAdRequest mAdRequest;
-
     @Override
-    public void requestNativeAd(Context context,
-                                CustomEventNativeListener listener,
-                                String serverParameter,
-                                NativeMediationAdRequest mediationAdRequest,
-                                Bundle customEventExtras) {
-        if (listener == null) {
-            Logger.e(TAG, "customEventBannerListener is null");
+    public void loadNativeAd(@NonNull MediationNativeAdConfiguration mediationNativeAdConfiguration, @NonNull MediationAdLoadCallback<UnifiedNativeAdMapper, MediationNativeAdCallback> callback) {
+        if (callback == null) {
+            Logger.e(TAG, "MediationAdLoadCallback is null");
             return;
         }
 
-        mNativeListener = listener;
-        mContext = context;
-
-        String zoneId;
-        String appToken;
-        if (!TextUtils.isEmpty(HyBidAdmobUtils.getAppToken(serverParameter))
-                && !TextUtils.isEmpty(HyBidAdmobUtils.getZoneId(serverParameter))) {
-            zoneId = HyBidAdmobUtils.getZoneId(serverParameter);
-            appToken = HyBidAdmobUtils.getAppToken(serverParameter);
-        } else {
-            Logger.e(TAG, "Could not find the required params in CustomEventNative serverExtras. " +
-                    "Required params in CustomEventNative serverExtras must be provided as a valid JSON Object. " +
-                    "Please consult HyBid documentation and update settings in your AdMob publisher dashboard.");
-            mNativeListener.onAdFailedToLoad(AdRequest.ERROR_CODE_INVALID_REQUEST);
+        if (mediationNativeAdConfiguration == null || mediationNativeAdConfiguration.getContext() == null) {
+            Logger.e(TAG, "Missing context. Dropping call");
             return;
         }
 
-        if (HyBid.isInitialized()) {
-            if (TextUtils.isEmpty(appToken) || !appToken.equals(HyBid.getAppToken())) {
-                Logger.e(TAG, "The provided app token doesn't match the one used to initialise HyBid");
-                mNativeListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NETWORK_ERROR);
+        HyBidNativeCustomEventLoader mAdLoader = new HyBidNativeCustomEventLoader(mediationNativeAdConfiguration, callback);
+        mAdLoader.loadAd();
+    }
+
+    public class HyBidNativeCustomEventLoader implements HyBidNativeAdRequest.RequestListener {
+        private HyBidNativeAdRequest mNativeAdRequest;
+        private final MediationNativeAdConfiguration mAdConfiguration;
+        private final MediationAdLoadCallback<UnifiedNativeAdMapper, MediationNativeAdCallback> mAdLoadCallback;
+
+        public HyBidNativeCustomEventLoader(MediationNativeAdConfiguration mediationNativeAdConfiguration, MediationAdLoadCallback<UnifiedNativeAdMapper, MediationNativeAdCallback> adLoadCallback) {
+            mAdConfiguration = mediationNativeAdConfiguration;
+            mAdLoadCallback = adLoadCallback;
+        }
+
+        public void loadAd() {
+            String zoneId;
+            String appToken;
+
+            String serverParameter = mAdConfiguration.getServerParameters().getString(MediationConfiguration.CUSTOM_EVENT_SERVER_PARAMETER_FIELD);
+            if (!TextUtils.isEmpty(HyBidAdmobUtils.getAppToken(serverParameter))
+                    && !TextUtils.isEmpty(HyBidAdmobUtils.getZoneId(serverParameter))) {
+                zoneId = HyBidAdmobUtils.getZoneId(serverParameter);
+                appToken = HyBidAdmobUtils.getAppToken(serverParameter);
             } else {
-                loadNativeAd(zoneId);
+                Logger.e(TAG, "Could not find the required params in MediationNativeAdConfiguration. " +
+                        "Required params in MediationNativeAdConfiguration must be provided as a valid JSON Object. " +
+                        "Please consult HyBid documentation and update settings in your AdMob publisher dashboard.");
+                mAdLoadCallback.onFailure(new AdError(AdRequest.ERROR_CODE_NETWORK_ERROR,
+                        "Could not find the required params in MediationNativeAdConfiguration",
+                        AdError.UNDEFINED_DOMAIN
+                ));
+                return;
             }
-        } else {
-            HyBid.initialize(appToken, (Application) context.getApplicationContext(), b ->
-                    loadNativeAd(zoneId));
-        }
-    }
 
-    private void loadNativeAd(String zoneId) {
-        mAdRequest = new HyBidNativeAdRequest();
-        mAdRequest.setMediation(true);
-        mAdRequest.load(zoneId, this);
-    }
-
-    //------------------------------ HyBidNativeAdRequest Callbacks --------------------------------
-    @Override
-    public void onRequestSuccess(NativeAd ad) {
-        HyBidNativeAdMapper mapper = new HyBidNativeAdMapper(ad, new HyBidNativeAdMapperCallback() {
-            @Override
-            public void onAdLoaded(HyBidNativeAdMapper mappedAd) {
-                if (mNativeListener != null) {
-                    mNativeListener.onAdLoaded(mappedAd);
+            if (HyBid.isInitialized()) {
+                if (TextUtils.isEmpty(appToken) || !appToken.equals(HyBid.getAppToken())) {
+                    Logger.e(TAG, "The provided app token doesn't match the one used to initialise HyBid");
+                    mAdLoadCallback.onFailure(new AdError(AdRequest.ERROR_CODE_NETWORK_ERROR,
+                            "The provided app token doesn't match the one used to initialise HyBid",
+                            AdError.UNDEFINED_DOMAIN
+                    ));
+                } else {
+                    loadNativeAd(zoneId);
                 }
+            } else {
+                HyBid.initialize(appToken, (Application) mAdConfiguration.getContext().getApplicationContext(), b ->
+                        loadNativeAd(zoneId));
             }
-        });
-        mapper.loadAd();
-    }
-
-    @Override
-    public void onRequestFail(Throwable throwable) {
-        if (mNativeListener != null) {
-            mNativeListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NO_FILL);
         }
-    }
 
-    @Override
-    public void onResume() {
+        private void loadNativeAd(String zoneId) {
+            mNativeAdRequest = new HyBidNativeAdRequest();
+            mNativeAdRequest.setMediation(true);
+            mNativeAdRequest.load(zoneId, this);
+        }
 
-    }
+        @Override
+        public void onRequestSuccess(NativeAd ad) {
+            HyBidNativeAdMapper mapper = new HyBidNativeAdMapper(mAdConfiguration.getContext(), ad, mAdLoadCallback);
+            mapper.loadAd();
+        }
 
-    @Override
-    public void onPause() {
-
-    }
-
-    @Override
-    public void onDestroy() {
-
+        @Override
+        public void onRequestFail(Throwable throwable) {
+            Logger.e(TAG, throwable.getMessage());
+            if (mAdLoadCallback != null) {
+                mAdLoadCallback.onFailure(new AdError(AdRequest.ERROR_CODE_NO_FILL,
+                        throwable != null && !TextUtils.isEmpty(throwable.getMessage()) ? throwable.getMessage() : "No fill.",
+                        AdError.UNDEFINED_DOMAIN
+                ));
+            }
+        }
     }
 
     private class HyBidNativeAdMapper extends UnifiedNativeAdMapper implements NativeAd.Listener {
         private final NativeAd mNativeAd;
-        private final HyBidNativeAdMapperCallback mMapperListener;
+        private final MediationAdLoadCallback<UnifiedNativeAdMapper, MediationNativeAdCallback> mAdLoadCallback;
+        private MediationNativeAdCallback mNativeAdCallback;
+        private final Context mContext;
 
-        public HyBidNativeAdMapper(NativeAd nativeAd, HyBidNativeAdMapperCallback listener) {
+        public HyBidNativeAdMapper(Context context, NativeAd nativeAd, MediationAdLoadCallback<UnifiedNativeAdMapper, MediationNativeAdCallback> adLoadCallback) {
+            this.mContext = context;
             this.mNativeAd = nativeAd;
-            this.mMapperListener = listener;
+            this.mAdLoadCallback = adLoadCallback;
             setOverrideClickHandling(false);
             setOverrideImpressionRecording(true);
         }
@@ -144,10 +172,14 @@ public class HyBidMediationNativeCustomEvent implements CustomEventNative, HyBid
                     PNBitmapDownloader bannerDownloader = new PNBitmapDownloader();
                     bannerDownloader.download(mNativeAd.getBannerUrl(), mBannerDownloadListener);
                 } else {
-                    if (mMapperListener != null) {
-                        mMapperListener.onAdLoaded(this);
-                    }
+                    reportAdLoaded();
                 }
+            }
+        }
+
+        private void reportAdLoaded() {
+            if (mAdLoadCallback != null) {
+                mNativeAdCallback = mAdLoadCallback.onSuccess(this);
             }
         }
 
@@ -160,9 +192,7 @@ public class HyBidMediationNativeCustomEvent implements CustomEventNative, HyBid
                     PNBitmapDownloader bannerDownloader = new PNBitmapDownloader();
                     bannerDownloader.download(mNativeAd.getBannerUrl(), mBannerDownloadListener);
                 } else {
-                    if (mMapperListener != null) {
-                        mMapperListener.onAdLoaded(HyBidNativeAdMapper.this);
-                    }
+                    reportAdLoaded();
                 }
             }
 
@@ -174,9 +204,7 @@ public class HyBidMediationNativeCustomEvent implements CustomEventNative, HyBid
                     PNBitmapDownloader bannerDownloader = new PNBitmapDownloader();
                     bannerDownloader.download(mNativeAd.getBannerUrl(), mBannerDownloadListener);
                 } else {
-                    if (mMapperListener != null) {
-                        mMapperListener.onAdLoaded(HyBidNativeAdMapper.this);
-                    }
+                    reportAdLoaded();
                 }
             }
         };
@@ -188,18 +216,14 @@ public class HyBidMediationNativeCustomEvent implements CustomEventNative, HyBid
                 imageList.add(new HyBidNativeMappedImage(mContext, mNativeAd.getBannerUrl(), IMAGE_SCALE, bitmap));
                 setImages(imageList);
 
-                if (mMapperListener != null) {
-                    mMapperListener.onAdLoaded(HyBidNativeAdMapper.this);
-                }
+                reportAdLoaded();
             }
 
             @Override
             public void onDownloadFailed(String url, Exception exception) {
                 Logger.e(TAG, exception.getMessage());
                 HyBid.reportException(exception);
-                if (mMapperListener != null) {
-                    mMapperListener.onAdLoaded(HyBidNativeAdMapper.this);
-                }
+                reportAdLoaded();
             }
         };
 
@@ -224,8 +248,8 @@ public class HyBidMediationNativeCustomEvent implements CustomEventNative, HyBid
 
         @Override
         public void onAdImpression(NativeAd ad, View view) {
-            if (mNativeListener != null) {
-                mNativeListener.onAdImpression();
+            if (mNativeAdCallback != null) {
+                mNativeAdCallback.reportAdImpression();
             }
         }
 

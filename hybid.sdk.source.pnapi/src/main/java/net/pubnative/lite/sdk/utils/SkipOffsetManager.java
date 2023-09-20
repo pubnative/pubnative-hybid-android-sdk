@@ -15,7 +15,7 @@ public class SkipOffsetManager {
 
     private static final int REWARDED_HTML_SKIP_OFFSET = 3;
 
-    private static final int Rewarded_VIDEO_DEFAULT = 30;
+    private static final int REWARDED_VIDEO_DEFAULT = 30;
 
     private static final int INTERSTITIAL_VIDEO_WITHOUT_END_CARD = 15;
     private static final int INTERSTITIAL_VIDEO_WITH_END_CARD = 10;
@@ -108,7 +108,7 @@ public class SkipOffsetManager {
         values.add(publisherSkipSeconds);
         values.add(adParamsSkipSeconds);
 
-        return findSkipOffset(values, Rewarded_VIDEO_DEFAULT);
+        return findSkipOffset(values, REWARDED_VIDEO_DEFAULT);
     }
 
     private static Integer findSkipOffset(ArrayList<Integer> values, int defaultSkipOffset) {
@@ -125,6 +125,8 @@ public class SkipOffsetManager {
         }
 
         if (skipOffset == -1) skipOffset = defaultSkipOffset;
+        // Handle maximum possible skip offset
+        if (skipOffset > 30) skipOffset = globalMaximumSkipOffset;
 
         return skipOffset;
     }
@@ -150,6 +152,22 @@ public class SkipOffsetManager {
                 skipOffset = maximumSkipOffset;
         }
         return new SkipOffset(isValid, skipOffset);
+    }
+
+    public static Integer getDefaultBackButtonDelay() {
+        return BACK_BUTTON_DELAY;
+    }
+
+    public static Integer getMaximumBackButtonDelay() {
+        return BACK_BUTTON_DELAY_MAXIMUM;
+    }
+
+    public static Integer getDefaultNativeCloseButtonDelay() {
+        return NATIVE_CLOSE_BUTTON_DELAY;
+    }
+
+    public static Integer getDefaultRewardedHtmlSkipOffset() {
+        return REWARDED_HTML_SKIP_OFFSET;
     }
 
     public static Integer getDefaultHtmlInterstitialSkipOffset() {
@@ -203,6 +221,6 @@ public class SkipOffsetManager {
 //    }
 
     public static int getMaximumRewardedSkipOffset() {
-        return Rewarded_VIDEO_DEFAULT;
+        return REWARDED_VIDEO_DEFAULT;
     }
 }

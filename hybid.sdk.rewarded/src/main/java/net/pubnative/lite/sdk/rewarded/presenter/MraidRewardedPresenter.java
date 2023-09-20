@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import net.pubnative.lite.sdk.CustomEndCardListener;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
@@ -122,9 +123,14 @@ public class MraidRewardedPresenter implements RewardedPresenter, HyBidRewardedB
         // Not need video listener for Mraid
     }
 
+    @Override
+    public void setCustomEndCardListener(CustomEndCardListener listener) {
+        // Not need custom end card listener for Mraid
+    }
+
     //------------------------- Rewarded Broadcast Receiver Callbacks ------------------------------
     @Override
     public void onReceivedAction(HyBidRewardedBroadcastReceiver.Action action, Bundle extras) {
-        mBroadcastReceiver.handleAction(action, this, extras, mListener, null);
+        mBroadcastReceiver.handleAction(action, this, extras, mListener, null, null);
     }
 }

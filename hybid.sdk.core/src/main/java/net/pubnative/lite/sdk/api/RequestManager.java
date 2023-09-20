@@ -414,6 +414,7 @@ public class RequestManager {
             reportingEvent.setSessionDuration(adRequest.sessionduration);
             reportingEvent.setImpDepth(adRequest.impdepth);
             reportingEvent.setAgeOfApp(adRequest.ageofapp);
+            reportingEvent.setRequestType("apiv3");
             mReportingController.reportEvent(reportingEvent);
         }
     }
@@ -430,6 +431,7 @@ public class RequestManager {
                 reportingEvent.setAdSize(adSize);
             }
             reportingEvent.setPlacementId(adRequest.zoneId);
+            reportingEvent.setRequestType("ortb");
             mReportingController.reportEvent(reportingEvent);
         }
     }

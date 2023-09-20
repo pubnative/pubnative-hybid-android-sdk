@@ -361,6 +361,11 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
         }
 
         @Override
+        public void onAdCustomEndCardFound() {
+
+        }
+
+        @Override
         public void onAdDismissed() {
             onAdDismissed(-1);
         }

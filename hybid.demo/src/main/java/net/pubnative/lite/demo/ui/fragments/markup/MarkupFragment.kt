@@ -3,7 +3,6 @@ package net.pubnative.lite.demo.ui.fragments.markup
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.text.TextUtils
 import android.view.View
 import android.widget.*
 import androidx.fragment.app.Fragment
@@ -11,12 +10,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.ui.adapters.MarkupAdapter
 import net.pubnative.lite.demo.ui.adapters.OnAdRefreshListener
 import net.pubnative.lite.demo.ui.adapters.OnLogDisplayListener
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd
+import net.pubnative.lite.sdk.rewarded.HyBidRewardedAd
 import net.pubnative.lite.sdk.utils.Logger
 
 class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
@@ -31,10 +32,13 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
     private lateinit var creativeIdView: TextView
     private lateinit var markupList: RecyclerView
     private lateinit var urWrapCheckbox: CheckBox
+    private lateinit var loadButton: MaterialButton
+    private lateinit var showButton: MaterialButton
 
     private val adapter = MarkupAdapter(this, this)
 
     private var interstitial: HyBidInterstitialAd? = null
+    private var rewarded: HyBidRewardedAd? = null
 
     private var loadButtonClicked = false
 
@@ -52,14 +56,21 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
         urWrapCheckbox = view.findViewById(R.id.check_ur_wrap)
         markupList = view.findViewById(R.id.list_markup)
         markupList.isNestedScrollingEnabled = false
+        loadButton = view.findViewById(R.id.button_load)
+        showButton = view.findViewById(R.id.button_show)
 
         markupViewModel.clipboard.observe(viewLifecycleOwner) {
             markupInput.setText(it)
         }
 
-        markupViewModel.listVisibillity.observe(viewLifecycleOwner) {
+        markupViewModel.listVisibility.observe(viewLifecycleOwner) {
             if (it) markupList.visibility = View.VISIBLE
             else markupList.visibility = View.GONE
+        }
+
+        markupViewModel.showButtonVisibility.observe(viewLifecycleOwner) {
+            if (it) showButton.visibility = View.VISIBLE
+            else showButton.visibility = View.GONE
         }
 
         markupViewModel.creativeIdVisibillity.observe(viewLifecycleOwner) {
@@ -87,6 +98,13 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
             }
         }
 
+        markupViewModel.loadRewarded.observe(viewLifecycleOwner) {
+            if (loadButtonClicked) {
+                loadRewarded(it)
+                loadButtonClicked = false
+            }
+        }
+
         markupViewModel.adapterUpdate.observe(viewLifecycleOwner) {
             adapter.refreshWithMarkup(it, markupViewModel.getMarkupSize())
         }
@@ -95,10 +113,24 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
             markupViewModel.pasteFromClipboard()
         }
 
-        view.findViewById<Button>(R.id.button_load).setOnClickListener {
+        loadButton.setOnClickListener {
             loadButtonClicked = true
             cleanLogs()
             loadMarkup()
+        }
+
+        showButton.setOnClickListener {
+            when (markupViewModel.getMarkupSize()) {
+                MarkupSize.INTERSTITIAL -> {
+                    interstitial?.show()
+                }
+
+                MarkupSize.REWARDED -> {
+                    rewarded?.show()
+                }
+
+                else -> {}
+            }
         }
 
         adSizeGroup.setOnCheckedChangeListener { _, checkedId ->
@@ -118,7 +150,12 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
                 R.id.radio_size_interstitial -> {
                     markupViewModel.setMarkupSize(MarkupSize.INTERSTITIAL)
                 }
+
+                R.id.radio_size_rewarded -> {
+                    markupViewModel.setMarkupSize(MarkupSize.REWARDED)
+                }
             }
+            showButton.isEnabled = false
         }
 
         groupMarkupType.setOnCheckedChangeListener { _, checkedId ->
@@ -146,18 +183,20 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
 
 
     private fun loadInterstitial(markup: String) {
+        showButton.isEnabled = false
         interstitial?.destroy()
 
         val interstitialListener = object : HyBidInterstitialAd.Listener {
             override fun onInterstitialLoaded() {
                 Logger.d(TAG, "onInterstitialLoaded")
-                interstitial?.show()
                 displayLogs()
+                showButton.isEnabled = true
             }
 
             override fun onInterstitialLoadFailed(error: Throwable?) {
                 Logger.e(TAG, "onInterstitialLoadFailed", error)
                 displayLogs()
+                showButton.isEnabled = false
             }
 
             override fun onInterstitialImpression() {
@@ -170,11 +209,51 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
 
             override fun onInterstitialDismissed() {
                 Logger.d(TAG, "onInterstitialDismissed")
+                showButton.isEnabled = false
             }
         }
 
         interstitial = HyBidInterstitialAd(requireActivity(), interstitialListener)
         interstitial?.prepareCustomMarkup(markup)
+    }
+
+    private fun loadRewarded(markup: String) {
+        showButton.isEnabled = false
+        rewarded?.destroy()
+
+        val rewardedListener = object : HyBidRewardedAd.Listener {
+            override fun onRewardedLoaded() {
+                Logger.d(TAG, "onRewardedLoaded")
+                displayLogs()
+                showButton.isEnabled = true
+            }
+
+            override fun onRewardedLoadFailed(error: Throwable?) {
+                Logger.e(TAG, "onRewardedLoadFailed", error)
+                displayLogs()
+                showButton.isEnabled = false
+            }
+
+            override fun onRewardedOpened() {
+                Logger.d(TAG, "onRewardedOpened")
+            }
+
+            override fun onRewardedClosed() {
+                Logger.d(TAG, "onRewardedClosed")
+                showButton.isEnabled = false
+            }
+
+            override fun onRewardedClick() {
+                Logger.d(TAG, "onRewardedClick")
+            }
+
+            override fun onReward() {
+                Logger.d(TAG, "onReward")
+            }
+        }
+
+        rewarded = HyBidRewardedAd(requireActivity(), rewardedListener)
+        rewarded?.prepareCustomMarkup(markup)
     }
 
     private fun loadMarkup() {
@@ -183,6 +262,7 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
 
     override fun onDestroy() {
         interstitial?.destroy()
+        rewarded?.destroy()
         super.onDestroy()
     }
 

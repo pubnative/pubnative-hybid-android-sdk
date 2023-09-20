@@ -8,7 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.RadioGroup
 import android.widget.TextView
+import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
@@ -27,7 +29,8 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
     private lateinit var loadButton: Button
     private lateinit var prepareButton: Button
     private lateinit var showButton: Button
-    private lateinit var cachingCheckbox: CheckBox
+    private lateinit var cachingCheckbox: SwitchCompat
+    private lateinit var apiRadioGroup: RadioGroup
     private lateinit var errorCodeView: TextView
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
@@ -44,6 +47,7 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
         prepareButton = view.findViewById(R.id.button_prepare)
         showButton = view.findViewById(R.id.button_show)
         cachingCheckbox = view.findViewById(R.id.check_caching)
+        apiRadioGroup = view.findViewById(R.id.group_api_type)
         prepareButton.isEnabled = false
         showButton.isEnabled = false
 
@@ -90,7 +94,11 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
         rewardedAd = HyBidRewardedAd(activity, zoneId, this)
         rewardedAd?.setVideoListener(this)
         rewardedAd?.isAutoCacheOnLoad = cachingEnabled
-        rewardedAd?.load()
+        if (apiRadioGroup.checkedRadioButtonId == R.id.radio_api_ortb) {
+            rewardedAd?.loadExchangeAd()
+        } else {
+            rewardedAd?.load()
+        }
     }
 
 

@@ -48,8 +48,8 @@ public class CloseableContainer extends FrameLayout {
         }
     }
 
-    private static final float CLOSE_REGION_SIZE_DP = 50.0f;
-    static final float CLOSE_BUTTON_PADDING_DP = 20.0f;
+    private static final float CLOSE_REGION_SIZE_DP = 30.0f;
+    static final float CLOSE_BUTTON_PADDING_DP = 0.0f;
     static final float CLOSE_BUTTON_PADDING_BORDER_DP = 0.0f;
 
     private OnCloseListener mOnCloseListener;
@@ -67,16 +67,16 @@ public class CloseableContainer extends FrameLayout {
     public CloseableContainer(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        mClosePosition = ClosePosition.TOP_RIGHT;
+        mClosePosition = ClosePosition.TOP_LEFT;
 
         int paddingPixels = (int) ViewUtils.convertDpToPixel(CLOSE_BUTTON_PADDING_DP, context);
         int paddingBorderPixels = (int) ViewUtils.convertDpToPixel(CLOSE_BUTTON_PADDING_BORDER_DP, context);
 
         mCloseButton = new ImageButton(context);
         Bitmap closeBitmap = BitmapHelper.toBitmap(context, HyBid.getNormalCloseXmlResource(), R.mipmap.close);
-        if (closeBitmap != null) ((ImageView) mCloseButton).setImageBitmap(closeBitmap);
+        if (closeBitmap != null) mCloseButton.setImageBitmap(closeBitmap);
         else
-            ((ImageView) mCloseButton).setImageBitmap(BitmapHelper.decodeResource(mCloseButton.getContext(), R.mipmap.close));
+            mCloseButton.setImageBitmap(BitmapHelper.decodeResource(mCloseButton.getContext(), R.mipmap.close));
         mCloseButton.setId(R.id.button_fullscreen_close);
         mCloseButton.setBackgroundColor(Color.TRANSPARENT);
         mCloseButton.setScaleType(ImageView.ScaleType.FIT_CENTER);

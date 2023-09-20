@@ -47,6 +47,9 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
     implementation project(':hybid.sdk.reporting')
+
+    testImplementation 'org.mockito:mockito-core:3.9.0'
+    testImplementation 'junit:junit:4.13.2'
 }
 
 //--------------------------------------------------------------------------------------------------

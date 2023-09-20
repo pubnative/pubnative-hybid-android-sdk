@@ -128,7 +128,7 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.ZONE_ID);
     }
 
-    public  synchronized void setAdType(String adType) {
+    public synchronized void setAdType(String adType) {
         setCustomString(Reporting.Key.AD_TYPE, adType);
     }
 
@@ -171,6 +171,14 @@ public class ReportingEvent {
 
     public synchronized void setSessionDuration(String sessionDuration) {
         setCustomString(Reporting.Key.SESSION_DURATION, sessionDuration);
+    }
+
+    public synchronized void setRequestType(String requestType) {
+        setCustomString(Reporting.Key.REQUEST_TYPE, requestType);
+    }
+
+    public synchronized String getRequestType() {
+        return getCustomString(Reporting.Key.REQUEST_TYPE);
     }
 
     public String getSessionDuration() {

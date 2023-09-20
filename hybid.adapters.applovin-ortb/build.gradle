@@ -1,0 +1,127 @@
+plugins {
+    id 'com.android.library'
+    id 'com.jfrog.artifactory'
+    id 'maven-publish'
+    id "org.sonarqube" version "3.3"
+}
+
+def project_name = project.name
+def version_name = project.version
+if (branchName != null && buildNumber != null && branchName.toString() != "master") {
+    version_name = "${version_name}-${branchName}.${buildNumber}"
+    project_name = "${project_name}.beta"
+}
+//==================================================================================================
+// ANDROID
+//==================================================================================================
+version = version_name
+
+android {
+    compileSdkVersion android_api
+
+    defaultConfig {
+        minSdkVersion min_android_api
+        targetSdkVersion android_api
+        versionCode System.getenv("CIRCLE_BUILD_NUM") ? System.getenv("CIRCLE_BUILD_NUM").toInteger() : 1
+        versionName version_name
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+    namespace 'com.applovin.mediation.adapters'
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(':hybid.sdk')
+    compileOnly 'com.applovin:applovin-sdk:11.11.1'
+
+    implementation project(':hybid.sdk.core')
+    implementation project(':hybid.sdk.logger')
+    implementation project(':hybid.sdk.fullscreen')
+    implementation project(':hybid.sdk.banner')
+    implementation project(':hybid.sdk.rewarded')
+    implementation project(':hybid.sdk.native')
+    implementation project(':hybid.sdk.source.pnapi')
+}
+
+
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+publishing {
+    publications {
+
+        aar(MavenPublication) {
+            groupId project.group
+            artifactId project.name
+            version version_name
+            if (branchName.toString() == "master") {
+                artifact sourcesJar
+            }
+            android.libraryVariants.all { variant ->
+                if (variant.buildType.name == "debug") return
+                artifact variant.outputs[0].packageLibrary // This is the aar library
+            }
+        }
+    }
+
+    artifactoryPublish {
+        publications(publishing.publications.aar)
+    }
+}
+
+artifactory {
+    contextUrl = System.getenv("ARTIFACTORY_CONTEXT_URL")
+    publish {
+        repository {
+            repoKey = (branchName.toString() == 'master') ? 'verve-gradle-release-local' : 'verve-gradle-dev-local'
+            username = System.getenv("ARTIFACTORY_USER")
+            password = System.getenv("ARTIFACTORY_PASSWORD")
+            maven = true
+        }
+
+        defaults {
+            publishArtifacts = branchName.toString() != "master"
+            publishPom = true
+        }
+    }
+    resolve {
+        repository {
+            repoKey = (branchName.toString() == 'master') ? 'verve-gradle-release' : 'verve-gradle-dev'
+            username = System.getenv("ARTIFACTORY_USER")
+            password = System.getenv("ARTIFACTORY_PASSWORD")
+            maven = true
+        }
+    }
+}
+
+sonarqube {
+    sonarqube {
+        properties {
+            property "sonar.projectName", "HyBidDemo"
+            property "sonar.projectKey", "HyBidDemoSample"
+            property "sonar.host.url", "http://localhost:9000"
+            property "sonar.projectVersion", version
+            property "sonar.language", "java"
+            property "sonar.sources", "src/main/"
+        }
+    }
+}

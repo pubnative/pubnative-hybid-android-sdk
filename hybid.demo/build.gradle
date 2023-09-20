@@ -2,13 +2,13 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-parcelize'
-    id 'com.fyber.fairbid-sdk-plugin' version '3.39.0'
+    id 'com.fyber.fairbid-sdk-plugin' version '3.42.0'
     id 'com.google.firebase.appdistribution'
     id 'com.google.firebase.firebase-perf'
     id 'com.google.firebase.crashlytics'
     id 'com.google.gms.google-services'
     id "org.sonarqube" version "3.3"
-    id "com.github.kt3k.coveralls" version "2.12.0"
+    id "com.github.kt3k.coveralls" version "2.12.2"
 }
 
 android {
@@ -32,6 +32,8 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'lite.sdk.pro'
             buildConfigField "String", "BASE_URL", "\"https://api.pubnative.net/\""
+            buildConfigField "String", "ONE_TRUST_DOMAIN_ID", "\"6a67554c-409b-4677-a3e3-a9a4cab93ed6-test\""
+            buildConfigField "String", "ONE_TRUST_DOMAIN_URL", "\"cdn.cookielaw.org\""
         }
         debug {
             minifyEnabled false
@@ -41,6 +43,8 @@ android {
                 artifactType = "APK"
             }
             buildConfigField "String", "BASE_URL", "\"https://api.pubnative.net/\""
+            buildConfigField "String", "ONE_TRUST_DOMAIN_ID", "\"6a67554c-409b-4677-a3e3-a9a4cab93ed6-test\""
+            buildConfigField "String", "ONE_TRUST_DOMAIN_URL", "\"cdn.cookielaw.org\""
         }
     }
 
@@ -91,27 +95,36 @@ dependencies {
     implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.multidex:multidex:2.0.1'
 
-    implementation 'com.ironsource.sdk:mediationsdk:7.3.1.1'
-    implementation 'com.applovin:applovin-sdk:11.10.1'
+    implementation 'com.ironsource.sdk:mediationsdk:7.5.0'
+    implementation 'com.applovin:applovin-sdk:11.11.3'
 
-    implementation 'com.google.android.gms:play-services-ads:22.1.0'
+    implementation 'com.google.android.gms:play-services-ads:22.3.0'
     implementation 'com.google.android.ads:mediation-test-suite:3.0.0'
-    implementation "androidx.navigation:navigation-fragment-ktx:2.6.0"
-    implementation "androidx.navigation:navigation-ui-ktx:2.6.0"
+    implementation "androidx.navigation:navigation-fragment-ktx:2.7.1"
+    implementation "androidx.navigation:navigation-ui-ktx:2.7.1"
+    implementation "androidx.preference:preference-ktx:1.2.1"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation 'com.squareup.picasso:picasso:2.8'
     implementation 'com.google.code.gson:gson:2.10'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
-    implementation 'co.ogury:ogury-sdk:5.5.0'
-    implementation 'com.google.android.ump:user-messaging-platform:2.0.0'
+    implementation 'co.ogury:ogury-sdk:5.6.0'
+    implementation 'com.google.android.ump:user-messaging-platform:2.1.0'
 
-    implementation platform('com.google.firebase:firebase-bom:31.2.3')
+    implementation platform('com.google.firebase:firebase-bom:32.2.3')
     implementation 'com.google.firebase:firebase-perf'
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
 
     testImplementation 'com.google.truth:truth:0.36'
+    testImplementation 'org.mockito:mockito-core:3.9.0'
+
+    implementation("com.onetrust.cmp:native-sdk:202308.1.0.0") {
+        exclude group: 'androidx.appcompat'
+        exclude group: 'androidx.constraintlayout'
+        exclude group: 'com.google.android.material'
+        exclude group: 'com.google.android.gms'
+    }
 }
 
 sonarqube {

@@ -3,7 +3,6 @@ package net.pubnative.lite.demo.viewmodel
 import android.app.Application
 import android.text.TextUtils
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -20,15 +19,16 @@ import net.pubnative.lite.sdk.models.APIAsset
 import net.pubnative.lite.sdk.models.Ad
 import net.pubnative.lite.sdk.models.AdResponse
 import net.pubnative.lite.sdk.models.AdSize
+import net.pubnative.lite.sdk.models.EndCardData
 import net.pubnative.lite.sdk.network.PNHttpClient
 import net.pubnative.lite.sdk.utils.AdRequestRegistry
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor
-import net.pubnative.lite.sdk.models.EndCardData
 import net.pubnative.lite.sdk.vpaid.response.AdParams
 import org.json.JSONObject
 
 class ApiTesterViewModel(application: Application) : AndroidViewModel(application) {
+    val TAG = this::class.java.simpleName
 
     private var adSize: LegacyApiTesterSize = BANNER
     private var customMarkup: MarkupType = MarkupType.CUSTOM_MARKUP
@@ -36,20 +36,29 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
     private val _clipboard: MutableLiveData<String> = MutableLiveData()
     val clipboard: LiveData<String> = _clipboard
 
+    private val _clipboardBody: MutableLiveData<String> = MutableLiveData()
+    val clipboardBody: LiveData<String> = _clipboardBody
+
     private val _loadInterstitial: MutableLiveData<Ad?> = MutableLiveData()
     val loadInterstitial: LiveData<Ad?> = _loadInterstitial
 
-    private val _loadReworded: MutableLiveData<Ad?> = MutableLiveData()
-    val loadReworded: LiveData<Ad?> = _loadReworded
+    private val _loadRewarded: MutableLiveData<Ad?> = MutableLiveData()
+    val loadRewarded: LiveData<Ad?> = _loadRewarded
 
     private val _adapterUpdate: MutableLiveData<Ad?> = MutableLiveData()
     val adapterUpdate: LiveData<Ad?> = _adapterUpdate
 
-    private val _listVisibillity: MutableLiveData<Boolean> = MutableLiveData()
-    val listVisibillity: LiveData<Boolean> = _listVisibillity
+    private val _listVisibility: MutableLiveData<Boolean> = MutableLiveData()
+    val listVisibility: LiveData<Boolean> = _listVisibility
 
-    private lateinit var apiClient: PNApiClient
-    private lateinit var oRtbApiClient: OpenRTBApiClient
+    private val _showButtonVisibility: MutableLiveData<Boolean> = MutableLiveData()
+    val showButtonVisibility: LiveData<Boolean> = _showButtonVisibility
+
+    private val _errorMessage: MutableLiveData<String> = MutableLiveData()
+    val errorMessage: LiveData<String> = _errorMessage
+
+    private var apiClient: PNApiClient
+    private var oRtbApiClient: OpenRTBApiClient
 
     init {
         apiClient = PNApiClient(application)
@@ -64,35 +73,57 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
+    fun pasteFromClipboardBody() {
+        val clipboardText =
+            ClipboardUtils.copyFromClipboard(getApplication<Application>().applicationContext)
+        if (!TextUtils.isEmpty(clipboardText)) {
+            _clipboardBody.value = clipboardText
+        }
+    }
+
     fun setAdSize(adSize: LegacyApiTesterSize) {
         this.adSize = adSize
-        _listVisibillity.value = adSize != INTERSTITIAL && adSize != REWARDED
+        val isFullscreen = adSize == INTERSTITIAL || adSize == REWARDED
+        _listVisibility.value = !isFullscreen
+        _showButtonVisibility.value = isFullscreen
     }
 
     fun setMarkupType(customMarkup: MarkupType) {
         this.customMarkup = customMarkup
     }
 
-    fun loadApiAd(apiAd: String) {
-        when (customMarkup) {
-            MarkupType.CUSTOM_MARKUP -> {
-                loadAdFromResponse(apiAd)
-            }
+    fun loadApiAd(apiAd: String, body: String?) {
+        if (HyBid.isInitialized()) {
+            when (customMarkup) {
+                MarkupType.CUSTOM_MARKUP -> {
+                    loadAdFromResponse(apiAd)
+                }
 
-            MarkupType.URL -> {
-                loadAdFromUrl(apiAd)
+                MarkupType.URL -> {
+                    loadAdFromUrl(apiAd)
+                }
+
+                MarkupType.ORTB_BODY -> {
+                    if (apiAd.isNullOrEmpty() || body.isNullOrEmpty()) {
+                        Log.v(TAG, "Please enter a valid URL and body for the request")
+                        _errorMessage.value = "Please enter a valid URL and body for the request"
+                        return
+                    } else {
+                        loadOrtbAd(apiAd, body)
+                    }
+                }
             }
+        } else {
+            Log.v(
+                TAG,
+                "HyBid SDK is not initiated yet. Please initiate it before attempting to load an ad from URL or api response"
+            )
         }
     }
 
     private fun loadAdFromResponse(response: String?) {
-
         if (!isValidResponse(response)) {
-            Toast.makeText(
-                getApplication<Application>().applicationContext,
-                "Please input valid response",
-                Toast.LENGTH_SHORT
-            ).show()
+            _errorMessage.value = "Please input valid response"
             return
         }
 
@@ -117,11 +148,36 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
 
                 override fun onFailure(error: Throwable) {
                     Log.d("onFailure", error.toString())
-                    Toast.makeText(
-                        getApplication<Application>().applicationContext,
-                        "Ad request failed",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    _errorMessage.value = "Ad request failed"
+                }
+            })
+    }
+
+    private fun loadOrtbAd(adUrl: String, adBody: String) {
+        val userAgent = HyBid.getDeviceInfo().userAgent
+        val headers: MutableMap<String, String> = HashMap()
+        headers["x-openrtb-version"] = "2.3"
+        headers["Content-Type"] = "application/json"
+        headers["Accept-Charset"] = "utf-8"
+        headers["User-Agent"] = userAgent
+
+        PNHttpClient.makeRequest(getApplication<Application>().applicationContext,
+            adUrl,
+            headers,
+            adBody,
+            true,
+            object : PNHttpClient.Listener {
+                override fun onSuccess(
+                    response: String?, headers: MutableMap<String?, MutableList<String>?>?
+                ) {
+                    AdRequestRegistry.getInstance().setLastAdRequest(adUrl, response, 0)
+                    Log.d("onSuccess", response ?: "")
+                    loadAdFromResponse(response)
+                }
+
+                override fun onFailure(error: Throwable) {
+                    Log.d("onFailure", error.toString())
+                    _errorMessage.value = "Ad request failed"
                 }
             })
     }
@@ -154,11 +210,7 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
                         }
 
                         override fun onFailure(exception: Throwable?) {
-                            Toast.makeText(
-                                getApplication<Application>().applicationContext,
-                                "Can't parse ad response",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            _errorMessage.value = "Can't parse ad response"
                         }
                     })
             }
@@ -171,7 +223,7 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
 
         if (adSize == INTERSTITIAL || adSize == REWARDED) {
             ad.zoneId = getZoneIdForInterstitial(ad)
-            val livedata = if (adSize == INTERSTITIAL) _loadInterstitial else _loadReworded
+            val livedata = if (adSize == INTERSTITIAL) _loadInterstitial else _loadRewarded
             if (isVideoAd(ad)) {
                 runCacheProcessForVideoAd(ad, livedata)
             } else {
@@ -239,7 +291,8 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
                     endCardFilePath: String?,
                     omidVendors: List<String>
                 ) {
-                    val hasEndCard = adParams.endCardList != null && adParams.endCardList.isNotEmpty()
+                    val hasEndCard =
+                        adParams.endCardList != null && adParams.endCardList.isNotEmpty()
                     val adCacheItem =
                         VideoAdCacheItem(adParams, videoFilePath, endCardData, endCardFilePath)
                     ad.setHasEndCard(hasEndCard)
@@ -249,11 +302,7 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
                 }
 
                 override fun onCacheError(error: Throwable) {
-                    Toast.makeText(
-                        getApplication<Application>().applicationContext,
-                        "Can't parse video ad response",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    _errorMessage.value = "Can't parse video ad response"
                 }
             })
     }

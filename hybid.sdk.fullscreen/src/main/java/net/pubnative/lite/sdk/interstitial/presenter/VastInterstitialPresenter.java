@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import net.pubnative.lite.sdk.CustomEndCardListener;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.interstitial.activity.HyBidInterstitialActivity;
@@ -44,6 +45,7 @@ public class VastInterstitialPresenter implements InterstitialPresenter, HyBidIn
 
     private InterstitialPresenter.Listener mListener;
     private VideoListener mVideoListener;
+    private CustomEndCardListener mCustomEndCardListener;
     private boolean mIsDestroyed;
     private boolean mReady = false;
 
@@ -68,6 +70,11 @@ public class VastInterstitialPresenter implements InterstitialPresenter, HyBidIn
     @Override
     public void setVideoListener(VideoListener listener) {
         mVideoListener = listener;
+    }
+
+    @Override
+    public void setCustomEndCardListener(CustomEndCardListener listener) {
+        mCustomEndCardListener = listener;
     }
 
     @Override
@@ -128,6 +135,6 @@ public class VastInterstitialPresenter implements InterstitialPresenter, HyBidIn
     //----------------------- Interstitial Broadcast Receiver Callbacks ----------------------------
     @Override
     public void onReceivedAction(HyBidInterstitialBroadcastReceiver.Action action, Bundle extras) {
-        mBroadcastReceiver.handleAction(action, extras, this, mListener, mVideoListener);
+        mBroadcastReceiver.handleAction(action, extras, this, mListener, mVideoListener, mCustomEndCardListener);
     }
 }

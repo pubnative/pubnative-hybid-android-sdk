@@ -27,7 +27,9 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.RadioGroup
 import android.widget.TextView
+import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import net.pubnative.lite.demo.Constants
@@ -51,7 +53,8 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
     private lateinit var loadButton: Button
     private lateinit var prepareButton: Button
     private lateinit var showButton: Button
-    private lateinit var cachingCheckbox: CheckBox
+    private lateinit var cachingCheckbox: SwitchCompat
+    private lateinit var apiRadioGroup: RadioGroup
     private lateinit var errorCodeView: TextView
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
@@ -60,19 +63,20 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
         super.onViewCreated(view, savedInstanceState)
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
-        initViews()
+        initViews(view)
         initListeners()
         initObservers()
     }
 
-    private fun initViews() {
-        errorView = requireView().findViewById(R.id.view_error)
-        errorCodeView = requireView().findViewById(R.id.view_error_code)
-        creativeIdView = requireView().findViewById(R.id.view_creative_id)
-        loadButton = requireView().findViewById(R.id.button_load)
-        prepareButton = requireView().findViewById(R.id.button_prepare)
-        cachingCheckbox = requireView().findViewById(R.id.check_caching)
-        showButton = requireView().findViewById(R.id.button_show)
+    private fun initViews(view: View) {
+        errorView = view.findViewById(R.id.view_error)
+        errorCodeView = view.findViewById(R.id.view_error_code)
+        creativeIdView = view.findViewById(R.id.view_creative_id)
+        loadButton = view.findViewById(R.id.button_load)
+        prepareButton = view.findViewById(R.id.button_prepare)
+        cachingCheckbox = view.findViewById(R.id.check_caching)
+        showButton = view.findViewById(R.id.button_show)
+        apiRadioGroup = view.findViewById(R.id.group_api_type)
         prepareButton.isEnabled = false
         showButton.isEnabled = false
     }
@@ -123,7 +127,7 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
         cleanLogs()
         val activity = activity as TabActivity
         activity.notifyAdCleaned()
-        interstitialViewModel.loadAd(activity, zoneId)
+        interstitialViewModel.loadAd(activity, zoneId, apiRadioGroup.checkedRadioButtonId)
     }
 
     private fun initObservers() {

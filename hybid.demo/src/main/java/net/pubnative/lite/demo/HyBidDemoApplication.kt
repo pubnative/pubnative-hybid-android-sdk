@@ -34,6 +34,10 @@ import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.initialization.InitializationStatus
 import com.ogury.sdk.Ogury
 import com.ogury.sdk.OguryConfiguration
+import com.onetrust.otpublishers.headless.Public.DataModel.OTSdkParams
+import com.onetrust.otpublishers.headless.Public.OTCallback
+import com.onetrust.otpublishers.headless.Public.OTPublishersHeadlessSDK
+import com.onetrust.otpublishers.headless.Public.Response.OTResponse
 import net.pubnative.lite.demo.managers.AnalyticsSubscriber.eventCallback
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.models.*
@@ -43,6 +47,7 @@ import net.pubnative.lite.sdk.InterstitialActionBehaviour
 import net.pubnative.lite.sdk.api.ApiManager.setApiUrl
 import net.pubnative.lite.sdk.utils.Logger
 import net.pubnative.lite.sdk.vpaid.enums.AudioState
+
 
 /**
  * Created by erosgarciaponte on 08.01.18.
@@ -67,103 +72,102 @@ class HyBidDemoApplication : MultiDexApplication() {
         WebView.setWebContentsDebuggingEnabled(true)
 
         val settings = fetchSettings()
-        if (settings != null) {
-            HyBid.setLogLevel(Logger.Level.debug)
+        HyBid.setLogLevel(Logger.Level.debug)
 
-            if (settings.hybidSettings != null) {
-                val appToken = settings.hybidSettings!!.appToken
+        if (settings.hybidSettings != null) {
+            val appToken = settings.hybidSettings!!.appToken
 
-                HyBid.initialize(appToken, this) { // HyBid SDK has been initialised
-                    HyBid.addReportingCallback(eventCallback)
+            HyBid.initialize(appToken, this) { // HyBid SDK has been initialised
+                HyBid.addReportingCallback(eventCallback)
+            }
+
+            settings.hybidSettings!!.testMode?.let { HyBid.setTestMode(it) }
+            settings.hybidSettings!!.coppa?.let { HyBid.setCoppaEnabled(it) }
+            settings.hybidSettings!!.age?.let { HyBid.setAge(it) }
+            settings.hybidSettings!!.gender?.let { HyBid.setGender(it) }
+
+            settings.hybidSettings!!.keywords?.let {
+                val keywordsBuilder = StringBuilder()
+                val separator = ","
+                for (keyword in it) {
+                    keywordsBuilder.append(keyword)
+                    keywordsBuilder.append(separator)
                 }
-
-                settings.hybidSettings!!.testMode?.let { HyBid.setTestMode(it) }
-                settings.hybidSettings!!.coppa?.let { HyBid.setCoppaEnabled(it) }
-                settings.hybidSettings!!.age?.let { HyBid.setAge(it) }
-                settings.hybidSettings!!.gender?.let { HyBid.setGender(it) }
-
-                settings.hybidSettings!!.keywords?.let {
-                    val keywordsBuilder = StringBuilder()
-                    val separator = ","
-                    for (keyword in it) {
-                        keywordsBuilder.append(keyword)
-                        keywordsBuilder.append(separator)
-                    }
-                    var keywordString = keywordsBuilder.toString()
-                    if (!TextUtils.isEmpty(keywordString)) {
-                        keywordString =
-                            keywordString.substring(0, keywordString.length - separator.length)
-                    }
-                    HyBid.setKeywords(keywordString)
+                var keywordString = keywordsBuilder.toString()
+                if (!TextUtils.isEmpty(keywordString)) {
+                    keywordString =
+                        keywordString.substring(0, keywordString.length - separator.length)
                 }
+                HyBid.setKeywords(keywordString)
+            }
 
-                settings.hybidSettings!!.browserPriorities?.let {
-                    if (HyBid.getViewabilityManager() != null) {
-                        HyBid.getViewabilityManager().isViewabilityMeasurementEnabled = true
-                    }
-                    if (HyBid.getBrowserManager() != null && !it.isEmpty()) {
-                        for (packageName in it) {
-                            HyBid.getBrowserManager().addBrowser(packageName)
-                        }
-                    }
+            settings.hybidSettings!!.browserPriorities?.let {
+                if (HyBid.getViewabilityManager() != null) {
+                    HyBid.getViewabilityManager().isViewabilityMeasurementEnabled = true
                 }
-
-                settings.hybidSettings!!.apiUrl?.let {
-                    if (!TextUtils.isEmpty(it)) {
-                        setApiUrl(it)
+                if (HyBid.getBrowserManager() != null && !it.isEmpty()) {
+                    for (packageName in it) {
+                        HyBid.getBrowserManager().addBrowser(packageName)
                     }
                 }
             }
 
-            if (settings.adCustomizationSettings != null) {
-                settings.adCustomizationSettings!!.initialAudioState?.let {
-                    HyBid.setVideoAudioStatus(
-                        getAudioStateFromSettings(it)
-                    )
-                }
-                settings.adCustomizationSettings!!.locationTracking?.let {
-                    HyBid.setLocationTrackingEnabled(it)
-                }
-                settings.adCustomizationSettings!!.locationUpdates?.let {
-                    HyBid.setLocationUpdatesEnabled(it)
-                }
-                settings.adCustomizationSettings!!.mraidExpanded?.let {
-                    HyBid.setMraidExpandEnabled(it)
-                }
-                settings.adCustomizationSettings!!.closeVideoAfterFinish?.let {
-                    HyBid.setCloseVideoAfterFinish(it)
-                }
-                settings.adCustomizationSettings!!.skipOffset?.let {
-                    HyBid.setHtmlInterstitialSkipOffset(it)
-                }
-                settings.adCustomizationSettings!!.videoSkipOffset?.let {
-                    HyBid.setVideoInterstitialSkipOffset(it)
-                }
-                settings.adCustomizationSettings!!.enableEndcard?.let {
-                    HyBid.setEndCardEnabled(it)
-                }
-                settings.adCustomizationSettings!!.endCardCloseButtonDelay?.let {
-                    HyBid.setEndCardCloseButtonDelay(it)
-                }
-                settings.adCustomizationSettings!!.videoClickBehaviour?.let {
-                    HyBid.setInterstitialClickBehaviour(
-                        getInterstitialActionBehaviourFromSettings(
-                            it
-                        )
-                    )
-                }
-                settings.adCustomizationSettings!!.countdownStyle?.let {
-                    HyBid.setCountdownStyle(CountdownStyle.from(it))
+            settings.hybidSettings!!.apiUrl?.let {
+                if (!TextUtils.isEmpty(it)) {
+                    setApiUrl(it)
                 }
             }
+        }
 
-            MobileAds.initialize(this) { initializationStatus: InitializationStatus? -> }
-            AppLovinSdk.getInstance(this).mediationProvider = "max"
-            AppLovinSdk.initializeSdk(this) { config: AppLovinSdkConfiguration? -> }
-            val oguryConfigBuilder = OguryConfiguration.Builder(this, Constants.OGURY_KEY)
-            Ogury.start(oguryConfigBuilder.build())
+        if (settings.adCustomizationSettings != null) {
+            settings.adCustomizationSettings!!.initialAudioState?.let {
+                HyBid.setVideoAudioStatus(
+                    getAudioStateFromSettings(it)
+                )
+            }
+            settings.adCustomizationSettings!!.locationTracking?.let {
+                HyBid.setLocationTrackingEnabled(it)
+            }
+            settings.adCustomizationSettings!!.locationUpdates?.let {
+                HyBid.setLocationUpdatesEnabled(it)
+            }
+            settings.adCustomizationSettings!!.mraidExpanded?.let {
+                HyBid.setMraidExpandEnabled(it)
+            }
+            settings.adCustomizationSettings!!.closeVideoAfterFinish?.let {
+                HyBid.setCloseVideoAfterFinish(it)
+            }
+            settings.adCustomizationSettings!!.skipOffset?.let {
+                HyBid.setHtmlInterstitialSkipOffset(it)
+            }
+            settings.adCustomizationSettings!!.videoSkipOffset?.let {
+                HyBid.setVideoInterstitialSkipOffset(it)
+            }
+            settings.adCustomizationSettings!!.enableEndcard?.let {
+                HyBid.setEndCardEnabled(it)
+            }
+            settings.adCustomizationSettings!!.endCardCloseButtonDelay?.let {
+                HyBid.setEndCardCloseButtonDelay(it)
+            }
+            settings.adCustomizationSettings!!.videoClickBehaviour?.let {
+                HyBid.setInterstitialClickBehaviour(
+                    getInterstitialActionBehaviourFromSettings(
+                        it
+                    )
+                )
+            }
+            settings.adCustomizationSettings!!.countdownStyle?.let {
+                HyBid.setCountdownStyle(CountdownStyle.from(it))
+            }
+        }
 
-            //todo : if we want to see customized skip and close button icons ,we have to decomment lines below to see one or both of them
+        MobileAds.initialize(this) { initializationStatus: InitializationStatus? -> }
+        AppLovinSdk.getInstance(this).mediationProvider = "max"
+        AppLovinSdk.initializeSdk(this) { config: AppLovinSdkConfiguration? -> }
+        val oguryConfigBuilder = OguryConfiguration.Builder(this, Constants.OGURY_KEY)
+        Ogury.start(oguryConfigBuilder.build())
+
+        //todo : if we want to see customized skip and close button icons ,we have to decomment lines below to see one or both of them
 //            HyBid.setCloseXmlResource(R.mipmap.close_sample, R.mipmap.close_sample)
 //            HyBid.setSkipXmlResource(R.mipmap.skip_sample)
 
@@ -174,8 +178,8 @@ class HyBidDemoApplication : MultiDexApplication() {
 //            )
 //            startRecording(apiToken)
 //        }
-        }
     }
+
 
     private fun fetchSettings(): Settings {
         var model: Settings? = null
@@ -265,7 +269,7 @@ class HyBidDemoApplication : MultiDexApplication() {
         return when (settingsAudioState) {
             1 -> AudioState.ON
             2 -> AudioState.MUTED
-            else -> AudioState.DEFAULT
+            else -> AudioState.ON
         }
     }
 

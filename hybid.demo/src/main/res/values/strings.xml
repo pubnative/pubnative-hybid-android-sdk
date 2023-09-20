@@ -143,14 +143,14 @@
     <string name="save_fairbid_settings">Save Fairbid Settings</string>
     <string name="init_fairbid">Init Fairbid SDK</string>
 
-<!--    <string name="pn_owned_consent">PN Owned</string>-->
-<!--    <string name="pn_accept_consent">Accept consent</string>-->
-<!--    <string name="pn_deny_consent">Reject consent</string>-->
-<!--    <string name="pn_can_collect_data">Can collect data?</string>-->
-<!--    <string name="publisher_owned_consent">Publisher Owned</string>-->
-<!--    <string name="action_check">Check</string>-->
-<!--    <string name="yes">Yes</string>-->
-<!--    <string name="no">No</string>-->
+    <!--    <string name="pn_owned_consent">PN Owned</string>-->
+    <!--    <string name="pn_accept_consent">Accept consent</string>-->
+    <!--    <string name="pn_deny_consent">Reject consent</string>-->
+    <!--    <string name="pn_can_collect_data">Can collect data?</string>-->
+    <!--    <string name="publisher_owned_consent">Publisher Owned</string>-->
+    <!--    <string name="action_check">Check</string>-->
+    <!--    <string name="yes">Yes</string>-->
+    <!--    <string name="no">No</string>-->
 
     <string name="action_ask_consent">Ask consent</string>
     <string name="action_edit_consent">Edit consent</string>
@@ -163,11 +163,14 @@
     <string name="action_check_vendor_purpose">Check all purposes for vendor</string>
     <string name="action_set">Set</string>
     <string name="action_remove">Remove</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_delete_all_gpp_data">Delete all gpp data</string>
     <string name="title_ogury_cmp">Ogury CMP</string>
     <string name="title_google_cmp">Funding Choices CMP</string>
     <string name="title_consent_strings">Consent Strings</string>
     <string name="title_vgi_id">VGI ID</string>
     <string name="title_gdpr_applies">GDPR Applies</string>
+    <string name="title_gpp_settings">GPP Settings</string>
     <string name="title_iab_v2_consent_string">TCF 2.0 Consent String:</string>
     <string name="title_purpose">Purposes:</string>
     <string name="title_consent_result">Consent result:</string>
@@ -185,7 +188,13 @@
     <string name="consent_form_load_success">Consent form load success</string>
     <string name="consent_info_not_available">Consent info not available</string>
     <string name="consent_form_not_available">Consent form not available</string>
-
+    <string name="action_trigger_onetrust_consent">Trigger OneTrust consent dialog</string>
+    <string name="label_public_gpp_string">Public Gpps String</string>
+    <string name="label_public_gppsid_string">Public Gppsid String</string>
+    <string name="label_internal_gpp_string">Internal Gpps String</string>
+    <string name="label_internal_gppsid_string">Internal Gppsid String</string>
+    <string name="hint_gpp_string">Gpp String</string>
+    <string name="hint_gppsid_string">Gppsid</string>
     <string name="purpose_tcf2_personalised_ads">Create personalised ads</string>
     <string name="purpose_tcf2_personalised_content">Create personalised content</string>
     <string name="purpose_tcf2_develop_improve_product">Develop and improve products</string>
@@ -203,6 +212,9 @@
     <string name="error_code">Error code:</string>
     <string name="error">Error:</string>
     <string name="banner_ad_size">Ad Size:</string>
+    <string name="api_type">API:</string>
+    <string name="api_v3">APIv3</string>
+    <string name="ortb">OpenRTB</string>
     <string name="request_url">PubNative request url:</string>
     <string name="response">PubNative response:</string>
     <string name="latency">PubNative latency (milliseconds):</string>
@@ -282,6 +294,8 @@
     <string name="countdown_style_timer">Timer</string>
     <string name="countdown_style_progress">Progress</string>
 
+    <string name="openrtb_body">oRTB URL + body</string>
+    <string name="body">oRTB body</string>
     <string name="hint_creative_id">Enter creative ID</string>
     <string name="sdk_and_build_versions">SDK and Build versions</string>
     <string name="sdk_and_build_version_concat">SDK Version: %s build: %s</string>

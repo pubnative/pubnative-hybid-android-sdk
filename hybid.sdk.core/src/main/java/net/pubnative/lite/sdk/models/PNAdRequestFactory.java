@@ -31,6 +31,13 @@ import net.pubnative.lite.sdk.DisplayManager;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
+import net.pubnative.lite.sdk.models.bidstream.BidstreamConstants;
+import net.pubnative.lite.sdk.models.bidstream.Extension;
+import net.pubnative.lite.sdk.models.bidstream.GeoLocation;
+import net.pubnative.lite.sdk.models.bidstream.Impression;
+import net.pubnative.lite.sdk.models.bidstream.ImpressionBanner;
+import net.pubnative.lite.sdk.models.bidstream.Signal;
+import net.pubnative.lite.sdk.models.bidstream.ImpressionVideo;
 import net.pubnative.lite.sdk.prefs.HyBidPreferences;
 import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
@@ -46,12 +53,12 @@ import java.util.Locale;
  * Created by erosgarciaponte on 08.01.18.
  */
 
-public class PNAdRequestFactory implements AdRequestFactory {
+public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestFactory {
     private static final String TAG = PNAdRequestFactory.class.getSimpleName();
 
     private DeviceInfo mDeviceInfo;
     private HyBidPreferences prefs;
-    private final HyBidLocationManager mLocationManager;
+    private HyBidLocationManager mLocationManager;
     private UserDataManager mUserDataManager;
     private final DisplayManager mDisplayManager;
     private IntegrationType mIntegrationType = IntegrationType.HEADER_BIDDING;
@@ -120,43 +127,140 @@ public class PNAdRequestFactory implements AdRequestFactory {
 
     @Override
     public AdRequest buildRequest(final String appToken, final String zoneid, AdSize adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType, final String mediationVendor, Integer impDepth) {
-        if (mUserDataManager == null) {
-            mUserDataManager = HyBid.getUserDataManager();
+        return buildRequest(null, appToken, zoneid, adSize, advertisingId, limitTracking, integrationType, mediationVendor, impDepth);
+    }
+
+    public AdRequest buildRequest(Context context, final String appToken, final String zoneid, AdSize adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType, final String mediationVendor, Integer impDepth) {
+        if (mUserDataManager == null && context != null) {
+            mUserDataManager = new UserDataManager(context);
         }
-        boolean isCCPAOptOut = mUserDataManager.isCCPAOptOut();
+
+        if (mDeviceInfo == null && context != null) {
+            mDeviceInfo = new DeviceInfo(context);
+        }
+
+        if (mLocationManager == null && context != null) {
+            mLocationManager = new HyBidLocationManager(context);
+        }
+
         PNAdRequest adRequest = new PNAdRequest();
+
+        boolean isCCPAOptOut = false;
+        if (mUserDataManager != null) {
+            isCCPAOptOut = mUserDataManager.isCCPAOptOut();
+
+            String usPrivacyString = mUserDataManager.getIABUSPrivacyString();
+            if (!TextUtils.isEmpty(usPrivacyString)) {
+                adRequest.usprivacy = usPrivacyString;
+            }
+
+            String gdprConsentString = mUserDataManager.getIABGDPRConsentString();
+            if (!TextUtils.isEmpty(gdprConsentString)) {
+                adRequest.userconsent = gdprConsentString;
+            }
+
+            String gppString = mUserDataManager.getGppString();
+            if (!TextUtils.isEmpty(gppString)) {
+                adRequest.gppstring = gppString;
+            }
+
+            String gppSid = mUserDataManager.getGppSid();
+            if (!TextUtils.isEmpty(gppSid)) {
+                adRequest.gppsid = gppSid.replace("_", ",");
+            }
+        }
+
         adRequest.zoneId = zoneid;
         adRequest.appToken = TextUtils.isEmpty(appToken) ? HyBid.getAppToken() : appToken;
         adRequest.os = "android";
         adRequest.osver = mDeviceInfo.getOSVersion();
-        adRequest.devicemodel = mDeviceInfo.getModel();
         adRequest.coppa = HyBid.isCoppaEnabled() ? "1" : "0";
         adRequest.omidpn = HyBid.OM_PARTNER_NAME;
         adRequest.omidpv = HyBid.OMSDK_VERSION;
         adRequest.isInterstitial = adSize == AdSize.SIZE_INTERSTITIAL;
 
-        if (HyBid.isCoppaEnabled() || limitTracking || TextUtils.isEmpty(advertisingId) || isCCPAOptOut || mUserDataManager.isConsentDenied()) {
+        int instl = 0;
+        if (adRequest.isInterstitial) instl = 1;
+        adRequest.addSignal(new Impression(instl, 1));
+
+        if (adSize != null) {
+            List<Integer> expDirs = new ArrayList<>();
+            Integer videoPlacement = null;
+            int videoPlacementSubtype;
+            List<Integer> playbackMethods = new ArrayList<>();
+            if (!adRequest.isInterstitial) {
+                expDirs.add(BidstreamConstants.ExpandableDirections.FULLSCREEN);
+                expDirs.add(BidstreamConstants.ExpandableDirections.RESIZE_MINIMIZE);
+                videoPlacementSubtype = BidstreamConstants.VideoPlacementSubtype.STANDALONE;
+                playbackMethods.add(BidstreamConstants.VideoPlaybackMethod.ENTER_VIEWPORT_SOUND_ON);
+                playbackMethods.add(BidstreamConstants.VideoPlaybackMethod.ENTER_VIEWPORT_SOUND_OFF);
+            } else {
+                videoPlacement = BidstreamConstants.VideoPlacement.INTERSTITIAL;
+                videoPlacementSubtype = BidstreamConstants.VideoPlacementSubtype.INTERSTITIAL;
+                playbackMethods.add(BidstreamConstants.VideoPlaybackMethod.PAGE_LOAD_SOUND_ON);
+                playbackMethods.add(BidstreamConstants.VideoPlaybackMethod.PAGE_LOAD_SOUND_OFF);
+            }
+            int pos = adRequest.isInterstitial ? BidstreamConstants.PlacementPosition.FULLSCREEN : BidstreamConstants.PlacementPosition.UNKNOWN;
+
+            adRequest.addSignal(new ImpressionBanner(pos, expDirs));
+            adRequest.addSignal(new ImpressionVideo(videoPlacement, videoPlacementSubtype, pos, playbackMethods));
+
+        }
+
+        if (HyBid.isCoppaEnabled() || limitTracking || TextUtils.isEmpty(advertisingId) || isCCPAOptOut || (mUserDataManager != null &&
+                mUserDataManager.isConsentDenied())) {
             adRequest.dnt = "1";
         } else {
             adRequest.gid = advertisingId;
 
-            adRequest.gidmd5 = mDeviceInfo.getAdvertisingIdMd5();
-            adRequest.gidsha1 = mDeviceInfo.getAdvertisingIdSha1();
+            if (mDeviceInfo != null) {
+                adRequest.gidmd5 = mDeviceInfo.getAdvertisingIdMd5();
+                adRequest.gidsha1 = mDeviceInfo.getAdvertisingIdSha1();
+            }
         }
 
-        String usPrivacyString = mUserDataManager.getIABUSPrivacyString();
-        if (!TextUtils.isEmpty(usPrivacyString)) {
-            adRequest.usprivacy = usPrivacyString;
+        if (mDeviceInfo != null) {
+            adRequest.devicemodel = mDeviceInfo.getModel();
+            adRequest.make = mDeviceInfo.getMake();
+            adRequest.deviceType = String.valueOf(mDeviceInfo.getDeviceType());
+            if (mDeviceInfo.getLocale() != null && mDeviceInfo.getLocale().getLanguage() != null
+                    && !mDeviceInfo.getLocale().getLanguage().isEmpty()) {
+                adRequest.locale = mDeviceInfo.getLocale().getLanguage();
+                adRequest.language = mDeviceInfo.getLocale().getLanguage();
+            } else if (mDeviceInfo.getLangb() != null && !mDeviceInfo.getLangb().isEmpty()) {
+                adRequest.langb = mDeviceInfo.getLangb();
+            }
+
+            adRequest.deviceHeight = mDeviceInfo.getDeviceHeight();
+            adRequest.deviceWidth = mDeviceInfo.getDeviceWidth();
+            adRequest.orientation = mDeviceInfo.getOrientation().toString();
+            adRequest.ppi = mDeviceInfo.getPpi();
+            adRequest.pxratio = mDeviceInfo.getPxratio();
+            adRequest.soundSetting = mDeviceInfo.getSoundSetting();
+            adRequest.js = "1"; // Javascript is always supported on the SDK
+
+            if (mDeviceInfo.getCarrier() != null && !mDeviceInfo.getCarrier().isEmpty()) {
+                adRequest.carrier = mDeviceInfo.getCarrier();
+            }
+            if (mDeviceInfo.getConnectionType() != null) {
+                adRequest.connectiontype = String.valueOf(mDeviceInfo.getConnectionType());
+            }
+            if (mDeviceInfo.getMccmnc() != null && !mDeviceInfo.getMccmnc().isEmpty()) {
+                adRequest.mccmnc = mDeviceInfo.getMccmnc();
+            }
+            if (mDeviceInfo.getMccmncsim() != null && !mDeviceInfo.getMccmncsim().isEmpty()) {
+                adRequest.mccmncsim = mDeviceInfo.getMccmncsim();
+            }
+            if (HyBid.isLocationTrackingEnabled() && mDeviceInfo.hasTrackingPermissions()
+                    && !limitTracking) {
+                adRequest.geofetch = "1";
+            } else {
+                adRequest.geofetch = "0";
+            }
         }
 
-        String gdprConsentString = mUserDataManager.getIABGDPRConsentString();
-        if (!TextUtils.isEmpty(gdprConsentString)) {
-            adRequest.userconsent = gdprConsentString;
-        }
-
-        adRequest.locale = mDeviceInfo.getLocale().getLanguage();
-
-        if (!HyBid.isCoppaEnabled() && !limitTracking && !isCCPAOptOut && !mUserDataManager.isConsentDenied()) {
+        if (!HyBid.isCoppaEnabled() && !limitTracking && !isCCPAOptOut
+                && (mUserDataManager == null || !mUserDataManager.isConsentDenied())) {
             adRequest.age = HyBid.getAge();
             adRequest.gender = HyBid.getGender();
             adRequest.keywords = HyBid.getKeywords();
@@ -197,10 +301,19 @@ public class PNAdRequestFactory implements AdRequestFactory {
 
         if (mLocationManager != null) {
             Location location = mLocationManager.getUserLocation();
-            if (location != null && !HyBid.isCoppaEnabled() && !limitTracking && !mUserDataManager.isConsentDenied() && !isCCPAOptOut && HyBid.isLocationTrackingEnabled()) {
+            if (location != null && !HyBid.isCoppaEnabled() && !limitTracking && (mUserDataManager == null || !mUserDataManager.isConsentDenied()) && !isCCPAOptOut && HyBid.isLocationTrackingEnabled()) {
                 adRequest.latitude = String.format(Locale.ENGLISH, "%.6f", location.getLatitude());
                 adRequest.longitude = String.format(Locale.ENGLISH, "%.6f", location.getLongitude());
+                if (location.hasAccuracy() && location.getAccuracy() != 0) {
+                    Signal signal = new GeoLocation((int) location.getAccuracy(), formatUTCTime());
+                    adRequest.addSignal(signal);
+                }
             }
+        }
+
+        Signal extensionsSignal = fillExtensionsObject(mDeviceInfo);
+        if (extensionsSignal != null) {
+            adRequest.addSignal(extensionsSignal);
         }
 
         if (mIsRewarded) {
@@ -209,13 +322,12 @@ public class PNAdRequestFactory implements AdRequestFactory {
             adRequest.rv = "0";
         }
 
-        adRequest.deviceHeight = mDeviceInfo.getDeviceHeight();
-        adRequest.deviceWidth = mDeviceInfo.getDeviceWidth();
-        adRequest.orientation = mDeviceInfo.getOrientation().toString();
-        adRequest.soundSetting = mDeviceInfo.getSoundSetting();
-
         adRequest.impdepth = String.valueOf(impDepth);
-        adRequest.ageofapp = new HyBidTimeUtils().getDaysSince(Long.parseLong(getAgeOfApp()));
+        try {
+            adRequest.ageofapp = new HyBidTimeUtils().getDaysSince(Long.parseLong(getAgeOfApp()));
+        } catch (NumberFormatException e) {
+            // Do nothing
+        }
         adRequest.sessionduration = new HyBidTimeUtils().getSeconds(calculateSessionDuration());
 
         return adRequest;

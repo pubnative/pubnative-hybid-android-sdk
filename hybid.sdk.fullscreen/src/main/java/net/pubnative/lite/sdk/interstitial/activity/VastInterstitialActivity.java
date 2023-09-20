@@ -71,9 +71,10 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
                         adCacheItem.getAdParams().setPublisherSkipSeconds(mSkipOffset);
                         if (adCacheItem.getEndCardData() != null
                                 && !TextUtils.isEmpty(adCacheItem.getEndCardData().getContent())) {
-                            mHasEndCard = AdEndCardManager.isEndCardEnabled(getAd(), getAd().isEndCardEnabled(), HyBid.isEndCardEnabled(), null);
+                            mHasEndCard = AdEndCardManager.isEndCardEnabled(getAd(), null);
                         } else if (getAd().isEndCardEnabled() != null
                                 && getAd().isEndCardEnabled()
+                                && getAd().isCustomEndCardEnabled() != null
                                 && getAd().isCustomEndCardEnabled()
                                 && getAd().hasCustomEndCard()) {
                             mHasEndCard = true;
@@ -234,6 +235,25 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
             mIsVideoFinished = true;
             if (getBroadcastSender() != null) {
                 getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_SKIP);
+            }
+        }
+
+        @Override
+        public void onAdCustomEndCardFound() {
+            mHasEndCard = true;
+        }
+
+        @Override
+        public void onCustomEndCardShow() {
+            if (getBroadcastSender() != null) {
+                getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CUSTOM_END_CARD_SHOW);
+            }
+        }
+
+        @Override
+        public void onCustomEndCardClicked() {
+            if (getBroadcastSender() != null) {
+                getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CUSTOM_END_CARD_CLICK);
             }
         }
 

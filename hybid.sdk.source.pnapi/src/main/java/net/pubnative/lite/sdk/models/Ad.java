@@ -87,6 +87,8 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
 
         String IMPRESSION = "impression";
         String CLICK = "click";
+        String CUSTOM_END_CARD_IMPRESSION = "custom_endcard_impression";
+        String CUSTOM_END_CARD_CLICK = "custom_endcard_click";
     }
 
     public enum AdType {
@@ -498,9 +500,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     }
 
     public Boolean isCustomEndCardEnabled() {
-        Boolean isEnabled = getRemoteConfig(RemoteConfig.CUSTOM_END_CARD_ENABLED);
-        if (isEnabled == null) isEnabled = false;
-        return isEnabled;
+        return getRemoteConfig(RemoteConfig.CUSTOM_END_CARD_ENABLED);
     }
 
     public String getAudioState() {
@@ -672,6 +672,11 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
 
     public boolean hasCustomEndCard() {
         return getAsset(APIAsset.CUSTOM_END_CARD) != null;
+    }
+
+    public CustomEndCardDisplay getCustomEndCardDisplay(){
+         String displayValue = getRemoteConfig(RemoteConfig.CUSTOM_END_CARD_DISPLAY);
+         return CustomEndCardDisplay.fromString(displayValue);
     }
 
     @Override

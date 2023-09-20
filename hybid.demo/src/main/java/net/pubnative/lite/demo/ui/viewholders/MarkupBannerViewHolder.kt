@@ -16,11 +16,12 @@ import net.pubnative.lite.sdk.views.HyBidBannerAdView
 import net.pubnative.lite.sdk.views.PNAdView
 
 class MarkupBannerViewHolder(
-    itemView: View,
-    private var mListener: OnLogDisplayListener,
-    private var onExpandedAdCloseListener: OnExpandedAdCloseListener
+        itemView: View,
+        private var mListener: OnLogDisplayListener,
+        private var onExpandedAdCloseListener: OnExpandedAdCloseListener
 ) :
-    RecyclerView.ViewHolder(itemView), PNAdView.Listener, MRAIDViewListener {
+        RecyclerView.ViewHolder(itemView), PNAdView.Listener, MRAIDViewListener {
+    private var banner: HyBidBannerAdView? = null
     private val TAG = MarkupBannerViewHolder::class.java.simpleName
 
     fun bind(markup: String) {
@@ -28,16 +29,16 @@ class MarkupBannerViewHolder(
             val container = itemView.findViewById<FrameLayout>(R.id.banner_container)
             container.removeAllViews()
 
-            val banner = HyBidBannerAdView(itemView.context)
+            banner = HyBidBannerAdView(itemView.context)
 
             val adLayoutParams = RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
             )
             adLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
             container.addView(banner, adLayoutParams)
             container.setBackgroundColor(Color.BLACK)
-            banner.setMraidListener(this)
-            banner.renderCustomMarkup(markup, this)
+            banner?.setMraidListener(this)
+            banner?.renderCustomMarkup(markup, this)
         }
     }
 
@@ -70,17 +71,18 @@ class MarkupBannerViewHolder(
     }
 
     override fun mraidViewExpand(mraidView: MRAIDView?) {
+        Logger.d(TAG, "mraidViewExpand")
     }
 
     override fun mraidViewClose(mraidView: MRAIDView?) {
     }
 
     override fun mraidViewResize(
-        mraidView: MRAIDView?,
-        width: Int,
-        height: Int,
-        offsetX: Int,
-        offsetY: Int
+            mraidView: MRAIDView?,
+            width: Int,
+            height: Int,
+            offsetX: Int,
+            offsetY: Int
     ): Boolean {
         return false
     }

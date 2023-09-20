@@ -29,8 +29,6 @@ import android.os.Bundle;
 import android.view.View;
 
 import net.pubnative.lite.sdk.models.APIAsset;
-import net.pubnative.lite.sdk.models.ContentInfoIconXPosition;
-import net.pubnative.lite.sdk.models.ContentInfoIconYPosition;
 import net.pubnative.lite.sdk.mraid.MRAIDBanner;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeature;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
@@ -39,7 +37,6 @@ import net.pubnative.lite.sdk.mraid.MRAIDViewCloseLayoutListener;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
 import net.pubnative.lite.sdk.utils.SkipOffsetManager;
-import net.pubnative.lite.sdk.views.CloseableContainer;
 
 public class MraidRewardedActivity extends HyBidRewardedActivity implements MRAIDViewListener, MRAIDNativeFeatureListener, MRAIDViewCloseLayoutListener {
     private final String[] mSupportedNativeFeatures = new String[]{MRAIDNativeFeature.CALENDAR, MRAIDNativeFeature.INLINE_VIDEO, MRAIDNativeFeature.SMS, MRAIDNativeFeature.STORE_PICTURE, MRAIDNativeFeature.TEL, MRAIDNativeFeature.LOCATION};
@@ -61,7 +58,7 @@ public class MraidRewardedActivity extends HyBidRewardedActivity implements MRAI
 
     private void defineBackButtonClickableityhandler() {
         if (mView != null)
-            mView.setBackButtonClickableityhandler(this::handleBackClickability);
+            mView.setBackButtonClickabilityHandler(this::handleBackClickability);
     }
 
     @Override
@@ -90,7 +87,7 @@ public class MraidRewardedActivity extends HyBidRewardedActivity implements MRAI
                 adView.setCloseLayoutListener(this);
             }
 
-            if (mSkipOffset != null && mSkipOffset > 0 && adView != null) {
+            if (mSkipOffset != null && mSkipOffset >= 0 && adView != null) {
                 adView.setSkipOffset(mSkipOffset);
             }
 

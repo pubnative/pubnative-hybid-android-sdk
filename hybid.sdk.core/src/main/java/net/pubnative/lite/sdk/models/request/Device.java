@@ -1,5 +1,6 @@
 package net.pubnative.lite.sdk.models.request;
 
+import net.pubnative.lite.sdk.models.bidstream.DeviceExtension;
 import net.pubnative.lite.sdk.utils.json.BindField;
 import net.pubnative.lite.sdk.utils.json.JsonModel;
 
@@ -51,6 +52,8 @@ public class Device extends JsonModel {
     @BindField
     private String mccmnc;
     @BindField
+    private String mccmncsim;
+    @BindField
     private Integer connectiontype;
     @BindField
     private String ifa;
@@ -66,6 +69,8 @@ public class Device extends JsonModel {
     private String macsha1;
     @BindField
     private String macmd5;
+    @BindField
+    private DeviceExtension ext;
 
     public Device() {
     }
@@ -250,6 +255,14 @@ public class Device extends JsonModel {
         this.mccmnc = mccmnc;
     }
 
+    public String getMccmncsim() {
+        return mccmncsim;
+    }
+
+    public void setMccmncsim(String mccmncsim) {
+        this.mccmncsim = mccmncsim;
+    }
+
     public Integer getConnectiontype() {
         return connectiontype;
     }
@@ -312,5 +325,13 @@ public class Device extends JsonModel {
 
     public void setMacmd5(String macmd5) {
         this.macmd5 = macmd5;
+    }
+
+    public DeviceExtension getExt() {
+        return ext;
+    }
+
+    public void setExt(DeviceExtension ext) {
+        this.ext = ext;
     }
 }

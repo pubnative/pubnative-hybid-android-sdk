@@ -19,7 +19,13 @@ class HyBidBannerViewHolder(itemView: View, val adListener: InFeedAdListener) :
 
     private lateinit var adView: HyBidAdView
 
-    fun bind(zoneId: String, adSize: AdSize, shouldLoad: Boolean, autoRefresh: Boolean) {
+    fun bind(
+        zoneId: String,
+        adSize: AdSize,
+        shouldLoad: Boolean,
+        autoRefresh: Boolean,
+        selectedApi: Int
+    ) {
         if (!TextUtils.isEmpty(zoneId) && shouldLoad) {
             val container = itemView.findViewById<FrameLayout>(R.id.banner_view)
             container.removeAllViews()
@@ -37,7 +43,11 @@ class HyBidBannerViewHolder(itemView: View, val adListener: InFeedAdListener) :
             container.addView(adView)
 
             autoRefreshCheck(autoRefresh)
-            adView.load(zoneId, this)
+            if (selectedApi == R.id.radio_api_ortb) {
+                adView.loadExchangeAd(zoneId, this)
+            } else {
+                adView.load(zoneId, this)
+            }
         }
     }
 

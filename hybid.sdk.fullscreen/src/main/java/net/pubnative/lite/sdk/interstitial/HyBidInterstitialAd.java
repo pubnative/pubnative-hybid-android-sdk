@@ -741,7 +741,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
 
     public boolean hasEndCard() {
         if (mAd != null)
-            return AdEndCardManager.isEndCardEnabled(mAd, mAd.isEndCardEnabled(), HyBid.isEndCardEnabled(), mAd.hasEndCard());
+            return AdEndCardManager.isEndCardEnabled(mAd, mAd.hasEndCard());
         return false;
     }
 }

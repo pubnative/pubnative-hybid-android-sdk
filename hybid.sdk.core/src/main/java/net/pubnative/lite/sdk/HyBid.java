@@ -111,7 +111,7 @@ public class HyBid {
     private static CountdownStyle sCountdownStyle = CountdownStyle.PIE_CHART;
 
 
-    private static AudioState sVideoAudioState = AudioState.DEFAULT;
+    private static AudioState sVideoAudioState = AudioState.ON;
 
     private static final boolean sEventLoggingEndpointEnabled = false;
 
@@ -609,12 +609,25 @@ public class HyBid {
     }
 
     public static String getCustomRequestSignalData(String mediationVendorName) {
-        if (!HyBid.isInitialized()) {
-            return "";
-        }
+        return getCustomRequestSignalData(null, mediationVendorName);
+    }
+
+    public static String getCustomRequestSignalData(Context context, String mediationVendorName) {
         PNAdRequestFactory PNAdRequestFactory = new PNAdRequestFactory();
-        AdRequest adRequest = PNAdRequestFactory.buildRequest("", "", AdSize.SIZE_INTERSTITIAL, "", true, IntegrationType.IN_APP_BIDDING, mediationVendorName, 0);
-        return PNApiUrlComposer.getUrlQuery(HyBid.getApiClient().getApiUrl(), (PNAdRequest) adRequest);
+        String url;
+        if (HyBid.isInitialized()) {
+            AdRequest adRequest = PNAdRequestFactory.buildRequest("", "", AdSize.SIZE_INTERSTITIAL, "", true, IntegrationType.IN_APP_BIDDING, mediationVendorName, 0);
+            url = PNApiUrlComposer.getUrlQuery(HyBid.getApiClient().getApiUrl(), (PNAdRequest) adRequest);
+        } else {
+            if (context == null) {
+                url = "";
+            } else {
+                AdRequest adRequest = PNAdRequestFactory.buildRequest(context, "", "", AdSize.SIZE_INTERSTITIAL, "", true, IntegrationType.IN_APP_BIDDING, mediationVendorName, 0);
+                url = PNApiUrlComposer.getUrlQuery(net.pubnative.lite.sdk.source.pnapi.BuildConfig.BASE_URL, (PNAdRequest) adRequest);
+            }
+        }
+
+        return url;
     }
 
     public static String getSDKVersionInfo() {

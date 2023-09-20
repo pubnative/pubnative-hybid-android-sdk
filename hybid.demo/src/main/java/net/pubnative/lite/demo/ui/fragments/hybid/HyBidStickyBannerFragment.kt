@@ -15,23 +15,27 @@ import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.HyBidError
 import net.pubnative.lite.sdk.models.AdSize
+import net.pubnative.lite.sdk.mraid.utils.MraidCloseAdRepo
 import net.pubnative.lite.sdk.views.HyBidAdView
 import net.pubnative.lite.sdk.views.PNAdView
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class HyBidStickyBannerFragment : Fragment(R.layout.fragment_sticky_top_bottom), PNAdView.Listener, RadioGroup.OnCheckedChangeListener {
+class HyBidStickyBannerFragment : Fragment(R.layout.fragment_sticky_top_bottom), PNAdView.Listener,
+    RadioGroup.OnCheckedChangeListener, AdapterView.OnItemSelectedListener {
 
+    private var adSize: AdSize = AdSize.SIZE_320x50
     private val TAG: String = HyBidStickyBannerFragment::class.java.simpleName
 
     private var zoneId: String? = null
 
     private var mPosition: HyBidAdView.Position = HyBidAdView.Position.TOP
 
-    private lateinit var hybidBanner: HyBidAdView
+    private var hybidBanner: HyBidAdView? = null
     private lateinit var loadButton: Button
     private lateinit var adSizeSpinner: Spinner
+    private lateinit var apiRadioGroup: RadioGroup
     private lateinit var spinnerAdapter: ArrayAdapter<AdSize>
     private lateinit var errorView: TextView
     private lateinit var errorCodeView: TextView
@@ -40,18 +44,19 @@ class HyBidStickyBannerFragment : Fragment(R.layout.fragment_sticky_top_bottom),
     private lateinit var radioPosition: RadioGroup
 
     private val adSizes = arrayOf(
-            AdSize.SIZE_320x50,
-            AdSize.SIZE_160x600,
-            AdSize.SIZE_250x250,
-            AdSize.SIZE_300x50,
-            AdSize.SIZE_300x250,
-            AdSize.SIZE_300x600,
-            AdSize.SIZE_320x100,
-            AdSize.SIZE_320x480,
-            AdSize.SIZE_480x320,
-            AdSize.SIZE_728x90,
-            AdSize.SIZE_768x1024,
-            AdSize.SIZE_1024x768)
+        AdSize.SIZE_320x50,
+        AdSize.SIZE_160x600,
+        AdSize.SIZE_250x250,
+        AdSize.SIZE_300x50,
+        AdSize.SIZE_300x250,
+        AdSize.SIZE_300x600,
+        AdSize.SIZE_320x100,
+        AdSize.SIZE_320x480,
+        AdSize.SIZE_480x320,
+        AdSize.SIZE_728x90,
+        AdSize.SIZE_768x1024,
+        AdSize.SIZE_1024x768
+    )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -60,13 +65,11 @@ class HyBidStickyBannerFragment : Fragment(R.layout.fragment_sticky_top_bottom),
         errorCodeView = view.findViewById(R.id.view_error_code)
         creativeIdView = view.findViewById(R.id.view_creative_id)
         loadButton = view.findViewById(R.id.button_load)
-        hybidBanner = HyBidAdView(activity)
         adSizeSpinner = view.findViewById(R.id.spinner_ad_size)
         radioPosition = view.findViewById(R.id.radioPosition)
+        apiRadioGroup = view.findViewById(R.id.group_api_type)
 
         zoneId = activity?.intent?.getStringExtra(Constants.IntentParams.ZONE_ID)
-
-        hybidBanner.setAdSize(AdSize.SIZE_320x50)
 
         loadButton.setOnClickListener {
             errorView.text = ""
@@ -75,22 +78,38 @@ class HyBidStickyBannerFragment : Fragment(R.layout.fragment_sticky_top_bottom),
             loadPNAd()
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
-        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), creativeIdView.text.toString()) }
+        errorView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                errorView.text.toString()
+            )
+        }
+        creativeIdView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                creativeIdView.text.toString()
+            )
+        }
 
-        spinnerAdapter = ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, adSizes)
+        spinnerAdapter =
+            ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, adSizes)
         adSizeSpinner.adapter = spinnerAdapter
+        adSizeSpinner.onItemSelectedListener = this
 
         radioPosition.setOnCheckedChangeListener(this)
     }
 
-    fun loadPNAd() {
+    private fun loadPNAd() {
+        hybidBanner?.destroy()
 
-        val adSize = adSizes[adSizeSpinner.selectedItemPosition]
-
-        hybidBanner.setAdSize(adSize)
-
-        hybidBanner.load(zoneId, mPosition, this)
+        hybidBanner = HyBidAdView(activity)
+        hybidBanner?.setAdSize(adSize)
+        hybidBanner?.setIsAdSticky(true)
+        if (apiRadioGroup.checkedRadioButtonId == R.id.radio_api_ortb) {
+            hybidBanner?.loadExchangeAd(zoneId, mPosition, this)
+        } else {
+            hybidBanner?.load(zoneId, mPosition, this)
+        }
     }
 
 
@@ -113,13 +132,13 @@ class HyBidStickyBannerFragment : Fragment(R.layout.fragment_sticky_top_bottom),
 
     override fun onAdImpression() {
         Log.d(TAG, "onAdImpression")
-        if (!TextUtils.isEmpty(hybidBanner.creativeId)) {
-            creativeIdView.text = hybidBanner.creativeId
+        if (!TextUtils.isEmpty(hybidBanner?.creativeId)) {
+            creativeIdView.text = hybidBanner?.creativeId
         }
         if (HyBid.getDiagnosticsManager() != null) {
             HyBid.getDiagnosticsManager().printPlacementDiagnosticsLog(
                 requireContext(),
-                hybidBanner.placementParams
+                hybidBanner?.placementParams
             )
         }
     }
@@ -136,7 +155,7 @@ class HyBidStickyBannerFragment : Fragment(R.layout.fragment_sticky_top_bottom),
     }
 
     override fun onDestroy() {
-        hybidBanner.destroy()
+        hybidBanner?.destroy()
         super.onDestroy()
     }
 
@@ -146,5 +165,13 @@ class HyBidStickyBannerFragment : Fragment(R.layout.fragment_sticky_top_bottom),
         } else if (checkedId == R.id.radioBottom) {
             mPosition = HyBidAdView.Position.BOTTOM
         }
+    }
+
+    override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
+        adSize = adSizes[pos]
+    }
+
+    override fun onNothingSelected(p0: AdapterView<*>?) {
+        adSize = AdSize.SIZE_320x50
     }
 }

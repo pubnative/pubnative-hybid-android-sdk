@@ -2,15 +2,17 @@ package net.pubnative.lite.demo.ui.fragments.apitester
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.RadioGroup
+import android.widget.RelativeLayout
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.ui.adapters.LegacyApiAdapter
@@ -22,14 +24,19 @@ import net.pubnative.lite.sdk.models.Ad
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedAd
 import net.pubnative.lite.sdk.utils.Logger
 
-class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester), OnLogDisplayListener {
+class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester),
+    OnLogDisplayListener {
 
-    private lateinit var mViewModel: ApiTesterViewModel
+    private lateinit var viewModel: ApiTesterViewModel
 
     private lateinit var responseInput: EditText
+    private lateinit var oRTBBodyInput: EditText
     private lateinit var adSizeGroup: RadioGroup
     private lateinit var responseSourceGroup: RadioGroup
     private lateinit var markupList: RecyclerView
+    private lateinit var loadButton: MaterialButton
+    private lateinit var showButton: MaterialButton
+    private lateinit var oRTBLayout: RelativeLayout
 
     private val adapter = LegacyApiAdapter(this)
 
@@ -40,80 +47,127 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester), O
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mViewModel = ViewModelProvider(this)[ApiTesterViewModel::class.java]
+        viewModel = ViewModelProvider(this)[ApiTesterViewModel::class.java]
 
         responseInput = view.findViewById(R.id.input_response)
+        oRTBBodyInput = view.findViewById(R.id.input_ortb_body)
         adSizeGroup = view.findViewById(R.id.group_ad_size)
         responseSourceGroup = view.findViewById(R.id.group_response_source)
         markupList = view.findViewById(R.id.list_markup)
         markupList.isNestedScrollingEnabled = false
+        loadButton = view.findViewById(R.id.button_load)
+        showButton = view.findViewById(R.id.button_show)
+        oRTBLayout = view.findViewById(R.id.layout_ortb_body)
 
-        mViewModel.clipboard.observe(viewLifecycleOwner) {
+        viewModel.clipboard.observe(viewLifecycleOwner) {
             responseInput.setText(it)
         }
 
-        mViewModel.listVisibillity.observe(viewLifecycleOwner) {
+        viewModel.clipboardBody.observe(viewLifecycleOwner) {
+            oRTBBodyInput.setText(it)
+        }
+
+        viewModel.listVisibility.observe(viewLifecycleOwner) {
             if (it) markupList.visibility = View.VISIBLE
             else markupList.visibility = View.GONE
         }
 
-        mViewModel.loadInterstitial.observe(viewLifecycleOwner) {
+        viewModel.showButtonVisibility.observe(viewLifecycleOwner) {
+            if (it) showButton.visibility = View.VISIBLE
+            else showButton.visibility = View.GONE
+        }
+
+        viewModel.loadInterstitial.observe(viewLifecycleOwner) {
             loadInterstitial(it)
         }
 
-        mViewModel.loadReworded.observe(viewLifecycleOwner) {
-            loadReworded(it)
+        viewModel.loadRewarded.observe(viewLifecycleOwner) {
+            loadRewarded(it)
         }
 
-        mViewModel.adapterUpdate.observe(viewLifecycleOwner) {
-            adapter.refreshWithAd(it, mViewModel.getAdSize())
+        viewModel.errorMessage.observe(viewLifecycleOwner) {
+            Toast.makeText(
+                context,
+                it,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        viewModel.adapterUpdate.observe(viewLifecycleOwner) {
+            adapter.refreshWithAd(it, viewModel.getAdSize())
         }
 
         view.findViewById<ImageButton>(R.id.button_paste_clipboard).setOnClickListener {
-            mViewModel.pasteFromClipboard()
+            viewModel.pasteFromClipboard()
         }
 
-        view.findViewById<Button>(R.id.button_load).setOnClickListener {
+        view.findViewById<ImageButton>(R.id.button_paste_clipboard_body).setOnClickListener {
+            viewModel.pasteFromClipboardBody()
+        }
+
+        loadButton.setOnClickListener {
             cleanLogs()
             loadAd()
+        }
+
+        showButton.setOnClickListener {
+            when (viewModel.getAdSize()) {
+                LegacyApiTesterSize.INTERSTITIAL -> {
+                    interstitial?.show()
+                }
+
+                LegacyApiTesterSize.REWARDED -> {
+                    rewardedAd?.show()
+                }
+
+                else -> {}
+            }
         }
 
         adSizeGroup.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
                 R.id.radio_size_banner -> {
-                    mViewModel.setAdSize(LegacyApiTesterSize.BANNER)
+                    viewModel.setAdSize(LegacyApiTesterSize.BANNER)
                 }
 
                 R.id.radio_size_medium -> {
-                    mViewModel.setAdSize(LegacyApiTesterSize.MEDIUM)
+                    viewModel.setAdSize(LegacyApiTesterSize.MEDIUM)
                 }
 
                 R.id.radio_size_leaderboard -> {
-                    mViewModel.setAdSize(LegacyApiTesterSize.LEADERBOARD)
+                    viewModel.setAdSize(LegacyApiTesterSize.LEADERBOARD)
                 }
 
                 R.id.radio_size_native -> {
-                    mViewModel.setAdSize(LegacyApiTesterSize.NATIVE)
+                    viewModel.setAdSize(LegacyApiTesterSize.NATIVE)
                 }
 
                 R.id.radio_size_interstitial -> {
-                    mViewModel.setAdSize(LegacyApiTesterSize.INTERSTITIAL)
+                    viewModel.setAdSize(LegacyApiTesterSize.INTERSTITIAL)
                 }
 
                 R.id.radio_size_rewarded -> {
-                    mViewModel.setAdSize(LegacyApiTesterSize.REWARDED)
+                    viewModel.setAdSize(LegacyApiTesterSize.REWARDED)
                 }
             }
+            showButton.isEnabled = false
         }
 
         responseSourceGroup.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
                 R.id.radio_markup -> {
-                    mViewModel.setMarkupType(MarkupType.CUSTOM_MARKUP)
+                    showORTBEditText(false)
+                    viewModel.setMarkupType(MarkupType.CUSTOM_MARKUP)
                 }
 
                 R.id.radio_url -> {
-                    mViewModel.setMarkupType(MarkupType.URL)
+                    showORTBEditText(false)
+                    viewModel.setMarkupType(MarkupType.URL)
+                }
+
+                R.id.radio_ortb -> {
+                    showORTBEditText(true)
+                    viewModel.setMarkupType(MarkupType.ORTB_BODY)
                 }
             }
         }
@@ -130,13 +184,14 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester), O
         val interstitialListener = object : HyBidInterstitialAd.Listener {
             override fun onInterstitialLoaded() {
                 Logger.d(TAG, "onInterstitialLoaded")
-                interstitial?.show()
                 displayLogs()
+                showButton.isEnabled = true
             }
 
             override fun onInterstitialLoadFailed(error: Throwable?) {
                 Logger.e(TAG, "onInterstitialLoadFailed", error)
                 displayLogs()
+                showButton.isEnabled = false
             }
 
             override fun onInterstitialImpression() {
@@ -149,6 +204,7 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester), O
 
             override fun onInterstitialDismissed() {
                 Logger.d(TAG, "onInterstitialDismissed")
+                showButton.isEnabled = false
             }
         }
 
@@ -156,20 +212,21 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester), O
         interstitial?.prepareAd(ad)
     }
 
-    private fun loadReworded(ad: Ad?) {
+    private fun loadRewarded(ad: Ad?) {
         rewardedAd?.destroy()
 
         val rewardelListener = object : HyBidRewardedAd.Listener {
 
             override fun onRewardedLoaded() {
                 Logger.d(TAG, "onRewardedLoaded")
-                rewardedAd?.show()
                 displayLogs()
+                showButton.isEnabled = true
             }
 
             override fun onRewardedLoadFailed(error: Throwable?) {
                 Logger.e(TAG, "onRewardedLoadFailed", error)
                 displayLogs()
+                showButton.isEnabled = false
             }
 
             override fun onRewardedOpened() {
@@ -178,6 +235,7 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester), O
 
             override fun onRewardedClosed() {
                 Logger.d(TAG, "onRewardedClosed")
+                showButton.isEnabled = false
             }
 
             override fun onRewardedClick() {
@@ -194,7 +252,8 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester), O
     }
 
     private fun loadAd() {
-        mViewModel.loadApiAd(responseInput.text.toString())
+        showButton.isEnabled = false
+        viewModel.loadApiAd(responseInput.text.toString(), oRTBBodyInput.text.toString())
     }
 
     override fun onDestroy() {
@@ -216,6 +275,14 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester), O
             activity.clearEventList()
             activity.clearTrackerList()
             activity.notifyAdCleaned()
+        }
+    }
+
+    private fun showORTBEditText(rtbEditTextEnabled: Boolean) {
+        if (rtbEditTextEnabled) {
+            oRTBLayout.visibility = View.VISIBLE
+        } else {
+            oRTBLayout.visibility = View.GONE
         }
     }
 }

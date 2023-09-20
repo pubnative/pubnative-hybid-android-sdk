@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 
+import net.pubnative.lite.sdk.CustomEndCardListener;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenter;
 import net.pubnative.lite.sdk.utils.PNLocalBroadcastManager;
@@ -27,6 +28,8 @@ public class HyBidInterstitialBroadcastReceiver extends BroadcastReceiver {
         VIDEO_SKIP("net.pubnative.hybid.interstitial.video_skip"),
         VIDEO_DISMISS("net.pubnative.hybid.interstitial.video_dismiss"),
         VIDEO_FINISH("net.pubnative.hybid.interstitial.video_finish"),
+        CUSTOM_END_CARD_SHOW("net.pubnative.hybid.interstitial.custom_end_card_show"),
+        CUSTOM_END_CARD_CLICK("net.pubnative.hybid.interstitial.custom_end_card_click"),
         NONE("none");
 
         public static Action from(String action) {
@@ -48,6 +51,10 @@ public class HyBidInterstitialBroadcastReceiver extends BroadcastReceiver {
                 return VIDEO_DISMISS;
             } else if (VIDEO_FINISH.getId().equals(action)) {
                 return VIDEO_FINISH;
+            } else if(CUSTOM_END_CARD_SHOW.getId().equals(action)){
+                return CUSTOM_END_CARD_SHOW;
+            } else if (CUSTOM_END_CARD_CLICK.getId().equals(action)){
+                return CUSTOM_END_CARD_CLICK;
             }
 
             return NONE;
@@ -93,6 +100,8 @@ public class HyBidInterstitialBroadcastReceiver extends BroadcastReceiver {
         mIntentFilter.addAction(Action.VIDEO_SKIP.getId());
         mIntentFilter.addAction(Action.VIDEO_DISMISS.getId());
         mIntentFilter.addAction(Action.VIDEO_FINISH.getId());
+        mIntentFilter.addAction(Action.CUSTOM_END_CARD_SHOW.getId());
+        mIntentFilter.addAction(Action.CUSTOM_END_CARD_CLICK.getId());
         mIntentFilter.addAction(Action.ERROR.getId());
     }
 
@@ -135,14 +144,15 @@ public class HyBidInterstitialBroadcastReceiver extends BroadcastReceiver {
                              Bundle extras,
                              InterstitialPresenter presenter,
                              InterstitialPresenter.Listener listener) {
-        handleAction(action, extras, presenter, listener, null);
+        handleAction(action, extras, presenter, listener, null, null);
     }
 
     public void handleAction(Action action,
                              Bundle extras,
                              InterstitialPresenter presenter,
                              InterstitialPresenter.Listener listener,
-                             VideoListener videoListener) {
+                             VideoListener videoListener,
+                             CustomEndCardListener customEndCardListener) {
         if (listener == null) {
             return;
         }
@@ -191,6 +201,16 @@ public class HyBidInterstitialBroadcastReceiver extends BroadcastReceiver {
             case VIDEO_FINISH:
                 if (videoListener != null) {
                     videoListener.onVideoFinished();
+                }
+                break;
+            case CUSTOM_END_CARD_SHOW:
+                if (customEndCardListener != null) {
+                    customEndCardListener.onCustomEndCardShow();
+                }
+                break;
+            case CUSTOM_END_CARD_CLICK:
+                if (customEndCardListener != null) {
+                    customEndCardListener.onCustomEndCardClick();
                 }
                 break;
             case NONE:

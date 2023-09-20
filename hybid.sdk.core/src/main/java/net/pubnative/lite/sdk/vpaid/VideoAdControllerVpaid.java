@@ -119,7 +119,7 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
     }
 
     @Override
-    public void setEndCardData(EndCardData endCardData) {
+    public void addEndCardData(EndCardData endCardData) {
     }
 
     @Override
@@ -204,6 +204,12 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
         });
 
     }
+
+    @Override
+    public void skipEndCard() {
+
+    }
+
     //endregion
 
     //region BridgeEventHandler methods
@@ -433,5 +439,17 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
     @Override
     public void setVideoVisible(boolean isVisible) {
         this.mIsVisible = isVisible;
+    }
+
+    @Override
+    public void onCustomEndCardShow() {
+        if(mBaseAdInternal != null)
+            mBaseAdInternal.onCustomEndCardShow();
+    }
+
+    @Override
+    public void onCustomEndCardClick() {
+        if(mBaseAdInternal != null)
+            mBaseAdInternal.onCustomEndCardClick();
     }
 }

@@ -22,6 +22,7 @@
 //
 package net.pubnative.lite.sdk.rewarded.presenter;
 
+import net.pubnative.lite.sdk.CustomEndCardListener;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.models.Ad;
 
@@ -45,6 +46,8 @@ public interface RewardedPresenter {
     void setListener(RewardedPresenter.Listener listener);
 
     void setVideoListener(VideoListener listener);
+
+    void setCustomEndCardListener(CustomEndCardListener listener);
 
     Ad getAd();
 

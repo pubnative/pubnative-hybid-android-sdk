@@ -5,6 +5,7 @@ public enum RemoteConfig {
     AUDIO_STATE("audiostate", String.class),
     END_CARD_ENABLED("endcardenabled", Boolean.class),
     CUSTOM_END_CARD_ENABLED("custom_endcard_enabled", Boolean.class),
+    CUSTOM_END_CARD_DISPLAY("custom_endcard_display", String.class),
     END_CARD_CLOSE_DELAY("endcard_close_delay", Integer.class),
     HTML_SKIP_OFFSET("html_skip_offset", Integer.class),
     REWARDED_HTML_SKIP_OFFSET("rewarded_html_skip_offset", Integer.class),

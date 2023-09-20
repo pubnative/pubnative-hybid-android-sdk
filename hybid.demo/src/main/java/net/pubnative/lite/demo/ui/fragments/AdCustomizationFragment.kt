@@ -125,7 +125,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
             R.id.radio_sound_default -> AudioState.DEFAULT
             R.id.radio_sound_on -> AudioState.ON
             R.id.radio_sound_mute -> AudioState.MUTED
-            else -> AudioState.DEFAULT
+            else -> AudioState.ON
         }
 
         val mraidExpand = mraidExpandSwitch.isChecked

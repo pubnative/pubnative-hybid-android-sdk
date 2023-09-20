@@ -46,7 +46,6 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,9 +69,7 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RatingBar;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
 
@@ -93,8 +90,6 @@ import net.pubnative.lite.sdk.viewability.HyBidViewabilityWebAdSession;
 import net.pubnative.lite.sdk.views.PNWebView;
 import net.pubnative.lite.sdk.vpaid.helpers.BitmapHelper;
 import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
-import net.pubnative.lite.sdk.vpaid.models.CloseCardData;
-import net.pubnative.lite.sdk.vpaid.utils.ImageUtils;
 import net.pubnative.lite.sdk.vpaid.widget.CountDownView;
 import net.pubnative.lite.sdk.vpaid.widget.CountDownViewFactory;
 
@@ -126,7 +121,7 @@ import java.util.Map;
 public class MRAIDView extends FrameLayout {
     // used to differentiate logging
     private static final String MRAID_LOG_TAG = MRAIDView.class.getSimpleName();
-    private boolean isExpandEnabled;
+    private final boolean isExpandEnabled;
 
     private Boolean showTimerBeforeEndCard = false;
 
@@ -136,16 +131,13 @@ public class MRAIDView extends FrameLayout {
 
     private Integer mBackButtonDelay = -1;
     private Boolean isBackClickable = false;
-
-    private SimpleTimer mBackButtonTimer;
-
     private SimpleTimer mExpirationTimer;
     private SimpleTimer mNativeCloseButtonTimer;
 
-    private Runnable backButtonClickableityhandler = null;
+    private Runnable backButtonClickabilityHandler = null;
 
-    public void setBackButtonClickableityhandler(Runnable handler){
-        this.backButtonClickableityhandler = handler;
+    public void setBackButtonClickabilityHandler(Runnable handler) {
+        this.backButtonClickabilityHandler = handler;
     }
 
     public void handleNativeCloseButtonDelay() {
@@ -296,21 +288,6 @@ public class MRAIDView extends FrameLayout {
     private boolean isClosing;
     private boolean isExpanded;
 
-    // Close card
-    private CloseCardData mCloseCardData = null;
-    // Close card views
-    private boolean mCloseCardIsShown = false;
-    private View mCloseCardLayout;
-    private FrameLayout mHtmlCloseCardContainer;
-    private TextView mCloseCardTitleView;
-    private ImageView mCloseCardIconView;
-    private RatingBar mCloseCardRatingView;
-    private ImageView mStaticCloseCardView;
-    private View closeCardVotesLayout;
-    private TextView mCloseCardVoteView;
-    private View mCloseCardActionView;
-    private MRAIDBanner mHtmlCloseCardView;
-
     // used to force full-screen mode on expand and to restore original state on close
     private View titleBar;
     private boolean isFullScreen;
@@ -389,7 +366,6 @@ public class MRAIDView extends FrameLayout {
         mraidWebChromeClient = new MRAIDWebChromeClient();
         mraidWebViewClient = new MRAIDWebViewClient();
 
-        inflateCloseCardViews();
         webView = createWebView();
 
         if (webView == null) {
@@ -413,20 +389,6 @@ public class MRAIDView extends FrameLayout {
                 webView.loadUrl(baseUrl);
             }
         }
-    }
-
-    private void inflateCloseCardViews() {
-        mCloseCardLayout = LayoutInflater.from(context).inflate(R.layout.close_card, this, false);
-        mCloseCardLayout.setVisibility(View.GONE);
-        mStaticCloseCardView = mCloseCardLayout.findViewById(net.pubnative.lite.sdk.core.R.id.staticCloseCardView);
-        mHtmlCloseCardContainer = mCloseCardLayout.findViewById(net.pubnative.lite.sdk.core.R.id.htmlCloseCardContainer);
-        mCloseCardTitleView = mCloseCardLayout.findViewById(net.pubnative.lite.sdk.core.R.id.closeCardTitle);
-        mCloseCardRatingView = mCloseCardLayout.findViewById(net.pubnative.lite.sdk.core.R.id.closeCardRaiting);
-        mCloseCardRatingView.setIsIndicator(true);
-        mCloseCardVoteView = mCloseCardLayout.findViewById(net.pubnative.lite.sdk.core.R.id.closeCardVoteCount);
-        mCloseCardActionView = mCloseCardLayout.findViewById(net.pubnative.lite.sdk.core.R.id.closeCardActionButton);
-        mCloseCardIconView = mCloseCardLayout.findViewById(net.pubnative.lite.sdk.core.R.id.closeCardIconImageView);
-        closeCardVotesLayout = mCloseCardLayout.findViewById(net.pubnative.lite.sdk.core.R.id.closeCardVotesLayout);
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -1293,7 +1255,7 @@ public class MRAIDView extends FrameLayout {
         // The input parameter should be either expandedView or resizedView.
 
         closeRegion = new ImageButton(context);
-        closeRegion.setId(R.id.closeView);
+        closeRegion.setId(R.id.close_view);
         closeRegion.setBackgroundColor(Color.TRANSPARENT);
         closeRegion.setOnClickListener(v -> close());
 
@@ -1309,9 +1271,9 @@ public class MRAIDView extends FrameLayout {
     private void showDefaultCloseButton() {
         if (closeRegion != null) {
             Bitmap closeBitmap = BitmapHelper.toBitmap(closeRegion.getContext(), HyBid.getNormalCloseXmlResource(), R.mipmap.close);
-            if (closeBitmap != null) ((ImageView) closeRegion).setImageBitmap(closeBitmap);
+            if (closeBitmap != null) (closeRegion).setImageBitmap(closeBitmap);
             else
-                ((ImageView) closeRegion).setImageBitmap(BitmapHelper.decodeResource(closeRegion.getContext(), R.mipmap.close));
+                closeRegion.setImageBitmap(BitmapHelper.decodeResource(closeRegion.getContext(), R.mipmap.close));
             closeRegion.setScaleType(ImageView.ScaleType.FIT_CENTER);
         }
     }
@@ -1334,7 +1296,7 @@ public class MRAIDView extends FrameLayout {
             // resizeProperties.
             if (view == expandedView) {
                 params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-                params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                params.addRule(RelativeLayout.ALIGN_PARENT_START);
             } else if (view == resizedView) {
 
                 switch (resizeProperties.customClosePosition) {
@@ -2156,8 +2118,8 @@ public class MRAIDView extends FrameLayout {
 
         if (useCustomClose) {
             handleNativeCloseButtonDelay();
-            if(backButtonClickableityhandler != null){
-                backButtonClickableityhandler.run();
+            if (backButtonClickabilityHandler != null) {
+                backButtonClickabilityHandler.run();
             }
             skipTimerDelay = mNativeCloseButtonDelay;
             if (mSkipCountdownView != null) mSkipCountdownView.setVisibility(View.GONE);
@@ -2189,7 +2151,7 @@ public class MRAIDView extends FrameLayout {
         }
 
         if (mBackButtonDelay > 0) {
-            mBackButtonTimer = new SimpleTimer(mBackButtonDelay, new SimpleTimer.Listener() {
+            SimpleTimer mBackButtonTimer = new SimpleTimer(mBackButtonDelay, new SimpleTimer.Listener() {
 
                 @Override
                 public void onFinish() {
@@ -2218,74 +2180,5 @@ public class MRAIDView extends FrameLayout {
 
     private void closeOnMainThread() {
         new Handler(Looper.getMainLooper()).post(this::close);
-    }
-
-    public void setCloseCardData(CloseCardData closeCardData) {
-        this.mCloseCardData = closeCardData;
-    }
-
-    public boolean hasValidCloseCard() {
-        return mCloseCardData != null && mCloseCardData.getTitle() != null && !mCloseCardData.getTitle().isEmpty() && mCloseCardData.getIcon() != null && mCloseCardData.getBannerImage() != null;
-    }
-
-    public boolean isCloseCardShown() {
-        return mCloseCardIsShown;
-    }
-
-    public void showCloseCard(String adUrl) {
-
-        mCloseCardIsShown = true;
-        mCloseCardLayout.setVisibility(View.VISIBLE);
-        RelativeLayout.LayoutParams closeCardParams = new RelativeLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
-        if (mCloseCardLayout.getParent() != null) {
-            ((ViewGroup) mCloseCardLayout.getParent()).removeView(mCloseCardLayout);
-        } else {
-            removeView(mCloseCardLayout);
-        }
-        this.removeView(webView);
-        this.addView(mCloseCardLayout, 0, closeCardParams);
-        mCloseCardLayout.setOnClickListener(null);
-
-        mCloseCardTitleView.setText(mCloseCardData.getTitle());
-        mCloseCardRatingView.setRating((float) mCloseCardData.getRating());
-
-        if (mCloseCardData.getVotes() > 0) {
-            closeCardVotesLayout.setVisibility(View.VISIBLE);
-            mCloseCardVoteView.setText(mCloseCardLayout.getContext().getString(net.pubnative.lite.sdk.core.R.string.close_card_votes, mCloseCardData.getVotes()));
-        } else {
-            closeCardVotesLayout.setVisibility(View.GONE);
-        }
-
-        if (mCloseCardData.getIcon() != null) {
-            mCloseCardIconView.setImageBitmap(mCloseCardData.getIcon());
-        }
-
-        mCloseCardActionView.setOnClickListener(v -> {
-            wasTouched = true;
-            if (adUrl.startsWith("mraid://")) {
-                parseCommandUrl(adUrl);
-            } else {
-                try {
-                    open(URLEncoder.encode(adUrl, "UTF-8"));
-                } catch (UnsupportedEncodingException e) {
-                    closeLayoutListener.onClose();
-                }
-            }
-        });
-
-        if (mCloseCardData.getBanner() != null) {
-            // add Check if is static banner or MRAIDBanner in the feature
-            if (true) {
-                if (mCloseCardData.getBannerImage() != null) {
-                    ImageUtils.setScaledImage(mStaticCloseCardView, mCloseCardData.getBannerImage());
-                    mStaticCloseCardView.setVisibility(View.VISIBLE);
-                }
-            } else {
-                /*mStaticCloseCardView.setVisibility(View.GONE);
-                mHtmlCloseCardView = new MRAIDBanner(this, closeCardData.getBanner(), "",
-                        new String[]{}, this, this, null);
-                mHtmlCloseCardContainer.addView(mHtmlCloseCardView);*/
-            }
-        }
     }
 }

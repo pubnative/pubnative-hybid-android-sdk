@@ -52,6 +52,7 @@ class HyBidInFeedFragment : Fragment(R.layout.fragment_hybid_infeed_banner), InF
     private var zoneId: String? = null
 
     private lateinit var autoRefreshSwitch: SwitchCompat
+    private lateinit var apiRadioGroup: RadioGroup
     private lateinit var loadButton: Button
     private lateinit var errorCodeView: TextView
     private lateinit var errorView: TextView
@@ -62,18 +63,19 @@ class HyBidInFeedFragment : Fragment(R.layout.fragment_hybid_infeed_banner), InF
     private lateinit var adapter: InFeedAdapter
 
     private val adSizes = arrayOf(
-            AdSize.SIZE_320x50,
-            AdSize.SIZE_300x250,
-            AdSize.SIZE_160x600,
-            AdSize.SIZE_250x250,
-            AdSize.SIZE_300x50,
-            AdSize.SIZE_300x600,
-            AdSize.SIZE_320x100,
-            AdSize.SIZE_320x480,
-            AdSize.SIZE_480x320,
-            AdSize.SIZE_728x90,
-            AdSize.SIZE_768x1024,
-            AdSize.SIZE_1024x768)
+        AdSize.SIZE_320x50,
+        AdSize.SIZE_300x250,
+        AdSize.SIZE_160x600,
+        AdSize.SIZE_250x250,
+        AdSize.SIZE_300x50,
+        AdSize.SIZE_300x600,
+        AdSize.SIZE_320x100,
+        AdSize.SIZE_320x480,
+        AdSize.SIZE_480x320,
+        AdSize.SIZE_728x90,
+        AdSize.SIZE_768x1024,
+        AdSize.SIZE_1024x768
+    )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -85,6 +87,7 @@ class HyBidInFeedFragment : Fragment(R.layout.fragment_hybid_infeed_banner), InF
         recyclerView = view.findViewById(R.id.list)
         adSizeSpinner = view.findViewById(R.id.spinner_ad_size)
         autoRefreshSwitch = view.findViewById(R.id.check_auto_refresh)
+        apiRadioGroup = view.findViewById(R.id.group_api_type)
 
         autoRefreshSwitch.isChecked = false
 
@@ -111,10 +114,21 @@ class HyBidInFeedFragment : Fragment(R.layout.fragment_hybid_infeed_banner), InF
             }
         }
 
-        errorView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), errorView.text.toString()) }
-        creativeIdView.setOnClickListener { ClipboardUtils.copyToClipboard(requireActivity(), creativeIdView.text.toString()) }
+        errorView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                errorView.text.toString()
+            )
+        }
+        creativeIdView.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                creativeIdView.text.toString()
+            )
+        }
 
-        spinnerAdapter = ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, adSizes)
+        spinnerAdapter =
+            ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, adSizes)
         adSizeSpinner.adapter = spinnerAdapter
     }
 
@@ -122,7 +136,7 @@ class HyBidInFeedFragment : Fragment(R.layout.fragment_hybid_infeed_banner), InF
         errorView.text = ""
 
         val adSize = adSizes[adSizeSpinner.selectedItemPosition]
-        adapter.loadWithAd(adSize)
+        adapter.loadWithAd(adSize, apiRadioGroup.checkedRadioButtonId)
     }
 
     // --------------- InFeedAdListener Listener --------------------

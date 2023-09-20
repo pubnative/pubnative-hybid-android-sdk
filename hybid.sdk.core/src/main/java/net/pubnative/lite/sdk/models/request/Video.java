@@ -27,6 +27,8 @@ public class Video extends JsonModel {
     @BindField
     private Integer placement;
     @BindField
+    private Integer plcmt;
+    @BindField
     private Integer linearity;
     @BindField
     private Integer skip;
@@ -36,6 +38,10 @@ public class Video extends JsonModel {
     private Integer skipafter = 0;
     @BindField
     private Integer sequence;
+    @BindField
+    private Boolean mraidendcard;
+    @BindField
+    private Integer clktype;
     @BindField
     private List<Integer> battr;
     @BindField
@@ -274,5 +280,29 @@ public class Video extends JsonModel {
 
     public void setCompanionTypes(List<Integer> companionTypes) {
         this.companiontype = companionTypes;
+    }
+
+    public Integer getPlacementSubtype() {
+        return plcmt;
+    }
+
+    public void setPlacementSubtype(Integer plcmt) {
+        this.plcmt = plcmt;
+    }
+
+    public Boolean getMraidEndcard() {
+        return mraidendcard;
+    }
+
+    public void setMraidEndcard(Boolean mraidEndcard) {
+        this.mraidendcard = mraidEndcard;
+    }
+
+    public Integer getClickType() {
+        return clktype;
+    }
+
+    public void setClickType(Integer clktype) {
+        this.clktype = clktype;
     }
 }

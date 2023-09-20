@@ -1,12 +1,9 @@
 package net.pubnative.lite.sdk.views.endcard;
 
-import static net.pubnative.lite.sdk.views.endcard.EndCardConstants.CUSTOM_END_CARD_CLICK_URL;
-
 import android.content.Context;
 import android.graphics.Color;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,16 +11,21 @@ import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import net.pubnative.lite.sdk.core.R;
 import net.pubnative.lite.sdk.models.SkipOffset;
 import net.pubnative.lite.sdk.mraid.MRAIDBanner;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
+import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.utils.SkipOffsetManager;
-import net.pubnative.lite.sdk.vpaid.CloseButtonListener;
+import net.pubnative.lite.sdk.utils.ViewUtils;
 import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
 import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.utils.ImageUtils;
+
+import java.util.List;
+import java.util.Map;
 
 public class HyBidEndCardView extends FrameLayout {
 
@@ -31,6 +33,8 @@ public class HyBidEndCardView extends FrameLayout {
     private FrameLayout htmlEndCardContainer;
     private MRAIDBanner mHtmlEndCardView;
 
+    private ImageView mSkipView;
+    private ImageView mCloseView;
     private SimpleTimer mEndcardTimer;
 
     private EndCardViewListener endcardViewListener;
@@ -38,11 +42,15 @@ public class HyBidEndCardView extends FrameLayout {
     // Config
     private SkipOffset skipOffset = new SkipOffset(SkipOffsetManager.getDefaultEndcardSkipOffset(), false);
 
+    private Boolean isCustomEndCard = false;
+
     // Listeners
     private final MRAIDViewListener mraidViewListener = new MRAIDViewListener() {
 
         @Override
         public void mraidViewLoaded(MRAIDView mraidView) {
+            if (endcardViewListener != null)
+                endcardViewListener.onShow(isCustomEndCard);
             ViewTreeObserver.OnDrawListener listener = new ViewTreeObserver.OnDrawListener() {
                 @Override
                 public void onDraw() {
@@ -105,7 +113,7 @@ public class HyBidEndCardView extends FrameLayout {
         public void mraidNativeFeatureOpenBrowser(String url) {
             if (endcardViewListener != null) {
                 Boolean isCustomEndCardClick = url != null && url.contains(EndCardConstants.CUSTOM_END_CARD_CLICK_URL);
-                endcardViewListener.onClick(isCustomEndCardClick, url);
+                endcardViewListener.onClick(isCustomEndCardClick);
             }
         }
 
@@ -119,16 +127,52 @@ public class HyBidEndCardView extends FrameLayout {
     };
 
     public HyBidEndCardView(Context context) {
-        this(context, null, 0);
+        super(context);
+        initUi();
+        initControViews();
     }
 
     public HyBidEndCardView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        super(context, attrs);
+        initUi();
+        initControViews();
     }
 
     public HyBidEndCardView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initUi();
+        initControViews();
+    }
+
+    private void initControViews() {
+
+        int skipViewSize = (int) ViewUtils.convertDpToPixel(30f, getContext());
+        LayoutParams lp = new LayoutParams(skipViewSize, skipViewSize);
+        lp.gravity = Gravity.START;
+        int margin = (int) ViewUtils.convertDpToPixel(8f, getContext());
+        lp.setMargins(margin, margin, 0, 0);
+
+
+        mSkipView = new ImageView(getContext());
+        mSkipView.setId(R.id.end_card_skip_view);
+        mSkipView.setLayoutParams(lp);
+        mSkipView.setImageResource(R.mipmap.skip);
+        mSkipView.setVisibility(View.GONE);
+        mSkipView.setOnClickListener(v -> {
+            if (endcardViewListener != null) endcardViewListener.onSkip();
+        });
+
+        mCloseView = new ImageView(getContext());
+        mCloseView.setId(R.id.button_fullscreen_close);
+        mCloseView.setLayoutParams(lp);
+        mCloseView.setImageResource(R.mipmap.close);
+        mCloseView.setVisibility(View.GONE);
+        mCloseView.setOnClickListener(v -> {
+            if (endcardViewListener != null) endcardViewListener.onClose();
+        });
+
+        this.addView(mSkipView);
+        this.addView(mCloseView);
     }
 
     public void setSkipOffset(SkipOffset skipOffset) {
@@ -150,11 +194,17 @@ public class HyBidEndCardView extends FrameLayout {
         imageView.setLayoutParams(lp);
         imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         imageView.setVisibility(View.GONE);
+        imageView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (endcardViewListener != null)
+                    endcardViewListener.onClick(isCustomEndCard);
+            }
+        });
         return imageView;
     }
 
     private FrameLayout createHtmlEndCardContainer() {
-        LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
         FrameLayout frameLayout = new FrameLayout(this.getContext());
         frameLayout.setVisibility(View.GONE);
         frameLayout.setBackgroundColor(Color.TRANSPARENT);
@@ -162,8 +212,10 @@ public class HyBidEndCardView extends FrameLayout {
     }
 
     public void show(EndCardData endCardData, String imageUri) {
+        removeExistingEndcardViews();
         this.setVisibility(View.VISIBLE);
         if (endCardData != null) {
+            this.isCustomEndCard = endCardData.isCustom();
             configUi(endCardData);
             clearEndCardViews();
             if (endCardData.getType() == EndCardData.Type.STATIC_RESOURCE) {
@@ -171,26 +223,55 @@ public class HyBidEndCardView extends FrameLayout {
                 this.addView(staticEndCardView);
                 staticEndCardView.setVisibility(View.VISIBLE);
                 ImageUtils.setScaledImage(staticEndCardView, imageUri);
+                if (endcardViewListener != null) {
+                    endcardViewListener.onShow(endCardData.isCustom());
+                }
             } else if (!TextUtils.isEmpty(endCardData.getContent())) {
                 htmlEndCardContainer = createHtmlEndCardContainer();
                 this.addView(htmlEndCardContainer);
                 htmlEndCardContainer.setVisibility(View.VISIBLE);
                 if (endCardData.getType() == EndCardData.Type.IFRAME_RESOURCE) {
-                    mHtmlEndCardView = new MRAIDBanner(this.getContext(), endCardData.getContent(), "", false, false, new String[]{}, mraidViewListener, mraidNativeFeatureListener, null);
+                    PNHttpClient.makeRequest(getContext(), endCardData.getContent(), null, null, true, new PNHttpClient.Listener() {
+                        @Override
+                        public void onSuccess(String response, Map<String, List<String>> headers) {
+                            if (!TextUtils.isEmpty(response)) {
+                                renderHtmlEndcard(response, endCardData.isCustom());
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Throwable error) {
+                        }
+                    });
                 } else {
-                    mHtmlEndCardView = new MRAIDBanner(this.getContext(), "", endCardData.getContent(), false, false, new String[]{}, mraidViewListener, mraidNativeFeatureListener, null);
+                    renderHtmlEndcard(endCardData.getContent(), endCardData.isCustom());
                 }
-                mHtmlEndCardView.setSkipOffset(skipOffset.getOffset());
-                mHtmlEndCardView.setUseCustomClose(true);
-                int height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                if (endCardData.isCustom()) {
-                    height = ViewGroup.LayoutParams.MATCH_PARENT;
-                }
-                FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
-                lp.gravity = Gravity.CENTER_VERTICAL;
-                mHtmlEndCardView.setLayoutParams(lp);
-                htmlEndCardContainer.addView(mHtmlEndCardView);
             }
+        }
+    }
+
+    private void renderHtmlEndcard(String content, boolean isCustom) {
+        mHtmlEndCardView = new MRAIDBanner(this.getContext(), "", content, false, false, new String[]{}, mraidViewListener, mraidNativeFeatureListener, null);
+        mHtmlEndCardView.setSkipOffset(skipOffset.getOffset());
+        mHtmlEndCardView.setUseCustomClose(true);
+        int height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        if (isCustom) {
+            height = ViewGroup.LayoutParams.MATCH_PARENT;
+        }
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
+        lp.gravity = Gravity.CENTER_VERTICAL;
+        mHtmlEndCardView.setLayoutParams(lp);
+        htmlEndCardContainer.addView(mHtmlEndCardView);
+    }
+
+    private void removeExistingEndcardViews() {
+        if (staticEndCardView != null) {
+            this.removeView(staticEndCardView);
+            staticEndCardView = null;
+        }
+        if (htmlEndCardContainer != null) {
+            this.removeView(htmlEndCardContainer);
+            htmlEndCardContainer = null;
         }
     }
 
@@ -216,7 +297,23 @@ public class HyBidEndCardView extends FrameLayout {
         this.setVisibility(View.GONE);
     }
 
-    public void showCloseButton(CloseButtonListener listener) {
+    public void showSkipButton() {
+        mCloseView.setVisibility(INVISIBLE);
+        startSkipOffsetTimer(() -> {
+            mSkipView.setVisibility(VISIBLE);
+            mSkipView.bringToFront();
+        });
+    }
+
+    public void showCloseButton() {
+        mSkipView.setVisibility(INVISIBLE);
+        startSkipOffsetTimer(() -> {
+            mCloseView.setVisibility(VISIBLE);
+            mCloseView.bringToFront();
+        });
+    }
+
+    public void startSkipOffsetTimer(Runnable callback) {
 
         int delay = skipOffset.getOffset();
 
@@ -226,7 +323,7 @@ public class HyBidEndCardView extends FrameLayout {
             mEndcardTimer = new SimpleTimer(endCardDelayInMillis, new SimpleTimer.Listener() {
                 @Override
                 public void onFinish() {
-                    listener.onCloseButtonVisible();
+                    callback.run();
                 }
 
                 @Override
@@ -235,7 +332,7 @@ public class HyBidEndCardView extends FrameLayout {
             });
             mEndcardTimer.start();
         } else {
-            listener.onCloseButtonVisible();
+            callback.run();
         }
     }
 
@@ -273,6 +370,12 @@ public class HyBidEndCardView extends FrameLayout {
 
     public interface EndCardViewListener {
 
-        public void onClick(Boolean isCustomEndCard, String openUrl);
+        public void onClick(Boolean isCustomEndCard);
+
+        public void onSkip();
+
+        public void onClose();
+
+        public void onShow(Boolean isCustomEndCard);
     }
 }

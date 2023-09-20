@@ -24,6 +24,7 @@ package net.pubnative.lite.sdk.interstitial.presenter;
 
 import android.text.TextUtils;
 
+import net.pubnative.lite.sdk.CustomEndCardListener;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
@@ -40,23 +41,28 @@ import org.json.JSONObject;
  * Created by erosgarciaponte on 09.01.18.
  */
 
-public class InterstitialPresenterDecorator implements InterstitialPresenter, InterstitialPresenter.Listener, VideoListener {
+public class InterstitialPresenterDecorator implements InterstitialPresenter, InterstitialPresenter.Listener, VideoListener, CustomEndCardListener {
     private static final String TAG = InterstitialPresenterDecorator.class.getSimpleName();
     private final InterstitialPresenter mInterstitialPresenter;
     private final AdTracker mAdTrackingDelegate;
+    private final AdTracker mCustomEndCardTrackingDelegate;
     private final ReportingController mReportingController;
     private final InterstitialPresenter.Listener mListener;
     private VideoListener mVideoListener;
     private boolean mIsDestroyed = false;
     private boolean mImpressionTracked = false;
     private boolean mClickTracked = false;
+    private boolean mEndCardImpressionTracked = false;
+    private boolean mEndCardClickTracked = false;
 
     public InterstitialPresenterDecorator(InterstitialPresenter interstitialPresenter,
                                           AdTracker adTrackingDelegate,
+                                          AdTracker customEndCardTrackingDelegate,
                                           ReportingController reportingController,
                                           InterstitialPresenter.Listener listener) {
         mInterstitialPresenter = interstitialPresenter;
         mAdTrackingDelegate = adTrackingDelegate;
+        mCustomEndCardTrackingDelegate = customEndCardTrackingDelegate;
         mReportingController = reportingController;
         mListener = listener;
     }
@@ -70,6 +76,9 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
     public void setVideoListener(VideoListener listener) {
         mVideoListener = listener;
     }
+
+    @Override
+    public void setCustomEndCardListener(CustomEndCardListener listener) { }
 
     @Override
     public Ad getAd() {
@@ -250,5 +259,43 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
         if (mVideoListener != null) {
             mVideoListener.onVideoSkipped();
         }
+    }
+
+    @Override
+    public void onCustomEndCardShow() {
+
+        if (mIsDestroyed || mEndCardImpressionTracked) {
+            return;
+        }
+
+        if (mReportingController != null) {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.CUSTOM_END_CARD_IMPRESSION);
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            reportingEvent.setAdFormat(Reporting.AdFormat.FULLSCREEN);
+            mReportingController.reportEvent(reportingEvent);
+        }
+
+        mCustomEndCardTrackingDelegate.trackImpression();
+        mEndCardImpressionTracked = true;
+    }
+
+    @Override
+    public void onCustomEndCardClick() {
+
+        if (mIsDestroyed || mEndCardClickTracked) {
+            return;
+        }
+
+        if (mReportingController != null) {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.CUSTOM_END_CARD_CLICK);
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            reportingEvent.setAdFormat(Reporting.AdFormat.FULLSCREEN);
+            mReportingController.reportEvent(reportingEvent);
+        }
+
+        mCustomEndCardTrackingDelegate.trackClick();
+        mEndCardClickTracked = true;
     }
 }

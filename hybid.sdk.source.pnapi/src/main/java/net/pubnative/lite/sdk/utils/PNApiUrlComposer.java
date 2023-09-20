@@ -25,8 +25,12 @@ package net.pubnative.lite.sdk.utils;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.PNAdRequest;
+import net.pubnative.lite.sdk.models.bidstream.BidParam;
+import net.pubnative.lite.sdk.models.bidstream.Signal;
+
+import java.lang.reflect.Field;
+import java.util.Map;
 
 /**
  * Created by erosgarciaponte on 22.01.18.
@@ -66,6 +70,10 @@ public final class PNApiUrlComposer {
             uriBuilder.appendQueryParameter("devicemodel", adRequest.devicemodel);
         }
 
+        if (!TextUtils.isEmpty(adRequest.make)) {
+                uriBuilder.appendQueryParameter("make", adRequest.make);
+        }
+
         if (!TextUtils.isEmpty(adRequest.deviceHeight)) {
             uriBuilder.appendQueryParameter("dh", adRequest.deviceHeight);
         }
@@ -74,11 +82,23 @@ public final class PNApiUrlComposer {
             uriBuilder.appendQueryParameter("dw", adRequest.deviceWidth);
         }
 
-        if(!TextUtils.isEmpty(adRequest.orientation)){
+        if (!TextUtils.isEmpty(adRequest.orientation)) {
             uriBuilder.appendQueryParameter("scro", adRequest.orientation);
         }
 
-        if(!TextUtils.isEmpty(adRequest.soundSetting)){
+        if (!TextUtils.isEmpty(adRequest.ppi)) {
+            uriBuilder.appendQueryParameter("ppi", adRequest.ppi);
+        }
+
+        if (!TextUtils.isEmpty(adRequest.pxratio)) {
+            uriBuilder.appendQueryParameter("pxratio", adRequest.pxratio);
+        }
+
+        if (!TextUtils.isEmpty(adRequest.js)) {
+            uriBuilder.appendQueryParameter("js", adRequest.js);
+        }
+
+        if(!TextUtils.isEmpty(adRequest.soundSetting)) {
             uriBuilder.appendQueryParameter("aud", adRequest.soundSetting);
         }
 
@@ -116,6 +136,14 @@ public final class PNApiUrlComposer {
 
         if (!TextUtils.isEmpty(adRequest.locale)) {
             uriBuilder.appendQueryParameter("locale", adRequest.locale);
+        }
+
+        if (!TextUtils.isEmpty(adRequest.language)) {
+            uriBuilder.appendQueryParameter("language", adRequest.language);
+        }
+
+        if (!TextUtils.isEmpty(adRequest.langb)) {
+            uriBuilder.appendQueryParameter("langb", adRequest.langb);
         }
 
         if (!TextUtils.isEmpty(adRequest.latitude)) {
@@ -166,15 +194,15 @@ public final class PNApiUrlComposer {
             uriBuilder.appendQueryParameter("displaymanagerver", adRequest.displaymanagerver);
         }
 
-        if (!TextUtils.isEmpty(adRequest.omidpn)){
+        if (!TextUtils.isEmpty(adRequest.omidpn)) {
             uriBuilder.appendQueryParameter("omidpn", adRequest.omidpn);
         }
 
-        if (!TextUtils.isEmpty(adRequest.omidpv)){
+        if (!TextUtils.isEmpty(adRequest.omidpv)) {
             uriBuilder.appendQueryParameter("omidpv", adRequest.omidpv);
         }
 
-        if (!TextUtils.isEmpty(adRequest.rv)){
+        if (!TextUtils.isEmpty(adRequest.rv)) {
             uriBuilder.appendQueryParameter("rv", adRequest.rv);
         }
 
@@ -184,6 +212,34 @@ public final class PNApiUrlComposer {
 
         if (!TextUtils.isEmpty(adRequest.userconsent)) {
             uriBuilder.appendQueryParameter("userconsent", adRequest.userconsent);
+        }
+
+        if (!TextUtils.isEmpty(adRequest.gppstring)) {
+            uriBuilder.appendQueryParameter("gpp", adRequest.gppstring);
+        }
+
+        if (!TextUtils.isEmpty(adRequest.gppsid)) {
+            uriBuilder.appendQueryParameter("gppsid", adRequest.gppsid);
+        }
+
+        if (!TextUtils.isEmpty(adRequest.carrier)) {
+            uriBuilder.appendQueryParameter("carrier", adRequest.carrier);
+        }
+
+        if (!TextUtils.isEmpty(adRequest.connectiontype)) {
+            uriBuilder.appendQueryParameter("connectiontype", adRequest.connectiontype);
+        }
+
+        if (!TextUtils.isEmpty(adRequest.mccmnc)) {
+            uriBuilder.appendQueryParameter("mccmnc", adRequest.mccmnc);
+        }
+
+        if (!TextUtils.isEmpty(adRequest.mccmncsim)) {
+            uriBuilder.appendQueryParameter("mccmncsim", adRequest.mccmncsim);
+        }
+
+        if (!TextUtils.isEmpty(adRequest.geofetch)) {
+            uriBuilder.appendQueryParameter("geofetch", adRequest.geofetch);
         }
 
         if (!TextUtils.isEmpty(adRequest.protocol)) {
@@ -204,6 +260,33 @@ public final class PNApiUrlComposer {
 
         if (!TextUtils.isEmpty(adRequest.sessionduration)) {
             uriBuilder.appendQueryParameter("sessionduration", adRequest.sessionduration);
+        }
+
+        if (!adRequest.getSignals().isEmpty()) {
+            for (Signal signal : adRequest.getSignals()) {
+                for (Field field : signal.getClass().getDeclaredFields()) {
+                    final BidParam bidParam = field.getAnnotation(BidParam.class);
+                    if (bidParam == null) {
+                        continue;
+                    }
+                    try {
+                        Class typeClass = field.getType();
+                        String value;
+                        if (Iterable.class.isAssignableFrom(typeClass)) {
+                            value = String.valueOf(field.get(signal));
+                            value = value.substring(1, value.length() - 1);
+                            value = value.replaceAll("\\s+", "");
+                        } else {
+                            value = String.valueOf(field.get(signal));
+                        }
+                        if (!TextUtils.isEmpty(value) && !value.equals("null") && !TextUtils.isEmpty(bidParam.name())) {
+                            uriBuilder.appendQueryParameter(bidParam.name(), value);
+                        }
+                    } catch (IllegalAccessException e) {
+
+                    }
+                }
+            }
         }
 
         return uriBuilder.build();

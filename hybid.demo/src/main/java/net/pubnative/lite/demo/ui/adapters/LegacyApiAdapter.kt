@@ -76,15 +76,19 @@ class LegacyApiAdapter(private var mListener: OnLogDisplayListener) :
                 LegacyApiTesterSize.BANNER -> {
                     return TYPE_API_BANNER
                 }
+
                 LegacyApiTesterSize.MEDIUM -> {
                     return TYPE_API_MRECT
                 }
+
                 LegacyApiTesterSize.LEADERBOARD -> {
                     return TYPE_API_LEADERBOARD
                 }
+
                 LegacyApiTesterSize.NATIVE -> {
-                    return  TYPE_API_NATIVE
+                    return TYPE_API_NATIVE
                 }
+
                 else -> {
                     return TYPE_TEXT
                 }

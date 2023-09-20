@@ -8,6 +8,8 @@ import org.json.JSONObject;
 public class Regs extends JsonModel {
     @BindField
     private Integer coppa;
+    @BindField
+    private Ext ext;
 
     public Regs() {
     }
@@ -18,5 +20,11 @@ public class Regs extends JsonModel {
 
     public Integer getCOPPA() {
         return coppa;
+    }
+
+    public Ext getExt() {return ext;}
+
+    public void setExt(Ext ext) {
+        this.ext = ext;
     }
 }

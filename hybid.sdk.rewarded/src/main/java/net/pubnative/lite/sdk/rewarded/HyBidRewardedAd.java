@@ -41,7 +41,6 @@ import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.OpenRTBAdRequestFactory;
-import net.pubnative.lite.sdk.models.RemoteConfigFeature;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
 import net.pubnative.lite.sdk.rewarded.presenter.RewardedPresenter;
@@ -434,7 +433,20 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
                     }
                 });
             } else {
-                invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ASSET));
+                if (TextUtils.isEmpty(mZoneId)) {
+                    mZoneId = "3";
+                }
+                assetGroupId = 21;
+                type = Ad.AdType.HTML;
+                mAd = new Ad(assetGroupId, adValue, type);
+                HyBid.getAdCache().put(mZoneId, mAd);
+                mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, HyBidRewardedAd.this);
+                if (mPresenter != null) {
+                    mPresenter.setVideoListener(this);
+                    mPresenter.load();
+                } else {
+                    invokeOnLoadFailed(new HyBidError(HyBidErrorCode.UNSUPPORTED_ASSET));
+                }
             }
         } else {
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ASSET));
@@ -684,7 +696,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
 
     public boolean hasEndCard() {
         if (mAd != null)
-            return AdEndCardManager.isEndCardEnabled(mAd, mAd.isEndCardEnabled(), HyBid.isEndCardEnabled(), mAd.hasEndCard());
+            return AdEndCardManager.isEndCardEnabled(mAd, mAd.hasEndCard());
         return false;
     }
 }

@@ -60,31 +60,16 @@ public class ViewControllerVast implements View.OnClickListener {
     private TextureView mVideoPlayerLayoutTexture;
     private View mControlsLayout;
     private HyBidEndCardView mEndCardView;
-    private View mCloseCardLayout;
-    private FrameLayout mHtmlCloseCardContainer;
-    private TextView mCloseCardTitleView;
-    private ImageView mCloseCardIconView;
-    private RatingBar mCloseCardRatingView;
-    private ImageView mStaticCloseCardView;
-    private View closeCardVotesLayout;
-    private TextView mCloseCardVoteView;
-    private View mCloseCardActionView;
-    private MRAIDBanner mHtmlCloseCardView;
     private boolean mMuteState;
-    private boolean mIsFullscreen;
-    private RelativeLayout mMediaLayout;
+    private final boolean mIsFullscreen;
     private Surface mSurface;
     private View mSkipView;
     private ImageView mMuteView;
-    private SimpleTimer mEndcardTimer;
-    private Integer mRemoteEndCardCloseDelay;
-    private Integer mRemoteNativeCloseButtonDelay;
-    private AdCloseButtonListener mAdCloseButtonListener;
+    private final Integer mRemoteEndCardCloseDelay;
 
     VideoVisibilityManager videoVisibilityManager;
     VastActivityInteractor interactor;
 
-    private InterstitialActionBehaviour interstitialClickBehaviour;
     private InterstitialActionBehaviour remoteConfigInterstitialClickBehaviour = null;
 
     public ViewControllerVast(VideoAdController adController, boolean isFullscreen, Integer endCardCloseDelay, Integer nativeCloseButtonDelay, Boolean fullScreenClickability, AdCloseButtonListener adCloseButtonListener) {
@@ -92,8 +77,6 @@ public class ViewControllerVast implements View.OnClickListener {
         mIsFullscreen = isFullscreen;
         videoVisibilityManager = VideoVisibilityManager.getInstance();
         mRemoteEndCardCloseDelay = endCardCloseDelay;
-        mRemoteNativeCloseButtonDelay = nativeCloseButtonDelay;
-        mAdCloseButtonListener = adCloseButtonListener;
         if (fullScreenClickability != null) {
             if (fullScreenClickability)
                 remoteConfigInterstitialClickBehaviour = InterstitialActionBehaviour.HB_CREATIVE;
@@ -112,21 +95,22 @@ public class ViewControllerVast implements View.OnClickListener {
 
             mControlsLayout = LayoutInflater.from(context).inflate(R.layout.controls, bannerView, false);
 
-            interstitialClickBehaviour = HyBid.getInterstitialClickBehaviour();
+            InterstitialActionBehaviour interstitialClickBehaviour = HyBid.getInterstitialClickBehaviour();
             if (remoteConfigInterstitialClickBehaviour != null)
                 interstitialClickBehaviour = remoteConfigInterstitialClickBehaviour;
 
+            TextView openView = mControlsLayout.findViewById(R.id.openURL);
             if (interstitialClickBehaviour == InterstitialActionBehaviour.HB_CREATIVE) {
                 mControlsLayout.setOnClickListener(v -> validateOpenURLClicked());
-                mControlsLayout.findViewById(R.id.openURL).setVisibility(View.GONE);
+                if (openView != null) openView.setVisibility(View.GONE);
             } else {
-                mControlsLayout.findViewById(R.id.openURL).setVisibility(View.VISIBLE);
+                if (openView != null) openView.setVisibility(View.VISIBLE);
             }
 
             mVideoPlayerLayout = mControlsLayout.findViewById(R.id.videoPlayerLayout);
 
             if (hasCTAExtension(mAdController.getAdParams())) {
-                mMediaLayout = new RelativeLayout(mVideoPlayerLayout.getContext());
+                RelativeLayout mMediaLayout = new RelativeLayout(mVideoPlayerLayout.getContext());
                 mVideoPlayerLayoutTexture = new TextureView(mMediaLayout.getContext());
                 mVideoPlayerLayoutTexture.setId(R.id.textureView);
                 mMediaLayout.addView(mVideoPlayerLayoutTexture, new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
@@ -137,21 +121,9 @@ public class ViewControllerVast implements View.OnClickListener {
                 mVideoPlayerLayout.addView(mVideoPlayerLayoutTexture, 0, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
             }
 
-            mEndCardView = new HyBidEndCardView(context); //mControlsLayout.findViewById(R.id.endCardView);
+            mEndCardView = new HyBidEndCardView(context);
             mEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             mEndCardView.setVisibility(View.GONE);
-
-            mCloseCardLayout = mControlsLayout.findViewById(R.id.closeCardLayout);
-            mCloseCardLayout.setVisibility(View.GONE);
-            mStaticCloseCardView = mCloseCardLayout.findViewById(R.id.staticCloseCardView);
-            mHtmlCloseCardContainer = mCloseCardLayout.findViewById(R.id.htmlCloseCardContainer);
-            mCloseCardTitleView = mCloseCardLayout.findViewById(R.id.closeCardTitle);
-            mCloseCardRatingView = mCloseCardLayout.findViewById(R.id.closeCardRaiting);
-            mCloseCardRatingView.setIsIndicator(true);
-            mCloseCardVoteView = mCloseCardLayout.findViewById(R.id.closeCardVoteCount);
-            mCloseCardActionView = mCloseCardLayout.findViewById(R.id.closeCardActionButton);
-            mCloseCardIconView = mCloseCardLayout.findViewById(R.id.closeCardIconImageView);
-            closeCardVotesLayout = mCloseCardLayout.findViewById(R.id.closeCardVotesLayout);
 
             mControlsLayout.findViewById(R.id.openURL).setOnClickListener(this);
 
@@ -282,72 +254,49 @@ public class ViewControllerVast implements View.OnClickListener {
         return mMuteState;
     }
 
-    public void showEndCard(EndCardData endCardData, String imageUri, CloseButtonListener closeButtonListener) {
+    public void showEndCard(EndCardData endCardData, String imageUri, Boolean isLastEndCard, CloseButtonListener closeButtonListener) {
         if (mEndCardView != null) {
-            mEndCardView.setEndCardViewListener(new HyBidEndCardView.EndCardViewListener(){
+            mEndCardView.setEndCardViewListener(new HyBidEndCardView.EndCardViewListener() {
                 @Override
-                public void onClick(Boolean isCustomEndCard, String openUrl) {
+                public void onClick(Boolean isCustomEndCard) {
                     validateOpenURLClicked();
+                    if(isCustomEndCard){
+                        mAdController.onCustomEndCardClick();
+                    }
+                }
+
+                @Override
+                public void onSkip() {
+                    skipEndCard();
+                }
+
+                @Override
+                public void onClose() {
+                    closeSelf();
+                }
+
+                @Override
+                public void onShow(Boolean isCustomEndCard) {
+                    if(isCustomEndCard)
+                        mAdController.onCustomEndCardShow();
                 }
             });
-
             SkipOffset endCardCloseDelay = getEndCardCloseDelay();
             mEndCardView.setSkipOffset(endCardCloseDelay);
             mEndCardView.show(endCardData, imageUri);
             if (mIsFullscreen) {
-                mEndCardView.showCloseButton(() -> {
-                    if (closeButtonListener != null) {
-                        closeButtonListener.onCloseButtonVisible();
-                    }
-                    if (mAdCloseButtonListener != null) {
-                        mAdCloseButtonListener.showButton();
-                    }
-                });
+                if (isLastEndCard) {
+                    mEndCardView.showCloseButton();
+                } else {
+                    mEndCardView.showSkipButton();
+                }
             }
-
             ReportingEvent event = new ReportingEvent();
             event.setEventType(Reporting.EventType.COMPANION_VIEW_END_CARD);
             event.setCreativeType(Reporting.CreativeType.VIDEO);
             event.setTimestamp(System.currentTimeMillis());
             if (HyBid.getReportingController() != null) {
                 HyBid.getReportingController().reportEvent(event);
-            }
-        }
-    }
-
-    public void showCloseCard(CloseCardData closeCardData) {
-
-        mCloseCardLayout.setVisibility(View.VISIBLE);
-        mCloseCardLayout.setOnClickListener(null);
-        mControlsLayout.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-
-        mCloseCardTitleView.setText(closeCardData.getTitle());
-        mCloseCardRatingView.setRating((float) closeCardData.getRating());
-
-        if (closeCardData.getVotes() > 0) {
-            closeCardVotesLayout.setVisibility(View.VISIBLE);
-            mCloseCardVoteView.setText(mCloseCardLayout.getContext().getString(R.string.close_card_votes, closeCardData.getVotes()));
-        } else {
-            closeCardVotesLayout.setVisibility(View.GONE);
-        }
-
-        if (closeCardData.getIcon() != null) {
-            mCloseCardIconView.setImageBitmap(closeCardData.getIcon());
-        }
-
-        mCloseCardActionView.setOnClickListener(v -> validateOpenURLClicked());
-
-        if (closeCardData.getBanner() != null) {
-            // add Check if is static banner or MRAIDBanner in the feature
-            if (true) {
-                if (closeCardData.getBannerImage() != null) {
-                    ImageUtils.setScaledImage(mStaticCloseCardView, closeCardData.getBannerImage());
-                    mStaticCloseCardView.setVisibility(View.VISIBLE);
-                }
-            } else {
-                mStaticCloseCardView.setVisibility(View.GONE);
-                mHtmlCloseCardView = new MRAIDBanner(mCloseCardLayout.getContext(), closeCardData.getBanner(), "", false, false, new String[]{}, mraidViewListener, mraidNativeFeatureListener, null);
-                mHtmlCloseCardContainer.addView(mHtmlCloseCardView);
             }
         }
     }
@@ -459,7 +408,7 @@ public class ViewControllerVast implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.closeView) {
+        if (v.getId() == R.id.close_view) {
             closeSelf();
         } else if (v.getId() == R.id.skipView || v.getId() == R.id.progressSkipView) {
             skipVideo();
@@ -472,6 +421,10 @@ public class ViewControllerVast implements View.OnClickListener {
 
     private void skipVideo() {
         mAdController.skipVideo();
+    }
+
+    private void skipEndCard() {
+        mAdController.skipEndCard();
     }
 
     private void closeSelf() {
@@ -498,8 +451,10 @@ public class ViewControllerVast implements View.OnClickListener {
         if (mMuteView != null) {
             if (mMuteState) {
                 mMuteView.setImageResource(R.mipmap.mute);
+                mMuteView.setContentDescription("muteButton");
             } else {
                 mMuteView.setImageResource(R.mipmap.unmute);
+                mMuteView.setContentDescription("unmuteButton");
             }
         }
     }

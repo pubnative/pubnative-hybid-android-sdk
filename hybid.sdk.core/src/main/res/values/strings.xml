@@ -5,4 +5,7 @@
     <string name="close_card_votes">( %1$d )</string>
     <string name="feedback_form">Feedback Form</string>
     <string name="loading">Loading ...</string>
+    <string name="mute_button">muteButton</string>
+    <string name="unmute_button">unmuteButton</string>
+    <bool name="is_tablet">false</bool>
 </resources>

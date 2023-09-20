@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 
+import net.pubnative.lite.sdk.CustomEndCardListener;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.rewarded.presenter.RewardedPresenter;
 import net.pubnative.lite.sdk.utils.PNLocalBroadcastManager;
@@ -49,6 +50,8 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
         VIDEO_SKIP("net.pubnative.hybid.rewarded.video_skip"),
         VIDEO_DISMISS("net.pubnative.hybid.rewarded.video_dismiss"),
         VIDEO_FINISH("net.pubnative.hybid.rewarded.video_finish"),
+        CUSTOM_END_CARD_SHOW("net.pubnative.hybid.rewarded.custom_end_card_show"),
+        CUSTOM_END_CARD_CLICK("net.pubnative.hybid.rewarded.custom_end_card_click"),
         NONE("none");
 
         public static Action from(String action) {
@@ -72,8 +75,15 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
             }
             else if (VIDEO_ERROR.getId().equals(action)) {
                 return VIDEO_ERROR;
-            }else if (ERROR.getId().equals(action)) {
+            }
+            else if (ERROR.getId().equals(action)) {
                 return ERROR;
+            }
+            else if(CUSTOM_END_CARD_SHOW.getId().equals(action)){
+                return CUSTOM_END_CARD_SHOW;
+            }
+            else if (CUSTOM_END_CARD_CLICK.getId().equals(action)){
+                return CUSTOM_END_CARD_CLICK;
             }
 
             return NONE;
@@ -119,6 +129,8 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
         mIntentFilter.addAction(Action.VIDEO_FINISH.getId());
         mIntentFilter.addAction(Action.VIDEO_DISMISS.getId());
         mIntentFilter.addAction(Action.VIDEO_ERROR.getId());
+        mIntentFilter.addAction(Action.CUSTOM_END_CARD_SHOW.getId());
+        mIntentFilter.addAction(Action.CUSTOM_END_CARD_CLICK.getId());
         mIntentFilter.addAction(Action.ERROR.getId());
     }
 
@@ -161,7 +173,8 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
                              RewardedPresenter presenter,
                              Bundle extras,
                              RewardedPresenter.Listener listener,
-                             VideoListener videoListener) {
+                             VideoListener videoListener,
+                             CustomEndCardListener customEndCardListener) {
         if (listener == null) {
             return;
         }
@@ -174,8 +187,8 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
                 listener.onRewardedClicked(presenter);
                 break;
             case CLOSE:
-                listener.onRewardedClosed(presenter);
                 listener.onRewardedFinished(presenter);
+                listener.onRewardedClosed(presenter);
                 break;
             case ERROR:
                 listener.onRewardedError(presenter);
@@ -202,6 +215,16 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
             case VIDEO_FINISH:
                 if (videoListener != null) {
                     videoListener.onVideoFinished();
+                }
+                break;
+            case CUSTOM_END_CARD_SHOW:
+                if (customEndCardListener != null) {
+                    customEndCardListener.onCustomEndCardShow();
+                }
+                break;
+            case CUSTOM_END_CARD_CLICK:
+                if (customEndCardListener != null) {
+                    customEndCardListener.onCustomEndCardClick();
                 }
                 break;
             case NONE:

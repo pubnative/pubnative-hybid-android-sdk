@@ -455,23 +455,23 @@ class SettingsManager private constructor(context: Context) {
         val keywords = preferences.getStringSet(SETTINGS_KEY_KEYWORDS, emptySet())?.toList()!!
         val browserPriorities =
             preferences.getStringSet(SETTINGS_KEY_BROWSER_PRIORITIES, emptySet())?.toList()!!
-        val coppa = preferences.getBoolean(SETTINGS_KEY_COPPA, false)
-        val testMode = preferences.getBoolean(SETTINGS_KEY_TEST_MODE, false)
-        val locationTracking = preferences.getBoolean(SETTINGS_KEY_LOCATION_TRACKING, false)
-        val locationUpdates = preferences.getBoolean(SETTINGS_KEY_LOCATION_UPDATES, false)
+        val coppa = preferences.getBoolean(SETTINGS_KEY_COPPA, Constants.COPPA_DEFAULT)
+        val testMode = preferences.getBoolean(SETTINGS_KEY_TEST_MODE, Constants.TEST_MODE_DEFAULT)
+        val locationTracking = preferences.getBoolean(SETTINGS_KEY_LOCATION_TRACKING, Constants.LOCATION_TRACKING_DEFAULT)
+        val locationUpdates = preferences.getBoolean(SETTINGS_KEY_LOCATION_UPDATES, Constants.LOCATION_UPDATES_DEFAULT)
         val customSkipOffsetDisabled =
             preferences.getBoolean(SETTINGS_KEY_CUSTOM_SKIP_OFFSET_DISABLED, false)
-        val initialAudioState = preferences.getInt(SETTINGS_KEY_INITIAL_AUDIO_STATE, 0)
-        val mraidExpanded = preferences.getBoolean(SETTINGS_KEY_MRAID_EXPANDED, true)
+        val initialAudioState = preferences.getInt(SETTINGS_KEY_INITIAL_AUDIO_STATE, Constants.INITIAL_AUDIO_STATE_DEFAULT)
+        val mraidExpanded = preferences.getBoolean(SETTINGS_KEY_MRAID_EXPANDED, Constants.MRAID_EXPANDED_DEFAULT)
         val closeVideoAfterFinish =
-            preferences.getBoolean(SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH, false)
+            preferences.getBoolean(SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH, Constants.CLOSE_VIDEO_AFTER_FINISH_DEFAULT)
         val closeVideoAfterFinishForRewarded =
-            preferences.getBoolean(SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH_REWARDED, false)
-        val enableEndcard = preferences.getBoolean(SETTINGS_KEY_ENABLE_ENDCARD, false)
-        val skipOffset = preferences.getInt(SETTINGS_KEY_SKIP_OFFSET, 3)
-        val videoSkipOffset = preferences.getInt(SETTINGS_KEY_VIDEO_SKIP_OFFSET, 8)
-        val endcardCloseButtonDelay = preferences.getInt(SETTINGS_KEY_ENDCARD_CLOSE_BUTTON_DELAY, 5)
-        val videoClickBehaviour = preferences.getBoolean(SETTINGS_KEY_VIDEO_CLICK_BEHAVIOUR, true)
+            preferences.getBoolean(SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH_REWARDED, Constants.CLOSE_VIDEO_AFTER_FINISH_DEFAULT_FOR_REWARDED)
+        val enableEndcard = preferences.getBoolean(SETTINGS_KEY_ENABLE_ENDCARD, Constants.ENABLE_ENDCARD_DEFAULT)
+        val skipOffset = preferences.getInt(SETTINGS_KEY_SKIP_OFFSET, Constants.SKIP_OFFSET_DEFAULT)
+        val videoSkipOffset = preferences.getInt(SETTINGS_KEY_VIDEO_SKIP_OFFSET, Constants.VIDEO_SKIP_OFFSET_DEFAULT)
+        val endcardCloseButtonDelay = preferences.getInt(SETTINGS_KEY_ENDCARD_CLOSE_BUTTON_DELAY, Constants.ENDCARD_CLOSE_BUTTON_DELAY_DEFAULT)
+        val videoClickBehaviour = preferences.getBoolean(SETTINGS_KEY_VIDEO_CLICK_BEHAVIOUR, Constants.VIDEO_CLICK_BEHAVIOUR_DEFAULT)
         val dfpBannerAdUnitId = preferences.getString(SETTINGS_KEY_DFP_BANNER_AD_UNIT_ID, "")!!
         val dfpMediumAdUnitId = preferences.getString(SETTINGS_KEY_DFP_MEDIUM_AD_UNIT_ID, "")!!
         val dfpLeaderboardAdUnitId =

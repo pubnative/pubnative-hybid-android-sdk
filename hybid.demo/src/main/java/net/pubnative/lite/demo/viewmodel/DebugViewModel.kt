@@ -33,8 +33,10 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
     init {
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(application)
         mFirebaseAnalytics!!.setAnalyticsCollectionEnabled(true)
-        HyBid.getReportingController().addCallback(this)
-        HyBid.getReportingController().addTrackerCallback(this)
+        if (HyBid.isInitialized() && HyBid.getReportingController() != null) {
+            HyBid.getReportingController().addCallback(this)
+            HyBid.getReportingController().addTrackerCallback(this)
+        }
     }
 
     fun updateLogs() {
@@ -58,7 +60,9 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
     }
 
     fun cacheEventList() {
-        HyBid.getReportingController().cacheAdEventList(_eventList)
+        if (HyBid.getReportingController() != null) {
+            HyBid.getReportingController().cacheAdEventList(_eventList)
+        }
     }
 
     fun clearEventList() {
@@ -120,19 +124,23 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
 
     override fun onCleared() {
         super.onCleared()
-        HyBid.getReportingController().removeCallback(this)
+        if (HyBid.getReportingController() != null) {
+            HyBid.getReportingController().removeCallback(this)
+        }
     }
 
     fun registerReportingCallbacks() {
-        if (!isReportingCallbackActive) {
+        if (!isReportingCallbackActive && HyBid.getReportingController() != null) {
             HyBid.getReportingController().addCallback(this)
             HyBid.getReportingController().addTrackerCallback(this)
         }
     }
 
     fun removeReportingCallbacks() {
-        HyBid.getReportingController().removeCallback(this)
-        HyBid.getReportingController().removeTrackerCallback(this)
+        if (HyBid.getReportingController() != null) {
+            HyBid.getReportingController().removeCallback(this)
+            HyBid.getReportingController().removeTrackerCallback(this)
+        }
         isReportingCallbackActive = false
     }
 }

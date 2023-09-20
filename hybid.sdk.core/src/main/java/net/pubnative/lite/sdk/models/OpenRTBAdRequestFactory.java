@@ -1,6 +1,7 @@
 package net.pubnative.lite.sdk.models;
 
 import android.content.Context;
+import android.location.Location;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.DeviceInfo;
@@ -8,15 +9,22 @@ import net.pubnative.lite.sdk.DisplayManager;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
+import net.pubnative.lite.sdk.models.bidstream.BidstreamConstants;
+import net.pubnative.lite.sdk.models.bidstream.DeviceExtension;
+import net.pubnative.lite.sdk.models.bidstream.Extension;
+import net.pubnative.lite.sdk.models.bidstream.GeoLocation;
+import net.pubnative.lite.sdk.models.bidstream.Signal;
 import net.pubnative.lite.sdk.models.request.App;
 import net.pubnative.lite.sdk.models.request.Banner;
 import net.pubnative.lite.sdk.models.request.Device;
+import net.pubnative.lite.sdk.models.request.Ext;
 import net.pubnative.lite.sdk.models.request.Format;
 import net.pubnative.lite.sdk.models.request.Geo;
 import net.pubnative.lite.sdk.models.request.Imp;
 import net.pubnative.lite.sdk.models.request.Metric;
 import net.pubnative.lite.sdk.models.request.Native;
 import net.pubnative.lite.sdk.models.request.OpenRTBAdRequest;
+import net.pubnative.lite.sdk.models.request.Regs;
 import net.pubnative.lite.sdk.models.request.User;
 import net.pubnative.lite.sdk.models.request.Video;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
@@ -27,7 +35,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class OpenRTBAdRequestFactory implements AdRequestFactory {
+public class OpenRTBAdRequestFactory extends BaseRequestFactory implements AdRequestFactory {
     private static final String TAG = OpenRTBAdRequestFactory.class.getSimpleName();
 
     private final DeviceInfo mDeviceInfo;
@@ -87,12 +95,14 @@ public class OpenRTBAdRequestFactory implements AdRequestFactory {
         bidRequest.setAt(2);
         bidRequest.setTmax(1500);
         bidRequest.setAllimps(0);
+        bidRequest.setRegs(getRegs());
 
         List<String> currencies = new ArrayList<>();
         currencies.add("USD");
         bidRequest.setCur(currencies);
 
         bidRequest.isInterstitial = adSize == AdSize.SIZE_INTERSTITIAL;
+
         return bidRequest;
     }
 
@@ -115,12 +125,7 @@ public class OpenRTBAdRequestFactory implements AdRequestFactory {
     List<Imp> getImpressions(AdSize adSize, String mediationVendor, IntegrationType integrationType) {
         List<Imp> imps = new ArrayList<>();
 
-        if (adSize == AdSize.SIZE_INTERSTITIAL
-                || adSize == AdSize.SIZE_300x250
-                || adSize == AdSize.SIZE_320x480
-                || adSize == AdSize.SIZE_480x320
-                || adSize == AdSize.SIZE_768x1024
-                || adSize == AdSize.SIZE_1024x768) {
+        if (adSize == AdSize.SIZE_INTERSTITIAL || adSize == AdSize.SIZE_300x250 || adSize == AdSize.SIZE_320x480 || adSize == AdSize.SIZE_480x320 || adSize == AdSize.SIZE_768x1024 || adSize == AdSize.SIZE_1024x768) {
             imps.add(getVideoImpression(adSize, mediationVendor, integrationType));
         }
         imps.add(getBannerImpression(adSize, mediationVendor, integrationType));
@@ -138,8 +143,12 @@ public class OpenRTBAdRequestFactory implements AdRequestFactory {
         imp.setBanner(getBanner(adSize));
         imp.setDisplaymanager(mDisplayManager.getDisplayManager());
         imp.setDisplaymanagerver(mDisplayManager.getDisplayManagerVersion(mediationVendor, integrationType));
-        imp.setInstl(0);
+        int instl = 0;
+        if (adSize == AdSize.SIZE_INTERSTITIAL) instl = 1;
+        imp.setInstl(instl);
+        imp.setClickbrowser(1);
         imp.setSecure(1);
+
         return imp;
     }
 
@@ -153,7 +162,10 @@ public class OpenRTBAdRequestFactory implements AdRequestFactory {
         imp.setVideo(getVideo(adSize));
         imp.setDisplaymanager(mDisplayManager.getDisplayManager());
         imp.setDisplaymanagerver(mDisplayManager.getDisplayManagerVersion(mediationVendor, integrationType));
-        imp.setInstl(0);
+        int instl = 0;
+        if (adSize == AdSize.SIZE_INTERSTITIAL) instl = 1;
+        imp.setInstl(instl);
+        imp.setClickbrowser(1);
         imp.setSecure(1);
         return imp;
     }
@@ -178,21 +190,30 @@ public class OpenRTBAdRequestFactory implements AdRequestFactory {
         List<Integer> blacklistedAttributes = new ArrayList<>();
         banner.setBattr(blacklistedAttributes);
 
-        banner.setPos(0);
+
+        if (adSize != AdSize.SIZE_INTERSTITIAL) {
+            List<Integer> expDirs = new ArrayList<>();
+            expDirs.add(BidstreamConstants.ExpandableDirections.FULLSCREEN);
+            expDirs.add(BidstreamConstants.ExpandableDirections.RESIZE_MINIMIZE);
+            banner.setExpdir(expDirs);
+        }
+
+        banner.setPos(adSize == AdSize.SIZE_INTERSTITIAL ? BidstreamConstants.PlacementPosition.FULLSCREEN : BidstreamConstants.PlacementPosition.UNKNOWN);
 
         List<String> mimes = new ArrayList<>();
+        mimes.add("text/html");
+        mimes.add("text/javascript");
         banner.setMimes(mimes);
 
         banner.setTopframe(1);
-
-        List<Integer> expdir = new ArrayList<>();
-        banner.setExpdir(expdir);
 
         List<Integer> apis = new ArrayList<>();
         banner.setApi(apis);
 
         banner.setId("");
         banner.setVcm(0);
+
+        banner.setApi(getSupportedApis());
 
         return banner;
     }
@@ -206,6 +227,40 @@ public class OpenRTBAdRequestFactory implements AdRequestFactory {
             video.setWidth(adSize.getWidth());
             video.setHeight(adSize.getHeight());
         }
+
+        List<Integer> playbackMethods = new ArrayList<>();
+        if (adSize != AdSize.SIZE_INTERSTITIAL) {
+            video.setPlacementSubtype(BidstreamConstants.VideoPlacementSubtype.STANDALONE);
+            playbackMethods.add(BidstreamConstants.VideoPlaybackMethod.ENTER_VIEWPORT_SOUND_ON);
+            playbackMethods.add(BidstreamConstants.VideoPlaybackMethod.ENTER_VIEWPORT_SOUND_OFF);
+        } else {
+            video.setPlacement(BidstreamConstants.VideoPlacement.INTERSTITIAL);
+            video.setPlacementSubtype(BidstreamConstants.VideoPlacementSubtype.INTERSTITIAL);
+            playbackMethods.add(BidstreamConstants.VideoPlaybackMethod.PAGE_LOAD_SOUND_ON);
+            playbackMethods.add(BidstreamConstants.VideoPlaybackMethod.PAGE_LOAD_SOUND_OFF);
+
+        }
+
+        video.setPlaybackMethod(playbackMethods);
+
+        video.setPos(adSize == AdSize.SIZE_INTERSTITIAL ? BidstreamConstants.PlacementPosition.FULLSCREEN : BidstreamConstants.PlacementPosition.UNKNOWN);
+
+        List<String> mimes = new ArrayList<>();
+        mimes.add("video/mp4");
+        mimes.add("video/webm");
+        video.setMimes(mimes);
+
+        video.setBoxingAllowed(0);
+        video.setLinearity(1);
+        video.setPlaybackEnd(1);
+        video.setMraidEndcard(true);
+        video.setClickType(3);
+        List<Integer> delivery = new ArrayList<>();
+        delivery.add(3);
+        video.setDelivery(delivery);
+
+        video.setProtocols(getSupportedProtocols());
+
         return video;
     }
 
@@ -233,23 +288,37 @@ public class OpenRTBAdRequestFactory implements AdRequestFactory {
 
     Device getDevice() {
         Device device = new Device();
-        device.setUserAgent(mDeviceInfo.getUserAgent());
+        device.setOs("Android");
+        if (mDeviceInfo != null) {
+            device.setOsVersion(mDeviceInfo.getOSVersion());
+            device.setUserAgent(mDeviceInfo.getUserAgent());
+            device.setModel(mDeviceInfo.getModel());
+            device.setMake(mDeviceInfo.getMake());
+            device.setDeviceType(mDeviceInfo.getDeviceType());
+            device.setCarrier(mDeviceInfo.getCarrier());
+            device.setMccmnc(mDeviceInfo.getMccmnc());
+            device.setMccmncsim(mDeviceInfo.getMccmncsim());
+            device.setPpi(Integer.parseInt(mDeviceInfo.getPpi()));
+            device.setPxratio(Float.parseFloat(mDeviceInfo.getPxratio()));
+            device.setH(Integer.parseInt(mDeviceInfo.getDeviceHeight()));
+            device.setW(Integer.parseInt(mDeviceInfo.getDeviceWidth()));
+            device.setLanguage(mDeviceInfo.getLocale().toString());
+            device.setConnectiontype(mDeviceInfo.getConnectionType());
+            device.setIfa(mDeviceInfo.getAdvertisingId());
+            device.setDpidsha1(mDeviceInfo.getAdvertisingIdSha1());
+            device.setDpidmd5(mDeviceInfo.getAdvertisingIdMd5());
+            if (mDeviceInfo.getLocale() != null && mDeviceInfo.getLocale().getLanguage() != null && !mDeviceInfo.getLocale().getLanguage().isEmpty()) {
+                device.setLanguage(mDeviceInfo.getLocale().getLanguage());
+            }
+        }
+        device.setGeofetch(getGeofetch());
         device.setGeo(getDeviceGeo());
         device.setDnt(getDnt());
-        device.setDeviceType(1);
+        device.setJs(1);
         device.setIp("107.219.186.28");
-        device.setModel(mDeviceInfo.getModel());
-        device.setOs("Android");
-        device.setOsVersion(mDeviceInfo.getOSVersion());
-        device.setH(Integer.parseInt(mDeviceInfo.getDeviceHeight()));
-        device.setW(Integer.parseInt(mDeviceInfo.getDeviceWidth()));
-        device.setLanguage(mDeviceInfo.getLocale().toString());
-        device.setConnectiontype(2);
-        device.setIfa(mDeviceInfo.getAdvertisingId());
-        device.setDpidsha1(mDeviceInfo.getAdvertisingIdSha1());
-        device.setDpidmd5(mDeviceInfo.getAdvertisingIdMd5());
         device.setMacsha1("");
         device.setMacmd5("");
+        device.setExt(fillBidStreamExtensionsObject(mDeviceInfo));
         return device;
     }
 
@@ -257,8 +326,22 @@ public class OpenRTBAdRequestFactory implements AdRequestFactory {
         Geo geo = new Geo();
         geo.setLat(getLatitude());
         geo.setLon(getLongitude());
+        geo.setAccuracy(getAccuracy());
+        geo.setUtcoffset(getUTcOffset());
         geo.setType(1);
         return geo;
+    }
+
+    private Integer getUTcOffset() {
+        return formatUTCTime();
+    }
+
+    private Integer getAccuracy() {
+        if (mLocationManager != null) {
+            Location location = mLocationManager.getUserLocation();
+            if (location != null) return Math.round(location.getAccuracy());
+        }
+        return null;
     }
 
     User getUser() {
@@ -282,8 +365,7 @@ public class OpenRTBAdRequestFactory implements AdRequestFactory {
     }
 
     private int getDnt() {
-        if (HyBid.isCoppaEnabled() || mLimitTracking || TextUtils.isEmpty(mAdvertisingId)
-                || mIsCCPAOptOut || mUserDataManager.isConsentDenied()) {
+        if (HyBid.isCoppaEnabled() || mLimitTracking || TextUtils.isEmpty(mAdvertisingId) || mIsCCPAOptOut || mUserDataManager.isConsentDenied()) {
             return 1;
         } else return 0;
     }
@@ -301,6 +383,39 @@ public class OpenRTBAdRequestFactory implements AdRequestFactory {
         } else return null;
     }
 
+    private Regs getRegs() {
+        Regs regs = new Regs();
+        if (mUserDataManager != null) {
+            regs.setExt(getExt());
+        }
+        return regs;
+    }
+
+    private Ext getExt() {
+        Ext ext = new Ext();
+        if (mUserDataManager != null) {
+            String gppString = mUserDataManager.getGppString();
+            if (!TextUtils.isEmpty(gppString)) {
+                ext.setGpp(gppString);
+            }
+            String gppIdString = mUserDataManager.getGppSid();
+            if (!TextUtils.isEmpty(gppIdString)) {
+                String[] splitResult = gppIdString.split("_");
+                ArrayList<Integer> gppsid = new ArrayList<>();
+                for (String s : splitResult) {
+                    try {
+                        Integer id = Integer.parseInt(s);
+                        gppsid.add(id);
+                    } catch (Exception e) {
+                        Logger.e(TAG, e.getMessage());
+                    }
+                }
+                if (!gppsid.isEmpty()) ext.setGppSid(gppsid);
+            }
+        }
+        return ext;
+    }
+
     private int getTestInt() {
         return HyBid.isTestMode() ? 1 : 0;
     }
@@ -310,5 +425,41 @@ public class OpenRTBAdRequestFactory implements AdRequestFactory {
         if (!TextUtils.isEmpty(gender)) {
             return gender;
         } else return null;
+    }
+
+    private List<Integer> getSupportedProtocols() {
+        List<Integer> supportedProtocols = new ArrayList<>();
+        supportedProtocols.add(Integer.parseInt(Protocol.VAST_1_0));
+        supportedProtocols.add(Integer.parseInt(Protocol.VAST_2_0));
+        supportedProtocols.add(Integer.parseInt(Protocol.VAST_3_0));
+        supportedProtocols.add(Integer.parseInt(Protocol.VAST_1_0_WRAPPER));
+        supportedProtocols.add(Integer.parseInt(Protocol.VAST_2_0_WRAPPER));
+        supportedProtocols.add(Integer.parseInt(Protocol.VAST_3_0_WRAPPER));
+        supportedProtocols.add(Integer.parseInt(Protocol.VAST_4_0));
+        supportedProtocols.add(Integer.parseInt(Protocol.VAST_4_0_WRAPPER));
+        supportedProtocols.add(Integer.parseInt(Protocol.VAST_4_1));
+        supportedProtocols.add(Integer.parseInt(Protocol.VAST_4_1_WRAPPER));
+        supportedProtocols.add(Integer.parseInt(Protocol.VAST_4_2));
+        supportedProtocols.add(Integer.parseInt(Protocol.VAST_4_2_WRAPPER));
+
+        return supportedProtocols;
+    }
+
+    private List<Integer> getSupportedApis() {
+        List<Integer> supportedApis = new ArrayList<>();
+        supportedApis.add(Integer.parseInt(Api.MRAID_1));
+        supportedApis.add(Integer.parseInt(Api.MRAID_2));
+        supportedApis.add(Integer.parseInt(Api.MRAID_3));
+        supportedApis.add(Integer.parseInt(Api.OMID_1));
+
+        return supportedApis;
+    }
+
+    private Integer getGeofetch() {
+        if (HyBid.isLocationTrackingEnabled() && mDeviceInfo.hasTrackingPermissions() && !mLimitTracking) {
+            return 1;
+        } else {
+            return 0;
+        }
     }
 }

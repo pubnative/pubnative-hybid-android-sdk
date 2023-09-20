@@ -9,6 +9,7 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.fragment.app.Fragment
+import com.google.android.material.button.MaterialButton
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
@@ -32,6 +33,8 @@ class CreativeTesterFragment : Fragment(R.layout.fragment_creative_tester), HyBi
     private lateinit var bannerAdView: HyBidBannerAdView
     private lateinit var mrectAdView: HyBidMRectAdView
     private lateinit var leaderboardAdView: HyBidLeaderboardAdView
+    private lateinit var loadButton: MaterialButton
+    private lateinit var showButton: MaterialButton
 
     private var selectedSize: Int = R.id.radio_size_banner
     private var selectedServer: Int = R.id.radio_server_p161
@@ -47,6 +50,8 @@ class CreativeTesterFragment : Fragment(R.layout.fragment_creative_tester), HyBi
         bannerAdView = view.findViewById(R.id.banner_adview)
         mrectAdView = view.findViewById(R.id.mrect_adview)
         leaderboardAdView = view.findViewById(R.id.leaderboard_adview)
+        loadButton = view.findViewById(R.id.button_load)
+        showButton = view.findViewById(R.id.button_show)
 
         bannerAdView.setAdSize(AdSize.SIZE_320x50)
         bannerAdView.isAutoShowOnLoad = true
@@ -59,7 +64,7 @@ class CreativeTesterFragment : Fragment(R.layout.fragment_creative_tester), HyBi
             pasteFromClipboard()
         }
 
-        view.findViewById<Button>(R.id.button_load).setOnClickListener {
+        loadButton.setOnClickListener {
             hideKeyboard(context, view)
             val activity = activity as TabActivity
             activity.notifyAdCleaned()
@@ -67,9 +72,17 @@ class CreativeTesterFragment : Fragment(R.layout.fragment_creative_tester), HyBi
             loadCreative()
         }
 
+        showButton.setOnClickListener {
+            when (selectedSize) {
+                R.id.radio_size_interstitial -> {
+                    interstitial?.show()
+                }
+            }
+        }
+
         adSizeGroup.setOnCheckedChangeListener { _, checkedId ->
             selectedSize = checkedId
-            updateListVisibility()
+            updateVisibility()
         }
 
         serverGroup.setOnCheckedChangeListener { _, checkedId ->
@@ -82,22 +95,34 @@ class CreativeTesterFragment : Fragment(R.layout.fragment_creative_tester), HyBi
         super.onDestroy()
     }
 
-    private fun updateListVisibility() {
+    private fun updateVisibility() {
         when (selectedSize) {
             R.id.radio_size_banner -> {
                 bannerAdView.visibility = View.VISIBLE
                 mrectAdView.visibility = View.GONE
                 leaderboardAdView.visibility = View.GONE
+                showButton.visibility = View.GONE
             }
+
             R.id.radio_size_medium -> {
                 bannerAdView.visibility = View.GONE
                 mrectAdView.visibility = View.VISIBLE
                 leaderboardAdView.visibility = View.GONE
+                showButton.visibility = View.GONE
             }
+
             R.id.radio_size_leaderboard -> {
                 bannerAdView.visibility = View.GONE
                 mrectAdView.visibility = View.GONE
                 leaderboardAdView.visibility = View.VISIBLE
+                showButton.visibility = View.GONE
+            }
+
+            R.id.radio_size_interstitial -> {
+                bannerAdView.visibility = View.GONE
+                mrectAdView.visibility = View.GONE
+                leaderboardAdView.visibility = View.GONE
+                showButton.visibility = View.VISIBLE
             }
         }
     }
@@ -110,6 +135,7 @@ class CreativeTesterFragment : Fragment(R.layout.fragment_creative_tester), HyBi
     }
 
     private fun loadCreative() {
+        showButton.isEnabled = false
         if (!TextUtils.isEmpty(creativeIdInput.text.toString())) {
             val creativeId = creativeIdInput.text.toString().trim()
             if (selectedServer == R.id.radio_server_p161) {
@@ -143,7 +169,8 @@ class CreativeTesterFragment : Fragment(R.layout.fragment_creative_tester), HyBi
                     Log.d("onFailure", error.toString())
                     Toast.makeText(activity, "Creative request failed", Toast.LENGTH_SHORT).show()
                     val responseTime = System.currentTimeMillis() - initTime
-                    AdRequestRegistry.getInstance().setLastAdRequest(url, error.message, responseTime)
+                    AdRequestRegistry.getInstance()
+                        .setLastAdRequest(url, error.message, responseTime)
                 }
             })
     }
@@ -173,7 +200,8 @@ class CreativeTesterFragment : Fragment(R.layout.fragment_creative_tester), HyBi
                         )
                         Log.d("result", result)
                         val responseTime = System.currentTimeMillis() - initTime
-                        AdRequestRegistry.getInstance().setLastAdRequest(url, response, responseTime)
+                        AdRequestRegistry.getInstance()
+                            .setLastAdRequest(url, response, responseTime)
                         loadMarkup(result)
                     } else {
                         Log.d("onSuccess", "Request succeeded with an empty response")
@@ -183,7 +211,11 @@ class CreativeTesterFragment : Fragment(R.layout.fragment_creative_tester), HyBi
                             Toast.LENGTH_SHORT
                         ).show()
                         val responseTime = System.currentTimeMillis() - initTime
-                        AdRequestRegistry.getInstance().setLastAdRequest(url, "Request succeeded with an empty response", responseTime)
+                        AdRequestRegistry.getInstance().setLastAdRequest(
+                            url,
+                            "Request succeeded with an empty response",
+                            responseTime
+                        )
                     }
                 }
 
@@ -191,7 +223,8 @@ class CreativeTesterFragment : Fragment(R.layout.fragment_creative_tester), HyBi
                     Log.d("onFailure", error.toString())
                     Toast.makeText(activity, "Creative request failed", Toast.LENGTH_SHORT).show()
                     val responseTime = System.currentTimeMillis() - initTime
-                    AdRequestRegistry.getInstance().setLastAdRequest(url, error.message, responseTime)
+                    AdRequestRegistry.getInstance()
+                        .setLastAdRequest(url, error.message, responseTime)
                 }
             })
     }
@@ -216,13 +249,14 @@ class CreativeTesterFragment : Fragment(R.layout.fragment_creative_tester), HyBi
         val interstitialListener = object : HyBidInterstitialAd.Listener {
             override fun onInterstitialLoaded() {
                 Logger.d(TAG, "onInterstitialLoaded")
-                interstitial?.show()
                 displayLogs()
+                showButton.isEnabled = true
             }
 
             override fun onInterstitialLoadFailed(error: Throwable?) {
                 Logger.e(TAG, "onInterstitialLoadFailed", error)
                 displayLogs()
+                showButton.isEnabled = false
             }
 
             override fun onInterstitialImpression() {
@@ -235,6 +269,7 @@ class CreativeTesterFragment : Fragment(R.layout.fragment_creative_tester), HyBi
 
             override fun onInterstitialDismissed() {
                 Logger.d(TAG, "onInterstitialDismissed")
+                showButton.isEnabled = false
             }
         }
 

@@ -25,6 +25,7 @@ package net.pubnative.lite.sdk.rewarded.presenter;
 import android.text.TextUtils;
 import android.util.Log;
 
+import net.pubnative.lite.sdk.CustomEndCardListener;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
@@ -37,21 +38,25 @@ import net.pubnative.lite.sdk.utils.json.JsonOperations;
 
 import org.json.JSONObject;
 
-public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPresenter.Listener, VideoListener {
+public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPresenter.Listener, VideoListener, CustomEndCardListener {
     private static final String TAG = RewardedPresenterDecorator.class.getSimpleName();
     private final RewardedPresenter mRewardedPresenter;
     private final AdTracker mAdTrackingDelegate;
+    private final AdTracker mCustomEndCardTrackingDelegate;
     private final ReportingController mReportingController;
     private final RewardedPresenter.Listener mListener;
     private VideoListener mVideoListener;
     private boolean mIsDestroyed = false;
     private boolean mImpressionTracked = false;
     private boolean mClickTracked = false;
+    private boolean mEndCardImpressionTracked = false;
+    private boolean mEndCardClickTracked = false;
 
-    public RewardedPresenterDecorator(RewardedPresenter rewardedPresenter, AdTracker adTrackingDelegate, ReportingController reportingController, RewardedPresenter.Listener listener) {
+    public RewardedPresenterDecorator(RewardedPresenter rewardedPresenter, AdTracker adTrackingDelegate, AdTracker customEndCardTrackingDelegate, ReportingController reportingController, RewardedPresenter.Listener listener) {
         mRewardedPresenter = rewardedPresenter;
         mRewardedPresenter.setVideoListener(this);
         mAdTrackingDelegate = adTrackingDelegate;
+        mCustomEndCardTrackingDelegate = customEndCardTrackingDelegate;
         mReportingController = reportingController;
         mListener = listener;
     }
@@ -204,6 +209,11 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
     }
 
     @Override
+    public void setCustomEndCardListener(CustomEndCardListener listener) {
+
+    }
+
+    @Override
     public void onVideoError(int progressPercentage) {
         if (mVideoListener != null) {
             mVideoListener.onVideoError(progressPercentage);
@@ -265,5 +275,43 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
 
         Logger.d(TAG, errorMessage);
         mListener.onRewardedError(rewardedPresenter);
+    }
+
+    @Override
+    public void onCustomEndCardShow() {
+
+        if (mIsDestroyed || mEndCardImpressionTracked) {
+            return;
+        }
+
+        if (mReportingController != null) {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.CUSTOM_END_CARD_IMPRESSION);
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            reportingEvent.setAdFormat(Reporting.AdFormat.FULLSCREEN);
+            mReportingController.reportEvent(reportingEvent);
+        }
+
+        mCustomEndCardTrackingDelegate.trackImpression();
+        mEndCardImpressionTracked = true;
+    }
+
+    @Override
+    public void onCustomEndCardClick() {
+
+        if (mIsDestroyed || mEndCardClickTracked) {
+            return;
+        }
+
+        if (mReportingController != null) {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.CUSTOM_END_CARD_CLICK);
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            reportingEvent.setAdFormat(Reporting.AdFormat.FULLSCREEN);
+            mReportingController.reportEvent(reportingEvent);
+        }
+
+        mCustomEndCardTrackingDelegate.trackClick();
+        mEndCardClickTracked = true;
     }
 }

@@ -51,7 +51,7 @@ import java.util.Map;
  * Created by erosgarciaponte on 17.01.18.
  */
 
-public class PNApiClient implements ApiClient{
+public class PNApiClient implements ApiClient {
     private static final String TAG = PNApiClient.class.getSimpleName();
 
     private final Context mContext;

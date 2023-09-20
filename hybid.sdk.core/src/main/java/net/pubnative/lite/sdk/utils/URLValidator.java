@@ -21,14 +21,14 @@ public class URLValidator {
                 URLConnection c = url.openConnection();
                 String contentType = c.getContentType();
 
-                if(contentType == null){
+                if (contentType == null) {
                     mHandler.postDelayed(() -> listener.isValidURL(false), 0L);
                     return;
                 }
 
                 contentType = contentType.toLowerCase(Locale.ENGLISH);
 
-                if (contentType.equals("text/html; charset=utf-8") || contentType.equals("text/html;") || contentType.equals("text/html")) {
+                if(contentType.contains("text")){
                     mHandler.postDelayed(() -> listener.isValidURL(true), 0L);
                 } else {
                     mHandler.postDelayed(() -> listener.isValidURL(false), 0L);

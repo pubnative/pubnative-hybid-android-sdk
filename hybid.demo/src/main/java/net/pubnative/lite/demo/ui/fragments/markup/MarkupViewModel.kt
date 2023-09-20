@@ -26,14 +26,20 @@ class MarkupViewModel(application: Application) : AndroidViewModel(application) 
     private val _loadInterstitial: MutableLiveData<String> = MutableLiveData()
     val loadInterstitial: LiveData<String> = _loadInterstitial
 
+    private val _loadRewarded: MutableLiveData<String> = MutableLiveData()
+    val loadRewarded: LiveData<String> = _loadRewarded
+
     private val _creativeId: MutableLiveData<String> = MutableLiveData()
     val creativeId: LiveData<String> = _creativeId
 
     private val _adapterUpdate: MutableLiveData<String> = MutableLiveData()
     val adapterUpdate: LiveData<String> = _adapterUpdate
 
-    private val _listVisibillity: MutableLiveData<Boolean> = MutableLiveData()
-    val listVisibillity: LiveData<Boolean> = _listVisibillity
+    private val _listVisibility: MutableLiveData<Boolean> = MutableLiveData()
+    val listVisibility: LiveData<Boolean> = _listVisibility
+
+    private val _showButtonVisibility: MutableLiveData<Boolean> = MutableLiveData()
+    val showButtonVisibility: LiveData<Boolean> = _showButtonVisibility
 
     private val _creativeIdVisibillity: MutableLiveData<Boolean> = MutableLiveData()
     val creativeIdVisibillity: LiveData<Boolean> = _creativeIdVisibillity
@@ -60,7 +66,9 @@ class MarkupViewModel(application: Application) : AndroidViewModel(application) 
 
     fun setMarkupSize(markupSize: MarkupSize) {
         this.customMarkupSize = markupSize
-        _listVisibillity.value = customMarkupSize != MarkupSize.INTERSTITIAL
+        val isFullscreen = customMarkupSize == MarkupSize.INTERSTITIAL || customMarkupSize == MarkupSize.REWARDED
+        _listVisibility.value = !isFullscreen
+        _showButtonVisibility.value = isFullscreen
     }
 
     fun loadMarkup(markupText: String) {
@@ -71,6 +79,10 @@ class MarkupViewModel(application: Application) : AndroidViewModel(application) 
 
             MarkupType.URL -> {
                 loadCreativeUrl(markupText)
+            }
+
+            MarkupType.ORTB_BODY -> {
+                //Do nothing
             }
         }
     }
@@ -128,10 +140,16 @@ class MarkupViewModel(application: Application) : AndroidViewModel(application) 
         } else {
             val renderMarkup =
                 if (urWrap && urTemplate.isNotEmpty()) wrapInUR(markup!!) else markup!!
-            if (customMarkupSize == MarkupSize.INTERSTITIAL) {
-                _loadInterstitial.value = renderMarkup
-            } else {
-                _adapterUpdate.value = renderMarkup
+            when (customMarkupSize) {
+                MarkupSize.INTERSTITIAL -> {
+                    _loadInterstitial.value = renderMarkup
+                }
+                MarkupSize.REWARDED -> {
+                    _loadRewarded.value = renderMarkup
+                }
+                else -> {
+                    _adapterUpdate.value = renderMarkup
+                }
             }
         }
     }

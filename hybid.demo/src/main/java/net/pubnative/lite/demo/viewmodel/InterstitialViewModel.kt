@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import net.pubnative.lite.demo.R
 import net.pubnative.lite.sdk.CacheListener
 import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.HyBidError
@@ -21,12 +22,13 @@ class InterstitialViewModel(application: Application) : AndroidViewModel(applica
     var cachingEnabled: Boolean = true
 
     // Listeners
-    private val interstitialAdListener: HyBidInterstitialAd.Listener = object : HyBidInterstitialAd.Listener {
+    private val interstitialAdListener: HyBidInterstitialAd.Listener =
+        object : HyBidInterstitialAd.Listener {
 
             override fun onInterstitialLoaded() {
                 Log.d(TAG, "onInterstitialLoaded")
                 _interstitialLoadLiveData.value = true
-                _creativeIdLiveData.value = if(interstitial?.creativeId?.isNotEmpty() == true)
+                _creativeIdLiveData.value = if (interstitial?.creativeId?.isNotEmpty() == true)
                     interstitial?.creativeId else ""
             }
 
@@ -73,7 +75,10 @@ class InterstitialViewModel(application: Application) : AndroidViewModel(applica
     private val videoListener: VideoListener = object : VideoListener {
 
         override fun onVideoError(progressPercentage: Int) {
-            Log.d(TAG, String.format(Locale.ENGLISH, "onVideoError progress: %d", progressPercentage))
+            Log.d(
+                TAG,
+                String.format(Locale.ENGLISH, "onVideoError progress: %d", progressPercentage)
+            )
         }
 
         override fun onVideoStarted() {
@@ -81,7 +86,10 @@ class InterstitialViewModel(application: Application) : AndroidViewModel(applica
         }
 
         override fun onVideoDismissed(progressPercentage: Int) {
-            Log.d(TAG, String.format(Locale.ENGLISH, "onVideoDismissed progress: %d", progressPercentage))
+            Log.d(
+                TAG,
+                String.format(Locale.ENGLISH, "onVideoDismissed progress: %d", progressPercentage)
+            )
         }
 
         override fun onVideoFinished() {
@@ -105,24 +113,28 @@ class InterstitialViewModel(application: Application) : AndroidViewModel(applica
     private val _creativeIdLiveData = MutableLiveData<String>()
     val creativeIdLiveData: LiveData<String> = _creativeIdLiveData
 
-    fun loadAd(activity: Activity, zoneId: String?){
+    fun loadAd(activity: Activity, zoneId: String?, selectedApi: Int) {
         clearErrors()
         interstitial = HyBidInterstitialAd(activity, zoneId, interstitialAdListener)
         interstitial?.isAutoCacheOnLoad = cachingEnabled
         //Optional to track video events
         interstitial?.setVideoListener(videoListener)
-        interstitial?.load()
+        if (selectedApi == R.id.radio_api_ortb) {
+            interstitial?.loadExchangeAd()
+        } else {
+            interstitial?.load()
+        }
     }
 
-    fun prepareAd(){
+    fun prepareAd() {
         interstitial?.prepare(cacheListener)
     }
 
-    fun showAd(){
+    fun showAd() {
         interstitial?.show()
     }
 
-    fun reset(){
+    fun reset() {
         clearErrors()
         _interstitialLoadLiveData.value = false
         interstitial?.destroy()
@@ -135,7 +147,7 @@ class InterstitialViewModel(application: Application) : AndroidViewModel(applica
         super.onCleared()
     }
 
-    private fun handleError(error: Throwable?){
+    private fun handleError(error: Throwable?) {
 
         if (error != null && error is HyBidError) {
             Log.e(TAG, error.message ?: " - ")
@@ -147,7 +159,7 @@ class InterstitialViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    private fun clearErrors(){
+    private fun clearErrors() {
         _errorCodeLiveData.value = ""
         _errorMessageLiveData.value = ""
     }

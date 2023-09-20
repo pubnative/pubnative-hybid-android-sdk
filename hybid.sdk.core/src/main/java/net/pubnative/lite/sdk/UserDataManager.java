@@ -47,8 +47,11 @@ public class UserDataManager {
     private static final String KEY_CMP_PRESENT_PUBLIC = "IABConsent_CMPPresent";
     private static final String KEY_CCPA_CONSENT = "ccpa_consent";
     private static final String KEY_GDPR_CONSENT = "gdpr_consent";
+    private static final String KEY_PUBLIC_GPP_STRING = "IABGPP_HDR_GppString";
+    private static final String KEY_PUBLIC_GPP_ID = "IABGPP_GppSID";
+    private static final String KEY_GPP_STRING = "gpp_string";
+    private static final String KEY_GPP_ID = "gpp_id";
     private static final String DEVICE_ID_TYPE = "gaid";
-
     private static final int CONSENT_STATE_ACCEPTED = 1;
     private static final int CONSENT_STATE_DENIED = 0;
 
@@ -237,6 +240,8 @@ public class UserDataManager {
             String tcf2Consent = getPublicTCF2Consent(publicPrefs);
             String tcf1Consent = getPublicTCFConsent(publicPrefs);
             String ccpaConsent = getPublicCCPAConsent(publicPrefs);
+            String gppString = getPublicGppString(publicPrefs);
+            String gppId = getPublicGppId(publicPrefs);
 
             if (!TextUtils.isEmpty(tcf2Consent)) {
                 setIABGDPRConsentString(tcf2Consent);
@@ -246,6 +251,14 @@ public class UserDataManager {
 
             if (!TextUtils.isEmpty(ccpaConsent)) {
                 setIABUSPrivacyString(ccpaConsent);
+            }
+
+            if (!TextUtils.isEmpty(gppString)) {
+                setGppString(gppString);
+            }
+
+            if (!TextUtils.isEmpty(gppId)) {
+                setGppSid(gppId);
             }
         }
     }
@@ -279,6 +292,24 @@ public class UserDataManager {
                             setIABUSPrivacyString(consentString);
                         } else {
                             removeIABUSPrivacyString();
+                        }
+                        break;
+                    }
+                    case KEY_PUBLIC_GPP_STRING: {
+                        String gppString = getPublicGppString(sharedPreferences);
+                        if (!TextUtils.isEmpty(gppString)) {
+                            setGppString(gppString);
+                        } else {
+                            removeGppString();
+                        }
+                        break;
+                    }
+                    case KEY_PUBLIC_GPP_ID: {
+                        String gppId = getPublicGppId(sharedPreferences);
+                        if (!TextUtils.isEmpty(gppId)) {
+                            setGppSid(gppId);
+                        } else {
+                            removeGppSid();
                         }
                         break;
                     }
@@ -348,4 +379,62 @@ public class UserDataManager {
             mPreferences.edit().remove(KEY_GDPR_CONSENT).apply();
         }
     }
+
+    //------------------------------------------- GPP ---------------------------------------------
+
+    private String getPublicGppString(SharedPreferences sharedPreferences) {
+        return sharedPreferences.getString(KEY_PUBLIC_GPP_STRING, null);
+    }
+
+    private String getPublicGppId(SharedPreferences sharedPreferences) {
+        return sharedPreferences.getString(KEY_PUBLIC_GPP_ID, null);
+    }
+
+    public String getGppString() {
+        if (mPreferences != null) {
+            return mPreferences.getString(KEY_GPP_STRING, null);
+        } else {
+            return null;
+        }
+    }
+
+    public void setGppString(String gppString) {
+        if (mPreferences != null) {
+            mPreferences.edit().putString(KEY_GPP_STRING, gppString).apply();
+        }
+    }
+
+    public void removeGppString() {
+        if (mPreferences != null) {
+            mPreferences.edit().remove(KEY_GPP_STRING).apply();
+        }
+    }
+
+    public String getGppSid() {
+        if (mPreferences != null) {
+            return mPreferences.getString(KEY_GPP_ID, null);
+        } else {
+            return null;
+        }
+    }
+
+    public void setGppSid(String gppId) {
+        if (mPreferences != null) {
+            mPreferences.edit().putString(KEY_GPP_ID, gppId).apply();
+        }
+    }
+
+    public void removeGppSid() {
+        if (mPreferences != null) {
+            mPreferences.edit().remove(KEY_GPP_ID).apply();
+        }
+    }
+
+    public void removeGppData() {
+        if (mPreferences != null) {
+            mPreferences.edit().remove(KEY_GPP_STRING).apply();
+            mPreferences.edit().remove(KEY_GPP_ID).apply();
+        }
+    }
+
 }

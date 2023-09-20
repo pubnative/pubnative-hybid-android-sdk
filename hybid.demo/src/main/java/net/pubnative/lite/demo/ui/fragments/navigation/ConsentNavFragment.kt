@@ -43,5 +43,10 @@ class ConsentNavFragment : Fragment(R.layout.fragment_nav_consent) {
                 Toast.makeText(activity, "GDPR does NOT apply", Toast.LENGTH_SHORT).show()
             }
         }
+
+        view.findViewById<TextView>(R.id.button_gpp_settings).setOnClickListener {
+            val intent = Intent(activity, GppSettingsActivity::class.java)
+            startActivity(intent)
+        }
     }
 }

@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import net.pubnative.lite.sdk.CustomEndCardListener;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
@@ -43,6 +44,7 @@ public class VastRewardedPresenter implements RewardedPresenter, HyBidRewardedBr
 
     private RewardedPresenter.Listener mListener;
     private VideoListener mVideoListener;
+    private CustomEndCardListener mCustomEndCardListener;
     private boolean mIsDestroyed;
     private boolean mReady = false;
 
@@ -123,6 +125,11 @@ public class VastRewardedPresenter implements RewardedPresenter, HyBidRewardedBr
     }
 
     @Override
+    public void setCustomEndCardListener(CustomEndCardListener listener) {
+        mCustomEndCardListener = listener;
+    }
+
+    @Override
     public void onVideoError(int progressPercentage) {
         if (mVideoListener != null) {
             mVideoListener.onVideoError(progressPercentage);
@@ -161,6 +168,6 @@ public class VastRewardedPresenter implements RewardedPresenter, HyBidRewardedBr
     //------------------------- Rewarded Broadcast Receiver Callbacks ------------------------------
     @Override
     public void onReceivedAction(HyBidRewardedBroadcastReceiver.Action action, Bundle extras) {
-        mBroadcastReceiver.handleAction(action, this, extras, mListener, this);
+        mBroadcastReceiver.handleAction(action, this, extras, mListener, this, mCustomEndCardListener);
     }
 }
