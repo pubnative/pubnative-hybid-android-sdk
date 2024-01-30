@@ -33,6 +33,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
@@ -56,7 +57,11 @@ class KeywordsFragment : Fragment(R.layout.fragment_keywords) {
         settingManager = SettingsManager.getInstance(requireContext())
 
         adapter = KeywordAdapter()
-        val layoutManager = GridLayoutManager(activity, 3, RecyclerView.VERTICAL, false)
+        val gridLayoutManager =
+            object : GridLayoutManager(activity, 3, RecyclerView.VERTICAL, false) {
+                override fun canScrollVertically() = false
+            }
+        val layoutManager = gridLayoutManager
         keywordList.layoutManager = layoutManager
         keywordList.adapter = adapter
 

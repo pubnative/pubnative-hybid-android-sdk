@@ -21,7 +21,7 @@ public class HyBidInterstitialActivityTest {
     private long broadcastIdentifier;
 
     // Make a concrete version of the abstract class for testing purposes.
-    private static class TestInterstitialActivity extends HyBidInterstitialActivity {
+    private static class TestInterstitialActivity extends MraidInterstitialActivity {
         View view;
 
         @Override

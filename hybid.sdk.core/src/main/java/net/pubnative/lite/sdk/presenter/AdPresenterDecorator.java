@@ -26,11 +26,13 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.utils.AdTracker;
@@ -60,12 +62,15 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
     private boolean mImpressionTracked = false;
     private boolean mClickTracked = false;
 
-    public AdPresenterDecorator(AdPresenter adPresenter, AdTracker adTrackingDelegate, ReportingController reportingController, AdPresenter.Listener listener, AdPresenter.ImpressionListener impressionListener) {
+    private IntegrationType mIntegrationType;
+
+    public AdPresenterDecorator(AdPresenter adPresenter, AdTracker adTrackingDelegate, ReportingController reportingController, AdPresenter.Listener listener, AdPresenter.ImpressionListener impressionListener, IntegrationType integrationType) {
         mAdPresenter = adPresenter;
         mAdTrackingDelegate = adTrackingDelegate;
         mReportingController = reportingController;
         mListener = listener;
         mImpressionListener = impressionListener;
+        mIntegrationType = integrationType;
     }
 
     @Override
@@ -167,6 +172,15 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
             reportingEvent.setEventType(Reporting.EventType.CLICK);
             reportingEvent.setTimestamp(String.valueOf(System.currentTimeMillis()));
             reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
+            Ad ad = getAd();
+            if (ad != null) {
+                reportingEvent.setImpId(ad.getSessionId());
+                reportingEvent.setCampaignId(ad.getCampaignId());
+                reportingEvent.setConfigId(ad.getConfigId());
+            }
+            reportingEvent.setCustomString(Reporting.Key.CLICK_SOURCE_TYPE, Reporting.Key.CLICK_SOURCE_TYPE_AD);
             mReportingController.reportEvent(reportingEvent);
         }
 
@@ -186,6 +200,14 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
             reportingEvent.setEventType(Reporting.EventType.ERROR);
             reportingEvent.setTimestamp(String.valueOf(System.currentTimeMillis()));
             reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
+            Ad ad = getAd();
+            if (ad != null) {
+                reportingEvent.setImpId(ad.getSessionId());
+                reportingEvent.setCampaignId(ad.getCampaignId());
+                reportingEvent.setConfigId(ad.getConfigId());
+            }
             if (getAd() != null && !TextUtils.isEmpty(getAd().getVast())) {
                 reportingEvent.setVast(getAd().getVast());
             }
@@ -213,6 +235,14 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
             reportingEvent.setEventType(Reporting.EventType.IMPRESSION);
             reportingEvent.setTimestamp(String.valueOf(System.currentTimeMillis()));
             reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
+            Ad ad = getAd();
+            if (ad != null) {
+                reportingEvent.setImpId(ad.getSessionId());
+                reportingEvent.setCampaignId(ad.getCampaignId());
+                reportingEvent.setConfigId(ad.getConfigId());
+            }
             mReportingController.reportEvent(reportingEvent);
         }
 

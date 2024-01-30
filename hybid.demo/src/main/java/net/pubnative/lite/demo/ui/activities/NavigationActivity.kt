@@ -1,11 +1,9 @@
 package net.pubnative.lite.demo.ui.activities
 
-import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI
 import com.fyber.FairBid
@@ -13,6 +11,7 @@ import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.databinding.ActivityNavigationBinding
 import net.pubnative.lite.demo.util.OneTrustManager
+import net.pubnative.lite.sdk.TopicManager
 
 class NavigationActivity : AppCompatActivity() {
 
@@ -34,20 +33,7 @@ class NavigationActivity : AppCompatActivity() {
 
         FairBid.start(Constants.FAIRBID_APP_ID, this)
 
-        checkPermissions()
-
         initializeOpenTrustSDK()
-    }
-
-    private fun checkPermissions() {
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            val permissionList = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
-            ActivityCompat.requestPermissions(this, permissionList, PERMISSION_REQUEST)
-        }
     }
 
     override fun onSupportNavigateUp() = findNavController(R.id.fragment_nav_host).navigateUp()

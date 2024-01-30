@@ -296,6 +296,66 @@ public class VastProcessor {
                 }
             }
 
+            try {
+                List<Companion> companionList = getSortedCompanions(creativeList, parseParams);
+                List<EndCardData> endCardList = new ArrayList<>();
+                for (int i = 0; i < companionList.size() && endCardList.isEmpty(); i++) {
+                    Companion companion = companionList.get(i);
+                    if (companion.getHtmlResources() != null && !companion.getHtmlResources().isEmpty()) {
+                        for (HTMLResource htmlResource : companion.getHtmlResources()) {
+                            if (!TextUtils.isEmpty(htmlResource.getText())) {
+                                endCardList.add(new EndCardData(EndCardData.Type.HTML_RESOURCE, htmlResource.getText().trim()));
+                            }
+                        }
+                    }
+                    if (companion.getiFrameResources() != null && !companion.getiFrameResources().isEmpty()) {
+                        for (IFrameResource iFrameResource : companion.getiFrameResources()) {
+                            if (!TextUtils.isEmpty(iFrameResource.getText())) {
+                                endCardList.add(new EndCardData(EndCardData.Type.IFRAME_RESOURCE, iFrameResource.getText().trim()));
+                            }
+                        }
+                    }
+                    if (companion.getStaticResources() != null && !companion.getStaticResources().isEmpty()) {
+                        for (StaticResource staticResource : companion.getStaticResources()) {
+                            if (!TextUtils.isEmpty(staticResource.getText())) {
+                                endCardList.add(new EndCardData(EndCardData.Type.STATIC_RESOURCE, staticResource.getText().trim()));
+                            }
+                        }
+                    }
+
+                }
+                adParams.setEndCardList(endCardList);
+
+                if (!companionList.isEmpty()) {
+                    Companion companion = companionList.get(0);
+                    CompanionClickThrough clickThrough = companion.getCompanionClickThrough();
+                    if (clickThrough != null && !TextUtils.isEmpty(clickThrough.getText())) {
+                        String redirectUrl = clickThrough.getText().trim();
+                        adParams.setEndCardRedirectUrl(redirectUrl);
+                    }
+
+                    if (companion.getCompanionClickTrackingList() != null) {
+                        List<String> clickEvents = new ArrayList<>();
+                        for (CompanionClickTracking tracking : companion.getCompanionClickTrackingList()) {
+                            clickEvents.add(tracking.getText());
+                        }
+                        adParams.setEndCardClicks(clickEvents);
+                    }
+
+                    if (companion.getTrackingEvents() != null
+                            && companion.getTrackingEvents().getTrackingList() != null) {
+                        List<String> events = new ArrayList<>();
+                        for (Tracking tracking : companion.getTrackingEvents().getTrackingList()) {
+                            events.add(tracking.getText());
+                        }
+                        adParams.setCompanionCreativeViewEvents(events);
+                    }
+                }
+            } catch (Exception e) {
+                // Do nothing, companion is optional
+                Logger.e(LOG_TAG, e.getMessage());
+            }
+
             if (linear != null) {
                 if (!TextUtils.isEmpty(linear.getSkipOffset())) {
                     adParams.setSkipTime(linear.getSkipOffset());
@@ -356,66 +416,6 @@ public class VastProcessor {
                         if (videoFileUrlsList.isEmpty()) {
                             ErrorLog.postError(context, VastError.MEDIA_FILE_NO_SUPPORTED_TYPE);
                         }
-                    }
-
-                    try {
-                        List<Companion> companionList = getSortedCompanions(creativeList, parseParams);
-                        List<EndCardData> endCardList = new ArrayList<>();
-                        for (int i = 0; i < companionList.size() && endCardList.isEmpty(); i++) {
-                            Companion companion = companionList.get(i);
-                            if (companion.getHtmlResources() != null && !companion.getHtmlResources().isEmpty()) {
-                                for (HTMLResource htmlResource : companion.getHtmlResources()) {
-                                    if (!TextUtils.isEmpty(htmlResource.getText())) {
-                                        endCardList.add(new EndCardData(EndCardData.Type.HTML_RESOURCE, htmlResource.getText().trim()));
-                                    }
-                                }
-                            }
-                            if (companion.getiFrameResources() != null && !companion.getiFrameResources().isEmpty()) {
-                                for (IFrameResource iFrameResource : companion.getiFrameResources()) {
-                                    if (!TextUtils.isEmpty(iFrameResource.getText())) {
-                                        endCardList.add(new EndCardData(EndCardData.Type.IFRAME_RESOURCE, iFrameResource.getText().trim()));
-                                    }
-                                }
-                            }
-                            if (companion.getStaticResources() != null && !companion.getStaticResources().isEmpty()) {
-                                for (StaticResource staticResource : companion.getStaticResources()) {
-                                    if (!TextUtils.isEmpty(staticResource.getText())) {
-                                        endCardList.add(new EndCardData(EndCardData.Type.STATIC_RESOURCE, staticResource.getText().trim()));
-                                    }
-                                }
-                            }
-
-                        }
-                        adParams.setEndCardList(endCardList);
-
-                        if (!companionList.isEmpty()) {
-                            Companion companion = companionList.get(0);
-                            CompanionClickThrough clickThrough = companion.getCompanionClickThrough();
-                            if (clickThrough != null && !TextUtils.isEmpty(clickThrough.getText())) {
-                                String redirectUrl = clickThrough.getText().trim();
-                                adParams.setEndCardRedirectUrl(redirectUrl);
-                            }
-
-                            if (companion.getCompanionClickTrackingList() != null) {
-                                List<String> clickEvents = new ArrayList<>();
-                                for (CompanionClickTracking tracking : companion.getCompanionClickTrackingList()) {
-                                    clickEvents.add(tracking.getText());
-                                }
-                                adParams.setEndCardClicks(clickEvents);
-                            }
-
-                            if (companion.getTrackingEvents() != null
-                                    && companion.getTrackingEvents().getTrackingList() != null) {
-                                List<String> events = new ArrayList<>();
-                                for (Tracking tracking : companion.getTrackingEvents().getTrackingList()) {
-                                    events.add(tracking.getText());
-                                }
-                                adParams.setCompanionCreativeViewEvents(events);
-                            }
-                        }
-                    } catch (Exception e) {
-                        // Do nothing, companion is optional
-                        Logger.e(LOG_TAG, e.getMessage());
                     }
                 }
 

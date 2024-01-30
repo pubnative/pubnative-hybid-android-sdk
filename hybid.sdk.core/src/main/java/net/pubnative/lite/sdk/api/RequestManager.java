@@ -30,8 +30,7 @@ import net.pubnative.lite.sdk.AdCache;
 import net.pubnative.lite.sdk.CacheListener;
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
-import net.pubnative.lite.sdk.HyBidError;
-import net.pubnative.lite.sdk.HyBidErrorCode;
+import net.pubnative.lite.sdk.HyBidAdSelectionManager;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
@@ -43,7 +42,6 @@ import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.PNAdRequest;
 import net.pubnative.lite.sdk.models.PNAdRequestFactory;
-import net.pubnative.lite.sdk.models.RemoteConfigFeature;
 import net.pubnative.lite.sdk.models.request.OpenRTBAdRequest;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.HeaderBiddingUtils;
@@ -66,6 +64,8 @@ import java.util.List;
  * Created by erosgarciaponte on 08.01.18.
  */
 public class RequestManager {
+    private IntegrationType mIntegrationType = IntegrationType.STANDALONE;
+
     public interface RequestListener {
         void onRequestSuccess(Ad ad);
 
@@ -79,6 +79,7 @@ public class RequestManager {
     private VideoAdCache mVideoCache;
     private final AdRequestFactory mAdRequestFactory;
     private final ReportingController mReportingController;
+    private final HyBidAdSelectionManager mAdSelectionManager;
     private final PNInitializationHelper mInitializationHelper;
     private String mAppToken;
     private String mZoneId;
@@ -124,6 +125,11 @@ public class RequestManager {
         mAdCache = adCache;
         mVideoCache = videoCache;
         mReportingController = reportingController;
+        if (apiClient != null && apiClient.getContext() != null) {
+            mAdSelectionManager = new HyBidAdSelectionManager(apiClient.getContext());
+        } else {
+            mAdSelectionManager = null;
+        }
         mAdRequestFactory = requestFactory;
         mInitializationHelper = initializationHelper;
         mPlacementParams = new JSONObject();
@@ -205,8 +211,10 @@ public class RequestManager {
         mCacheStarted = false;
         mCacheFinished = false;
 
+        boolean protectedAudiencesAvailable = mAdSelectionManager != null && mAdSelectionManager.isApiAvailable();
+
         mAdRequestFactory.createAdRequest(TextUtils.isEmpty(mAppToken) ? null : mAppToken, mZoneId,
-                getAdSize(), isRewarded(), adRequest -> {
+                getAdSize(), isRewarded(), protectedAudiencesAvailable, adRequest -> {
                     requestAdFromApi(adRequest);
                     if (adRequest != null) {
                         try {
@@ -258,7 +266,7 @@ public class RequestManager {
                 }
 
                 Logger.d(TAG, "Received ad response for zone id: " + adRequest.zoneId);
-                reportAdResponse(adRequest, ad);
+                reportAdResponse(adRequest, ad, mIntegrationType);
                 processAd(adRequest, ad);
             }
 
@@ -393,6 +401,8 @@ public class RequestManager {
         if (mReportingController != null) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.CACHE);
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
             JsonOperations.mergeJsonObjects(jsonCacheParams, getPlacementParams());
             reportingEvent.mergeJSONObject(jsonCacheParams);
             mReportingController.reportEvent(reportingEvent);
@@ -403,6 +413,8 @@ public class RequestManager {
         if (mReportingController != null) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.REQUEST);
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
             reportingEvent.setTimestamp(String.valueOf(System.currentTimeMillis()));
 
             String adSize;
@@ -423,6 +435,8 @@ public class RequestManager {
         if (mReportingController != null) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.REQUEST);
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
             reportingEvent.setTimestamp(String.valueOf(System.currentTimeMillis()));
 
             String adSize;
@@ -436,10 +450,12 @@ public class RequestManager {
         }
     }
 
-    private void reportAdResponse(AdRequest adRequest, Ad adResponse) {
+    private void reportAdResponse(AdRequest adRequest, Ad adResponse, IntegrationType mIntegrationType) {
         if (mReportingController != null) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.RESPONSE);
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
             reportingEvent.setTimestamp(String.valueOf(System.currentTimeMillis()));
             String adSize;
             if (getAdSize() != null) {
@@ -447,17 +463,56 @@ public class RequestManager {
                 reportingEvent.setAdSize(adSize);
             }
             reportingEvent.setPlacementId(adRequest.zoneId);
+            reportingEvent.setImpId(adResponse.getSessionId());
+            reportingEvent.setCampaignId(adResponse.getCampaignId());
+            reportingEvent.setConfigId(adResponse.getConfigId());
             reportingEvent.setCustomString(Reporting.Key.BID_PRICE,
                     HeaderBiddingUtils.getBidFromPoints(
                             adResponse.getECPM(), PrebidUtils.KeywordMode.THREE_DECIMALS));
             switch (adResponse.assetgroupid) {
-                case ApiAssetGroupType.VAST_INTERSTITIAL:
+                case ApiAssetGroupType.MRAID_320x50:
+                case ApiAssetGroupType.MRAID_300x50:
+                case ApiAssetGroupType.MRAID_300x250:
+                case ApiAssetGroupType.MRAID_728x90:
+                case ApiAssetGroupType.MRAID_160x600:
+                case ApiAssetGroupType.MRAID_250x250:
+                case ApiAssetGroupType.MRAID_300x600:
+                case ApiAssetGroupType.MRAID_320x100: {
+                    reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
+                    reportingEvent.setCreativeType(Reporting.CreativeType.STANDARD);
+                    break;
+                }
+
+                case ApiAssetGroupType.MRAID_320x480:
+                case ApiAssetGroupType.MRAID_1024x768:
+                case ApiAssetGroupType.MRAID_768x1024:
+                case ApiAssetGroupType.MRAID_480x320: {
+                    if (isRewarded()) {
+                        reportingEvent.setAdFormat(Reporting.AdFormat.REWARDED);
+                    } else {
+                        reportingEvent.setAdFormat(Reporting.AdFormat.FULLSCREEN);
+                    }
+                    reportingEvent.setCreativeType(Reporting.CreativeType.STANDARD);
+                    break;
+                }
+
+                case ApiAssetGroupType.VAST_INTERSTITIAL: {
+                    if (isRewarded()) {
+                        reportingEvent.setAdFormat(Reporting.AdFormat.REWARDED);
+                    } else {
+                        reportingEvent.setAdFormat(Reporting.AdFormat.FULLSCREEN);
+                    }
+                    reportingEvent.setCreativeType(Reporting.CreativeType.VIDEO);
+                    break;
+                }
+
                 case ApiAssetGroupType.VAST_MRECT: {
+                    reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
                     reportingEvent.setCreativeType(Reporting.CreativeType.VIDEO);
                     break;
                 }
                 default: {
-                    reportingEvent.setCreativeType(Reporting.CreativeType.STANDARD);
+                    reportingEvent.setAdFormat(Reporting.AdFormat.NATIVE);
                 }
             }
             mReportingController.reportEvent(reportingEvent);
@@ -474,6 +529,9 @@ public class RequestManager {
     }
 
     public void setIntegrationType(IntegrationType integrationType) {
+        if (integrationType != null) {
+            mIntegrationType = integrationType;
+        }
         if (mAdRequestFactory != null) {
             mAdRequestFactory.setIntegrationType(integrationType);
             JsonOperations.putJsonString(mPlacementParams, Reporting.Key.INTEGRATION_TYPE, integrationType.getCode());
@@ -516,5 +574,9 @@ public class RequestManager {
             }
         }
         return finalParams;
+    }
+
+    public IntegrationType getIntegrationType() {
+        return mIntegrationType;
     }
 }

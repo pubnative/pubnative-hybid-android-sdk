@@ -48,6 +48,7 @@ public class Constants {
 
     public static final Boolean COPPA_DEFAULT = false;
     public static final Boolean TEST_MODE_DEFAULT = true;
+    public static final Boolean TOPICS_API_DEFAULT = false;
     public static final Boolean LOCATION_TRACKING_DEFAULT = true;
     public static final Boolean LOCATION_UPDATES_DEFAULT = false;
     public static final int INITIAL_AUDIO_STATE_DEFAULT = 1;
@@ -59,11 +60,8 @@ public class Constants {
     public static final int VIDEO_SKIP_OFFSET_DEFAULT = 8;
     public static final int ENDCARD_CLOSE_BUTTON_DELAY_DEFAULT = 5;
     public static final Boolean VIDEO_CLICK_BEHAVIOUR_DEFAULT = true;
-
-    public static final String DFP_MRAID_BANNER_AD_UNIT = "/219576711/pnlite_dfp_banner";
-    public static final String DFP_MRAID_INTERSTITIAL_AD_UNIT = "/219576711/pnlite_dfp_interstitial";
-    public static final String DFP_MRAID_MEDIUM_AD_UNIT = "/219576711/pnlite_dfp_mrect";
-    public static final String DFP_MRAID_LEADERBOARD_AD_UNIT = "/219576711/pnlite_dfp_leaderboard";
+    public static final int MRAID_CUSTOM_CLOSE_BACK_BUTTON_DELAY_DEFAULT = 3;
+    public static final int MRAID_CUSTOM_CLOSE_CLOSE_BUTTON_DELAY_DEFAULT = 15;
 
     public static final String DFP_MEDIATION_BANNER_AD_UNIT = "";
     public static final String DFP_MEDIATION_INTERSTITIAL_AD_UNIT = "";
@@ -100,16 +98,22 @@ public class Constants {
     public static final String FAIRBID_MEDIATION_INTERSTITIAL_AD_UNIT = "681244";
     public static final String FAIRBID_MEDIATION_REWARDED_AD_UNIT = "681245";
 
-    public static final String FAIRBID_BANNER_AD_UNIT = "";
-    public static final String FAIRBID_INTERSTITIAL_AD_UNIT = "";
-    public static final String FAIRBID_REWARDED_AD_UNIT = "";
+    public static final String CONTENT_INFO_URL = "https://pubnative.net/content-info";
+    public static final String CONTENT_INFO_ICON_URL = "https://cdn.pubnative.net/static/adserver/contentinfo.png";
+
+    public static final String CHARTBOOST_APP_ID = "";
+    public static final String CHARTBOOST_APP_SIGNATURE = "";
+    public static final String CHARTBOOST_MEDIATION_BANNER_AD_UNIT = "";
+    public static final String CHARTBOOST_MEDIATION_MRECT_AD_UNIT = "";
+    public static final String CHARTBOOST_MEDIATION_MRECT_VIDEO_AD_UNIT = "";
+    public static final String CHARTBOOST_MEDIATION_LEADERBOARD_AD_UNIT = "";
+    public static final String CHARTBOOST_MEDIATION_INTERSTITIAL_AD_UNIT = "";
+    public static final String CHARTBOOST_MEDIATION_INTERSTITIAL_VIDEO_AD_UNIT = "";
+    public static final String CHARTBOOST_MEDIATION_REWARDED_AD_UNIT = "";
+    public static final String CHARTBOOST_MEDIATION_REWARDED_HTML_AD_UNIT = "";
 
     public static final String APP_TOKEN = "dde3c298b47648459f8ada4a982fa92d";
-    public static final List<String> ZONE_ID_LIST = Arrays.asList(NATIVE_ZONE_ID, MRAID_320x50_ZONE_ID,
-            MRAID_300x250_ZONE_ID, INTERSTITIAL_MRAID_ZONE_ID, MEDIUM_VIDEO_ZONE_ID,
-            INTERSTITIAL_VIDEO_ZONE_ID, MRAID_728x90_ZONE_ID, MRAID_160x600_ZONE_ID,
-            MRAID_250x250_ZONE_ID, MRAID_300x600_ZONE_ID, MRAID_320x100_ZONE_ID,
-            MRAID_480x320_ZONE_ID, MRAID_300x50_ZONE_ID);
+    public static final List<String> ZONE_ID_LIST = Arrays.asList(NATIVE_ZONE_ID, MRAID_320x50_ZONE_ID, MRAID_300x250_ZONE_ID, INTERSTITIAL_MRAID_ZONE_ID, MEDIUM_VIDEO_ZONE_ID, INTERSTITIAL_VIDEO_ZONE_ID, MRAID_728x90_ZONE_ID, MRAID_160x600_ZONE_ID, MRAID_250x250_ZONE_ID, MRAID_300x600_ZONE_ID, MRAID_320x100_ZONE_ID, MRAID_480x320_ZONE_ID, MRAID_300x50_ZONE_ID);
 
     public static final String OGURY_KEY = "OGY-7B028F43E33F";
 
@@ -117,5 +121,16 @@ public class Constants {
 
     public static final class IntentParams {
         public static final String ZONE_ID = "zone_id";
+    }
+
+    public static final class AdmType {
+        public static final String MARKUP = "markup";
+        public static final String API_V3 = "apiv3";
+        public static final String ORTB = "ortb";
+    }
+
+    public static final class Format {
+        public static final String HTML = "html";
+        public static final String VIDEO = "video";
     }
 }

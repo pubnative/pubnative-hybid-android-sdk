@@ -9,9 +9,13 @@ import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.CustomCTAData;
 import net.pubnative.lite.sdk.models.CustomEndCardDisplay;
 import net.pubnative.lite.sdk.models.EndCardData;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
+import net.pubnative.lite.sdk.utils.AdCustomCTAManager;
+import net.pubnative.lite.sdk.utils.AdEndCardManager;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeVideoAdSession;
 import net.pubnative.lite.sdk.vpaid.enums.AdState;
@@ -19,11 +23,9 @@ import net.pubnative.lite.sdk.vpaid.enums.VastError;
 import net.pubnative.lite.sdk.vpaid.helpers.AssetsLoader;
 import net.pubnative.lite.sdk.vpaid.helpers.ErrorLog;
 import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
-import net.pubnative.lite.sdk.vpaid.models.CloseCardData;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.AdSpotDimensions;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.response.VastProcessor;
-import net.pubnative.lite.sdk.vpaid.utils.CloseCardUtil;
 
 abstract class BaseVideoAdInternal {
 
@@ -32,29 +34,25 @@ abstract class BaseVideoAdInternal {
     private final Context mContext;
     private final AssetsLoader mAssetsLoader;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
-
+    private final String mVastData;
+    private final boolean isInterstitial;
+    protected final boolean isFullscreen;
+    private final HyBidViewabilityNativeVideoAdSession mViewabilityAdSession;
+    AdPresenter.ImpressionListener mImpressionListener;
     private int mAdState;
     private boolean mIsReady;
     private boolean mIsRewarded = false;
     private VideoAdListener mVideoAdListener;
     private AdCloseButtonListener mAdCloseButtonListener;
     private CloseButtonListener mCloseButtonListener;
+    private BackButtonClickabilityListener mBackButtonClickabilityListener;
     private long mAdLoadingStartTime;
     private SimpleTimer mExpirationTimer;
     private VideoAdController mAdController;
     private SimpleTimer mFetcherTimer;
     private SimpleTimer mPrepareTimer;
-    private final String mVastData;
     private Ad mAd;
-
-    private final boolean isInterstitial;
-    private final boolean isFullscreen;
-
     private VideoAdCacheItem mCacheItem;
-
-    private final HyBidViewabilityNativeVideoAdSession mViewabilityAdSession;
-
-    AdPresenter.ImpressionListener mImpressionListener;
 
     BaseVideoAdInternal(Context context, Ad ad, boolean isInterstitial, boolean isFullscreen, AdPresenter.ImpressionListener impressionListener, AdCloseButtonListener adCloseButtonListener) throws Exception {
         String data = ad.getVast();
@@ -92,6 +90,10 @@ abstract class BaseVideoAdInternal {
         return mVideoAdListener;
     }
 
+    void setAdListener(VideoAdListener videoAdListener) {
+        mVideoAdListener = videoAdListener;
+    }
+
     VideoAdController getAdController() {
         return mAdController;
     }
@@ -120,12 +122,12 @@ abstract class BaseVideoAdInternal {
         this.mIsRewarded = isRewarded;
     }
 
-    void setAdListener(VideoAdListener videoAdListener) {
-        mVideoAdListener = videoAdListener;
-    }
-
     void setAdCloseButtonListener(CloseButtonListener closeButtonListener) {
         mCloseButtonListener = closeButtonListener;
+    }
+
+    void setBackButtonClickabilityListener(BackButtonClickabilityListener listener) {
+        mBackButtonClickabilityListener = listener;
     }
 
     public void setVideoCacheItem(VideoAdCacheItem adCacheItem) {
@@ -219,11 +221,11 @@ abstract class BaseVideoAdInternal {
     }
 
 
-    void proceedLoad() {
+    void proceedLoad(IntegrationType integrationType) {
         if (mCacheItem != null) {
-            prepare(mCacheItem.getAdParams(), mVastData);
+            prepare(mCacheItem.getAdParams(), mVastData, integrationType);
         } else {
-            fetchAd();
+            fetchAd(integrationType);
         }
     }
 
@@ -262,12 +264,12 @@ abstract class BaseVideoAdInternal {
         mHandler.removeCallbacksAndMessages(null);
     }
 
-    private void fetchAd() {
+    private void fetchAd(IntegrationType integrationType) {
         VastProcessor processor = new VastProcessor(getContext(), getAdSpotDimensions());
         processor.parseResponse(mVastData, new VastProcessor.Listener() {
             @Override
             public void onParseSuccess(AdParams adParams, String vastFileContent) {
-                prepare(adParams, vastFileContent);
+                prepare(adParams, vastFileContent, integrationType);
             }
 
             @Override
@@ -277,21 +279,42 @@ abstract class BaseVideoAdInternal {
         });
     }
 
-    private void prepare(AdParams adParams, String vastFileContent) {
+    private void prepare(AdParams adParams, String vastFileContent, IntegrationType integrationType) {
 
         if (adParams.isVpaid()) {
             ErrorLog.postError(getContext(), VastError.VAST_VERSION_NOT_SUPPORTED);
             onAdLoadFail(new PlayerInfo("Unsupported ad format"));
             return;
         }
-
-        mAdController = new VideoAdControllerVast(this, adParams, getViewabilityAdSession(), isFullscreen, this.mImpressionListener, mAdCloseButtonListener);
+        mAdController = new VideoAdControllerVast(
+                this, adParams, getViewabilityAdSession(),
+                isFullscreen, this.mImpressionListener, mAdCloseButtonListener,
+                getCustomCTAData(),
+                getCustomCTADelay(),
+                integrationType
+        );
 
         if (mCacheItem != null) {
             prepareAdController(mCacheItem.getVideoFilePath(), mCacheItem.getEndCardData(), mCacheItem.getEndCardFilePath());
         } else {
             mAssetsLoader.load(adParams, mContext, createAssetsLoadListener());
         }
+    }
+
+    private Integer getCustomCTADelay() {
+        Integer delay = AdCustomCTAManager.CUSTOM_CTA_DELAY_DEFAULT;
+        if (getAd() != null) {
+            delay = AdCustomCTAManager.getCustomCtaDelay(getAd());
+        }
+        return delay;
+    }
+
+    private CustomCTAData getCustomCTAData() {
+        CustomCTAData data = null;
+        if (getAd() != null && AdCustomCTAManager.isAbleShow(this.getAd())) {
+            data = getAd().getCustomCta(getContext());
+        }
+        return data;
     }
 
     private AssetsLoader.OnAssetsLoaded createAssetsLoadListener() {
@@ -317,31 +340,29 @@ abstract class BaseVideoAdInternal {
         }
         mAdController.setVideoFilePath(videoFilePath);
 
-        if(((getAd().isEndCardEnabled() != null && getAd().isEndCardEnabled())
-                || (getAd().isEndCardEnabled() == null && HyBid.isEndCardEnabled() != null && HyBid.isEndCardEnabled()))
-                && getAd().hasEndCard()){
-            mAdController.addEndCardData(endCardData);
-            if(getAd().isCustomEndCardEnabled() != null && getAd().isCustomEndCardEnabled() && getAd().hasCustomEndCard() && getAd().getCustomEndCardDisplay().equals(CustomEndCardDisplay.EXTENSION)){
-                mAdController.addEndCardData(getAd().getCustomEndCard());
-                mVideoAdListener.onAdCustomEndCardFound();
+        if (getAd() != null) {
+            EndCardData endCard = getAd().getCustomEndCard();
+            if (AdEndCardManager.shouldShowEndcard(getAd())) {
+                mAdController.addEndCardData(endCardData);
+                if (AdEndCardManager.shouldShowCustomEndcard(getAd()) && getAd().getCustomEndCardDisplay().equals(CustomEndCardDisplay.EXTENSION)) {
+                    if (!endCard.getContent().isEmpty()) {
+                        mAdController.addEndCardData(endCard);
+                        mVideoAdListener.onAdCustomEndCardFound();
+                    }
+                }
+            } else if (AdEndCardManager.shouldShowCustomEndcard(getAd())) {
+                if (!endCard.getContent().isEmpty()) {
+                    mAdController.addEndCardData(endCard);
+                    mVideoAdListener.onAdCustomEndCardFound();
+                }
             }
-        } else if(getAd().isCustomEndCardEnabled() != null && getAd().isCustomEndCardEnabled() && getAd().hasCustomEndCard()){
-            mAdController.addEndCardData(getAd().getCustomEndCard());
-            mVideoAdListener.onAdCustomEndCardFound();
         }
 
-        mAdController.setCloseCardData(createCloseCardData(mAd));
         mAdController.setEndCardFilePath(endCardFilePath);
         runOnUiThread(() -> {
             startPrepareTimer();
             mAdController.prepare(createOnPrepareListener());
         });
-    }
-
-    private CloseCardData createCloseCardData(Ad mAd) {
-        CloseCardData closeCardData = new CloseCardData();
-        new CloseCardUtil().fetchCloseCardData(mAd, closeCardData);
-        return closeCardData;
     }
 
     private VideoAdController.OnPreparedListener createOnPrepareListener() {
@@ -360,7 +381,7 @@ abstract class BaseVideoAdInternal {
     }
 
     void onAdLoadSuccessInternal() {
-        runOnUiThread(() -> onAdLoadSuccess());
+        runOnUiThread(this::onAdLoadSuccess);
     }
 
     private void onAdExpired() {
@@ -424,17 +445,66 @@ abstract class BaseVideoAdInternal {
         }
     }
 
-    void onCustomEndCardShow(){
+    void onCustomEndCardShow(String endCardType) {
         Logger.d(LOG_TAG, "Ad received custom end card impression event");
         if (mVideoAdListener != null) {
-            mVideoAdListener.onCustomEndCardShow();
+            mVideoAdListener.onCustomEndCardShow(endCardType);
         }
     }
 
-    void onCustomEndCardClick(){
+    void onDefaultEndCardShow(String endCardType) {
+        Logger.d(LOG_TAG, "Ad received custom end card impression event");
+        if (mVideoAdListener != null) {
+            mVideoAdListener.onDefaultEndCardShow(endCardType);
+        }
+    }
+
+    void onCustomEndCardClick(String endCardType) {
         Logger.d(LOG_TAG, "Ad received custom end card click event");
         if (mVideoAdListener != null) {
-            mVideoAdListener.onCustomEndCardClicked();
+            mVideoAdListener.onCustomEndCardClick(endCardType);
+        }
+    }
+
+    void onDefaultEndCardClick(String endCardType) {
+        Logger.d(LOG_TAG, "Ad received custom end card click event");
+        if (mVideoAdListener != null) {
+            mVideoAdListener.onDefaultEndCardClick(endCardType);
+        }
+    }
+
+    void onCustomCTAClick(boolean isEndcardVisible) {
+        Logger.d(LOG_TAG, "Ad received custom CTA click event");
+        if (mVideoAdListener != null) {
+            mVideoAdListener.onCustomCTACLick(isEndcardVisible);
+        }
+    }
+
+    void onCustomCTAShow() {
+        Logger.d(LOG_TAG, "Ad received custom CTA show event");
+        if (mVideoAdListener != null) {
+            mVideoAdListener.onCustomCTAShow();
+        }
+    }
+
+    void onCustomCTALoadFail() {
+        Logger.d(LOG_TAG, "Ad received custom CTA load fail event");
+        if (mVideoAdListener != null) {
+            mVideoAdListener.onCustomCTALoadFail();
+        }
+    }
+
+    void onEndCardLoadSuccess(Boolean isCustomEndCard) {
+        Logger.d(LOG_TAG, "Ad received custom end card click event");
+        if (mVideoAdListener != null) {
+            mVideoAdListener.onEndCardLoadSuccess(isCustomEndCard);
+        }
+    }
+
+    void onEndCardLoadFail(Boolean isCustomEndCard) {
+        Logger.d(LOG_TAG, "Ad received custom end card click event");
+        if (mVideoAdListener != null) {
+            mVideoAdListener.onEndCardLoadFail(isCustomEndCard);
         }
     }
 
@@ -448,5 +518,24 @@ abstract class BaseVideoAdInternal {
     void onAdCloseButtonVisible() {
         if (mCloseButtonListener != null)
             mCloseButtonListener.onCloseButtonVisible();
+    }
+
+    void onBackButtonClickable() {
+        if (mBackButtonClickabilityListener != null)
+            mBackButtonClickabilityListener.onBackButtonClickable();
+    }
+
+    void onEndCardSkipped(Boolean custom) {
+        Logger.d(LOG_TAG, "onEndCardSkipped");
+        if (mVideoAdListener != null) {
+            mVideoAdListener.onEndCardSkipped(custom);
+        }
+    }
+
+    public void onEndCardClosed(Boolean isCustomEndCard) {
+        Logger.d(LOG_TAG, "onEndCardClosed");
+        if (mVideoAdListener != null) {
+            mVideoAdListener.onEndCardClosed(isCustomEndCard);
+        }
     }
 }

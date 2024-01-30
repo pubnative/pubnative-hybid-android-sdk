@@ -54,8 +54,13 @@ class ZoneIdsFragment : Fragment(R.layout.fragment_zone_ids) {
         settingManager = SettingsManager.getInstance(requireContext())
 
         adapter = ZoneIdAdapter(null)
-        val layoutManager = GridLayoutManager(activity, 6, RecyclerView.VERTICAL, false)
-        zoneIdList.layoutManager = layoutManager
+
+        val gridLayoutManager =
+            object : GridLayoutManager(activity, 6, RecyclerView.VERTICAL, false) {
+                override fun canScrollVertically() = false
+            }
+
+        zoneIdList.layoutManager = gridLayoutManager
         zoneIdList.adapter = adapter
 
         view.findViewById<TextView>(R.id.button_add_zone_id).setOnClickListener {

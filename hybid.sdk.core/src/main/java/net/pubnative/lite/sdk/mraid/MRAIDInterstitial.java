@@ -30,6 +30,7 @@ import android.text.TextUtils;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 
+import net.pubnative.lite.sdk.models.CustomCTAData;
 import net.pubnative.lite.sdk.mraid.internal.MRAIDLog;
 
 import java.io.UnsupportedEncodingException;

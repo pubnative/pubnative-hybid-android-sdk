@@ -24,7 +24,6 @@
 package net.pubnative.lite.demo.ui.activities
 
 import android.os.Bundle
-import android.util.Log
 import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentPagerAdapter
@@ -136,6 +135,10 @@ abstract class TabActivity : AppCompatActivity() {
 
     fun clearTrackerList() {
         debugViewModel.clearTrackerList()
+    }
+
+    fun clearRequestUrlString() {
+        debugViewModel.clearRequestUri()
     }
 
     fun cacheEventList() {

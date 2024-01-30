@@ -24,6 +24,8 @@ package net.pubnative.lite.sdk.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Picture;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Handler;
@@ -31,6 +33,8 @@ import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.URLUtil;
+
+import net.pubnative.lite.sdk.utils.svgparser.SVG;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -63,9 +67,17 @@ public class PNBitmapDownloader {
                 // Get new InputStream second time,
                 // because it can't be reused from previous time
                 InputStream inputStream = url.openConnection().getInputStream();
-                Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, getBitmapOptionsDecodingBounds(false));
+                Bitmap bitmap;
+                if(url.openConnection().getContentType().equals("image/svg+xml")){
+                    SVG svg = SVG.getFromInputStream(inputStream);
+                    Picture picture = svg.renderToPicture();
+                    bitmap = Bitmap.createBitmap(picture.getWidth(), picture.getHeight(), Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(bitmap);
+                    canvas.drawPicture(picture);
+                } else {
+                    bitmap = BitmapFactory.decodeStream(inputStream, null, getBitmapOptionsDecodingBounds(false));
+                }
                 inputStream.close();
-
                 PNBitmapLruCache.addBitmapToMemoryCache(mURL, bitmap);
                 invokeLoad(bitmap);
             } catch (RuntimeException e) {

@@ -4,6 +4,7 @@ import com.google.common.truth.Truth;
 
 import net.pubnative.lite.sdk.banner.presenter.MraidAdPresenter;
 import net.pubnative.lite.sdk.models.AdSize;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.leaderboard.presenter.LeaderboardPresenterFactory;
 import net.pubnative.lite.sdk.models.Ad;

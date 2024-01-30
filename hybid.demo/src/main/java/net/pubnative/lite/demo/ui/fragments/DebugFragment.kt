@@ -1,10 +1,12 @@
 package net.pubnative.lite.demo.ui.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -13,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
+import net.pubnative.lite.demo.ui.activities.UrlInspectorActivity
 import net.pubnative.lite.demo.ui.adapters.ReportingEventAdapter
 import net.pubnative.lite.demo.ui.adapters.ReportingTrackerAdapter
 import net.pubnative.lite.demo.util.ClipboardUtils
@@ -28,6 +31,7 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
     private var postBodyViewLabel: TextView? = null
     private var eventReportButton: Button? = null
     private var trackerReportButton: Button? = null
+    private var urlInspectorButton: Button? = null
 
     private var eventReportDialog: AlertDialog? = null
     private var trackersReportDialog: AlertDialog? = null
@@ -37,6 +41,7 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
     private var eventList: ArrayList<ReportingEvent>? = ArrayList()
     private var isOpenedEventReport: Boolean = false
     private var isOpenedTrackerReport: Boolean = false
+    private var isOpenedUrlInspector: Boolean = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -44,7 +49,7 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
         initViews()
         initObservers()
         setOnClickListeners()
-        handleSaveInstanse(savedInstanceState)
+        handleSaveInstance(savedInstanceState)
     }
 
     private fun initViews() {
@@ -57,6 +62,7 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
         postBodyViewLabel = requireView().findViewById(R.id.view_post_body_label)
         eventReportButton = requireView().findViewById(R.id.button_event_report)
         trackerReportButton = requireView().findViewById(R.id.button_tracker_report)
+        urlInspectorButton = requireView().findViewById(R.id.button_url_inspector)
     }
 
     private fun setOnClickListeners() {
@@ -79,11 +85,20 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
                 responseView?.text.toString()
             )
         }
+        postBodyView?.setOnClickListener {
+            ClipboardUtils.copyToClipboard(
+                requireActivity(),
+                postBodyView?.text.toString()
+            )
+        }
         eventReportButton?.setOnClickListener {
             displayEventReport()
         }
         trackerReportButton?.setOnClickListener {
             displayTrackerReport()
+        }
+        urlInspectorButton?.setOnClickListener {
+            displayUrlInspector()
         }
     }
 
@@ -106,7 +121,7 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
         }
     }
 
-    private fun handleSaveInstanse(savedInstanceState: Bundle?) {
+    private fun handleSaveInstance(savedInstanceState: Bundle?) {
         savedInstanceState?.let {
             this.isOpenedEventReport = it.getBoolean("isOpenedEventReport", false)
             eventList = HyBid.getReportingController().adEventList as ArrayList<ReportingEvent>?
@@ -198,10 +213,26 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
             }
     }
 
+    private fun displayUrlInspector() {
+        (requireActivity() as? TabActivity)?.debugViewModel?.getRequestUri()
+            ?.observe(viewLifecycleOwner) {
+                val intent = Intent(context, UrlInspectorActivity::class.java)
+
+                if (it != null) {
+                    intent.putExtra("requestUrl", it)
+                    context?.startActivity(intent)
+                    isOpenedUrlInspector = true
+                } else {
+                    Toast.makeText(context, "A request must be done first", Toast.LENGTH_SHORT).show()
+                }
+            }
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putBoolean("isOpenedEventReport", isOpenedEventReport)
         outState.putBoolean("isOpenedTrackerReport", isOpenedTrackerReport)
+        outState.putBoolean("isOpenedUrlInspector", isOpenedUrlInspector)
         HyBid.getReportingController().cacheAdEventList(eventList)
     }
 }

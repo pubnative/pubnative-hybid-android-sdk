@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.util.List;
 
 public class FileLoader {
 
@@ -98,7 +99,7 @@ public class FileLoader {
             }
             return;
         }
-        ExecutorHelper.getExecutor().submit(() -> load());
+        ExecutorHelper.getExecutor().submit(this::load);
     }
 
     private void load() {
@@ -169,6 +170,13 @@ public class FileLoader {
         try {
             URL url = new URL(remoteFileUrl);
             mConnection = (HttpURLConnection) url.openConnection();
+            if (mConnection != null && mConnection.getHeaderFields() != null &&
+                    mConnection.getHeaderFields().get("content-Length") != null &&
+                    mConnection.getHeaderFields().get("content-Length").isEmpty()) {
+                Logger.e(LOG_TAG, "File not found by URL: " + mRemoteFileUrl);
+                ErrorLog.postError(mContext, VastError.TRAFFICKING);
+                return null;
+            }
             mConnection.setRequestMethod("HEAD");
             if (mConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 String eTag = mConnection.getHeaderField("ETag");

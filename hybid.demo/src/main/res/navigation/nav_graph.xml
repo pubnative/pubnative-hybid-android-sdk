@@ -12,12 +12,6 @@
         tools:layout="@layout/fragment_nav_standalone" />
 
     <fragment
-        android:id="@+id/nav_pre_bid"
-        android:name="net.pubnative.lite.demo.ui.fragments.navigation.PrebidNavFragment"
-        android:label="@string/nav_pre_bid"
-        tools:layout="@layout/fragment_nav_prebid" />
-
-    <fragment
         android:id="@+id/nav_mediation"
         android:name="net.pubnative.lite.demo.ui.fragments.navigation.MediationNavFragment"
         android:label="@string/nav_mediation"

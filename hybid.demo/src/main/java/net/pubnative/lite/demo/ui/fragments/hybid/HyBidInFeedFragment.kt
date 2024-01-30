@@ -23,8 +23,6 @@
 package net.pubnative.lite.demo.ui.fragments.hybid
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.text.TextUtils
 import android.util.Log
 import android.view.View
@@ -95,7 +93,12 @@ class HyBidInFeedFragment : Fragment(R.layout.fragment_hybid_infeed_banner), InF
 
         adapter = InFeedAdapter(zoneId!!, this)
 
-        recyclerView.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
+        val linearLayoutManager =
+            object : LinearLayoutManager(activity, RecyclerView.VERTICAL, false) {
+                override fun canScrollVertically() = false
+            }
+
+        recyclerView.layoutManager = linearLayoutManager
         recyclerView.itemAnimator = DefaultItemAnimator()
         recyclerView.adapter = adapter
 
@@ -103,6 +106,7 @@ class HyBidInFeedFragment : Fragment(R.layout.fragment_hybid_infeed_banner), InF
             val activity = activity as TabActivity
             activity.notifyAdCleaned()
             activity.clearEventList()
+            activity.clearRequestUrlString()
             loadPNAd()
         }
 

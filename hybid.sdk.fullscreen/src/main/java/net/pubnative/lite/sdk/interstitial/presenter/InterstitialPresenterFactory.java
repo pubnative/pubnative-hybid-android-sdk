@@ -27,7 +27,7 @@ import android.content.Context;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
-import net.pubnative.lite.sdk.models.RemoteConfigFeature;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.SkipOffset;
 import net.pubnative.lite.sdk.utils.AdEndCardManager;
 import net.pubnative.lite.sdk.utils.AdTracker;
@@ -50,20 +50,20 @@ public class InterstitialPresenterFactory {
 
     public InterstitialPresenter createInterstitialPresenter(
             Ad ad,
-            InterstitialPresenter.Listener interstitialPresenterListener) {
+            InterstitialPresenter.Listener interstitialPresenterListener, IntegrationType integrationType) {
         return createInterstitialPresenter(ad, new SkipOffset(SkipOffsetManager.getDefaultHtmlInterstitialSkipOffset(), false),
                 new SkipOffset(ad.hasEndCard() ? SkipOffsetManager.getDefaultVideoWithEndCardSkipOffset() :
                         SkipOffsetManager.getDefaultVideoWithoutEndCardSkipOffset(), false),
-                interstitialPresenterListener);
+                interstitialPresenterListener, integrationType);
     }
 
     public InterstitialPresenter createInterstitialPresenter(
             Ad ad,
             SkipOffset htmlSkipOffset,
             SkipOffset videoSkipOffset,
-            InterstitialPresenter.Listener interstitialPresenterListener) {
+            InterstitialPresenter.Listener interstitialPresenterListener, IntegrationType integrationType) {
 
-        final InterstitialPresenter interstitialPresenter = fromCreativeType(ad.assetgroupid, ad, htmlSkipOffset, videoSkipOffset);
+        final InterstitialPresenter interstitialPresenter = fromCreativeType(ad.assetgroupid, ad, htmlSkipOffset, videoSkipOffset, integrationType);
         if (interstitialPresenter == null) {
             return null;
         }
@@ -72,15 +72,16 @@ public class InterstitialPresenterFactory {
                 new InterstitialPresenterDecorator(interstitialPresenter,
                         new AdTracker(ad.getBeacons(Ad.Beacon.IMPRESSION), ad.getBeacons(Ad.Beacon.CLICK)),
                         new AdTracker(ad.getBeacons(Ad.Beacon.CUSTOM_END_CARD_IMPRESSION), ad.getBeacons(Ad.Beacon.CUSTOM_END_CARD_CLICK)),
+                        new AdTracker(ad.getBeacons(Ad.Beacon.DEFAULT_END_CARD_IMPRESSION), ad.getBeacons(Ad.Beacon.DEFAULT_END_CARD_CLICK)),
                         HyBid.getReportingController(),
-                        interstitialPresenterListener);
+                        interstitialPresenterListener, integrationType);
         interstitialPresenter.setListener(interstitialPresenterDecorator);
         interstitialPresenter.setVideoListener(interstitialPresenterDecorator);
         interstitialPresenter.setCustomEndCardListener(interstitialPresenterDecorator);
         return interstitialPresenterDecorator;
     }
 
-    InterstitialPresenter fromCreativeType(int assetGroupId, Ad ad, SkipOffset htmlSkipOffset, SkipOffset videoSkipOffset) {
+    InterstitialPresenter fromCreativeType(int assetGroupId, Ad ad, SkipOffset htmlSkipOffset, SkipOffset videoSkipOffset, IntegrationType integrationType) {
         switch (assetGroupId) {
             case ApiAssetGroupType.MRAID_300x600:
             case ApiAssetGroupType.MRAID_320x480:
@@ -92,14 +93,14 @@ public class InterstitialPresenterFactory {
             case ApiAssetGroupType.VAST_INTERSTITIAL: {
                 int videoOffset = videoSkipOffset.getOffset();
                 if (!videoSkipOffset.isCustom()) {
-                    Boolean hasEndCard = AdEndCardManager.isEndCardEnabled(ad, null);
+                    Boolean hasEndCard = AdEndCardManager.isEndCardEnabled(ad);
                     if (ad.hasEndCard() && hasEndCard) {
                         videoOffset = SkipOffsetManager.getDefaultVideoWithEndCardSkipOffset();
                     } else {
                         videoOffset = SkipOffsetManager.getDefaultVideoWithoutEndCardSkipOffset();
                     }
                 }
-                return new VastInterstitialPresenter(mContext, ad, mZoneId, videoOffset);
+                return new VastInterstitialPresenter(mContext, ad, mZoneId, videoOffset, integrationType);
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for interstitial ad format.");

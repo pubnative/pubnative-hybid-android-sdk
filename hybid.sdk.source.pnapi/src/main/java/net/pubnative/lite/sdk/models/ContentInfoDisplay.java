@@ -19,9 +19,9 @@ public enum ContentInfoDisplay {
 
         String lowercaseName = name.toLowerCase(Locale.ENGLISH);
 
-        if (lowercaseName.equals(IN_APP.display))
+        if (lowercaseName.equalsIgnoreCase(IN_APP.display))
             return IN_APP;
-        else if (lowercaseName.equals(SYSTEM_BROWSER.display))
+        else if (lowercaseName.equalsIgnoreCase(SYSTEM_BROWSER.display))
             return SYSTEM_BROWSER;
 
         return SYSTEM_BROWSER;

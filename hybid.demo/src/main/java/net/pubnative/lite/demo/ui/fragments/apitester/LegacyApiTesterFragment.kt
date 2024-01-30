@@ -1,9 +1,13 @@
 package net.pubnative.lite.demo.ui.fragments.apitester
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.RadioGroup
 import android.widget.RelativeLayout
 import android.widget.Toast
@@ -13,30 +17,45 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
+import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.ui.activities.AdCustomizationActivity
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.ui.adapters.LegacyApiAdapter
 import net.pubnative.lite.demo.ui.adapters.OnLogDisplayListener
+import net.pubnative.lite.demo.ui.fragments.apitester.LegacyApiTesterSize.*
 import net.pubnative.lite.demo.ui.fragments.markup.MarkupType
+import net.pubnative.lite.demo.viewmodel.AdCustomizationViewModel
 import net.pubnative.lite.demo.viewmodel.ApiTesterViewModel
+import net.pubnative.lite.sdk.HyBid
+import net.pubnative.lite.sdk.VideoListener
+import net.pubnative.lite.sdk.analytics.Reporting
+import net.pubnative.lite.sdk.analytics.ReportingEvent
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd
 import net.pubnative.lite.sdk.models.Ad
+import net.pubnative.lite.sdk.models.AdSize
+import net.pubnative.lite.sdk.models.IntegrationType
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedAd
 import net.pubnative.lite.sdk.utils.Logger
+import java.util.Locale
 
 class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester),
     OnLogDisplayListener {
 
     private lateinit var viewModel: ApiTesterViewModel
+    private lateinit var adCustomizationViewModel: AdCustomizationViewModel
 
     private lateinit var responseInput: EditText
     private lateinit var oRTBBodyInput: EditText
     private lateinit var adSizeGroup: RadioGroup
     private lateinit var responseSourceGroup: RadioGroup
+    private lateinit var enableAdCustomisationCheckbox: CheckBox
     private lateinit var markupList: RecyclerView
     private lateinit var loadButton: MaterialButton
     private lateinit var showButton: MaterialButton
+    private lateinit var customizeButton: MaterialButton
     private lateinit var oRTBLayout: RelativeLayout
+    private lateinit var adCustomizationLayout: LinearLayout
 
     private val adapter = LegacyApiAdapter(this)
 
@@ -45,9 +64,57 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester),
 
     private val TAG = LegacyApiTesterFragment::class.java.simpleName
 
+    private var adCustomisationEnabled: Boolean = false
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initViewModels()
+        initViews(view)
+        initObservers()
+        setListeners()
+    }
+
+
+    private fun loadInterstitial(ad: Ad?) {
+        interstitial?.destroy()
+
+        val interstitialListener = object : HyBidInterstitialAd.Listener {
+            override fun onInterstitialLoaded() {
+                Logger.d(TAG, "onInterstitialLoaded")
+                displayLogs()
+                showButton.isEnabled = true
+            }
+
+            override fun onInterstitialLoadFailed(error: Throwable?) {
+                Logger.e(TAG, "onInterstitialLoadFailed", error)
+                displayLogs()
+                showButton.isEnabled = false
+            }
+
+            override fun onInterstitialImpression() {
+                Logger.d(TAG, "onInterstitialImpression")
+            }
+
+            override fun onInterstitialClick() {
+                Logger.d(TAG, "onInterstitialClick")
+            }
+
+            override fun onInterstitialDismissed() {
+                Logger.d(TAG, "onInterstitialDismissed")
+                showButton.isEnabled = false
+            }
+        }
+
+        interstitial = HyBidInterstitialAd(requireActivity(), interstitialListener)
+        interstitial?.prepareAd(ad)
+    }
+
+    private fun initViewModels() {
         viewModel = ViewModelProvider(this)[ApiTesterViewModel::class.java]
+        adCustomizationViewModel = ViewModelProvider(this)[AdCustomizationViewModel::class.java]
+    }
+
+    private fun initViews(view: View) {
 
         responseInput = view.findViewById(R.id.input_response)
         oRTBBodyInput = view.findViewById(R.id.input_ortb_body)
@@ -58,6 +125,17 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester),
         loadButton = view.findViewById(R.id.button_load)
         showButton = view.findViewById(R.id.button_show)
         oRTBLayout = view.findViewById(R.id.layout_ortb_body)
+        adCustomizationLayout = view.findViewById(R.id.ad_customisation_layout)
+        enableAdCustomisationCheckbox = view.findViewById(R.id.cb_enable_customization)
+        customizeButton = view.findViewById(R.id.customize_button)
+
+        markupList.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
+        markupList.itemAnimator = DefaultItemAnimator()
+        markupList.adapter = adapter
+    }
+
+    private fun initObservers() {
+
 
         viewModel.clipboard.observe(viewLifecycleOwner) {
             responseInput.setText(it)
@@ -97,26 +175,45 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester),
             adapter.refreshWithAd(it, viewModel.getAdSize())
         }
 
-        view.findViewById<ImageButton>(R.id.button_paste_clipboard).setOnClickListener {
+        adCustomizationViewModel.onAdLoaded.observe(viewLifecycleOwner) { ad ->
+            viewModel.handleAdResult(ad)
+        }
+
+        adCustomizationViewModel.onAdLoadFailed.observe(viewLifecycleOwner) {
+            Toast.makeText(
+                context,
+                it,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    private fun setListeners() {
+
+        view?.findViewById<ImageButton>(R.id.button_paste_clipboard)?.setOnClickListener {
             viewModel.pasteFromClipboard()
         }
 
-        view.findViewById<ImageButton>(R.id.button_paste_clipboard_body).setOnClickListener {
+        view?.findViewById<ImageButton>(R.id.button_paste_clipboard_body)?.setOnClickListener {
             viewModel.pasteFromClipboardBody()
         }
 
         loadButton.setOnClickListener {
             cleanLogs()
-            loadAd()
+            if (adCustomisationEnabled && viewModel.getMarkupType() != MarkupType.ORTB_BODY && viewModel.getAdSize() != NATIVE) {
+                loadCustomizedAd()
+            } else {
+                loadAd()
+            }
         }
 
         showButton.setOnClickListener {
             when (viewModel.getAdSize()) {
-                LegacyApiTesterSize.INTERSTITIAL -> {
+                INTERSTITIAL -> {
                     interstitial?.show()
                 }
 
-                LegacyApiTesterSize.REWARDED -> {
+                REWARDED -> {
                     rewardedAd?.show()
                 }
 
@@ -127,29 +224,30 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester),
         adSizeGroup.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
                 R.id.radio_size_banner -> {
-                    viewModel.setAdSize(LegacyApiTesterSize.BANNER)
+                    viewModel.setAdSize(BANNER)
                 }
 
                 R.id.radio_size_medium -> {
-                    viewModel.setAdSize(LegacyApiTesterSize.MEDIUM)
+                    viewModel.setAdSize(MEDIUM)
                 }
 
                 R.id.radio_size_leaderboard -> {
-                    viewModel.setAdSize(LegacyApiTesterSize.LEADERBOARD)
+                    viewModel.setAdSize(LEADERBOARD)
                 }
 
                 R.id.radio_size_native -> {
-                    viewModel.setAdSize(LegacyApiTesterSize.NATIVE)
+                    viewModel.setAdSize(NATIVE)
                 }
 
                 R.id.radio_size_interstitial -> {
-                    viewModel.setAdSize(LegacyApiTesterSize.INTERSTITIAL)
+                    viewModel.setAdSize(INTERSTITIAL)
                 }
 
                 R.id.radio_size_rewarded -> {
-                    viewModel.setAdSize(LegacyApiTesterSize.REWARDED)
+                    viewModel.setAdSize(REWARDED)
                 }
             }
+            showAdCustomisationLayoutIfAvalable()
             showButton.isEnabled = false
         }
 
@@ -170,46 +268,20 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester),
                     viewModel.setMarkupType(MarkupType.ORTB_BODY)
                 }
             }
+            showAdCustomisationLayoutIfAvalable()
         }
 
-        markupList.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
-        markupList.itemAnimator = DefaultItemAnimator()
-        markupList.adapter = adapter
-    }
-
-
-    private fun loadInterstitial(ad: Ad?) {
-        interstitial?.destroy()
-
-        val interstitialListener = object : HyBidInterstitialAd.Listener {
-            override fun onInterstitialLoaded() {
-                Logger.d(TAG, "onInterstitialLoaded")
-                displayLogs()
-                showButton.isEnabled = true
-            }
-
-            override fun onInterstitialLoadFailed(error: Throwable?) {
-                Logger.e(TAG, "onInterstitialLoadFailed", error)
-                displayLogs()
-                showButton.isEnabled = false
-            }
-
-            override fun onInterstitialImpression() {
-                Logger.d(TAG, "onInterstitialImpression")
-            }
-
-            override fun onInterstitialClick() {
-                Logger.d(TAG, "onInterstitialClick")
-            }
-
-            override fun onInterstitialDismissed() {
-                Logger.d(TAG, "onInterstitialDismissed")
-                showButton.isEnabled = false
+        customizeButton.setOnClickListener {
+            if (adCustomisationEnabled) {
+                val intent = Intent(context, AdCustomizationActivity::class.java)
+                startActivity(intent)
             }
         }
 
-        interstitial = HyBidInterstitialAd(requireActivity(), interstitialListener)
-        interstitial?.prepareAd(ad)
+        enableAdCustomisationCheckbox.setOnCheckedChangeListener { compoundButton, isChecked ->
+            adCustomisationEnabled = isChecked
+            customizeButton.isEnabled = adCustomisationEnabled
+        }
     }
 
     private fun loadRewarded(ad: Ad?) {
@@ -256,6 +328,57 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester),
         viewModel.loadApiAd(responseInput.text.toString(), oRTBBodyInput.text.toString())
     }
 
+    private fun loadCustomizedAd() {
+
+        showButton.isEnabled = false
+        var isReworded = false;
+        val adSize: AdSize?
+
+        when (viewModel.getAdSize()) {
+            BANNER -> {
+                adSize = AdSize.SIZE_300x50
+            }
+
+            MEDIUM -> {
+                adSize = AdSize.SIZE_300x250
+            }
+
+            LEADERBOARD -> {
+                adSize = AdSize.SIZE_728x90
+            }
+
+            INTERSTITIAL -> {
+                adSize = AdSize.SIZE_INTERSTITIAL
+            }
+
+            REWARDED -> {
+                adSize = AdSize.SIZE_INTERSTITIAL; isReworded = true
+            }
+
+            NATIVE -> {
+                adSize = null
+            }
+        }
+
+        if (viewModel.getMarkupType() == MarkupType.CUSTOM_MARKUP) {
+            adCustomizationViewModel.loadCustomizedAd(
+                responseInput.text.toString(),
+                adSize,
+                isReworded,
+                "",
+                Constants.AdmType.API_V3
+            )
+        } else if (viewModel.getMarkupType() == MarkupType.URL) {
+            adCustomizationViewModel.loadCustomizedAdFromUrl(
+                responseInput.text.toString(),
+                adSize,
+                isReworded,
+                "",
+                Constants.AdmType.API_V3
+            )
+        }
+    }
+
     override fun onDestroy() {
         interstitial?.destroy()
         rewardedAd?.destroy()
@@ -274,6 +397,7 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester),
             val activity = activity as TabActivity
             activity.clearEventList()
             activity.clearTrackerList()
+            activity.clearRequestUrlString()
             activity.notifyAdCleaned()
         }
     }
@@ -284,5 +408,18 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester),
         } else {
             oRTBLayout.visibility = View.GONE
         }
+    }
+
+    private fun showAdCustomisationLayoutIfAvalable() {
+        if (viewModel.getMarkupType() != MarkupType.ORTB_BODY && viewModel.getAdSize() != NATIVE) {
+            adCustomizationLayout.visibility = View.VISIBLE
+        } else {
+            adCustomizationLayout.visibility = View.GONE
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        adCustomizationViewModel.refetchAdCustomisationParams()
     }
 }

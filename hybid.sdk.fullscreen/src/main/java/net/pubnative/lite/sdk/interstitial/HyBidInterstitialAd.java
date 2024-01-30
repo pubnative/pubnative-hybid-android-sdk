@@ -43,7 +43,6 @@ import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.OpenRTBAdRequestFactory;
-import net.pubnative.lite.sdk.models.RemoteConfigFeature;
 import net.pubnative.lite.sdk.models.SkipOffset;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
@@ -64,6 +63,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 
@@ -133,8 +133,8 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         //Zone Id
         addReportingKey(Reporting.Key.ZONE_ID, mZoneId);
 
-        mHtmlSkipOffset = HyBid.getHtmlInterstitialSkipOffset();
-        mVideoSkipOffset = HyBid.getVideoInterstitialSkipOffset();
+        mHtmlSkipOffset = new SkipOffset(SkipOffsetManager.getDefaultHtmlInterstitialSkipOffset(), false);
+        mVideoSkipOffset = new SkipOffset(SkipOffsetManager.getDefaultVideoWithoutEndCardSkipOffset(), false);
 
         mRequestManager.setIntegrationType(IntegrationType.STANDALONE);
         mORTBRequestManager.setIntegrationType(IntegrationType.STANDALONE);
@@ -149,7 +149,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
             addReportingKey(Reporting.Key.APP_TOKEN, HyBid.getAppToken());
         //Ad Type
         addReportingKey(Reporting.Key.AD_TYPE, Reporting.AdFormat.FULLSCREEN);
-        if (mRequestManager.getAdSize() != null)
+        if (mRequestManager != null && mRequestManager.getAdSize() != null)
             //Ad Size
             addReportingKey(Reporting.Key.AD_SIZE, mRequestManager.getAdSize().toString());
         //Integration Type
@@ -164,12 +164,14 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         } else {
             cleanup();
             mInitialLoadTime = System.currentTimeMillis();
-            if (!TextUtils.isEmpty(mAppToken)) {
-                mRequestManager.setAppToken(mAppToken);
+            if(mRequestManager != null){
+                if (!TextUtils.isEmpty(mAppToken)) {
+                    mRequestManager.setAppToken(mAppToken);
+                }
+                mRequestManager.setZoneId(mZoneId);
+                mRequestManager.setRequestListener(this);
+                mRequestManager.requestAd();
             }
-            mRequestManager.setZoneId(mZoneId);
-            mRequestManager.setRequestListener(this);
-            mRequestManager.requestAd();
         }
     }
 
@@ -271,29 +273,6 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         return mAd != null ? mAd.getECPM() : 0;
     }
 
-    /**
-     * @param seconds amount of seconds until the interstitial ad can be dismissed
-     * @deprecated This method is not recommended. Use instead setHtmlSkipOffset or
-     * setVideoSkipOffset to define the offset per ad type
-     */
-    @Deprecated
-    public void setSkipOffset(int seconds) {
-        setHtmlSkipOffset(seconds);
-        setVideoSkipOffset(seconds);
-    }
-
-    public void setHtmlSkipOffset(int seconds) {
-        if (seconds >= 0) {
-            mHtmlSkipOffset = new SkipOffset(seconds, true);
-        }
-    }
-
-    public void setVideoSkipOffset(int seconds) {
-        if (seconds >= 0) {
-            mVideoSkipOffset = new SkipOffset(seconds, true);
-        }
-    }
-
     public void setCustomUrl(String customUrl) {
         mCustomUrl = customUrl;
     }
@@ -317,7 +296,10 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     }
 
     private void renderAd() {
-        mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, this);
+        IntegrationType integrationType = IntegrationType.IN_APP_BIDDING;
+        if(mRequestManager != null )
+            integrationType = mRequestManager.getIntegrationType();
+        mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, this, integrationType);
         if (mPresenter != null) {
             mPresenter.setVideoListener(this);
             mPresenter.load();
@@ -361,11 +343,16 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         if (ad != null) {
             mAd = ad;
             checkRemoteConfigs();
-            if (!mAd.getZoneId().equalsIgnoreCase(mZoneId)) {
+            if (mAd != null && mAd.getZoneId() != null && !mAd.getZoneId().equalsIgnoreCase(mZoneId)) {
                 mZoneId = mAd.getZoneId();
                 JsonOperations.putJsonString(mPlacementParams, Reporting.Key.ZONE_ID, mZoneId);
+            } else if (mZoneId == null) {
+                mZoneId = "4";
             }
-            mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, this);
+            IntegrationType integrationType = IntegrationType.IN_APP_BIDDING;
+            if(mRequestManager != null )
+                integrationType = mRequestManager.getIntegrationType();
+            mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, this, integrationType);
             if (mPresenter != null) {
                 mPresenter.setVideoListener(this);
                 mPresenter.load();
@@ -413,7 +400,10 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
                         HyBid.getAdCache().put(mZoneId, mAd);
                         HyBid.getVideoAdCache().put(mZoneId, adCacheItem);
                         checkRemoteConfigs();
-                        mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, HyBidInterstitialAd.this);
+                        IntegrationType integrationType = IntegrationType.IN_APP_BIDDING;
+                        if(mRequestManager != null )
+                            integrationType = mRequestManager.getIntegrationType();
+                        mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, HyBidInterstitialAd.this, integrationType);
                         if (mPresenter != null) {
                             mPresenter.setVideoListener(HyBidInterstitialAd.this);
                             mPresenter.load();
@@ -439,9 +429,14 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
                 assetGroupId = 21;
                 type = Ad.AdType.HTML;
                 mAd = new Ad(assetGroupId, adValue, type);
+                mAd.setZoneId(mZoneId);
+                mAd.setHasEndCard(hasEndCard());
                 HyBid.getAdCache().put(mZoneId, mAd);
                 checkRemoteConfigs();
-                mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, HyBidInterstitialAd.this);
+                IntegrationType integrationType = IntegrationType.IN_APP_BIDDING;
+                if(mRequestManager != null )
+                    integrationType = mRequestManager.getIntegrationType();
+                mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, HyBidInterstitialAd.this, integrationType);
                 if (mPresenter != null) {
                     mPresenter.setVideoListener(this);
                     mPresenter.load();
@@ -456,9 +451,11 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     }
 
     private void checkRemoteConfigs() {
+        if (mAd == null)
+            return;
 
-        Integer htmlSkipOffset = SkipOffsetManager.getInterstitialHTMLSkipOffset(mAd.getHtmlSkipOffset(), mHtmlSkipOffset.getOffset());
-        Integer videoSkipOffset = SkipOffsetManager.getInterstitialVideoSkipOffset(mAd.getVideoSkipOffset(), mVideoSkipOffset.getOffset(), mVideoSkipOffset.isCustom(), null, null, hasEndCard());
+        Integer htmlSkipOffset = SkipOffsetManager.getInterstitialHTMLSkipOffset(mAd.getHtmlSkipOffset());
+        Integer videoSkipOffset = SkipOffsetManager.getInterstitialVideoSkipOffset(mAd.getVideoSkipOffset(), null, null, hasEndCard());
 
         if (htmlSkipOffset != null) {
             mHtmlSkipOffset = new SkipOffset(htmlSkipOffset, SkipOffsetManager.isCustomInterstitialHTMLSkipOffset());
@@ -523,7 +520,16 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
             ReportingEvent loadEvent = new ReportingEvent();
             loadEvent.setEventType(Reporting.EventType.LOAD);
             loadEvent.setAdFormat(Reporting.AdFormat.FULLSCREEN);
+            loadEvent.setPlatform(Reporting.Platform.ANDROID);
+            if(mRequestManager != null){
+                loadEvent.setSdkVersion(HyBid.getSDKVersionInfo(mRequestManager.getIntegrationType()));
+            }
             loadEvent.setCustomInteger(Reporting.Key.TIME_TO_LOAD, loadTime);
+            if (mAd != null) {
+                loadEvent.setImpId(mAd.getSessionId());
+                loadEvent.setCampaignId(mAd.getCampaignId());
+                loadEvent.setConfigId(mAd.getConfigId());
+            }
             loadEvent.mergeJSONObject(getPlacementParams());
             HyBid.getReportingController().reportEvent(loadEvent);
         }
@@ -544,7 +550,16 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
             ReportingEvent loadFailEvent = new ReportingEvent();
             loadFailEvent.setEventType(Reporting.EventType.LOAD_FAIL);
             loadFailEvent.setAdFormat(Reporting.AdFormat.FULLSCREEN);
+            loadFailEvent.setPlatform(Reporting.Platform.ANDROID);
+            if(mRequestManager != null){
+                loadFailEvent.setSdkVersion(HyBid.getSDKVersionInfo(mRequestManager.getIntegrationType()));
+            }
             loadFailEvent.setCustomInteger(Reporting.Key.TIME_TO_LOAD, loadTime);
+            if (mAd != null) {
+                loadFailEvent.setImpId(mAd.getSessionId());
+                loadFailEvent.setCampaignId(mAd.getCampaignId());
+                loadFailEvent.setConfigId(mAd.getConfigId());
+            }
             loadFailEvent.mergeJSONObject(getPlacementParams());
             HyBid.getReportingController().reportEvent(loadFailEvent);
         }
@@ -733,7 +748,16 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         ReportingEvent event = new ReportingEvent();
         event.setEventType(Reporting.EventType.RENDER);
         event.setAdFormat(adFormat);
+        event.setPlatform(Reporting.Platform.ANDROID);
+        if(mRequestManager != null){
+            event.setSdkVersion(HyBid.getSDKVersionInfo(mRequestManager.getIntegrationType()));
+        }
         event.setHasEndCard(hasEndCard());
+        if (mAd != null) {
+            event.setImpId(mAd.getSessionId());
+            event.setCampaignId(mAd.getCampaignId());
+            event.setConfigId(mAd.getConfigId());
+        }
         event.mergeJSONObject(placementParams);
         if (HyBid.getReportingController() != null)
             HyBid.getReportingController().reportEvent(event);
@@ -741,7 +765,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
 
     public boolean hasEndCard() {
         if (mAd != null)
-            return AdEndCardManager.isEndCardEnabled(mAd, mAd.hasEndCard());
+            return AdEndCardManager.isEndCardEnabled(mAd);
         return false;
     }
 }

@@ -2,6 +2,7 @@ package net.pubnative.lite.sdk.vpaid.response;
 
 import com.iab.omid.library.pubnativenet.adsession.VerificationScriptResource;
 
+import net.pubnative.lite.sdk.models.AdData;
 import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.models.vast.AdServingId;
 import net.pubnative.lite.sdk.vpaid.models.vast.Category;
@@ -96,8 +97,13 @@ public class AdParams {
         }
     }
 
-    public List<String> getCompanionCreativeViewEvents() {
-        return companionCreativeViewEvents;
+    public List<AdData> getCompanionCreativeViewEvents() {
+        ArrayList<AdData> eventList = new ArrayList<>();
+        if(companionCreativeViewEvents.isEmpty()) return eventList;
+        for (String url : companionCreativeViewEvents) {
+            eventList.add(new AdData("url","impression", url));
+        }
+        return eventList;
     }
 
     public void setCompanionCreativeViewEvents(List<String> companionCreativeViewEvents) {

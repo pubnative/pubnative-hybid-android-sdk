@@ -55,7 +55,7 @@ public class AdFeedbackFormHelper extends ResultReceiver{
             return;
         }
 
-        AdFeedbackData mAdFeedbackData = new AdFeedbackDataCollector().collectData(ad, adFormat, integrationType);
+        AdFeedbackData mAdFeedbackData = new AdFeedbackDataCollector(integrationType).collectData(ad, adFormat, integrationType);
         FeedbackMacros macroHelper = new FeedbackMacros();
         parsedUrl = macroHelper.processUrl(parsedUrl, mAdFeedbackData);
 

@@ -27,7 +27,7 @@ import android.content.Context;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
-import net.pubnative.lite.sdk.models.RemoteConfigFeature;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.Logger;
 
@@ -43,9 +43,9 @@ public class RewardedPresenterFactory {
 
     public RewardedPresenter createRewardedPresenter(
             Ad ad,
-            RewardedPresenter.Listener rewardedPresenterListener) {
+            RewardedPresenter.Listener rewardedPresenterListener, IntegrationType integrationType) {
 
-        final RewardedPresenter rewardedPresenter = fromCreativeType(ad.assetgroupid, ad);
+        final RewardedPresenter rewardedPresenter = fromCreativeType(ad.assetgroupid, ad, integrationType);
         if (rewardedPresenter == null) {
             return null;
         }
@@ -54,14 +54,15 @@ public class RewardedPresenterFactory {
                 new RewardedPresenterDecorator(rewardedPresenter,
                         new AdTracker(ad.getBeacons(Ad.Beacon.IMPRESSION), ad.getBeacons(Ad.Beacon.CLICK)),
                         new AdTracker(ad.getBeacons(Ad.Beacon.CUSTOM_END_CARD_IMPRESSION), ad.getBeacons(Ad.Beacon.CUSTOM_END_CARD_CLICK)),
+                        new AdTracker(ad.getBeacons(Ad.Beacon.DEFAULT_END_CARD_IMPRESSION), ad.getBeacons(Ad.Beacon.DEFAULT_END_CARD_CLICK)),
                         HyBid.getReportingController(),
-                        rewardedPresenterListener);
+                        rewardedPresenterListener, integrationType);
         rewardedPresenter.setListener(rewardedPresenterDecorator);
         rewardedPresenter.setCustomEndCardListener(rewardedPresenterDecorator);
         return rewardedPresenterDecorator;
     }
 
-    RewardedPresenter fromCreativeType(int assetGroupId, Ad ad) {
+    RewardedPresenter fromCreativeType(int assetGroupId, Ad ad, IntegrationType integrationType) {
         switch (assetGroupId) {
             case ApiAssetGroupType.MRAID_300x600:
             case ApiAssetGroupType.MRAID_320x480:
@@ -71,7 +72,7 @@ public class RewardedPresenterFactory {
                 return new MraidRewardedPresenter(mContext, ad, mZoneId);
             }
             case ApiAssetGroupType.VAST_INTERSTITIAL: {
-                return new VastRewardedPresenter(mContext, ad, mZoneId);
+                return new VastRewardedPresenter(mContext, ad, mZoneId, integrationType);
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for rewarded ad format.");

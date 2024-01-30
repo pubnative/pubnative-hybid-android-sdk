@@ -26,7 +26,10 @@ public enum RemoteConfig {
     FULL_SCREEN_CLICKABILITY("fullscreen_clickability", Boolean.class),
     MRAID_EXPAND("mraid_expand", Boolean.class),
     BACK_BUTTON_DELAY("back_button_delay", Integer.class),
-    NATIVE_CLOSE_BUTTON_DELAY("close_button_delay", Integer.class);
+    NATIVE_CLOSE_BUTTON_DELAY("close_button_delay", Integer.class),
+    CUSTOM_CTA_ENABLED("custom_cta_enabled", Boolean.class),
+    CUSTOM_CTA_DELAY("custom_cta_delay", Integer.class),
+    TOPICS_API_ENABLED("topics_api_enabled", Boolean.class);
 
     public final String fieldName;
     public final Class<?> type;

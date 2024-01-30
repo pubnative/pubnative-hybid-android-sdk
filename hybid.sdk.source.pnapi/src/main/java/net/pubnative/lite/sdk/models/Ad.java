@@ -39,6 +39,7 @@ import org.json.JSONObject;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
 
@@ -72,6 +73,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     @BindField
     public List<AdData> meta;
 
+    private String sessiondId;
     private String zoneId;
     private String adSourceName;
     private boolean hasEndCard = false;
@@ -89,6 +91,8 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         String CLICK = "click";
         String CUSTOM_END_CARD_IMPRESSION = "custom_endcard_impression";
         String CUSTOM_END_CARD_CLICK = "custom_endcard_click";
+        String DEFAULT_END_CARD_IMPRESSION = "default_endcard_impression";
+        String DEFAULT_END_CARD_CLICK = "default_endcard_click";
     }
 
     public enum AdType {
@@ -327,6 +331,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             return null;
         } else {
             PNAPIContentInfoView result = new PNAPIContentInfoView(context, getContentInfoIconXPosition());
+            result.setIconId(R.id.ic_context_icon_custom);
             result.setIconUrl(contentInfo.getIconUrl());
             result.setIconClickUrl(contentInfo.getLinkUrl());
             if (TextUtils.isEmpty(contentInfo.getText())) {
@@ -468,12 +473,36 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         return impressionId;
     }
 
+    public String getSessionId() {
+        String impressionId = getImpressionId();
+        if (impressionId != null && !impressionId.isEmpty()) {
+            return impressionId;
+        } else {
+            if (sessiondId == null) {
+                sessiondId = String.valueOf(UUID.randomUUID());
+            }
+            return sessiondId;
+        }
+    }
+
+    public String getCampaignId() {
+        AdData adData = getMeta(APIMeta.CAMPAIGN_ID);
+
+        if (adData == null) {
+            return "";
+        }
+
+        String creativeId = adData.getStringField(DATA_TEXT_KEY);
+
+        return TextUtils.isEmpty(creativeId) ? "" : creativeId;
+    }
+
     @SuppressWarnings("unchecked")
     public <T> T getRemoteConfig(RemoteConfig config) {
 
         AdData data = getMeta(APIMeta.REMOTE_CONFIGS);
 
-        if (data == null || !data.haseField("jsondata")) return null;
+        if (data == null || !data.hasField("jsondata")) return null;
 
         JSONObject jsonObject = data.getJSONObjectField("jsondata");
 
@@ -493,6 +522,33 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public RemoteConfigsDebug getRemoteConfigDebug() {
+        AdData data = getMeta(APIMeta.REMOTE_CONFIGS_DEBUG);
+        if (data == null || !data.hasField("jsondata")) return null;
+
+        JSONObject jsonObject = data.getJSONObjectField("jsondata");
+
+        try {
+            return new RemoteConfigsDebug(jsonObject);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+
+    public String getConfigId() {
+        RemoteConfigsDebug remoteConfigsDebug = getRemoteConfigDebug();
+
+        if (remoteConfigsDebug != null) {
+            List<Integer> configIds = remoteConfigsDebug.getConfigIds();
+            if (configIds != null && configIds.size() > 0) {
+                return configIds.get(0).toString();
+            }
+        }
+
+        return "";
     }
 
     public Boolean isEndCardEnabled() {
@@ -637,6 +693,20 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         }
     }
 
+    public BuyerSignals getBuyerSignals() {
+        AdData data = getMeta(APIMeta.PA_BUYER_SIGNALS);
+
+        if (data == null || !data.hasField("jsondata")) return null;
+
+        JSONObject jsonObject = data.getJSONObjectField("jsondata");
+
+        try {
+            return new BuyerSignals(jsonObject);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public void setZoneId(String zoneId) {
         this.zoneId = zoneId;
     }
@@ -674,9 +744,34 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         return getAsset(APIAsset.CUSTOM_END_CARD) != null;
     }
 
-    public CustomEndCardDisplay getCustomEndCardDisplay(){
-         String displayValue = getRemoteConfig(RemoteConfig.CUSTOM_END_CARD_DISPLAY);
-         return CustomEndCardDisplay.fromString(displayValue);
+    public CustomCTAData getCustomCta(Context context) {
+        CustomCTAData result = null;
+        AdData data = getAsset(APIAsset.CUSTOM_CTA);
+        if (data != null && !TextUtils.isEmpty(data.getStringField("icon"))) {
+            result = new CustomCTAData(data.getStringField("icon"), context.getResources().getString(R.string.custom_cta_button));
+        }
+        return result;
+    }
+
+    public boolean hasCustomCTA() {
+        return getAsset(APIAsset.CUSTOM_CTA) != null;
+    }
+
+    public CustomEndCardDisplay getCustomEndCardDisplay() {
+        String displayValue = getRemoteConfig(RemoteConfig.CUSTOM_END_CARD_DISPLAY);
+        return CustomEndCardDisplay.fromString(displayValue);
+    }
+
+    public Boolean isCustomCTAEnabled() {
+        return getRemoteConfig(RemoteConfig.CUSTOM_CTA_ENABLED);
+    }
+
+    public Boolean isTopicsAPIEnabled() {
+        return getRemoteConfig(RemoteConfig.TOPICS_API_ENABLED);
+    }
+
+    public Integer getCustomCTADelay() {
+        return getRemoteConfig(RemoteConfig.CUSTOM_CTA_DELAY);
     }
 
     @Override

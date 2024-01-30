@@ -1,5 +1,6 @@
 package net.pubnative.lite.sdk.utils;
 
+import static junit.framework.Assert.assertEquals;
 import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getBackButtonDelay;
 import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getDefaultRewardedHtmlSkipOffset;
 import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getInterstitialHTMLSkipOffset;
@@ -9,7 +10,7 @@ import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getRewardedHTMLSkip
 import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getRewardedSkipOffset;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
+
 
 public class SkipOffsetManagerTest {
 
@@ -60,7 +61,7 @@ public class SkipOffsetManagerTest {
     public void testGetBackButtonDelay_remoteConfigDelayGreaterThanBACK_BUTTON_DELAY_MAXIMUM() {
         // Test with remoteConfigDelay greater than BACK_BUTTON_DELAY_MAXIMUM
         Integer backButtonDelay = getBackButtonDelay(SkipOffsetManager.getMaximumBackButtonDelay() + 1);
-        assertEquals(SkipOffsetManager.getDefaultBackButtonDelay(), backButtonDelay);
+        assertEquals(SkipOffsetManager.getMaximumBackButtonDelay(), backButtonDelay);
     }
 
     @Test
@@ -76,26 +77,23 @@ public class SkipOffsetManagerTest {
     public void testGetInterstitialHTMLSkipOffset_nullRemoteConfigSkipOffset() {
         // Test with null remoteConfigSkipOffset
         Integer remoteConfigSkipOffset = null;
-        Integer renderingSkipOffset = 10;
-        Integer resultSkipOffset = getInterstitialHTMLSkipOffset(remoteConfigSkipOffset, renderingSkipOffset);
-        assertEquals(resultSkipOffset, renderingSkipOffset);
+        Integer resultSkipOffset = getInterstitialHTMLSkipOffset(remoteConfigSkipOffset);
+        assertEquals((int) resultSkipOffset, SkipOffsetManager.INTERSTITIAL_MRAID);
     }
 
     @Test
     public void testGetInterstitialHTMLSkipOffset_negativeRemoteConfigSkipOffset() {
         // Test with negative remoteConfigSkipOffset
         Integer remoteConfigSkipOffset = -1;
-        Integer renderingSkipOffset = 10;
-        Integer resultSkipOffset = getInterstitialHTMLSkipOffset(remoteConfigSkipOffset, renderingSkipOffset);
-        assertEquals(resultSkipOffset, renderingSkipOffset);
+        Integer resultSkipOffset = getInterstitialHTMLSkipOffset(remoteConfigSkipOffset);
+        assertEquals((int) resultSkipOffset, SkipOffsetManager.INTERSTITIAL_MRAID);
     }
 
     @Test
     public void testGetInterstitialHTMLSkipOffset_validRemoteConfigSkipOffset() {
         // Test with valid remoteConfigSkipOffset
         Integer remoteConfigSkipOffset = 25;
-        Integer renderingSkipOffset = 10;
-        Integer resultSkipOffset = getInterstitialHTMLSkipOffset(remoteConfigSkipOffset, renderingSkipOffset);
+        Integer resultSkipOffset = getInterstitialHTMLSkipOffset(remoteConfigSkipOffset);
         assertEquals(resultSkipOffset, remoteConfigSkipOffset);
     }
 
@@ -103,40 +101,37 @@ public class SkipOffsetManagerTest {
     public void testGetRewardedSkipOffset_nullRemoteConfigSkipOffset() {
         // Test with null remoteConfigSkipOffset
         Integer remoteConfigSkipOffset = null;
-        Integer renderingSkipOffset = 10;
-        Integer publisherSkipSeconds = 12;
+        Integer publisherSkipSeconds = 8;
         Integer adParamsSkipSeconds = 8;
         Boolean hasEndcard = false;
 
-        Integer resultSkipOffset = getRewardedSkipOffset(remoteConfigSkipOffset, renderingSkipOffset, adParamsSkipSeconds, hasEndcard);
-        assertEquals(resultSkipOffset, renderingSkipOffset);
+        Integer resultSkipOffset = getRewardedSkipOffset(remoteConfigSkipOffset, publisherSkipSeconds, adParamsSkipSeconds, hasEndcard);
+        assertEquals(resultSkipOffset, publisherSkipSeconds);
     }
 
     @Test
     public void testGetRewardedSkipOffset_negativeRemoteConfigSkipOffset() {
         // Test with negative remoteConfigSkipOffset
         Integer remoteConfigSkipOffset = -1;
-        Integer renderingSkipOffset = 10;
         Integer publisherSkipSeconds = 12;
         Integer adParamsSkipSeconds = 8;
         Boolean hasEndcard = false;
 
-        Integer resultSkipOffset = getRewardedSkipOffset(remoteConfigSkipOffset, renderingSkipOffset, adParamsSkipSeconds, hasEndcard);
-        assertEquals(resultSkipOffset, renderingSkipOffset);
+        Integer resultSkipOffset = getRewardedSkipOffset(remoteConfigSkipOffset, publisherSkipSeconds, adParamsSkipSeconds, hasEndcard);
+        assertEquals(resultSkipOffset, publisherSkipSeconds);
     }
 
     @Test
     public void testGetRewardedSkipOffset_remoteConfigSkipOffsetGreaterThanREWARDED_HTML_SKIP_OFFSET() {
         // Test with remoteConfigSkipOffset greater than REWARDED_HTML_SKIP_OFFSET
         Integer remoteConfigSkipOffset = 40;
-        Integer renderingSkipOffset = 10;
         Integer publisherSkipSeconds = 12;
         Integer adParamsSkipSeconds = 8;
         Boolean hasEndcard = false;
 
         Integer correctSkipOffset = 30;
 
-        Integer resultSkipOffset = getRewardedSkipOffset(remoteConfigSkipOffset, renderingSkipOffset, adParamsSkipSeconds, hasEndcard);
+        Integer resultSkipOffset = getRewardedSkipOffset(remoteConfigSkipOffset, publisherSkipSeconds, adParamsSkipSeconds, hasEndcard);
         assertEquals(resultSkipOffset, correctSkipOffset);
     }
 
@@ -144,12 +139,11 @@ public class SkipOffsetManagerTest {
     public void testGetRewardedSkipOffset_validRemoteConfigSkipOffset() {
         // Test with valid remoteConfigSkipOffset
         Integer remoteConfigSkipOffset = 22;
-        Integer renderingSkipOffset = 10;
         Integer publisherSkipSeconds = 12;
         Integer adParamsSkipSeconds = 8;
         Boolean hasEndcard = false;
 
-        Integer resultSkipOffset = getRewardedSkipOffset(remoteConfigSkipOffset, renderingSkipOffset, adParamsSkipSeconds, hasEndcard);
+        Integer resultSkipOffset = getRewardedSkipOffset(remoteConfigSkipOffset, publisherSkipSeconds, adParamsSkipSeconds, hasEndcard);
         assertEquals(resultSkipOffset, remoteConfigSkipOffset);
     }
 
@@ -157,13 +151,12 @@ public class SkipOffsetManagerTest {
     public void testGetRewardedSkipOffset_allNullValues() {
         // Test with all null values
         Integer remoteConfigSkipOffset = null;
-        Integer renderingSkipOffset = null;
         Integer publisherSkipSeconds = null;
         Integer adParamsSkipSeconds = null;
         Boolean hasEndcard = false;
         Integer defaultRewardedSkipOffset = getMaximumRewardedSkipOffset();
 
-        Integer resultSkipOffset = getRewardedSkipOffset(remoteConfigSkipOffset, renderingSkipOffset, adParamsSkipSeconds, hasEndcard);
+        Integer resultSkipOffset = getRewardedSkipOffset(remoteConfigSkipOffset, publisherSkipSeconds, adParamsSkipSeconds, hasEndcard);
         assertEquals(resultSkipOffset, defaultRewardedSkipOffset);
     }
 

@@ -30,6 +30,7 @@ public class SkipOffsetManager {
     private static final int VIDEO_WITHOUT_ENDCARD_SKIP_OFFSET = 15;
 
     private static final int ENDCARD_SKIP_OFFSET = 4;
+    private static final int ENDCARD_CLOSE_DELAY_MAXIMUM = 30;
 
 //    private static final int globalMaximumSkipOffsetWithoutEndCard = 30;
 //
@@ -39,9 +40,15 @@ public class SkipOffsetManager {
 
     public static Integer getBackButtonDelay(Integer remoteConfigDelay) {
         Integer backButtonDelay = remoteConfigDelay;
-        if (backButtonDelay == null || backButtonDelay < 0 || backButtonDelay > SkipOffsetManager.BACK_BUTTON_DELAY_MAXIMUM) {
+
+        if (backButtonDelay == null || backButtonDelay < 0) {
             backButtonDelay = SkipOffsetManager.BACK_BUTTON_DELAY;
         }
+
+        if(backButtonDelay > SkipOffsetManager.BACK_BUTTON_DELAY_MAXIMUM){
+            backButtonDelay = SkipOffsetManager.BACK_BUTTON_DELAY_MAXIMUM;
+        }
+
         return backButtonDelay;
     }
 
@@ -55,12 +62,11 @@ public class SkipOffsetManager {
 
 
     //Mraid interstitial ads has no end card !.
-    public static Integer getInterstitialHTMLSkipOffset(Integer remoteConfigSkipOffset, Integer renderingSkipOffset) {
+    public static Integer getInterstitialHTMLSkipOffset(Integer remoteConfigSkipOffset) {
 
         ArrayList<Integer> values = new ArrayList<>();
 
         values.add(remoteConfigSkipOffset);
-        values.add(renderingSkipOffset);
 
         Integer skipOffset = findSkipOffset(values, INTERSTITIAL_MRAID);
         isCustomInterstitialHTMLSkipOffset = skipOffset != INTERSTITIAL_MRAID;
@@ -77,7 +83,7 @@ public class SkipOffsetManager {
         return findSkipOffset(values, REWARDED_HTML_SKIP_OFFSET);
     }
 
-    public static Integer getInterstitialVideoSkipOffset(Integer remoteConfigSkipOffset, Integer renderingSkipOffset, Boolean isRenderingOffsetCustom, Integer publisherSkipSeconds, Integer adParamsSkipSeconds, Boolean hasEndCard) {
+    public static Integer getInterstitialVideoSkipOffset(Integer remoteConfigSkipOffset, Integer publisherSkipSeconds, Integer adParamsSkipSeconds, Boolean hasEndCard) {
         int defaultSkipOffset;
 
         if (hasEndCard) defaultSkipOffset = INTERSTITIAL_VIDEO_WITH_END_CARD;
@@ -86,11 +92,7 @@ public class SkipOffsetManager {
         ArrayList<Integer> values = new ArrayList<>();
 
         values.add(remoteConfigSkipOffset);
-        if (isRenderingOffsetCustom != null && !isRenderingOffsetCustom) {
-            values.add(defaultSkipOffset);
-        } else {
-            values.add(renderingSkipOffset);
-        }
+        values.add(defaultSkipOffset);
         values.add(publisherSkipSeconds);
         values.add(adParamsSkipSeconds);
 
@@ -184,6 +186,10 @@ public class SkipOffsetManager {
 
     public static Integer getDefaultEndcardSkipOffset() {
         return ENDCARD_SKIP_OFFSET;
+    }
+
+    public static Integer getMaximumEndcardCloseDelay() {
+        return ENDCARD_CLOSE_DELAY_MAXIMUM;
     }
 
     private static class SkipOffset {

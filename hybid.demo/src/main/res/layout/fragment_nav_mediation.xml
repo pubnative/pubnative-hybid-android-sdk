@@ -284,5 +284,91 @@
             android:layout_marginBottom="20dp"
             android:text="@string/rewarded" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="16dp"
+            android:fontFamily="@font/roboto"
+            android:maxLines="1"
+            android:text="@string/chartboost"
+            android:textColor="?colorPrimaryVariant"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_chartboost_banner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/banner" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_chartboost_medium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/medium" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_chartboost_medium_video"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/medium_video" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_chartboost_leaderboard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/leaderboard" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_chartboost_interstitial"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/interstitial" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_chartboost_interstitial_video"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/interstitial_video" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_chartboost_rewarded_html"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/rewarded_html" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_chartboost_rewarded"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="20dp"
+            android:text="@string/rewarded" />
+
     </LinearLayout>
 </ScrollView>

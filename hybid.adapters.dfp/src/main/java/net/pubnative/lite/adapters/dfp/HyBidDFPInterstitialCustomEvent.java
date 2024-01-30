@@ -35,6 +35,7 @@ import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenter;
 import net.pubnative.lite.sdk.interstitial.presenter.InterstitialPresenterFactory;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.SkipOffset;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.SkipOffsetManager;
@@ -78,9 +79,9 @@ public class HyBidDFPInterstitialCustomEvent implements CustomEventInterstitial,
         }
 
 
-        Integer htmlSkipOffsetInt = SkipOffsetManager.getInterstitialHTMLSkipOffset(ad.getHtmlSkipOffset(), HyBid.getHtmlInterstitialSkipOffset().getOffset());
+        Integer htmlSkipOffsetInt = SkipOffsetManager.getInterstitialHTMLSkipOffset(ad.getHtmlSkipOffset());
         SkipOffset htmlSkipOffset;
-        Integer videoSkipOffsetInt = SkipOffsetManager.getInterstitialVideoSkipOffset(ad.getVideoSkipOffset(), HyBid.getVideoInterstitialSkipOffset().getOffset(), HyBid.getVideoInterstitialSkipOffset().isCustom(), null, null, false);
+        Integer videoSkipOffsetInt = SkipOffsetManager.getInterstitialVideoSkipOffset(ad.getVideoSkipOffset(), null, null, false);
         SkipOffset videoSkipOffset;
 
         htmlSkipOffset = new SkipOffset(htmlSkipOffsetInt, SkipOffsetManager.isCustomInterstitialHTMLSkipOffset());
@@ -89,10 +90,10 @@ public class HyBidDFPInterstitialCustomEvent implements CustomEventInterstitial,
         if (htmlSkipOffset.getOffset() > 0 || videoSkipOffset.getOffset() > 0) {
             mPresenter = new InterstitialPresenterFactory(context, zoneIdKey)
                     .createInterstitialPresenter(ad, htmlSkipOffset,
-                            videoSkipOffset, this);
+                            videoSkipOffset, this, IntegrationType.MEDIATION);
         } else {
             mPresenter = new InterstitialPresenterFactory(context, zoneIdKey)
-                    .createInterstitialPresenter(ad, this);
+                    .createInterstitialPresenter(ad, this, IntegrationType.MEDIATION);
         }
 
         if (mPresenter == null) {

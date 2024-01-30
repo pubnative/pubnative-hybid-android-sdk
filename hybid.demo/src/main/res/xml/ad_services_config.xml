@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ad-services-config>
+    <!-- We need to enrolment ID after approve. It'll be needed for production-->
+    <topics allowAdPartnersToAccess="TE565" allowAllToAccess="true" />
+    <custom-audiences allowAdPartnersToAccess="TE565" allowAllToAccess="true" />
+</ad-services-config>

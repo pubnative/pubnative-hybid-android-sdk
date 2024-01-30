@@ -25,13 +25,15 @@ public class Extension extends Signal {
     public Integer bluetooth;
     @BidParam(name = "headset")
     public Integer headset;
+    @BidParam(name = "ringmute")
+    public Integer ringmute;
 
     public Extension() {
     }
 
     public Extension(List<String> inputLanguages, Integer charging, Integer batterylevel,
                      Integer batterysaver, Integer diskspace, Integer totaldisk, Integer darkmode,
-                     Integer dnd, Integer airplane, Integer bluetooth, Integer headset) {
+                     Integer dnd, Integer airplane, Integer bluetooth, Integer headset, Integer ringmute) {
         this.inputlanguages = inputLanguages;
         this.charging = charging;
         this.batterylevel = batterylevel;
@@ -43,5 +45,6 @@ public class Extension extends Signal {
         this.airplane = airplane;
         this.bluetooth = bluetooth;
         this.headset = headset;
+        this.ringmute = ringmute;
     }
 }

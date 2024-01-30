@@ -2,10 +2,6 @@ package net.pubnative.lite.demo.models
 
 class DFPSettings private constructor(builder: Builder) {
 
-    val bannerAdUnitId: String?
-    val mediumAdUnitId: String?
-    val leaderboardAdUnitId: String?
-    val interstitialAdUnitId: String?
     val mediationBannerAdUnitId: String?
     val mediationMediumAdUnitId: String?
     val mediationLeaderboardAdUnitId: String?
@@ -13,10 +9,6 @@ class DFPSettings private constructor(builder: Builder) {
     val mediationRewardedAdUnitId: String?
 
     init {
-        this.bannerAdUnitId = builder.bannerAdUnitId
-        this.mediumAdUnitId = builder.mediumAdUnitId
-        this.leaderboardAdUnitId = builder.leaderboardAdUnitId
-        this.interstitialAdUnitId = builder.interstitialAdUnitId
         this.mediationBannerAdUnitId = builder.mediationBannerAdUnitId
         this.mediationMediumAdUnitId = builder.mediationMediumAdUnitId
         this.mediationLeaderboardAdUnitId = builder.mediationLeaderboardAdUnitId
@@ -25,14 +17,6 @@ class DFPSettings private constructor(builder: Builder) {
     }
 
     class Builder {
-        var bannerAdUnitId: String? = null
-            private set
-        var mediumAdUnitId: String? = null
-            private set
-        var leaderboardAdUnitId: String? = null
-            private set
-        var interstitialAdUnitId: String? = null
-            private set
         var mediationBannerAdUnitId: String? = null
             private set
         var mediationMediumAdUnitId: String? = null
@@ -44,17 +28,6 @@ class DFPSettings private constructor(builder: Builder) {
         var mediationRewardedAdUnitId: String? = null
             private set
 
-        fun bannerAdUnitId(dfpBannerAdUnitId: String) =
-            apply { this.bannerAdUnitId = dfpBannerAdUnitId }
-
-        fun mediumAdUnitId(dfpMediumAdUnitId: String) =
-            apply { this.mediumAdUnitId = dfpMediumAdUnitId }
-
-        fun leaderboardAdUnitId(dfpLeaderboardAdUnitId: String) =
-            apply { this.leaderboardAdUnitId = dfpLeaderboardAdUnitId }
-
-        fun interstitialAdUnitId(dfpInterstitialAdUnitId: String) =
-            apply { this.interstitialAdUnitId = dfpInterstitialAdUnitId }
 
         fun mediationBannerAdUnitId(dfpMediationBannerAdUnitId: String) =
             apply { this.mediationBannerAdUnitId = dfpMediationBannerAdUnitId }

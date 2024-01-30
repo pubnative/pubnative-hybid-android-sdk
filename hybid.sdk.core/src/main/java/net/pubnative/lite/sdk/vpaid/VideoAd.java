@@ -8,6 +8,7 @@ import android.view.View;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
+import net.pubnative.lite.sdk.utils.AdAudioStateManager;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
 import net.pubnative.lite.sdk.vpaid.enums.AdFormat;
@@ -131,13 +132,8 @@ public class VideoAd extends BaseVideoAd {
 
     private void validateAudioState() {
         boolean isMuted = false;
-        AudioState audioState;
-        String stateFromRemoteConfig = getAd().getAudioState();
-        if(stateFromRemoteConfig != null && AudioState.fromString(stateFromRemoteConfig) != null){
-            audioState = AudioState.fromString(stateFromRemoteConfig);
-        } else {
-            audioState = HyBid.getVideoAudioStatus();
-        }
+        AudioState audioState = AdAudioStateManager.getAudioState(getAd(), isFullscreen);
+
         switch (audioState) {
             case DEFAULT:
             case MUTED:
@@ -229,5 +225,9 @@ public class VideoAd extends BaseVideoAd {
 
     public boolean isAdStarted() {
         return mIsAdStarted;
+    }
+
+    public void skip() {
+        getAdController().skipVideo();
     }
 }

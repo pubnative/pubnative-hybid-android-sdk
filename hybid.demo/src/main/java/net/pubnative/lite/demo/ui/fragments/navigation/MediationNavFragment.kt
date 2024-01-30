@@ -7,6 +7,14 @@ import android.widget.Button
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.admob.*
+import net.pubnative.lite.demo.ui.activities.chartboost.ChartboostMediationBannerActivity
+import net.pubnative.lite.demo.ui.activities.chartboost.ChartboostMediationInterstitialActivity
+import net.pubnative.lite.demo.ui.activities.chartboost.ChartboostMediationInterstitialVideoActivity
+import net.pubnative.lite.demo.ui.activities.chartboost.ChartboostMediationLeaderboardActivity
+import net.pubnative.lite.demo.ui.activities.chartboost.ChartboostMediationMRectActivity
+import net.pubnative.lite.demo.ui.activities.chartboost.ChartboostMediationMRectVideoActivity
+import net.pubnative.lite.demo.ui.activities.chartboost.ChartboostMediationRewardedActivity
+import net.pubnative.lite.demo.ui.activities.chartboost.ChartboostMediationRewardedHtmlActivity
 import net.pubnative.lite.demo.ui.activities.dfp.*
 import net.pubnative.lite.demo.ui.activities.fairbid.FairbidMediationBannerActivity
 import net.pubnative.lite.demo.ui.activities.fairbid.FairbidMediationInterstitialActivity
@@ -133,6 +141,46 @@ class MediationNavFragment : Fragment(R.layout.fragment_nav_mediation) {
 
         view.findViewById<Button>(R.id.button_fairbid_rewarded).setOnClickListener {
             val intent = Intent(activity, FairbidMediationRewardedActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_chartboost_banner).setOnClickListener {
+            val intent = Intent(activity, ChartboostMediationBannerActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_chartboost_medium).setOnClickListener {
+            val intent = Intent(activity, ChartboostMediationMRectActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_chartboost_medium_video).setOnClickListener {
+            val intent = Intent(activity, ChartboostMediationMRectVideoActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_chartboost_leaderboard).setOnClickListener {
+            val intent = Intent(activity, ChartboostMediationLeaderboardActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_chartboost_interstitial).setOnClickListener {
+            val intent = Intent(activity, ChartboostMediationInterstitialActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_chartboost_interstitial_video).setOnClickListener {
+            val intent = Intent(activity, ChartboostMediationInterstitialVideoActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_chartboost_rewarded_html).setOnClickListener {
+            val intent = Intent(activity, ChartboostMediationRewardedHtmlActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_chartboost_rewarded).setOnClickListener {
+            val intent = Intent(activity, ChartboostMediationRewardedActivity::class.java)
             startActivity(intent)
         }
     }

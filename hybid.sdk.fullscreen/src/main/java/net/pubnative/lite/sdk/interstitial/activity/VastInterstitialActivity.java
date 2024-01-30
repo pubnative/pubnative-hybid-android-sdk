@@ -1,5 +1,7 @@
 package net.pubnative.lite.sdk.interstitial.activity;
 
+import static net.pubnative.lite.sdk.analytics.Reporting.Key.CLICK_SOURCE_TYPE_END_CARD;
+
 import android.annotation.SuppressLint;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -11,12 +13,16 @@ import android.view.KeyEvent;
 import android.view.View;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.analytics.Reporting;
+import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.AdEndCardManager;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.views.CloseableContainer;
 import net.pubnative.lite.sdk.vpaid.AdCloseButtonListener;
+import net.pubnative.lite.sdk.vpaid.BackButtonClickabilityListener;
 import net.pubnative.lite.sdk.vpaid.CloseButtonListener;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.VastActivityInteractor;
@@ -30,9 +36,8 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
     private boolean mReady = false;
 
     private VideoAdView mVideoPlayer;
-    private VideoAd mVideoAd;
+
     private boolean mHasEndCard = false;
-    private boolean mIsVideoFinished = false;
 
     VastActivityInteractor vastActivityInteractor;
 
@@ -63,20 +68,16 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
                 mVideoAd.bindView(mVideoPlayer);
                 mVideoAd.setAdListener(mVideoAdListener);
                 mVideoAd.setAdCloseButtonListener(mCloseButtonListener);
+                mVideoAd.setBackButtonClickabilityListener(mBackButtonClickability);
                 setProgressBarVisible();
 
                 VideoAdCacheItem adCacheItem = HyBid.getVideoAdCache().remove(getZoneId());
                 if (adCacheItem != null) {
                     if (adCacheItem.getAdParams() != null) {
                         adCacheItem.getAdParams().setPublisherSkipSeconds(mSkipOffset);
-                        if (adCacheItem.getEndCardData() != null
-                                && !TextUtils.isEmpty(adCacheItem.getEndCardData().getContent())) {
-                            mHasEndCard = AdEndCardManager.isEndCardEnabled(getAd(), null);
-                        } else if (getAd().isEndCardEnabled() != null
-                                && getAd().isEndCardEnabled()
-                                && getAd().isCustomEndCardEnabled() != null
-                                && getAd().isCustomEndCardEnabled()
-                                && getAd().hasCustomEndCard()) {
+                        if (adCacheItem.getEndCardData() != null && !TextUtils.isEmpty(adCacheItem.getEndCardData().getContent())) {
+                            mHasEndCard = AdEndCardManager.isEndCardEnabled(getAd());
+                        } else if (getAd().isEndCardEnabled() != null && getAd().isEndCardEnabled() && getAd().isCustomEndCardEnabled() != null && getAd().isCustomEndCardEnabled() && getAd().hasCustomEndCard()) {
                             mHasEndCard = true;
                         }
 
@@ -91,7 +92,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
                     setupContentInfo();
                 }
 
-                mVideoPlayer.postDelayed(() -> mVideoAd.load(), 1000);
+                mVideoPlayer.postDelayed(() -> mVideoAd.load(mIntegrationType), 1000);
             } else {
                 if (getBroadcastSender() != null) {
                     Bundle extras = new Bundle();
@@ -100,6 +101,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
                     getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_ERROR, extras);
                     getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
                 }
+                mIsFinishing = true;
                 finish();
             }
         } catch (Exception exception) {
@@ -111,6 +113,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
                 getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_ERROR, extras);
                 getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
             }
+            mIsFinishing = true;
             finish();
         }
     }
@@ -127,11 +130,11 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
     @Override
     protected void onDestroy() {
         vastActivityInteractor.activityDestroyed();
-        super.onDestroy();
         if (mVideoAd != null) {
             mVideoAd.destroy();
             mReady = false;
         }
+        super.onDestroy();
     }
 
     @Override
@@ -143,9 +146,11 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
 
     @Override
     protected void onPause() {
-        vastActivityInteractor.activityPaused();
+        if (!mIsFinishing) {
+            vastActivityInteractor.activityPaused();
+            pauseAd();
+        }
         super.onPause();
-        pauseAd();
     }
 
     @Override
@@ -153,6 +158,18 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
         return true;
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+            if (mIsVideoFinished && mIsSkippable && mIsBackEnabled) {
+                dismiss();
+                return true;
+            }
+        } else {
+            return super.onKeyDown(keyCode, event);
+        }
+        return false;
+    }
 
     @Override
     protected void resumeAd() {
@@ -203,6 +220,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
                 getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_ERROR, extras);
                 getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
             }
+            mIsFinishing = true;
             finish();
         }
 
@@ -215,12 +233,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
         public void onAdDidReachEnd() {
             mReady = false;
             if (!mHasEndCard) {
-                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        showInterstitialCloseButton();
-                    }
-                }, 100);
+                new Handler(Looper.getMainLooper()).postDelayed(() -> showInterstitialCloseButton(), 100);
 
                 mIsSkippable = true;
             }
@@ -231,7 +244,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
         }
 
         @Override
-        public void onAdSkipped() {
+        public synchronized void onAdSkipped() {
             mIsVideoFinished = true;
             if (getBroadcastSender() != null) {
                 getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_SKIP);
@@ -244,16 +257,145 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
         }
 
         @Override
-        public void onCustomEndCardShow() {
-            if (getBroadcastSender() != null) {
-                getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CUSTOM_END_CARD_SHOW);
+        public void onCustomEndCardShow(String endCardType) {
+            if (!mCustomEndCardImpressionTracked) {
+                if (getBroadcastSender() != null) {
+                    Bundle extras = new Bundle();
+                    extras.putString(Reporting.Key.END_CARD_TYPE, endCardType);
+                    extras.putString(Reporting.Key.CLICK_SOURCE_TYPE, CLICK_SOURCE_TYPE_END_CARD);
+                    getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CUSTOM_END_CARD_SHOW, extras);
+                }
+                mCustomEndCardImpressionTracked = true;
             }
         }
 
         @Override
-        public void onCustomEndCardClicked() {
+        public void onCustomEndCardClick(String endCardType) {
+            if (!mCustomEndCardClickTracked) {
+                if (getBroadcastSender() != null) {
+                    Bundle extras = new Bundle();
+                    extras.putString(Reporting.Key.END_CARD_TYPE, endCardType);
+                    extras.putString(Reporting.EventType.CLICK, endCardType);
+                    extras.putString(Reporting.Key.CLICK_SOURCE_TYPE, CLICK_SOURCE_TYPE_END_CARD);
+                    getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CUSTOM_END_CARD_CLICK, extras);
+                }
+                mCustomEndCardClickTracked = true;
+            }
+        }
+
+        @Override
+        public void onDefaultEndCardShow(String endCardType) {
+            if (!mDefaultEndCardImpressionTracked) {
+                if (getBroadcastSender() != null) {
+                    Bundle extras = new Bundle();
+                    extras.putString(Reporting.Key.END_CARD_TYPE, endCardType);
+                    extras.putString(Reporting.Key.CLICK_SOURCE_TYPE, CLICK_SOURCE_TYPE_END_CARD);
+                    getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DEFAULT_END_CARD_SHOW, extras);
+                }
+                mDefaultEndCardImpressionTracked = true;
+            }
+        }
+
+        @Override
+        public void onDefaultEndCardClick(String endCardType) {
+            if (!mDefaultEndCardClickTracked) {
+                if (getBroadcastSender() != null) {
+                    Bundle extras = new Bundle();
+                    extras.putString(Reporting.Key.END_CARD_TYPE, endCardType);
+                    extras.putString(Reporting.Key.CLICK_SOURCE_TYPE, CLICK_SOURCE_TYPE_END_CARD);
+                    getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DEFAULT_END_CARD_CLICK, extras);
+                }
+                mDefaultEndCardClickTracked = true;
+            }
+
+        }
+
+        @Override
+        public synchronized void onEndCardLoadSuccess(Boolean isCustomEndCard) {
+            if (isCustomEndCard && mLoadCustomEndCardTracked) return;
+            if (!isCustomEndCard && mLoadDefaultEndCardTracked) return;
             if (getBroadcastSender() != null) {
-                getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CUSTOM_END_CARD_CLICK);
+                if (isCustomEndCard) mLoadCustomEndCardTracked = true;
+                else mLoadDefaultEndCardTracked = true;
+                Bundle extras = new Bundle();
+                extras.putBoolean(Reporting.Key.IS_CUSTOM_END_CARD, isCustomEndCard);
+                getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.END_CARD_LOAD_SUCCESS, extras);
+            }
+        }
+
+        @Override
+        public void onEndCardLoadFail(Boolean isCustomEndCard) {
+            if (!mLoadEndCardFailTracked) {
+                if (getBroadcastSender() != null) {
+                    Bundle extras = new Bundle();
+                    extras.putBoolean(Reporting.Key.IS_CUSTOM_END_CARD, isCustomEndCard);
+                    getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.END_CARD_LOAD_FAILURE, extras);
+                }
+                mLoadEndCardFailTracked = true;
+            }
+        }
+
+        @Override
+        public void onCustomCTACLick(boolean isEndcardVisible) {
+
+            String eventType = (isEndcardVisible) ? Reporting.EventType.CUSTOM_CTA_ENDCARD_CLICK : Reporting.EventType.CUSTOM_CTA_CLICK;
+            if (mCustomCTAClickTrackedEvents.contains(eventType)) return;
+
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(eventType);
+            reportingEvent.setAdFormat(Reporting.AdFormat.FULLSCREEN);
+            reportingEvent.setCreativeType(Reporting.CreativeType.VIDEO);
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(IntegrationType.STANDALONE));
+            if (getAd() != null) {
+                reportingEvent.setImpId(getAd().getSessionId());
+                reportingEvent.setCampaignId(getAd().getCampaignId());
+                reportingEvent.setConfigId(getAd().getConfigId());
+            }
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            if (HyBid.getReportingController() != null) {
+                HyBid.getReportingController().reportEvent(reportingEvent);
+            }
+            mCustomCTAClickTrackedEvents.add(eventType);
+        }
+
+        @Override
+        public void onCustomCTAShow() {
+            if (mCustomCTAImpressionTracked) return;
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.CUSTOM_CTA_SHOW);
+            reportingEvent.setAdFormat(Reporting.AdFormat.FULLSCREEN);
+            reportingEvent.setCreativeType(Reporting.CreativeType.VIDEO);
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(IntegrationType.STANDALONE));
+            if (getAd() != null) {
+                reportingEvent.setImpId(getAd().getSessionId());
+                reportingEvent.setCampaignId(getAd().getCampaignId());
+                reportingEvent.setConfigId(getAd().getConfigId());
+            }
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            if (HyBid.getReportingController() != null) {
+                HyBid.getReportingController().reportEvent(reportingEvent);
+            }
+            mCustomCTAImpressionTracked = true;
+        }
+
+        @Override
+        public void onCustomCTALoadFail() {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.CUSTOM_CTA_LOAD_FAIL);
+            reportingEvent.setAdFormat(Reporting.AdFormat.FULLSCREEN);
+            reportingEvent.setCreativeType(Reporting.CreativeType.VIDEO);
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(IntegrationType.STANDALONE));
+            if (getAd() != null) {
+                reportingEvent.setImpId(getAd().getSessionId());
+                reportingEvent.setCampaignId(getAd().getCampaignId());
+                reportingEvent.setConfigId(getAd().getConfigId());
+            }
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            if (HyBid.getReportingController() != null) {
+                HyBid.getReportingController().reportEvent(reportingEvent);
             }
         }
 
@@ -274,9 +416,60 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
                 getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.VIDEO_START);
             }
         }
+
+        @Override
+        public void onEndCardSkipped(Boolean isCustom) {
+            if (isCustom && mCustomEndCardSkipTracked) return;
+            if (!isCustom && mDefaultEndCardSkipTracked) return;
+
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            if (!isCustom) {
+                reportingEvent.setEventType(Reporting.EventType.DEFAULT_ENDCARD_SKIP);
+                reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE, Reporting.Key.END_CARD_TYPE_DEFAULT);
+                mDefaultEndCardSkipTracked = true;
+            }
+
+//            else {
+//                reportingEvent.setEventType(Reporting.EventType.CUSTOM_END_CARD_SKIP);
+//                reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE,  Reporting.Key.END_CARD_TYPE_CUSTOM);
+//                mCustomEndCardSkipTracked = true;
+//            }
+            if (HyBid.getReportingController() != null) {
+                HyBid.getReportingController().reportEvent(reportingEvent);
+            }
+        }
+
+        @Override
+        public void onEndCardClosed(Boolean isCustom) {
+            if (isCustom && mCustomEndCardCloseTracked) return;
+            if (!isCustom && mDefaultEndCardCloseTracked) return;
+
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            if (!isCustom) {
+                reportingEvent.setEventType(Reporting.EventType.DEFAULT_ENDCARD_CLOSE);
+                reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE, Reporting.Key.END_CARD_TYPE_DEFAULT);
+                mDefaultEndCardCloseTracked = true;
+            } else {
+                reportingEvent.setEventType(Reporting.EventType.CUSTOM_ENDCARD_CLOSE);
+                reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE, Reporting.Key.END_CARD_TYPE_CUSTOM);
+                mCustomEndCardCloseTracked = true;
+            }
+            if (HyBid.getReportingController() != null) {
+                HyBid.getReportingController().reportEvent(reportingEvent);
+            }
+        }
     };
 
-    private final CloseButtonListener mCloseButtonListener = () -> mIsSkippable = true;
+    private final CloseButtonListener mCloseButtonListener = () -> {
+        mIsVideoFinished = true;
+        mIsSkippable = true;
+    };
+
+    private final BackButtonClickabilityListener mBackButtonClickability = () -> {
+        mIsBackEnabled = true;
+    };
 
     private void dismissVideo(int progressPercentage) {
         if (getBroadcastSender() != null) {

@@ -3,6 +3,7 @@ package net.pubnative.lite.sdk.vpaid;
 import android.content.Context;
 
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.enums.AdState;
@@ -78,6 +79,10 @@ abstract class BaseVideoAd extends BaseVideoAdInternal {
         super.setAdCloseButtonListener(closeButtonListener);
     }
 
+    public void setBackButtonClickabilityListener(BackButtonClickabilityListener backButtonClickabilityListener) {
+        super.setBackButtonClickabilityListener(backButtonClickabilityListener);
+    }
+
     /**
      * Defines, should use mobile network for caching video or not.
      * By default, video will not cache on mobile network (only on wi-fi)
@@ -113,7 +118,7 @@ abstract class BaseVideoAd extends BaseVideoAdInternal {
      * application.
      * After its execution, the interstitial/banner notifies whether the loading of the ad content failed or succeeded.
      */
-    public void load() {
+    public void load(IntegrationType integrationType) {
         runOnUiThread(() -> {
             Logger.d(LOG_TAG, "Start loading ad");
             if (getAdState() == AdState.LOADING || getAdState() == AdState.SHOWING) {
@@ -137,7 +142,7 @@ abstract class BaseVideoAd extends BaseVideoAdInternal {
             }
 
             if (Utils.isOnline(getContext())) {
-                proceedLoad();
+                proceedLoad(integrationType);
             } else {
                 onAdLoadFailInternal(new PlayerInfo("No connection"));
             }

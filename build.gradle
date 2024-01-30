@@ -3,23 +3,32 @@ buildscript {
 
     repositories {
         google()
+        mavenCentral()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
         maven { url 'https://verve.jfrog.io/artifactory/verve-gradle-dev' }
         maven { url 'https://verve.jfrog.io/artifactory/verve-gradle-release' }
         maven { url 'https://maven.ogury.co' }
         maven { url 'https://android-sdk.is.com/' }
         maven { url "https://plugins.gradle.org/m2/" }
+        maven {
+            url = uri("https://storage.googleapis.com/r8-releases/raw")
+        }
+        maven {
+            name "Chartboost Mediation's maven repo"
+            url "https://cboost.jfrog.io/artifactory/chartboost-mediation"
+        }
     }
 
     dependencies {
         classpath 'com.android.tools.build:gradle:7.4.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
+        classpath "com.android.tools:r8:8.2.33"
         classpath 'net.saliman:gradle-cobertura-plugin:4.0.0'
 
-        classpath 'com.google.firebase:firebase-appdistribution-gradle:4.0.0'
+        classpath 'com.google.firebase:firebase-appdistribution-gradle:4.0.1'
         classpath 'com.google.firebase:perf-plugin:1.4.2'  // Performance Monitoring plugin
-        classpath 'com.google.gms:google-services:4.3.15'
+        classpath 'com.google.gms:google-services:4.4.0'
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9'
         classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.29.0'
     }
@@ -36,12 +45,12 @@ subprojects {
         if (System.getenv("CIRCLE_BUILD_NUM") != null) {
             buildNumber = "${System.getenv("CIRCLE_BUILD_NUM")}"
         }
-        min_android_api = 19
+        min_android_api = 21
         android_api = 34
         android_build_tools = '34.0.0'
-        omid_version = '1.4.8'
+        omid_version = '1.4.10'
     }
-    version = "2.20.0"
+    version = "2.21.0"
     group = "net.pubnative"
 }
 
@@ -55,6 +64,10 @@ allprojects {
         maven { url 'https://maven.ogury.co' }
         maven { url 'https://android-sdk.is.com/' }
         maven { url "https://plugins.gradle.org/m2/" }
+        maven {
+            name "Chartboost Mediation's maven repo"
+            url "https://cboost.jfrog.io/artifactory/chartboost-mediation"
+        }
     }
 }
 

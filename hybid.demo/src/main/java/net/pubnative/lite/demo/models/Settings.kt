@@ -8,4 +8,5 @@ class Settings {
     var admobSettings: AdmobSettings? = null
     var ironSourceSettings: IronSourceSettings? = null
     var maxAdsSettings: MaxAdsSettings? = null
+    var chartboostSettings: ChartboostSettings? = null
 }

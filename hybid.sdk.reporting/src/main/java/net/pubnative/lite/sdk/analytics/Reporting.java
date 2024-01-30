@@ -5,6 +5,7 @@ public class Reporting {
         public static final String CATEGORY_ID = "category_id";
         public static final String CAMPAIGN_ID = "campaign_id";
         public static final String CREATIVE_ID = "creative_id";
+        public static final String PLATFORM = "platform";
         public static final String APP_TOKEN = "app_token";
         public static final String PLACEMENT_ID = "placement_id";
         public static final String EVENT_TYPE = "event_type";
@@ -38,8 +39,20 @@ public class Reporting {
         public static final String FIRED_CLICK_BEACONS = "fired_clicks";
         public static final String SESSION_DURATION = "session_duration";
         public static final String IMP_DEPTH = "imp_depth";
+        public static final String IMP_ID = "impression_id";
         public static final String AGE_OF_APP = "age_of_app";
         public static final String REQUEST_TYPE = "request_type";
+        public static final String REMOTE_CONFIG_ID = "remote_config_id";
+        public static final String END_CARD_TYPE = "end_card_type";
+        public static final String END_CARD_TYPE_DEFAULT = "default";
+        public static final String END_CARD_TYPE_CUSTOM = "custom";
+        public static final String END_CARD_HTML = "html";
+        public static final String END_CARD_STATIC = "static";
+        public static final String END_CARD_IFRAME = "iframe";
+        public static final String IS_CUSTOM_END_CARD = "is_custom_end_card";
+        public static final String CLICK_SOURCE_TYPE = "click_source_type";
+        public static final String CLICK_SOURCE_TYPE_END_CARD = "end_card";
+        public static final String CLICK_SOURCE_TYPE_AD = "ad";
     }
 
     public static final class EventType {
@@ -57,8 +70,7 @@ public class Reporting {
         public static final String INTERSTITIAL_CLOSED = "interstitial_closed";
         public static final String REWARDED_CLOSED = "rewarded_closed";
         public static final String REWARD = "reward";
-        public static final String CUSTOM_END_CARD_IMPRESSION = "custom_end_card_impression";
-        public static final String CUSTOM_END_CARD_CLICK = "custom_end_card_click";
+
         public static final String VIDEO_STARTED = "video_started";
         public static final String VIDEO_DISMISSED = "video_dismissed";
         public static final String VIDEO_FINISHED = "video_finished";
@@ -74,9 +86,10 @@ public class Reporting {
         public static final String NO_FILL = "no_fill";
         public static final String WINNER = "winner";
         public static final String NEXT_AD_SOURCE = "next_ad_source";
-        public static final String VIDEO_AD_SESSION_INITIALIZED = "session_initialized";
-        public static final String VIDEO_AD_SESSION_LOADED = "session_loaded";
-        public static final String VIDEO_AD_SESSION_STARTED = "session_started";
+        public static final String AD_SESSION_INITIALIZED = "session_initialized";
+        public static final String AD_SESSION_LOADED = "session_loaded";
+        public static final String AD_SESSION_STARTED = "session_started";
+        public static final String AD_SESSION_STOPPED = "session_stopped";
         public static final String VIDEO_AD_FIRST_QUARTILE = "first_quartile";
         public static final String VIDEO_AD_MIDPOINT = "midpoint";
         public static final String VIDEO_AD_THIRD_QUARTILE = "third_quartile";
@@ -90,8 +103,24 @@ public class Reporting {
         public static final String VIDEO_AD_CLICKED = "clicked";
         public static final String VIDEO_AD_IMPRESSION = "impression";
         public static final String WEB_AD_SESSION_INITIALIZED = "web_ad_session_started";
-        public static final String VIDEO_AD_SESSION_STOPPED = "session_stopped";
-        public static final String COMPANION_VIEW_END_CARD = "companion_view";
+        public static final String COMPANION_VIEW = "companion_view";
+        public static final String CREATIVE_VIEW = "creative_view";
+        public static final String CUSTOM_END_CARD_LOAD_SUCCESS = "custom_endcard_load_success";
+//        public static final String CUSTOM_END_CARD_SKIP = "custom_endcard_skipped";
+        public static final String CUSTOM_ENDCARD_CLOSE = "custom_endcard_closed";
+        public static final String CUSTOM_END_CARD_LOAD_FAILURE = "custom_endcard_load_failure";
+        public static final String CUSTOM_ENDCARD_IMPRESSION = "custom_endcard_impression";
+        public static final String CUSTOM_ENDCARD_CLICK = "custom_endcard_click";
+        public static final String DEFAULT_END_CARD_LOAD_SUCCESS = "default_endcard_load_success";
+        public static final String DEFAULT_ENDCARD_SKIP = "default_endcard_skipped";
+        public static final String DEFAULT_ENDCARD_CLOSE = "default_endcard_closed";
+        public static final String DEFAULT_END_CARD_LOAD_FAILURE = "default_endcard_load_failure";
+        public static final String DEFAULT_ENDCARD_IMPRESSION = "default_endcard_impression";
+        public static final String DEFAULT_ENDCARD_CLICK = "default_endcard_click";
+        public static final String CUSTOM_CTA_SHOW = "custom_cta_show";
+        public static final String CUSTOM_CTA_CLICK = "custom_cta_click";
+        public static final String CUSTOM_CTA_ENDCARD_CLICK = "custom_cta_endcard_click";
+        public static final String CUSTOM_CTA_LOAD_FAIL = "custom_cta_load_fail";
     }
 
     public static final class CreativeType {
@@ -104,5 +133,9 @@ public class Reporting {
         public static final String BANNER = "banner";
         public static final String FULLSCREEN = "fullscreen";
         public static final String REWARDED = "rewarded";
+    }
+
+    public static final class Platform {
+        public static final String ANDROID = "android";
     }
 }

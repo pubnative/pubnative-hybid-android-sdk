@@ -5,10 +5,7 @@ import net.pubnative.lite.sdk.models.bidstream.DeviceExtension;
 import net.pubnative.lite.sdk.models.bidstream.Extension;
 import net.pubnative.lite.sdk.models.bidstream.Signal;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.TimeZone;
 
 public class BaseRequestFactory {
@@ -29,11 +26,18 @@ public class BaseRequestFactory {
             Integer totalSpace = deviceInfo.getTotalMemoryMb();
             Integer darkMode = deviceInfo.isDarkMode();
             Integer headset = deviceInfo.isHeadsetOn();
+            Integer ring_mute = null;
+            if (deviceInfo.getSoundSetting() != null) {
+                try {
+                    ring_mute = Integer.parseInt(deviceInfo.getSoundSetting());
+                } catch (Exception ignored) {
+                }
+            }
             Integer dndEnabled = deviceInfo.isDndEnabled();
             Integer bluetooth = deviceInfo.isBluetoothEnabled();
             Integer airplaneModeEnabled = deviceInfo.isAirplaneModeEnabled();
             return new Extension(inputLanguages, isCharging, batteryLevel, batterySaver,
-                    freeSpace, totalSpace, darkMode, dndEnabled, airplaneModeEnabled, bluetooth, headset);
+                    freeSpace, totalSpace, darkMode, dndEnabled, airplaneModeEnabled, bluetooth, headset, ring_mute);
         } else {
             return null;
         }
@@ -49,11 +53,18 @@ public class BaseRequestFactory {
             Integer totalSpace = deviceInfo.getTotalMemoryMb();
             Integer darkMode = deviceInfo.isDarkMode();
             Integer headset = deviceInfo.isHeadsetOn();
+            Integer ring_mute = null;
+            if (deviceInfo.getSoundSetting() != null) {
+                try {
+                    ring_mute = Integer.parseInt(deviceInfo.getSoundSetting());
+                } catch (Exception ignored) {
+                }
+            }
             Integer dndEnabled = deviceInfo.isDndEnabled();
             Integer bluetooth = deviceInfo.isBluetoothEnabled();
             Integer airplaneModeEnabled = deviceInfo.isAirplaneModeEnabled();
             return new DeviceExtension(inputLanguages, isCharging, batteryLevel, batterySaver,
-                    freeSpace, totalSpace, darkMode, dndEnabled, airplaneModeEnabled, bluetooth, headset);
+                    freeSpace, totalSpace, darkMode, dndEnabled, airplaneModeEnabled, bluetooth, headset, ring_mute);
         } else {
             return null;
         }

@@ -101,7 +101,7 @@ class FairbidMediationRewardedFragment : Fragment(R.layout.fragment_fairbid_medi
         Log.d(FairbidMediationRewardedFragment_TAG, "onCompletion")
     }
 
-    override fun onRequestStart(placementId: String) {
+    override fun onRequestStart(placementId: String, requestId: String) {
         Log.d(FairbidMediationRewardedFragment_TAG, "onRequestStart")
     }
 

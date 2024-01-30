@@ -92,6 +92,10 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
         this.customMarkup = customMarkup
     }
 
+    fun getMarkupType(): MarkupType {
+        return this.customMarkup
+    }
+
     fun loadApiAd(apiAd: String, body: String?) {
         if (HyBid.isInitialized()) {
             when (customMarkup) {
@@ -217,7 +221,7 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
         })
     }
 
-    private fun handleAdResult(ad: Ad?) {
+    fun handleAdResult(ad: Ad?) {
 
         if (ad == null) return
 

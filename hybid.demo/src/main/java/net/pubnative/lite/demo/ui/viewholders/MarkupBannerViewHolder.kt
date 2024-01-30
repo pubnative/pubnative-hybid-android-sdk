@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.adapters.OnExpandedAdCloseListener
 import net.pubnative.lite.demo.ui.adapters.OnLogDisplayListener
+import net.pubnative.lite.sdk.models.Ad
 import net.pubnative.lite.sdk.mraid.MRAIDView
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener
 import net.pubnative.lite.sdk.utils.Logger
@@ -16,11 +17,11 @@ import net.pubnative.lite.sdk.views.HyBidBannerAdView
 import net.pubnative.lite.sdk.views.PNAdView
 
 class MarkupBannerViewHolder(
-        itemView: View,
-        private var mListener: OnLogDisplayListener,
-        private var onExpandedAdCloseListener: OnExpandedAdCloseListener
+    itemView: View,
+    private var mListener: OnLogDisplayListener,
+    private var onExpandedAdCloseListener: OnExpandedAdCloseListener
 ) :
-        RecyclerView.ViewHolder(itemView), PNAdView.Listener, MRAIDViewListener {
+    RecyclerView.ViewHolder(itemView), PNAdView.Listener, MRAIDViewListener {
     private var banner: HyBidBannerAdView? = null
     private val TAG = MarkupBannerViewHolder::class.java.simpleName
 
@@ -32,13 +33,31 @@ class MarkupBannerViewHolder(
             banner = HyBidBannerAdView(itemView.context)
 
             val adLayoutParams = RelativeLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
             )
             adLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
             container.addView(banner, adLayoutParams)
             container.setBackgroundColor(Color.BLACK)
             banner?.setMraidListener(this)
             banner?.renderCustomMarkup(markup, this)
+        }
+    }
+
+    fun bind(ad: Ad?) {
+        if (ad != null) {
+            val container = itemView.findViewById<FrameLayout>(R.id.banner_container)
+            container.removeAllViews()
+
+            banner = HyBidBannerAdView(itemView.context)
+
+            val adLayoutParams = RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            adLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
+            container.addView(banner, adLayoutParams)
+            container.setBackgroundColor(Color.BLACK)
+            banner?.setMraidListener(this)
+            banner?.renderAd(ad, this)
         }
     }
 
@@ -78,11 +97,11 @@ class MarkupBannerViewHolder(
     }
 
     override fun mraidViewResize(
-            mraidView: MRAIDView?,
-            width: Int,
-            height: Int,
-            offsetX: Int,
-            offsetY: Int
+        mraidView: MRAIDView?,
+        width: Int,
+        height: Int,
+        offsetX: Int,
+        offsetY: Int
     ): Boolean {
         return false
     }

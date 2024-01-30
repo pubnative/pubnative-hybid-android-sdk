@@ -28,13 +28,17 @@ import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.utils.AdTracker;
 
 public abstract class PresenterFactory {
-    private final Context mContext;
 
-    public PresenterFactory(Context context) {
+    private final Context mContext;
+    protected final IntegrationType mIntegrationType;
+
+    public PresenterFactory(Context context, IntegrationType integrationType) {
         mContext = context;
+        mIntegrationType = integrationType;
     }
 
     public AdPresenter createPresenter(Ad ad, AdSize adSize,
@@ -44,7 +48,7 @@ public abstract class PresenterFactory {
 
     public AdPresenter createPresenter(Ad ad, AdSize adSize,
                                        AdPresenter.Listener bannerPresenterListener, AdPresenter.ImpressionListener impressionListener) {
-        return createPresenter(ad, adSize, ImpressionTrackingMethod.AD_RENDERED, bannerPresenterListener, impressionListener);
+        return createPresenter(ad, adSize, ImpressionTrackingMethod.AD_VIEWABLE, bannerPresenterListener, impressionListener);
     }
 
     public AdPresenter createPresenter(Ad ad, AdSize adSize, ImpressionTrackingMethod trackingMethod,
@@ -59,7 +63,7 @@ public abstract class PresenterFactory {
         }
 
         final AdPresenterDecorator bannerPresenterDecorator = new AdPresenterDecorator(adPresenter,
-                new AdTracker(ad.getBeacons(Ad.Beacon.IMPRESSION), ad.getBeacons(Ad.Beacon.CLICK)), HyBid.getReportingController(), bannerPresenterListener, impressionListener);
+                new AdTracker(ad.getBeacons(Ad.Beacon.IMPRESSION), ad.getBeacons(Ad.Beacon.CLICK)), HyBid.getReportingController(), bannerPresenterListener, impressionListener, mIntegrationType);
         adPresenter.setListener(bannerPresenterDecorator);
         adPresenter.setImpressionListener(bannerPresenterDecorator);
         adPresenter.setVideoListener(bannerPresenterDecorator);

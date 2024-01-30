@@ -130,6 +130,12 @@ public class PNAPIContentInfoView extends FrameLayout {
         });
     }
 
+    public void setIconId(int iconId) {
+        if (iconId != -1 && mContentInfoIcon != null) {
+            mContentInfoIcon.setId(iconId);
+        }
+    }
+
     public void setIconUrl(String iconUrl) {
         setIconUrl(iconUrl, false);
     }

@@ -58,6 +58,7 @@ import org.json.JSONObject;
 
 public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNativeFeatureListener, ImpressionTracker.Listener, PNAPIContentInfoView.ContentInfoListener {
     private static final String TAG = MraidAdPresenter.class.getSimpleName();
+    private static final boolean MRAID_EXPAND_DEFAULT = true;
     private final Context mContext;
     private final Ad mAd;
     private final ImpressionTrackingMethod mTrackingMethod;
@@ -86,7 +87,7 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
         if (trackingMethodFinal != null) {
             mTrackingMethod = trackingMethodFinal;
         } else {
-            mTrackingMethod = ImpressionTrackingMethod.AD_RENDERED;
+            mTrackingMethod = ImpressionTrackingMethod.AD_VIEWABLE;
         }
 
         mUrlHandlerDelegate = new UrlHandler(context);
@@ -126,7 +127,7 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
 
         Boolean isExpandEnabled = mAd.getMraidExpand();
         if (isExpandEnabled == null) {
-            isExpandEnabled = HyBid.isMraidExpandEnabled();
+            isExpandEnabled = MRAID_EXPAND_DEFAULT;
         }
         if (mAd.getAssetUrl(APIAsset.HTML_BANNER) != null) {
             mMRAIDBanner = new MRAIDBanner(mContext, mAd.getAssetUrl(APIAsset.HTML_BANNER), "", true, isExpandEnabled, mSupportedNativeFeatures, this, this, mAd.getContentInfoContainer(mContext, this));

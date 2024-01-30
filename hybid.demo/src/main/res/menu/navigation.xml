@@ -6,10 +6,6 @@
         android:icon="@mipmap/baseline_view_stream_black_24"
         android:title="@string/nav_standalone" />
     <item
-        android:id="@+id/nav_pre_bid"
-        android:icon="@mipmap/baseline_line_style_black_24"
-        android:title="@string/nav_pre_bid" />
-    <item
         android:id="@+id/nav_mediation"
         android:icon="@mipmap/baseline_list_black_24"
         android:title="@string/nav_mediation" />

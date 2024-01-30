@@ -33,6 +33,7 @@ import android.widget.FrameLayout;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.analytics.Reporting;
+import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.contentinfo.AdFeedbackFormHelper;
 import net.pubnative.lite.sdk.contentinfo.listeners.AdFeedbackLoadListener;
 import net.pubnative.lite.sdk.models.Ad;
@@ -66,6 +67,9 @@ import net.pubnative.lite.sdk.vpaid.utils.Utils;
 
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener, PNAPIContentInfoView.ContentInfoListener, VideoVisibilityListener {
     private static final String TAG = VastAdPresenter.class.getSimpleName();
     private final Context mContext;
@@ -87,7 +91,21 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
 
     private boolean isFeedbackFormVisible = false;
 
-    public VastAdPresenter(Context context, Ad ad, AdSize adSize, ImpressionTrackingMethod trackingMethod) {
+    private Boolean mDefaultEndCardClickTracked = false;
+    private Boolean mCustomEndCardClickTracked = false;
+    private List<String> mCustomCTAClickTrackedEvents = new ArrayList<>();
+    private Boolean mDefaultEndCardImpressionTracked = false;
+    private Boolean mCustomEndCardImpressionTracked = false;
+    private Boolean mLoadDefaultEndCardTracked = false;
+    private Boolean mLoadCustomEndCardTracked = false;
+    private Boolean mCustomCTAImpressionTracked = false;
+    private Boolean mDefaultEndCardSkipTracked = false;
+    private Boolean mCustomEndCardSkipTracked = false;
+    private Boolean mDefaultEndCardCloseTracked = false;
+    private Boolean mCustomEndCardCloseTracked = false;
+    private IntegrationType mIntegrationType;
+
+    public VastAdPresenter(Context context, Ad ad, AdSize adSize, ImpressionTrackingMethod trackingMethod, IntegrationType integrationType) {
         mContext = context;
         mAdSize = adSize;
         mAd = ad;
@@ -102,11 +120,12 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
         } else if (trackingMethod != null) {
             mTrackingMethod = trackingMethod;
         } else {
-            mTrackingMethod = ImpressionTrackingMethod.AD_RENDERED;
+            mTrackingMethod = ImpressionTrackingMethod.AD_VIEWABLE;
         }
 
         videoVisibilityManager = VideoVisibilityManager.getInstance();
         videoVisibilityManager.addCallback(this);
+        mIntegrationType = integrationType;
     }
 
     @Override
@@ -146,7 +165,12 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
             mVideoAd.bindView(mVideoPlayer);
             mVideoAd.setAdListener(mVideoAdListener);
             mVideoAd.setAdCloseButtonListener(mAdCloseButtonListener);
-
+            mDefaultEndCardClickTracked = false;
+            mCustomEndCardClickTracked = false;
+            mDefaultEndCardImpressionTracked = false;
+            mCustomEndCardImpressionTracked = false;
+            mLoadDefaultEndCardTracked = false;
+            mLoadCustomEndCardTracked = false;
             if (!TextUtils.isEmpty(getAd().getZoneId())) {
                 VideoAdCacheItem adCacheItem = HyBid.getVideoAdCache().remove(getAd().getZoneId());
                 if (adCacheItem != null) {
@@ -157,7 +181,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
                 }
             }
 
-            mVideoAd.load();
+            mVideoAd.load(mIntegrationType);
         } catch (Exception exception) {
             Logger.e(TAG, exception.getMessage());
             if (mListener != null) {
@@ -386,6 +410,252 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
                 mVideoListener.onVideoStarted();
             }
         }
+
+        @Override
+        public synchronized void onEndCardLoadSuccess(Boolean isCustomEndCard) {
+            if (isCustomEndCard && mLoadCustomEndCardTracked) return;
+            if (!isCustomEndCard && mLoadDefaultEndCardTracked) return;
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
+            if (mAd != null) {
+                reportingEvent.setImpId(mAd.getSessionId());
+                reportingEvent.setCampaignId(mAd.getCampaignId());
+                reportingEvent.setConfigId(mAd.getConfigId());
+            }
+            if (!isCustomEndCard) {
+                reportingEvent.setEventType(Reporting.EventType.DEFAULT_END_CARD_LOAD_SUCCESS);
+                reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE, Reporting.Key.END_CARD_TYPE_DEFAULT);
+                mLoadDefaultEndCardTracked = true;
+            } else {
+                reportingEvent.setEventType(Reporting.EventType.CUSTOM_END_CARD_LOAD_SUCCESS);
+                reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE, Reporting.Key.END_CARD_TYPE_CUSTOM);
+                mLoadCustomEndCardTracked = true;
+            }
+            if (HyBid.getReportingController() != null) {
+                HyBid.getReportingController().reportEvent(reportingEvent);
+            }
+        }
+
+        @Override
+        public void onEndCardLoadFail(Boolean isCustomEndCard) {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
+            if (mAd != null) {
+                reportingEvent.setImpId(mAd.getSessionId());
+                reportingEvent.setCampaignId(mAd.getCampaignId());
+                reportingEvent.setConfigId(mAd.getConfigId());
+            }
+            if (!isCustomEndCard) {
+                reportingEvent.setEventType(Reporting.EventType.DEFAULT_END_CARD_LOAD_FAILURE);
+                reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE, Reporting.Key.END_CARD_TYPE_DEFAULT);
+            } else {
+                reportingEvent.setEventType(Reporting.EventType.CUSTOM_END_CARD_LOAD_FAILURE);
+                reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE, Reporting.Key.END_CARD_TYPE_CUSTOM);
+            }
+            if (HyBid.getReportingController() != null) {
+                HyBid.getReportingController().reportEvent(reportingEvent);
+            }
+        }
+
+        @Override
+        public void onDefaultEndCardShow(String endCardType) {
+            if (!mDefaultEndCardImpressionTracked) {
+                reportCompanionView();
+                ReportingEvent reportingEvent = new ReportingEvent();
+                reportingEvent.setTimestamp(System.currentTimeMillis());
+                reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
+                reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+                reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
+                if (mAd != null) {
+                    reportingEvent.setImpId(mAd.getSessionId());
+                    reportingEvent.setCampaignId(mAd.getCampaignId());
+                    reportingEvent.setConfigId(mAd.getConfigId());
+                }
+                reportingEvent.setEventType(Reporting.EventType.DEFAULT_ENDCARD_IMPRESSION);
+                reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE, endCardType);
+                if (HyBid.getReportingController() != null) {
+                    HyBid.getReportingController().reportEvent(reportingEvent);
+                }
+                mDefaultEndCardImpressionTracked = true;
+            }
+        }
+
+        @Override
+        public void onCustomEndCardShow(String endCardType) {
+            if (!mCustomEndCardImpressionTracked) {
+                ReportingEvent reportingEvent = new ReportingEvent();
+                reportingEvent.setTimestamp(System.currentTimeMillis());
+                reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
+                reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+                reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
+                if (mAd != null) {
+                    reportingEvent.setImpId(mAd.getSessionId());
+                    reportingEvent.setCampaignId(mAd.getCampaignId());
+                    reportingEvent.setConfigId(mAd.getConfigId());
+                }
+                reportingEvent.setEventType(Reporting.EventType.CUSTOM_ENDCARD_IMPRESSION);
+                reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE, endCardType);
+                if (HyBid.getReportingController() != null) {
+                    HyBid.getReportingController().reportEvent(reportingEvent);
+                }
+
+                mCustomEndCardImpressionTracked = true;
+            }
+        }
+
+        @Override
+        public void onDefaultEndCardClick(String endCardType) {
+            if (!mDefaultEndCardClickTracked) {
+                ReportingEvent reportingEvent = new ReportingEvent();
+                reportingEvent.setEventType(Reporting.EventType.DEFAULT_ENDCARD_CLICK);
+                reportingEvent.setTimestamp(System.currentTimeMillis());
+                reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
+                reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+                reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
+                if (mAd != null) {
+                    reportingEvent.setImpId(mAd.getSessionId());
+                    reportingEvent.setCampaignId(mAd.getCampaignId());
+                    reportingEvent.setConfigId(mAd.getConfigId());
+                }
+                reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE, Reporting.Key.END_CARD_TYPE_DEFAULT);
+
+                if (HyBid.getReportingController() != null) {
+                    HyBid.getReportingController().reportEvent(reportingEvent);
+                }
+                mDefaultEndCardClickTracked = true;
+            }
+        }
+
+        @Override
+        public void onCustomEndCardClick(String endCardType) {
+            if (!mCustomEndCardClickTracked) {
+                ReportingEvent reportingEvent = new ReportingEvent();
+                reportingEvent.setEventType(Reporting.EventType.CUSTOM_ENDCARD_CLICK);
+                reportingEvent.setTimestamp(System.currentTimeMillis());
+                reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
+                reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+                reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
+                if (mAd != null) {
+                    reportingEvent.setImpId(mAd.getSessionId());
+                    reportingEvent.setCampaignId(mAd.getCampaignId());
+                    reportingEvent.setConfigId(mAd.getConfigId());
+                }
+                reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE, Reporting.Key.END_CARD_TYPE_CUSTOM);
+                if (HyBid.getReportingController() != null) {
+                    HyBid.getReportingController().reportEvent(reportingEvent);
+                }
+                mCustomEndCardClickTracked = true;
+            }
+        }
+
+        @Override
+        public void onCustomCTACLick(boolean isEndcardVisible) {
+            String eventType = (isEndcardVisible) ? Reporting.EventType.CUSTOM_CTA_ENDCARD_CLICK : Reporting.EventType.CUSTOM_CTA_CLICK;
+            if (mCustomCTAClickTrackedEvents.contains(eventType)) return;
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(eventType);
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            if (mAd != null) {
+                reportingEvent.setImpId(mAd.getSessionId());
+                reportingEvent.setCampaignId(mAd.getCampaignId());
+                reportingEvent.setConfigId(mAd.getConfigId());
+            }
+            if (HyBid.getReportingController() != null) {
+                HyBid.getReportingController().reportEvent(reportingEvent);
+            }
+            mCustomCTAClickTrackedEvents.add(eventType);
+        }
+
+        @Override
+        public void onCustomCTAShow() {
+            if (mCustomCTAImpressionTracked) return;
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.CUSTOM_CTA_SHOW);
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            if (mAd != null) {
+                reportingEvent.setImpId(mAd.getSessionId());
+                reportingEvent.setCampaignId(mAd.getCampaignId());
+                reportingEvent.setConfigId(mAd.getConfigId());
+            }
+            if (HyBid.getReportingController() != null) {
+                HyBid.getReportingController().reportEvent(reportingEvent);
+            }
+            mCustomCTAImpressionTracked = true;
+        }
+
+        @Override
+        public void onCustomCTALoadFail() {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.CUSTOM_CTA_LOAD_FAIL);
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            if (mAd != null) {
+                reportingEvent.setImpId(mAd.getSessionId());
+                reportingEvent.setCampaignId(mAd.getCampaignId());
+                reportingEvent.setConfigId(mAd.getConfigId());
+            }
+            if (HyBid.getReportingController() != null) {
+                HyBid.getReportingController().reportEvent(reportingEvent);
+            }
+        }
+
+        @Override
+        public void onEndCardSkipped(Boolean isCustom) {
+            if (isCustom && mCustomEndCardSkipTracked)
+                return;
+            if (!isCustom && mDefaultEndCardSkipTracked)
+                return;
+
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            if (!isCustom) {
+                reportingEvent.setEventType(Reporting.EventType.DEFAULT_ENDCARD_SKIP);
+                reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE, Reporting.Key.END_CARD_TYPE_DEFAULT);
+                mDefaultEndCardSkipTracked = true;
+            }
+//            else {
+//                reportingEvent.setEventType(Reporting.EventType.CUSTOM_END_CARD_SKIP);
+//                reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE, Reporting.Key.END_CARD_TYPE_CUSTOM);
+//                mCustomEndCardSkipTracked = true;
+//            }
+            if (HyBid.getReportingController() != null) {
+                HyBid.getReportingController().reportEvent(reportingEvent);
+            }
+        }
+
+        @Override
+        public void onEndCardClosed(Boolean isCustom) {
+            if (isCustom && mCustomEndCardCloseTracked)
+                return;
+            if (!isCustom && mDefaultEndCardCloseTracked)
+                return;
+
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            if (!isCustom) {
+                reportingEvent.setEventType(Reporting.EventType.DEFAULT_ENDCARD_CLOSE);
+                reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE, Reporting.Key.END_CARD_TYPE_DEFAULT);
+                mDefaultEndCardCloseTracked = true;
+            } else {
+                reportingEvent.setEventType(Reporting.EventType.CUSTOM_ENDCARD_CLOSE);
+                reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE, Reporting.Key.END_CARD_TYPE_CUSTOM);
+                mCustomEndCardCloseTracked = true;
+            }
+            if (HyBid.getReportingController() != null) {
+                HyBid.getReportingController().reportEvent(reportingEvent);
+            }
+        }
     };
 
     // Content info listener
@@ -402,39 +672,55 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
         if (!isLinkClickRunning) {
             isLinkClickRunning = true;
             AdFeedbackFormHelper adFeedbackFormHelper = new AdFeedbackFormHelper();
-            URLValidator.isValidURL(url, isValid -> {
-                if (isValid) {
-                    adFeedbackFormHelper.showFeedbackForm(mContext, url, mAd, Reporting.AdFormat.BANNER, IntegrationType.STANDALONE, new AdFeedbackLoadListener() {
+            if (URLValidator.isValidURL(url)) {
+                adFeedbackFormHelper.showFeedbackForm(mContext, url, mAd, Reporting.AdFormat.BANNER, IntegrationType.STANDALONE, new AdFeedbackLoadListener() {
 
-                        @Override
-                        public void onLoad(String url1) {}
+                    @Override
+                    public void onLoad(String url1) {
+                    }
 
-                        @Override
-                        public void onLoadFinished() {
-                            isFeedbackFormVisible = true;
-                            isLinkClickRunning = false;
-                        }
+                    @Override
+                    public void onLoadFinished() {
+                        isFeedbackFormVisible = true;
+                        isLinkClickRunning = false;
+                    }
 
-                        @Override
-                        public void onLoadFailed(Throwable error) {
-                            Logger.e(TAG, error.getMessage());
-                            isLinkClickRunning = false;
-                        }
+                    @Override
+                    public void onLoadFailed(Throwable error) {
+                        Logger.e(TAG, error.getMessage());
+                        isLinkClickRunning = false;
+                    }
 
-                        @Override
-                        public void onFormClosed() {
-                            isFeedbackFormVisible = false;
-                            isLinkClickRunning = false;
-                        }
-                    });
-                } else {
-                    Logger.e(TAG, "URL is invalid");
-                    isLinkClickRunning = false;
-                }
-            });
+                    @Override
+                    public void onFormClosed() {
+                        isFeedbackFormVisible = false;
+                        isLinkClickRunning = false;
+                    }
+                });
+            } else {
+                Logger.e(TAG, "URL is invalid");
+                isLinkClickRunning = false;
+            }
         }
     }
 
+    private void reportCompanionView() {
+        ReportingEvent reportingEvent = new ReportingEvent();
+        reportingEvent.setEventType(Reporting.EventType.COMPANION_VIEW);
+        reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
+        reportingEvent.setCreativeType(Reporting.CreativeType.VIDEO);
+        reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+        reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(IntegrationType.STANDALONE));
+        if (mAd != null) {
+            reportingEvent.setImpId(mAd.getSessionId());
+            reportingEvent.setCampaignId(mAd.getCampaignId());
+            reportingEvent.setConfigId(mAd.getConfigId());
+        }
+        reportingEvent.setTimestamp(System.currentTimeMillis());
+        if (HyBid.getReportingController() != null) {
+            HyBid.getReportingController().reportEvent(reportingEvent);
+        }
+    }
 
     public boolean isLinkClickRunning = false;
 }

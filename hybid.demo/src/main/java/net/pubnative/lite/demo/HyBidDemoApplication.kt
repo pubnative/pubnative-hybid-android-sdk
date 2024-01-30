@@ -30,22 +30,26 @@ import androidx.multidex.MultiDex
 import androidx.multidex.MultiDexApplication
 import com.applovin.sdk.AppLovinSdk
 import com.applovin.sdk.AppLovinSdkConfiguration
+import com.chartboost.heliumsdk.HeliumInitializationOptions
+import com.chartboost.heliumsdk.HeliumSdk
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.initialization.InitializationStatus
 import com.ogury.sdk.Ogury
 import com.ogury.sdk.OguryConfiguration
-import com.onetrust.otpublishers.headless.Public.DataModel.OTSdkParams
-import com.onetrust.otpublishers.headless.Public.OTCallback
-import com.onetrust.otpublishers.headless.Public.OTPublishersHeadlessSDK
-import com.onetrust.otpublishers.headless.Public.Response.OTResponse
+import net.pubnative.lite.demo.managers.AdCustomizationPrefs
+import net.pubnative.lite.demo.managers.AdCustomizationsManager
 import net.pubnative.lite.demo.managers.AnalyticsSubscriber.eventCallback
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.models.*
 import net.pubnative.lite.sdk.CountdownStyle
 import net.pubnative.lite.sdk.HyBid
-import net.pubnative.lite.sdk.InterstitialActionBehaviour
 import net.pubnative.lite.sdk.api.ApiManager.setApiUrl
+import net.pubnative.lite.sdk.models.ContentInfoDisplay
+import net.pubnative.lite.sdk.models.ContentInfoIconAction
+import net.pubnative.lite.sdk.models.CustomEndCardDisplay
+import net.pubnative.lite.sdk.models.ImpressionTrackingMethod
 import net.pubnative.lite.sdk.utils.Logger
+import net.pubnative.lite.sdk.visibility.ImpressionTracker
 import net.pubnative.lite.sdk.vpaid.enums.AudioState
 
 
@@ -131,34 +135,6 @@ class HyBidDemoApplication : MultiDexApplication() {
             settings.adCustomizationSettings!!.locationUpdates?.let {
                 HyBid.setLocationUpdatesEnabled(it)
             }
-            settings.adCustomizationSettings!!.mraidExpanded?.let {
-                HyBid.setMraidExpandEnabled(it)
-            }
-            settings.adCustomizationSettings!!.closeVideoAfterFinish?.let {
-                HyBid.setCloseVideoAfterFinish(it)
-            }
-            settings.adCustomizationSettings!!.skipOffset?.let {
-                HyBid.setHtmlInterstitialSkipOffset(it)
-            }
-            settings.adCustomizationSettings!!.videoSkipOffset?.let {
-                HyBid.setVideoInterstitialSkipOffset(it)
-            }
-            settings.adCustomizationSettings!!.enableEndcard?.let {
-                HyBid.setEndCardEnabled(it)
-            }
-            settings.adCustomizationSettings!!.endCardCloseButtonDelay?.let {
-                HyBid.setEndCardCloseButtonDelay(it)
-            }
-            settings.adCustomizationSettings!!.videoClickBehaviour?.let {
-                HyBid.setInterstitialClickBehaviour(
-                    getInterstitialActionBehaviourFromSettings(
-                        it
-                    )
-                )
-            }
-            settings.adCustomizationSettings!!.countdownStyle?.let {
-                HyBid.setCountdownStyle(CountdownStyle.from(it))
-            }
         }
 
         MobileAds.initialize(this) { initializationStatus: InitializationStatus? -> }
@@ -178,6 +154,63 @@ class HyBidDemoApplication : MultiDexApplication() {
 //            )
 //            startRecording(apiToken)
 //        }
+
+        manageAdCustomizationParams()
+    }
+
+    private fun manageAdCustomizationParams() {
+        val prefs = AdCustomizationPrefs(applicationContext)
+        if (!prefs.isInitialised()) {
+            val adCustomizationsManager = AdCustomizationsManager(
+                false,
+                1,
+                false,
+                true,
+                false,
+                false,
+                false,
+                true,
+                false,
+                false,
+                false,
+                CustomEndCardDisplay.FALLBACK.display,
+                false,
+                false,
+                false,
+                Constants.SKIP_OFFSET_DEFAULT.toString(),
+                false,
+                Constants.VIDEO_SKIP_OFFSET_DEFAULT.toString(),
+                false,
+                "5",
+                false,
+                "15",
+                false,
+                Constants.ENDCARD_CLOSE_BUTTON_DELAY_DEFAULT.toString(),
+                false,
+                true,
+                false,
+                Constants.CONTENT_INFO_URL,
+                false,
+                Constants.CONTENT_INFO_ICON_URL,
+                false,
+                ContentInfoIconAction.EXPAND.action.toString(),
+                false,
+                ContentInfoDisplay.SYSTEM_BROWSER.display.toString(),
+                false,
+                Constants.MRAID_CUSTOM_CLOSE_BACK_BUTTON_DELAY_DEFAULT.toString(),
+                false,
+                Constants.MRAID_CUSTOM_CLOSE_CLOSE_BUTTON_DELAY_DEFAULT.toString(),
+                false,
+                CountdownStyle.PIE_CHART.name,
+                false,
+                ImpressionTrackingMethod.AD_VIEWABLE.methodName,
+                false,
+                "0",
+                false,
+                "0.0"
+            )
+            prefs.setAdCustomizationData(adCustomizationsManager.toJson())
+        }
     }
 
 
@@ -191,39 +224,27 @@ class HyBidDemoApplication : MultiDexApplication() {
             val hybidSettings = HyBidSettings.Builder().appToken(Constants.APP_TOKEN)
                 .zoneIds(Constants.ZONE_ID_LIST).apiUrl(BuildConfig.BASE_URL).age("")
                 .keywords(ArrayList()).browserPriorities(ArrayList()).coppa(Constants.COPPA_DEFAULT)
-                .testMode(Constants.TEST_MODE_DEFAULT).gender("").build()
+                .testMode(Constants.TEST_MODE_DEFAULT).gender("")
+                .topicsApi(Constants.TOPICS_API_DEFAULT).build()
 
             val adCustomizationSettings = AdCustomizationSettings.Builder()
                 .initialAudioState(Constants.INITIAL_AUDIO_STATE_DEFAULT)
-                .closeVideoAfterFinish(Constants.CLOSE_VIDEO_AFTER_FINISH_DEFAULT)
-                .closeVideoAfterFinishForRewardedVideo(Constants.CLOSE_VIDEO_AFTER_FINISH_DEFAULT_FOR_REWARDED)
-                .enableEndcard(Constants.ENABLE_ENDCARD_DEFAULT)
-                .mraidExpanded(Constants.MRAID_EXPANDED_DEFAULT)
                 .locationTracking(Constants.LOCATION_TRACKING_DEFAULT)
                 .locationUpdates(Constants.LOCATION_UPDATES_DEFAULT)
-                .videoClickBehaviour(Constants.VIDEO_CLICK_BEHAVIOUR_DEFAULT)
-                .skipOffset(Constants.SKIP_OFFSET_DEFAULT)
-                .videoSkipOffset(Constants.VIDEO_SKIP_OFFSET_DEFAULT)
-                .endCardCloseButtonDelay(Constants.ENDCARD_CLOSE_BUTTON_DELAY_DEFAULT)
-                .countdownStyle(Constants.COUNTDOWN_STYLE_DEFAULT).build()
-
+                .locationTrackingEnabled(true)
+                .locationUpdatesEnabled(true)
+                .build()
 
             val dfpSettings =
-                DFPSettings.Builder().mediumAdUnitId(Constants.DFP_MRAID_MEDIUM_AD_UNIT)
-                    .interstitialAdUnitId(Constants.DFP_MRAID_INTERSTITIAL_AD_UNIT)
-                    .leaderboardAdUnitId(Constants.DFP_MRAID_LEADERBOARD_AD_UNIT)
-                    .mediationBannerAdUnitId(Constants.DFP_MEDIATION_BANNER_AD_UNIT)
+                DFPSettings.Builder().mediationBannerAdUnitId(Constants.DFP_MEDIATION_BANNER_AD_UNIT)
                     .mediationMediumAdUnitId(Constants.DFP_MEDIATION_MEDIUM_AD_UNIT)
                     .mediationLeaderboardAdUnitId(Constants.DFP_MEDIATION_LEADERBOARD_AD_UNIT)
                     .mediationInterstitialAdUnitId(Constants.DFP_MEDIATION_INTERSTITIAL_AD_UNIT)
                     .mediationRewardedAdUnitId(Constants.DFP_MEDIATION_REWARDED_AD_UNIT).build()
 
             val fairbidSettings = FairbidSettings.Builder().appId(Constants.FAIRBID_APP_ID)
-                .bannerAdUnitId(Constants.FAIRBID_BANNER_AD_UNIT)
-                .interstitialAdUnitId(Constants.FAIRBID_INTERSTITIAL_AD_UNIT)
                 .mediationBannerAdUnitId(Constants.FAIRBID_MEDIATION_BANNER_AD_UNIT)
                 .mediationInterstitialAdUnitId(Constants.FAIRBID_MEDIATION_INTERSTITIAL_AD_UNIT)
-                .rewardedAdUnitId(Constants.FAIRBID_REWARDED_AD_UNIT)
                 .mediationRewardedAdUnitId(Constants.FAIRBID_MEDIATION_REWARDED_AD_UNIT).build()
 
             val admobSettings = AdmobSettings.Builder().appId(Constants.ADMOB_APP_ID)
@@ -249,6 +270,19 @@ class HyBidDemoApplication : MultiDexApplication() {
                 .rewardedAdUnitId(Constants.MAXADS_REWARDED_AD_UNIT)
                 .nativeAdUnitId(Constants.MAXADS_NATIVE_AD_UNIT).build()
 
+            val chartboostSettings =
+                ChartboostSettings.Builder().heliumAppId(Constants.CHARTBOOST_APP_ID)
+                    .heliumAppSignature(Constants.CHARTBOOST_APP_SIGNATURE)
+                    .mediationBannerAdUnitId(Constants.CHARTBOOST_MEDIATION_BANNER_AD_UNIT)
+                    .mediationMrectAdUnitId(Constants.CHARTBOOST_MEDIATION_MRECT_AD_UNIT)
+                    .mediationMrectVideoAdUnitId(Constants.CHARTBOOST_MEDIATION_MRECT_VIDEO_AD_UNIT)
+                    .mediationLeaderboardAdUnitId(Constants.CHARTBOOST_MEDIATION_LEADERBOARD_AD_UNIT)
+                    .mediationInterstitialAdUnitId(Constants.CHARTBOOST_MEDIATION_INTERSTITIAL_AD_UNIT)
+                    .mediationInterstitialVideoAdUnitId(Constants.CHARTBOOST_MEDIATION_INTERSTITIAL_VIDEO_AD_UNIT)
+                    .mediationRewardedAdUnitId(Constants.CHARTBOOST_MEDIATION_REWARDED_AD_UNIT)
+                    .mediationRewardedHtmlAdUnitId(Constants.CHARTBOOST_MEDIATION_REWARDED_HTML_AD_UNIT)
+                    .build()
+
             model = Settings()
 
             model.hybidSettings = hybidSettings
@@ -258,8 +292,11 @@ class HyBidDemoApplication : MultiDexApplication() {
             model.admobSettings = admobSettings
             model.ironSourceSettings = ironSourceSettings
             model.maxAdsSettings = maxAdsSettings
+            model.chartboostSettings = chartboostSettings
 
             manager.setSettings(model, true)
+
+            manager.setInitialised(true)
         }
 
         return model
@@ -273,11 +310,27 @@ class HyBidDemoApplication : MultiDexApplication() {
         }
     }
 
-    private fun getInterstitialActionBehaviourFromSettings(settingsActionBehaviour: Boolean): InterstitialActionBehaviour {
-        return if (settingsActionBehaviour) {
-            InterstitialActionBehaviour.HB_CREATIVE
-        } else {
-            InterstitialActionBehaviour.HB_ACTION_BUTTON
-        }
-    }
+    // todo Initiate chartboost once we have the required IDs
+    /*private fun initChartboost() {
+        HeliumSdk.start(
+            this@HyBidDemoApplication,
+            Constants.CHARTBOOST_APP_ID,
+            Constants.CHARTBOOST_APP_SIGNATURE,
+            HeliumInitializationOptions(),
+            object : HeliumSdkListener() {
+                fun didInitialize(error: Error?) {
+                    if (error != null) {
+                        Log.d(
+                            "initChartboost",
+                            "Chartboost Mediation SDK failed to initialize. Reason: " + error.message
+                        )
+                    } else {
+                        //SDK Started,
+                        Log.d("initChartboost", "Chartboost Mediation SDK initialized successfully")
+                    }
+                }
+            }
+        )
+    }*/
+
 }

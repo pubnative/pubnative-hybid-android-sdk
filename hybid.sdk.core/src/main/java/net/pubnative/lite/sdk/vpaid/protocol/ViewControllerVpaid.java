@@ -55,7 +55,7 @@ public class ViewControllerVpaid {
         mWebView.setVisibility(View.GONE);
 
         ReportingEvent event = new ReportingEvent();
-        event.setEventType(Reporting.EventType.COMPANION_VIEW_END_CARD);
+        event.setEventType(Reporting.EventType.COMPANION_VIEW);
         event.setCreativeType(Reporting.CreativeType.VIDEO);
         event.setTimestamp(System.currentTimeMillis());
         if (HyBid.getReportingController() != null) {

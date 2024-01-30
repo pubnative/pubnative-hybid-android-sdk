@@ -70,13 +70,20 @@ class SettingsManager private constructor(context: Context) {
         preferences.edit().putBoolean(SETTINGS_KEY_LOCATION_TRACKING, enabled).apply()
     }
 
+    fun setLocationTrackingEnabled(enabled: Boolean) {
+        preferences.edit().putBoolean(SETTINGS_KEY_LOCATION_TRACKING_ENABLED, enabled).apply()
+    }
+
     fun setLocationUpdates(enabled: Boolean) {
         preferences.edit().putBoolean(SETTINGS_KEY_LOCATION_UPDATES, enabled).apply()
     }
 
-    fun setCustomSkipOffsetDisabled(customSkipOffsetDisabled: Boolean) {
-        preferences.edit()
-            .putBoolean(SETTINGS_KEY_CUSTOM_SKIP_OFFSET_DISABLED, customSkipOffsetDisabled).apply()
+    fun setLocationUpdatesEnabled(enabled: Boolean) {
+        preferences.edit().putBoolean(SETTINGS_KEY_LOCATION_UPDATES_ENABLED, enabled).apply()
+    }
+
+    fun setTopicsApi(enabled: Boolean) {
+        preferences.edit().putBoolean(SETTINGS_KEY_TOPICS_API, enabled).apply()
     }
 
     fun setMraidExpanded(enabled: Boolean) {
@@ -136,22 +143,6 @@ class SettingsManager private constructor(context: Context) {
     fun setBrowserPriorities(browserPriorities: List<String>) {
         preferences.edit().putStringSet(SETTINGS_KEY_BROWSER_PRIORITIES, browserPriorities.toSet())
             .apply()
-    }
-
-    fun setDFPBannerAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_DFP_BANNER_AD_UNIT_ID, adUnitId).apply()
-    }
-
-    fun setDFPMediumAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_DFP_MEDIUM_AD_UNIT_ID, adUnitId).apply()
-    }
-
-    fun setDFPLeaderboardAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_DFP_LEADERBOARD_AD_UNIT_ID, adUnitId).apply()
-    }
-
-    fun setDFPInterstitialAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_DFP_INTERSTITIAL_AD_UNIT_ID, adUnitId).apply()
     }
 
     fun setDFPMediationBannerAdUnitId(adUnitId: String) {
@@ -274,18 +265,6 @@ class SettingsManager private constructor(context: Context) {
             .apply()
     }
 
-    fun setFairbidBannerAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_FAIRBID_BANNER_AD_UNIT_ID, adUnitId).apply()
-    }
-
-    fun setFairbidInterstitialAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_FAIRBID_INTERSTITIAL_AD_UNIT_ID, adUnitId).apply()
-    }
-
-    fun setFairbidRewardedAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_FAIRBID_REWARDED_AD_UNIT_ID, adUnitId).apply()
-    }
-
     fun setFeedbackFormEnabled(enabled: Boolean) {
         preferences.edit().putBoolean(SETTINGS_KEY_FEEDBACK_FORM_ENABLED, enabled).apply()
     }
@@ -322,34 +301,26 @@ class SettingsManager private constructor(context: Context) {
                     )
                 }
 
-                it.customSkipOffsetDisabled?.let { it1 ->
+                it.locationUpdates?.let { it1 ->
                     editor.putBoolean(
-                        SETTINGS_KEY_CUSTOM_SKIP_OFFSET_DISABLED, it1
+                        SETTINGS_KEY_LOCATION_UPDATES, it1
                     )
                 }
 
-                it.closeVideoAfterFinish?.let { it1 ->
+                it.locationTrackingEnabled?.let {
                     editor.putBoolean(
-                        SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH, it1
+                        SETTINGS_KEY_LOCATION_TRACKING_ENABLED, it
                     )
                 }
 
-                it.closeVideoAfterFinishForRewardedVideo?.let { it1 ->
+                it.locationUpdatesEnabled?.let {
                     editor.putBoolean(
-                        SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH_REWARDED, it1
+                        SETTINGS_KEY_LOCATION_UPDATES_ENABLED, it
                     )
                 }
-
-                editor.putString(SETTINGS_KEY_COUNTDOWN_STYLE, it.countdownStyle)
             }
 
             model.dfpSettings?.let {
-                editor.putString(SETTINGS_KEY_DFP_BANNER_AD_UNIT_ID, it.bannerAdUnitId)
-                editor.putString(SETTINGS_KEY_DFP_MEDIUM_AD_UNIT_ID, it.mediumAdUnitId)
-                editor.putString(SETTINGS_KEY_DFP_LEADERBOARD_AD_UNIT_ID, it.leaderboardAdUnitId)
-                editor.putString(
-                    SETTINGS_KEY_DFP_INTERSTITIAL_AD_UNIT_ID, it.interstitialAdUnitId
-                )
                 editor.putString(
                     SETTINGS_KEY_DFP_MEDIATION_BANNER_AD_UNIT_ID, it.mediationBannerAdUnitId
                 )
@@ -426,14 +397,6 @@ class SettingsManager private constructor(context: Context) {
                 editor.putString(
                     SETTINGS_KEY_FAIRBID_MEDIATION_REWARDED_AD_UNIT_ID, it.mediationRewardedAdUnitId
                 )
-
-                editor.putString(SETTINGS_KEY_FAIRBID_BANNER_AD_UNIT_ID, it.bannerAdUnitId)
-                editor.putString(
-                    SETTINGS_KEY_FAIRBID_INTERSTITIAL_AD_UNIT_ID, it.interstitialAdUnitId
-                )
-                editor.putString(
-                    SETTINGS_KEY_FAIRBID_REWARDED_AD_UNIT_ID, it.rewardedAdUnitId
-                )
             }
 
             editor.putBoolean(SETTINGS_KEY_INITIALISED, true)
@@ -457,21 +420,29 @@ class SettingsManager private constructor(context: Context) {
             preferences.getStringSet(SETTINGS_KEY_BROWSER_PRIORITIES, emptySet())?.toList()!!
         val coppa = preferences.getBoolean(SETTINGS_KEY_COPPA, Constants.COPPA_DEFAULT)
         val testMode = preferences.getBoolean(SETTINGS_KEY_TEST_MODE, Constants.TEST_MODE_DEFAULT)
-        val locationTracking = preferences.getBoolean(SETTINGS_KEY_LOCATION_TRACKING, Constants.LOCATION_TRACKING_DEFAULT)
-        val locationUpdates = preferences.getBoolean(SETTINGS_KEY_LOCATION_UPDATES, Constants.LOCATION_UPDATES_DEFAULT)
-        val customSkipOffsetDisabled =
-            preferences.getBoolean(SETTINGS_KEY_CUSTOM_SKIP_OFFSET_DISABLED, false)
-        val initialAudioState = preferences.getInt(SETTINGS_KEY_INITIAL_AUDIO_STATE, Constants.INITIAL_AUDIO_STATE_DEFAULT)
-        val mraidExpanded = preferences.getBoolean(SETTINGS_KEY_MRAID_EXPANDED, Constants.MRAID_EXPANDED_DEFAULT)
-        val closeVideoAfterFinish =
-            preferences.getBoolean(SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH, Constants.CLOSE_VIDEO_AFTER_FINISH_DEFAULT)
-        val closeVideoAfterFinishForRewarded =
-            preferences.getBoolean(SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH_REWARDED, Constants.CLOSE_VIDEO_AFTER_FINISH_DEFAULT_FOR_REWARDED)
-        val enableEndcard = preferences.getBoolean(SETTINGS_KEY_ENABLE_ENDCARD, Constants.ENABLE_ENDCARD_DEFAULT)
-        val skipOffset = preferences.getInt(SETTINGS_KEY_SKIP_OFFSET, Constants.SKIP_OFFSET_DEFAULT)
-        val videoSkipOffset = preferences.getInt(SETTINGS_KEY_VIDEO_SKIP_OFFSET, Constants.VIDEO_SKIP_OFFSET_DEFAULT)
-        val endcardCloseButtonDelay = preferences.getInt(SETTINGS_KEY_ENDCARD_CLOSE_BUTTON_DELAY, Constants.ENDCARD_CLOSE_BUTTON_DELAY_DEFAULT)
-        val videoClickBehaviour = preferences.getBoolean(SETTINGS_KEY_VIDEO_CLICK_BEHAVIOUR, Constants.VIDEO_CLICK_BEHAVIOUR_DEFAULT)
+        val topicsApi = preferences.getBoolean(SETTINGS_KEY_TOPICS_API, Constants.TOPICS_API_DEFAULT)
+        val locationTracking = preferences.getBoolean(
+            SETTINGS_KEY_LOCATION_TRACKING,
+            Constants.LOCATION_TRACKING_DEFAULT
+        )
+        val locationUpdates = preferences.getBoolean(
+            SETTINGS_KEY_LOCATION_UPDATES,
+            Constants.LOCATION_UPDATES_DEFAULT
+        )
+        val locationTrackingEnabled = preferences.getBoolean(
+            SETTINGS_KEY_LOCATION_TRACKING_ENABLED,
+            true
+        )
+        val locationUpdatesEnabled = preferences.getBoolean(
+            SETTINGS_KEY_LOCATION_UPDATES_ENABLED,
+            true
+        )
+        val initialAudioState = preferences.getInt(
+            SETTINGS_KEY_INITIAL_AUDIO_STATE,
+            Constants.INITIAL_AUDIO_STATE_DEFAULT
+        )
+        val mraidExpanded =
+            preferences.getBoolean(SETTINGS_KEY_MRAID_EXPANDED, Constants.MRAID_EXPANDED_DEFAULT)
         val dfpBannerAdUnitId = preferences.getString(SETTINGS_KEY_DFP_BANNER_AD_UNIT_ID, "")!!
         val dfpMediumAdUnitId = preferences.getString(SETTINGS_KEY_DFP_MEDIUM_AD_UNIT_ID, "")!!
         val dfpLeaderboardAdUnitId =
@@ -534,30 +505,22 @@ class SettingsManager private constructor(context: Context) {
         val fairbidRewardedAdUnitId =
             preferences.getString(SETTINGS_KEY_FAIRBID_REWARDED_AD_UNIT_ID, "")!!
 
-        val countdownStyle =
-            preferences.getString(SETTINGS_KEY_COUNTDOWN_STYLE, CountdownStyle.PIE_CHART.id)!!
-
         val settings = Settings()
 
         val hybidSettings =
             HyBidSettings.Builder().appToken(appToken).zoneIds(zoneIds).apiUrl(apiUrl).age(age)
                 .keywords(keywords).browserPriorities(browserPriorities).coppa(coppa)
-                .testMode(testMode).gender(gender).build()
+                .testMode(testMode).gender(gender).topicsApi(topicsApi).build()
 
         val adCustomizationSettings =
-            AdCustomizationSettings.Builder().initialAudioState(initialAudioState)
-                .closeVideoAfterFinish(closeVideoAfterFinish)
-                .customSkipOffsetDisabled(customSkipOffsetDisabled).enableEndcard(enableEndcard)
-                .endCardCloseButtonDelay(endcardCloseButtonDelay)
-                .closeVideoAfterFinishForRewardedVideo(closeVideoAfterFinishForRewarded)
-                .mraidExpanded(mraidExpanded).locationTracking(locationTracking)
-                .locationUpdates(locationUpdates).videoClickBehaviour(videoClickBehaviour)
-                .skipOffset(skipOffset).videoSkipOffset(videoSkipOffset)
-                .countdownStyle(countdownStyle).build()
+            AdCustomizationSettings.Builder()
+                .initialAudioState(initialAudioState).locationTracking(locationTracking)
+                .locationUpdates(locationUpdates)
+                .locationTrackingEnabled(locationTrackingEnabled)
+                .locationUpdatesEnabled(locationUpdatesEnabled)
+                .build()
 
-        val dfpSettings = DFPSettings.Builder().bannerAdUnitId(dfpBannerAdUnitId)
-            .mediumAdUnitId(dfpMediumAdUnitId).interstitialAdUnitId(dfpInterstitialAdUnitId)
-            .leaderboardAdUnitId(dfpLeaderboardAdUnitId)
+        val dfpSettings = DFPSettings.Builder()
             .mediationBannerAdUnitId(dfpMediationBannerAdUnitId)
             .mediationMediumAdUnitId(dfpMediationMediumAdUnitId)
             .mediationLeaderboardAdUnitId(dfpMediationLeaderboardAdUnitId)
@@ -565,11 +528,9 @@ class SettingsManager private constructor(context: Context) {
             .mediationRewardedAdUnitId(dfpMediationRewardedAdUnitId).build()
 
         val fairbidSettings =
-            FairbidSettings.Builder().appId(fairbidAppId).bannerAdUnitId(fairbidBannerAdUnitId)
-                .interstitialAdUnitId(fairbidInterstitialAdUnitId)
+            FairbidSettings.Builder().appId(fairbidAppId)
                 .mediationBannerAdUnitId(fairbidMediationBannerAdUnitId)
                 .mediationInterstitialAdUnitId(fairbidMediationInterstitialAdUnitId)
-                .rewardedAdUnitId(fairbidRewardedAdUnitId)
                 .mediationRewardedAdUnitId(fairbidMediationRewardedAdUnitId).build()
 
         val admobSettings =

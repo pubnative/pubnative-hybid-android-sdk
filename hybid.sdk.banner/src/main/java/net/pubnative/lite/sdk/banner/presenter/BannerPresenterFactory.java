@@ -24,12 +24,11 @@ package net.pubnative.lite.sdk.banner.presenter;
 
 import android.content.Context;
 
-import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
-import net.pubnative.lite.sdk.models.RemoteConfigFeature;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.presenter.PresenterFactory;
 import net.pubnative.lite.sdk.utils.Logger;
@@ -41,13 +40,13 @@ import net.pubnative.lite.sdk.utils.Logger;
 public class BannerPresenterFactory extends PresenterFactory {
     private static final String TAG = BannerPresenterFactory.class.getSimpleName();
 
-    public BannerPresenterFactory(Context context) {
-        super(context);
+    public BannerPresenterFactory(Context context, IntegrationType integrationType) {
+        super(context, integrationType);
     }
 
     @Override
     public AdPresenter fromCreativeType(int assetGroupId, Ad ad, AdSize adSize) {
-        return fromCreativeType(assetGroupId, ad, adSize, ImpressionTrackingMethod.AD_RENDERED);
+        return fromCreativeType(assetGroupId, ad, adSize, ImpressionTrackingMethod.AD_VIEWABLE);
     }
 
     @Override
@@ -55,9 +54,10 @@ public class BannerPresenterFactory extends PresenterFactory {
 
 
         ImpressionTrackingMethod trackingMethodFinal = trackingMethod;
-        if(ad != null && ad.getImpressionTrackingMethod() != null &&
-                ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod()) != null){
-            trackingMethodFinal = ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod());;
+        if (ad != null && ad.getImpressionTrackingMethod() != null &&
+                ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod()) != null) {
+            trackingMethodFinal = ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod());
+            ;
         }
 
         switch (assetGroupId) {
@@ -76,7 +76,7 @@ public class BannerPresenterFactory extends PresenterFactory {
                 return new MraidAdPresenter(getContext(), ad, adSize, trackingMethodFinal);
             }
             case ApiAssetGroupType.VAST_MRECT: {
-                return new VastAdPresenter(getContext(), ad, adSize, trackingMethodFinal);
+                return new VastAdPresenter(getContext(), ad, adSize, trackingMethodFinal, mIntegrationType);
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for banner ad format.");

@@ -2,9 +2,11 @@ package net.pubnative.lite.sdk.vpaid.vast;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.graphics.SurfaceTexture;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.TextureView;
@@ -12,37 +14,35 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.RatingBar;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
 
 import net.pubnative.lite.sdk.CountdownStyle;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.InterstitialActionBehaviour;
-import net.pubnative.lite.sdk.analytics.Reporting;
-import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.core.R;
+import net.pubnative.lite.sdk.models.CustomCTAData;
+import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.models.SkipOffset;
-import net.pubnative.lite.sdk.mraid.MRAIDBanner;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeatureListener;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.ScreenDimensionsUtils;
+import net.pubnative.lite.sdk.utils.SkipOffsetManager;
+import net.pubnative.lite.sdk.utils.ViewUtils;
+import net.pubnative.lite.sdk.views.cta.HyBidCTAView;
 import net.pubnative.lite.sdk.views.endcard.HyBidEndCardView;
 import net.pubnative.lite.sdk.vpaid.AdCloseButtonListener;
+import net.pubnative.lite.sdk.vpaid.BackButtonClickabilityListener;
 import net.pubnative.lite.sdk.vpaid.CloseButtonListener;
 import net.pubnative.lite.sdk.vpaid.VastActivityInteractor;
 import net.pubnative.lite.sdk.vpaid.VideoAdController;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
 import net.pubnative.lite.sdk.vpaid.VideoVisibilityManager;
 import net.pubnative.lite.sdk.vpaid.helpers.BitmapHelper;
-import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
-import net.pubnative.lite.sdk.vpaid.models.CloseCardData;
-import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
-import net.pubnative.lite.sdk.vpaid.utils.ImageUtils;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
 import net.pubnative.lite.sdk.vpaid.widget.CountDownView;
 import net.pubnative.lite.sdk.vpaid.widget.CountDownViewFactory;
@@ -50,6 +50,8 @@ import net.pubnative.lite.sdk.vpaid.widget.LinearCountDownView;
 
 public class ViewControllerVast implements View.OnClickListener {
     private static final String LOG_TAG = ViewControllerVast.class.getSimpleName();
+    private static final CountdownStyle COUNTDOWN_STYLE_DEFAULT = CountdownStyle.PIE_CHART;
+    private static final InterstitialActionBehaviour INTERSTITIAL_CLICK_BEHAVIOUR_DEFAULT = InterstitialActionBehaviour.HB_CREATIVE;
 
     private final VideoAdController mAdController;
 
@@ -59,24 +61,34 @@ public class ViewControllerVast implements View.OnClickListener {
     private FrameLayout mVideoPlayerLayout;
     private TextureView mVideoPlayerLayoutTexture;
     private View mControlsLayout;
+    private View mOpenUrlLayout;
     private HyBidEndCardView mEndCardView;
+    private HyBidCTAView ctaView;
     private boolean mMuteState;
     private final boolean mIsFullscreen;
     private Surface mSurface;
     private View mSkipView;
     private ImageView mMuteView;
     private final Integer mRemoteEndCardCloseDelay;
+    private final Integer mRemoteBackButtonDelay;
 
     VideoVisibilityManager videoVisibilityManager;
     VastActivityInteractor interactor;
+    AdCloseButtonListener mcloseButtonListener;
 
     private InterstitialActionBehaviour remoteConfigInterstitialClickBehaviour = null;
+    private CustomCTAData mCustomCTAData = null;
+    private Integer mCustomCTADelay = 0;
 
-    public ViewControllerVast(VideoAdController adController, boolean isFullscreen, Integer endCardCloseDelay, Integer nativeCloseButtonDelay, Boolean fullScreenClickability, AdCloseButtonListener adCloseButtonListener) {
+    public ViewControllerVast(VideoAdController adController, boolean isFullscreen, Integer endCardCloseDelay, Integer backButtonDelay, Boolean fullScreenClickability, AdCloseButtonListener adCloseButtonListener, CustomCTAData customCTAData, Integer customCTADelay) {
         mAdController = adController;
         mIsFullscreen = isFullscreen;
+        mcloseButtonListener = adCloseButtonListener;
+        mCustomCTAData = customCTAData;
+        mCustomCTADelay = customCTADelay;
         videoVisibilityManager = VideoVisibilityManager.getInstance();
         mRemoteEndCardCloseDelay = endCardCloseDelay;
+        mRemoteBackButtonDelay = backButtonDelay;
         if (fullScreenClickability != null) {
             if (fullScreenClickability)
                 remoteConfigInterstitialClickBehaviour = InterstitialActionBehaviour.HB_CREATIVE;
@@ -94,17 +106,25 @@ public class ViewControllerVast implements View.OnClickListener {
             bannerView.removeAllViews();
 
             mControlsLayout = LayoutInflater.from(context).inflate(R.layout.controls, bannerView, false);
+            mOpenUrlLayout = LayoutInflater.from(context).inflate(R.layout.open_url, bannerView, false);
 
-            InterstitialActionBehaviour interstitialClickBehaviour = HyBid.getInterstitialClickBehaviour();
+            initCustomCta(context);
+
+            InterstitialActionBehaviour interstitialClickBehaviour = INTERSTITIAL_CLICK_BEHAVIOUR_DEFAULT;
             if (remoteConfigInterstitialClickBehaviour != null)
                 interstitialClickBehaviour = remoteConfigInterstitialClickBehaviour;
 
-            TextView openView = mControlsLayout.findViewById(R.id.openURL);
-            if (interstitialClickBehaviour == InterstitialActionBehaviour.HB_CREATIVE) {
-                mControlsLayout.setOnClickListener(v -> validateOpenURLClicked());
-                if (openView != null) openView.setVisibility(View.GONE);
+            if (mCustomCTAData != null && mIsFullscreen) {
+                mBannerView.setOnClickListener(v -> validateOpenURLClicked(false));
+                if (mOpenUrlLayout != null) mOpenUrlLayout.setVisibility(View.GONE);
+                showCTAButton(mCustomCTAData, mCustomCTADelay);
             } else {
-                if (openView != null) openView.setVisibility(View.VISIBLE);
+                if (interstitialClickBehaviour == InterstitialActionBehaviour.HB_CREATIVE) {
+                    mBannerView.setOnClickListener(v -> validateOpenURLClicked(false));
+                    if (mOpenUrlLayout != null) mOpenUrlLayout.setVisibility(View.GONE);
+                } else {
+                    if (mOpenUrlLayout != null) mOpenUrlLayout.setVisibility(View.VISIBLE);
+                }
             }
 
             mVideoPlayerLayout = mControlsLayout.findViewById(R.id.videoPlayerLayout);
@@ -125,9 +145,9 @@ public class ViewControllerVast implements View.OnClickListener {
             mEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             mEndCardView.setVisibility(View.GONE);
 
-            mControlsLayout.findViewById(R.id.openURL).setOnClickListener(this);
+            mOpenUrlLayout.findViewById(R.id.openURL).setOnClickListener(this);
 
-            mSkipCountdownView = new CountDownViewFactory().createCountdownView(context, HyBid.getCountdownStyle(), mVideoPlayerLayout);
+            mSkipCountdownView = new CountDownViewFactory().createCountdownView(context, COUNTDOWN_STYLE_DEFAULT, mVideoPlayerLayout);
             mVideoPlayerLayout.addView(mSkipCountdownView);
             mLinearCountdownView = mControlsLayout.findViewById(R.id.linear_count_down);
             if (mVideoPlayerLayoutTexture != null) {
@@ -137,15 +157,11 @@ public class ViewControllerVast implements View.OnClickListener {
             mMuteView = mControlsLayout.findViewById(R.id.muteView);
             mMuteView.setOnClickListener(this);
 
-            if (HyBid.getCountdownStyle() == CountdownStyle.PROGRESS) {
-                mSkipView = mControlsLayout.findViewById(R.id.progressSkipView);
-            } else {
-                mSkipView = mControlsLayout.findViewById(R.id.skipView);
-                Bitmap skipBitmap = BitmapHelper.toBitmap(mSkipView.getContext(), HyBid.getSkipXmlResource(), R.mipmap.skip);
-                if (skipBitmap != null) ((ImageView) mSkipView).setImageBitmap(skipBitmap);
-                else
-                    ((ImageView) mSkipView).setImageBitmap(BitmapHelper.decodeResource(mSkipView.getContext(), R.mipmap.skip));
-            }
+            mSkipView = mControlsLayout.findViewById(R.id.skipView);
+            Bitmap skipBitmap = BitmapHelper.toBitmap(mSkipView.getContext(), HyBid.getSkipXmlResource(), R.mipmap.skip);
+            if (skipBitmap != null) ((ImageView) mSkipView).setImageBitmap(skipBitmap);
+            else
+                ((ImageView) mSkipView).setImageBitmap(BitmapHelper.decodeResource(mSkipView.getContext(), R.mipmap.skip));
 
             mSkipView.setOnClickListener(this);
 
@@ -153,16 +169,35 @@ public class ViewControllerVast implements View.OnClickListener {
 
             bannerView.addView(mControlsLayout);
             bannerView.addView(mEndCardView);
+            bannerView.addView(ctaView);
+            bannerView.addView(mOpenUrlLayout);
         }
+    }
+
+    private void initCustomCta(Context context) {
+        ctaView = new HyBidCTAView(context);
+        FrameLayout.LayoutParams ctaLp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        int hMargin = ViewUtils.asIntPixels(6, context);
+        ScreenDimensionsUtils screenDimensionsUtils = new ScreenDimensionsUtils();
+        Point point = screenDimensionsUtils.getScreenDimensionsToPoint(context);
+        int vMargin = point.y * 10 / 100;
+        ctaLp.setMargins(hMargin, vMargin, hMargin, vMargin);
+        ctaLp.gravity = Gravity.BOTTOM | Gravity.END;
+        ctaView.setLayoutParams(ctaLp);
+        ctaView.setContentDescription("ctaView");
     }
 
     private boolean hasCTAExtension(AdParams adParams) {
         return adParams != null && !TextUtils.isEmpty(adParams.getCtaExtensionHtml());
     }
 
-    private void validateOpenURLClicked() {
+    private void validateOpenURLClicked(Boolean isCTAClick) {
         mAdController.getViewabilityAdSession().fireClick();
-        mAdController.openUrl(null);
+        mAdController.openUrl(null, false, isCTAClick);
+    }
+
+    private void validateEndCardOpenURLClicked() {
+        mAdController.openUrl(null, true, false);
     }
 
     private final VideoAdView.VisibilityListener mCreateVisibilityListener = new VideoAdView.VisibilityListener() {
@@ -237,10 +272,16 @@ public class ViewControllerVast implements View.OnClickListener {
         }
     }
 
-    public void endSkip() {
+    public void endSkip(Boolean isAutoClose, Boolean hasEndcard) {
         if (mSkipCountdownView != null) {
             mSkipCountdownView.setVisibility(View.GONE);
-            showSkipButton();
+            if (isAutoClose) {
+                showCloseButton();
+            } else if (!hasEndcard) {
+                showCloseButton();
+            } else {
+                showSkipButton();
+            }
         }
     }
 
@@ -254,14 +295,16 @@ public class ViewControllerVast implements View.OnClickListener {
         return mMuteState;
     }
 
-    public void showEndCard(EndCardData endCardData, String imageUri, Boolean isLastEndCard, CloseButtonListener closeButtonListener) {
+    public void showEndCard(EndCardData endCardData, String imageUri, Boolean isLastEndCard, CloseButtonListener closeButtonListener, BackButtonClickabilityListener backButtonClickabilityListener) {
         if (mEndCardView != null) {
             mEndCardView.setEndCardViewListener(new HyBidEndCardView.EndCardViewListener() {
                 @Override
-                public void onClick(Boolean isCustomEndCard) {
-                    validateOpenURLClicked();
-                    if(isCustomEndCard){
-                        mAdController.onCustomEndCardClick();
+                public void onClick(Boolean isCustomEndCard, String endCardType) {
+                    validateEndCardOpenURLClicked();
+                    if (isCustomEndCard) {
+                        mAdController.onCustomEndCardClick(endCardType);
+                    } else {
+                        mAdController.onDefaultEndCardClick(endCardType);
                     }
                 }
 
@@ -271,34 +314,84 @@ public class ViewControllerVast implements View.OnClickListener {
                 }
 
                 @Override
-                public void onClose() {
+                public void onClose(Boolean isCustomEndCard) {
+                    if (mAdController != null) {
+                        mAdController.onEndCardClosed(isCustomEndCard);
+                    }
                     closeSelf();
                 }
 
                 @Override
-                public void onShow(Boolean isCustomEndCard) {
-                    if(isCustomEndCard)
-                        mAdController.onCustomEndCardShow();
+                public void onShow(Boolean isCustomEndCard, String endCardType) {
+                    if (mOpenUrlLayout != null) mOpenUrlLayout.setVisibility(View.GONE);
+                    if (isCustomEndCard) {
+                        mAdController.onCustomEndCardShow(endCardType);
+                        mEndCardView.bringToFront();
+                        if (ctaView != null) {
+                            ctaView.hide();
+                        }
+                    } else {
+                        mAdController.onDefaultEndCardShow(endCardType);
+                        if (ctaView != null) {
+                            ctaView.show();
+                        }
+                    }
+                }
+
+                @Override
+                public void onLoadSuccess(Boolean isCustomEndCard) {
+                    if (mAdController != null) {
+                        mAdController.onEndCardLoadSuccess(isCustomEndCard);
+                    }
+                }
+
+                @Override
+                public void onLoadFail(Boolean isCustomEndCard) {
+                    if (mAdController != null) {
+                        mAdController.onEndCardLoadFail(isCustomEndCard);
+                    }
                 }
             });
             SkipOffset endCardCloseDelay = getEndCardCloseDelay();
+            SkipOffset backButtonDelay = getBackButtonDelay();
             mEndCardView.setSkipOffset(endCardCloseDelay);
+            mEndCardView.setBackButtonSkipOffset(backButtonDelay);
             mEndCardView.show(endCardData, imageUri);
             if (mIsFullscreen) {
                 if (isLastEndCard) {
-                    mEndCardView.showCloseButton();
+                    mEndCardView.showCloseButton(closeButtonListener, backButtonClickabilityListener);
                 } else {
                     mEndCardView.showSkipButton();
                 }
             }
-            ReportingEvent event = new ReportingEvent();
-            event.setEventType(Reporting.EventType.COMPANION_VIEW_END_CARD);
-            event.setCreativeType(Reporting.CreativeType.VIDEO);
-            event.setTimestamp(System.currentTimeMillis());
-            if (HyBid.getReportingController() != null) {
-                HyBid.getReportingController().reportEvent(event);
-            }
         }
+    }
+
+    public void showCTAButton(CustomCTAData data, Integer delay) {
+
+        if (ctaView == null || TextUtils.isEmpty(data.getIconURL())) {
+            if (mAdController != null) mAdController.onCustomCTALoadFail();
+            return;
+        }
+        ctaView.setListener(new HyBidCTAView.CTAViewListener() {
+            @Override
+            public void onClick() {
+                if (mAdController != null)
+                    mAdController.onCustomCTAClick(isEndCard());
+                validateOpenURLClicked(true);
+            }
+
+            @Override
+            public void onShow() {
+                if (mAdController != null) mAdController.onCustomCTAShow();
+            }
+
+            @Override
+            public void onFail() {
+                if (mAdController != null) mAdController.onCustomCTALoadFail();
+            }
+        });
+        ctaView.show(data.getIconURL(), data.getLabel(), delay);
     }
 
     private final MRAIDViewListener mraidViewListener = new MRAIDViewListener() {
@@ -352,7 +445,7 @@ public class ViewControllerVast implements View.OnClickListener {
 
         @Override
         public void mraidNativeFeatureOpenBrowser(String url) {
-            validateOpenURLClicked();
+            validateOpenURLClicked(false);
         }
 
         @Override
@@ -368,6 +461,18 @@ public class ViewControllerVast implements View.OnClickListener {
         if (mSkipView != null) {
             mSkipView.setVisibility(View.VISIBLE);
             mSkipView.setClickable(true);
+        }
+    }
+
+    public void showCloseButton() {
+        if (mcloseButtonListener != null) {
+            mcloseButtonListener.showButton();
+        }
+    }
+
+    public void hideCloseButton() {
+        if (mcloseButtonListener != null) {
+            mcloseButtonListener.hideButton();
         }
     }
 
@@ -391,7 +496,7 @@ public class ViewControllerVast implements View.OnClickListener {
     }
 
     public boolean isEndCard() {
-        return mEndCardView != null && mEndCardView.getVisibility() != View.VISIBLE;
+        return mEndCardView != null && mEndCardView.getVisibility() != View.GONE;
     }
 
     public void dismiss() {
@@ -415,7 +520,7 @@ public class ViewControllerVast implements View.OnClickListener {
         } else if (v.getId() == R.id.muteView) {
             muteVideo();
         } else if (v.getId() == R.id.openURL) {
-            validateOpenURLClicked();
+            validateOpenURLClicked(false);
         }
     }
 
@@ -439,6 +544,14 @@ public class ViewControllerVast implements View.OnClickListener {
 
     public void pauseEndCardCloseButtonTimer() {
         if (mEndCardView != null) mEndCardView.pause();
+    }
+
+    public void pause() {
+        if (ctaView != null) ctaView.pause();
+    }
+
+    public void resume() {
+        if (ctaView != null) ctaView.resume();
     }
 
     public void resumeEndCardCloseButtonTimer() {
@@ -465,9 +578,25 @@ public class ViewControllerVast implements View.OnClickListener {
 
     private SkipOffset getEndCardCloseDelay() {
         if (mRemoteEndCardCloseDelay != null) {
-            return new SkipOffset(mRemoteEndCardCloseDelay, true);
+            if (mRemoteEndCardCloseDelay > SkipOffsetManager.getMaximumEndcardCloseDelay()) {
+                return new SkipOffset(SkipOffsetManager.getMaximumEndcardCloseDelay(), true);
+            } else {
+                return new SkipOffset(mRemoteEndCardCloseDelay, true);
+            }
         } else {
-            return HyBid.getEndCardCloseButtonDelay();
+            return new SkipOffset(SkipOffsetManager.getDefaultEndcardSkipOffset(), false);
+        }
+    }
+
+    private SkipOffset getBackButtonDelay() {
+        if (mRemoteBackButtonDelay != null) {
+            if (mRemoteBackButtonDelay > SkipOffsetManager.getMaximumBackButtonDelay()) {
+                return new SkipOffset(SkipOffsetManager.getMaximumBackButtonDelay(), true);
+            } else {
+                return new SkipOffset(mRemoteBackButtonDelay, true);
+            }
+        } else {
+            return new SkipOffset(SkipOffsetManager.getDefaultBackButtonDelay(), false);
         }
     }
 }

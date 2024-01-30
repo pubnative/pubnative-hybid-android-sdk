@@ -14,6 +14,7 @@ include ':hybid.demo',
         ':hybid.adapters.applovin',
         //':hybid.adapters.applovin-ortb',
         //':hybid.adapters.applovin-fledge',
+        //':prebid.adapters.applovin'
         ':hybid.sdk',
         ':hybid.sdk.core',
         ':hybid.sdk.viewability',
@@ -26,5 +27,5 @@ include ':hybid.demo',
         ':hybid.sdk.rewarded',
         ':hybid.sdk.source.pnapi',
         ':hybid.sdk.logger',
-        //':hybid.sdk.source.ortbapi',
-        ':prebid.adapters.applovin'
+        ':hybid.sdk.topicsapi',
+        ':hybid.sdk.protectedaudiences'

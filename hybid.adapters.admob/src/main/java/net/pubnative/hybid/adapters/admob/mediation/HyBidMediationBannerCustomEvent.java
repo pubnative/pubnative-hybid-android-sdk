@@ -24,7 +24,6 @@ package net.pubnative.hybid.adapters.admob.mediation;
 
 import android.app.Application;
 import android.content.Context;
-import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 
@@ -43,8 +42,6 @@ import net.pubnative.hybid.adapters.admob.HyBidAdmobUtils;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.views.HyBidAdView;
-
-import java.util.List;
 
 public class HyBidMediationBannerCustomEvent extends HyBidMediationBaseCustomEvent {
     private static final String TAG = HyBidMediationBannerCustomEvent.class.getSimpleName();

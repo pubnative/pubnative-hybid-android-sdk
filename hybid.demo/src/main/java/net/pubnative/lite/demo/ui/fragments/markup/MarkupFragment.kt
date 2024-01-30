@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.ui.activities.AdCustomizationActivity
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.ui.adapters.MarkupAdapter
 import net.pubnative.lite.demo.ui.adapters.OnAdRefreshListener
@@ -34,8 +35,9 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
     private lateinit var urWrapCheckbox: CheckBox
     private lateinit var loadButton: MaterialButton
     private lateinit var showButton: MaterialButton
+    private lateinit var adCustomization: MaterialButton
 
-    private val adapter = MarkupAdapter(this, this)
+    private var adapter: MarkupAdapter? = null
 
     private var interstitial: HyBidInterstitialAd? = null
     private var rewarded: HyBidRewardedAd? = null
@@ -58,6 +60,7 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
         markupList.isNestedScrollingEnabled = false
         loadButton = view.findViewById(R.id.button_load)
         showButton = view.findViewById(R.id.button_show)
+        adCustomization = view.findViewById(R.id.customize_button)
 
         markupViewModel.clipboard.observe(viewLifecycleOwner) {
             markupInput.setText(it)
@@ -98,6 +101,10 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
             }
         }
 
+        markupViewModel.loadAdInterstitial.observe(viewLifecycleOwner) {
+            interstitial?.prepareAd(it)
+        }
+
         markupViewModel.loadRewarded.observe(viewLifecycleOwner) {
             if (loadButtonClicked) {
                 loadRewarded(it)
@@ -105,8 +112,24 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
             }
         }
 
+        markupViewModel.loadAdRewarded.observe(viewLifecycleOwner) {
+            rewarded?.prepareAd(it)
+        }
+
+        markupViewModel.loadAdBanner.observe(viewLifecycleOwner) {
+            adapter?.refreshWithAd(it, markupViewModel.getMarkupSize())
+        }
+
         markupViewModel.adapterUpdate.observe(viewLifecycleOwner) {
-            adapter.refreshWithMarkup(it, markupViewModel.getMarkupSize())
+            val configs = markupViewModel.getRemoteConfigParams()
+            if (configs.isNotEmpty()) {
+                markupViewModel.loadBannerRemoteConfig(it)
+            } else {
+                adapter?.refreshWithMarkup(
+                    it,
+                    markupViewModel.getMarkupSize()
+                )
+            }
         }
 
         view.findViewById<ImageButton>(R.id.button_paste_clipboard).setOnClickListener {
@@ -131,6 +154,11 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
 
                 else -> {}
             }
+        }
+
+        adCustomization.setOnClickListener {
+            val intent = Intent(context, AdCustomizationActivity::class.java)
+            startActivity(intent)
         }
 
         adSizeGroup.setOnCheckedChangeListener { _, checkedId ->
@@ -174,13 +202,13 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
             markupViewModel.setURWrap(isChecked)
         }
 
+        fetchURTemplate()
+
+        adapter = MarkupAdapter(this, this)
         markupList.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
         markupList.itemAnimator = DefaultItemAnimator()
         markupList.adapter = adapter
-
-        fetchURTemplate()
     }
-
 
     private fun loadInterstitial(markup: String) {
         showButton.isEnabled = false
@@ -214,7 +242,13 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
         }
 
         interstitial = HyBidInterstitialAd(requireActivity(), interstitialListener)
-        interstitial?.prepareCustomMarkup(markup)
+
+        val configs = markupViewModel.getRemoteConfigParams()
+        if (configs.isNotEmpty()) {
+            markupViewModel.loadInterstitialRemoteConfig(markup)
+        } else {
+            interstitial?.prepareCustomMarkup(markup)
+        }
     }
 
     private fun loadRewarded(markup: String) {
@@ -253,7 +287,12 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
         }
 
         rewarded = HyBidRewardedAd(requireActivity(), rewardedListener)
-        rewarded?.prepareCustomMarkup(markup)
+        val configs = markupViewModel.getRemoteConfigParams()
+        if (configs.isNotEmpty()) {
+            markupViewModel.loadRewardedRemoteConfig(markup)
+        } else {
+            rewarded?.prepareCustomMarkup(markup)
+        }
     }
 
     private fun loadMarkup() {
@@ -277,6 +316,7 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
         if (activity != null) {
             val activity = activity as TabActivity
             activity.clearEventList()
+            activity.clearRequestUrlString()
             activity.notifyAdCleaned()
         }
     }
@@ -303,8 +343,7 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
                 val finalUrl = if (param != null) {
                     uri
                 } else {
-                    uri.buildUpon().appendQueryParameter(creativeIdQueryParam, creativeId)
-                        .build()
+                    uri.buildUpon().appendQueryParameter(creativeIdQueryParam, creativeId).build()
                 }
 
                 finalUrl?.let {
@@ -319,5 +358,10 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
         if (intent.resolveActivity(requireActivity().packageManager) != null) {
             startActivity(intent)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        markupViewModel.refetchAdCustomisationParams()
     }
 }

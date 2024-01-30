@@ -136,6 +136,22 @@ public class ReportingEvent {
         return getCustomString(Reporting.Key.AD_TYPE);
     }
 
+    public synchronized void setPlatform(String platform) {
+        setCustomString(Reporting.Key.PLATFORM, platform);
+    }
+
+    public String getPlatform() {
+        return getCustomString(Reporting.Key.PLATFORM);
+    }
+
+    public synchronized void setSdkVersion(String sdkVersion) {
+        setCustomString(Reporting.Key.HYBID_VERSION, sdkVersion);
+    }
+
+    public String getSdkVersion() {
+        return getCustomString(Reporting.Key.HYBID_VERSION);
+    }
+
     public synchronized void setAppToken(String appToken) {
         setCustomString(Reporting.Key.APP_TOKEN, appToken);
     }
@@ -191,6 +207,22 @@ public class ReportingEvent {
 
     public String getImpDepth() {
         return getCustomString(Reporting.Key.IMP_DEPTH);
+    }
+
+    public synchronized void setImpId(String impId) {
+        setCustomString(Reporting.Key.IMP_ID, impId);
+    }
+
+    public String getImpId() {
+        return getCustomString(Reporting.Key.IMP_ID);
+    }
+
+    public synchronized void setConfigId(String configId) {
+        setCustomString(Reporting.Key.REMOTE_CONFIG_ID, configId);
+    }
+
+    public String getConfigId() {
+        return getCustomString(Reporting.Key.REMOTE_CONFIG_ID);
     }
 
     public synchronized void setAgeOfApp(String ageOfApp) {

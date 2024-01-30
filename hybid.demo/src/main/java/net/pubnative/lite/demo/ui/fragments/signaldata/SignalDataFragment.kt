@@ -67,7 +67,11 @@ class SignalDataFragment : Fragment(R.layout.fragment_signal_data) {
             updateVisibility()
         }
 
-        signalDataList.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
+        val linearLayoutManager = object : LinearLayoutManager(activity, RecyclerView.VERTICAL, false) {
+            override fun canScrollVertically() = false
+        }
+
+        signalDataList.layoutManager = linearLayoutManager
         signalDataList.itemAnimator = DefaultItemAnimator()
         signalDataList.adapter = adapter
     }

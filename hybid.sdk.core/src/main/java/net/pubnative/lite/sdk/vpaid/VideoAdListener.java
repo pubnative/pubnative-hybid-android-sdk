@@ -61,10 +61,43 @@ public abstract class VideoAdListener {
     }
 
     public abstract void onAdSkipped();
-    public void onCustomEndCardShow() {
-    }
-    public void onCustomEndCardClicked() {
+
+    public void onCustomEndCardShow(String endCardType) {
     }
 
-    public abstract void onAdCustomEndCardFound() ;
+    public void onCustomEndCardClick(String endCardType) {
+    }
+
+    public void onDefaultEndCardShow(String endCardType) {
+    }
+
+    public void onDefaultEndCardClick(String endCardType) {
+    }
+
+    public void onCustomCTACLick(boolean isEndcardVisible) {
+    }
+
+    public void onCustomCTAShow() {
+    }
+
+    public void onCustomCTALoadFail() {
+    }
+
+    public abstract void onAdCustomEndCardFound();
+
+    public void onEndCardLoadSuccess(Boolean isCustomEndCard) {
+
+    }
+
+    public void onEndCardLoadFail(Boolean isCustomEndCard) {
+
+    }
+
+    public void onEndCardSkipped(Boolean isCustom) {
+
+    }
+
+    public void onEndCardClosed(Boolean isCustomEndCard) {
+
+    }
 }

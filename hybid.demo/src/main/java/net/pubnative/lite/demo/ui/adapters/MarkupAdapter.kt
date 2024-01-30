@@ -11,13 +11,13 @@ import net.pubnative.lite.demo.ui.viewholders.MarkupLeaderboardViewHolder
 import net.pubnative.lite.demo.ui.viewholders.MarkupMRectViewHolder
 import net.pubnative.lite.demo.ui.viewholders.SampleTextViewHolder
 import net.pubnative.lite.demo.util.SampleQuotes
-
+import net.pubnative.lite.sdk.models.Ad
 
 class MarkupAdapter(
-        private var mListener: OnLogDisplayListener,
-        private var mAdRefreshListener: OnAdRefreshListener
+    private var mListener: OnLogDisplayListener,
+    private var mAdRefreshListener: OnAdRefreshListener,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), OnLogDisplayListener,
-        OnExpandedAdCloseListener {
+    OnExpandedAdCloseListener {
 
     companion object {
         private const val TYPE_TEXT = 1
@@ -27,41 +27,45 @@ class MarkupAdapter(
         private const val ATTACHED_AD_VIEW_POSITION = 2
     }
 
-    private var isClosingExpandedAd: Boolean = false
     private var selectedSize: MarkupSize = MarkupSize.BANNER
     private var markup = ""
 
     private val list: List<Quote> = SampleQuotes.list
 
+    private var mAd: Ad? = null
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
             TYPE_MARKUP_BANNER -> MarkupBannerViewHolder(
-                    LayoutInflater.from(parent.context)
-                            .inflate(R.layout.item_markup_banner, parent, false), mListener, this
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_markup_banner, parent, false), mListener, this
             )
 
             TYPE_MARKUP_MRECT -> MarkupMRectViewHolder(
-                    LayoutInflater.from(parent.context)
-                            .inflate(R.layout.item_markup_mrect, parent, false), mListener
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_markup_mrect, parent, false), mListener
             )
 
             TYPE_MARKUP_LEADERBOARD -> MarkupLeaderboardViewHolder(
-                    LayoutInflater.from(parent.context)
-                            .inflate(R.layout.item_markup_leaderboard, parent, false), mListener
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_markup_leaderboard, parent, false), mListener
             )
 
             else -> SampleTextViewHolder(
-                    LayoutInflater.from(parent.context)
-                            .inflate(R.layout.item_sample_text, parent, false)
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_sample_text, parent, false)
             )
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
-            is MarkupBannerViewHolder -> holder.bind(markup)
-            is MarkupMRectViewHolder -> holder.bind(markup)
-            is MarkupLeaderboardViewHolder -> holder.bind(markup)
+            is MarkupBannerViewHolder -> if (mAd == null) holder.bind(markup) else holder.bind(mAd)
+            is MarkupMRectViewHolder -> if (mAd == null) holder.bind(markup) else holder.bind(mAd)
+            is MarkupLeaderboardViewHolder -> if (mAd == null) holder.bind(markup) else holder.bind(
+                mAd
+            )
+
             else -> {
                 holder as SampleTextViewHolder
                 holder.bind(list[position])
@@ -72,7 +76,10 @@ class MarkupAdapter(
     override fun getItemCount() = list.count()
 
     override fun getItemViewType(position: Int): Int {
-        if (position == ATTACHED_AD_VIEW_POSITION && markup.isNotEmpty()) {
+        if (position == ATTACHED_AD_VIEW_POSITION) {
+            if (mAd == null && markup.isEmpty()) {
+                return TYPE_TEXT
+            }
             when (selectedSize) {
                 MarkupSize.BANNER -> {
                     return TYPE_MARKUP_BANNER
@@ -95,7 +102,9 @@ class MarkupAdapter(
         return TYPE_TEXT
     }
 
-    fun refreshWithMarkup(markup: String, selectedSize: MarkupSize) {
+    fun refreshWithMarkup(
+        markup: String, selectedSize: MarkupSize
+    ) {
         this.markup = markup
         this.selectedSize = selectedSize
         notifyDataSetChanged()
@@ -108,5 +117,11 @@ class MarkupAdapter(
     override fun onExpandedAdClosed() {
         mAdRefreshListener.onAdRefresh()
         notifyItemChanged(ATTACHED_AD_VIEW_POSITION)
+    }
+
+    fun refreshWithAd(ad: Ad?, markupSize: MarkupSize) {
+        this.mAd = ad
+        this.selectedSize = markupSize
+        notifyDataSetChanged()
     }
 }

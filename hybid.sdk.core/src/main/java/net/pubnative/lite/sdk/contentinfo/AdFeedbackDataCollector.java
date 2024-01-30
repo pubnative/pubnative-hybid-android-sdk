@@ -17,13 +17,15 @@ public class AdFeedbackDataCollector {
     private static final String TAG = AdFeedbackDataCollector.class.getSimpleName();
 
     private final DeviceInfo mDeviceInfo;
+    private final IntegrationType mIntegrationType;
 
-    public AdFeedbackDataCollector() {
-        this(HyBid.getDeviceInfo());
+    public AdFeedbackDataCollector(IntegrationType integrationType) {
+        this(HyBid.getDeviceInfo(), integrationType);
     }
 
-    public AdFeedbackDataCollector(DeviceInfo deviceInfo) {
+    public AdFeedbackDataCollector(DeviceInfo deviceInfo, IntegrationType integrationType) {
         mDeviceInfo = deviceInfo;
+        mIntegrationType = integrationType;
     }
 
     public AdFeedbackData collectData(Ad ad, String adFormat, IntegrationType integrationType) {
@@ -33,8 +35,8 @@ public class AdFeedbackDataCollector {
             builder.setAppToken(HyBid.getAppToken());
         }
 
-        if (!TextUtils.isEmpty(HyBid.getSDKVersionInfo())) {
-            builder.setSdkVersion(HyBid.getSDKVersionInfo());
+        if (!TextUtils.isEmpty(HyBid.getSDKVersionInfo(mIntegrationType))) {
+            builder.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
         }
 
         if (!TextUtils.isEmpty(HyBid.getAppVersion())) {
@@ -51,9 +53,9 @@ public class AdFeedbackDataCollector {
 
         String audioState;
         String stateFromRemoteConfig = ad.getAudioState();
-        if(stateFromRemoteConfig != null){
+        if (stateFromRemoteConfig != null) {
             audioState = stateFromRemoteConfig;
-        }else {
+        } else {
             audioState = HyBid.getVideoAudioStatus().getStateName();
         }
 

@@ -8,6 +8,8 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -54,6 +56,12 @@ public class AdFeedbackActivity extends Activity implements MRAIDViewListener, M
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
         initVariables();
@@ -96,7 +104,7 @@ public class AdFeedbackActivity extends Activity implements MRAIDViewListener, M
         super.onRestoreInstanceState(savedInstanceState);
     }
 
-    private void initUi(){
+    private void initUi() {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
     }
@@ -107,31 +115,31 @@ public class AdFeedbackActivity extends Activity implements MRAIDViewListener, M
 
     private void getDataFromIntent(Intent intent) {
         try {
-            if(intent.hasExtra(EXTRA_FEEDBACK_FORM_URL) && !TextUtils.isEmpty(intent.getStringExtra(EXTRA_FEEDBACK_FORM_URL))) {
+            if (intent.hasExtra(EXTRA_FEEDBACK_FORM_CALLBACK)) {
+                callback = intent.getParcelableExtra(EXTRA_FEEDBACK_FORM_CALLBACK);
+            }
+            if (intent.hasExtra(EXTRA_FEEDBACK_FORM_URL) && !TextUtils.isEmpty(intent.getStringExtra(EXTRA_FEEDBACK_FORM_URL))) {
                 feedbackFormUrl = intent.getStringExtra(EXTRA_FEEDBACK_FORM_URL);
             } else {
                 sendError();
                 finish();
             }
-            if(intent.hasExtra(EXTRA_FEEDBACK_FORM_CALLBACK)){
-                callback = intent.getParcelableExtra(EXTRA_FEEDBACK_FORM_CALLBACK);
-            }
-            if(intent.hasExtra(EXTRA_FEEDBACK_FORM_DATA) && intent.getSerializableExtra(EXTRA_FEEDBACK_FORM_DATA) != null){
+            if (intent.hasExtra(EXTRA_FEEDBACK_FORM_DATA) && intent.getSerializableExtra(EXTRA_FEEDBACK_FORM_DATA) != null) {
                 mAdFeedbackData = (AdFeedbackData) intent.getSerializableExtra(EXTRA_FEEDBACK_FORM_DATA);
             } else {
                 sendError();
                 finish();
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             sendError();
             finish();
         }
     }
 
-    private void startProgress(){
+    private void startProgress() {
         mIsFeedbackFormLoading = true;
         cancelExistingFeedbackTimer();
-        showProgressDialog(getString(R.string.feedback_form), getString(R.string.loading));
+        showProgressDialog(null, getString(R.string.loading));
         mFeedbackFormExpirationTimer = new SimpleTimer(10000, new SimpleTimer.Listener() {
             @Override
             public void onFinish() {
@@ -139,14 +147,16 @@ public class AdFeedbackActivity extends Activity implements MRAIDViewListener, M
                     finish();
                 }
             }
+
             @Override
-            public void onTick(long millisUntilFinished) {}
+            public void onTick(long millisUntilFinished) {
+            }
         });
         mFeedbackFormExpirationTimer.start();
     }
 
-    private void loadFeedbackForm(){
-        if(feedbackFormUrl == null){
+    private void loadFeedbackForm() {
+        if (feedbackFormUrl == null) {
             sendError();
             finish();
         }
@@ -201,17 +211,15 @@ public class AdFeedbackActivity extends Activity implements MRAIDViewListener, M
         jsInterface.submitData(mAdFeedbackData, mraidView);
         hideProgressDialog();
         sendOpenAction();
-        URLValidator.isValidURL(feedbackFormUrl, isValid -> {
-            if (isValid) {
-                mViewContainer.show(this, () -> {
-                    mViewContainer.showDefaultContentInfoURL(CONTENT_INFO_LINK_URL);
-                    sendError();
-                }, feedbackFormUrl);
-            } else {
+        if (URLValidator.isValidURL(feedbackFormUrl)) {
+            mViewContainer.show(this, () -> {
+                mViewContainer.showDefaultContentInfoURL(CONTENT_INFO_LINK_URL);
                 sendError();
-                finish();
-            }
-        });
+            }, feedbackFormUrl);
+        } else {
+            sendError();
+            finish();
+        }
     }
 
     @Override
@@ -255,20 +263,20 @@ public class AdFeedbackActivity extends Activity implements MRAIDViewListener, M
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
     }
 
-    private void sendCloseAction(){
-        if(callback != null){
+    private void sendCloseAction() {
+        if (callback != null) {
             callback.send(AdFeedbackFormHelper.FeedbackFormAction.CLOSE.code, null);
         }
     }
 
-    private void sendOpenAction(){
-        if(callback != null){
+    private void sendOpenAction() {
+        if (callback != null) {
             callback.send(AdFeedbackFormHelper.FeedbackFormAction.OPEN.code, null);
         }
     }
 
-    private void sendError(){
-        if(callback != null){
+    private void sendError() {
+        if (callback != null) {
             callback.send(AdFeedbackFormHelper.FeedbackFormAction.ERROR.code, null);
         }
     }

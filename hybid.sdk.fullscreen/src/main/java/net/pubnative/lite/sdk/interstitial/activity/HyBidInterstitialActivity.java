@@ -34,10 +34,14 @@ import net.pubnative.lite.sdk.utils.URLValidator;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.views.CloseableContainer;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
+import net.pubnative.lite.sdk.vpaid.VideoAd;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
 import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
 import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public abstract class HyBidInterstitialActivity extends Activity implements PNAPIContentInfoView.ContentInfoListener {
@@ -45,8 +49,7 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
     public static final String EXTRA_ZONE_ID = "extra_pn_zone_id";
     public static final String EXTRA_BROADCAST_ID = "extra_pn_broadcast_id";
     public static final String EXTRA_SKIP_OFFSET = "extra_pn_skip_offset";
-
-    protected Integer backButtonDelay = -1;
+    public static final String INTEGRATION_TYPE = "integration_type";
 
     private CloseableContainer mCloseableContainer;
     private UrlHandler mUrlHandlerDelegate;
@@ -59,6 +62,28 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
     private boolean mIsFeedbackFormLoading = false;
 
     protected Boolean mIsSkippable = false;
+    protected Boolean mIsBackEnabled = false;
+
+    protected Boolean mDefaultEndCardClickTracked = false;
+    protected Boolean mCustomEndCardClickTracked = false;
+    protected List<String> mCustomCTAClickTrackedEvents = new ArrayList<>();
+
+    protected Boolean mDefaultEndCardImpressionTracked = false;
+    protected Boolean mCustomEndCardImpressionTracked = false;
+    protected Boolean mLoadDefaultEndCardTracked = false;
+    protected Boolean mLoadCustomEndCardTracked = false;
+    protected Boolean mLoadEndCardFailTracked = false;
+    protected Boolean mCustomCTAImpressionTracked = false;
+    protected Boolean mDefaultEndCardSkipTracked = false;
+    protected Boolean mCustomEndCardSkipTracked = false;
+    protected Boolean mCustomEndCardCloseTracked = false;
+    protected Boolean mDefaultEndCardCloseTracked = false;
+    protected IntegrationType mIntegrationType;
+    protected boolean mIsFinishing = false;
+
+    protected boolean mIsVideoFinished = false;
+
+    protected VideoAd mVideoAd;
 
     public abstract View getAdView();
 
@@ -77,16 +102,15 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
 
         mUrlHandlerDelegate = new UrlHandler(this);
         mZoneId = intent.getStringExtra(EXTRA_ZONE_ID);
+
+        validateIntegrationType(intent.getStringExtra(INTEGRATION_TYPE));
+
         long broadcastId = intent.getLongExtra(EXTRA_BROADCAST_ID, -1);
 
         if (!TextUtils.isEmpty(mZoneId) && broadcastId != -1) {
             mBroadcastSender = new HyBidInterstitialBroadcastSender(this, broadcastId);
 
             View adView = getAdView();
-
-            if (getAd() != null) {
-                backButtonDelay = SkipOffsetManager.getBackButtonDelay(getAd().getBackButtonDelay());
-            }
 
             if (adView != null) {
 
@@ -114,33 +138,33 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
                 }
                 setContentView(mCloseableContainer);
             } else {
+                mIsFinishing = true;
                 finish();
             }
         } else {
+            mIsFinishing = true;
             finish();
         }
     }
 
-    SimpleTimer backButtonTimer;
+    private void validateIntegrationType(String integration_type) {
+        if (integration_type == null) {
+            mIntegrationType = IntegrationType.IN_APP_BIDDING;
+            return;
+        }
 
-    protected void handleBackClickability() {
-        int delay = backButtonDelay * 1000;
-
-        backButtonTimer = new SimpleTimer(delay, new SimpleTimer.Listener() {
-
-            @Override
-            public void onFinish() {
-                mIsSkippable = true;
-            }
-
-            @Override
-            public void onTick(long millisUntilFinished) {
-                mIsSkippable = false;
-            }
-        }, 1000);
-
-        backButtonTimer.start();
+        if (integration_type.equals(IntegrationType.HEADER_BIDDING.getCode())) {
+            mIntegrationType = IntegrationType.HEADER_BIDDING;
+        } else if (integration_type.equals(IntegrationType.MEDIATION.getCode())) {
+            mIntegrationType = IntegrationType.MEDIATION;
+        } else if (integration_type.equals(IntegrationType.STANDALONE.getCode())) {
+            mIntegrationType = IntegrationType.STANDALONE;
+        } else {
+            mIntegrationType = IntegrationType.IN_APP_BIDDING;
+        }
     }
+
+    SimpleTimer backButtonTimer;
 
     protected void setupContentInfo() {
         setupContentInfo(null);
@@ -203,12 +227,25 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
         return contentInfo == null ? ad.getContentInfoContainer(context, this) : ad.getContentInfoContainer(context, contentInfo, this);
     }
 
-    private final CloseableContainer.OnCloseListener mCloseListener = this::dismiss;
+    private final CloseableContainer.OnCloseListener mCloseListener = this::closeButtonClicked;
+
+    protected void closeButtonClicked() {
+        if (getBroadcastSender() != null) {
+            if (mIsVast && !mIsVideoFinished) {
+                mVideoAd.skip();
+            } else {
+                getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
+                mIsFinishing = true;
+                finish();
+            }
+        }
+    }
 
     protected void dismiss() {
         if (getBroadcastSender() != null) {
             getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
         }
+        mIsFinishing = true;
         finish();
     }
 
@@ -286,45 +323,43 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
             isLinkClickRunning = true;
             if (!mIsFeedbackFormOpen && !mIsFeedbackFormLoading) {
                 adFeedbackFormHelper = new AdFeedbackFormHelper();
-                URLValidator.isValidURL(url, isValid -> {
-                    if (isValid) {
-                        adFeedbackFormHelper.showFeedbackForm(HyBidInterstitialActivity.this, url, mAd, Reporting.AdFormat.REWARDED, IntegrationType.STANDALONE, new AdFeedbackLoadListener() {
-                            @Override
-                            public void onLoad(String url1) {
-                                mIsFeedbackFormLoading = true;
-                            }
+                if (URLValidator.isValidURL(url)) {
+                    adFeedbackFormHelper.showFeedbackForm(HyBidInterstitialActivity.this, url, mAd, Reporting.AdFormat.REWARDED, IntegrationType.STANDALONE, new AdFeedbackLoadListener() {
+                        @Override
+                        public void onLoad(String url1) {
+                            mIsFeedbackFormLoading = true;
+                        }
 
-                            @Override
-                            public void onLoadFinished() {
-                                isLinkClickRunning = false;
-                                mIsFeedbackFormLoading = false;
-                                mIsFeedbackFormOpen = true;
-                            }
+                        @Override
+                        public void onLoadFinished() {
+                            isLinkClickRunning = false;
+                            mIsFeedbackFormLoading = false;
+                            mIsFeedbackFormOpen = true;
+                        }
 
-                            @Override
-                            public void onLoadFailed(Throwable error) {
-                                isLinkClickRunning = false;
-                                mIsFeedbackFormLoading = false;
-                                if (mIsFeedbackFormOpen) {
-                                    mIsFeedbackFormOpen = false;
-                                }
-                                Logger.e(TAG, error.getMessage());
-                            }
-
-                            @Override
-                            public void onFormClosed() {
-                                isLinkClickRunning = false;
+                        @Override
+                        public void onLoadFailed(Throwable error) {
+                            isLinkClickRunning = false;
+                            mIsFeedbackFormLoading = false;
+                            if (mIsFeedbackFormOpen) {
                                 mIsFeedbackFormOpen = false;
-                                mIsFeedbackFormLoading = false;
                             }
-                        });
-                    } else {
-                        isLinkClickRunning = false;
-                        mIsFeedbackFormOpen = false;
-                        mIsFeedbackFormLoading = false;
-                        Logger.e(TAG, "Content Info URL is invalid");
-                    }
-                });
+                            Logger.e(TAG, error.getMessage());
+                        }
+
+                        @Override
+                        public void onFormClosed() {
+                            isLinkClickRunning = false;
+                            mIsFeedbackFormOpen = false;
+                            mIsFeedbackFormLoading = false;
+                        }
+                    });
+                } else {
+                    isLinkClickRunning = false;
+                    mIsFeedbackFormOpen = false;
+                    mIsFeedbackFormLoading = false;
+                    Logger.e(TAG, "Content Info URL is invalid");
+                }
             }
         }
     }

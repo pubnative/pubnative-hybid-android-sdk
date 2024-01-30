@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="content_info_icon">Ad content info icon</string>
+    <string name="content_info_icon" translatable="false">Ad content info icon</string>
+    <string name="ad_customisation_title" translatable="false">Ad Customisation</string>
+    <string name="custom_cta_label" translatable="false">GET</string>
+    <string name="custom_cta_button">Install</string>
+    <string name="custom_cta_ad_customisation_label" translatable="false">Custom CTA</string>
 </resources>

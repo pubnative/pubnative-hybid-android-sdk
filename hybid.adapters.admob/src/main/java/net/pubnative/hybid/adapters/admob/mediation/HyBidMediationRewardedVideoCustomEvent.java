@@ -24,7 +24,6 @@ package net.pubnative.hybid.adapters.admob.mediation;
 
 import android.app.Application;
 import android.content.Context;
-import android.os.Bundle;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;

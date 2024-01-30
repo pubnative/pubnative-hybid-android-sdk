@@ -10,6 +10,7 @@ public class CrashController {
     public synchronized ReportingEvent formatException(Exception exception) {
         ReportingEvent event = new ReportingEvent();
         event.setEventType(Reporting.EventType.ERROR);
+        event.setPlatform(Reporting.Platform.ANDROID);
         if (exception != null) {
             if (exception.getMessage() != null)
                 event.setErrorMessage(exception.getMessage());
@@ -24,6 +25,7 @@ public class CrashController {
     public ReportingEvent formatException(Throwable exception) {
         ReportingEvent event = new ReportingEvent();
         event.setEventType(Reporting.EventType.ERROR);
+        event.setPlatform(Reporting.Platform.ANDROID);
         if (exception != null) {
             if (exception.getMessage() != null)
                 event.setErrorMessage(exception.getMessage());

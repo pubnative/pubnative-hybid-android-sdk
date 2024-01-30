@@ -32,6 +32,7 @@ import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.interstitial.activity.HyBidInterstitialActivity;
 import net.pubnative.lite.sdk.interstitial.activity.VastInterstitialActivity;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 
 import org.json.JSONObject;
@@ -49,7 +50,9 @@ public class VastInterstitialPresenter implements InterstitialPresenter, HyBidIn
     private boolean mIsDestroyed;
     private boolean mReady = false;
 
-    public VastInterstitialPresenter(Context context, Ad ad, String zoneId, int skipOffset) {
+    private IntegrationType mIntegrationType;
+
+    public VastInterstitialPresenter(Context context, Ad ad, String zoneId, int skipOffset, IntegrationType integrationType) {
         mContext = context;
         mAd = ad;
         mZoneId = zoneId;
@@ -60,6 +63,7 @@ public class VastInterstitialPresenter implements InterstitialPresenter, HyBidIn
         } else {
             mBroadcastReceiver = null;
         }
+        mIntegrationType = integrationType;
     }
 
     @Override
@@ -112,6 +116,7 @@ public class VastInterstitialPresenter implements InterstitialPresenter, HyBidIn
             intent.putExtra(HyBidInterstitialActivity.EXTRA_BROADCAST_ID, mBroadcastReceiver.getBroadcastId());
             intent.putExtra(HyBidInterstitialActivity.EXTRA_ZONE_ID, mZoneId);
             intent.putExtra(HyBidInterstitialActivity.EXTRA_SKIP_OFFSET, mSkipOffset);
+            intent.putExtra(HyBidInterstitialActivity.INTEGRATION_TYPE, mIntegrationType.getCode());
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mContext.startActivity(intent);
         }

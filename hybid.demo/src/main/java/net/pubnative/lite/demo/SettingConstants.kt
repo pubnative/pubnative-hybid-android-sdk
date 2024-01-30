@@ -26,6 +26,10 @@ package net.pubnative.lite.demo
  * Created by erosgarciaponte on 30.01.18.
  */
 const val SETTINGS_KEY_INITIALISED = "settings_initialised"
+const val SETTINGS_KEY_AD_CUSTOMIZATION_INITIALISED = "ad_customization_initialised"
+const val SETTINGS_KEY_AD_CUSTOMIZATION_DATA = "ad_customization_data"
+const val SETTINGS_KEY_CUSTOM_END_CARD_HTML= "custom_end_card_html"
+const val SETTINGS_KEY_CUSTOM_CTA_ICON_URL= "custom_cta_html"
 
 const val SETTINGS_KEY_APP_TOKEN = "app_token"
 const val SETTINGS_KEY_ZONE_ID_LIST = "zone_id_list"
@@ -36,8 +40,11 @@ const val SETTINGS_KEY_KEYWORDS = "keywords"
 const val SETTINGS_KEY_BROWSER_PRIORITIES = "browser_priorities"
 const val SETTINGS_KEY_COPPA = "coppa"
 const val SETTINGS_KEY_TEST_MODE = "test_mode"
+const val SETTINGS_KEY_TOPICS_API = "topics_api"
 const val SETTINGS_KEY_LOCATION_TRACKING = "location_tracking"
+const val SETTINGS_KEY_LOCATION_TRACKING_ENABLED = "location_tracking_enabled"
 const val SETTINGS_KEY_LOCATION_UPDATES = "location_updates"
+const val SETTINGS_KEY_LOCATION_UPDATES_ENABLED = "location_updates_enabled"
 const val SETTINGS_KEY_INITIAL_AUDIO_STATE = "initial_audio_state"
 const val SETTINGS_KEY_MRAID_EXPANDED = "mraid_expanded"
 const val SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH = "close_video_after_finish"

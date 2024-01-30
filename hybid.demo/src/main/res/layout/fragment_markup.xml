@@ -164,6 +164,15 @@
                     android:text="@string/rewarded" />
             </RadioGroup>
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/customize_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:text="@string/ad_customization"
+                android:visibility="visible" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

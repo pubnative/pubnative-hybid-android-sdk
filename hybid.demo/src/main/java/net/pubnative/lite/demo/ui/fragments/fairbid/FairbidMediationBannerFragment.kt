@@ -92,8 +92,8 @@ class FairbidMediationBannerFragment : Fragment(R.layout.fragment_fairbid_mediat
         Log.d(TAG, "onClick")
     }
 
-    override fun onRequestStart(placementId: String) {
-        Log.d(TAG, "onAvailable")
+    override fun onRequestStart(placementId: String, requestId: String) {
+        Log.d(TAG, "onRequestStart")
     }
 
 

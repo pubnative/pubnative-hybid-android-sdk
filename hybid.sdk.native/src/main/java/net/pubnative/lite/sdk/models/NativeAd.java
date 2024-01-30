@@ -441,36 +441,34 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
         if (mAdView != null && mAdView.getContext() != null && !isLinkClickRunning) {
             isLinkClickRunning = true;
             AdFeedbackFormHelper adFeedbackFormHelper = new AdFeedbackFormHelper();
-            URLValidator.isValidURL(url, isValid -> {
-                if (isValid) {
-                    adFeedbackFormHelper.showFeedbackForm(mAdView.getContext(), url, mAd, Reporting.AdFormat.NATIVE, IntegrationType.STANDALONE, new AdFeedbackLoadListener() {
-                        @Override
-                        public void onLoad(String url1) {
-                            //load simple dialog
-                            processedURL = url1;
-                        }
+            if (URLValidator.isValidURL(url)) {
+                adFeedbackFormHelper.showFeedbackForm(mAdView.getContext(), url, mAd, Reporting.AdFormat.NATIVE, IntegrationType.STANDALONE, new AdFeedbackLoadListener() {
+                    @Override
+                    public void onLoad(String url1) {
+                        //load simple dialog
+                        processedURL = url1;
+                    }
 
-                        @Override
-                        public void onLoadFinished() {
-                            isLinkClickRunning = false;
-                        }
+                    @Override
+                    public void onLoadFinished() {
+                        isLinkClickRunning = false;
+                    }
 
-                        @Override
-                        public void onLoadFailed(Throwable error) {
-                            isLinkClickRunning = false;
-                            Logger.e(TAG, error.getMessage());
-                        }
+                    @Override
+                    public void onLoadFailed(Throwable error) {
+                        isLinkClickRunning = false;
+                        Logger.e(TAG, error.getMessage());
+                    }
 
-                        @Override
-                        public void onFormClosed() {
-                            isLinkClickRunning = false;
-                        }
-                    });
-                } else {
-                    Logger.e(TAG, "Content info url is invalid");
-                    isLinkClickRunning = false;
-                }
-            });
+                    @Override
+                    public void onFormClosed() {
+                        isLinkClickRunning = false;
+                    }
+                });
+            } else {
+                Logger.e(TAG, "Content info url is invalid");
+                isLinkClickRunning = false;
+            }
         }
     }
 

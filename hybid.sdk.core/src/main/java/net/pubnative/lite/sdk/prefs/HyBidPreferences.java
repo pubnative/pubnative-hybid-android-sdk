@@ -27,6 +27,18 @@ public class HyBidPreferences {
         }
     }
 
+    public void setTopicsAPIEnabled(Boolean isEnabled) {
+        if (sharedPreferences != null) {
+            editor = sharedPreferences.edit();
+            editor.putBoolean(Key.TOPICS_API_ENABLED, isEnabled);
+            editor.commit();
+        }
+    }
+
+    public Boolean isTopicsAPIEnabled() {
+        return sharedPreferences.getBoolean(Key.TOPICS_API_ENABLED, false);
+    }
+
     public void setSessionTimeStamp(long milliseconds, OnDatabaseResetListener listener, TIMESTAMP timestamp) {
         long sessionTimestamp = getSessionTimeStamp();
         if (sessionTimestamp != 0L) {
@@ -64,6 +76,7 @@ public class HyBidPreferences {
         public static final String App_FIRST_INSTALLED = "app_first_installed";
         public static final String SESSION_TIMESTAMP = "session_timestamp";
         public static final String IS_App_FIRST_INSTALLED_TRACKED = "is_app_first_installed_tracked";
+        public static final String TOPICS_API_ENABLED = "topics_api_enabled";
     }
 
     public enum TIMESTAMP {

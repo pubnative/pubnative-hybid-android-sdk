@@ -7,15 +7,14 @@ import android.text.TextUtils;
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.DisplayManager;
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.TopicManager;
 import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.models.bidstream.BidstreamConstants;
-import net.pubnative.lite.sdk.models.bidstream.DeviceExtension;
-import net.pubnative.lite.sdk.models.bidstream.Extension;
-import net.pubnative.lite.sdk.models.bidstream.GeoLocation;
-import net.pubnative.lite.sdk.models.bidstream.Signal;
 import net.pubnative.lite.sdk.models.request.App;
 import net.pubnative.lite.sdk.models.request.Banner;
+import net.pubnative.lite.sdk.models.request.Data;
+import net.pubnative.lite.sdk.models.request.DataExtension;
 import net.pubnative.lite.sdk.models.request.Device;
 import net.pubnative.lite.sdk.models.request.Ext;
 import net.pubnative.lite.sdk.models.request.Format;
@@ -25,6 +24,7 @@ import net.pubnative.lite.sdk.models.request.Metric;
 import net.pubnative.lite.sdk.models.request.Native;
 import net.pubnative.lite.sdk.models.request.OpenRTBAdRequest;
 import net.pubnative.lite.sdk.models.request.Regs;
+import net.pubnative.lite.sdk.models.request.Segment;
 import net.pubnative.lite.sdk.models.request.User;
 import net.pubnative.lite.sdk.models.request.Video;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
@@ -33,7 +33,10 @@ import net.pubnative.lite.sdk.utils.PNAsyncUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class OpenRTBAdRequestFactory extends BaseRequestFactory implements AdRequestFactory {
     private static final String TAG = OpenRTBAdRequestFactory.class.getSimpleName();
@@ -41,6 +44,7 @@ public class OpenRTBAdRequestFactory extends BaseRequestFactory implements AdReq
     private final DeviceInfo mDeviceInfo;
     private final HyBidLocationManager mLocationManager;
     private final UserDataManager mUserDataManager;
+    private final TopicManager mTopicManager;
     private final DisplayManager mDisplayManager;
     private IntegrationType mIntegrationType = IntegrationType.HEADER_BIDDING;
     private String mMediationVendor;
@@ -50,18 +54,19 @@ public class OpenRTBAdRequestFactory extends BaseRequestFactory implements AdReq
     private boolean mIsCCPAOptOut;
 
     public OpenRTBAdRequestFactory() {
-        this(HyBid.getDeviceInfo(), HyBid.getLocationManager(), HyBid.getUserDataManager(), new DisplayManager());
+        this(HyBid.getDeviceInfo(), HyBid.getLocationManager(), HyBid.getUserDataManager(), new DisplayManager(), HyBid.getTopicManager());
     }
 
-    OpenRTBAdRequestFactory(DeviceInfo deviceInfo, HyBidLocationManager locationManager, UserDataManager userDataManager, DisplayManager displayManager) {
+    OpenRTBAdRequestFactory(DeviceInfo deviceInfo, HyBidLocationManager locationManager, UserDataManager userDataManager, DisplayManager displayManager, TopicManager topicManager) {
         mDeviceInfo = deviceInfo;
         mLocationManager = locationManager;
         mUserDataManager = userDataManager;
         mDisplayManager = displayManager;
+        mTopicManager = topicManager;
     }
 
     @Override
-    public void createAdRequest(String appToken, String zoneid, AdSize adSize, boolean isRewarded, Callback callback) {
+    public void createAdRequest(String appToken, String zoneid, AdSize adSize, boolean isRewarded, boolean protectedAudiencesAvailable, Callback callback) {
         mAdvertisingId = mDeviceInfo.getAdvertisingId();
         mLimitTracking = mDeviceInfo.limitTracking();
         Context context = mDeviceInfo.getContext();
@@ -71,19 +76,19 @@ public class OpenRTBAdRequestFactory extends BaseRequestFactory implements AdReq
                 PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(context, new HyBidAdvertisingId.Listener() {
                     @Override
                     public void onHyBidAdvertisingIdFinish(String advertisingId, Boolean limitTracking) {
-                        processAdvertisingId(appToken, zoneid, adSize, advertisingId, limitTracking, callback);
+                        processAdvertisingId(appToken, zoneid, adSize, advertisingId, limitTracking, protectedAudiencesAvailable, callback);
                     }
                 }));
             } catch (Exception exception) {
                 Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
             }
         } else {
-            processAdvertisingId(appToken, zoneid, adSize, mAdvertisingId, mLimitTracking, callback);
+            processAdvertisingId(appToken, zoneid, adSize, mAdvertisingId, mLimitTracking, protectedAudiencesAvailable, callback);
         }
     }
 
     @Override
-    public AdRequest buildRequest(String appToken, String zoneid, AdSize adSize, String advertisingId, boolean limitTracking, IntegrationType integrationType, String mediationVendor, Integer impDepth) {
+    public AdRequest buildRequest(String appToken, String zoneid, AdSize adSize, String advertisingId, boolean limitTracking, IntegrationType integrationType, String mediationVendor, Integer impDepth, boolean paAvailable) {
         mIsCCPAOptOut = mUserDataManager.isCCPAOptOut();
         OpenRTBAdRequest bidRequest = new OpenRTBAdRequest(appToken, zoneid);
         bidRequest.setId("92d6421e44a44dff9f05b29be0ca5bef");
@@ -116,9 +121,9 @@ public class OpenRTBAdRequestFactory extends BaseRequestFactory implements AdReq
         this.mIntegrationType = integrationType;
     }
 
-    private void processAdvertisingId(String appToken, String zoneId, AdSize adSize, String advertisingId, boolean limitTracking, PNAdRequestFactory.Callback callback) {
+    private void processAdvertisingId(String appToken, String zoneId, AdSize adSize, String advertisingId, boolean limitTracking, boolean paAvailable, PNAdRequestFactory.Callback callback) {
         if (callback != null) {
-            callback.onRequestCreated(buildRequest(appToken, zoneId, adSize, advertisingId, limitTracking, mIntegrationType, mMediationVendor, 0));
+            callback.onRequestCreated(buildRequest(appToken, zoneId, adSize, advertisingId, limitTracking, mIntegrationType, mMediationVendor, 0, paAvailable));
         }
     }
 
@@ -307,8 +312,14 @@ public class OpenRTBAdRequestFactory extends BaseRequestFactory implements AdReq
             device.setIfa(mDeviceInfo.getAdvertisingId());
             device.setDpidsha1(mDeviceInfo.getAdvertisingIdSha1());
             device.setDpidmd5(mDeviceInfo.getAdvertisingIdMd5());
-            if (mDeviceInfo.getLocale() != null && mDeviceInfo.getLocale().getLanguage() != null && !mDeviceInfo.getLocale().getLanguage().isEmpty()) {
-                device.setLanguage(mDeviceInfo.getLocale().getLanguage());
+            if (mDeviceInfo.getLocale() != null) {
+                mDeviceInfo.getLocale().getLanguage();
+                if (!mDeviceInfo.getLocale().getLanguage().isEmpty()) {
+                    device.setLanguage(mDeviceInfo.getLocale().getLanguage());
+                }
+            }
+            if (mDeviceInfo.getStructuredUserAgent() != null) {
+                device.setSua(mDeviceInfo.getStructuredUserAgent());
             }
         }
         device.setGeofetch(getGeofetch());
@@ -348,8 +359,46 @@ public class OpenRTBAdRequestFactory extends BaseRequestFactory implements AdReq
         User user = new User();
         user.setYearOfBirth(getYearOfBirth());
         user.setGender(getGender());
+        user.setData(getUserData());
 
         return user;
+    }
+
+    private List<Data> getUserData() {
+
+        ArrayList<Data> dataList = new ArrayList<>();
+
+        if (mTopicManager != null && mTopicManager.getTopics() != null && !mTopicManager.getTopics().isEmpty()) {
+
+            Map<Long, ArrayList<Topic>> sortedTopics = new HashMap<>();
+            for (Topic topic : mTopicManager.getTopics()) {
+                Long taxonomyVersion = topic.getTaxonomyVersion();
+                if (!sortedTopics.containsKey(taxonomyVersion)) {
+                    sortedTopics.put(taxonomyVersion, new ArrayList<>());
+                }
+                Objects.requireNonNull(sortedTopics.get(taxonomyVersion)).add(topic);
+            }
+
+            for (Map.Entry<Long, ArrayList<Topic>> entry : sortedTopics.entrySet()) {
+                Long key = entry.getKey();
+                ArrayList<Topic> topics = entry.getValue();
+                if (!topics.isEmpty()) {
+                    Data topicData = new Data();
+                    DataExtension ext = new DataExtension(topics.get(0).getTaxonomyVersion(), topics.get(0).getTaxonomyVersionName());
+                    topicData.setExt(ext);
+                    List<Segment> segment = new ArrayList<>();
+                    for (Topic topic : topics) {
+                        Segment seg = new Segment();
+                        seg.setId(String.valueOf(topic.getId()));
+                        segment.add(seg);
+                    }
+                    topicData.setSegment(segment);
+                    dataList.add(topicData);
+                }
+            }
+        }
+
+        return dataList;
     }
 
     private Float getLatitude() {

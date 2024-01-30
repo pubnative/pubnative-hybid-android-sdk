@@ -22,37 +22,21 @@
 //
 package net.pubnative.hybid.adapters.admob.mediation;
 
-import android.app.Application;
 import android.content.Context;
-import android.os.Bundle;
-import android.text.TextUtils;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.gms.ads.AdError;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.VersionInfo;
 import com.google.android.gms.ads.mediation.Adapter;
 import com.google.android.gms.ads.mediation.InitializationCompleteCallback;
-import com.google.android.gms.ads.mediation.MediationAdLoadCallback;
-import com.google.android.gms.ads.mediation.MediationBannerAd;
-import com.google.android.gms.ads.mediation.MediationBannerAdCallback;
-import com.google.android.gms.ads.mediation.MediationBannerAdConfiguration;
 import com.google.android.gms.ads.mediation.MediationConfiguration;
-
-import net.pubnative.hybid.adapters.admob.HyBidAdmobUtils;
-import net.pubnative.lite.sdk.HyBid;
-import net.pubnative.lite.sdk.utils.Logger;
-import net.pubnative.lite.sdk.views.HyBidAdView;
 
 import java.util.List;
 
 public class HyBidMediationBaseCustomEvent extends Adapter {
     private static final String TAG = HyBidMediationBaseCustomEvent.class.getSimpleName();
     private static final int SDK_VERSION_MAJOR = 2;
-    private static final int SDK_VERSION_MINOR = 20;
+    private static final int SDK_VERSION_MINOR = 21;
     private static final int SDK_VERSION_MICRO = 0;
 
     @Override

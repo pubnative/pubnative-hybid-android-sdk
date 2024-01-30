@@ -46,6 +46,25 @@
             android:text="@string/check_test_mode" />
 
         <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/check_topics_api"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/check_topics_api" />
+
+        <CheckBox
+            android:id="@+id/cb_location_tracking"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:checked="true"
+            android:text="@string/check_location_tracking"/>
+
+        <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/check_location_tracking"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -53,6 +72,25 @@
             android:layout_marginTop="6dp"
             android:layout_marginEnd="16dp"
             android:text="@string/check_location_tracking" />
+
+        <CheckBox
+            android:id="@+id/cb_location_updates"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:checked="true"
+            android:text="@string/check_location_updates"/>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/check_location_updates"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/check_location_updates" />
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -129,6 +167,40 @@
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="16dp"
+            android:fontFamily="@font/roboto"
+            android:text="@string/title_geolocation_permission_status"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tv_precise_permission_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="16dp"
+            android:fontFamily="@font/roboto"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tv_geo_permission_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="16dp"
+            android:fontFamily="@font/roboto"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_keywords"
             android:layout_width="match_parent"
@@ -155,6 +227,15 @@
             android:layout_marginTop="6dp"
             android:layout_marginEnd="16dp"
             android:text="@string/title_browser_priority" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_geolocation_permission"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/title_geolocation_permission" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_save_pn_settings"

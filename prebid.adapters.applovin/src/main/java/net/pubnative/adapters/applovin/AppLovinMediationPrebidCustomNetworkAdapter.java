@@ -42,7 +42,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AppLovinMediationPrebidCustomNetworkAdapter extends MediationAdapterBase implements MaxAdViewAdapter,
         MaxInterstitialAdapter, MaxRewardedAdapter {
 
-    public static final String PREBID_VERSION = "2.0.4";
+    public static final String PREBID_VERSION = "2.1.5";
     public static final String MAX_ADAPTER_VERSION = PREBID_VERSION + ".0";
     public static final String PARAM_ACCOUNT_ID = "prebid_account_id";
     public static final String PARAM_SERVER_AUCTION_ENDPOINT = "prebid_server_auction_endpoint";

@@ -27,6 +27,7 @@ import net.pubnative.lite.sdk.utils.json.JsonModel;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by erosgarciaponte on 10.01.18.
@@ -36,6 +37,7 @@ public class AdRequest extends JsonModel {
     public String appToken;
     public String zoneId;
     public Boolean isInterstitial = false;
+    public List<Topic> topics;
     private final Collection<Signal> signals = new ArrayList<>();
     public void addSignal(Signal signal){
         signals.add(signal);

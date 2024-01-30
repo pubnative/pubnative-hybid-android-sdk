@@ -13,6 +13,8 @@ public class Data extends JsonModel {
     @BindField
     private String name;
     @BindField
+    private DataExtension ext;
+    @BindField
     private List<Segment> segment;
 
     public Data() {
@@ -45,4 +47,8 @@ public class Data extends JsonModel {
     public void setSegment(List<Segment> segment) {
         this.segment = segment;
     }
+
+    public DataExtension getExt() { return ext; }
+
+    public void setExt(DataExtension ext) { this.ext = ext;}
 }

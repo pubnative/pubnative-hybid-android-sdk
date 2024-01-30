@@ -2,7 +2,6 @@ package net.pubnative.lite.demo.viewmodel
 
 import android.app.Application
 import android.os.Bundle
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -17,6 +16,7 @@ import net.pubnative.lite.sdk.analytics.tracker.ReportingTracker
 import net.pubnative.lite.sdk.analytics.tracker.ReportingTrackerCallback
 import net.pubnative.lite.sdk.utils.AdRequestRegistry
 
+
 class DebugViewModel(application: Application) : AndroidViewModel(application),
     ReportingEventCallback, ReportingTrackerCallback {
 
@@ -27,6 +27,7 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
     val requestDebugInfo: LiveData<RequestDebugInfo> = _requestDebugInfo
     private var _eventList: ArrayList<ReportingEvent> = arrayListOf()
     private var _trackerList: ArrayList<ReportingTracker> = arrayListOf()
+    private var _requestUri: String? = null
 
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
 
@@ -55,6 +56,7 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
             )
 
             _requestDebugInfo.value = debugInfo
+            _requestUri = debugInfo.requestUrl
             AdRequestRegistry.getInstance().setLastAdRequest("", "", 0)
         }
     }
@@ -73,6 +75,10 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
         _trackerList = arrayListOf()
     }
 
+    fun clearRequestUri() {
+        _requestUri = null
+    }
+
     fun clearLogs() {
         _requestDebugInfo.value = RequestDebugInfo("", "", 0, "")
     }
@@ -84,6 +90,7 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
             if (event.eventType != null && event.eventType.equals(Reporting.EventType.REQUEST)) {
                 clearEventList()
                 clearTrackerList()
+                clearRequestUri()
             }
 
             _eventList.add(event)
@@ -119,6 +126,12 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
     fun getFiredTrackersList(): MutableLiveData<List<ReportingTracker>> {
         val liveData: MutableLiveData<List<ReportingTracker>> = MutableLiveData()
         liveData.value = _trackerList
+        return liveData
+    }
+
+    fun getRequestUri(): MutableLiveData<String> {
+        val liveData: MutableLiveData<String> = MutableLiveData()
+        liveData.value = _requestUri
         return liveData
     }
 

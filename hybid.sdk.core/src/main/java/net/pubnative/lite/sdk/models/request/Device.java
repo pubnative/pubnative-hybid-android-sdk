@@ -10,6 +10,8 @@ public class Device extends JsonModel {
     @BindField
     private String ua;
     @BindField
+    private UserAgent sua;
+    @BindField
     private Geo geo;
     @BindField
     private Integer dnt;
@@ -333,5 +335,13 @@ public class Device extends JsonModel {
 
     public void setExt(DeviceExtension ext) {
         this.ext = ext;
+    }
+
+    public UserAgent getSua() {
+        return sua;
+    }
+
+    public void setSua(UserAgent sua) {
+        this.sua = sua;
     }
 }

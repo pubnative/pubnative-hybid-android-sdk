@@ -53,7 +53,6 @@ import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.OpenRTBAdRequestFactory;
-import net.pubnative.lite.sdk.models.RemoteConfigFeature;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.mraid.utils.MraidCloseAdRepo;
@@ -127,8 +126,8 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     private JSONObject mPlacementParams;
     private long mInitialLoadTime = -1;
     private long mInitialRenderTime = -1;
-    private String mIntegrationType = IntegrationType.STANDALONE.getCode();
-    private ImpressionTrackingMethod mTrackingMethod = ImpressionTrackingMethod.AD_RENDERED;
+    private IntegrationType mIntegrationType = IntegrationType.IN_APP_BIDDING;
+    private ImpressionTrackingMethod mTrackingMethod = ImpressionTrackingMethod.AD_VIEWABLE;
 
     private Long mAutoRefreshTime = 0L;
     private String mAppToken = null;
@@ -319,10 +318,8 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
             }
 
             localLayoutParams.flags = WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-            localLayoutParams.width =
-                    (int) ViewUtils.convertDpToPixel(mRequestManager.getAdSize().getWidth(), getContext());
-            localLayoutParams.height =
-                    (int) ViewUtils.convertDpToPixel(mRequestManager.getAdSize().getHeight(), getContext());
+            localLayoutParams.width = (int) ViewUtils.convertDpToPixel(mRequestManager.getAdSize().getWidth(), getContext());
+            localLayoutParams.height = (int) ViewUtils.convertDpToPixel(mRequestManager.getAdSize().getHeight(), getContext());
             localLayoutParams.format = PixelFormat.TRANSPARENT;
             if (mContainer == null) {
                 mContainer = new FrameLayout(getContext());
@@ -340,8 +337,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         startTracking();
 
         if (mInitialRenderTime != -1) {
-            addReportingKey(Reporting.Key.RENDER_TIME,
-                    System.currentTimeMillis() - mInitialRenderTime);
+            addReportingKey(Reporting.Key.RENDER_TIME, System.currentTimeMillis() - mInitialRenderTime);
         }
 
 //        invokeOnImpression();
@@ -474,8 +470,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         if (mRequestManager != null && mRequestManager.getAdSize() != null) {
             adSize = mRequestManager.getAdSize();
         }
-        return new BannerPresenterFactory(getContext())
-                .createPresenter(mAd, adSize, mTrackingMethod, this, this);
+        return new BannerPresenterFactory(getContext(), mIntegrationType).createPresenter(mAd, adSize, mTrackingMethod, this, this);
     }
 
     public void renderAd() {
@@ -497,14 +492,21 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                         ReportingEvent renderErrorEvent = new ReportingEvent();
                         renderErrorEvent.setAppToken(HyBid.getAppToken());
                         renderErrorEvent.setEventType(Reporting.EventType.RENDER_ERROR);
+                        renderErrorEvent.setPlatform(Reporting.Platform.ANDROID);
+                        renderErrorEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
                         renderErrorEvent.setErrorCode(HyBidErrorCode.UNSUPPORTED_ASSET.getCode());
                         renderErrorEvent.setErrorMessage(HyBidErrorCode.UNSUPPORTED_ASSET.getMessage());
                         renderErrorEvent.setTimestamp(System.currentTimeMillis());
                         renderErrorEvent.setAdFormat(mAdFormat);
+                        if (mAd != null) {
+                            renderErrorEvent.setImpId(mAd.getSessionId());
+                            renderErrorEvent.setCampaignId(mAd.getCampaignId());
+                            renderErrorEvent.setConfigId(mAd.getConfigId());
+                        }
                         if (mRequestManager != null && mRequestManager.getAdSize() != null) {
                             renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
                         }
-                        renderErrorEvent.setIntegrationType(mIntegrationType);
+                        renderErrorEvent.setIntegrationType(mIntegrationType.getCode());
                         if (mAd != null) {
                             if (!TextUtils.isEmpty(mAd.getVast())) {
                                 renderErrorEvent.setVast(mAd.getVast());
@@ -544,14 +546,21 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                 ReportingEvent renderErrorEvent = new ReportingEvent();
                 renderErrorEvent.setAppToken(HyBid.getAppToken());
                 renderErrorEvent.setEventType(Reporting.EventType.RENDER_ERROR);
+                renderErrorEvent.setPlatform(Reporting.Platform.ANDROID);
+                renderErrorEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
                 renderErrorEvent.setErrorCode(HyBidErrorCode.INVALID_AD.getCode());
                 renderErrorEvent.setErrorMessage(HyBidErrorCode.INVALID_AD.getMessage());
                 renderErrorEvent.setTimestamp(System.currentTimeMillis());
                 renderErrorEvent.setAdFormat(mAdFormat);
+                if (mAd != null) {
+                    renderErrorEvent.setImpId(mAd.getSessionId());
+                    renderErrorEvent.setCampaignId(mAd.getCampaignId());
+                    renderErrorEvent.setConfigId(mAd.getConfigId());
+                }
                 if (mRequestManager != null && mRequestManager.getAdSize() != null) {
                     renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
                 }
-                renderErrorEvent.setIntegrationType(mIntegrationType);
+                renderErrorEvent.setIntegrationType(mIntegrationType.getCode());
                 if (mAd != null) {
                     if (!TextUtils.isEmpty(mAd.getVast())) {
                         renderErrorEvent.setVast(mAd.getVast());
@@ -591,14 +600,21 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                             ReportingEvent renderErrorEvent = new ReportingEvent();
                             renderErrorEvent.setAppToken(HyBid.getAppToken());
                             renderErrorEvent.setEventType(Reporting.EventType.RENDER_ERROR);
+                            renderErrorEvent.setPlatform(Reporting.Platform.ANDROID);
+                            renderErrorEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
                             renderErrorEvent.setErrorCode(HyBidErrorCode.NULL_AD.getCode());
                             renderErrorEvent.setErrorMessage(HyBidErrorCode.NULL_AD.getMessage());
                             renderErrorEvent.setTimestamp(System.currentTimeMillis());
                             renderErrorEvent.setAdFormat(mAdFormat);
+                            if (mAd != null) {
+                                renderErrorEvent.setImpId(mAd.getSessionId());
+                                renderErrorEvent.setCampaignId(mAd.getCampaignId());
+                                renderErrorEvent.setConfigId(mAd.getConfigId());
+                            }
                             if (mRequestManager != null && mRequestManager.getAdSize() != null) {
                                 renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
                             }
-                            renderErrorEvent.setIntegrationType(mIntegrationType);
+                            renderErrorEvent.setIntegrationType(mIntegrationType.getCode());
                             if (mAd != null) {
                                 if (!TextUtils.isEmpty(mAd.getVast())) {
                                     renderErrorEvent.setVast(mAd.getVast());
@@ -628,16 +644,22 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                 ReportingEvent renderErrorEvent = new ReportingEvent();
                 renderErrorEvent.setAppToken(HyBid.getAppToken());
                 renderErrorEvent.setEventType(Reporting.EventType.RENDER_ERROR);
+                renderErrorEvent.setPlatform(Reporting.Platform.ANDROID);
+                renderErrorEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
                 renderErrorEvent.setErrorCode(HyBidErrorCode.INVALID_SIGNAL_DATA.getCode());
                 renderErrorEvent.setErrorMessage(HyBidErrorCode.INVALID_SIGNAL_DATA.getMessage());
                 renderErrorEvent.setTimestamp(System.currentTimeMillis());
                 renderErrorEvent.setAdFormat(mAdFormat);
-
+                if (mAd != null) {
+                    renderErrorEvent.setImpId(mAd.getSessionId());
+                    renderErrorEvent.setCampaignId(mAd.getCampaignId());
+                    renderErrorEvent.setConfigId(mAd.getConfigId());
+                }
                 if (mRequestManager != null && mRequestManager.getAdSize() != null) {
                     renderErrorEvent.setAdSize(mRequestManager.getAdSize().toString());
                 }
 
-                renderErrorEvent.setIntegrationType(mIntegrationType);
+                renderErrorEvent.setIntegrationType(mIntegrationType.getCode());
                 if (mAd != null) {
                     if (!TextUtils.isEmpty(mAd.getVast())) {
                         renderErrorEvent.setVast(mAd.getVast());
@@ -664,23 +686,21 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
             headers.put("User-Agent", userAgent);
         }
 
-        PNHttpClient.makeRequest(getContext(), url, headers,
-                null, new PNHttpClient.Listener() {
-                    @Override
-                    public void onSuccess(String response, Map<String, List<String>> headers) {
-                        if (!TextUtils.isEmpty(response)) {
-                            renderCustomMarkup(response, listener);
-                        }
-                    }
+        PNHttpClient.makeRequest(getContext(), url, headers, null, new PNHttpClient.Listener() {
+            @Override
+            public void onSuccess(String response, Map<String, List<String>> headers) {
+                if (!TextUtils.isEmpty(response)) {
+                    renderCustomMarkup(response, listener);
+                }
+            }
 
-                    @Override
-                    public void onFailure(Throwable error) {
-                        Logger.e(TAG, "Request failed: " + error.toString());
-                        invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ASSET));
-                    }
-                });
+            @Override
+            public void onFailure(Throwable error) {
+                Logger.e(TAG, "Request failed: " + error.toString());
+                invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ASSET));
+            }
+        });
     }
-
 
     public void renderCustomMarkup(String adValue, Listener listener) {
         cleanup();
@@ -704,13 +724,10 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                                 if (mIsDestroyed) {
                                     return;
                                 }
-
                                 if (omidVendors != null && !omidVendors.isEmpty()) {
                                     JsonOperations.putStringArray(mPlacementParams, Reporting.Key.OM_VENDORS, omidVendors);
                                 }
-
                                 boolean hasEndCard = adParams.getEndCardList() != null && !adParams.getEndCardList().isEmpty();
-
                                 VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardData, endCardFilePath);
                                 mAd = new Ad(assetGroup, adValue, type);
                                 mAd.setZoneId(zoneId);
@@ -725,7 +742,6 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                                 if (mIsDestroyed) {
                                     return;
                                 }
-
                                 Logger.w(TAG, "onCacheError", error);
                                 invokeOnLoadFailed(error);
                             }
@@ -797,7 +813,14 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
             ReportingEvent loadEvent = new ReportingEvent();
             loadEvent.setEventType(Reporting.EventType.LOAD);
             loadEvent.setAdFormat(Reporting.AdFormat.BANNER);
+            loadEvent.setPlatform(Reporting.Platform.ANDROID);
+            loadEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
             loadEvent.setCustomInteger(Reporting.Key.TIME_TO_LOAD, loadTime);
+            if (mAd != null) {
+                loadEvent.setImpId(mAd.getSessionId());
+                loadEvent.setCampaignId(mAd.getCampaignId());
+                loadEvent.setConfigId(mAd.getConfigId());
+            }
             loadEvent.mergeJSONObject(getPlacementParams());
             HyBid.getReportingController().reportEvent(loadEvent);
         }
@@ -811,15 +834,21 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         long loadTime = -1;
         if (mInitialLoadTime != -1) {
             loadTime = System.currentTimeMillis() - mInitialLoadTime;
-            addReportingKey(Reporting.Key.TIME_TO_LOAD_FAILED,
-                    loadTime);
+            addReportingKey(Reporting.Key.TIME_TO_LOAD_FAILED, loadTime);
         }
 
         if (HyBid.getReportingController() != null) {
             ReportingEvent loadFailEvent = new ReportingEvent();
             loadFailEvent.setEventType(Reporting.EventType.LOAD_FAIL);
             loadFailEvent.setAdFormat(Reporting.AdFormat.BANNER);
+            loadFailEvent.setPlatform(Reporting.Platform.ANDROID);
+            loadFailEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
             loadFailEvent.setCustomInteger(Reporting.Key.TIME_TO_LOAD, loadTime);
+            if (mAd != null) {
+                loadFailEvent.setImpId(mAd.getSessionId());
+                loadFailEvent.setCampaignId(mAd.getCampaignId());
+                loadFailEvent.setConfigId(mAd.getConfigId());
+            }
             loadFailEvent.mergeJSONObject(getPlacementParams());
             HyBid.getReportingController().reportEvent(loadFailEvent);
         }
@@ -875,8 +904,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
 
             startTracking();
             if (mInitialRenderTime != -1) {
-                addReportingKey(Reporting.Key.RENDER_TIME,
-                        System.currentTimeMillis() - mInitialRenderTime);
+                addReportingKey(Reporting.Key.RENDER_TIME, System.currentTimeMillis() - mInitialRenderTime);
             }
         } else {
             show(view, mPosition);
@@ -900,9 +928,9 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
             mORTBRequestManager.setIntegrationType(isMediation ? IntegrationType.MEDIATION : IntegrationType.STANDALONE);
         }
         if (isMediation) {
-            mIntegrationType = IntegrationType.MEDIATION.getCode();
+            mIntegrationType = IntegrationType.MEDIATION;
         } else {
-            mIntegrationType = IntegrationType.STANDALONE.getCode();
+            mIntegrationType = IntegrationType.STANDALONE;
         }
     }
 
@@ -938,8 +966,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     }
 
     public enum Position {
-        TOP,
-        BOTTOM
+        TOP, BOTTOM
     }
 
     public void setPosition(Position position) {
@@ -965,8 +992,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
             if (mHandler != null) {
                 mHandler.removeCallbacksAndMessages(null);
                 if (mAutoRefreshTime > 0) {
-                    mHandler.postDelayed(() ->
-                            load(mAppToken, mZoneId, mListener), mAutoRefreshTime);
+                    mHandler.postDelayed(() -> load(mAppToken, mZoneId, mListener), mAutoRefreshTime);
                 }
             }
         }, 100);
@@ -1075,24 +1101,29 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                 JsonOperations.putJsonValue(mPlacementParams, key, (Integer) value);
             else if (value instanceof Double)
                 JsonOperations.putJsonValue(mPlacementParams, key, (Double) value);
-            else
-                JsonOperations.putJsonString(mPlacementParams, key, value.toString());
+            else JsonOperations.putJsonString(mPlacementParams, key, value.toString());
         }
     }
 
     public void reportAdRender(String adFormat, JSONObject placementParams) {
         ReportingEvent event = new ReportingEvent();
         event.setEventType(Reporting.EventType.RENDER);
+        event.setPlatform(Reporting.Platform.ANDROID);
+        event.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
         event.setAdFormat(adFormat);
         event.setHasEndCard(hasEndCard());
+        if (mAd != null) {
+            event.setImpId(mAd.getSessionId());
+            event.setCampaignId(mAd.getCampaignId());
+            event.setConfigId(mAd.getConfigId());
+        }
         event.mergeJSONObject(placementParams);
         if (HyBid.getReportingController() != null)
             HyBid.getReportingController().reportEvent(event);
     }
 
     public boolean hasEndCard() {
-        if (mAd != null)
-            return AdEndCardManager.isEndCardEnabled(mAd, mAd.hasEndCard());
+        if (mAd != null) return AdEndCardManager.isEndCardEnabled(mAd);
         return false;
     }
 
@@ -1124,7 +1155,6 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
 
     @Override
     public void onExpandedAdClosed() {
-        if (mRaidListener != null)
-            mRaidListener.onExpandedAdClosed();
+        if (mRaidListener != null) mRaidListener.onExpandedAdClosed();
     }
 }

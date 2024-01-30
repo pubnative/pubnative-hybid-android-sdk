@@ -66,7 +66,7 @@ public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureList
         }
 
         mUrlHandlerDelegate = new UrlHandler(context);
-        mAdFeedbackData = new AdFeedbackDataCollector().collectData(ad, adFormat, integrationType);
+        mAdFeedbackData = new AdFeedbackDataCollector(integrationType).collectData(ad, adFormat, integrationType);
 
         FeedbackMacros macroHelper = new FeedbackMacros();
 
@@ -182,18 +182,16 @@ public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureList
 
     public synchronized void showFeedbackForm(Activity activity, String url) {
         if (mViewContainer != null && mViewContainer.isLoaded() && mIsReady) {
-            URLValidator.isValidURL(url, isValid -> {
-                if (isValid) {
-                    mViewContainer.show(activity, () -> {
-                        mViewContainer.showDefaultContentInfoURL(CONTENT_INFO_LINK_URL);
-                        mListener.onLoadFailed(new HyBidError(HyBidErrorCode.ERROR_LOADING_FEEDBACK));
-                    }, url);
-                } else {
-                    if (mListener != null) {
-                        mListener.onLoadFailed(new HyBidError(HyBidErrorCode.ERROR_LOADING_FEEDBACK));
-                    }
+            if (URLValidator.isValidURL(url)) {
+                mViewContainer.show(activity, () -> {
+                    mViewContainer.showDefaultContentInfoURL(CONTENT_INFO_LINK_URL);
+                    mListener.onLoadFailed(new HyBidError(HyBidErrorCode.ERROR_LOADING_FEEDBACK));
+                }, url);
+            } else {
+                if (mListener != null) {
+                    mListener.onLoadFailed(new HyBidError(HyBidErrorCode.ERROR_LOADING_FEEDBACK));
                 }
-            });
+            }
         } else {
             if (mListener != null) {
                 mListener.onLoadFailed(new HyBidError(HyBidErrorCode.ERROR_LOADING_FEEDBACK));

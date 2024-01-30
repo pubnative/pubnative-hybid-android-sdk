@@ -6,18 +6,12 @@ class FairbidSettings private constructor(builder: Builder) {
     val mediationBannerAdUnitId: String?
     val mediationInterstitialAdUnitId: String?
     val mediationRewardedAdUnitId: String?
-    val bannerAdUnitId: String?
-    val interstitialAdUnitId: String?
-    val rewardedAdUnitId: String?
 
     init {
         this.appId = builder.appId
         this.mediationBannerAdUnitId = builder.mediationBannerAdUnitId
         this.mediationInterstitialAdUnitId = builder.mediationInterstitialAdUnitId
         this.mediationRewardedAdUnitId = builder.mediationRewardedAdUnitId
-        this.bannerAdUnitId = builder.bannerAdUnitId
-        this.interstitialAdUnitId = builder.interstitialAdUnitId
-        this.rewardedAdUnitId = builder.rewardedAdUnitId
     }
 
     class Builder {
@@ -28,12 +22,6 @@ class FairbidSettings private constructor(builder: Builder) {
         var mediationInterstitialAdUnitId: String? = null
             private set
         var mediationRewardedAdUnitId: String? = null
-            private set
-        var bannerAdUnitId: String? = null
-            private set
-        var interstitialAdUnitId: String? = null
-            private set
-        var rewardedAdUnitId: String? = null
             private set
 
         fun appId(fairbidAppId: String) = apply { this.appId = fairbidAppId }
@@ -49,14 +37,6 @@ class FairbidSettings private constructor(builder: Builder) {
         fun mediationRewardedAdUnitId(fairbidMediationRewardedAdUnitId: String) =
             apply { this.mediationRewardedAdUnitId = fairbidMediationRewardedAdUnitId }
 
-        fun bannerAdUnitId(fairbidBannerAdUnitId: String) =
-            apply { this.bannerAdUnitId = fairbidBannerAdUnitId }
-
-        fun interstitialAdUnitId(fairbidInterstitialAdUnitId: String) =
-            apply { this.interstitialAdUnitId = fairbidInterstitialAdUnitId }
-
-        fun rewardedAdUnitId(fairbidRewardedAdUnitId: String) =
-            apply { this.rewardedAdUnitId = fairbidRewardedAdUnitId }
 
         fun build() = FairbidSettings(this)
     }

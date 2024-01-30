@@ -56,16 +56,21 @@ import net.pubnative.lite.sdk.utils.URLValidator;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.views.CloseableContainer;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
+import net.pubnative.lite.sdk.vpaid.VideoAd;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
 import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
 import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class HyBidRewardedActivity extends Activity implements PNAPIContentInfoView.ContentInfoListener {
     private static final String TAG = HyBidRewardedActivity.class.getSimpleName();
     public static final String EXTRA_ZONE_ID = "extra_pn_zone_id";
     public static final String EXTRA_BROADCAST_ID = "extra_pn_broadcast_id";
     public static final String EXTRA_SKIP_OFFSET = "extra_pn_skip_offset";
+    public static final String INTEGRATION_TYPE = "integration_type";
 
     private CloseableContainer mCloseableContainer;
     private UrlHandler mUrlHandlerDelegate;
@@ -80,6 +85,29 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
 
     protected Integer backButtonDelay = -1;
     protected boolean mIsSkippable = false;
+
+    protected boolean mIsBackEnabled = false;
+
+    protected Boolean mDefaultEndCardClickTracked = false;
+    protected Boolean mCustomEndCardClickTracked = false;
+
+    protected Boolean mDefaultEndCardImpressionTracked = false;
+    protected Boolean mCustomEndCardImpressionTracked = false;
+    protected Boolean mCustomCTAImpressionTracked = false;
+    protected Boolean mLoadCustomEndCardTracked = false;
+    protected Boolean mLoadDefaultEndCardTracked = false;
+    protected Boolean mLoadEndCardFailTracked = false;
+    protected Boolean mCustomEndCardSkipTracked = false;
+    protected Boolean mDefaultEndCardSkipTracked = false;
+    protected Boolean mCustomEndCardCloseTracked = false;
+    protected Boolean mDefaultEndCardCloseTracked = false;
+    protected List<String> mCustomCTAClickTrackedEvents = new ArrayList<>();
+
+    protected IntegrationType mIntegrationType;
+
+    protected boolean mFinished = false;
+
+    protected VideoAd mVideoAd;
 
     public abstract View getAdView();
 
@@ -96,6 +124,8 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
 
         mUrlHandlerDelegate = new UrlHandler(this);
         mZoneId = intent.getStringExtra(EXTRA_ZONE_ID);
+
+        validateIntegrationType(intent.getStringExtra(INTEGRATION_TYPE));
         long broadcastId = intent.getLongExtra(EXTRA_BROADCAST_ID, -1);
 
         if (!TextUtils.isEmpty(mZoneId) && broadcastId != -1) {
@@ -138,6 +168,23 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
             }
         } else {
             finish();
+        }
+    }
+
+    private void validateIntegrationType(String integration_type) {
+        if (integration_type == null) {
+            mIntegrationType = IntegrationType.IN_APP_BIDDING;
+            return;
+        }
+
+        if (integration_type.equals(IntegrationType.HEADER_BIDDING.getCode())) {
+            mIntegrationType = IntegrationType.HEADER_BIDDING;
+        } else if (integration_type.equals(IntegrationType.MEDIATION.getCode())) {
+            mIntegrationType = IntegrationType.MEDIATION;
+        } else if (integration_type.equals(IntegrationType.STANDALONE.getCode())) {
+            mIntegrationType = IntegrationType.STANDALONE;
+        } else {
+            mIntegrationType = IntegrationType.IN_APP_BIDDING;
         }
     }
 
@@ -223,7 +270,19 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
         return contentInfo == null ? ad.getContentInfoContainer(context, this) : ad.getContentInfoContainer(context, contentInfo, this);
     }
 
-    private final CloseableContainer.OnCloseListener mCloseListener = this::dismiss;
+    private final CloseableContainer.OnCloseListener mCloseListener = this::closeButtonClicked;
+
+    protected void closeButtonClicked() {
+        if (getBroadcastSender() != null) {
+            if (mIsVast && !mFinished) {
+                mVideoAd.skip();
+            } else {
+                getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLOSE);
+                mFinished = true;
+                finish();
+            }
+        }
+    }
 
     protected void dismiss() {
         if (getBroadcastSender() != null) {
@@ -290,39 +349,36 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
         if (!mIsFeedbackFormOpen && !mIsFeedbackFormLoading && !isLinkClickRunning) {
             isLinkClickRunning = true;
             adFeedbackFormHelper = new AdFeedbackFormHelper();
-            URLValidator.isValidURL(url, isValid -> {
-                if (isValid) {
-                    adFeedbackFormHelper.showFeedbackForm(HyBidRewardedActivity.this, url, mAd, Reporting.AdFormat.REWARDED, IntegrationType.STANDALONE, new AdFeedbackLoadListener() {
-                        @Override
-                        public void onLoad(String url1) {
-                            mIsFeedbackFormLoading = true;
-                        }
+            if (URLValidator.isValidURL(url))
+                adFeedbackFormHelper.showFeedbackForm(HyBidRewardedActivity.this, url, mAd, Reporting.AdFormat.REWARDED, IntegrationType.STANDALONE, new AdFeedbackLoadListener() {
+                    @Override
+                    public void onLoad(String url1) {
+                        mIsFeedbackFormLoading = true;
+                    }
 
-                        @Override
-                        public void onLoadFinished() {
-                            isLinkClickRunning = false;
-                            mIsFeedbackFormLoading = false;
-                            mIsFeedbackFormOpen = true;
-                        }
+                    @Override
+                    public void onLoadFinished() {
+                        isLinkClickRunning = false;
+                        mIsFeedbackFormLoading = false;
+                        mIsFeedbackFormOpen = true;
+                    }
 
-                        @Override
-                        public void onLoadFailed(Throwable error) {
-                            isLinkClickRunning = false;
-                            mIsFeedbackFormLoading = false;
-                            Logger.e(TAG, error.getMessage());
-                        }
+                    @Override
+                    public void onLoadFailed(Throwable error) {
+                        isLinkClickRunning = false;
+                        mIsFeedbackFormLoading = false;
+                        Logger.e(TAG, error.getMessage());
+                    }
 
-                        @Override
-                        public void onFormClosed() {
-                            isLinkClickRunning = false;
-                            mIsFeedbackFormOpen = false;
-                            mIsFeedbackFormLoading = false;
-                        }
-                    });
-                } else {
-                    isLinkClickRunning = false;
-                }
-            });
+                    @Override
+                    public void onFormClosed() {
+                        isLinkClickRunning = false;
+                        mIsFeedbackFormOpen = false;
+                        mIsFeedbackFormLoading = false;
+                    }
+                });
+        } else {
+            isLinkClickRunning = false;
         }
     }
 

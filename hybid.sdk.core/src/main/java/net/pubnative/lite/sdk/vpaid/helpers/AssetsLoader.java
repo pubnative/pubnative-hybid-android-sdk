@@ -85,6 +85,7 @@ public class AssetsLoader {
             mListener.onAssetsLoaded(mVideoFilePath, null, null);
             return;
         }
+        endCardFileIndex = mAdParams.getEndCardList().size() - 1;
         final EndCardData endCardData = mAdParams.getEndCardList().get(endCardFileIndex);
         if (endCardData != null && endCardData.getType() == EndCardData.Type.STATIC_RESOURCE) {
             mFileLoader = new FileLoader(endCardData.getContent(), mContext, new FileLoader.Callback() {
@@ -96,8 +97,8 @@ public class AssetsLoader {
                 @Override
                 public void onError(PlayerInfo info) {
                     ErrorLog.postError(mContext, VastError.COMPANION);
-                    endCardFileIndex++;
-                    if (endCardFileIndex < mAdParams.getEndCardList().size()) {
+                    endCardFileIndex--;
+                    if (endCardFileIndex >= 0) {
                         loadEndCard();
                     } else {
                         mListener.onAssetsLoaded(mVideoFilePath, null, null);

@@ -54,6 +54,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 
 import net.pubnative.lite.sdk.core.R;
+import net.pubnative.lite.sdk.models.request.UserAgent;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNAsyncUtils;
@@ -446,6 +447,10 @@ public class DeviceInfo {
         return mUserAgentProvider != null ? mUserAgentProvider.getUserAgent() : "";
     }
 
+    public UserAgent getStructuredUserAgent() {
+        return mUserAgentProvider != null ? mUserAgentProvider.getStructuredUserAgent() : null;
+    }
+
     public String getPpi() {
         if (mContext != null) {
             float ppi = mContext.getResources().getDisplayMetrics().xdpi;
@@ -735,30 +740,37 @@ public class DeviceInfo {
     }
 
     public Integer isHeadsetOn() {
-
-        AudioManager am = (AudioManager) this.mContext.getSystemService(Context.AUDIO_SERVICE);
-
-        if (am == null)
-            return null;
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return (am.isWiredHeadsetOn() || am.isBluetoothScoOn() || am.isBluetoothA2dpOn()) ? 1 : 0;
-        } else {
-            AudioDeviceInfo[] devices = am.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
-            if (devices == null) return null;
-            for (AudioDeviceInfo device : devices) {
-                if (device.getType() == AudioDeviceInfo.TYPE_WIRED_HEADSET
-                        || device.getType() == AudioDeviceInfo.TYPE_WIRED_HEADPHONES
-                        || device.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP
-                        || device.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_SCO) {
-                    return 1;
+        boolean readPhoneStatePermission = hasPermission(Manifest.permission.READ_PHONE_STATE);
+        if (readPhoneStatePermission) {
+            AudioManager am = (AudioManager) this.mContext.getSystemService(Context.AUDIO_SERVICE);
+            if (am == null)
+                return null;
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                return (am.isWiredHeadsetOn() || am.isBluetoothScoOn() || am.isBluetoothA2dpOn()) ? 1 : 0;
+            } else {
+                AudioDeviceInfo[] devices = am.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
+                if (devices == null) return null;
+                for (AudioDeviceInfo device : devices) {
+//                if (device.getType() == AudioDeviceInfo.TYPE_WIRED_HEADSET
+//                        || device.getType() == AudioDeviceInfo.TYPE_WIRED_HEADPHONES
+//                        || device.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP
+//                        || device.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_SCO) {
+//                    return 1;
+//                }
+                    if (device.getType() == AudioDeviceInfo.TYPE_WIRED_HEADSET
+                            || device.getType() == AudioDeviceInfo.TYPE_WIRED_HEADPHONES) {
+                        return 1;
+                    }
                 }
             }
+            return 0;
+        } else {
+            return null;
         }
-        return 0;
     }
 
     public Integer isBluetoothEnabled() {
+
         if (mContext == null)
             return null;
 
@@ -780,10 +792,14 @@ public class DeviceInfo {
             bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         }
 
-        if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
-            return 0;
-        } else {
-            return 1;
+        try {
+            if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
+                return 0;
+            } else {
+                return 1;
+            }
+        } catch (Exception e){
+            return null;
         }
     }
 }

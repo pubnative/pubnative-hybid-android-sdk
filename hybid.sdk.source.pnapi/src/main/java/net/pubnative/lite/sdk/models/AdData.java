@@ -114,7 +114,7 @@ public class AdData extends JsonModel implements Serializable {
         return (Boolean) getDataField(field);
     }
 
-    public Boolean haseField(String field){
+    public Boolean hasField(String field){
         return data.containsKey(field);
     }
 

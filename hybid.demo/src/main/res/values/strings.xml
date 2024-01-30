@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">HyBid demo</string>
 
     <string name="native_ad">"Native"</string>
@@ -9,6 +9,7 @@
     <string name="medium_video">Medium Video</string>
     <string name="leaderboard">Leaderboard</string>
     <string name="rewarded">Rewarded</string>
+    <string name="rewarded_html">Rewarded html</string>
 
     <string name="banner_in_feed">In-Feed Banner</string>
     <string name="zone_id">Zone ID:</string>
@@ -33,6 +34,7 @@
     <string name="admob">Admob</string>
     <string name="ironsource">IronSource</string>
     <string name="fairbid">Fairbid</string>
+    <string name="chartboost">Chartboost</string>
 
     <string name="hint_dfp_banner_ad_unit_id">Banner Ad Unit ID</string>
     <string name="hint_dfp_medium_ad_unit_id">Medium Ad Unit ID</string>
@@ -84,6 +86,15 @@
     <string name="title_pn_keywords">Keywords</string>
     <string name="title_pn_zone_ids">Zone Ids</string>
     <string name="title_browser_priority">Browser Priority</string>
+    <string name="title_geolocation_permission">Request Geolocation Permission</string>
+    <string name="title_geolocation_permission_status">Geolocation Permission Status</string>
+    <string name="geolocation_permission_enabled">"Tracking permission enabled"</string>
+    <string name="geolocation_permission_disabled">"Tracking permission disabled"</string>
+    <string name="precise_permission_enabled">"Precise location is enabled"</string>
+    <string name="precise_permission_disabled">"Precise location is disabled"</string>
+    <string name="geolocation_allowed_all_time">"Location is allowed all the time"</string>
+    <string name="geolocation_allowed_using_app">"Location is allowed while using the app"</string>
+    <string name="geolocation_not_allowed">"Location is not allowed"</string>
     <string name="save_pn_settings">Save HyBid settings</string>
     <string name="save_pn_zone_ids">Save Zone Ids</string>
     <string name="save_pn_keywords">Save Keywords</string>
@@ -128,7 +139,16 @@
 
     <string name="fairbid_mediation_banner">Fairbid Mediation Banner</string>
     <string name="fairbid_mediation_interstitial">Fairbid Mediation Interstitial</string>
-    <string name="fairbid_mediation_rewarded">Fairbid Mediation  Rewarded Video</string>
+    <string name="fairbid_mediation_rewarded">Fairbid Mediation Rewarded Video</string>
+
+    <string name="chartboost_mediation_banner">Chartboost Mediation Banner</string>
+    <string name="chartboost_mediation_mrect">Chartboost Mediation Mrect</string>
+    <string name="chartboost_mediation_mrect_video">Chartboost Mediation Mrect Video</string>
+    <string name="chartboost_mediation_leaderboard">Chartboost Mediation Leaderboard</string>
+    <string name="chartboost_mediation_interstitial">Chartboost Mediation Interstitial</string>
+    <string name="chartboost_mediation_interstitial_video">Chartboost Mediation Interstitial Video</string>
+    <string name="chartboost_mediation_rewarded">Chartboost Mediation Rewarded Video</string>
+    <string name="chartboost_mediation_rewarded_html">Chartboost Mediation Rewarded Html</string>
 
     <string name="hint_fairbid_app_id">Fairbid App Id</string>
 
@@ -223,8 +243,10 @@
     <string name="tracker_report_type">Tracker type:</string>
     <string name="tracker_report_response">Response code:</string>
     <string name="tracker_report_url">Tracker url:</string>
+    <string name="tracker_content">Content:</string>
     <string name="action_dismiss">Dismiss</string>
     <string name="event_details">Event details</string>
+    <string name="url_inspector">URL Inspector</string>
 
     <string name="nav_standalone">Standalone</string>
     <string name="nav_pre_bid">Pre-Bid</string>
@@ -270,14 +292,29 @@
     <string name="custom_sdk_data">Custom SDK Data</string>
 
     <string name="ad_customization">Ad Customization</string>
+    <string name="ad_customize_btn">Customize</string>
     <string name="general">General</string>
     <string name="fullscreen_video">Fullscreen video</string>
     <string name="check_location_updates">Location Updates</string>
+    <string name="check_topics_api">Topics API</string>
+    <string name="disable_ad_customization" formatted="false" translatable="false">Disable Ad Customization</string>
+    <string name="enable_ad_customization" formatted="false" translatable="false">Enable Ad Customization</string>
     <string name="check_mraid_expand">MRAID Expand</string>
     <string name="initial_audio">Initial Audio</string>
     <string name="hint_html_mraid_skip_offset">HTML/MRAID Skip Offset</string>
     <string name="hint_video_skip_offset">Video Skip Offset</string>
+    <string name="hint_rewarded_html_mraid_skip_offset">Rewarded HTML/MRAID Skip Offset</string>
+    <string name="hint_rewarded_video_skip_offset">Rewarded Video Skip Offset</string>
     <string name="hint_endcard_close_button_delay">EndCard close button delay</string>
+    <string name="content_info">Content Info</string>
+    <string name="hint_content_info_url">Content Info URL</string>
+    <string name="hint_content_info_icon_url">Content Info Icon URL</string>
+    <string name="hint_content_info_icon_click_action">Content Info Icon Click Action</string>
+    <string name="hint_content_info_display">Content Info Display</string>
+    <string name="content_info_icon_click_action_expand">Expand</string>
+    <string name="content_info_icon_click_action_open">Open</string>
+    <string name="content_info_display_inapp">In App</string>
+    <string name="content_info_display_systembrowser">System Browser</string>
     <string name="check_auto_close">Auto Close after Finish</string>
     <string name="check_enable_endcard">Enable endcard</string>
     <string name="click_behaviour">Click Behaviour</string>
@@ -294,6 +331,10 @@
     <string name="countdown_style_timer">Timer</string>
     <string name="countdown_style_progress">Progress</string>
 
+    <string name="mraid_custom_close">MRAID Custom Close</string>
+    <string name="hint_back_button_delay">Back Button Delay</string>
+    <string name="hint_close_button_delay">Close Button Delay</string>
+
     <string name="openrtb_body">oRTB URL + body</string>
     <string name="body">oRTB body</string>
     <string name="hint_creative_id">Enter creative ID</string>
@@ -305,4 +346,20 @@
     <string name="custom_skip_offset_disabled">Custom Skip Offset Disabled</string>
     <string name="response_source">Response source</string>
     <string name="post_body">Pubnative Request Body:</string>
+
+    <string name="viewability_tracking_label">Viewability Tracking</string>
+    <string name="imp_tracking_hint">Impression tracking</string>
+    <string name="min_visible_time_hint">Min visible time</string>
+    <string name="min_visible_percent_hint">Min visible percent</string>
+
+    <string name="key">Key</string>
+    <string name="value">Value</string>
+    <string name="fallback">Fallback</string>
+    <string name="extension">Extension</string>
+
+    <string name="check_enable_custom_endcard" tools:ignore="ExtraTranslation">Enable Custom endcard</string>
+    <string name="check_enable_custom_endcard_display" tools:ignore="ExtraTranslation">Enable Custom endcard Display</string>
+    <string name="custom_end_card">Custom EndCard</string>
+    <string name="custom_end_card_html">Custom End Card HTML</string>
+    <string name="hint_custom_cta_icon">Custom CTA Icon</string>
 </resources>

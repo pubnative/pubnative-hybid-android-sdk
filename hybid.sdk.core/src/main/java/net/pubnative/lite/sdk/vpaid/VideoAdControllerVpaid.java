@@ -24,7 +24,6 @@ import net.pubnative.lite.sdk.vpaid.enums.VastError;
 import net.pubnative.lite.sdk.vpaid.helpers.ErrorLog;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
 import net.pubnative.lite.sdk.vpaid.macros.MacroHelper;
-import net.pubnative.lite.sdk.vpaid.models.CloseCardData;
 import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.models.vast.Tracking;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.AdSpotDimensions;
@@ -95,6 +94,11 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
 
     }
 
+    @Override
+    public void onEndCardClosed(Boolean isCustomEndCard) {
+
+    }
+
     //region VideoAdController methods
     @Override
     public void prepare(VideoAdController.OnPreparedListener listener) {
@@ -120,10 +124,6 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
 
     @Override
     public void addEndCardData(EndCardData endCardData) {
-    }
-
-    @Override
-    public void setCloseCardData(CloseCardData closeCardData) {
     }
 
     @Override
@@ -272,6 +272,15 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
 
     @Override
     public void openUrl(String url) {
+        openClickUrl(url, null);
+    }
+
+    @Override
+    public void openUrl(String url, Boolean isCustomEndCard, Boolean isCTAClick) {
+        openClickUrl(url, isCustomEndCard);
+    }
+
+    void openClickUrl(String url, Boolean isCustomEndCard) {
         for (String trackUrl : mAdParams.getVideoClicks()) {
             EventTracker.post(mBaseAdInternal.getContext(), trackUrl, mMacroHelper, true);
         }
@@ -290,7 +299,8 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
             Logger.e(LOG_TAG, "No internet connection");
         }
 
-        mBaseAdInternal.onAdClicked();
+        if (isCustomEndCard != null && !isCustomEndCard)
+            mBaseAdInternal.onAdClicked();
     }
 
     @Override
@@ -442,14 +452,56 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
     }
 
     @Override
-    public void onCustomEndCardShow() {
-        if(mBaseAdInternal != null)
-            mBaseAdInternal.onCustomEndCardShow();
+    public void onCustomEndCardShow(String endCardType) {
+        if (mBaseAdInternal != null)
+            mBaseAdInternal.onCustomEndCardShow(endCardType);
     }
 
     @Override
-    public void onCustomEndCardClick() {
-        if(mBaseAdInternal != null)
-            mBaseAdInternal.onCustomEndCardClick();
+    public void onDefaultEndCardShow(String endCardType) {
+        if (mBaseAdInternal != null)
+            mBaseAdInternal.onDefaultEndCardShow(endCardType);
+    }
+
+    @Override
+    public void onCustomEndCardClick(String endCardType) {
+        if (mBaseAdInternal != null)
+            mBaseAdInternal.onCustomEndCardClick(endCardType);
+    }
+
+    @Override
+    public void onDefaultEndCardClick(String endCardType) {
+        if (mBaseAdInternal != null)
+            mBaseAdInternal.onDefaultEndCardClick(endCardType);
+    }
+
+    @Override
+    public void onCustomCTAShow() {
+        if (mBaseAdInternal != null)
+            mBaseAdInternal.onCustomCTAShow();
+    }
+
+    @Override
+    public void onCustomCTAClick(boolean isEndcardvisible) {
+        if (mBaseAdInternal != null)
+            mBaseAdInternal.onCustomCTAClick(isEndcardvisible);
+    }
+
+    @Override
+    public void onCustomCTALoadFail() {
+        if (mBaseAdInternal != null)
+            mBaseAdInternal.onCustomCTALoadFail();
+    }
+
+    @Override
+    public void onEndCardLoadSuccess(Boolean isCustomEndCard) {
+        if (mBaseAdInternal != null)
+            mBaseAdInternal.onEndCardLoadSuccess(isCustomEndCard);
+    }
+
+    @Override
+    public void onEndCardLoadFail(Boolean isCustomEndCard) {
+        if (mBaseAdInternal != null)
+            mBaseAdInternal.onEndCardLoadFail(isCustomEndCard);
     }
 }

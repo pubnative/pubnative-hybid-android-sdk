@@ -38,4 +38,5 @@ public interface APIAsset {
     String HTML_BANNER = "htmlbanner";
     String VAST = "vast2";
     String CUSTOM_END_CARD = "custom_endcard";
+    String CUSTOM_CTA = "custom_cta";
 }

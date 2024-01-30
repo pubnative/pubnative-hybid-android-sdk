@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -81,8 +82,20 @@ public class ProgressDialogView extends RelativeLayout {
     }
 
     public void show(String title, String message){
-        progressTitleTextView.setText(title);
-        progressDescTextView.setText(message);
+
+        if(title != null){
+            progressTitleTextView.setVisibility(View.VISIBLE);
+            progressTitleTextView.setText(title);
+        } else {
+            progressTitleTextView.setVisibility(View.GONE);
+        }
+
+        if(message != null){
+            progressDescTextView.setVisibility(View.VISIBLE);
+            progressDescTextView.setText(message);
+        } else {
+            progressDescTextView.setVisibility(View.GONE);
+        }
         this.setVisibility(VISIBLE);
     }
 

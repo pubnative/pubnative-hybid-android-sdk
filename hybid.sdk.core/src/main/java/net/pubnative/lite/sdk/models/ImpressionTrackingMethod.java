@@ -16,7 +16,7 @@ public enum ImpressionTrackingMethod {
     public final String methodName;
 
     public static ImpressionTrackingMethod fromString(String name) {
-        if (TextUtils.isEmpty(name)) return AD_RENDERED;
+        if (TextUtils.isEmpty(name)) return AD_VIEWABLE;
 
         String lowercaseName = name.toLowerCase(Locale.ENGLISH);
 
@@ -25,6 +25,6 @@ public enum ImpressionTrackingMethod {
         else if (lowercaseName.equals(AD_VIEWABLE.methodName))
             return AD_VIEWABLE;
 
-        return AD_RENDERED;
+        return AD_VIEWABLE;
     }
 }

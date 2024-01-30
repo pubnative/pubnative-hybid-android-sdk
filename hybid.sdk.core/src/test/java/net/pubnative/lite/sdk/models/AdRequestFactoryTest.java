@@ -94,7 +94,7 @@ public class AdRequestFactoryTest {
     public void createAdRequest() {
 
 //        AdRequest request = mSubject.buildRequest("aabbcc112233", "2", AdSize.SIZE_320x50, "aabbccdd", false, IntegrationType.HEADER_BIDDING,"m");
-        PNAdRequest request = (PNAdRequest) mSubject.buildRequest("aabbcc112233", "2", AdSize.SIZE_320x50, "aabbccdd", false, IntegrationType.HEADER_BIDDING, "b", 0);
+        PNAdRequest request = (PNAdRequest) mSubject.buildRequest("aabbcc112233", "2", AdSize.SIZE_320x50, "aabbccdd", false, IntegrationType.HEADER_BIDDING, "b", 0, false);
         Assert.assertEquals("aabbccdd", request.gid);
         Assert.assertEquals(PNCrypto.md5("aabbccdd"), request.gidmd5);
         Assert.assertEquals(PNCrypto.sha1("aabbccdd"), request.gidsha1);
@@ -112,7 +112,7 @@ public class AdRequestFactoryTest {
         Assert.assertEquals("0", request.coppa);
         Assert.assertEquals("12.126543", request.latitude);
         Assert.assertEquals("15.151534", request.longitude);
-        Assert.assertEquals("points,revenuemodel,contentinfo,creativeid", request.mf);
+        Assert.assertEquals("points,revenuemodel,contentinfo,creativeid,campaignid", request.mf);
         Assert.assertEquals("1,2,3,4,5,6,7,8,11,12,13,14", request.protocol);
         Assert.assertEquals("3,5,6,7", request.api);
         Assert.assertEquals("HyBid", request.displaymanager);
@@ -127,6 +127,7 @@ public class AdRequestFactoryTest {
         Assert.assertEquals("321123", request.mccmnc);
         Assert.assertEquals("123321", request.mccmncsim);
         Assert.assertEquals("1", request.js);
+        Assert.assertEquals("0", request.ae);
         Assert.assertEquals("1234567", mockPrefs.getString("", ""));
         Assert.assertEquals(HyBid.OMSDK_VERSION, request.omidpv);
         Assert.assertEquals(HyBid.OM_PARTNER_NAME, request.omidpn);

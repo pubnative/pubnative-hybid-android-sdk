@@ -276,7 +276,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     }
 
     private void renderAd() {
-        mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, this);
+        mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, this, mRequestManager.getIntegrationType());
         if (mPresenter != null) {
             mPresenter.setVideoListener(HyBidRewardedAd.this);
             mPresenter.load();
@@ -323,7 +323,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
                 mZoneId = mAd.getZoneId();
                 JsonOperations.putJsonString(mPlacementParams, Reporting.Key.ZONE_ID, mZoneId);
             }
-            mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, this);
+            mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, this, mRequestManager.getIntegrationType());
             if (mPresenter != null) {
                 mPresenter.setVideoListener(HyBidRewardedAd.this);
                 mPresenter.load();
@@ -401,19 +401,17 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
                         if (mIsDestroyed) {
                             return;
                         }
-
                         if (omidVendors != null && !omidVendors.isEmpty()) {
                             JsonOperations.putStringArray(mPlacementParams, Reporting.Key.OM_VENDORS, omidVendors);
                         }
-
                         boolean hasEndCard = adParams.getEndCardList() != null && !adParams.getEndCardList().isEmpty();
-
                         VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardData, endCardFilePath);
                         mAd = new Ad(assetGroupId, adValue, type);
+                        mAd.setZoneId(mZoneId);
                         mAd.setHasEndCard(hasEndCard);
                         HyBid.getAdCache().put(mZoneId, mAd);
                         HyBid.getVideoAdCache().put(mZoneId, adCacheItem);
-                        mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, HyBidRewardedAd.this);
+                        mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, HyBidRewardedAd.this, mRequestManager.getIntegrationType());
                         if (mPresenter != null) {
                             mPresenter.setVideoListener(HyBidRewardedAd.this);
                             mPresenter.load();
@@ -440,9 +438,9 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
                 type = Ad.AdType.HTML;
                 mAd = new Ad(assetGroupId, adValue, type);
                 HyBid.getAdCache().put(mZoneId, mAd);
-                mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, HyBidRewardedAd.this);
+                mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, HyBidRewardedAd.this, mRequestManager.getIntegrationType());
                 if (mPresenter != null) {
-                    mPresenter.setVideoListener(this);
+                    mPresenter.setVideoListener(HyBidRewardedAd.this);
                     mPresenter.load();
                 } else {
                     invokeOnLoadFailed(new HyBidError(HyBidErrorCode.UNSUPPORTED_ASSET));
@@ -464,7 +462,14 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
             ReportingEvent loadEvent = new ReportingEvent();
             loadEvent.setEventType(Reporting.EventType.LOAD);
             loadEvent.setAdFormat(Reporting.AdFormat.REWARDED);
+            loadEvent.setPlatform(Reporting.Platform.ANDROID);
+            loadEvent.setSdkVersion(HyBid.getSDKVersionInfo(mRequestManager.getIntegrationType()));
             loadEvent.setCustomInteger(Reporting.Key.TIME_TO_LOAD, loadTime);
+            if (mAd != null) {
+                loadEvent.setImpId(mAd.getSessionId());
+                loadEvent.setCampaignId(mAd.getCampaignId());
+                loadEvent.setConfigId(mAd.getConfigId());
+            }
             loadEvent.mergeJSONObject(getPlacementParams());
             HyBid.getReportingController().reportEvent(loadEvent);
         }
@@ -485,7 +490,14 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
             ReportingEvent loadFailEvent = new ReportingEvent();
             loadFailEvent.setEventType(Reporting.EventType.LOAD_FAIL);
             loadFailEvent.setAdFormat(Reporting.AdFormat.REWARDED);
+            loadFailEvent.setPlatform(Reporting.Platform.ANDROID);
+            loadFailEvent.setSdkVersion(HyBid.getSDKVersionInfo(mRequestManager.getIntegrationType()));
             loadFailEvent.setCustomInteger(Reporting.Key.TIME_TO_LOAD, loadTime);
+            if (mAd != null) {
+                loadFailEvent.setImpId(mAd.getSessionId());
+                loadFailEvent.setCampaignId(mAd.getCampaignId());
+                loadFailEvent.setConfigId(mAd.getConfigId());
+            }
             loadFailEvent.mergeJSONObject(getPlacementParams());
             HyBid.getReportingController().reportEvent(loadFailEvent);
         }
@@ -535,8 +547,15 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
         ReportingEvent event = new ReportingEvent();
         event.setEventType(Reporting.EventType.REWARD);
         event.setAdFormat(Reporting.AdFormat.REWARDED);
+        event.setPlatform(Reporting.Platform.ANDROID);
+        event.setSdkVersion(HyBid.getSDKVersionInfo(mRequestManager.getIntegrationType()));
         event.setHasEndCard(hasEndCard());
         event.mergeJSONObject(mPlacementParams);
+        if (mAd != null) {
+            event.setImpId(mAd.getSessionId());
+            event.setCampaignId(mAd.getCampaignId());
+            event.setConfigId(mAd.getConfigId());
+        }
         if (HyBid.getReportingController() != null)
             HyBid.getReportingController().reportEvent(event);
 
@@ -688,7 +707,14 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
         ReportingEvent event = new ReportingEvent();
         event.setEventType(Reporting.EventType.RENDER);
         event.setAdFormat(adFormat);
+        event.setPlatform(Reporting.Platform.ANDROID);
+        event.setSdkVersion(HyBid.getSDKVersionInfo(mRequestManager.getIntegrationType()));
         event.setHasEndCard(hasEndCard());
+        if (mAd != null) {
+            event.setImpId(mAd.getSessionId());
+            event.setCampaignId(mAd.getCampaignId());
+            event.setConfigId(mAd.getConfigId());
+        }
         event.mergeJSONObject(placementParams);
         if (HyBid.getReportingController() != null)
             HyBid.getReportingController().reportEvent(event);
@@ -696,7 +722,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
 
     public boolean hasEndCard() {
         if (mAd != null)
-            return AdEndCardManager.isEndCardEnabled(mAd, mAd.hasEndCard());
+            return AdEndCardManager.isEndCardEnabled(mAd);
         return false;
     }
 }

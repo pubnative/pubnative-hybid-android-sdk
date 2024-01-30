@@ -26,7 +26,7 @@ public interface ApiClient {
     }
 
     public interface TrackJSListener {
-        void onSuccess();
+        void onSuccess(String js);
 
         void onFailure(Throwable throwable);
     }

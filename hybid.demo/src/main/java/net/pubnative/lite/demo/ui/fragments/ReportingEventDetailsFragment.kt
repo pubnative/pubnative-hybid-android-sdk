@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.models.SDKDataItem
 import net.pubnative.lite.demo.ui.adapters.CustomSDKDataAdapter
-import net.pubnative.lite.sdk.HyBid
 
 class ReportingEventDetailsFragment : Fragment(R.layout.fragment_reporting_event_details) {
     private lateinit var itemList: RecyclerView
@@ -28,8 +27,6 @@ class ReportingEventDetailsFragment : Fragment(R.layout.fragment_reporting_event
         itemList.itemAnimator = DefaultItemAnimator()
         itemList.layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
         itemList.adapter = adapter
-
-
     }
 
     private fun getItems(bundle: Bundle): List<SDKDataItem> {

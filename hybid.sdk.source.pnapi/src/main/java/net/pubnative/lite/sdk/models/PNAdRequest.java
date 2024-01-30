@@ -52,4 +52,6 @@ public class PNAdRequest extends AdRequest{
     public String language;
     public String langb;
     public String geofetch;
+    public String sua;
+    public String ae;
 }

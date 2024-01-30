@@ -39,6 +39,7 @@ import java.util.List;
  */
 
 public class IntentHandler {
+    private static final String TAG = IntentHandler.class.getSimpleName();
     private final Context context;
 
     public IntentHandler(Context context) {
@@ -56,7 +57,12 @@ public class IntentHandler {
         intent.setData(uri);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         if (canHandleIntent(intent)) {
-            context.startActivity(intent);
+            try {
+                context.startActivity(intent);
+            } catch (RuntimeException e) {
+                Logger.e(TAG, e.getMessage());
+                return false;
+            }
             return true;
         }
         return false;
@@ -86,7 +92,12 @@ public class IntentHandler {
             if (intent == null) {
                 return handleDeepLink(uri);
             } else {
-                context.startActivity(intent);
+                try {
+                    context.startActivity(intent);
+                } catch (RuntimeException e) {
+                    Logger.e(TAG, e.getMessage());
+                    return false;
+                }
                 return true;
             }
         } else {

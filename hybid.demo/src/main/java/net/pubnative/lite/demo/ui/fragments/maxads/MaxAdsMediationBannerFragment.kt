@@ -14,7 +14,8 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 
-class MaxAdsMediationBannerFragment : Fragment(R.layout.fragment_maxads_banner), MaxAdViewAdListener {
+class MaxAdsMediationBannerFragment : Fragment(R.layout.fragment_maxads_banner),
+    MaxAdViewAdListener {
     val TAG = MaxAdsMediationBannerFragment::class.java.simpleName
 
     private var maxBanner: MaxAdView? = null
@@ -54,39 +55,38 @@ class MaxAdsMediationBannerFragment : Fragment(R.layout.fragment_maxads_banner),
     }
 
     // ---------------- MaxAds Banner Listener ---------------------
-
-    override fun onAdLoaded(ad: MaxAd?) {
+    override fun onAdLoaded(ad: MaxAd) {
         Log.d(TAG, "onAdLoaded")
     }
 
-    override fun onAdLoadFailed(adUnitId: String?, error: MaxError?) {
+    override fun onAdLoadFailed(adUnitId: String, error: MaxError) {
         Log.d(TAG, "onAdLoadFailed")
         displayLogs()
-        errorView.text = error?.message
+        errorView.text = error.message
     }
 
-    override fun onAdDisplayed(ad: MaxAd?) {
+    override fun onAdDisplayed(ad: MaxAd) {
         Log.d(TAG, "onAdDisplayed")
     }
 
-    override fun onAdDisplayFailed(ad: MaxAd?, error: MaxError?) {
+    override fun onAdDisplayFailed(ad: MaxAd, error: MaxError) {
         Log.d(TAG, "onAdDisplayFailed")
-        Toast.makeText(requireContext(), error?.message, Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), error.message, Toast.LENGTH_SHORT).show()
     }
 
-    override fun onAdClicked(ad: MaxAd?) {
+    override fun onAdClicked(ad: MaxAd) {
         Log.d(TAG, "onAdClicked")
     }
 
-    override fun onAdExpanded(ad: MaxAd?) {
+    override fun onAdExpanded(ad: MaxAd) {
         Log.d(TAG, "onAdExpanded")
     }
 
-    override fun onAdCollapsed(ad: MaxAd?) {
+    override fun onAdCollapsed(ad: MaxAd) {
         Log.d(TAG, "onAdCollapsed")
     }
 
-    override fun onAdHidden(ad: MaxAd?) {
+    override fun onAdHidden(ad: MaxAd) {
         Log.d(TAG, "onAdHidden")
     }
 

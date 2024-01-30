@@ -6,7 +6,6 @@ import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
 
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeVideoAdSession;
-import net.pubnative.lite.sdk.vpaid.models.CloseCardData;
 import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 
@@ -18,6 +17,8 @@ public interface VideoAdController {
 
     void pauseEndCardCloseButtonTimer();
 
+    void onEndCardClosed(Boolean isCustomEndCard);
+
     interface OnPreparedListener {
         void onPrepared();
     }
@@ -28,16 +29,29 @@ public interface VideoAdController {
 
     void addEndCardData(EndCardData endCardData);
 
-    void setCloseCardData(CloseCardData closeCardData);
-
     void setEndCardFilePath(String filePath);
 
     void buildVideoAdView(VideoAdView bannerView);
 
-    void openUrl(String url);
+    void openUrl(String url, Boolean isCustomEndCard, Boolean isCTAClick);
 
-    void onCustomEndCardShow();
-    void onCustomEndCardClick();
+    void onCustomEndCardShow(String endCardType);
+
+    void onDefaultEndCardShow(String endCardType);
+
+    void onCustomEndCardClick(String endCardType);
+
+    void onCustomCTAShow();
+
+    void onCustomCTAClick(boolean isEndcardVisible);
+
+    void onCustomCTALoadFail();
+
+    void onDefaultEndCardClick(String endCardType);
+
+    void onEndCardLoadSuccess(Boolean isCustomEndCard);
+
+    void onEndCardLoadFail(Boolean isCustomEndCard);
 
     AdParams getAdParams();
 

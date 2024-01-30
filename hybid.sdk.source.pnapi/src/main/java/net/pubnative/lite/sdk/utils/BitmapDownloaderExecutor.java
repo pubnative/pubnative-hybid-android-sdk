@@ -10,7 +10,7 @@ public class BitmapDownloaderExecutor {
     private BitmapDownloaderExecutor() {
     }
 
-    public static ExecutorService getExecutor() {
+    synchronized public static ExecutorService getExecutor() {
         return sExecutor;
     }
 }

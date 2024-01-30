@@ -103,7 +103,7 @@ class FairbidMediationInterstitialFragment :
         showButton.isEnabled = false
     }
 
-    override fun onRequestStart(placementId: String) {
+    override fun onRequestStart(placementId: String, requestId: String) {
         Log.d(TAG, "onRequestStart")
     }
 

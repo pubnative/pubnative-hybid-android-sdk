@@ -36,6 +36,7 @@ import com.google.android.gms.ads.mediation.customevent.CustomEventBannerListene
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.Logger;
 
@@ -78,7 +79,7 @@ public class HyBidDFPBannerCustomEvent implements CustomEventBanner, AdPresenter
             return;
         }
 
-        mPresenter = new BannerPresenterFactory(context).createPresenter(ad, getAdSize(size), this);
+        mPresenter = new BannerPresenterFactory(context, IntegrationType.MEDIATION).createPresenter(ad, getAdSize(size), this);
         if (mPresenter == null) {
             Logger.e(TAG, "Could not create valid banner presenter");
             mBannerListener.onAdFailedToLoad(AdRequest.ERROR_CODE_NETWORK_ERROR);

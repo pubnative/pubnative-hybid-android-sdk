@@ -1,0 +1,164 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'com.jfrog.artifactory'
+    id 'maven-publish'
+    id "org.sonarqube" version "3.3"
+}
+
+def project_name = project.name
+def version_name = project.version
+if (branchName != null && buildNumber != null && branchName.toString() != "master") {
+    version_name = "${version_name}-${branchName}.${buildNumber}"
+    project_name = "${project_name}.beta"
+}
+version = version_name
+
+android {
+    compileSdk android_api
+    buildToolsVersion android_build_tools
+
+    defaultConfig {
+        minSdkVersion min_android_api
+        targetSdkVersion android_api
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            buildConfigField "String", "SDK_VERSION", "\"$version_name\""
+        }
+        debug {
+            buildConfigField "String", "SDK_VERSION", "\"$version_name\""
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11.toString()
+    }
+    namespace 'net.pubnative.lite.sdk.topicsapi'
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+
+    implementation project(':hybid.sdk.logger')
+    implementation project(':hybid.sdk.reporting')
+}
+
+//--------------------------------------------------------------------------------------------------
+// PUBLISHING
+//--------------------------------------------------------------------------------------------------
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    archiveClassifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.rootProject.files(android.getBootClasspath().join(File.pathSeparator))
+    options.memberLevel = JavadocMemberLevel.PUBLIC
+    failOnError false
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+static def addDependency(dependency, dependenciesNode) { //finish with dependencies
+    if (dependency.group != null && dependency.name != null) {
+        def dependencyNode = dependenciesNode.appendNode('dependency')
+        dependencyNode.appendNode('groupId', dependency.group)
+        dependencyNode.appendNode('artifactId', dependency.name)
+        dependencyNode.appendNode('version', dependency.version)
+
+        if (dependency.excludeRules.size() > 0) {
+            def exclusions = dependencyNode.appendNode('exclusions')
+            dependency.excludeRules.each { ExcludeRule ex ->
+                def exclusion = exclusions.appendNode('exclusion')
+                exclusion.appendNode('groupId', ex.group)
+                if (ex.module == null || ex.module.isEmpty()) {
+                    exclusion.appendNode('artifactId', "*")
+                } else {
+                    exclusion.appendNode('artifactId', ex.module)
+                }
+            }
+        }
+    }
+}
+
+publishing {
+    publications {
+        aar(MavenPublication) {
+            groupId project.group
+            artifactId project.name
+            version version_name
+            artifact javadocJar
+            if (branchName.toString() == "master") {
+                artifact sourcesJar
+            }
+            android.libraryVariants.all { variant ->
+                if (variant.buildType.name == "debug") return
+                artifact variant.outputs[0].packageLibrary // This is the aar library
+            }
+
+            pom.withXml {
+                def dependenciesNode = asNode().appendNode('dependencies')
+
+                configurations.implementation.allDependencies.withType(ModuleDependency).each {
+                    addDependency(it, dependenciesNode)
+                }
+            }
+        }
+    }
+
+    artifactoryPublish {
+        publications(publishing.publications.aar)
+    }
+}
+
+artifactory {
+    contextUrl = System.getenv("ARTIFACTORY_CONTEXT_URL")
+    publish {
+        repository {
+            repoKey = (branchName.toString() == 'master') ? 'verve-gradle-release-local' : 'verve-gradle-dev-local'
+            username = System.getenv("ARTIFACTORY_USER")
+            password = System.getenv("ARTIFACTORY_PASSWORD")
+            maven = true
+        }
+
+        defaults {
+            publishArtifacts = branchName.toString() != "master"
+            publishPom = true
+        }
+    }
+    resolve {
+        repository {
+            repoKey = (branchName.toString() == 'master') ? 'verve-gradle-release' : 'verve-gradle-dev'
+            username = System.getenv("ARTIFACTORY_USER")
+            password = System.getenv("ARTIFACTORY_PASSWORD")
+            maven = true
+        }
+    }
+}
+
+sonarqube {
+    sonarqube {
+        properties {
+            property "sonar.projectName", "HyBidDemo"
+            property "sonar.projectKey", "HyBidDemoSample"
+            property "sonar.host.url", "http://localhost:9000"
+            property "sonar.projectVersion", version
+            property "sonar.language", "java"
+            property "sonar.sources", "src/main/"
+        }
+    }
+}

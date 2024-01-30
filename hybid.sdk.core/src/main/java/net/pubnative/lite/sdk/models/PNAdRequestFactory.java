@@ -25,10 +25,12 @@ package net.pubnative.lite.sdk.models;
 import android.content.Context;
 import android.location.Location;
 import android.text.TextUtils;
+import android.util.Base64;
 
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.DisplayManager;
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.TopicManager;
 import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.models.bidstream.BidstreamConstants;
@@ -45,6 +47,9 @@ import net.pubnative.lite.sdk.utils.HyBidTimeUtils;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNAsyncUtils;
 
+import org.json.JSONObject;
+
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -61,23 +66,25 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
     private HyBidLocationManager mLocationManager;
     private UserDataManager mUserDataManager;
     private final DisplayManager mDisplayManager;
+    private final TopicManager mTopicManager;
     private IntegrationType mIntegrationType = IntegrationType.HEADER_BIDDING;
     private String mMediationVendor;
     private boolean mIsRewarded;
 
     public PNAdRequestFactory() {
-        this(HyBid.getDeviceInfo(), HyBid.getLocationManager(), HyBid.getUserDataManager(), new DisplayManager());
+        this(HyBid.getDeviceInfo(), HyBid.getLocationManager(), HyBid.getUserDataManager(), new DisplayManager(), HyBid.getTopicManager());
     }
 
-    PNAdRequestFactory(DeviceInfo deviceInfo, HyBidLocationManager locationManager, UserDataManager userDataManager, DisplayManager displayManager) {
+    PNAdRequestFactory(DeviceInfo deviceInfo, HyBidLocationManager locationManager, UserDataManager userDataManager, DisplayManager displayManager, TopicManager topicManager) {
         mDeviceInfo = deviceInfo;
         mLocationManager = locationManager;
         mUserDataManager = userDataManager;
         mDisplayManager = displayManager;
+        mTopicManager = topicManager;
     }
 
     @Override
-    public void createAdRequest(final String appToken, final String zoneid, final AdSize adSize, final boolean isRewarded, final Callback callback) {
+    public void createAdRequest(String appToken, String zoneid, AdSize adSize, boolean isRewarded, boolean protectedAudiencesAvailable, Callback callback) {
         if (mDeviceInfo == null) {
             mDeviceInfo = HyBid.getDeviceInfo();
         }
@@ -100,7 +107,7 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
 
                 SessionImpressionPrefs prefs = new SessionImpressionPrefs(mDeviceInfo.getContext());
                 int impDepth = prefs.getImpressionDepth(zoneid);
-                PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(context, (advertisingId1, limitTracking1) -> processAdvertisingId(appToken, zoneid, adSize, advertisingId1, limitTracking1, callback, impDepth)));
+                PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(context, (advertisingId1, limitTracking1) -> processAdvertisingId(appToken, zoneid, adSize, advertisingId1, limitTracking1, impDepth, protectedAudiencesAvailable, callback)));
             } catch (Exception exception) {
                 Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
             }
@@ -114,23 +121,23 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
                 SessionImpressionPrefs prefs = new SessionImpressionPrefs(mDeviceInfo.getContext());
                 int impDepth = prefs.getImpressionDepth(zoneid);
 
-                processAdvertisingId(appToken, zoneid, adSize, advertisingId, limitTracking, callback, impDepth);
+                processAdvertisingId(appToken, zoneid, adSize, advertisingId, limitTracking, impDepth, protectedAudiencesAvailable, callback);
             }
         }
     }
 
-    private void processAdvertisingId(String appToken, String zoneId, AdSize adSize, String advertisingId, boolean limitTracking, Callback callback, int impDepth) {
+    private void processAdvertisingId(String appToken, String zoneId, AdSize adSize, String advertisingId, boolean limitTracking, int impDepth, boolean paAvailable, Callback callback) {
         if (callback != null) {
-            callback.onRequestCreated(buildRequest(appToken, zoneId, adSize, advertisingId, limitTracking, mIntegrationType, mMediationVendor, impDepth));
+            callback.onRequestCreated(buildRequest(appToken, zoneId, adSize, advertisingId, limitTracking, mIntegrationType, mMediationVendor, impDepth, paAvailable));
         }
     }
 
     @Override
-    public AdRequest buildRequest(final String appToken, final String zoneid, AdSize adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType, final String mediationVendor, Integer impDepth) {
-        return buildRequest(null, appToken, zoneid, adSize, advertisingId, limitTracking, integrationType, mediationVendor, impDepth);
+    public AdRequest buildRequest(String appToken, String zoneid, AdSize adSize, String advertisingId, boolean limitTracking, IntegrationType integrationType, String mediationVendor, Integer impDepth, boolean paAvailable) {
+        return buildRequest(null, appToken, zoneid, adSize, advertisingId, limitTracking, integrationType, mediationVendor, impDepth, paAvailable);
     }
 
-    public AdRequest buildRequest(Context context, final String appToken, final String zoneid, AdSize adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType, final String mediationVendor, Integer impDepth) {
+    public AdRequest buildRequest(Context context, final String appToken, final String zoneid, AdSize adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType, final String mediationVendor, Integer impDepth, boolean paAvailable) {
         if (mUserDataManager == null && context != null) {
             mUserDataManager = new UserDataManager(context);
         }
@@ -178,10 +185,7 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
         adRequest.omidpn = HyBid.OM_PARTNER_NAME;
         adRequest.omidpv = HyBid.OMSDK_VERSION;
         adRequest.isInterstitial = adSize == AdSize.SIZE_INTERSTITIAL;
-
-        int instl = 0;
-        if (adRequest.isInterstitial) instl = 1;
-        adRequest.addSignal(new Impression(instl, 1));
+        adRequest.ae = paAvailable ? "1" : "0";
 
         if (adSize != null) {
             List<Integer> expDirs = new ArrayList<>();
@@ -205,6 +209,11 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
             adRequest.addSignal(new ImpressionBanner(pos, expDirs));
             adRequest.addSignal(new ImpressionVideo(videoPlacement, videoPlacementSubtype, pos, playbackMethods));
 
+            int instl = 0;
+            if (adRequest.isInterstitial) instl = 1;
+            adRequest.addSignal(new Impression(instl, 1));
+        } else {
+            adRequest.addSignal(new Impression(null, 1));
         }
 
         if (HyBid.isCoppaEnabled() || limitTracking || TextUtils.isEmpty(advertisingId) || isCCPAOptOut || (mUserDataManager != null &&
@@ -251,6 +260,19 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
             if (mDeviceInfo.getMccmncsim() != null && !mDeviceInfo.getMccmncsim().isEmpty()) {
                 adRequest.mccmncsim = mDeviceInfo.getMccmncsim();
             }
+
+            if (mDeviceInfo.getStructuredUserAgent() != null) {
+                try {
+                    JSONObject suaJson = mDeviceInfo.getStructuredUserAgent().toJson();
+                    if (suaJson != null) {
+                        String suaString = suaJson.toString();
+                        adRequest.sua = Base64.encodeToString(suaString.getBytes(), Base64.NO_WRAP);
+                    }
+                } catch (Exception e) {
+                    // Do nothing
+                }
+            }
+
             if (HyBid.isLocationTrackingEnabled() && mDeviceInfo.hasTrackingPermissions()
                     && !limitTracking) {
                 adRequest.geofetch = "1";
@@ -330,6 +352,10 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
         }
         adRequest.sessionduration = new HyBidTimeUtils().getSeconds(calculateSessionDuration());
 
+        if(mTopicManager != null){
+            adRequest.topics = mTopicManager.getTopics();
+        }
+
         return adRequest;
     }
 
@@ -355,7 +381,7 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
     }
 
     private String getDefaultMetaFields() {
-        String[] metaFields = new String[]{APIMeta.POINTS, APIMeta.REVENUE_MODEL, APIMeta.CONTENT_INFO, APIMeta.CREATIVE_ID};
+        String[] metaFields = new String[]{APIMeta.POINTS, APIMeta.REVENUE_MODEL, APIMeta.CONTENT_INFO, APIMeta.CREATIVE_ID, APIMeta.CAMPAIGN_ID};
         return TextUtils.join(",", metaFields);
     }
 

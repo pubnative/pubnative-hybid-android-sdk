@@ -28,8 +28,18 @@ class CustomSDKDataFragment : Fragment(R.layout.fragment_custom_sdk_data) {
 
     private fun getItems(): List<SDKDataItem> {
         val list = mutableListOf<SDKDataItem>()
-        list.add(SDKDataItem("SDK version info", HyBid.getSDKVersionInfo()))
-        list.add(SDKDataItem("Custom request signal data", HyBid.getCustomRequestSignalData(requireContext(), "m")))
+        list.add(
+            SDKDataItem(
+                "SDK version info",
+                HyBid.getSDKVersionInfo(IntegrationType.STANDALONE)
+            )
+        )
+        list.add(
+            SDKDataItem(
+                "Custom request signal data",
+                HyBid.getCustomRequestSignalData(requireContext(), "m")
+            )
+        )
         return list
     }
 }

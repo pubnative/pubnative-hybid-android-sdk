@@ -171,7 +171,7 @@ public class PNApiClient implements ApiClient {
                 }
 
                 if (listener != null) {
-                    listener.onSuccess();
+                    listener.onSuccess(js);
                 }
             } catch (RuntimeException exception) {
                 if (listener != null) {

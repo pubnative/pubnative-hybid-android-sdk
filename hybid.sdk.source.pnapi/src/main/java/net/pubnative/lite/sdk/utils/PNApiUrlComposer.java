@@ -25,12 +25,16 @@ package net.pubnative.lite.sdk.utils;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import net.pubnative.lite.sdk.models.Topic;
 import net.pubnative.lite.sdk.models.PNAdRequest;
 import net.pubnative.lite.sdk.models.bidstream.BidParam;
 import net.pubnative.lite.sdk.models.bidstream.Signal;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by erosgarciaponte on 22.01.18.
@@ -71,7 +75,7 @@ public final class PNApiUrlComposer {
         }
 
         if (!TextUtils.isEmpty(adRequest.make)) {
-                uriBuilder.appendQueryParameter("make", adRequest.make);
+            uriBuilder.appendQueryParameter("make", adRequest.make);
         }
 
         if (!TextUtils.isEmpty(adRequest.deviceHeight)) {
@@ -98,7 +102,7 @@ public final class PNApiUrlComposer {
             uriBuilder.appendQueryParameter("js", adRequest.js);
         }
 
-        if(!TextUtils.isEmpty(adRequest.soundSetting)) {
+        if (!TextUtils.isEmpty(adRequest.soundSetting)) {
             uriBuilder.appendQueryParameter("aud", adRequest.soundSetting);
         }
 
@@ -242,6 +246,14 @@ public final class PNApiUrlComposer {
             uriBuilder.appendQueryParameter("geofetch", adRequest.geofetch);
         }
 
+        if (!TextUtils.isEmpty(adRequest.sua)) {
+            uriBuilder.appendQueryParameter("sua", adRequest.sua);
+        }
+
+        if (!TextUtils.isEmpty(adRequest.ae)) {
+            uriBuilder.appendQueryParameter("ae", adRequest.ae);
+        }
+
         if (!TextUtils.isEmpty(adRequest.protocol)) {
             uriBuilder.appendQueryParameter("protocol", adRequest.protocol);
         }
@@ -287,6 +299,29 @@ public final class PNApiUrlComposer {
                     }
                 }
             }
+        }
+
+        if (adRequest.topics != null && !adRequest.topics.isEmpty()) {
+
+            Map<String, ArrayList<String>> sortedTopics = new HashMap<>();
+            for (Topic topic : adRequest.topics) {
+                Long taxonomyVersion = topic.getTaxonomyVersion();
+                String taxonomyVersionName = topic.getTaxonomyVersionName();
+                String key = String.valueOf(taxonomyVersion).concat(",").concat(taxonomyVersionName.replaceAll("\\s", "+"));
+                if (!sortedTopics.containsKey(key)) {
+                    sortedTopics.put(key, new ArrayList<>());
+                }
+                Objects.requireNonNull(sortedTopics.get(key)).add(String.valueOf(topic.getId()));
+            }
+            String queryParamValue = "";
+            for (Map.Entry<String, ArrayList<String>> entry : sortedTopics.entrySet()) {
+                String key = entry.getKey();
+                ArrayList<String> value = entry.getValue();
+                queryParamValue = queryParamValue.concat(key).concat(",")
+                        .concat(String.join(",", value)).concat("_");
+            }
+            queryParamValue = queryParamValue.substring(0, queryParamValue.length() - 1);
+            uriBuilder.appendQueryParameter("psut", queryParamValue);
         }
 
         return uriBuilder.build();

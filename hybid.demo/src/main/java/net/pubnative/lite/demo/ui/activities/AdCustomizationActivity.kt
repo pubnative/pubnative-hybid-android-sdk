@@ -11,6 +11,7 @@ class AdCustomizationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ad_customization)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        toolbar.title = getString(R.string.ad_customisation_title)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)

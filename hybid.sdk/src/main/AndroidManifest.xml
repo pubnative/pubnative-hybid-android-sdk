@@ -16,11 +16,11 @@
             android:screenOrientation="behind" />
         <activity
             android:name=".rewarded.activity.MraidRewardedActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:configChanges="keyboardHidden|screenSize"
             android:screenOrientation="behind" />
         <activity
             android:name=".rewarded.activity.VastRewardedActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:configChanges="keyboardHidden|screenSize"
             android:screenOrientation="behind" />
     </application>
 

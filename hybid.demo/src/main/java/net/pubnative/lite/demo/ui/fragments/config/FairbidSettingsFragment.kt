@@ -19,10 +19,6 @@ class FairbidSettingsFragment : Fragment(R.layout.fragment_fairbid_settings) {
     private lateinit var mediationInterstitialInput: EditText
     private lateinit var mediationRewardedInput: EditText
 
-    private lateinit var bannerInput: EditText
-    private lateinit var interstitialInput: EditText
-    private lateinit var rewardedInput: EditText
-
     private lateinit var settingManager: SettingsManager
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -33,10 +29,6 @@ class FairbidSettingsFragment : Fragment(R.layout.fragment_fairbid_settings) {
         mediationInterstitialInput = view.findViewById(R.id.input_fairbid_mediation_interstitial)
         mediationRewardedInput = view.findViewById(R.id.input_fairbid_mediation_rewarded)
 
-        bannerInput = view.findViewById(R.id.input_fairbid_banner)
-        interstitialInput = view.findViewById(R.id.input_fairbid_interstitial)
-        rewardedInput = view.findViewById(R.id.input_fairbid_rewarded)
-
         settingManager = SettingsManager.getInstance(requireContext())
 
         view.findViewById<Button>(R.id.button_save_fairbid_settings).setOnClickListener {
@@ -46,18 +38,10 @@ class FairbidSettingsFragment : Fragment(R.layout.fragment_fairbid_settings) {
             val mediationInterstitialAdUnitId = mediationInterstitialInput.text.toString()
             val mediationRewardedAdUnitId = mediationRewardedInput.text.toString()
 
-            val bannerAdUnitId = bannerInput.text.toString()
-            val interstitialAdUnitId = interstitialInput.text.toString()
-            val rewardedAdUnitId = rewardedInput.text.toString()
-
             settingManager.setFairbidAppId(fairbidAppId)
             settingManager.setFairbidMediationBannerAdUnitId(mediationBannerAdUnitId)
             settingManager.setFairbidMediationInterstitialAdUnitId(mediationInterstitialAdUnitId)
             settingManager.setFairbidMediationRewardedAdUnitId(mediationRewardedAdUnitId)
-
-            settingManager.setFairbidBannerAdUnitId(bannerAdUnitId)
-            settingManager.setFairbidInterstitialAdUnitId(interstitialAdUnitId)
-            settingManager.setFairbidRewardedAdUnitId(rewardedAdUnitId)
 
             Toast.makeText(activity, "Fairbid settings saved successfully.", Toast.LENGTH_SHORT)
                 .show()
@@ -78,10 +62,6 @@ class FairbidSettingsFragment : Fragment(R.layout.fragment_fairbid_settings) {
             mediationBannerInput.setText(settings.mediationBannerAdUnitId)
             mediationInterstitialInput.setText(settings.mediationInterstitialAdUnitId)
             mediationRewardedInput.setText(settings.mediationRewardedAdUnitId)
-
-            bannerInput.setText(settings.bannerAdUnitId)
-            interstitialInput.setText(settings.interstitialAdUnitId)
-            rewardedInput.setText(settings.rewardedAdUnitId)
         }
 
     }

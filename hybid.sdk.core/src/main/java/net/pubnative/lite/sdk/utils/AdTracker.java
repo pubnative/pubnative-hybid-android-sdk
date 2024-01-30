@@ -108,8 +108,12 @@ public class AdTracker {
 
         mTrackJSListener = new PNApiClient.TrackJSListener() {
             @Override
-            public void onSuccess() {
-
+            public void onSuccess(String js) {
+                if(HyBid.getReportingController() != null){
+                    HyBid.getReportingController().reportFiredTracker(
+                            new ReportingTracker("JavaScript", js)
+                    );
+                }
             }
 
             @Override

@@ -29,6 +29,7 @@ import android.os.Bundle;
 import net.pubnative.lite.sdk.CustomEndCardListener;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
 import net.pubnative.lite.sdk.rewarded.activity.HyBidRewardedActivity;
 import net.pubnative.lite.sdk.rewarded.activity.VastRewardedActivity;
@@ -47,8 +48,9 @@ public class VastRewardedPresenter implements RewardedPresenter, HyBidRewardedBr
     private CustomEndCardListener mCustomEndCardListener;
     private boolean mIsDestroyed;
     private boolean mReady = false;
+    IntegrationType mIntegrationType;
 
-    public VastRewardedPresenter(Context context, Ad ad, String zoneId) {
+    public VastRewardedPresenter(Context context, Ad ad, String zoneId, IntegrationType integrationType) {
         mContext = context;
         mAd = ad;
         mZoneId = zoneId;
@@ -58,6 +60,7 @@ public class VastRewardedPresenter implements RewardedPresenter, HyBidRewardedBr
         } else {
             mBroadcastReceiver = null;
         }
+        mIntegrationType = integrationType;
     }
 
     @Override
@@ -99,6 +102,7 @@ public class VastRewardedPresenter implements RewardedPresenter, HyBidRewardedBr
             Intent intent = new Intent(mContext, VastRewardedActivity.class);
             intent.putExtra(HyBidRewardedActivity.EXTRA_BROADCAST_ID, mBroadcastReceiver.getBroadcastId());
             intent.putExtra(HyBidRewardedActivity.EXTRA_ZONE_ID, mZoneId);
+            intent.putExtra(HyBidRewardedActivity.INTEGRATION_TYPE, mIntegrationType.getCode());
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mContext.startActivity(intent);
         }

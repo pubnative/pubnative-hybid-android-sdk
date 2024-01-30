@@ -34,6 +34,7 @@ import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.NativeAd;
 import net.pubnative.lite.sdk.request.HyBidNativeAdRequest;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedAd;
@@ -46,7 +47,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AppLovinMediationVerveCustomNetworkAdapter extends MediationAdapterBase implements MaxAdViewAdapter,
         MaxInterstitialAdapter, MaxRewardedAdapter, MaxNativeAdAdapter {
     public static final String MAX_MEDIATION_VENDOR = "m";
-    public static final String MAX_ADAPTER_VERSION = "2.20.0.0";
+    public static final String MAX_ADAPTER_VERSION = "2.21.0.0";
     public static final String PARAM_APP_TOKEN = "pn_app_token";
     public static final String DUMMY_TOKEN = "dummytoken";
 
@@ -93,7 +94,7 @@ public class AppLovinMediationVerveCustomNetworkAdapter extends MediationAdapter
 
     @Override
     public String getSdkVersion() {
-        return HyBid.getSDKVersionInfo();
+        return HyBid.getSDKVersionInfo(IntegrationType.MEDIATION);
     }
 
     @Override

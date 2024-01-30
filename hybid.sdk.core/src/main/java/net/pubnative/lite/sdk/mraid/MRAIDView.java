@@ -73,6 +73,7 @@ import android.widget.RelativeLayout;
 
 import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
 
+import net.pubnative.lite.sdk.CountdownStyle;
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.core.BuildConfig;
@@ -121,6 +122,7 @@ import java.util.Map;
 public class MRAIDView extends FrameLayout {
     // used to differentiate logging
     private static final String MRAID_LOG_TAG = MRAIDView.class.getSimpleName();
+    private static final CountdownStyle COUNTDOWN_STYLE_DEFAULT = CountdownStyle.PIE_CHART;
     private final boolean isExpandEnabled;
 
     private Boolean showTimerBeforeEndCard = false;
@@ -571,6 +573,7 @@ public class MRAIDView extends FrameLayout {
 
         MRAIDParser parser = new MRAIDParser();
         Map<String, String> commandMap = parser.parseCommandUrl(commandUrl);
+        if(commandMap == null) return;
 
         String command = commandMap.get("command");
 
@@ -691,7 +694,7 @@ public class MRAIDView extends FrameLayout {
             applyOrientationProperties();
         }
 
-        if (!HyBid.isMraidExpandEnabled() && !isCreatedByFeedbackForm) {
+        if (!isExpandEnabled && !isCreatedByFeedbackForm) {
             MRAIDLog.d(MRAID_LOG_TAG + "-JS callback", "expand disabled by the developer");
         } else {
             // 1-part expansion
@@ -1650,7 +1653,7 @@ public class MRAIDView extends FrameLayout {
                     listener.mraidViewLoaded(MRAIDView.this);
 
                     // Add countdown functionality for interstitial
-                    mSkipCountdownView = new CountDownViewFactory().createCountdownView(context, HyBid.getCountdownStyle(), MRAIDView.this);
+                    mSkipCountdownView = new CountDownViewFactory().createCountdownView(context, COUNTDOWN_STYLE_DEFAULT, MRAIDView.this);
                     addView(mSkipCountdownView);
 
                     mSkipCountdownView.setVisibility(View.GONE);
@@ -1798,7 +1801,7 @@ public class MRAIDView extends FrameLayout {
             return false;
         }
 
-        return url.contains("tags-prod.vrvm.com") && url.contains("type=expandable");
+        return (url.contains("tags-prod.vrvm.com") || url.contains("ad.vrvm.com")) && url.contains("type=expandable");
     }
 
     private boolean isCloseSignal(String url) {

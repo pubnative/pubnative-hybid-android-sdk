@@ -1,42 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical"
+    android:fillViewport="true"
     tools:context="net.pubnative.lite.demo.ui.fragments.hybid.HyBidInFeedFragment"
     tools:showIn="@layout/activity_tab">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="16dp"
-        android:fontFamily="@font/roboto"
-        android:text="@string/banner_ad_size"
-        android:textColor="?colorPrimaryVariant"
-        android:textSize="14sp"
-        android:textStyle="bold" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <Spinner
-        android:id="@+id/spinner_ad_size"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="16dp" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="16dp"
+            android:fontFamily="@font/roboto"
+            android:text="@string/banner_ad_size"
+            android:textColor="?colorPrimaryVariant"
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
-    <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/check_auto_refresh"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="6dp"
-        android:layout_marginEnd="16dp"
-        android:text="@string/check_auto_refresh"
-        tools:ignore="UseSwitchCompatOrMaterialXml" />
+        <Spinner
+            android:id="@+id/spinner_ad_size"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="16dp" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/check_auto_refresh"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/check_auto_refresh"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
 
     <TextView
         android:layout_width="match_parent"
@@ -164,8 +169,9 @@
         android:textColor="@android:color/black"
         android:textSize="16sp" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-</LinearLayout>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
