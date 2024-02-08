@@ -462,20 +462,13 @@ public class HyBid {
         PNAdRequestFactory adRequestFactory = new PNAdRequestFactory();
         String url;
         if (HyBid.isInitialized()) {
-            HyBidAdSelectionManager adSelectionManager;
-            if (HyBid.getDeviceInfo() != null && HyBid.getDeviceInfo().getContext() != null) {
-                adSelectionManager = new HyBidAdSelectionManager(HyBid.getDeviceInfo().getContext());
-            } else {
-                adSelectionManager = null;
-            }
-            AdRequest adRequest = adRequestFactory.buildRequest("", "", AdSize.SIZE_INTERSTITIAL, "", true, IntegrationType.IN_APP_BIDDING, mediationVendorName, 0, adSelectionManager != null && adSelectionManager.isApiAvailable());
+            AdRequest adRequest = adRequestFactory.buildRequest("", "", AdSize.SIZE_INTERSTITIAL, "", true, IntegrationType.IN_APP_BIDDING, mediationVendorName, 0, false);
             url = PNApiUrlComposer.getUrlQuery(HyBid.getApiClient().getApiUrl(), (PNAdRequest) adRequest);
         } else {
             if (context == null) {
                 url = "";
             } else {
-                HyBidAdSelectionManager adSelectionManager = new HyBidAdSelectionManager(context);
-                AdRequest adRequest = adRequestFactory.buildRequest(context, "", "", AdSize.SIZE_INTERSTITIAL, "", true, IntegrationType.IN_APP_BIDDING, mediationVendorName, 0, adSelectionManager.isApiAvailable());
+                AdRequest adRequest = adRequestFactory.buildRequest(context, "", "", AdSize.SIZE_INTERSTITIAL, "", true, IntegrationType.IN_APP_BIDDING, mediationVendorName, 0, false);
                 url = PNApiUrlComposer.getUrlQuery(net.pubnative.lite.sdk.source.pnapi.BuildConfig.BASE_URL, (PNAdRequest) adRequest);
             }
         }

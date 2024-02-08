@@ -50,7 +50,7 @@ subprojects {
         android_build_tools = '34.0.0'
         omid_version = '1.4.10'
     }
-    version = "2.21.0"
+    version = "2.21.1"
     group = "net.pubnative"
 }
 

@@ -27,5 +27,5 @@ include ':hybid.demo',
         ':hybid.sdk.rewarded',
         ':hybid.sdk.source.pnapi',
         ':hybid.sdk.logger',
-        ':hybid.sdk.topicsapi',
-        ':hybid.sdk.protectedaudiences'
+        //':hybid.sdk.protectedaudiences',
+        ':hybid.sdk.topicsapi'

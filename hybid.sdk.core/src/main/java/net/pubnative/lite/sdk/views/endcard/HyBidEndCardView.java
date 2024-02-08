@@ -160,7 +160,11 @@ public class HyBidEndCardView extends FrameLayout {
     }
 
     private void initControViews() {
-
+        if (!isValidContext()) {
+            if (endcardViewListener != null)
+                endcardViewListener.onLoadFail(isCustomEndCard);
+            return;
+        }
         int skipViewSize = (int) ViewUtils.convertDpToPixel(30f, getContext());
         LayoutParams lp = new LayoutParams(skipViewSize, skipViewSize);
         lp.gravity = Gravity.START;
@@ -202,17 +206,28 @@ public class HyBidEndCardView extends FrameLayout {
     }
 
     private void initUi() {
+        if (!isValidContext()) {
+            if (endcardViewListener != null)
+                endcardViewListener.onLoadFail(isCustomEndCard);
+            return;
+        }
         this.setVisibility(GONE);
         this.setBackgroundColor(Color.TRANSPARENT);
-        gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                return true;
-            }
-        });
+        try {
+            gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
+                @Override
+                public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                    return true;
+                }
+            });
+        } catch (Exception ex) {
+        }
     }
 
     private ImageView createStaticEndCardView() {
+        if (!isValidContext()) {
+            return null;
+        }
         LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
         CustomImageView imageView = new CustomImageView(this.getContext());
         imageView.setLayoutParams(lp);
@@ -228,6 +243,9 @@ public class HyBidEndCardView extends FrameLayout {
     }
 
     private FrameLayout createHtmlEndCardContainer() {
+        if (!isValidContext()) {
+            return null;
+        }
         FrameLayout frameLayout = new FrameLayout(this.getContext());
         frameLayout.setVisibility(View.GONE);
         frameLayout.setBackgroundColor(Color.TRANSPARENT);
@@ -243,6 +261,11 @@ public class HyBidEndCardView extends FrameLayout {
             clearEndCardViews();
             if (endCardData.getType() == EndCardData.Type.STATIC_RESOURCE) {
                 staticEndCardView = createStaticEndCardView();
+                if (staticEndCardView == null) {
+                    if (endcardViewListener != null)
+                        endcardViewListener.onLoadFail(isCustomEndCard);
+                    return;
+                }
                 this.addView(staticEndCardView);
                 staticEndCardView.setVisibility(View.VISIBLE);
                 ImageUtils.setScaledImage(staticEndCardView, imageUri);
@@ -253,10 +276,19 @@ public class HyBidEndCardView extends FrameLayout {
                 endCardType = Reporting.Key.END_CARD_STATIC;
             } else if (!TextUtils.isEmpty(endCardData.getContent())) {
                 htmlEndCardContainer = createHtmlEndCardContainer();
+                if (htmlEndCardContainer == null) {
+                    if (endcardViewListener != null)
+                        endcardViewListener.onLoadFail(isCustomEndCard);
+                    return;
+                }
                 this.addView(htmlEndCardContainer);
                 htmlEndCardContainer.setVisibility(View.VISIBLE);
                 if (endCardData.getType() == EndCardData.Type.IFRAME_RESOURCE) {
                     endCardType = Reporting.Key.END_CARD_IFRAME;
+                    if (!isValidContext()) {
+                        if (endcardViewListener != null)
+                            endcardViewListener.onLoadFail(isCustomEndCard);
+                    }
                     PNHttpClient.makeRequest(getContext(), endCardData.getContent(), null, null, true, new PNHttpClient.Listener() {
                         @Override
                         public void onSuccess(String response, Map<String, List<String>> headers) {
@@ -278,6 +310,10 @@ public class HyBidEndCardView extends FrameLayout {
     }
 
     private void renderHtmlEndcard(String content, boolean isCustom) {
+        if (!isValidContext()) {
+            endcardViewListener.onLoadFail(isCustomEndCard);
+            return;
+        }
         mHtmlEndCardView = new MRAIDBanner(this.getContext(), "", content, false, false, new String[]{}, mraidViewListener, mraidNativeFeatureListener, null);
         mHtmlEndCardView.setSkipOffset(skipOffset.getOffset());
         mHtmlEndCardView.setUseCustomClose(true);
@@ -318,6 +354,10 @@ public class HyBidEndCardView extends FrameLayout {
     public void show(String imageUri) {
         clearEndCardViews();
         staticEndCardView = createStaticEndCardView();
+        if (staticEndCardView == null) {
+            endcardViewListener.onLoadFail(isCustomEndCard);
+            return;
+        }
         this.addView(staticEndCardView);
         staticEndCardView.setVisibility(View.VISIBLE);
         ImageUtils.setScaledImage(staticEndCardView, imageUri);
@@ -439,9 +479,15 @@ public class HyBidEndCardView extends FrameLayout {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (gestureDetector.onTouchEvent(event)) {
-            event.setAction(MotionEvent.ACTION_CANCEL);
+        if (gestureDetector != null) {
+            if (gestureDetector.onTouchEvent(event)) {
+                event.setAction(MotionEvent.ACTION_CANCEL);
+            }
         }
         return super.onTouchEvent(event);
+    }
+
+    private boolean isValidContext() {
+        return getContext() != null;
     }
 }

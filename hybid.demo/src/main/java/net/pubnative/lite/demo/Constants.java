@@ -86,12 +86,12 @@ public class Constants {
     public static final String IRONSOURCE_INTERSTITIAL_AD_UNIT = "HyBid_Interstitial";
     public static final String IRONSOURCE_REWARDED_AD_UNIT = "HyBid_Rewarded";
 
-    public static final String MAXADS_SDK_KEY = "7-JBxCfWENehXonRZUofTDd0JdARpWUG6LmQKs1mwy61r_AfBFUK7TpkZ8VR6-63GA6vK_Vp0hTCa6raFBQsAT";
-    public static final String MAXADS_BANNER_AD_UNIT = "HyBid_Demo_Banner";
-    public static final String MAXADS_MRECT_AD_UNIT = "HyBid_Demo_MRect";
-    public static final String MAXADS_NATIVE_AD_UNIT = "HyBid_Demo_Native";
-    public static final String MAXADS_INTERSTITIAL_AD_UNIT = "HyBid_Demo_Interstitial";
-    public static final String MAXADS_REWARDED_AD_UNIT = "HyBid_Demo_Rewarded";
+    public static final String MAXADS_SDK_KEY = "sMRyqsHzbW5B55p5RLfJTNaXBH1rFzvkU5_LGa_Kerigolzf62Jl6iwzLtMIqn2XRt0tDol1bAc8g0N7C7c51N";
+    public static final String MAXADS_BANNER_AD_UNIT = "a6eea664dbc57ba2";
+    public static final String MAXADS_MRECT_AD_UNIT = "b530984eac9af2db";
+    public static final String MAXADS_NATIVE_AD_UNIT = "9052d6e7f6f0841a";
+    public static final String MAXADS_INTERSTITIAL_AD_UNIT = "d9c7ea61191f825a";
+    public static final String MAXADS_REWARDED_AD_UNIT = "8750fa87e3aaaea9";
 
     public static final String FAIRBID_APP_ID = "133232";
     public static final String FAIRBID_MEDIATION_BANNER_AD_UNIT = "681242";

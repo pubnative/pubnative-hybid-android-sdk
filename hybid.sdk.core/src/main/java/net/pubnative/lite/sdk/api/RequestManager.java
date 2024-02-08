@@ -30,7 +30,6 @@ import net.pubnative.lite.sdk.AdCache;
 import net.pubnative.lite.sdk.CacheListener;
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
-import net.pubnative.lite.sdk.HyBidAdSelectionManager;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
@@ -79,7 +78,6 @@ public class RequestManager {
     private VideoAdCache mVideoCache;
     private final AdRequestFactory mAdRequestFactory;
     private final ReportingController mReportingController;
-    private final HyBidAdSelectionManager mAdSelectionManager;
     private final PNInitializationHelper mInitializationHelper;
     private String mAppToken;
     private String mZoneId;
@@ -125,11 +123,6 @@ public class RequestManager {
         mAdCache = adCache;
         mVideoCache = videoCache;
         mReportingController = reportingController;
-        if (apiClient != null && apiClient.getContext() != null) {
-            mAdSelectionManager = new HyBidAdSelectionManager(apiClient.getContext());
-        } else {
-            mAdSelectionManager = null;
-        }
         mAdRequestFactory = requestFactory;
         mInitializationHelper = initializationHelper;
         mPlacementParams = new JSONObject();
@@ -211,7 +204,7 @@ public class RequestManager {
         mCacheStarted = false;
         mCacheFinished = false;
 
-        boolean protectedAudiencesAvailable = mAdSelectionManager != null && mAdSelectionManager.isApiAvailable();
+        boolean protectedAudiencesAvailable = false;
 
         mAdRequestFactory.createAdRequest(TextUtils.isEmpty(mAppToken) ? null : mAppToken, mZoneId,
                 getAdSize(), isRewarded(), protectedAudiencesAvailable, adRequest -> {

@@ -66,7 +66,7 @@ dependencies {
     implementation project(':hybid.sdk.logger')
     implementation project(':hybid.sdk.source.pnapi')
     implementation project(':hybid.sdk.topicsapi')
-    implementation project(':hybid.sdk.protectedaudiences')
+    //implementation project(':hybid.sdk.protectedaudiences')
 
     //Testing
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

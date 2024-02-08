@@ -10,6 +10,7 @@ import com.applovin.mediation.MaxAd
 import com.applovin.mediation.MaxAdViewAdListener
 import com.applovin.mediation.MaxError
 import com.applovin.mediation.ads.MaxAdView
+import com.applovin.sdk.AppLovinSdkUtils
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
@@ -36,8 +37,8 @@ class MaxAdsMediationBannerFragment : Fragment(R.layout.fragment_maxads_banner),
         maxBanner = MaxAdView(adUnitId, requireActivity())
         maxBanner?.setListener(this)
 
-        val width = FrameLayout.LayoutParams.MATCH_PARENT
-        val height = resources.getDimensionPixelSize(R.dimen.banner_height)
+        val width = AppLovinSdkUtils.dpToPx(requireContext(), 320)
+        val height = AppLovinSdkUtils.dpToPx(requireContext(), 50)
 
         maxBanner?.layoutParams = FrameLayout.LayoutParams(width, height)
         maxBanner?.setBackgroundColor(Color.BLACK)
