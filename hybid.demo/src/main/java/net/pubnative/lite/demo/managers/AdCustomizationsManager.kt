@@ -52,6 +52,10 @@ data class AdCustomizationsManager(
     var min_visibility_time_value: String,
     var min_visibility_percent_enabled: Boolean,
     var min_visibility_percent_value: String,
+    var custom_cta_enabled: Boolean,
+    var custom_cta_enabled_value: Boolean,
+    var custom_cta_delay_enabled: Boolean,
+    var custom_cta_delay_enabled_value: String,
 ) {
 
     fun toJson(): String {

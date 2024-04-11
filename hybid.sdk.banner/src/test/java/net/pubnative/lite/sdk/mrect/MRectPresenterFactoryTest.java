@@ -2,14 +2,13 @@ package net.pubnative.lite.sdk.mrect;
 
 import com.google.common.truth.Truth;
 
+import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
 import net.pubnative.lite.sdk.banner.presenter.MraidAdPresenter;
 import net.pubnative.lite.sdk.banner.presenter.VastAdPresenter;
 import net.pubnative.lite.sdk.models.AdSize;
-import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
-import net.pubnative.lite.sdk.mrect.presenter.MRectPresenterFactory;
 import net.pubnative.lite.sdk.testing.TestUtil;
 
 import org.junit.Before;
@@ -31,7 +30,7 @@ public class MRectPresenterFactoryTest {
     private Ad mTestAd;
 
     @InjectMocks
-    private MRectPresenterFactory mSubject;
+    private BannerPresenterFactory mSubject;
 
     @Before
     public void setup() {

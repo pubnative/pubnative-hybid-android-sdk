@@ -32,4 +32,5 @@ public interface AdRequestFactory {
     public AdRequest buildRequest(final String appToken, final String zoneid, AdSize adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType, final String mediationVendor, Integer impDepth, boolean paAvailable);
     public void setMediationVendor(String mediationVendor);
     public void setIntegrationType(IntegrationType integrationType);
+    public void setAdFormat(String adFormat);
 }

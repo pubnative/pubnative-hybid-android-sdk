@@ -24,7 +24,8 @@ class HyBidBannerViewHolder(itemView: View, val adListener: InFeedAdListener) :
         adSize: AdSize,
         shouldLoad: Boolean,
         autoRefresh: Boolean,
-        selectedApi: Int
+        selectedApi: Int,
+        selectedFormat: Int
     ) {
         if (!TextUtils.isEmpty(zoneId) && shouldLoad) {
             val container = itemView.findViewById<FrameLayout>(R.id.banner_view)
@@ -44,7 +45,11 @@ class HyBidBannerViewHolder(itemView: View, val adListener: InFeedAdListener) :
 
             autoRefreshCheck(autoRefresh)
             if (selectedApi == R.id.radio_api_ortb) {
-                adView.loadExchangeAd(zoneId, this)
+                if (selectedFormat == R.id.radio_format_html) {
+                    adView.loadExchangeAd(null, null, zoneId, this,"html")
+                } else {
+                    adView.loadExchangeAd(null, null, zoneId, this,"video")
+                }
             } else {
                 adView.load(zoneId, this)
             }

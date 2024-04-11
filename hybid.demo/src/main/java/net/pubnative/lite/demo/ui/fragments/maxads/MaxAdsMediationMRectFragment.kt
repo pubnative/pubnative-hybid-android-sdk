@@ -35,6 +35,8 @@ class MaxAdsMediationMRectFragment : Fragment(R.layout.fragment_maxads_mrect), M
 
         maxMRect = MaxAdView(adUnitId, requireActivity())
         maxMRect?.setListener(this)
+        maxMRect?.setExtraParameter("allow_pause_auto_refresh_immediately", "true")
+        maxMRect?.stopAutoRefresh()
 
         val width = AppLovinSdkUtils.dpToPx(requireContext(), 300)
         val height = AppLovinSdkUtils.dpToPx(requireContext(), 250)
@@ -58,6 +60,7 @@ class MaxAdsMediationMRectFragment : Fragment(R.layout.fragment_maxads_mrect), M
 
     override fun onAdLoaded(ad: MaxAd) {
         Log.d(TAG, "onAdLoaded")
+        displayLogs()
     }
 
     override fun onAdLoadFailed(adUnitId: String, error: MaxError) {
@@ -72,7 +75,7 @@ class MaxAdsMediationMRectFragment : Fragment(R.layout.fragment_maxads_mrect), M
 
     override fun onAdDisplayFailed(ad: MaxAd, error: MaxError) {
         Log.d(TAG, "onAdDisplayFailed")
-        Toast.makeText(requireContext(), error?.message, Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), error.message, Toast.LENGTH_SHORT).show()
     }
 
     override fun onAdClicked(ad: MaxAd) {

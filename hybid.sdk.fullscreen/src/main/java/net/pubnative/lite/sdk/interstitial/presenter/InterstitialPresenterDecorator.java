@@ -48,7 +48,6 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
     private final InterstitialPresenter mInterstitialPresenter;
     private final AdTracker mAdTrackingDelegate;
     private final AdTracker mCustomEndCardTrackingDelegate;
-    private final AdTracker mDefaultEndCardTrackingDelegate;
     private final ReportingController mReportingController;
     private final InterstitialPresenter.Listener mListener;
     private VideoListener mVideoListener;
@@ -68,13 +67,11 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
     public InterstitialPresenterDecorator(InterstitialPresenter interstitialPresenter,
                                           AdTracker adTrackingDelegate,
                                           AdTracker customEndCardTrackingDelegate,
-                                          AdTracker defaultEndCardTrackingDelegate,
                                           ReportingController reportingController,
                                           Listener listener, IntegrationType integrationType) {
         mInterstitialPresenter = interstitialPresenter;
         mAdTrackingDelegate = adTrackingDelegate;
         mCustomEndCardTrackingDelegate = customEndCardTrackingDelegate;
-        mDefaultEndCardTrackingDelegate = defaultEndCardTrackingDelegate;
         mReportingController = reportingController;
         mListener = listener;
         mIntegrationType = integrationType;
@@ -392,7 +389,6 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             mReportingController.reportEvent(reportingEvent);
         }
 
-        mDefaultEndCardTrackingDelegate.trackImpression();
         mDefaultEndCardImpressionTracked = true;
     }
 
@@ -419,7 +415,6 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             mReportingController.reportEvent(reportingEvent);
         }
 
-        mDefaultEndCardTrackingDelegate.trackClick();
         mDefaultEndCardClickTracked = true;
     }
 

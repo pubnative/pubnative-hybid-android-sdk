@@ -2,7 +2,6 @@ package net.pubnative.lite.sdk.analytics;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import net.pubnative.lite.sdk.analytics.tracker.ReportingTracker;
 import net.pubnative.lite.sdk.analytics.tracker.ReportingTrackerCallback;

@@ -41,6 +41,7 @@ import net.pubnative.lite.sdk.views.PNBeaconWebView;
 import net.pubnative.lite.sdk.visibility.ImpressionManager;
 import net.pubnative.lite.sdk.visibility.ImpressionTracker;
 import net.pubnative.lite.sdk.visibility.TrackingManager;
+import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
 
 import java.util.List;
 import java.util.Map;
@@ -430,8 +431,12 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
 
     // Content info listener
     @Override
-    public void onIconClicked() {
-        //TODO report content info icon clicked
+    public void onIconClicked(List<String> clickTrackers) {
+        if (clickTrackers != null && !clickTrackers.isEmpty()) {
+            for (int i=0; i < clickTrackers.size(); i++) {
+                EventTracker.post(mAdView.getContext(), clickTrackers.get(i), null, false);
+            }
+        }
     }
 
     String processedURL = "";

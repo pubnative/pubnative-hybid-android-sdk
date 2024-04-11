@@ -59,6 +59,8 @@ class HyBidInFeedFragment : Fragment(R.layout.fragment_hybid_infeed_banner), InF
     private lateinit var creativeIdView: TextView
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: InFeedAdapter
+    private lateinit var formatRadioGroup: RadioGroup
+    private lateinit var adFormatLayout: LinearLayout
 
     private val adSizes = arrayOf(
         AdSize.SIZE_320x50,
@@ -86,6 +88,8 @@ class HyBidInFeedFragment : Fragment(R.layout.fragment_hybid_infeed_banner), InF
         adSizeSpinner = view.findViewById(R.id.spinner_ad_size)
         autoRefreshSwitch = view.findViewById(R.id.check_auto_refresh)
         apiRadioGroup = view.findViewById(R.id.group_api_type)
+        formatRadioGroup = view.findViewById(R.id.group_ad_format)
+        adFormatLayout = view.findViewById(R.id.linear_ad_format)
 
         autoRefreshSwitch.isChecked = false
 
@@ -131,6 +135,14 @@ class HyBidInFeedFragment : Fragment(R.layout.fragment_hybid_infeed_banner), InF
             )
         }
 
+        apiRadioGroup.setOnCheckedChangeListener { _, checkedId ->
+            if (checkedId == R.id.radio_api_ortb) {
+                adFormatLayout.visibility = View.VISIBLE
+            } else {
+                adFormatLayout.visibility = View.GONE
+            }
+        }
+
         spinnerAdapter =
             ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, adSizes)
         adSizeSpinner.adapter = spinnerAdapter
@@ -140,7 +152,8 @@ class HyBidInFeedFragment : Fragment(R.layout.fragment_hybid_infeed_banner), InF
         errorView.text = ""
 
         val adSize = adSizes[adSizeSpinner.selectedItemPosition]
-        adapter.loadWithAd(adSize, apiRadioGroup.checkedRadioButtonId)
+        adapter.loadWithAd(adSize, apiRadioGroup.checkedRadioButtonId,
+            formatRadioGroup.checkedRadioButtonId)
     }
 
     // --------------- InFeedAdListener Listener --------------------

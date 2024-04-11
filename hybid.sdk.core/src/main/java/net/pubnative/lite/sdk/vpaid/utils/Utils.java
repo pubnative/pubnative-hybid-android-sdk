@@ -17,6 +17,7 @@ import net.pubnative.lite.sdk.models.PositionX;
 import net.pubnative.lite.sdk.models.PositionY;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
+import net.pubnative.lite.sdk.vpaid.models.vast.IconClickTracking;
 import net.pubnative.lite.sdk.vpaid.models.vast.IconViewTracking;
 
 import java.io.ByteArrayOutputStream;
@@ -239,6 +240,17 @@ public class Utils {
             clickUrl = icon.getIconClicks().getIconClickThrough().getText();
         }
 
+        List<String> clickTrackers = new ArrayList<>();
+        if (icon.getIconClicks() != null
+                && icon.getIconClicks().getIconClickTrackingList() != null
+                && !icon.getIconClicks().getIconClickTrackingList().isEmpty()) {
+            for (IconClickTracking clickTracking : icon.getIconClicks().getIconClickTrackingList()) {
+                if (!TextUtils.isEmpty(clickTracking.getText())) {
+                    clickTrackers.add(clickTracking.getText());
+                }
+            }
+        }
+
         List<String> viewTrackers = new ArrayList<>();
         if (icon.getIconViewTrackingList() != null && !icon.getIconViewTrackingList().isEmpty()) {
             for (IconViewTracking tracking : icon.getIconViewTrackingList()) {
@@ -280,6 +292,6 @@ public class Utils {
         }
 
         return TextUtils.isEmpty(iconUrl) ? null :
-                new ContentInfo(iconUrl, clickUrl, "", width, height, positionX, positionY, viewTrackers);
+                new ContentInfo(iconUrl, clickUrl, "", width, height, positionX, positionY, viewTrackers, clickTrackers);
     }
 }

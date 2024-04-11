@@ -93,7 +93,7 @@ public class MRAIDHtmlProcessor {
         String omSdk = new String(omsdkBytes);
         String omsdkTag = "<script>" + ls + omSdk + ls + "</script>";
 
-        String scalingStr = Assets.scaling_script;
+        String scalingStr = Assets.scaling_script_minified;
         byte[] scalingBytes = Base64.decode(scalingStr, Base64.DEFAULT);
         String scaling = new String(scalingBytes);
         String scalingTag = "<script>" + ls + scaling + ls + "</script>";

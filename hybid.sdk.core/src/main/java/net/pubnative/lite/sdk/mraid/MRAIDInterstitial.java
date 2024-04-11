@@ -26,15 +26,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
-import android.text.TextUtils;
 import android.view.ViewGroup;
 import android.webkit.WebView;
-
-import net.pubnative.lite.sdk.models.CustomCTAData;
-import net.pubnative.lite.sdk.mraid.internal.MRAIDLog;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 
 /**
  * Created by erosgarciaponte on 08.01.18.

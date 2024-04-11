@@ -29,7 +29,6 @@ import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.PositionX;
 import net.pubnative.lite.sdk.models.PositionY;
 import net.pubnative.lite.sdk.utils.Logger;
-import net.pubnative.lite.sdk.utils.SkipOffsetManager;
 import net.pubnative.lite.sdk.utils.URLValidator;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.views.CloseableContainer;
@@ -79,6 +78,7 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
     protected Boolean mCustomEndCardCloseTracked = false;
     protected Boolean mDefaultEndCardCloseTracked = false;
     protected IntegrationType mIntegrationType;
+    protected View mContentInfoView = null;
     protected boolean mIsFinishing = false;
 
     protected boolean mIsVideoFinished = false;
@@ -173,8 +173,8 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
     protected void setupContentInfo(Icon icon) {
         if (getAd() != null && mCloseableContainer != null) {
             ContentInfo contentInfo = Utils.parseContentInfo(icon);
-            View contentInfoView = getContentInfo(this, getAd(), contentInfo);
-            if (contentInfoView != null) {
+            mContentInfoView = getContentInfo(this, getAd(), contentInfo);
+            if (mContentInfoView != null) {
                 if (contentInfo != null) {
                     int xGravity = Gravity.START;
                     int yGravity = Gravity.TOP;
@@ -207,9 +207,9 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
 
                     FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                     layoutParams.gravity = xGravity | yGravity;
-                    mCloseableContainer.addView(contentInfoView, layoutParams);
+                    mCloseableContainer.addView(mContentInfoView, layoutParams);
                 } else {
-                    mCloseableContainer.addView(contentInfoView);
+                    mCloseableContainer.addView(mContentInfoView);
                     if (getAd().getContentInfoIconYPosition() == ContentInfoIconYPosition.TOP && getAd().getContentInfoIconXPosition() == ContentInfoIconXPosition.RIGHT) {
                         mCloseableContainer.setClosePosition(CloseableContainer.ClosePosition.TOP_LEFT);
                     }
@@ -225,6 +225,12 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
 
     private View getContentInfo(Context context, Ad ad, ContentInfo contentInfo) {
         return contentInfo == null ? ad.getContentInfoContainer(context, this) : ad.getContentInfoContainer(context, contentInfo, this);
+    }
+
+    public void hideContentInfo() {
+        if (mContentInfoView != null && mCloseableContainer != null) {
+            mCloseableContainer.removeView(mContentInfoView);
+        }
     }
 
     private final CloseableContainer.OnCloseListener mCloseListener = this::closeButtonClicked;
@@ -311,8 +317,12 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
 
     // Content info listener
     @Override
-    public void onIconClicked() {
-        //TODO report content info icon clicked
+    public void onIconClicked(List<String> clickTrackers) {
+        if (clickTrackers != null && !clickTrackers.isEmpty()) {
+            for (int i=0; i < clickTrackers.size(); i++) {
+                EventTracker.post(this, clickTrackers.get(i), null, false);
+            }
+        }
     }
 
     String processedURL = "";

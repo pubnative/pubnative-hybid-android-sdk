@@ -60,6 +60,8 @@ public class Bid extends JsonModel {
     private Integer hratio;
     @BindField
     private Integer exp;
+    @BindField
+    private BidExtension ext;
 
     public Bid() {
     }
@@ -170,5 +172,9 @@ public class Bid extends JsonModel {
 
     public Integer getExpiration() {
         return exp;
+    }
+
+    public BidExtension getExt() {
+        return ext;
     }
 }

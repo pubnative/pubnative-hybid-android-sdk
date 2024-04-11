@@ -44,13 +44,17 @@ import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.CheckUtils;
+import net.pubnative.lite.sdk.utils.URLValidator;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.views.ProgressDialogFragment;
 import net.pubnative.lite.sdk.visibility.ImpressionManager;
 import net.pubnative.lite.sdk.visibility.ImpressionTracker;
+import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
 
 import org.json.JSONObject;
+
+import java.util.List;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
@@ -264,8 +268,12 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
 
     // Content info listener
     @Override
-    public void onIconClicked() {
-        //TODO report content info icon clicked
+    public void onIconClicked(List<String> clickTrackers) {
+        if (clickTrackers != null && !clickTrackers.isEmpty()) {
+            for (int i=0; i < clickTrackers.size(); i++) {
+                EventTracker.post(mContext, clickTrackers.get(i), null, false);
+            }
+        }
     }
 
     String processedURL = "";

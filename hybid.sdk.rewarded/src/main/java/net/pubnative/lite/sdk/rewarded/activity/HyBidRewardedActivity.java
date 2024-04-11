@@ -104,8 +104,10 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
     protected List<String> mCustomCTAClickTrackedEvents = new ArrayList<>();
 
     protected IntegrationType mIntegrationType;
+    protected View mContentInfoView = null;
 
-    protected boolean mFinished = false;
+    protected boolean mIsFinishing = false;
+    protected boolean mIsVideoFinished = false;
 
     protected VideoAd mVideoAd;
 
@@ -164,9 +166,11 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
 
                 setContentView(mCloseableContainer);
             } else {
+                mIsFinishing = true;
                 finish();
             }
         } else {
+            mIsFinishing = true;
             finish();
         }
     }
@@ -216,8 +220,8 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
     protected void setupContentInfo(Icon icon) {
         if (getAd() != null && mCloseableContainer != null) {
             ContentInfo contentInfo = Utils.parseContentInfo(icon);
-            View contentInfoView = getContentInfo(this, getAd(), contentInfo);
-            if (contentInfoView != null) {
+            mContentInfoView = getContentInfo(this, getAd(), contentInfo);
+            if (mContentInfoView != null) {
                 if (contentInfo != null) {
                     int xGravity = Gravity.START;
                     int yGravity = Gravity.TOP;
@@ -250,9 +254,9 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
 
                     FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                     layoutParams.gravity = xGravity | yGravity;
-                    mCloseableContainer.addView(contentInfoView, layoutParams);
+                    mCloseableContainer.addView(mContentInfoView, layoutParams);
                 } else {
-                    mCloseableContainer.addView(contentInfoView);
+                    mCloseableContainer.addView(mContentInfoView);
                     if (getAd().getContentInfoIconYPosition() == ContentInfoIconYPosition.TOP && getAd().getContentInfoIconXPosition() == ContentInfoIconXPosition.RIGHT) {
                         mCloseableContainer.setClosePosition(CloseableContainer.ClosePosition.TOP_LEFT);
                     }
@@ -270,15 +274,21 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
         return contentInfo == null ? ad.getContentInfoContainer(context, this) : ad.getContentInfoContainer(context, contentInfo, this);
     }
 
+    public void hideContentInfo() {
+        if (mContentInfoView != null && mCloseableContainer != null) {
+            mCloseableContainer.removeView(mContentInfoView);
+        }
+    }
+
     private final CloseableContainer.OnCloseListener mCloseListener = this::closeButtonClicked;
 
     protected void closeButtonClicked() {
         if (getBroadcastSender() != null) {
-            if (mIsVast && !mFinished) {
+            if (mIsVast && !mIsVideoFinished) {
                 mVideoAd.skip();
             } else {
                 getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLOSE);
-                mFinished = true;
+                mIsFinishing = true;
                 finish();
             }
         }
@@ -288,6 +298,7 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
         if (getBroadcastSender() != null) {
             getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLOSE);
         }
+        mIsFinishing = true;
         finish();
     }
 
@@ -338,8 +349,12 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
 
     // Content info listener
     @Override
-    public void onIconClicked() {
-        //TODO report content info icon clicked
+    public void onIconClicked(List<String> clickTrackers) {
+        if (clickTrackers != null && !clickTrackers.isEmpty()) {
+            for (int i=0; i < clickTrackers.size(); i++) {
+                EventTracker.post(this, clickTrackers.get(i), null, false);
+            }
+        }
     }
 
     String processedURL = "";

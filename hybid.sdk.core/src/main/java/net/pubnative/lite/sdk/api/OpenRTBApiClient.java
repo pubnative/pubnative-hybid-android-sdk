@@ -21,6 +21,7 @@ import net.pubnative.lite.sdk.utils.AdRequestRegistry;
 import net.pubnative.lite.sdk.utils.MarkupUtils;
 import net.pubnative.lite.sdk.utils.OpenRTBApiUrlComposer;
 import net.pubnative.lite.sdk.utils.OpenRTBAssetsGroup;
+import net.pubnative.lite.sdk.utils.SignalDataProcessor;
 
 import org.json.JSONObject;
 
@@ -195,6 +196,7 @@ public final class OpenRTBApiClient implements ApiClient {
 
     private void buildAd(OpenRTBResponse apiResponseModel, AdRequest request, Bid bid, Integer width, Integer height, AdRequestListener listener) {
         OpenRTBAdRequest adRequest = null;
+        boolean isSignalDataProcessing = false;
 
         if (request != null) {
             adRequest = (OpenRTBAdRequest) request;
@@ -226,9 +228,27 @@ public final class OpenRTBApiClient implements ApiClient {
                 } else {
                     adType = Ad.AdType.HTML;
                 }
-            }
+            } else {
+                if (bid.getExt() != null && !TextUtils.isEmpty(bid.getExt().getSignaldata())) {
+                    isSignalDataProcessing = true;
+                    SignalDataProcessor signalDataProcessor = new SignalDataProcessor();
+                    signalDataProcessor.processSignalData(bid.getExt().getSignaldata(), new SignalDataProcessor.Listener() {
+                        @Override
+                        public void onProcessed(Ad ad) {
+                            listener.onSuccess(ad);
+                        }
 
+                        @Override
+                        public void onError(Throwable error) {
+                            listener.onFailure(new Exception("no ads found"));
+                        }
+                    });
+                }
+            }
         }
+
+        if (isSignalDataProcessing)
+            return;
 
         if (adType == null) {
             listener.onFailure(new HyBidError(HyBidErrorCode.NO_FILL));
@@ -249,7 +269,8 @@ public final class OpenRTBApiClient implements ApiClient {
             return;
         }
 
-        final Ad ad = new Ad(assetGroup, bid.getAdMarkup(), adType);
+        Ad ad = new Ad(assetGroup, bid.getAdMarkup(), adType);
+
         ad.setZoneId(request != null ? request.zoneId : "100");
 
         String winUrl = replaceMacros(bid.getNoticeUrl(), request, apiResponseModel, bid);

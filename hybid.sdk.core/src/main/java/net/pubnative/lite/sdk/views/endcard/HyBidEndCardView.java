@@ -376,8 +376,20 @@ public class HyBidEndCardView extends FrameLayout {
         }, null);
     }
 
+    public void hideSkipButton() {
+        mSkipView.setVisibility(GONE);
+    }
+
     public void showCloseButton(CloseButtonListener closeButtonListener, BackButtonClickabilityListener backButtonClickabilityListener) {
         mSkipView.setVisibility(INVISIBLE);
+        if (mEndcardTimer != null) {
+            mEndcardTimer.cancel();
+            mEndcardTimer = null;
+        }
+        if (mBackButtonTimer != null) {
+            mBackButtonTimer.cancel();
+            mBackButtonTimer = null;
+        }
         startSkipOffsetTimer(() -> {
             mCloseView.setVisibility(VISIBLE);
             mCloseView.bringToFront();
@@ -385,7 +397,7 @@ public class HyBidEndCardView extends FrameLayout {
         }, backButtonClickabilityListener::onBackButtonClickable);
     }
 
-    public void startSkipOffsetTimer(Runnable callback, Runnable backButtonRunnable) {
+    public synchronized void startSkipOffsetTimer(Runnable callback, Runnable backButtonRunnable) {
         int delay = skipOffset.getOffset();
         int backButtonDelay = backButtonOffset.getOffset();
         if (delay >= 0) {
@@ -393,8 +405,13 @@ public class HyBidEndCardView extends FrameLayout {
             mEndcardTimer = new SimpleTimer(endCardDelayInMillis, new SimpleTimer.Listener() {
                 @Override
                 public void onFinish() {
-                    callback.run();
+                    if (callback != null)
+                        callback.run();
                     if (backButtonRunnable != null && backButtonDelay < delay) {
+                        if (mBackButtonTimer != null) {
+                            mBackButtonTimer.cancel();
+                            mBackButtonTimer = null;
+                        }
                         backButtonRunnable.run();
                     }
                 }
@@ -420,20 +437,27 @@ public class HyBidEndCardView extends FrameLayout {
             if (mBackButtonTimer != null)
                 mBackButtonTimer.start();
         } else {
-            callback.run();
+            if (callback != null)
+                callback.run();
         }
     }
 
     public void pause() {
-        if (mEndcardTimer != null) mEndcardTimer.pause();
-        if (mHtmlEndCardView != null) mHtmlEndCardView.pause();
-        if (mBackButtonTimer != null) mBackButtonTimer.pause();
+        if (mEndcardTimer != null)
+            mEndcardTimer.pauseTimer();
+        if (mHtmlEndCardView != null)
+            mHtmlEndCardView.pause();
+        if (mBackButtonTimer != null)
+            mBackButtonTimer.pauseTimer();
     }
 
     public void resume() {
-        if (mEndcardTimer != null) mEndcardTimer.resume();
-        if (mHtmlEndCardView != null) mHtmlEndCardView.resume();
-        if (mBackButtonTimer != null) mBackButtonTimer.resume();
+        if (mEndcardTimer != null)
+            mEndcardTimer.resumeTimer();
+        if (mHtmlEndCardView != null)
+            mHtmlEndCardView.resume();
+        if (mBackButtonTimer != null)
+            mBackButtonTimer.resumeTimer();
     }
 
     private void clearEndCardViews() {
@@ -452,12 +476,12 @@ public class HyBidEndCardView extends FrameLayout {
     }
 
     public void destroy() {
-        if (mEndcardTimer != null) {
+        if (mEndcardTimer != null)
             mEndcardTimer.cancel();
-        }
-        if (mBackButtonTimer != null) {
+        if (mBackButtonTimer != null)
             mBackButtonTimer.cancel();
-        }
+        if (mHtmlEndCardView != null)
+            mHtmlEndCardView.cancel();
         clearEndCardViews();
     }
 

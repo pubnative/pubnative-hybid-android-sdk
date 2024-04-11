@@ -13,9 +13,9 @@ public class OpenRTBResponse extends JsonModel {
     @BindField
     private List<SeatBid> seatbid;
     @BindField
-    private String bidid;
-    @BindField
     private String cur = "USD";
+    @BindField
+    private String bidid;
     @BindField
     private String customData;
     @BindField
@@ -36,12 +36,12 @@ public class OpenRTBResponse extends JsonModel {
         return seatbid;
     }
 
-    public String getBidId() {
-        return bidid;
-    }
-
     public String getCurrency() {
         return cur;
+    }
+
+    public String getBidId() {
+        return bidid;
     }
 
     public String getCustomData() {

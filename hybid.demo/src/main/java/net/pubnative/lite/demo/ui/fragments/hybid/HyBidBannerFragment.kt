@@ -64,6 +64,8 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
     private lateinit var errorCodeView: TextView
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
+    private lateinit var formatRadioGroup: RadioGroup
+    private lateinit var adFormatLayout: LinearLayout
     private var cachingEnabled: Boolean = true
 
     private val adSizes = arrayOf(
@@ -96,6 +98,8 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
         autoRefreshSwitch = view.findViewById(R.id.check_auto_refresh)
         autoShowSwitch = view.findViewById(R.id.check_auto_show)
         apiRadioGroup = view.findViewById(R.id.group_api_type)
+        formatRadioGroup = view.findViewById(R.id.group_ad_format)
+        adFormatLayout = view.findViewById(R.id.linear_ad_format)
         prepareButton.isEnabled = false
         showButton.isEnabled = false
 
@@ -156,6 +160,14 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
             )
         }
 
+        apiRadioGroup.setOnCheckedChangeListener { _, checkedId ->
+            if (checkedId == R.id.radio_api_ortb) {
+                adFormatLayout.visibility = View.VISIBLE
+            } else {
+                adFormatLayout.visibility = View.GONE
+            }
+        }
+
         spinnerAdapter =
             ArrayAdapter(requireActivity(), android.R.layout.simple_spinner_item, adSizes)
         adSizeSpinner.adapter = spinnerAdapter
@@ -181,6 +193,11 @@ class HyBidBannerFragment : Fragment(R.layout.fragment_hybid_banner), PNAdView.L
         hybidBanner.setTrackingMethod(ImpressionTrackingMethod.AD_VIEWABLE)
 
         if (apiRadioGroup.checkedRadioButtonId == R.id.radio_api_ortb) {
+            if (formatRadioGroup.checkedRadioButtonId == R.id.radio_format_html) {
+                hybidBanner.loadExchangeAd(null, null, zoneId, this, "html")
+            } else {
+                hybidBanner.loadExchangeAd(null, null, zoneId, this, "video")
+            }
             hybidBanner.loadExchangeAd(zoneId, this)
         } else {
             hybidBanner.load(zoneId, this)

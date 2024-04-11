@@ -41,6 +41,7 @@ import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.PNAdRequest;
 import net.pubnative.lite.sdk.models.PNAdRequestFactory;
+import net.pubnative.lite.sdk.models.RemoteConfigFeature;
 import net.pubnative.lite.sdk.models.request.OpenRTBAdRequest;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.HeaderBiddingUtils;
@@ -52,6 +53,7 @@ import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
 import net.pubnative.lite.sdk.models.EndCardData;
+import net.pubnative.lite.sdk.vpaid.enums.AdFormat;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 
 import org.json.JSONException;
@@ -69,6 +71,11 @@ public class RequestManager {
         void onRequestSuccess(Ad ad);
 
         void onRequestFail(Throwable throwable);
+    }
+
+    public static final class AdFormat {
+        public static final String HTML = "html";
+        public static final String VIDEO = "video";
     }
 
     private static final String TAG = RequestManager.class.getSimpleName();
@@ -89,6 +96,7 @@ public class RequestManager {
     private boolean mAutoCacheOnLoad = true;
     private boolean mCacheStarted = false;
     private boolean mCacheFinished = false;
+    private String mAdFormat = null;
 
     final JSONObject jsonCacheParams;
     private Long mRequestTimeMilliseconds = 0L;
@@ -528,6 +536,12 @@ public class RequestManager {
         if (mAdRequestFactory != null) {
             mAdRequestFactory.setIntegrationType(integrationType);
             JsonOperations.putJsonString(mPlacementParams, Reporting.Key.INTEGRATION_TYPE, integrationType.getCode());
+        }
+    }
+
+    public void setAdFormat(String adFormat) {
+        if (mAdRequestFactory != null) {
+            mAdRequestFactory.setAdFormat(adFormat);
         }
     }
 

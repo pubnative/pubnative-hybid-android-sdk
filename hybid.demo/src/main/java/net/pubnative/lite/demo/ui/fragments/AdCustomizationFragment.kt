@@ -1,9 +1,7 @@
 package net.pubnative.lite.demo.ui.fragments
 
 import android.os.Bundle
-import android.util.Patterns
 import android.view.View
-import android.webkit.URLUtil
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
@@ -23,9 +21,6 @@ import net.pubnative.lite.sdk.models.ContentInfoIconAction
 import net.pubnative.lite.sdk.models.CustomEndCardDisplay
 import net.pubnative.lite.sdk.utils.URLValidator
 import net.pubnative.lite.sdk.vpaid.enums.AudioState
-import java.net.MalformedURLException
-
-
 
 class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
 
@@ -54,6 +49,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
     private lateinit var minVisibilityPercent: EditText
     private lateinit var customEndCardHTML: EditText
     private lateinit var customCTAIconURL: EditText
+    private lateinit var customCTADelay: EditText
 
     private lateinit var cbInitialAudio: CheckBox
     private lateinit var cbMraidExpand: CheckBox
@@ -78,12 +74,15 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
     private lateinit var cbImpTracking: CheckBox
     private lateinit var cbMinVisibilityTime: CheckBox
     private lateinit var cbMinVisibilityPercent: CheckBox
+    private lateinit var cbCustomCTAEnabled: CheckBox
+    private lateinit var cbInputCustomCTADelay: CheckBox
 
     private lateinit var mraidExpandSwitch: SwitchCompat
     private lateinit var enableAutoCloseSwitch: SwitchCompat
     private lateinit var enableAutoCloseSwitchRewarded: SwitchCompat
     private lateinit var enableEndcardSwitch: SwitchCompat
     private lateinit var enableCustomEndcardSwitch: SwitchCompat
+    private lateinit var enableCustomCTASwitch: SwitchCompat
 
     private lateinit var adCustomizationsManager: AdCustomizationsManager
     private lateinit var prefs: AdCustomizationPrefs
@@ -107,6 +106,8 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
         enableAutoCloseSwitchRewarded = requireView().findViewById(R.id.check_auto_close_rewarded)
         enableEndcardSwitch = requireView().findViewById(R.id.check_enable_endcard)
         enableCustomEndcardSwitch = requireView().findViewById(R.id.check_enable_custom_endcard)
+        enableCustomCTASwitch = requireView().findViewById(R.id.check_custom_cta_enabled)
+
         htmlSkipOffsetInput = requireView().findViewById(R.id.input_skip_offset)
         videoSkipOffsetInput = requireView().findViewById(R.id.input_video_skip_offset)
         rewardedHtmlSkipOffsetInput = requireView().findViewById(R.id.input_rewarded_skip_offset)
@@ -155,8 +156,11 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
         cbImpTracking = requireView().findViewById(R.id.cb_input_imp_tracking)
         cbMinVisibilityTime = requireView().findViewById(R.id.cb_input_min_visible_time)
         cbMinVisibilityPercent = requireView().findViewById(R.id.cb_input_min_visible_percent)
+        cbCustomCTAEnabled = requireView().findViewById(R.id.cb_custom_cta_enabled)
+        cbInputCustomCTADelay = requireView().findViewById(R.id.cb_input_custom_cta_delay)
         customEndCardHTML = requireView().findViewById(R.id.input_custom_end_card_html)
         customCTAIconURL = requireView().findViewById(R.id.input_custom_cta_icon)
+        customCTADelay = requireView().findViewById(R.id.input_custom_cta_delay)
 
         cbInitialAudio.setOnCheckedChangeListener { p0, checked ->
             requireView().findViewById<RadioButton>(R.id.radio_sound_default).isEnabled = checked
@@ -174,6 +178,14 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
 
         cbAutoCloseRewarded.setOnCheckedChangeListener { p0, checked ->
             enableAutoCloseSwitchRewarded.isEnabled = checked
+        }
+
+        cbCustomCTAEnabled.setOnCheckedChangeListener { p0, checked ->
+            enableCustomCTASwitch.isEnabled = checked
+        }
+
+        cbInputCustomCTADelay.setOnCheckedChangeListener { p0, checked ->
+            customCTADelay.isEnabled = checked
         }
 
         cbEnableEndcard.setOnCheckedChangeListener { p0, checked ->
@@ -443,6 +455,14 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
 
         customEndCardHTML.setText(prefs.getCustomEndCardHTML())
         customCTAIconURL.setText(prefs.getCustomCTAIconURL())
+
+        //Custom CTA
+        cbCustomCTAEnabled.isChecked = adCustomizationsManager.custom_cta_enabled
+        enableCustomCTASwitch.isEnabled = adCustomizationsManager.custom_cta_enabled
+        enableCustomCTASwitch.isChecked = adCustomizationsManager.custom_cta_enabled_value
+        cbInputCustomCTADelay.isChecked = adCustomizationsManager.custom_cta_delay_enabled
+        customCTADelay.isEnabled = adCustomizationsManager.custom_cta_delay_enabled
+        customCTADelay.setText(adCustomizationsManager.custom_cta_delay_enabled_value)
     }
 
     private fun isValidCustomisation(): Boolean {
@@ -482,6 +502,20 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
             } else {
                 if (cbInputEndcardCloseButtonDelay.isChecked) {
                     val offset = endCardCloseButtonDelayInput.text.toString().trim().toDouble()
+                    if (offset > Int.MAX_VALUE) {
+                        isMaximumIntegerValueMessageDisplayed = true
+                        return false
+                    }
+                }
+            }
+
+            if (cbInputCustomCTADelay.isChecked && customCTADelay.text.toString().trim()
+                    .isEmpty()
+            ) {
+                return false
+            } else {
+                if (cbInputCustomCTADelay.isChecked) {
+                    val offset = customCTADelay.text.toString().trim().toDouble()
                     if (offset > Int.MAX_VALUE) {
                         isMaximumIntegerValueMessageDisplayed = true
                         return false
@@ -546,13 +580,15 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
             }
 
             if (cbContentInfoUrl.isChecked &&
-                !URLValidator.isValidURL(contentInfoUrlInput.text.toString().trim())) {
+                !URLValidator.isValidURL(contentInfoUrlInput.text.toString().trim())
+            ) {
                 isWrongUrlUsed = true
                 return false
             }
 
             if (cbContentInfoIconUrl.isChecked &&
-                !URLValidator.isValidURL(contentInfoIconUrlInput.text.toString().trim())) {
+                !URLValidator.isValidURL(contentInfoIconUrlInput.text.toString().trim())
+            ) {
                 isWrongUrlUsed = true
                 return false
             }
@@ -667,7 +703,11 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
                 cbMinVisibilityTime.isChecked,
                 minVisibilityTime.text.toString(),
                 cbMinVisibilityPercent.isChecked,
-                minVisibilityPercent.text.toString()
+                minVisibilityPercent.text.toString(),
+                cbCustomCTAEnabled.isChecked,
+                enableCustomCTASwitch.isChecked,
+                cbInputCustomCTADelay.isChecked,
+                customCTADelay.text.toString()
             )
             prefs.setAdCustomizationData(adCustomizationsManager.toJson())
             prefs.setCustomEndCardHTML(

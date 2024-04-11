@@ -3,12 +3,11 @@ package net.pubnative.lite.sdk.views.cta;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,13 +19,18 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import net.pubnative.lite.sdk.core.R;
 import net.pubnative.lite.sdk.utils.PNBitmapDownloader;
-import net.pubnative.lite.sdk.utils.ScreenDimensionsUtils;
 import net.pubnative.lite.sdk.utils.ViewUtils;
 import net.pubnative.lite.sdk.views.helpers.ImageHelper;
 import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
 
 public class HyBidCTAView extends FrameLayout {
+    private static final long ANIMATION_DURATION = 1000;
+    private static final float CORNER_RADIUS = 18;
+    private static final int COLOR_BACKGROUND = Color.argb(102, 0, 0, 0);
+    private static final int COLOR_BUTTON = Color.argb(255, 0, 122, 255);
+
 
     private CTAViewListener listener;
     private SimpleTimer mShowTimer;
@@ -34,10 +38,6 @@ public class HyBidCTAView extends FrameLayout {
     private ImageView icon;
     private TextView button;
 
-    private final int backgroundColor = Color.argb(102, 0, 0, 0);
-    private final int buttonColor = Color.argb(255, 0, 122, 255);
-
-    private final long animationDuration = 1000;
 
     private Boolean isLoaded = null;
     private Boolean showImmediately = false;
@@ -66,7 +66,7 @@ public class HyBidCTAView extends FrameLayout {
 
     private void initUi() {
         this.setVisibility(INVISIBLE);
-        this.setBackground(getRoundedDrawable(backgroundColor, 20));
+        this.setBackground(getRoundedDrawable(COLOR_BACKGROUND, CORNER_RADIUS));
     }
 
     private void initViews() {
@@ -85,17 +85,17 @@ public class HyBidCTAView extends FrameLayout {
             invokeClick();
         });
         this.icon.setContentDescription("ctaIcon");
-
         this.button = new TextView(getContext());
         this.button.setId(View.generateViewId());
-        this.button.setTextSize(18);
-        this.button.setPadding(100, 0, 100, 0);
+        int fontSize = (int) (getResources().getDimension(R.dimen.cta_font_size) / getResources().getDisplayMetrics().density);
+        this.button.setPadding(40, 0, 40, 0);
+        this.button.setTextSize(fontSize);
         this.button.setTextColor(Color.WHITE);
         this.button.setGravity(Gravity.CENTER);
         this.button.setAllCaps(true);
         this.button.setTypeface(null, Typeface.BOLD);
-        this.button.setBackground(getRoundedDrawable(buttonColor, 20));
-        LinearLayout.LayoutParams labelLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewUtils.asIntPixels(40, getContext()));
+        this.button.setBackground(getRoundedDrawable(COLOR_BUTTON, CORNER_RADIUS));
+        LinearLayout.LayoutParams labelLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewUtils.asIntPixels(40, getContext()));
         labelLp.setMarginStart(5);
         this.button.setLayoutParams(labelLp);
         this.button.setContentDescription("ctaButton");
@@ -103,7 +103,7 @@ public class HyBidCTAView extends FrameLayout {
         rootLayout.addView(this.button);
         this.setOnClickListener(view -> {
             invokeClick();
-        });;
+        });
         this.addView(rootLayout);
     }
 
@@ -120,11 +120,33 @@ public class HyBidCTAView extends FrameLayout {
         return shape;
     }
 
+    public void show(Bitmap bitmap, String buttonText, Integer delay) {
+        resetAll();
+
+        if (delay == null || delay == 0) {
+            showImmediately = true;
+        }
+
+        if (bitmap != null) {
+            icon.setImageBitmap(ImageHelper.getRoundedCornerBitmap(bitmap, (int) CORNER_RADIUS, ViewUtils.asIntPixels(40, getContext()), ViewUtils.asIntPixels(40, getContext())));
+            isLoaded = true;
+            if (showImmediately) show();
+        }
+
+        setButton(buttonText);
+
+        if (delay != null && delay > 0) {
+            showWithDelay(delay);
+        } else if (isLoaded != null && isLoaded) {
+            show();
+        }
+    }
+
     public void show(String iconUrl, String buttonText, Integer delay) {
 
         resetAll();
 
-        if(delay == null || delay == 0){
+        if (delay == null || delay == 0) {
             showImmediately = true;
         }
 
@@ -133,7 +155,7 @@ public class HyBidCTAView extends FrameLayout {
 
         if (delay != null && delay > 0) {
             showWithDelay(delay);
-        } else if(isLoaded != null && isLoaded){
+        } else if (isLoaded != null && isLoaded) {
             show();
         }
     }
@@ -176,15 +198,29 @@ public class HyBidCTAView extends FrameLayout {
     }
 
     public void show() {
-        if(isLoaded == null || !isLoaded || isVisible() || mShowTimer != null) return;
-        invokeShow();
+        if (isLoaded == null || !isLoaded || isVisible() || mShowTimer != null) return;
         Animation inFromRight = new TranslateAnimation(
                 Animation.RELATIVE_TO_PARENT, +1.0f,
                 Animation.RELATIVE_TO_PARENT, 0.0f,
                 Animation.RELATIVE_TO_PARENT, 0.0f,
                 Animation.RELATIVE_TO_PARENT, 0.0f);
-        inFromRight.setDuration(animationDuration);
+        inFromRight.setDuration(ANIMATION_DURATION);
         inFromRight.setInterpolator(new AccelerateInterpolator());
+        inFromRight.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                invokeShow();
+                HyBidCTAView.this.clearAnimation();
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
         this.setVisibility(VISIBLE);
         this.startAnimation(inFromRight);
     }
@@ -197,7 +233,7 @@ public class HyBidCTAView extends FrameLayout {
                 if (bitmap != null) {
                     icon.setImageBitmap(ImageHelper.getRoundedCornerBitmap(bitmap, 20, ViewUtils.asIntPixels(40, getContext()), ViewUtils.asIntPixels(40, getContext())));
                     isLoaded = true;
-                    if(showImmediately) show();
+                    if (showImmediately) show();
                 } else {
                     invokeFail();
                     isLoaded = false;
@@ -213,18 +249,18 @@ public class HyBidCTAView extends FrameLayout {
     }
 
     public void hide() {
-        if(mShowTimer != null) {
+        if (mShowTimer != null) {
             mShowTimer.cancel();
             mShowTimer = null;
         }
         this.setVisibility(INVISIBLE);
     }
 
-    public boolean isLoaded(){
+    public boolean isLoaded() {
         return isLoaded != null && isLoaded;
     }
 
-    public boolean isVisible(){
+    public boolean isVisible() {
         return this.getVisibility() == VISIBLE;
     }
 
@@ -247,10 +283,17 @@ public class HyBidCTAView extends FrameLayout {
             listener.onShow();
     }
 
-    private void resetAll(){
+    private void resetAll() {
         this.setVisibility(INVISIBLE);
         isLoaded = null;
         showImmediately = false;
+    }
+
+    public void destroy() {
+        if (mShowTimer != null) {
+            mShowTimer.cancel();
+            mShowTimer = null;
+        }
     }
 
     public interface CTAViewListener {
@@ -260,5 +303,10 @@ public class HyBidCTAView extends FrameLayout {
         void onShow();
 
         void onFail();
+    }
+
+    public float getScreenWidthInDP() {
+        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
+        return displayMetrics.widthPixels / displayMetrics.density;
     }
 }

@@ -20,6 +20,7 @@ class InFeedAdapter(val zoneId: String, val adListener: InFeedAdListener) :
     private val list: List<Quote> = SampleQuotes.list
     private var adSize: AdSize = AdSize.SIZE_300x250
     private var selectedApi: Int = R.id.radio_api_legacy
+    private var selectedFormat: Int = R.id.radio_format_html
 
     private var shouldLoadAd: Boolean = false
     private var autoRefresh: Boolean = false
@@ -47,7 +48,8 @@ class InFeedAdapter(val zoneId: String, val adListener: InFeedAdListener) :
                 adSize,
                 shouldLoadAd,
                 autoRefresh,
-                selectedApi
+                selectedApi,
+                selectedFormat
             )
 
             else -> {
@@ -67,9 +69,10 @@ class InFeedAdapter(val zoneId: String, val adListener: InFeedAdListener) :
         return TYPE_TEXT
     }
 
-    fun loadWithAd(adSize: AdSize, selectedApi: Int) {
+    fun loadWithAd(adSize: AdSize, selectedApi: Int, selectedFormat: Int) {
         this.adSize = adSize
         this.selectedApi = selectedApi
+        this.selectedFormat = selectedFormat
         notifyDataSetChanged()
         shouldLoadAd = true
     }

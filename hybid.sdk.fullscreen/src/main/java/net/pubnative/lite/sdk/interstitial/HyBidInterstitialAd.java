@@ -175,7 +175,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         }
     }
 
-    public void loadExchangeAd() {
+    public void loadExchangeAd(String adFormat) {
         //Timestamp
         addReportingKey(Reporting.Key.TIMESTAMP, String.valueOf(System.currentTimeMillis()));
         if (HyBid.getAppToken() != null)
@@ -203,10 +203,17 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
             if (!TextUtils.isEmpty(mAppToken)) {
                 mORTBRequestManager.setAppToken(mAppToken);
             }
+            if (!TextUtils.isEmpty(adFormat)) {
+                mORTBRequestManager.setAdFormat(adFormat);
+            }
             mORTBRequestManager.setZoneId(mZoneId);
             mORTBRequestManager.setRequestListener(this);
             mORTBRequestManager.requestAd();
         }
+    }
+
+    public void loadExchangeAd() {
+        loadExchangeAd(null);
     }
 
     public boolean show() {

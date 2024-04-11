@@ -12,6 +12,8 @@ public class Segment extends JsonModel {
     private String name;
     @BindField
     private String value;
+    @BindField
+    private String signal;
 
     public Segment() {
     }
@@ -42,5 +44,13 @@ public class Segment extends JsonModel {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public String getSignal() {
+        return signal;
+    }
+
+    public void setSignal(String signal) {
+        this.signal = signal;
     }
 }

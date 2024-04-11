@@ -1,6 +1,7 @@
 package net.pubnative.lite.sdk.vpaid;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -17,7 +18,10 @@ import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.AdCustomCTAManager;
 import net.pubnative.lite.sdk.utils.AdEndCardManager;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.PNBitmapDownloader;
+import net.pubnative.lite.sdk.utils.ViewUtils;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeVideoAdSession;
+import net.pubnative.lite.sdk.views.helpers.ImageHelper;
 import net.pubnative.lite.sdk.vpaid.enums.AdState;
 import net.pubnative.lite.sdk.vpaid.enums.VastError;
 import net.pubnative.lite.sdk.vpaid.helpers.AssetsLoader;
@@ -280,16 +284,39 @@ abstract class BaseVideoAdInternal {
     }
 
     private void prepare(AdParams adParams, String vastFileContent, IntegrationType integrationType) {
-
         if (adParams.isVpaid()) {
             ErrorLog.postError(getContext(), VastError.VAST_VERSION_NOT_SUPPORTED);
             onAdLoadFail(new PlayerInfo("Unsupported ad format"));
             return;
         }
+        CustomCTAData customCTAData = getCustomCTAData();
+        if (customCTAData != null && customCTAData.getIconURL() != null) {
+            new PNBitmapDownloader().download(customCTAData.getIconURL(), new PNBitmapDownloader.DownloadListener() {
+                @Override
+                public void onDownloadFinish(String url, Bitmap bitmap) {
+                    if (bitmap != null) {
+                        customCTAData.setBitmap(bitmap);
+                    }
+                    prepareAdController(adParams, integrationType, customCTAData);
+                }
+
+                @Override
+                public void onDownloadFailed(String url, Exception ex) {
+                    prepareAdController(adParams, integrationType, null);
+                }
+            });
+        } else {
+            prepareAdController(adParams, integrationType, null);
+        }
+    }
+
+    private void prepareAdController(AdParams adParams, IntegrationType integrationType, CustomCTAData customCTAData) {
+        if (customCTAData == null)
+            customCTAData = getCustomCTAData();
         mAdController = new VideoAdControllerVast(
                 this, adParams, getViewabilityAdSession(),
                 isFullscreen, this.mImpressionListener, mAdCloseButtonListener,
-                getCustomCTAData(),
+                customCTAData,
                 getCustomCTADelay(),
                 integrationType
         );
@@ -467,7 +494,7 @@ abstract class BaseVideoAdInternal {
     }
 
     void onDefaultEndCardClick(String endCardType) {
-        Logger.d(LOG_TAG, "Ad received custom end card click event");
+        Logger.d(LOG_TAG, "Ad received default end card click event");
         if (mVideoAdListener != null) {
             mVideoAdListener.onDefaultEndCardClick(endCardType);
         }
@@ -495,14 +522,14 @@ abstract class BaseVideoAdInternal {
     }
 
     void onEndCardLoadSuccess(Boolean isCustomEndCard) {
-        Logger.d(LOG_TAG, "Ad received custom end card click event");
+        Logger.d(LOG_TAG, "EndCard loading success");
         if (mVideoAdListener != null) {
             mVideoAdListener.onEndCardLoadSuccess(isCustomEndCard);
         }
     }
 
     void onEndCardLoadFail(Boolean isCustomEndCard) {
-        Logger.d(LOG_TAG, "Ad received custom end card click event");
+        Logger.d(LOG_TAG, "EndCard loading failed");
         if (mVideoAdListener != null) {
             mVideoAdListener.onEndCardLoadFail(isCustomEndCard);
         }

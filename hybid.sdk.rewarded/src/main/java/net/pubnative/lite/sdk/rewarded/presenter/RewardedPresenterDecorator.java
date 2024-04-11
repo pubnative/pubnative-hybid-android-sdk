@@ -44,7 +44,6 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
     private final RewardedPresenter mRewardedPresenter;
     private final AdTracker mAdTrackingDelegate;
     private final AdTracker mCustomEndCardTrackingDelegate;
-    private final AdTracker mDefaultEndCardTrackingDelegate;
     private final ReportingController mReportingController;
     private final RewardedPresenter.Listener mListener;
     private VideoListener mVideoListener;
@@ -60,12 +59,11 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
     private final IntegrationType mIntegrationType;
     private boolean mVideoAdSkipped = false;
 
-    public RewardedPresenterDecorator(RewardedPresenter rewardedPresenter, AdTracker adTrackingDelegate, AdTracker customEndCardTrackingDelegate, AdTracker defaultEndCardTrackingDelegate, ReportingController reportingController, RewardedPresenter.Listener listener, IntegrationType integrationType) {
+    public RewardedPresenterDecorator(RewardedPresenter rewardedPresenter, AdTracker adTrackingDelegate, AdTracker customEndCardTrackingDelegate, ReportingController reportingController, RewardedPresenter.Listener listener, IntegrationType integrationType) {
         mRewardedPresenter = rewardedPresenter;
         mRewardedPresenter.setVideoListener(this);
         mAdTrackingDelegate = adTrackingDelegate;
         mCustomEndCardTrackingDelegate = customEndCardTrackingDelegate;
-        mDefaultEndCardTrackingDelegate = defaultEndCardTrackingDelegate;
         mReportingController = reportingController;
         mListener = listener;
         mIntegrationType = integrationType;
@@ -398,7 +396,6 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             mReportingController.reportEvent(reportingEvent);
         }
 
-        mDefaultEndCardTrackingDelegate.trackImpression();
         mDefaultEndCardImpressionTracked = true;
     }
 
@@ -425,7 +422,6 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             mReportingController.reportEvent(reportingEvent);
         }
 
-        mDefaultEndCardTrackingDelegate.trackClick();
         mDefaultEndCardClickTracked = true;
     }
 

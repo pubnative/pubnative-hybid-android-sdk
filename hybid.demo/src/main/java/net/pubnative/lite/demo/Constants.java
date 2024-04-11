@@ -115,8 +115,6 @@ public class Constants {
     public static final String APP_TOKEN = "dde3c298b47648459f8ada4a982fa92d";
     public static final List<String> ZONE_ID_LIST = Arrays.asList(NATIVE_ZONE_ID, MRAID_320x50_ZONE_ID, MRAID_300x250_ZONE_ID, INTERSTITIAL_MRAID_ZONE_ID, MEDIUM_VIDEO_ZONE_ID, INTERSTITIAL_VIDEO_ZONE_ID, MRAID_728x90_ZONE_ID, MRAID_160x600_ZONE_ID, MRAID_250x250_ZONE_ID, MRAID_300x600_ZONE_ID, MRAID_320x100_ZONE_ID, MRAID_480x320_ZONE_ID, MRAID_300x50_ZONE_ID);
 
-    public static final String OGURY_KEY = "OGY-7B028F43E33F";
-
     public static final String COUNTDOWN_STYLE_DEFAULT = CountdownStyle.PIE_CHART.getId();
 
     public static final class IntentParams {

@@ -43,10 +43,11 @@ import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ContentInfo;
 import net.pubnative.lite.sdk.models.ContentInfoDisplay;
 import net.pubnative.lite.sdk.models.ContentInfoIconXPosition;
-import net.pubnative.lite.sdk.models.PositionX;
 import net.pubnative.lite.sdk.source.pnapi.R;
 import net.pubnative.lite.sdk.utils.PNBitmapDownloader;
 import net.pubnative.lite.sdk.utils.ViewUtils;
+
+import java.util.List;
 
 public class PNAPIContentInfoView extends FrameLayout {
 
@@ -55,9 +56,10 @@ public class PNAPIContentInfoView extends FrameLayout {
     private static final int MAX_HEIGHT_DP = 30;
     private ContentInfoIconXPosition contentInfoIconXPosition;
     private String iconClickURL = null;
+    private List<String> clickTrackers = null;
 
     public interface ContentInfoListener {
-        void onIconClicked();
+        void onIconClicked(List<String> clickTrackers);
 
         void onLinkClicked(String url);
     }
@@ -177,8 +179,19 @@ public class PNAPIContentInfoView extends FrameLayout {
         });
     }
 
+    public void setIconClickTrackers(List<String> clickTrackers) {
+        this.clickTrackers = clickTrackers;
+    }
+
+    public List<String> getIconClickTrackers() {
+        return clickTrackers;
+    }
+
     public void openLink() {
         if (mContentInfoListener == null || mContentInfoDisplay == ContentInfoDisplay.SYSTEM_BROWSER || !(getContext() instanceof Activity) || TextUtils.isEmpty(iconClickURL)) {
+            if (mContentInfoListener != null && clickTrackers != null) {
+                mContentInfoListener.onIconClicked(clickTrackers);
+            }
             try {
                 Intent openLink = new Intent(Intent.ACTION_VIEW);
                 openLink.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

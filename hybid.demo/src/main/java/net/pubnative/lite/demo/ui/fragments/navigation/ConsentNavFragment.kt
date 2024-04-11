@@ -15,11 +15,6 @@ class ConsentNavFragment : Fragment(R.layout.fragment_nav_consent) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        view.findViewById<TextView>(R.id.button_ogury_cmp).setOnClickListener {
-            val intent = Intent(activity, OguryCMPActivity::class.java)
-            startActivity(intent)
-        }
-
         view.findViewById<TextView>(R.id.button_google_cmp).setOnClickListener {
             val intent = Intent(activity, GoogleCMPActivity::class.java)
             startActivity(intent)

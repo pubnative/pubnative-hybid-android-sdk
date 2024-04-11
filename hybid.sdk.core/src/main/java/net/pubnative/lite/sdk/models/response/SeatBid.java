@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import java.util.List;
 
 public class SeatBid extends JsonModel {
+
     @BindField
     private List<Bid> bid;
     @BindField

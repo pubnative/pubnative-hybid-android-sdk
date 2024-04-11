@@ -629,9 +629,9 @@ public class MRAIDView extends FrameLayout {
         return true;
     }
 
-    ///////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////
     // These are methods in the MRAID API.
-    ///////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////
 
     @JavascriptMRAIDCallback
     protected void close() {
@@ -2172,13 +2172,18 @@ public class MRAIDView extends FrameLayout {
     }
 
     public void pause() {
-        if (mExpirationTimer != null) mExpirationTimer.pause();
-        if (mNativeCloseButtonTimer != null) mNativeCloseButtonTimer.pause();
+        if (mExpirationTimer != null) mExpirationTimer.pauseTimer();
+        if (mNativeCloseButtonTimer != null) mNativeCloseButtonTimer.pauseTimer();
     }
 
     public void resume() {
         if (mExpirationTimer != null) mExpirationTimer.resume();
         if (mNativeCloseButtonTimer != null) mNativeCloseButtonTimer.resume();
+    }
+
+    public void cancel() {
+        if (mExpirationTimer != null) mExpirationTimer.cancel();
+        if (mNativeCloseButtonTimer != null) mNativeCloseButtonTimer.cancel();
     }
 
     private void closeOnMainThread() {

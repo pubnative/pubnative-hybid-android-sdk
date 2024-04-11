@@ -272,13 +272,7 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
                     // Do nothing
                 }
             }
-
-            if (HyBid.isLocationTrackingEnabled() && mDeviceInfo.hasTrackingPermissions()
-                    && !limitTracking) {
-                adRequest.geofetch = "1";
-            } else {
-                adRequest.geofetch = "0";
-            }
+            adRequest.geofetch = "1";
         }
 
         if (!HyBid.isCoppaEnabled() && !limitTracking && !isCCPAOptOut
@@ -378,6 +372,11 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
     @Override
     public void setIntegrationType(IntegrationType integrationType) {
         this.mIntegrationType = integrationType;
+    }
+
+    @Override
+    public void setAdFormat(String adFormat) {
+        // Do nothing, not needed for APIv3 requests
     }
 
     private String getDefaultMetaFields() {

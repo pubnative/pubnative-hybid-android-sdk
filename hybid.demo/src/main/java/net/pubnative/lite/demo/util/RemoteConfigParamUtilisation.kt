@@ -171,6 +171,20 @@ object RemoteConfigParamUtilisation {
             configs.add(param)
         }
 
+        if (adCustomizationsManager.custom_cta_enabled) {
+            param = RemoteConfigParam()
+            param.name = "custom_cta_enabled"
+            param.value = adCustomizationsManager.custom_cta_enabled_value
+            configs.add(param)
+        }
+
+        if (adCustomizationsManager.custom_cta_delay_enabled) {
+            param = RemoteConfigParam()
+            param.name = "custom_cta_delay"
+            param.value = adCustomizationsManager.custom_cta_delay_enabled_value
+            configs.add(param)
+        }
+
         return configs
     }
 }

@@ -51,7 +51,7 @@ class AdCustomizationViewModel(application: Application) : AndroidViewModel(appl
     fun loadCustomizedAd(
         adm: String,
         adSize: AdSize?,
-        isReworded: Boolean,
+        isRewarded: Boolean,
         format: String,
         admType: String
     ) {
@@ -59,10 +59,10 @@ class AdCustomizationViewModel(application: Application) : AndroidViewModel(appl
         if (adSize == null) return
 
         if (adSize == AdSize.SIZE_INTERSTITIAL) {
-            if (isReworded) {
-                loadInterstitial(adm, format, admType)
-            } else {
+            if (isRewarded) {
                 loadRewarded(adm, format, admType)
+            } else {
+                loadInterstitial(adm, format, admType)
             }
         } else {
             loadBanner(adm, admType, adSize.width, adSize.height, format)
@@ -72,11 +72,10 @@ class AdCustomizationViewModel(application: Application) : AndroidViewModel(appl
     fun loadCustomizedAdFromUrl(
         adUrl: String,
         adSize: AdSize?,
-        isReworded: Boolean,
+        isRewarded: Boolean,
         format: String,
         admType: String
     ) {
-
         PNHttpClient.makeRequest(getApplication<Application>().applicationContext,
             adUrl,
             null,
@@ -86,7 +85,7 @@ class AdCustomizationViewModel(application: Application) : AndroidViewModel(appl
                 override fun onSuccess(
                     response: String?, headers: MutableMap<String?, MutableList<String>?>?
                 ) {
-                    loadCustomizedAd(response ?: "", adSize, isReworded, format, admType)
+                    loadCustomizedAd(response ?: "", adSize, isRewarded, format, admType)
                 }
 
                 override fun onFailure(error: Throwable) {

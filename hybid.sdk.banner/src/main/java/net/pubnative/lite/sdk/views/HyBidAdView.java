@@ -245,7 +245,10 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     }
 
     public void loadExchangeAd(String customUrl, String appToken, String zoneId, HyBidAdView.Listener listener) {
+        loadExchangeAd(customUrl, appToken, zoneId, listener, null);
+    }
 
+    public void loadExchangeAd(String customUrl, String appToken, String zoneId, HyBidAdView.Listener listener, String adFormat) {
         mAppToken = appToken;
         mZoneId = zoneId;
         mListener = listener;
@@ -262,11 +265,17 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                     if (!TextUtils.isEmpty(appToken)) {
                         mORTBRequestManager.setAppToken(appToken);
                     }
+                    if (!TextUtils.isEmpty(adFormat)) {
+                        mORTBRequestManager.setAdFormat(adFormat);
+                    }
                     mORTBRequestManager.setZoneId(zoneId);
                     mORTBRequestManager.setRequestListener(this);
                     mORTBRequestManager.requestAd();
                 }
             } else {
+                if (!TextUtils.isEmpty(adFormat)) {
+                    mORTBRequestManager.setAdFormat(adFormat);
+                }
                 mORTBRequestManager.setCustomUrl(customUrl);
                 mORTBRequestManager.setZoneId(zoneId);
                 mORTBRequestManager.setRequestListener(this);

@@ -91,8 +91,9 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         String CLICK = "click";
         String CUSTOM_END_CARD_IMPRESSION = "custom_endcard_impression";
         String CUSTOM_END_CARD_CLICK = "custom_endcard_click";
-        String DEFAULT_END_CARD_IMPRESSION = "default_endcard_impression";
-        String DEFAULT_END_CARD_CLICK = "default_endcard_click";
+        String CUSTOM_CTA_SHOW = "custom_cta_show";
+        String CUSTOM_CTA_CLICK = "custom_cta_click";
+        String CUSTOM_CTA_ENDCARD_CLICK = "custom_cta_endcard_click";
     }
 
     public enum AdType {
@@ -265,12 +266,13 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         result.setContentInfoListener(listener);
         result.setContentInfoDisplay(display);
         result.setOnClickListener(v -> {
-            if (!TextUtils.isEmpty(result.getIconClickURL()))
+            if (!TextUtils.isEmpty(result.getIconClickURL())) {
                 if (iconAction == ContentInfoIconAction.OPEN) {
                     ((PNAPIContentInfoView) v).openLink();
                 } else {
                     ((PNAPIContentInfoView) v).openLayout();
                 }
+            }
         });
 
         return result;
@@ -334,6 +336,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             result.setIconId(R.id.ic_context_icon_custom);
             result.setIconUrl(contentInfo.getIconUrl());
             result.setIconClickUrl(contentInfo.getLinkUrl());
+            result.setIconClickTrackers(contentInfo.getClickTrackers());
             if (TextUtils.isEmpty(contentInfo.getText())) {
                 result.setContextText(CONTENT_INFO_TEXT);
             } else {

@@ -670,9 +670,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
 
     @Override
     public void skipEndCard() {
-
         EndCardData endCardData = getNextEndCard();
-        Boolean isLastEndCard = !hasNextEndCard();
 
         if (endCardData == null || !isEndCardShowable() || (endCardData.getType() == EndCardData.Type.STATIC_RESOURCE && TextUtils.isEmpty(mImageUri))) {
             closeSelf();
@@ -681,7 +679,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
 
         if (mBaseAdInternal != null) {
             mBaseAdInternal.onEndCardSkipped(isLastEndCardCustom);
-            mViewControllerVast.showEndCard(endCardData, mImageUri, isLastEndCard, mBaseAdInternal::onAdCloseButtonVisible, mBaseAdInternal::onBackButtonClickable);
+            mViewControllerVast.showLastCustomEndCard(endCardData, mImageUri, mBaseAdInternal::onAdCloseButtonVisible, mBaseAdInternal::onBackButtonClickable);
         }
     }
 
@@ -823,7 +821,9 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
         if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
             url = trackVideoClicks();
         } else {
-            url = trackEndCardClicks();
+            if (!isCustomEndCard) {
+                url = trackEndCardClicks();
+            }
 
             String videoClickUrl = trackVideoClicks();
             if (url == null) {

@@ -72,7 +72,6 @@ public class InterstitialPresenterFactory {
                 new InterstitialPresenterDecorator(interstitialPresenter,
                         new AdTracker(ad.getBeacons(Ad.Beacon.IMPRESSION), ad.getBeacons(Ad.Beacon.CLICK)),
                         new AdTracker(ad.getBeacons(Ad.Beacon.CUSTOM_END_CARD_IMPRESSION), ad.getBeacons(Ad.Beacon.CUSTOM_END_CARD_CLICK)),
-                        new AdTracker(ad.getBeacons(Ad.Beacon.DEFAULT_END_CARD_IMPRESSION), ad.getBeacons(Ad.Beacon.DEFAULT_END_CARD_CLICK)),
                         HyBid.getReportingController(),
                         interstitialPresenterListener, integrationType);
         interstitialPresenter.setListener(interstitialPresenterDecorator);

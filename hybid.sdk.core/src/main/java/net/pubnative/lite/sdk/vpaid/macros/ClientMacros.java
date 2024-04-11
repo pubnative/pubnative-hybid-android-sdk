@@ -37,8 +37,12 @@ public class ClientMacros {
         String playerVersion = BuildConfig.SDK_VERSION;
         String pluginName = "HyBid VAST Player";
         mClientUserAgent = EncodingUtils.urlEncode(String.format(Locale.ENGLISH, "%s/%s %s/%s", playerName, playerVersion, pluginName, playerVersion));
-        //TODO get device user agent
-        mDeviceUserAgent = EncodingUtils.urlEncode("");
+        if (deviceInfo != null && deviceInfo.getUserAgent() != null && !TextUtils.isEmpty(deviceInfo.getUserAgent())) {
+            mDeviceUserAgent = EncodingUtils.urlEncode(deviceInfo.getUserAgent());
+        } else{
+
+            mDeviceUserAgent = String.valueOf(MacroDefaultValues.VALUE_UNKNOWN);
+        }
     }
 
     public String processUrl(String url) {

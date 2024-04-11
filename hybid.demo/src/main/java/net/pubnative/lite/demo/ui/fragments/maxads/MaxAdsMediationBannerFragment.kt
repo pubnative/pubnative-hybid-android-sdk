@@ -36,6 +36,8 @@ class MaxAdsMediationBannerFragment : Fragment(R.layout.fragment_maxads_banner),
 
         maxBanner = MaxAdView(adUnitId, requireActivity())
         maxBanner?.setListener(this)
+        maxBanner?.setExtraParameter("allow_pause_auto_refresh_immediately", "true")
+        maxBanner?.stopAutoRefresh()
 
         val width = AppLovinSdkUtils.dpToPx(requireContext(), 320)
         val height = AppLovinSdkUtils.dpToPx(requireContext(), 50)
@@ -58,6 +60,7 @@ class MaxAdsMediationBannerFragment : Fragment(R.layout.fragment_maxads_banner),
     // ---------------- MaxAds Banner Listener ---------------------
     override fun onAdLoaded(ad: MaxAd) {
         Log.d(TAG, "onAdLoaded")
+        displayLogs()
     }
 
     override fun onAdLoadFailed(adUnitId: String, error: MaxError) {

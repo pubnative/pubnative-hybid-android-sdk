@@ -28,14 +28,8 @@ import android.util.Log
 import android.webkit.WebView
 import androidx.multidex.MultiDex
 import androidx.multidex.MultiDexApplication
-import com.applovin.sdk.AppLovinSdk
-import com.applovin.sdk.AppLovinSdkConfiguration
-import com.chartboost.heliumsdk.HeliumInitializationOptions
-import com.chartboost.heliumsdk.HeliumSdk
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.initialization.InitializationStatus
-import com.ogury.sdk.Ogury
-import com.ogury.sdk.OguryConfiguration
 import net.pubnative.lite.demo.managers.AdCustomizationPrefs
 import net.pubnative.lite.demo.managers.AdCustomizationsManager
 import net.pubnative.lite.demo.managers.AnalyticsSubscriber.eventCallback
@@ -138,22 +132,6 @@ class HyBidDemoApplication : MultiDexApplication() {
         }
 
         MobileAds.initialize(this) { initializationStatus: InitializationStatus? -> }
-        AppLovinSdk.getInstance(this).mediationProvider = "max"
-        AppLovinSdk.initializeSdk(this) { config: AppLovinSdkConfiguration? -> }
-        val oguryConfigBuilder = OguryConfiguration.Builder(this, Constants.OGURY_KEY)
-        Ogury.start(oguryConfigBuilder.build())
-
-        //todo : if we want to see customized skip and close button icons ,we have to decomment lines below to see one or both of them
-//            HyBid.setCloseXmlResource(R.mipmap.close_sample, R.mipmap.close_sample)
-//            HyBid.setSkipXmlResource(R.mipmap.skip_sample)
-
-//        // NumberEight SDK crashes below API level 26.
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            val apiToken: APIToken = NumberEight.start(
-//                Constants.NUMBEREIGHT_API_TOKEN, this, ConsentOptions.withDefault()
-//            )
-//            startRecording(apiToken)
-//        }
 
         manageAdCustomizationParams()
     }
@@ -207,7 +185,11 @@ class HyBidDemoApplication : MultiDexApplication() {
                 false,
                 "0",
                 false,
-                "0.0"
+                "0.0",
+                false,
+                false,
+                false,
+                "2"
             )
             prefs.setAdCustomizationData(adCustomizationsManager.toJson())
         }
@@ -236,7 +218,8 @@ class HyBidDemoApplication : MultiDexApplication() {
                 .build()
 
             val dfpSettings =
-                DFPSettings.Builder().mediationBannerAdUnitId(Constants.DFP_MEDIATION_BANNER_AD_UNIT)
+                DFPSettings.Builder()
+                    .mediationBannerAdUnitId(Constants.DFP_MEDIATION_BANNER_AD_UNIT)
                     .mediationMediumAdUnitId(Constants.DFP_MEDIATION_MEDIUM_AD_UNIT)
                     .mediationLeaderboardAdUnitId(Constants.DFP_MEDIATION_LEADERBOARD_AD_UNIT)
                     .mediationInterstitialAdUnitId(Constants.DFP_MEDIATION_INTERSTITIAL_AD_UNIT)

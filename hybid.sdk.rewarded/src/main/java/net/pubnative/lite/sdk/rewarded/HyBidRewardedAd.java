@@ -159,7 +159,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
         }
     }
 
-    public void loadExchangeAd() {
+    public void loadExchangeAd(String adFormat) {
         //Timestamp
         addReportingKey(Reporting.Key.TIMESTAMP, String.valueOf(System.currentTimeMillis()));
         if (HyBid.getAppToken() != null)
@@ -186,10 +186,17 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
             if (!TextUtils.isEmpty(mAppToken)) {
                 mORTBRequestManager.setAppToken(mAppToken);
             }
+            if (!TextUtils.isEmpty(adFormat)) {
+                mORTBRequestManager.setAdFormat(adFormat);
+            }
             mORTBRequestManager.setZoneId(mZoneId);
             mORTBRequestManager.setRequestListener(this);
             mORTBRequestManager.requestAd();
         }
+    }
+
+    public void loadExchangeAd() {
+        loadExchangeAd(null);
     }
 
     public void show() {

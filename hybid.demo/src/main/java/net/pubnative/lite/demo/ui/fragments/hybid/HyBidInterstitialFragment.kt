@@ -23,10 +23,9 @@
 package net.pubnative.lite.demo.ui.fragments.hybid
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Button
-import android.widget.CheckBox
+import android.widget.LinearLayout
 import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
@@ -55,9 +54,11 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
     private lateinit var showButton: Button
     private lateinit var cachingCheckbox: SwitchCompat
     private lateinit var apiRadioGroup: RadioGroup
+    private lateinit var formatRadioGroup: RadioGroup
     private lateinit var errorCodeView: TextView
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
+    private lateinit var adFormatLayout: LinearLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -77,6 +78,8 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
         cachingCheckbox = view.findViewById(R.id.check_caching)
         showButton = view.findViewById(R.id.button_show)
         apiRadioGroup = view.findViewById(R.id.group_api_type)
+        formatRadioGroup = view.findViewById(R.id.group_ad_format)
+        adFormatLayout = view.findViewById(R.id.linear_ad_format)
         prepareButton.isEnabled = false
         showButton.isEnabled = false
     }
@@ -120,6 +123,14 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
                 requireActivity(), creativeIdView.text.toString()
             )
         }
+
+        apiRadioGroup.setOnCheckedChangeListener { _, checkedId ->
+            if (checkedId == R.id.radio_api_ortb) {
+                adFormatLayout.visibility = View.VISIBLE
+            } else {
+                adFormatLayout.visibility = View.GONE
+            }
+        }
     }
 
     private fun fireLoadClicked() {
@@ -127,7 +138,8 @@ class HyBidInterstitialFragment : Fragment(R.layout.fragment_hybid_interstitial)
         cleanLogs()
         val activity = activity as TabActivity
         activity.notifyAdCleaned()
-        interstitialViewModel.loadAd(activity, zoneId, apiRadioGroup.checkedRadioButtonId)
+        interstitialViewModel.loadAd(activity, zoneId, apiRadioGroup.checkedRadioButtonId,
+            formatRadioGroup.checkedRadioButtonId)
     }
 
     private fun initObservers() {

@@ -52,6 +52,7 @@ public class OpenRTBAdRequestFactory extends BaseRequestFactory implements AdReq
     private boolean mLimitTracking;
     private String mAdvertisingId;
     private boolean mIsCCPAOptOut;
+    private String mAdFormat;
 
     public OpenRTBAdRequestFactory() {
         this(HyBid.getDeviceInfo(), HyBid.getLocationManager(), HyBid.getUserDataManager(), new DisplayManager(), HyBid.getTopicManager());
@@ -121,6 +122,11 @@ public class OpenRTBAdRequestFactory extends BaseRequestFactory implements AdReq
         this.mIntegrationType = integrationType;
     }
 
+    @Override
+    public void setAdFormat(String adFormat) {
+        this.mAdFormat = adFormat;
+    }
+
     private void processAdvertisingId(String appToken, String zoneId, AdSize adSize, String advertisingId, boolean limitTracking, boolean paAvailable, PNAdRequestFactory.Callback callback) {
         if (callback != null) {
             callback.onRequestCreated(buildRequest(appToken, zoneId, adSize, advertisingId, limitTracking, mIntegrationType, mMediationVendor, 0, paAvailable));
@@ -129,12 +135,20 @@ public class OpenRTBAdRequestFactory extends BaseRequestFactory implements AdReq
 
     List<Imp> getImpressions(AdSize adSize, String mediationVendor, IntegrationType integrationType) {
         List<Imp> imps = new ArrayList<>();
+        boolean isVideoCompatible = adSize == AdSize.SIZE_INTERSTITIAL || adSize == AdSize.SIZE_300x250
+                || adSize == AdSize.SIZE_320x480 || adSize == AdSize.SIZE_480x320
+                || adSize == AdSize.SIZE_768x1024 || adSize == AdSize.SIZE_1024x768;
 
-        if (adSize == AdSize.SIZE_INTERSTITIAL || adSize == AdSize.SIZE_300x250 || adSize == AdSize.SIZE_320x480 || adSize == AdSize.SIZE_480x320 || adSize == AdSize.SIZE_768x1024 || adSize == AdSize.SIZE_1024x768) {
+        if (mAdFormat != null && mAdFormat.equals("video") && isVideoCompatible) {
             imps.add(getVideoImpression(adSize, mediationVendor, integrationType));
+        } else if (mAdFormat != null && mAdFormat.equals("html")) {
+            imps.add(getBannerImpression(adSize, mediationVendor, integrationType));
+        } else {
+            if (isVideoCompatible) {
+                imps.add(getVideoImpression(adSize, mediationVendor, integrationType));
+            }
+            imps.add(getBannerImpression(adSize, mediationVendor, integrationType));
         }
-        imps.add(getBannerImpression(adSize, mediationVendor, integrationType));
-
         return imps;
     }
 

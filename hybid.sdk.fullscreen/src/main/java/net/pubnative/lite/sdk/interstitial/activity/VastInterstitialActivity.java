@@ -16,9 +16,11 @@ import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
+import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.AdEndCardManager;
+import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.views.CloseableContainer;
 import net.pubnative.lite.sdk.vpaid.AdCloseButtonListener;
@@ -40,6 +42,8 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
     private boolean mHasEndCard = false;
 
     VastActivityInteractor vastActivityInteractor;
+    private AdTracker mCustomCTATracker;
+    private AdTracker mCustomCTAEndcardTracker;
 
     @SuppressLint("SourceLockedOrientationActivity")
     @Override
@@ -56,6 +60,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
 
         vastActivityInteractor = VastActivityInteractor.getInstance();
         vastActivityInteractor.activityStarted();
+        initiateCustomCTAAdTrackers();
 
         try {
             hideInterstitialCloseButton();
@@ -315,7 +320,10 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
             if (isCustomEndCard && mLoadCustomEndCardTracked) return;
             if (!isCustomEndCard && mLoadDefaultEndCardTracked) return;
             if (getBroadcastSender() != null) {
-                if (isCustomEndCard) mLoadCustomEndCardTracked = true;
+                if (isCustomEndCard) {
+                    hideContentInfo();
+                    mLoadCustomEndCardTracked = true;
+                }
                 else mLoadDefaultEndCardTracked = true;
                 Bundle extras = new Bundle();
                 extras.putBoolean(Reporting.Key.IS_CUSTOM_END_CARD, isCustomEndCard);
@@ -337,7 +345,6 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
 
         @Override
         public void onCustomCTACLick(boolean isEndcardVisible) {
-
             String eventType = (isEndcardVisible) ? Reporting.EventType.CUSTOM_CTA_ENDCARD_CLICK : Reporting.EventType.CUSTOM_CTA_CLICK;
             if (mCustomCTAClickTrackedEvents.contains(eventType)) return;
 
@@ -355,6 +362,15 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
             reportingEvent.setTimestamp(System.currentTimeMillis());
             if (HyBid.getReportingController() != null) {
                 HyBid.getReportingController().reportEvent(reportingEvent);
+            }
+            if (eventType.equals(Reporting.EventType.CUSTOM_CTA_ENDCARD_CLICK)) {
+                if (mCustomCTAEndcardTracker != null) {
+                    mCustomCTAEndcardTracker.trackClick();
+                }
+            } else {
+                if (mCustomCTATracker != null) {
+                    mCustomCTATracker.trackClick();
+                }
             }
             mCustomCTAClickTrackedEvents.add(eventType);
         }
@@ -376,6 +392,9 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
             reportingEvent.setTimestamp(System.currentTimeMillis());
             if (HyBid.getReportingController() != null) {
                 HyBid.getReportingController().reportEvent(reportingEvent);
+            }
+            if (mCustomCTATracker != null) {
+                mCustomCTATracker.trackClick();
             }
             mCustomCTAImpressionTracked = true;
         }
@@ -496,6 +515,13 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
         CloseableContainer closeableContainer = getCloseableContainer();
         if (closeableContainer != null) {
             closeableContainer.setCloseVisible(true);
+        }
+    }
+
+    private void initiateCustomCTAAdTrackers() {
+        if (getAd() != null) {
+            mCustomCTATracker = new AdTracker(getAd().getBeacons(Ad.Beacon.CUSTOM_CTA_SHOW), getAd().getBeacons(Ad.Beacon.CUSTOM_CTA_CLICK));
+            mCustomCTAEndcardTracker = new AdTracker(null, getAd().getBeacons(Ad.Beacon.CUSTOM_CTA_ENDCARD_CLICK));
         }
     }
 }

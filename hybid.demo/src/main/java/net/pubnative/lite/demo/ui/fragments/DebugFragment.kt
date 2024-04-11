@@ -220,12 +220,19 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
 
                 if (it != null) {
                     intent.putExtra("requestUrl", it)
+                    addOrtbRequestBody(intent)
                     context?.startActivity(intent)
                     isOpenedUrlInspector = true
                 } else {
                     Toast.makeText(context, "A request must be done first", Toast.LENGTH_SHORT).show()
                 }
             }
+    }
+
+    private fun addOrtbRequestBody(intent: Intent) {
+        if (!postBodyView!!.text.isNullOrEmpty()) {
+            intent.putExtra("requestBody", postBodyView!!.text.toString())
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

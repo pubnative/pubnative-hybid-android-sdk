@@ -113,14 +113,18 @@ class InterstitialViewModel(application: Application) : AndroidViewModel(applica
     private val _creativeIdLiveData = MutableLiveData<String>()
     val creativeIdLiveData: LiveData<String> = _creativeIdLiveData
 
-    fun loadAd(activity: Activity, zoneId: String?, selectedApi: Int) {
+    fun loadAd(activity: Activity, zoneId: String?, selectedApi: Int, selectedFormat: Int) {
         clearErrors()
         interstitial = HyBidInterstitialAd(activity, zoneId, interstitialAdListener)
         interstitial?.isAutoCacheOnLoad = cachingEnabled
         //Optional to track video events
         interstitial?.setVideoListener(videoListener)
         if (selectedApi == R.id.radio_api_ortb) {
-            interstitial?.loadExchangeAd()
+            if (selectedFormat == R.id.radio_format_html) {
+                interstitial?.loadExchangeAd("html")
+            } else {
+                interstitial?.loadExchangeAd("video")
+            }
         } else {
             interstitial?.load()
         }

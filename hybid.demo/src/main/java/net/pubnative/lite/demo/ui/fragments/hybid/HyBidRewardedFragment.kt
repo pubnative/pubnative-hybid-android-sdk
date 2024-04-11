@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.LinearLayout
 import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
@@ -31,9 +32,11 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
     private lateinit var showButton: Button
     private lateinit var cachingCheckbox: SwitchCompat
     private lateinit var apiRadioGroup: RadioGroup
+    private lateinit var formatRadioGroup: RadioGroup
     private lateinit var errorCodeView: TextView
     private lateinit var errorView: TextView
     private lateinit var creativeIdView: TextView
+    private lateinit var adFormatLayout: LinearLayout
     private var rewardedAd: HyBidRewardedAd? = null
     private var cachingEnabled: Boolean = true
 
@@ -48,6 +51,8 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
         showButton = view.findViewById(R.id.button_show)
         cachingCheckbox = view.findViewById(R.id.check_caching)
         apiRadioGroup = view.findViewById(R.id.group_api_type)
+        formatRadioGroup = view.findViewById(R.id.group_ad_format)
+        adFormatLayout = view.findViewById(R.id.linear_ad_format)
         prepareButton.isEnabled = false
         showButton.isEnabled = false
 
@@ -87,6 +92,14 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
                 creativeIdView.text.toString()
             )
         }
+
+        apiRadioGroup.setOnCheckedChangeListener { _, checkedId ->
+            if (checkedId == R.id.radio_api_ortb) {
+                adFormatLayout.visibility = View.VISIBLE
+            } else {
+                adFormatLayout.visibility = View.GONE
+            }
+        }
     }
 
 
@@ -95,7 +108,11 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
         rewardedAd?.setVideoListener(this)
         rewardedAd?.isAutoCacheOnLoad = cachingEnabled
         if (apiRadioGroup.checkedRadioButtonId == R.id.radio_api_ortb) {
-            rewardedAd?.loadExchangeAd()
+            if (formatRadioGroup.checkedRadioButtonId == R.id.radio_format_html) {
+                rewardedAd?.loadExchangeAd("html")
+            } else {
+                rewardedAd?.loadExchangeAd("video")
+            }
         } else {
             rewardedAd?.load()
         }

@@ -47,6 +47,7 @@ import net.pubnative.lite.sdk.models.PositionX;
 import net.pubnative.lite.sdk.models.PositionY;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
+import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.URLValidator;
@@ -105,6 +106,9 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
     private Boolean mCustomEndCardCloseTracked = false;
     private IntegrationType mIntegrationType;
 
+    private AdTracker mCustomCTATracker;
+    private AdTracker mCustomCTAEndcardTracker;
+
     public VastAdPresenter(Context context, Ad ad, AdSize adSize, ImpressionTrackingMethod trackingMethod, IntegrationType integrationType) {
         mContext = context;
         mAdSize = adSize;
@@ -126,6 +130,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
         videoVisibilityManager = VideoVisibilityManager.getInstance();
         videoVisibilityManager.addCallback(this);
         mIntegrationType = integrationType;
+        initiateCustomCTAAdTrackers();
     }
 
     @Override
@@ -396,9 +401,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
 
         @Override
         public void onAdDismissed(int progressPercentage) {
-            if (mContentInfo != null) {
-                mContentInfo.setVisibility(View.GONE);
-            }
+            hideContentInfo();
             if (mVideoListener != null) {
                 mVideoListener.onVideoDismissed(progressPercentage);
             }
@@ -489,6 +492,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
         @Override
         public void onCustomEndCardShow(String endCardType) {
             if (!mCustomEndCardImpressionTracked) {
+                hideContentInfo();
                 ReportingEvent reportingEvent = new ReportingEvent();
                 reportingEvent.setTimestamp(System.currentTimeMillis());
                 reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
@@ -558,6 +562,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
         public void onCustomCTACLick(boolean isEndcardVisible) {
             String eventType = (isEndcardVisible) ? Reporting.EventType.CUSTOM_CTA_ENDCARD_CLICK : Reporting.EventType.CUSTOM_CTA_CLICK;
             if (mCustomCTAClickTrackedEvents.contains(eventType)) return;
+
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(eventType);
             reportingEvent.setPlatform(Reporting.Platform.ANDROID);
@@ -570,6 +575,15 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
             }
             if (HyBid.getReportingController() != null) {
                 HyBid.getReportingController().reportEvent(reportingEvent);
+            }
+            if (eventType.equals(Reporting.EventType.CUSTOM_CTA_ENDCARD_CLICK)) {
+                if (mCustomCTAEndcardTracker != null) {
+                    mCustomCTAEndcardTracker.trackClick();
+                }
+            } else {
+                if (mCustomCTATracker != null) {
+                    mCustomCTATracker.trackImpression();
+                }
             }
             mCustomCTAClickTrackedEvents.add(eventType);
         }
@@ -589,6 +603,9 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
             }
             if (HyBid.getReportingController() != null) {
                 HyBid.getReportingController().reportEvent(reportingEvent);
+            }
+            if (mCustomCTATracker != null) {
+                mCustomCTATracker.trackImpression();
             }
             mCustomCTAImpressionTracked = true;
         }
@@ -660,8 +677,12 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
 
     // Content info listener
     @Override
-    public void onIconClicked() {
-        //TODO report content info icon clicked
+    public void onIconClicked(List<String> clickTrackers) {
+        if (clickTrackers != null && !clickTrackers.isEmpty()) {
+            for (int i=0; i < clickTrackers.size(); i++) {
+                EventTracker.post(mContext, clickTrackers.get(i), null, false);
+            }
+        }
     }
 
 
@@ -719,6 +740,19 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
         reportingEvent.setTimestamp(System.currentTimeMillis());
         if (HyBid.getReportingController() != null) {
             HyBid.getReportingController().reportEvent(reportingEvent);
+        }
+    }
+
+    private void initiateCustomCTAAdTrackers() {
+        if (mAd != null) {
+            mCustomCTATracker = new AdTracker(mAd.getBeacons(Ad.Beacon.CUSTOM_CTA_SHOW), mAd.getBeacons(Ad.Beacon.CUSTOM_CTA_CLICK));
+            mCustomCTAEndcardTracker = new AdTracker(null, mAd.getBeacons(Ad.Beacon.CUSTOM_CTA_ENDCARD_CLICK));
+        }
+    }
+
+    private void hideContentInfo() {
+        if (mContentInfo != null) {
+            mContentInfo.setVisibility(View.GONE);
         }
     }
 

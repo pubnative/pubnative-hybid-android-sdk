@@ -185,7 +185,6 @@
     <string name="action_remove">Remove</string>
     <string name="action_delete">Delete</string>
     <string name="action_delete_all_gpp_data">Delete all gpp data</string>
-    <string name="title_ogury_cmp">Ogury CMP</string>
     <string name="title_google_cmp">Funding Choices CMP</string>
     <string name="title_consent_strings">Consent Strings</string>
     <string name="title_vgi_id">VGI ID</string>
@@ -233,6 +232,9 @@
     <string name="error">Error:</string>
     <string name="banner_ad_size">Ad Size:</string>
     <string name="api_type">API:</string>
+    <string name="ad_format">Ad Format:</string>
+    <string name="ad_format_video">Video</string>
+    <string name="ad_format_html">HTML</string>
     <string name="api_v3">APIv3</string>
     <string name="ortb">OpenRTB</string>
     <string name="request_url">PubNative request url:</string>
@@ -362,4 +364,6 @@
     <string name="custom_end_card">Custom EndCard</string>
     <string name="custom_end_card_html">Custom End Card HTML</string>
     <string name="hint_custom_cta_icon">Custom CTA Icon</string>
+    <string name="custom_cta_enabled">Custom CTA Enabled</string>
+    <string name="custom_cta_delay">Custom CTA Delay</string>
 </resources>
