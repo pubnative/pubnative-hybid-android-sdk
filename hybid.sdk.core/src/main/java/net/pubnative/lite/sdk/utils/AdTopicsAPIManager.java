@@ -2,34 +2,26 @@ package net.pubnative.lite.sdk.utils;
 
 import android.content.Context;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.prefs.HyBidPreferences;
 
 public class AdTopicsAPIManager {
 
-    HyBidPreferences preferences;
-
-    private final Ad ad;
-
-    public AdTopicsAPIManager(Ad ad, Context context) {
-        this.ad = ad;
-        if (context != null) {
-            preferences = new HyBidPreferences(context);
+    public static void setTopicsAPIEnabled(Context context, Ad ad) {
+        if (context == null || ad == null) return;
+        Boolean adIsEnabled = ad.isTopicsAPIEnabled();
+        boolean isEnabled = HyBid.isTopicsApiEnabled();
+        if (adIsEnabled != null && adIsEnabled != isEnabled) {
+            HyBidPreferences preferences = new HyBidPreferences(context);
+            preferences.setTopicsAPIEnabled(adIsEnabled);
+            HyBid.setTopicsApiEnabled(adIsEnabled);
         }
     }
 
-    public Boolean isTopicsAPIEnabled() {
-        if (ad == null) return false;
-        Boolean isEnabled = ad.isTopicsAPIEnabled();
-        if (isEnabled == null) {
-            if (preferences != null)
-                isEnabled = preferences.isTopicsAPIEnabled();
-        } else {
-            if (preferences != null)
-                preferences.setTopicsAPIEnabled(isEnabled);
-        }
-        if (isEnabled == null)
-            isEnabled = false;
-        return isEnabled;
+    public static Boolean isTopicsAPIEnabled(Context context) {
+        if (context == null) return null;
+        HyBidPreferences preferences = new HyBidPreferences(context);
+        return preferences.isTopicsAPIEnabled();
     }
 }

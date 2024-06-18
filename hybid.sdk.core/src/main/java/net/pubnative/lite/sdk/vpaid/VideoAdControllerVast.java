@@ -821,7 +821,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
         if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
             url = trackVideoClicks();
         } else {
-            if (!isCustomEndCard) {
+            if (!isCustomEndCard && TextUtils.isEmpty(url)) {
                 url = trackEndCardClicks();
             }
 

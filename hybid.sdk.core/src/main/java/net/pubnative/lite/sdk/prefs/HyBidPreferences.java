@@ -28,7 +28,7 @@ public class HyBidPreferences {
     }
 
     public void setTopicsAPIEnabled(Boolean isEnabled) {
-        if (sharedPreferences != null) {
+        if (sharedPreferences != null && isEnabled != null) {
             editor = sharedPreferences.edit();
             editor.putBoolean(Key.TOPICS_API_ENABLED, isEnabled);
             editor.commit();
@@ -36,6 +36,8 @@ public class HyBidPreferences {
     }
 
     public Boolean isTopicsAPIEnabled() {
+        if (sharedPreferences == null) return null;
+        if (!sharedPreferences.contains(Key.TOPICS_API_ENABLED)) return null;
         return sharedPreferences.getBoolean(Key.TOPICS_API_ENABLED, false);
     }
 

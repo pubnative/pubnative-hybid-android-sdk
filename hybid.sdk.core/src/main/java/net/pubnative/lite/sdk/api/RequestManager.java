@@ -43,6 +43,7 @@ import net.pubnative.lite.sdk.models.PNAdRequest;
 import net.pubnative.lite.sdk.models.PNAdRequestFactory;
 import net.pubnative.lite.sdk.models.RemoteConfigFeature;
 import net.pubnative.lite.sdk.models.request.OpenRTBAdRequest;
+import net.pubnative.lite.sdk.utils.AdTopicsAPIManager;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.HeaderBiddingUtils;
 import net.pubnative.lite.sdk.utils.Logger;
@@ -296,6 +297,7 @@ public class RequestManager {
         }
         ad.setZoneId(adRequest.zoneId);
         mAdCache.put(adRequest.zoneId, ad);
+        AdTopicsAPIManager.setTopicsAPIEnabled(mApiClient.getContext(), ad);
 
         switch (ad.assetgroupid) {
             case ApiAssetGroupType.VAST_INTERSTITIAL:

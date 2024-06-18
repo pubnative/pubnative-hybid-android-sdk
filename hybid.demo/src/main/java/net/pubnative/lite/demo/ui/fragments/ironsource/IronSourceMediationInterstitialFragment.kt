@@ -1,22 +1,22 @@
 package net.pubnative.lite.demo.ui.fragments.ironsource
 
 import android.os.Bundle
-import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.ironsource.mediationsdk.IronSource
+import com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo
 import com.ironsource.mediationsdk.logger.IronSourceError
-import com.ironsource.mediationsdk.sdk.InterstitialListener
+import com.ironsource.mediationsdk.sdk.LevelPlayInterstitialListener
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
 
 class IronSourceMediationInterstitialFragment : Fragment(R.layout.fragment_ironsource_interstitial),
-    InterstitialListener {
+    LevelPlayInterstitialListener {
     val TAG = IronSourceMediationInterstitialFragment::class.java.simpleName
 
     private lateinit var loadButton: Button
@@ -55,7 +55,7 @@ class IronSourceMediationInterstitialFragment : Fragment(R.layout.fragment_irons
             )
         }
 
-        IronSource.setInterstitialListener(this)
+        IronSource.setLevelPlayInterstitialListener(this)
     }
 
     override fun onDestroy() {
@@ -63,38 +63,38 @@ class IronSourceMediationInterstitialFragment : Fragment(R.layout.fragment_irons
         super.onDestroy()
     }
 
-    override fun onInterstitialAdReady() {
-        Log.d(TAG, "onInterstitialAdReady")
+    override fun onAdReady(info: AdInfo?) {
+        Log.d(TAG, "onAdReady")
         displayLogs()
         showButton.isEnabled = true
     }
 
-    override fun onInterstitialAdLoadFailed(error: IronSourceError?) {
-        Log.d(TAG, "onInterstitialAdLoadFailed")
+    override fun onAdLoadFailed(error: IronSourceError?) {
+        Log.d(TAG, "onAdLoadFailed")
         displayLogs()
         errorView.text = error?.errorMessage
         showButton.isEnabled = false
     }
 
-    override fun onInterstitialAdOpened() {
-        Log.d(TAG, "onInterstitialAdOpened")
+    override fun onAdOpened(info: AdInfo?) {
+        Log.d(TAG, "onAdOpened")
     }
 
-    override fun onInterstitialAdClosed() {
-        Log.d(TAG, "onInterstitialAdClosed")
+    override fun onAdShowSucceeded(info: AdInfo?) {
+        Log.d(TAG, "onAdShowSucceeded")
+    }
+
+    override fun onAdShowFailed(error: IronSourceError?, info: AdInfo?) {
+        Log.d(TAG, "onAdShowFailed")
+    }
+
+    override fun onAdClicked(info: AdInfo?) {
+        Log.d(TAG, "onAdClicked")
+    }
+
+    override fun onAdClosed(info: AdInfo?) {
+        Log.d(TAG, "onAdClosed")
         showButton.isEnabled = false
-    }
-
-    override fun onInterstitialAdShowSucceeded() {
-        Log.d(TAG, "onInterstitialAdShowSucceeded")
-    }
-
-    override fun onInterstitialAdShowFailed(error: IronSourceError?) {
-        Log.d(TAG, "onInterstitialAdShowFailed")
-    }
-
-    override fun onInterstitialAdClicked() {
-        Log.d(TAG, "onInterstitialAdClicked")
     }
 
     private fun displayLogs() {
@@ -108,7 +108,7 @@ class IronSourceMediationInterstitialFragment : Fragment(R.layout.fragment_irons
         val settings =
             SettingsManager.getInstance(requireContext()).getSettings().ironSourceSettings
         val appKey = settings?.appKey
-        if (appKey != null && appKey.isNotEmpty()) {
+        if (!appKey.isNullOrEmpty()) {
             IronSource.setMetaData("is_test_suite", "enable")
             IronSource.init(
                 requireActivity(), appKey, IronSource.AD_UNIT.BANNER,

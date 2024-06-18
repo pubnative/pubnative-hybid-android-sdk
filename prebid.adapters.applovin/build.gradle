@@ -47,8 +47,8 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    compileOnly 'com.applovin:applovin-sdk:12.1.0'
-    compileOnly 'org.prebid:prebid-mobile-sdk:2.1.8'
+    compileOnly 'com.applovin:applovin-sdk:12.5.0'
+    compileOnly 'org.prebid:prebid-mobile-sdk:2.2.0'
 }
 
 

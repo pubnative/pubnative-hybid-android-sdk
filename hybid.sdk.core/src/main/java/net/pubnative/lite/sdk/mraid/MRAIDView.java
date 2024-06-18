@@ -112,6 +112,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -316,7 +317,7 @@ public class MRAIDView extends FrameLayout {
             this.showActivity = (Activity) context;
             this.activityInitialOrientation = this.showActivity.getRequestedOrientation();
         }
-        this.baseUrl = baseUrl == null ? "http://example.com/" : baseUrl;
+        this.baseUrl = baseUrl == null || baseUrl.isEmpty() ? "https://example.com" : baseUrl;
         this.isInterstitial = isInterstitial;
         this.isExpandEnabled = isExpandEnabled;
 
@@ -573,7 +574,7 @@ public class MRAIDView extends FrameLayout {
 
         MRAIDParser parser = new MRAIDParser();
         Map<String, String> commandMap = parser.parseCommandUrl(commandUrl);
-        if(commandMap == null) return;
+        if (commandMap == null) return;
 
         String command = commandMap.get("command");
 
@@ -612,7 +613,7 @@ public class MRAIDView extends FrameLayout {
             }
         } catch (Exception e) {
             HyBid.reportException(e);
-            e.printStackTrace();
+            Logger.e(MRAID_LOG_TAG, e.getMessage());
         }
     }
 
@@ -813,7 +814,7 @@ public class MRAIDView extends FrameLayout {
             }
         } catch (UnsupportedEncodingException e) {
             HyBid.reportException(e);
-            e.printStackTrace();
+            Logger.e(MRAID_LOG_TAG, e.getMessage());
         }
     }
 
@@ -827,7 +828,7 @@ public class MRAIDView extends FrameLayout {
             }
         } catch (UnsupportedEncodingException e) {
             HyBid.reportException(e);
-            e.printStackTrace();
+            Logger.e(MRAID_LOG_TAG, e.getMessage());
         }
     }
 
@@ -904,7 +905,7 @@ public class MRAIDView extends FrameLayout {
             }
         } catch (UnsupportedEncodingException e) {
             HyBid.reportException(e);
-            e.printStackTrace();
+            Logger.e(MRAID_LOG_TAG, e.getMessage());
         }
     }
 
@@ -1419,7 +1420,7 @@ public class MRAIDView extends FrameLayout {
             jsonVisibleRectangle.put("height", getHeight() * exposure / 100);
         } catch (JSONException e) {
             HyBid.reportException(e);
-            e.printStackTrace();
+            Logger.e(MRAID_LOG_TAG, e.getMessage());
         }
         injectJavaScript("mraid.fireExposureChangeEvent(" + exposure + "," + jsonVisibleRectangle.toString() + "," + "null" + ");");
     }
@@ -1758,7 +1759,7 @@ public class MRAIDView extends FrameLayout {
                     try {
                         open(URLEncoder.encode(url, "UTF-8"));
                     } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
+                        Logger.e(MRAID_LOG_TAG, e.getMessage());
                     }
                 }
             }
@@ -1766,14 +1767,18 @@ public class MRAIDView extends FrameLayout {
         }
 
         @Override
-        public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-            MRAIDLog.d("hz-m shouldInterceptRequest - " + url);
-            if (url.contains("mraid.js")) {
-                MRAIDLog.d("hz-m shouldInterceptRequest - intercepting mraid - " + url);
-                handler.post(() -> injectJavaScript(webView, "mraid.logLevel = mraid.LogLevelEnum.DEBUG;"));
-                return new WebResourceResponse("application/javascript", "UTF-8", getMraidJsStream());
+        public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+            if (request != null && request.getUrl() != null) {
+                String url = request.getUrl().toString();
+                MRAIDLog.d("hz-m shouldInterceptRequest - " + url);
+                if (url.contains("mraid.js")) {
+                    MRAIDLog.d("hz-m shouldInterceptRequest - intercepting mraid - " + url);
+                    handler.post(() -> injectJavaScript(webView, "mraid.logLevel = mraid.LogLevelEnum.DEBUG;"));
+                    return new WebResourceResponse("application/javascript", "UTF-8", getMraidJsStream());
+                }
             }
-            return null;
+
+            return super.shouldInterceptRequest(view, request);
         }
 
         @Override

@@ -2,7 +2,7 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-parcelize'
-    id 'com.fyber.fairbid-sdk-plugin' version '3.47.0'
+    id 'com.fyber.fairbid-sdk-plugin' version '3.50.0'
     id 'com.google.firebase.appdistribution'
     id 'com.google.firebase.firebase-perf'
     id 'com.google.firebase.crashlytics'
@@ -100,32 +100,32 @@ dependencies {
     implementation project(':hybid.sdk.source.pnapi')
     implementation project(':hybid.sdk.topicsapi')
 
-    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.multidex:multidex:2.0.1'
 
-    implementation 'com.ironsource.sdk:mediationsdk:7.9.0'
-    implementation 'com.applovin:applovin-sdk:12.2.0'
+    implementation 'com.ironsource.sdk:mediationsdk:8.1.0'
+    implementation 'com.applovin:applovin-sdk:12.5.0'
 
-    implementation 'com.chartboost:chartboost-mediation-sdk:4.6.0'
-    implementation 'com.chartboost:chartboost-mediation-adapter-verve:4.2.17.0.1'
-    implementation 'com.google.android.gms:play-services-base:18.3.0'
-    implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
-    implementation 'com.google.android.gms:play-services-appset:16.0.2'
+    implementation 'com.chartboost:chartboost-mediation-sdk:4.9.0'
+    implementation 'com.chartboost:chartboost-mediation-adapter-verve:4.3.0.0.0'
+    implementation 'com.google.android.gms:play-services-base:18.5.0'
+    implementation 'com.google.android.gms:play-services-ads-identifier:18.1.0'
+    implementation 'com.google.android.gms:play-services-appset:16.1.0'
 
-    implementation 'com.google.android.gms:play-services-ads:22.6.0'
+    implementation 'com.google.android.gms:play-services-ads:23.1.0'
     implementation 'com.google.android.ads:mediation-test-suite:3.0.0'
     implementation "androidx.navigation:navigation-fragment-ktx:2.7.7"
     implementation "androidx.navigation:navigation-ui-ktx:2.7.7"
     implementation "androidx.preference:preference-ktx:1.2.1"
 
     implementation 'com.squareup.picasso:picasso:2.71828'
-    implementation 'com.google.code.gson:gson:2.10'
-    implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
+    implementation 'com.google.code.gson:gson:2.11.0'
+    implementation 'androidx.vectordrawable:vectordrawable:1.2.0'
     implementation 'com.google.android.ump:user-messaging-platform:2.2.0'
 
-    implementation platform('com.google.firebase:firebase-bom:32.7.4')
+    implementation platform('com.google.firebase:firebase-bom:33.1.0')
     implementation 'com.google.firebase:firebase-perf'
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
@@ -133,8 +133,8 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0"
 
     // coroutine
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
 
     testImplementation 'com.google.truth:truth:1.1.3'
     testImplementation 'org.mockito:mockito-core:4.5.1'

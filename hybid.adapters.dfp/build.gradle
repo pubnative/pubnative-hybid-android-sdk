@@ -60,7 +60,7 @@ dependencies {
     implementation project(':hybid.sdk.logger')
     implementation project(':hybid.sdk.source.pnapi')
 
-    compileOnly 'com.google.android.gms:play-services-ads:22.6.0'
+    compileOnly 'com.google.android.gms:play-services-ads:23.1.0'
 }
 
 task sourcesJar(type: Jar) {

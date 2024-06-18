@@ -155,7 +155,7 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
                 mCloseableContainer.addView(mProgressBar, pBarParams);
 
                 mCloseableContainer.addView(adView, params);
-                mCloseableContainer.setBackgroundColor(Color.WHITE);
+                mCloseableContainer.setBackgroundColor(Color.BLACK);
 
                 if (!mIsVast && shouldShowContentInfo() && getAd() != null) {
                     View contentInfo = getAd().getContentInfoContainer(this, this);

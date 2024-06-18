@@ -199,8 +199,8 @@ public class ViewControllerVast implements View.OnClickListener {
         mAdController.openUrl(null, false, isCTAClick);
     }
 
-    private void validateEndCardOpenURLClicked() {
-        mAdController.openUrl(null, false, false);
+    private void validateEndCardOpenURLClicked(String url) {
+        mAdController.openUrl(url, false, false);
     }
 
     private void validateCustomEndCardOpenURLClicked() {
@@ -306,12 +306,12 @@ public class ViewControllerVast implements View.OnClickListener {
         if (mEndCardView != null) {
             mEndCardView.setEndCardViewListener(new HyBidEndCardView.EndCardViewListener() {
                 @Override
-                public void onClick(Boolean isCustomEndCard, String endCardType) {
+                public void onClick(String url, Boolean isCustomEndCard, String endCardType) {
                     if (isCustomEndCard) {
                         validateCustomEndCardOpenURLClicked();
                         mAdController.onCustomEndCardClick(endCardType);
                     } else {
-                        validateEndCardOpenURLClicked();
+                        validateEndCardOpenURLClicked(url);
                         mAdController.onDefaultEndCardClick(endCardType);
                     }
                 }
@@ -379,7 +379,7 @@ public class ViewControllerVast implements View.OnClickListener {
         if (mLastCustomEndCardView != null) {
             mLastCustomEndCardView.setEndCardViewListener(new HyBidEndCardView.EndCardViewListener() {
                 @Override
-                public void onClick(Boolean isCustomEndCard, String endCardType) {
+                public void onClick(String url, Boolean isCustomEndCard, String endCardType) {
                     validateCustomEndCardOpenURLClicked();
                     if (isCustomEndCard) {
                         mAdController.onCustomEndCardClick(endCardType);

@@ -26,6 +26,7 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.util.Log;
 
 import net.pubnative.lite.sdk.analytics.CrashController;
@@ -45,6 +46,7 @@ import net.pubnative.lite.sdk.models.PNAdRequest;
 import net.pubnative.lite.sdk.models.PNAdRequestFactory;
 import net.pubnative.lite.sdk.prefs.HyBidPreferences;
 import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
+import net.pubnative.lite.sdk.utils.AdTopicsAPIManager;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNApiUrlComposer;
 import net.pubnative.lite.sdk.viewability.ViewabilityManager;
@@ -83,7 +85,7 @@ public class HyBid {
     private static boolean sTestMode = false;
     private static boolean sLocationUpdatesEnabled = true;
     private static boolean sLocationTrackingEnabled = true;
-    private static boolean isDiagnosticsEnabled = true;
+    private static boolean isDiagnosticsEnabled = false;
     private static boolean sTopicsApiEnabled = false;
     private static String sAge;
     private static String sGender;
@@ -153,9 +155,15 @@ public class HyBid {
         sVgiIdManager = new VgiIdManager(application.getApplicationContext());
         sDiagnosticsManager = new DiagnosticsManager(application.getApplicationContext(), getReportingController());
         sViewabilityManager = new ViewabilityManager(application);
-        if (sTopicsApiEnabled) {
-            sTopicManager = new TopicManager(application.getApplicationContext());
+
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Boolean topicsEnabled = AdTopicsAPIManager.isTopicsAPIEnabled(application.getApplicationContext());
+            if (topicsEnabled != null && topicsEnabled) {
+                setTopicsApiEnabled(true);
+                sTopicManager = new TopicManager(application.getApplicationContext());
+            }
         }
+
         if (sCrashController == null) sCrashController = new CrashController();
         if (sDeviceInfo == null) {
             sDeviceInfo = new DeviceInfo(application.getApplicationContext());

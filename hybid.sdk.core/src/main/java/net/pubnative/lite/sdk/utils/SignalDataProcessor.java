@@ -155,6 +155,8 @@ public class SignalDataProcessor {
         ad.setZoneId(zoneId);
         mAdCache.put(zoneId, ad);
 
+        AdTopicsAPIManager.setTopicsAPIEnabled(mApiClient.getContext(), ad);
+
         switch (ad.assetgroupid) {
             case ApiAssetGroupType.VAST_INTERSTITIAL:
             case ApiAssetGroupType.VAST_MRECT: {

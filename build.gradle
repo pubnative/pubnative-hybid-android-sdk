@@ -22,12 +22,12 @@ buildscript {
         classpath 'com.android.tools.build:gradle:7.4.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
-        classpath "com.android.tools:r8:8.2.42"
+        classpath "com.android.tools:r8:8.3.37"
         classpath 'net.saliman:gradle-cobertura-plugin:4.0.0'
 
-        classpath 'com.google.firebase:firebase-appdistribution-gradle:4.2.0'
+        classpath 'com.google.firebase:firebase-appdistribution-gradle:5.0.0'
         classpath 'com.google.firebase:perf-plugin:1.4.2'  // Performance Monitoring plugin
-        classpath 'com.google.gms:google-services:4.4.1'
+        classpath 'com.google.gms:google-services:4.4.2'
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9'
         classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.29.0'
     }
@@ -40,16 +40,18 @@ subprojects {
         if (System.getenv("CIRCLE_BRANCH") != null) {
             branchName = "${System.getenv("CIRCLE_BRANCH")}"
         }
+
         buildNumber = null
         if (System.getenv("CIRCLE_BUILD_NUM") != null) {
             buildNumber = "${System.getenv("CIRCLE_BUILD_NUM")}"
         }
+
         min_android_api = 21
         android_api = 34
         android_build_tools = '34.0.0'
         omid_version = '1.4.12'
     }
-    version = "3.0.0"
+    version = "3.0.2"
     group = "net.pubnative"
 }
 

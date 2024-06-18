@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AppLovinMediationVerveFledgeCustomNetworkAdapter extends MediationAdapterBase implements MaxAdViewAdapter {
     public static final String MAX_MEDIATION_VENDOR = "m";
-    public static final String MAX_ADAPTER_VERSION = "3.0.0.0";
+    public static final String MAX_ADAPTER_VERSION = "3.0.2.0";
     public static final String PARAM_APP_TOKEN = "pn_app_token";
     public static final String DUMMY_TOKEN = "dummytoken";
 

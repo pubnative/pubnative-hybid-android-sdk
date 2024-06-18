@@ -127,8 +127,7 @@ public class HyBidEndCardView extends FrameLayout {
         @Override
         public void mraidNativeFeatureOpenBrowser(String url) {
             if (endcardViewListener != null) {
-//                Boolean isCustomEndCardClick = url != null && url.contains(EndCardConstants.CUSTOM_END_CARD_CLICK_URL);
-                endcardViewListener.onClick(isCustomEndCard, endCardType);
+                endcardViewListener.onClick(url, isCustomEndCard, endCardType);
             }
         }
 
@@ -220,7 +219,7 @@ public class HyBidEndCardView extends FrameLayout {
                     return true;
                 }
             });
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
         }
     }
 
@@ -235,7 +234,7 @@ public class HyBidEndCardView extends FrameLayout {
         imageView.setVisibility(View.GONE);
         imageView.setOnClickListener(view -> {
             if (endcardViewListener != null)
-                endcardViewListener.onClick(isCustomEndCard, endCardType);
+                endcardViewListener.onClick(null, isCustomEndCard, endCardType);
         });
 
         endCardType = Reporting.Key.END_CARD_STATIC;
@@ -487,7 +486,7 @@ public class HyBidEndCardView extends FrameLayout {
 
     public interface EndCardViewListener {
 
-        void onClick(Boolean isCustomEndCard, String endCardType);
+        void onClick(String url, Boolean isCustomEndCard, String endCardType);
 
         void onSkip();
 

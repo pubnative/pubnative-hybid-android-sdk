@@ -1,7 +1,6 @@
 package net.pubnative.lite.demo.ui.fragments.ironsource
 
 import android.os.Bundle
-import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -11,15 +10,16 @@ import androidx.fragment.app.Fragment
 import com.ironsource.mediationsdk.ISBannerSize
 import com.ironsource.mediationsdk.IronSource
 import com.ironsource.mediationsdk.IronSourceBannerLayout
+import com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo
 import com.ironsource.mediationsdk.logger.IronSourceError
-import com.ironsource.mediationsdk.sdk.BannerListener
+import com.ironsource.mediationsdk.sdk.LevelPlayBannerListener
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
 
 class IronSourceMediationBannerFragment : Fragment(R.layout.fragment_ironsource_banner),
-    BannerListener {
+    LevelPlayBannerListener {
     val TAG = IronSourceMediationBannerFragment::class.java.simpleName
 
     private lateinit var ironSourceBanner: IronSourceBannerLayout
@@ -39,7 +39,7 @@ class IronSourceMediationBannerFragment : Fragment(R.layout.fragment_ironsource_
                 .getSettings().ironSourceSettings?.bannerAdUnitId
 
         ironSourceBanner = IronSource.createBanner(requireActivity(), ISBannerSize.BANNER)
-        ironSourceBanner.bannerListener = this
+        ironSourceBanner.levelPlayBannerListener = this
         ironSourceBannerContainer.addView(ironSourceBanner)
 
         initializeIronSource()
@@ -63,31 +63,31 @@ class IronSourceMediationBannerFragment : Fragment(R.layout.fragment_ironsource_
         super.onDestroy()
     }
 
-    override fun onBannerAdLoaded() {
+    override fun onAdLoaded(info: AdInfo?) {
         displayLogs()
-        Log.d(TAG, "onBannerAdLoaded")
+        Log.d(TAG, "onAdLoaded")
     }
 
-    override fun onBannerAdLoadFailed(error: IronSourceError?) {
+    override fun onAdLoadFailed(error: IronSourceError?) {
         displayLogs()
         errorView.text = error?.errorMessage
-        Log.d(TAG, "onBannerAdLoadFailed")
+        Log.d(TAG, "onAdLoadFailed")
     }
 
-    override fun onBannerAdClicked() {
-        Log.d(TAG, "onBannerAdClicked")
+    override fun onAdClicked(info: AdInfo?) {
+        Log.d(TAG, "onAdClicked")
     }
 
-    override fun onBannerAdScreenPresented() {
-        Log.d(TAG, "onBannerAdScreenPresented")
+    override fun onAdLeftApplication(info: AdInfo?) {
+        Log.d(TAG, "onAdLeftApplication")
     }
 
-    override fun onBannerAdScreenDismissed() {
-        Log.d(TAG, "onBannerAdScreenDismissed")
+    override fun onAdScreenPresented(info: AdInfo?) {
+        Log.d(TAG, "onAdScreenPresented")
     }
 
-    override fun onBannerAdLeftApplication() {
-        Log.d(TAG, "onBannerAdLeftApplication")
+    override fun onAdScreenDismissed(info: AdInfo?) {
+        Log.d(TAG, "onAdScreenDismissed")
     }
 
     private fun displayLogs() {
@@ -101,7 +101,7 @@ class IronSourceMediationBannerFragment : Fragment(R.layout.fragment_ironsource_
         val settings =
             SettingsManager.getInstance(requireContext()).getSettings().ironSourceSettings
         val appKey = settings?.appKey
-        if (appKey != null && appKey.isNotEmpty()) {
+        if (!appKey.isNullOrEmpty()) {
             IronSource.setMetaData("is_test_suite", "enable")
             IronSource.init(
                 requireActivity(), appKey, IronSource.AD_UNIT.BANNER,

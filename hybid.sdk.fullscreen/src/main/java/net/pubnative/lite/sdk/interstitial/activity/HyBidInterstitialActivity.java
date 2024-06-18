@@ -128,7 +128,7 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
                 mCloseableContainer.addView(mProgressBar, pBarParams);
 
                 mCloseableContainer.addView(adView, params);
-                mCloseableContainer.setBackgroundColor(Color.WHITE);
+                mCloseableContainer.setBackgroundColor(Color.BLACK);
                 showInterstitialCloseButton();
                 if (!mIsVast && shouldShowContentInfo() && getAd() != null) {
                     View contentInfo = getAd().getContentInfoContainer(this, this);

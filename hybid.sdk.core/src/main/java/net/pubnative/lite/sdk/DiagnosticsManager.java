@@ -126,7 +126,6 @@ public class DiagnosticsManager implements ReportingEventCallback {
                 Logger.e(TAG, "Error parsing placement params: ", jsonException);
                 logBuilder.append("Placement data could not be loaded");
                 logBuilder.append("\n-----------------------------------------------------------------");
-                HyBid.reportException(jsonException);
             }
         }
         return logBuilder.toString();
@@ -207,7 +206,6 @@ public class DiagnosticsManager implements ReportingEventCallback {
             Class.forName(className);
             return true;
         } catch (ClassNotFoundException ignored) {
-            HyBid.reportException(ignored);
             return false;
         }
     }
@@ -221,7 +219,6 @@ public class DiagnosticsManager implements ReportingEventCallback {
                 return "";
             }
         } catch (PackageManager.NameNotFoundException exception) {
-            HyBid.reportException(exception);
             return "";
         }
     }
