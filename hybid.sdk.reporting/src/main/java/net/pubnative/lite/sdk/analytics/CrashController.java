@@ -7,15 +7,16 @@ public class CrashController {
     public CrashController() {
     }
 
-    public synchronized ReportingEvent formatException(Exception exception) {
+    public ReportingEvent formatException(Exception exception) {
         ReportingEvent event = new ReportingEvent();
         event.setEventType(Reporting.EventType.ERROR);
         event.setPlatform(Reporting.Platform.ANDROID);
         if (exception != null) {
             if (exception.getMessage() != null)
                 event.setErrorMessage(exception.getMessage());
-            if (exception.getStackTrace() != null)
-                event.setCustomString("Stacktrace", Arrays.toString(exception.getStackTrace()));
+            StackTraceElement[] stackTrace = exception.getStackTrace();
+            if (stackTrace != null)
+                event.setCustomString("Stacktrace", Arrays.toString(stackTrace));
             if (exception.getLocalizedMessage() != null)
                 event.setCustomString("LocalizedMessage", exception.getLocalizedMessage());
         }

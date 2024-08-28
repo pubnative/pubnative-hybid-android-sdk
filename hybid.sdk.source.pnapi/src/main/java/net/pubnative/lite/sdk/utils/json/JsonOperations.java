@@ -64,7 +64,7 @@ public class JsonOperations {
             try {
                 if (values != null && !values.isEmpty()) {
                     JSONArray stringArray = new JSONArray();
-                    for (String value: values) {
+                    for (String value : values) {
                         stringArray.put(value);
                     }
                     jsonObject.put(key, stringArray);
@@ -89,21 +89,28 @@ public class JsonOperations {
         }
     }
 
-    public static synchronized void mergeJsonObjects(JSONObject target, JSONObject source) {
-        if (target == null || source == null || source.length() == 0) {
-            return;
-        }
+    private static synchronized JSONObject merge(JSONObject target, JSONObject source) {
+        JSONObject myTarget = target;
+        JSONObject mySource = source;
 
-        JSONArray names = source.names();
+        JSONArray names = mySource.names();
         try {
             if (names != null) {
                 for (int i = 0; i < names.length(); i++) {
                     String name = names.getString(i);
-                    target.put(name, source.get(name));
+                    myTarget.put(name, source.get(name));
                 }
             }
         } catch (JSONException ignored) {
 
         }
+        return myTarget;
+    }
+
+    public static void mergeJsonObjects(JSONObject target, JSONObject source) {
+        if (target == null || source == null || source.length() == 0) {
+            return;
+        }
+        target = merge(target, source);
     }
 }

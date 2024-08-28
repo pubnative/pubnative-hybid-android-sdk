@@ -28,6 +28,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -118,6 +119,7 @@ public class DeviceInfo {
     private String mAdvertisingIdMd5;
     private String mAdvertisingIdSha1;
     private boolean mLimitTracking = false;
+    private boolean mIsCharging = false;
     private Listener mListener;
     private String deviceHeight;
     private String deviceWidth;
@@ -133,6 +135,21 @@ public class DeviceInfo {
         mListener = listener;
         fetchUserAgent();
         fetchAdvertisingId();
+        updateChargingStatus();
+    }
+
+    public void updateChargingStatus() {
+        BroadcastReceiver batteryStatusReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+                mIsCharging = status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL;
+                context.unregisterReceiver(this);
+            }
+        };
+
+        IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        mContext.registerReceiver(batteryStatusReceiver, filter);
     }
 
     private void fetchAdvertisingId() {
@@ -570,34 +587,10 @@ public class DeviceInfo {
     }
 
     public Integer isBatteryCharging() {
-        BatteryManager batteryManager;
-        Integer isCharging = null;
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            batteryManager = (BatteryManager) mContext.getSystemService(Context.BATTERY_SERVICE);
-            if (batteryManager != null) {
-                if (batteryManager.isCharging()) {
-                    isCharging = 1;
-                } else {
-                    isCharging = 0;
-                }
-            }
-        } else {
-            IntentFilter intentFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-            Intent batteryStatus = mContext.registerReceiver(null, intentFilter);
-
-            int status;
-            if (batteryStatus != null) {
-                status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-                if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
-                    isCharging = 1;
-                } else if (status == BatteryManager.BATTERY_STATUS_DISCHARGING ||
-                        status == BatteryManager.BATTERY_STATUS_NOT_CHARGING) {
-                    isCharging = 0;
-                }
-            }
-        }
-        return isCharging;
+        updateChargingStatus();
+        return mIsCharging ? 1 : 0;
     }
+
 
     public Integer getBatteryLevel() {
         Integer batteryPercentage;

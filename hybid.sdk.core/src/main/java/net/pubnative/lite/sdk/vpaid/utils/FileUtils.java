@@ -10,6 +10,7 @@ import java.io.File;
 public class FileUtils {
 
     private static final String LOG_TAG = FileUtils.class.getSimpleName();
+    private static File cachedParentDir = null;
 
     public static void deleteExpiredFiles(Context context) {
         File parentDir = getParentDir(context);
@@ -46,7 +47,15 @@ public class FileUtils {
     }
 
     public static File getParentDir(Context context) {
-        return context == null ? null : context.getExternalFilesDir(VpaidConstants.FILE_FOLDER);
+        if (cachedParentDir != null) {
+            return cachedParentDir;
+        }
+
+        if (context != null) {
+            cachedParentDir = context.getExternalFilesDir(VpaidConstants.FILE_FOLDER);
+        }
+
+        return cachedParentDir;
     }
 
     public static void clearCache(Context context) {
