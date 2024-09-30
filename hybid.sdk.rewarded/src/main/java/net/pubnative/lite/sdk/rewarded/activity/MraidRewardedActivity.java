@@ -27,6 +27,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
+
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.mraid.MRAIDBanner;
 import net.pubnative.lite.sdk.mraid.MRAIDNativeFeature;
@@ -55,16 +56,11 @@ public class MraidRewardedActivity extends HyBidRewardedActivity implements MRAI
         hideRewardedCloseButton();
     }
 
-    private void defineBackButtonClickableityhandler() {
-        if (mView != null)
-            mView.setBackButtonClickabilityHandler(this::handleBackClickability);
-    }
-
     @Override
     public View getAdView() {
         MRAIDBanner adView = null;
         if (getAd() != null) {
-            Integer mSkipOffset = SkipOffsetManager.getRewardedHTMLSkipOffset(getAd().getMraidRewardedSkipOffset());
+            Integer mSkipOffset = SkipOffsetManager.getHTMLSkipOffset(getAd().getMraidRewardedSkipOffset(), false);
 
             boolean showTimerBeforeEndCard = false;
 
@@ -91,18 +87,12 @@ public class MraidRewardedActivity extends HyBidRewardedActivity implements MRAI
             }
 
             Integer closeButtonDelay = SkipOffsetManager.getNativeCloseButtonDelay(getAd().getNativeCloseButtonDelay());
-            Integer backButtonDelay = SkipOffsetManager.getBackButtonDelay(getAd().getBackButtonDelay());
 
             if (closeButtonDelay != null && closeButtonDelay > 0 && adView != null) {
                 adView.setNativeCloseButtonDelay(closeButtonDelay);
             }
-
-            if (backButtonDelay != null && backButtonDelay > 0 && adView != null) {
-                adView.setBackButtonDelay(backButtonDelay);
-            }
         }
         mView = adView;
-        defineBackButtonClickableityhandler();
         return adView;
     }
 

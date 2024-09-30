@@ -267,6 +267,9 @@ public class OpenRTBAdRequestFactory extends BaseRequestFactory implements AdReq
         List<String> mimes = new ArrayList<>();
         mimes.add("video/mp4");
         mimes.add("video/webm");
+        mimes.add("video/3gpp");
+        mimes.add("video/3gpp2");
+        mimes.add("video/x-m4v");
         video.setMimes(mimes);
 
         video.setBoxingAllowed(0);
@@ -417,14 +420,18 @@ public class OpenRTBAdRequestFactory extends BaseRequestFactory implements AdReq
 
     private Float getLatitude() {
         if (mLocationManager.getUserLocation() != null) {
-            return (float) mLocationManager.getUserLocation().getLatitude();
-        } else return null;
+            return roundToTwoDecimalPlaces((float) mLocationManager.getUserLocation().getLatitude());
+        } else {
+            return null;
+        }
     }
 
     private Float getLongitude() {
         if (mLocationManager.getUserLocation() != null) {
-            return (float) mLocationManager.getUserLocation().getLongitude();
-        } else return null;
+            return roundToTwoDecimalPlaces((float) mLocationManager.getUserLocation().getLongitude());
+        } else {
+            return null;
+        }
     }
 
     private int getDnt() {
@@ -519,10 +526,14 @@ public class OpenRTBAdRequestFactory extends BaseRequestFactory implements AdReq
     }
 
     private Integer getGeofetch() {
-        if (HyBid.isLocationTrackingEnabled() && mDeviceInfo.hasTrackingPermissions() && !mLimitTracking) {
-            return 1;
+        return 1;
+    }
+
+    private Float roundToTwoDecimalPlaces(Float value) {
+        if (value != null) {
+            return Math.round(value * 100.0f) / 100.0f;
         } else {
-            return 0;
+            return null;
         }
     }
 }

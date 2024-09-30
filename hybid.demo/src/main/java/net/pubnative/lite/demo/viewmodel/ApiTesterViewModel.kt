@@ -302,7 +302,7 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
                     ad.setHasEndCard(hasEndCard)
                     HyBid.getAdCache().put(ad.zoneId, ad)
                     HyBid.getVideoAdCache().put(ad.zoneId, adCacheItem)
-                    _loadLiveData.value = ad
+                    _loadLiveData.postValue(ad)
                 }
 
                 override fun onCacheError(error: Throwable) {

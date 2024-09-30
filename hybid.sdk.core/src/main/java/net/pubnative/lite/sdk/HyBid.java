@@ -34,6 +34,7 @@ import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.analytics.ReportingEventCallback;
+import net.pubnative.lite.sdk.api.SDKConfigAPiClient;
 import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.browser.BrowserManager;
 import net.pubnative.lite.sdk.core.BuildConfig;
@@ -47,6 +48,7 @@ import net.pubnative.lite.sdk.models.PNAdRequestFactory;
 import net.pubnative.lite.sdk.prefs.HyBidPreferences;
 import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
 import net.pubnative.lite.sdk.utils.AdTopicsAPIManager;
+import net.pubnative.lite.sdk.utils.AtomManager;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNApiUrlComposer;
 import net.pubnative.lite.sdk.viewability.ViewabilityManager;
@@ -64,6 +66,8 @@ public class HyBid {
     @SuppressLint("StaticFieldLeak")
     private static PNApiClient sApiClient;
     @SuppressLint("StaticFieldLeak")
+    private static SDKConfigAPiClient sSDKConfigAPiClient;
+
     private static DeviceInfo sDeviceInfo;
     @SuppressLint("StaticFieldLeak")
     private static UserDataManager sUserDataManager;
@@ -87,6 +91,7 @@ public class HyBid {
     private static boolean sLocationTrackingEnabled = true;
     private static boolean isDiagnosticsEnabled = false;
     private static boolean sTopicsApiEnabled = false;
+    private static boolean sAtomEnabled = false;
     private static String sAge;
     private static String sGender;
     private static String sKeywords;
@@ -102,10 +107,10 @@ public class HyBid {
     private static Integer normalCloseXmlResource = -1;
     private static Integer pressedCloseXmlResource = -1;
 
-
     private static AudioState sVideoAudioState = AudioState.ON;
 
     private static final boolean sEventLoggingEndpointEnabled = false;
+    private static Boolean mIsSDKConfigFetched = false;
 
     public static void initialize(String appToken, Application application) {
         initialize(appToken, application, null);
@@ -141,6 +146,10 @@ public class HyBid {
 
         sBundleId = application.getPackageName();
         sApiClient = new PNApiClient(application);
+
+        //sSDKConfigAPiClient = new SDKConfigAPiClient(application.getApplicationContext());
+        //sSDKConfigAPiClient.setAppToken(appToken);
+
         if (application.getSystemService(Context.LOCATION_SERVICE) != null) {
             sLocationManager = new HyBidLocationManager(application);
             if (isLocationTrackingEnabled() && areLocationUpdatesEnabled()) {
@@ -183,7 +192,18 @@ public class HyBid {
             }
         }
 
+        //fetchSDKConfig();
+
         sInitialized = true;
+    }
+
+    private static void fetchSDKConfig() {
+        if (!mIsSDKConfigFetched) {
+            sSDKConfigAPiClient.fetchConfig(isAtomEnabled -> {
+                mIsSDKConfigFetched = true;
+                AtomManager.setAtomSDKConfig(isAtomEnabled);
+            });
+        }
     }
 
     public static String getHyBidVersion() {
@@ -376,6 +396,14 @@ public class HyBid {
         return sTopicsApiEnabled;
     }
 
+    public static void setAtomEnabled(Boolean enabled) {
+        sAtomEnabled = enabled;
+    }
+
+    public static Boolean isAtomEnabled() {
+        return sAtomEnabled;
+    }
+
     public static void reportException(Exception exception) {
         if (sCrashController != null) {
             ReportingEvent event = sCrashController.formatException(exception);
@@ -489,8 +517,7 @@ public class HyBid {
     }
 
     public static String getSDKVersionInfo(IntegrationType integrationType) {
-        if (integrationType == null)
-            integrationType = IntegrationType.IN_APP_BIDDING;
+        if (integrationType == null) integrationType = IntegrationType.IN_APP_BIDDING;
         return new DisplayManager().getDisplayManagerVersion(integrationType);
     }
 

@@ -14,14 +14,11 @@ import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewCloseLayoutListener;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.utils.SkipOffsetManager;
-import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
 
 public class MraidInterstitialActivity extends HyBidInterstitialActivity implements MRAIDViewListener, MRAIDNativeFeatureListener, MRAIDViewCloseLayoutListener {
     private final String[] mSupportedNativeFeatures = new String[]{MRAIDNativeFeature.CALENDAR, MRAIDNativeFeature.INLINE_VIDEO, MRAIDNativeFeature.SMS, MRAIDNativeFeature.STORE_PICTURE, MRAIDNativeFeature.TEL, MRAIDNativeFeature.LOCATION};
 
     private MRAIDBanner mView;
-
-    protected Integer backButtonDelay = -1;
 
     @SuppressLint("SourceLockedOrientationActivity")
     @Override
@@ -34,9 +31,6 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
         }
         super.onCreate(savedInstanceState);
         hideInterstitialCloseButton();
-        if (getAd() != null) {
-            backButtonDelay = SkipOffsetManager.getBackButtonDelay(getAd().getBackButtonDelay());
-        }
     }
 
     @Override
@@ -49,44 +43,18 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
                 adView = new MRAIDBanner(this, "", getAd().getAssetHtml(APIAsset.HTML_BANNER), true, false, mSupportedNativeFeatures, this, this, getAd().getContentInfoContainer(this, this));
             }
             if (adView != null) {
-                Integer mSkipOffset = SkipOffsetManager.getInterstitialHTMLSkipOffset(getAd().getHtmlSkipOffset());
+                Integer mSkipOffset = SkipOffsetManager.getHTMLSkipOffset(getAd().getHtmlSkipOffset(),true);
                 Integer nativeCloseButtonDelay = SkipOffsetManager.getNativeCloseButtonDelay(getAd().getNativeCloseButtonDelay());
                 adView.setCloseLayoutListener(this);
                 mIsSkippable = mSkipOffset != null && mSkipOffset == 0;
                 adView.setSkipOffset(mSkipOffset);
                 adView.setNativeCloseButtonDelay(nativeCloseButtonDelay);
-                adView.setBackButtonDelay(backButtonDelay);
             }
         }
         mView = adView;
 
         return adView;
     }
-
-    private void defineBackButtonClickabilityHandler() {
-        if (mView != null)
-            mView.setBackButtonClickabilityHandler(this::handleBackClickability);
-    }
-
-    private void handleBackClickability() {
-        int delay = backButtonDelay * 1000;
-
-        backButtonTimer = new SimpleTimer(delay, new SimpleTimer.Listener() {
-
-            @Override
-            public void onFinish() {
-                mIsSkippable = true;
-            }
-
-            @Override
-            public void onTick(long millisUntilFinished) {
-                mIsSkippable = false;
-            }
-        }, 1000);
-
-        backButtonTimer.start();
-    }
-
 
     @Override
     protected boolean shouldShowContentInfo() {
@@ -109,7 +77,6 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
         if (getBroadcastSender() != null) {
             getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.SHOW);
         }
-        defineBackButtonClickabilityHandler();
     }
 
     @Override

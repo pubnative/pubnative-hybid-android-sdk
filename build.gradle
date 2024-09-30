@@ -19,7 +19,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath "com.android.tools.build:gradle:7.4.2"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
         classpath "com.android.tools:r8:8.3.37"
@@ -49,9 +49,9 @@ subprojects {
         min_android_api = 21
         android_api = 34
         android_build_tools = '34.0.0'
-        omid_version = '1.4.12'
+        omid_version = '1.5.1'
     }
-    version = "3.0.4"
+    version = "3.1.0"
     group = "net.pubnative"
 }
 

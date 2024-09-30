@@ -30,6 +30,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import net.pubnative.lite.sdk.source.pnapi.R;
+import net.pubnative.lite.sdk.utils.AdExperienceManager;
 import net.pubnative.lite.sdk.utils.json.BindField;
 import net.pubnative.lite.sdk.utils.json.JsonModel;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
@@ -266,12 +267,10 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         result.setContentInfoListener(listener);
         result.setContentInfoDisplay(display);
         result.setOnClickListener(v -> {
-            if (!TextUtils.isEmpty(result.getIconClickURL())) {
-                if (iconAction == ContentInfoIconAction.OPEN) {
-                    ((PNAPIContentInfoView) v).openLink();
-                } else {
-                    ((PNAPIContentInfoView) v).openLayout();
-                }
+            if (iconAction == ContentInfoIconAction.OPEN) {
+                ((PNAPIContentInfoView) v).openLink();
+            } else {
+                ((PNAPIContentInfoView) v).openLayout();
             }
         });
 
@@ -352,12 +351,10 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             result.setContentInfoDisplay(display);
             result.setContentInfoListener(listener);
             result.setOnClickListener(v -> {
-                if (!TextUtils.isEmpty(result.getIconClickURL())) {
-                    if (iconAction == ContentInfoIconAction.OPEN) {
-                        ((PNAPIContentInfoView) v).openLink();
-                    } else {
-                        ((PNAPIContentInfoView) v).openLayout();
-                    }
+                if (iconAction == ContentInfoIconAction.OPEN) {
+                    ((PNAPIContentInfoView) v).openLink();
+                } else {
+                    ((PNAPIContentInfoView) v).openLayout();
                 }
             });
             return result;
@@ -381,12 +378,10 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             }
         });
         result.setOnClickListener(v -> {
-            if (!TextUtils.isEmpty(result.getIconClickURL())) {
-                if (iconAction == ContentInfoIconAction.OPEN) {
-                    ((PNAPIContentInfoView) v).openLink();
-                } else {
-                    ((PNAPIContentInfoView) v).openLayout();
-                }
+            if (iconAction == ContentInfoIconAction.OPEN) {
+                ((PNAPIContentInfoView) v).openLink();
+            } else {
+                ((PNAPIContentInfoView) v).openLayout();
             }
         });
         return result;
@@ -500,6 +495,35 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         return TextUtils.isEmpty(creativeId) ? "" : creativeId;
     }
 
+    public String getBundleId() {
+        AdData adData = getMeta(APIMeta.BUNDLE_ID);
+
+        if (adData == null) {
+            return "";
+        }
+
+        String bundleId = adData.getStringField(DATA_TEXT_KEY);
+
+        return TextUtils.isEmpty(bundleId) ? "" : bundleId;
+    }
+
+    public String getAdExperience() {
+        AdData adData = getMeta(APIMeta.AD_EXPERIENCE);
+
+        if (adData == null) {
+            return "";
+        }
+
+        String adExperience = adData.getStringField(DATA_TEXT_KEY);
+
+        if (adExperience.equalsIgnoreCase(AdExperience.BRAND) ||
+                adExperience.equalsIgnoreCase(AdExperience.PERFORMANCE)) {
+            return adExperience;
+        }
+
+        return "";
+    }
+
     @SuppressWarnings("unchecked")
     public <T> T getRemoteConfig(RemoteConfig config) {
 
@@ -540,7 +564,6 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         }
     }
 
-
     public String getConfigId() {
         RemoteConfigsDebug remoteConfigsDebug = getRemoteConfigDebug();
 
@@ -555,7 +578,11 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     }
 
     public Boolean isEndCardEnabled() {
-        return getRemoteConfig(RemoteConfig.END_CARD_ENABLED);
+        if (isPerformanceAd()) {
+            return isPcEndCardEnabled();
+        } else {
+            return getRemoteConfig(RemoteConfig.END_CARD_ENABLED);
+        }
     }
 
     public Boolean isCustomEndCardEnabled() {
@@ -567,19 +594,21 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     }
 
     public Integer getEndCardCloseDelay() {
-        Integer endCardCloseDelay = getRemoteConfig(RemoteConfig.END_CARD_CLOSE_DELAY);
-        if (endCardCloseDelay == null || endCardCloseDelay < 0) {
-            endCardCloseDelay = null;
+        if (isPerformanceAd()) {
+            return getPcEndCardCloseDelay();
+        } else if (isBrandAd()) {
+            return getBcEndCardCloseDelay();
+        } else {
+            Integer endCardCloseDelay = getRemoteConfig(RemoteConfig.END_CARD_CLOSE_DELAY);
+            if (endCardCloseDelay == null || endCardCloseDelay < 0) {
+                endCardCloseDelay = null;
+            }
+            return endCardCloseDelay;
         }
-        return endCardCloseDelay;
     }
 
     public Integer getNativeCloseButtonDelay() {
         return getRemoteConfig(RemoteConfig.NATIVE_CLOSE_BUTTON_DELAY);
-    }
-
-    public Integer getBackButtonDelay() {
-        return getRemoteConfig(RemoteConfig.BACK_BUTTON_DELAY);
     }
 
     public Boolean needCloseInterAfterFinish() {
@@ -642,19 +671,35 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     }
 
     public Integer getHtmlSkipOffset() {
-        return getSkipOffset(RemoteConfig.HTML_SKIP_OFFSET);
+        if (isPerformanceAd()){
+            return getPcHtmlSkipOffset();
+        } else
+            return getSkipOffset(RemoteConfig.HTML_SKIP_OFFSET);
     }
 
     public Integer getVideoSkipOffset() {
-        return getSkipOffset(RemoteConfig.VIDEO_SKIP_OFFSET);
+        if (isPerformanceAd()){
+            return getPcVideoSkipOffset();
+        } else if (isBrandAd()) {
+            return getBcVideoSkipOffset();
+        } else
+            return getSkipOffset(RemoteConfig.VIDEO_SKIP_OFFSET);
     }
 
     public Integer getMraidRewardedSkipOffset() {
-        return getSkipOffset(RemoteConfig.REWARDED_HTML_SKIP_OFFSET);
+        if (isPerformanceAd()){
+            return getPcMraidRewardedSkipOffset();
+        } else
+            return getSkipOffset(RemoteConfig.REWARDED_HTML_SKIP_OFFSET);
     }
 
     public Integer getVideoRewardedSkipOffset() {
-        return getSkipOffset(RemoteConfig.REWARDED_VIDEO_SKIP_OFFSET);
+        if (isPerformanceAd()){
+            return getPcVideoRewardedSkipOffset();
+        } else if (isBrandAd()) {
+            return getBcVideoRewardedSkipOffset();
+        } else
+            return getSkipOffset(RemoteConfig.REWARDED_VIDEO_SKIP_OFFSET);
     }
 
     private Integer getSkipOffset(RemoteConfig remoteConfigSkipOffset) {
@@ -769,8 +814,79 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         return getRemoteConfig(RemoteConfig.CUSTOM_CTA_ENABLED);
     }
 
+    public String getCustomCTAType() {
+        return getRemoteConfig(RemoteConfig.CUSTOM_CTA_TYPE);
+    }
+
     public Boolean isTopicsAPIEnabled() {
         return getRemoteConfig(RemoteConfig.TOPICS_API_ENABLED);
+    }
+
+    public Boolean isAtomEnabled() {
+        return getRemoteConfig(RemoteConfig.ATOM_ENABLED);
+    }
+
+    private Boolean isPcEndCardEnabled() {
+        return getRemoteConfig(RemoteConfig.PC_END_CARD_ENABLED);
+    }
+
+    private Integer getPcHtmlSkipOffset() {
+        return getSkipOffset(RemoteConfig.PC_HTML_SKIP_OFFSET);
+    }
+
+    private Integer getPcVideoSkipOffset() {
+        return getSkipOffset(RemoteConfig.PC_VIDEO_SKIP_OFFSET);
+    }
+
+    private Integer getPcMraidRewardedSkipOffset() {
+        return getSkipOffset(RemoteConfig.PC_REWARDED_HTML_SKIP_OFFSET);
+    }
+
+    private Integer getPcVideoRewardedSkipOffset() {
+        return getSkipOffset(RemoteConfig.PC_REWARDED_VIDEO_SKIP_OFFSET);
+    }
+
+    private Integer getPcEndCardCloseDelay() {
+        Integer endCardCloseDelay = getRemoteConfig(RemoteConfig.PC_END_CARD_CLOSE_DELAY);
+        if (endCardCloseDelay == null || endCardCloseDelay < 0) {
+            endCardCloseDelay = null;
+        }
+        return endCardCloseDelay;
+    }
+
+    public Boolean isIconSizeReduced() {
+        return getRemoteConfig(RemoteConfig.PC_REDUCED_ICON_SIZES);
+    }
+
+    private Integer getBcVideoSkipOffset() {
+        return getSkipOffset(RemoteConfig.BC_VIDEO_SKIP_OFFSET);
+    }
+
+    private Integer getBcVideoRewardedSkipOffset() {
+        return getSkipOffset(RemoteConfig.BC_REWARDED_VIDEO_SKIP_OFFSET);
+    }
+
+    private Integer getBcEndCardCloseDelay() {
+        Integer endCardCloseDelay = getRemoteConfig(RemoteConfig.BC_END_CARD_CLOSE_DELAY);
+        if (endCardCloseDelay == null || endCardCloseDelay < 0) {
+            endCardCloseDelay = null;
+        }
+        return endCardCloseDelay;
+    }
+
+    public boolean hasHiddenUxControls() {
+        Boolean hasHiddenControls = getRemoteConfig(RemoteConfig.BC_HIDE_CONTROLS);
+        if (hasHiddenControls == null) return false;
+
+        return hasHiddenControls;
+    }
+
+    public boolean isBrandAd() {
+        return AdExperienceManager.isBrandAd(assetgroupid, getAdExperience());
+    }
+
+    public boolean isPerformanceAd() {
+        return AdExperienceManager.isPerformanceAd(assetgroupid, getAdExperience());
     }
 
     public Integer getCustomCTADelay() {

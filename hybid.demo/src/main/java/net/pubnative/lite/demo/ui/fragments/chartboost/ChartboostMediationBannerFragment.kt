@@ -12,6 +12,7 @@ import com.chartboost.heliumsdk.ad.HeliumBannerAdListener
 import com.chartboost.heliumsdk.domain.ChartboostMediationAdException
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
+import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
 
 class ChartboostMediationBannerFragment : Fragment(R.layout.fragment_chartboost_banner),
@@ -71,6 +72,10 @@ class ChartboostMediationBannerFragment : Fragment(R.layout.fragment_chartboost_
         error: ChartboostMediationAdException?
     ) {
         Log.d(TAG, "onAdCached")
+        displayLogs()
+        if (error != null) {
+            Log.d(TAG, "onAdCached with error: " + error.message.toString())
+        }
     }
 
     override fun onAdClicked(placementName: String) {
@@ -79,6 +84,13 @@ class ChartboostMediationBannerFragment : Fragment(R.layout.fragment_chartboost_
 
     override fun onAdImpressionRecorded(placementName: String) {
         Log.d(TAG, "onAdImpressionRecorded")
+    }
+
+    private fun displayLogs() {
+        if (activity != null) {
+            val activity = activity as TabActivity
+            activity.notifyAdUpdated()
+        }
     }
 
 }

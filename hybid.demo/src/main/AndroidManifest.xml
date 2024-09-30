@@ -85,12 +85,27 @@
             android:label="@string/maxads_mrect"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".ui.activities.maxads.MaxAdsMediationMRectVideoActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:label="@string/maxads_mrect_video"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".ui.activities.maxads.MaxAdsMediationInterstitialActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:label="@string/maxads_interstitial"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".ui.activities.maxads.MaxAdsMediationInterstitialVideoActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:label="@string/maxads_interstitial_video"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".ui.activities.maxads.MaxAdsMediationRewardedActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:label="@string/maxads_rewarded"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.activities.maxads.MaxAdsMediationRewardedVideoActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:label="@string/maxads_rewarded"
             android:theme="@style/AppTheme.NoActionBar" />
@@ -221,9 +236,9 @@
             android:label="@string/chartboost_mediation_interstitial_video"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.activities.chartboost.ChartboostMediationRewardedActivity"
+            android:name=".ui.activities.chartboost.ChartboostMediationRewardedVideoActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:label="@string/chartboost_mediation_rewarded"
+            android:label="@string/chartboost_mediation_rewarded_video"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activities.chartboost.ChartboostMediationRewardedHtmlActivity"
@@ -271,6 +286,12 @@
             android:name=".ui.activities.config.FairbidSettingsActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:label="@string/fairbid_settings"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".ui.activities.config.ChartboostSettingsActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:label="@string/chartboost_settings"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
         <activity
@@ -334,6 +355,13 @@
             android:name=".ui.activities.UrlInspectorActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:label="@string/url_inspector"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden" />
+
+        <activity
+            android:name=".ui.activities.BeaconListActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:label="@string/beacon_list"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
 

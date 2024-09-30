@@ -41,9 +41,9 @@ import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.PNAdRequest;
 import net.pubnative.lite.sdk.models.PNAdRequestFactory;
-import net.pubnative.lite.sdk.models.RemoteConfigFeature;
 import net.pubnative.lite.sdk.models.request.OpenRTBAdRequest;
 import net.pubnative.lite.sdk.utils.AdTopicsAPIManager;
+import net.pubnative.lite.sdk.utils.AtomManager;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.HeaderBiddingUtils;
 import net.pubnative.lite.sdk.utils.Logger;
@@ -54,7 +54,6 @@ import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
 import net.pubnative.lite.sdk.models.EndCardData;
-import net.pubnative.lite.sdk.vpaid.enums.AdFormat;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 
 import org.json.JSONException;
@@ -298,6 +297,7 @@ public class RequestManager {
         ad.setZoneId(adRequest.zoneId);
         mAdCache.put(adRequest.zoneId, ad);
         AdTopicsAPIManager.setTopicsAPIEnabled(mApiClient.getContext(), ad);
+        AtomManager.setAtomEnabled(mApiClient.getContext(), ad);
 
         switch (ad.assetgroupid) {
             case ApiAssetGroupType.VAST_INTERSTITIAL:

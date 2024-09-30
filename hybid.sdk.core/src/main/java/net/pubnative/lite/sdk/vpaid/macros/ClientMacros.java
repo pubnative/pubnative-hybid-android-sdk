@@ -105,7 +105,7 @@ public class ClientMacros {
         if (mLocationManager != null) {
             Location location = mLocationManager.getUserLocation();
             if (location != null) {
-                return String.format(Locale.ENGLISH, "%f,%f", location.getLatitude(), location.getLongitude());
+                return String.format(Locale.ENGLISH, "%.2f,%.2f", location.getLatitude(), location.getLongitude());
             } else {
                 return String.valueOf(MacroDefaultValues.VALUE_UNKNOWN);
             }

@@ -79,9 +79,9 @@ public class HyBidDFPInterstitialCustomEvent implements CustomEventInterstitial,
         }
 
 
-        Integer htmlSkipOffsetInt = SkipOffsetManager.getInterstitialHTMLSkipOffset(ad.getHtmlSkipOffset());
+        Integer htmlSkipOffsetInt = SkipOffsetManager.getHTMLSkipOffset(ad.getHtmlSkipOffset(), true);
         SkipOffset htmlSkipOffset;
-        Integer videoSkipOffsetInt = SkipOffsetManager.getInterstitialVideoSkipOffset(ad.getVideoSkipOffset(), null, null, false);
+        Integer videoSkipOffsetInt = SkipOffsetManager.getVideoSkipOffset(ad.getVideoSkipOffset(), null, null, false, true);
         SkipOffset videoSkipOffset;
 
         htmlSkipOffset = new SkipOffset(htmlSkipOffsetInt, SkipOffsetManager.isCustomInterstitialHTMLSkipOffset());

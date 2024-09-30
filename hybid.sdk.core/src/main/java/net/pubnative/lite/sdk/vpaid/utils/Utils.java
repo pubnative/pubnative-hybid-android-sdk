@@ -202,7 +202,7 @@ public class Utils {
      * @param duration in format hh:mm:ss
      * @return in seconds
      */
-    public static int parseDuration(String duration) {
+    public static Integer parseDuration(String duration) {
         try {
             String[] data = duration.split(":");
             int hours = Integer.parseInt(data[0]);
@@ -213,7 +213,7 @@ public class Utils {
             HyBid.reportException(e);
             Logger.e(TAG, "Error while parsing ad duration");
         }
-        return 10;
+        return null;
     }
 
     public static int parsePercent(String duration) {
@@ -295,3 +295,5 @@ public class Utils {
                 new ContentInfo(iconUrl, clickUrl, "", width, height, positionX, positionY, viewTrackers, clickTrackers);
     }
 }
+
+

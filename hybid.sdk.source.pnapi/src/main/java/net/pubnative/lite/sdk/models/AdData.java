@@ -86,8 +86,12 @@ public class AdData extends JsonModel implements Serializable {
     }
 
     public String getStringField(String field) {
-
-        return (String) getDataField(field);
+        Object object = getDataField(field);
+        try {
+            return (String) object;
+        } catch (ClassCastException e) {
+            return "";
+        }
     }
 
     public JSONObject getJSONObjectField(String field){

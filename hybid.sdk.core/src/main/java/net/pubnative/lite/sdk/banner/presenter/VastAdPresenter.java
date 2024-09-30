@@ -33,6 +33,7 @@ import android.widget.FrameLayout;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.analytics.Reporting;
+import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.contentinfo.AdFeedbackFormHelper;
 import net.pubnative.lite.sdk.contentinfo.listeners.AdFeedbackLoadListener;
@@ -108,11 +109,14 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
 
     private AdTracker mCustomCTATracker;
     private AdTracker mCustomCTAEndcardTracker;
+    private ReportingController mReportingController;
 
     public VastAdPresenter(Context context, Ad ad, AdSize adSize, ImpressionTrackingMethod trackingMethod, IntegrationType integrationType) {
         mContext = context;
         mAdSize = adSize;
         mAd = ad;
+
+        mReportingController = HyBid.getReportingController();
 
         ImpressionTrackingMethod remoteConfigTrackingMethod = null;
         if (ad != null && ad.getImpressionTrackingMethod() != null && ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod()) != null) {
@@ -612,19 +616,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
 
         @Override
         public void onCustomCTALoadFail() {
-            ReportingEvent reportingEvent = new ReportingEvent();
-            reportingEvent.setEventType(Reporting.EventType.CUSTOM_CTA_LOAD_FAIL);
-            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
-            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
-            reportingEvent.setTimestamp(System.currentTimeMillis());
-            if (mAd != null) {
-                reportingEvent.setImpId(mAd.getSessionId());
-                reportingEvent.setCampaignId(mAd.getCampaignId());
-                reportingEvent.setConfigId(mAd.getConfigId());
-            }
-            if (HyBid.getReportingController() != null) {
-                HyBid.getReportingController().reportEvent(reportingEvent);
-            }
+            Logger.e("onCustomCTALoadFail", "CTA Failed to load");
         }
 
         @Override
@@ -679,9 +671,25 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
     @Override
     public void onIconClicked(List<String> clickTrackers) {
         if (clickTrackers != null && !clickTrackers.isEmpty()) {
-            for (int i=0; i < clickTrackers.size(); i++) {
+            for (int i = 0; i < clickTrackers.size(); i++) {
                 EventTracker.post(mContext, clickTrackers.get(i), null, false);
             }
+        }
+        invokeOnContentInfoClick();
+    }
+
+    private void invokeOnContentInfoClick() {
+        if (mReportingController != null) {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.CONTENT_INFO_CLICK);
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            if (mAd != null) {
+                reportingEvent.setImpId(mAd.getSessionId());
+                reportingEvent.setCampaignId(mAd.getCampaignId());
+                reportingEvent.setConfigId(mAd.getConfigId());
+            }
+            mReportingController.reportEvent(reportingEvent);
         }
     }
 
@@ -745,8 +753,8 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
 
     private void initiateCustomCTAAdTrackers() {
         if (mAd != null) {
-            mCustomCTATracker = new AdTracker(mAd.getBeacons(Ad.Beacon.CUSTOM_CTA_SHOW), mAd.getBeacons(Ad.Beacon.CUSTOM_CTA_CLICK));
-            mCustomCTAEndcardTracker = new AdTracker(null, mAd.getBeacons(Ad.Beacon.CUSTOM_CTA_ENDCARD_CLICK));
+            mCustomCTATracker = new AdTracker(mAd.getBeacons(Ad.Beacon.CUSTOM_CTA_SHOW), mAd.getBeacons(Ad.Beacon.CUSTOM_CTA_CLICK), false);
+            mCustomCTAEndcardTracker = new AdTracker(null, mAd.getBeacons(Ad.Beacon.CUSTOM_CTA_ENDCARD_CLICK), false);
         }
     }
 

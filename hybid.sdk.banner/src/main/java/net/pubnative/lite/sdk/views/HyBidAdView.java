@@ -35,7 +35,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-
 import net.pubnative.lite.sdk.CacheListener;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
@@ -327,7 +326,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
             }
 
             localLayoutParams.flags = WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-            if (mRequestManager.getAdSize() != null) {
+            if (mRequestManager != null && mRequestManager.getAdSize() != null) {
                 localLayoutParams.width = (int) ViewUtils.convertDpToPixel(mRequestManager.getAdSize().getWidth(), getContext());
                 localLayoutParams.height = (int) ViewUtils.convertDpToPixel(mRequestManager.getAdSize().getHeight(), getContext());
             }
@@ -904,7 +903,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         if (mPosition == null) {
             int width = AdSize.SIZE_320x50.getWidth();
             int height = AdSize.SIZE_320x50.getHeight();
-            if (mRequestManager.getAdSize() != null) {
+            if (mRequestManager != null && mRequestManager.getAdSize() != null) {
                 width = (int) ViewUtils.convertDpToPixel(mRequestManager.getAdSize().getWidth(), getContext());
                 height = (int) ViewUtils.convertDpToPixel(mRequestManager.getAdSize().getHeight(), getContext());
             }

@@ -39,4 +39,5 @@ public interface APIAsset {
     String VAST = "vast2";
     String CUSTOM_END_CARD = "custom_endcard";
     String CUSTOM_CTA = "custom_cta";
+    String ATOM_ENABLED = "custom_cta";
 }

@@ -28,8 +28,8 @@ public class RemoteConfigApiClient {
     public RemoteConfigApiClient() {
     }
 
-    public void sendBannerRequest(Context context, String adm, String format, String adm_type, String custom_cta_value, String custom_endcard_value, Integer width, Integer height, List<RemoteConfigParam> params, OnConfigFetchListener listener) {
-        RemoteConfigRequest remoteConfigRequest = formatBannerRequest(adm, format, adm_type, custom_cta_value, custom_endcard_value, width, height, params);
+    public void sendBannerRequest(Context context, String adm, String format, String adm_type, String custom_cta_value, String custom_cta_app_name, String bundle_id_value, String custom_endcard_value, Integer width, Integer height, List<RemoteConfigParam> params, OnConfigFetchListener listener) {
+        RemoteConfigRequest remoteConfigRequest = formatBannerRequest(adm, format, adm_type, custom_cta_value, custom_cta_app_name, bundle_id_value, custom_endcard_value, width, height, params);
         if (remoteConfigRequest == null)
             listener.onFetchError(new HyBidError(HyBidErrorCode.PARSER_ERROR));
         try {
@@ -59,8 +59,8 @@ public class RemoteConfigApiClient {
         }
     }
 
-    public void sendInterstitialRequest(Context context, String adm, String format, String adm_type, String custom_cta_value, String custom_endcard_value, List<RemoteConfigParam> params, OnConfigFetchListener listener) {
-        RemoteConfigRequest remoteConfigRequest = formatInterstitialRequest(adm, format, adm_type, custom_cta_value, custom_endcard_value, params);
+    public void sendInterstitialRequest(Context context, String adm, String format, String adm_type, String custom_cta_value, String custom_cta_app_name, String bundle_id_value, String custom_endcard_value, List<RemoteConfigParam> params, OnConfigFetchListener listener) {
+        RemoteConfigRequest remoteConfigRequest = formatInterstitialRequest(adm, format, adm_type, custom_cta_value, custom_cta_app_name, bundle_id_value, custom_endcard_value, params);
         if (remoteConfigRequest == null)
             listener.onFetchError(new HyBidError(HyBidErrorCode.PARSER_ERROR));
         try {
@@ -90,8 +90,8 @@ public class RemoteConfigApiClient {
         }
     }
 
-    public void sendRewardedRequest(Context context, String adm, String format, String adm_type, String custom_cta_value, String custom_endcard_value, List<RemoteConfigParam> params, OnConfigFetchListener listener) {
-        RemoteConfigRequest remoteConfigRequest = formatRewardedRequest(adm, format, adm_type, custom_cta_value, custom_endcard_value, params);
+    public void sendRewardedRequest(Context context, String adm, String format, String adm_type, String custom_cta_value, String custom_cta_app_name, String bundle_id_value, String custom_endcard_value, List<RemoteConfigParam> params, OnConfigFetchListener listener) {
+        RemoteConfigRequest remoteConfigRequest = formatRewardedRequest(adm, format, adm_type, custom_cta_value, custom_cta_app_name, bundle_id_value, custom_endcard_value, params);
         if (remoteConfigRequest == null)
             listener.onFetchError(new HyBidError(HyBidErrorCode.PARSER_ERROR));
         try {
@@ -121,7 +121,7 @@ public class RemoteConfigApiClient {
         }
     }
 
-    private RemoteConfigRequest formatBannerRequest(String adm, String format, String adm_type, String custom_cta_value, String custom_endcard_value, Integer width, Integer height, List<RemoteConfigParam> params) {
+    private RemoteConfigRequest formatBannerRequest(String adm, String format, String adm_type, String custom_cta_value, String custom_cta_app_name, String bundle_id_value, String custom_endcard_value, Integer width, Integer height, List<RemoteConfigParam> params) {
         RemoteConfigRequest remoteConfigRequest;
         try {
             remoteConfigRequest = new RemoteConfigRequest();
@@ -133,7 +133,9 @@ public class RemoteConfigApiClient {
             remoteConfigRequest.height = height;
             remoteConfigRequest.adm_type = adm_type;
             remoteConfigRequest.encoded_adm = encodeAdm(adm);
+            remoteConfigRequest.custom_cta_app_name = custom_cta_app_name;
             remoteConfigRequest.custom_cta_value = custom_cta_value;
+            remoteConfigRequest.bundle_id_value = bundle_id_value;
             remoteConfigRequest.custom_endcard_value = custom_endcard_value;
             remoteConfigRequest.configs = params;
             return remoteConfigRequest;
@@ -142,7 +144,7 @@ public class RemoteConfigApiClient {
         }
     }
 
-    private RemoteConfigRequest formatInterstitialRequest(String adm, String format, String adm_type, String custom_cta_value, String custom_endcard_value, List<RemoteConfigParam> params) {
+    private RemoteConfigRequest formatInterstitialRequest(String adm, String format, String adm_type, String custom_cta_value, String custom_cta_app_name, String bundle_id_value, String custom_endcard_value, List<RemoteConfigParam> params) {
         RemoteConfigRequest remoteConfigRequest;
         try {
             remoteConfigRequest = new RemoteConfigRequest();
@@ -152,7 +154,9 @@ public class RemoteConfigApiClient {
             remoteConfigRequest.rewarded = false;
             remoteConfigRequest.adm_type = adm_type;
             remoteConfigRequest.encoded_adm = encodeAdm(adm);
+            remoteConfigRequest.custom_cta_app_name = custom_cta_app_name;
             remoteConfigRequest.custom_cta_value = custom_cta_value;
+            remoteConfigRequest.bundle_id_value = bundle_id_value;
             remoteConfigRequest.custom_endcard_value = custom_endcard_value;
             remoteConfigRequest.configs = params;
             return remoteConfigRequest;
@@ -161,7 +165,7 @@ public class RemoteConfigApiClient {
         }
     }
 
-    private RemoteConfigRequest formatRewardedRequest(String adm, String format, String adm_type, String custom_cta_value, String custom_endcard_value, List<RemoteConfigParam> params) {
+    private RemoteConfigRequest formatRewardedRequest(String adm, String format, String adm_type, String custom_cta_value, String custom_cta_app_name, String bundle_id_value, String custom_endcard_value, List<RemoteConfigParam> params) {
         RemoteConfigRequest remoteConfigRequest;
         try {
             remoteConfigRequest = new RemoteConfigRequest();
@@ -171,7 +175,9 @@ public class RemoteConfigApiClient {
             remoteConfigRequest.rewarded = true;
             remoteConfigRequest.adm_type = adm_type;
             remoteConfigRequest.encoded_adm = encodeAdm(adm);
+            remoteConfigRequest.custom_cta_app_name = custom_cta_app_name;
             remoteConfigRequest.custom_cta_value = custom_cta_value;
+            remoteConfigRequest.bundle_id_value = bundle_id_value;
             remoteConfigRequest.custom_endcard_value = custom_endcard_value;
             remoteConfigRequest.configs = params;
             return remoteConfigRequest;

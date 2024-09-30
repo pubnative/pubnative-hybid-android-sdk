@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
-import android.util.Log;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.receiver.VolumeChangedActionReceiver;
@@ -56,7 +55,6 @@ public class VolumeObserver {
             receiver = new VolumeChangedActionReceiver();
             IntentFilter mediaFilter = new IntentFilter(Intent.ACTION_MEDIA_BUTTON);
             mediaFilter.addAction("android.media.VOLUME_CHANGED_ACTION");
-            mediaFilter.addAction("android.intent.action.MEDIA_BUTTON");
             mediaFilter.setPriority(2147483647);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 context.registerReceiver(receiver, mediaFilter, Context.RECEIVER_NOT_EXPORTED);

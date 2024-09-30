@@ -42,6 +42,15 @@
             android:text="@string/medium" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_max_mrect_video"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/medium_video" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_max_interstitial"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -51,6 +60,15 @@
             android:text="@string/interstitial" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_max_interstitial_video"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/interstitial_video" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_max_rewarded"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -58,6 +76,15 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
             android:text="@string/rewarded" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_max_rewarded_video"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/rewarded_video" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_max_native"
@@ -306,7 +333,7 @@
             android:layout_marginEnd="16dp"
             android:text="@string/banner" />
 
-        <com.google.android.material.button.MaterialButton
+        <!--<com.google.android.material.button.MaterialButton
             android:id="@+id/button_chartboost_medium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -331,7 +358,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:text="@string/leaderboard" />
+            android:text="@string/leaderboard" />-->
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_chartboost_interstitial"

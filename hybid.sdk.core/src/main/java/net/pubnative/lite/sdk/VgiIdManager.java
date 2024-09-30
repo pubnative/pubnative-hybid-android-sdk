@@ -25,6 +25,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 
 public class VgiIdManager {
@@ -43,7 +44,7 @@ public class VgiIdManager {
         mAppToken = HyBid.getAppToken();
     }
 
-    public void init(){
+    public void init() {
         UserDataManager userDataManager = HyBid.getUserDataManager();
         DeviceInfo deviceInfo = HyBid.getDeviceInfo();
         HyBidLocationManager locationManager = HyBid.getLocationManager();
@@ -80,7 +81,7 @@ public class VgiIdManager {
         return vgiIdModel;
     }
 
-    public void setVgiIdModel(IdModel idModel){
+    public void setVgiIdModel(IdModel idModel) {
         if (idModel != null) {
             String idModelString = null;
             try {
@@ -97,7 +98,7 @@ public class VgiIdManager {
         }
     }
 
-    private List<IdApp> getApps(UserDataManager userDataManager, DeviceInfo deviceInfo){
+    private List<IdApp> getApps(UserDataManager userDataManager, DeviceInfo deviceInfo) {
         List<IdApp> apps = new ArrayList<>();
         IdApp app = new IdApp();
 
@@ -115,7 +116,7 @@ public class VgiIdManager {
         return apps;
     }
 
-    private IdDevice getDevice(DeviceInfo deviceInfo){
+    private IdDevice getDevice(DeviceInfo deviceInfo) {
         IdDevice idDevice = new IdDevice();
         idDevice.id = Build.ID;
 
@@ -139,7 +140,7 @@ public class VgiIdManager {
         return idDevice;
     }
 
-    private List<IdUser> getUsers(DeviceInfo deviceInfo, HyBidLocationManager locationManager){
+    private List<IdUser> getUsers(DeviceInfo deviceInfo, HyBidLocationManager locationManager) {
         List<IdUser> users = new ArrayList<>();
         IdUser user = new IdUser();
 
@@ -156,8 +157,8 @@ public class VgiIdManager {
         if (locationManager != null && locationManager.getUserLocation() != null) {
             Location loc = locationManager.getUserLocation();
 
-            location.lat = String.valueOf(loc.getLatitude());
-            location.lon = String.valueOf(loc.getLongitude());
+            location.lat = String.format(Locale.ENGLISH, "%.2f", loc.getLatitude());
+            location.lon = String.format(Locale.ENGLISH, "%.2f", loc.getLongitude());
             location.accuracy = String.valueOf(loc.getAccuracy());
             location.ts = String.valueOf(loc.getTime());
         }
@@ -187,7 +188,7 @@ public class VgiIdManager {
         return -1;
     }
 
-    private Boolean isBatteryCharging(Context context){
+    private Boolean isBatteryCharging(Context context) {
         Boolean isCharging = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             BatteryManager mBatteryManager = (BatteryManager) context.getSystemService(Context.BATTERY_SERVICE);

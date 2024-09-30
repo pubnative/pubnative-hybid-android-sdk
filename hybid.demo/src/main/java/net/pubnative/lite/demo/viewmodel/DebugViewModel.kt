@@ -28,6 +28,7 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
     private var _eventList: ArrayList<ReportingEvent> = arrayListOf()
     private var _trackerList: ArrayList<ReportingTracker> = arrayListOf()
     private var _requestUri: String? = null
+    private var _response: String? = null
 
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
 
@@ -43,7 +44,7 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
     fun updateLogs() {
         val registryItem = AdRequestRegistry.getInstance().lastAdRequest
         if (registryItem != null && registryItem.response != null) {
-            val response =
+            _response =
                 if (JsonUtils.isValidJson(registryItem.response)) JsonUtils.toFormattedJson(
                     registryItem.response
                 ) else registryItem.response.toString()
@@ -52,7 +53,7 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
                 registryItem.url ?: "",
                 registryItem.postParams ?: "",
                 registryItem.latency ?: 0,
-                response
+                _response
             )
 
             _requestDebugInfo.value = debugInfo
@@ -132,6 +133,12 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
     fun getRequestUri(): MutableLiveData<String> {
         val liveData: MutableLiveData<String> = MutableLiveData()
         liveData.value = _requestUri
+        return liveData
+    }
+
+    fun getResponse(): MutableLiveData<String> {
+        val liveData: MutableLiveData<String> = MutableLiveData()
+        liveData.value = _response
         return liveData
     }
 

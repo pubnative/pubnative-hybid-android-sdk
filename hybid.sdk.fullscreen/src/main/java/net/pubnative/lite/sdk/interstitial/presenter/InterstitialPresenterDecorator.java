@@ -55,6 +55,7 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
 
     private boolean mImpressionTracked = false;
     private boolean mClickTracked = false;
+    private boolean mDismissTracked = false;
 
     private boolean mDefaultEndCardImpressionTracked = false;
     private boolean mDefaultEndCardClickTracked = false;
@@ -221,6 +222,10 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             return;
         }
 
+        if (mDismissTracked) {
+            return;
+        }
+
         if (mReportingController != null) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.INTERSTITIAL_CLOSED);
@@ -237,6 +242,7 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             mReportingController.reportEvent(reportingEvent);
         }
 
+        mDismissTracked = true;
         mListener.onInterstitialDismissed(interstitialPresenter);
     }
 

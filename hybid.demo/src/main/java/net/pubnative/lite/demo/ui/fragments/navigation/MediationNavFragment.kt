@@ -10,10 +10,7 @@ import net.pubnative.lite.demo.ui.activities.admob.*
 import net.pubnative.lite.demo.ui.activities.chartboost.ChartboostMediationBannerActivity
 import net.pubnative.lite.demo.ui.activities.chartboost.ChartboostMediationInterstitialActivity
 import net.pubnative.lite.demo.ui.activities.chartboost.ChartboostMediationInterstitialVideoActivity
-import net.pubnative.lite.demo.ui.activities.chartboost.ChartboostMediationLeaderboardActivity
-import net.pubnative.lite.demo.ui.activities.chartboost.ChartboostMediationMRectActivity
-import net.pubnative.lite.demo.ui.activities.chartboost.ChartboostMediationMRectVideoActivity
-import net.pubnative.lite.demo.ui.activities.chartboost.ChartboostMediationRewardedActivity
+import net.pubnative.lite.demo.ui.activities.chartboost.ChartboostMediationRewardedVideoActivity
 import net.pubnative.lite.demo.ui.activities.chartboost.ChartboostMediationRewardedHtmlActivity
 import net.pubnative.lite.demo.ui.activities.dfp.*
 import net.pubnative.lite.demo.ui.activities.fairbid.FairbidMediationBannerActivity
@@ -39,12 +36,27 @@ class MediationNavFragment : Fragment(R.layout.fragment_nav_mediation) {
             startActivity(intent)
         }
 
+        view.findViewById<Button>(R.id.button_max_mrect_video).setOnClickListener {
+            val intent = Intent(activity, MaxAdsMediationMRectVideoActivity::class.java)
+            startActivity(intent)
+        }
+
         view.findViewById<Button>(R.id.button_max_interstitial).setOnClickListener {
             val intent = Intent(activity, MaxAdsMediationInterstitialActivity::class.java)
             startActivity(intent)
         }
 
+        view.findViewById<Button>(R.id.button_max_interstitial_video).setOnClickListener {
+            val intent = Intent(activity, MaxAdsMediationInterstitialVideoActivity::class.java)
+            startActivity(intent)
+        }
+
         view.findViewById<Button>(R.id.button_max_rewarded).setOnClickListener {
+            val intent = Intent(activity, MaxAdsMediationRewardedActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<Button>(R.id.button_max_rewarded_video).setOnClickListener {
             val intent = Intent(activity, MaxAdsMediationRewardedActivity::class.java)
             startActivity(intent)
         }
@@ -149,7 +161,7 @@ class MediationNavFragment : Fragment(R.layout.fragment_nav_mediation) {
             startActivity(intent)
         }
 
-        view.findViewById<Button>(R.id.button_chartboost_medium).setOnClickListener {
+        /*view.findViewById<Button>(R.id.button_chartboost_medium).setOnClickListener {
             val intent = Intent(activity, ChartboostMediationMRectActivity::class.java)
             startActivity(intent)
         }
@@ -162,7 +174,7 @@ class MediationNavFragment : Fragment(R.layout.fragment_nav_mediation) {
         view.findViewById<Button>(R.id.button_chartboost_leaderboard).setOnClickListener {
             val intent = Intent(activity, ChartboostMediationLeaderboardActivity::class.java)
             startActivity(intent)
-        }
+        }*/
 
         view.findViewById<Button>(R.id.button_chartboost_interstitial).setOnClickListener {
             val intent = Intent(activity, ChartboostMediationInterstitialActivity::class.java)
@@ -180,7 +192,7 @@ class MediationNavFragment : Fragment(R.layout.fragment_nav_mediation) {
         }
 
         view.findViewById<Button>(R.id.button_chartboost_rewarded).setOnClickListener {
-            val intent = Intent(activity, ChartboostMediationRewardedActivity::class.java)
+            val intent = Intent(activity, ChartboostMediationRewardedVideoActivity::class.java)
             startActivity(intent)
         }
     }

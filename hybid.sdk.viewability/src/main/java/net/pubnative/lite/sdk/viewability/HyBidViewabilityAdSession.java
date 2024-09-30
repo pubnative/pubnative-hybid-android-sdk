@@ -9,10 +9,13 @@ import com.iab.omid.library.pubnativenet.adsession.AdSession;
 import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
 import com.iab.omid.library.pubnativenet.adsession.VerificationScriptResource;
 
+import net.pubnative.lite.sdk.utils.Logger;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class HyBidViewabilityAdSession {
+    private static final String TAG = HyBidViewabilityAdSession.class.getSimpleName();
     protected AdSession mAdSession;
     protected AdEvents mAdEvents;
     protected final List<VerificationScriptResource> mVerificationScriptResources = new ArrayList<>();
@@ -79,7 +82,11 @@ public abstract class HyBidViewabilityAdSession {
             return;
 
         if (mAdSession != null) {
-            mAdSession.finish();
+            try {
+                mAdSession.finish();
+            } catch (RuntimeException e) {
+                Logger.e(TAG, e.getMessage());
+            }
             mAdSession = null;
         }
     }

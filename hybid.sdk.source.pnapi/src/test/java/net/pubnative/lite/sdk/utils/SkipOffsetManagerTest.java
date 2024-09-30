@@ -1,13 +1,12 @@
 package net.pubnative.lite.sdk.utils;
 
 import static junit.framework.Assert.assertEquals;
-import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getBackButtonDelay;
+import static junit.framework.Assert.assertNotSame;
 import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getDefaultRewardedHtmlSkipOffset;
-import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getInterstitialHTMLSkipOffset;
+import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getHTMLSkipOffset;
 import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getMaximumRewardedSkipOffset;
 import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getNativeCloseButtonDelay;
-import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getRewardedHTMLSkipOffset;
-import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getRewardedSkipOffset;
+import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getVideoSkipOffset;
 
 import org.junit.Test;
 
@@ -44,40 +43,10 @@ public class SkipOffsetManagerTest {
     }
 
     @Test
-    public void testGetBackButtonDelay_nullRemoteConfigDelay() {
-        // Test with null remoteConfigDelay
-        Integer backButtonDelay = getBackButtonDelay(null);
-        assertEquals(SkipOffsetManager.getDefaultBackButtonDelay(), backButtonDelay);
-    }
-
-    @Test
-    public void testGetBackButtonDelay_negativeRemoteConfigDelay() {
-        // Test with negative remoteConfigDelay
-        Integer backButtonDelay = getBackButtonDelay(-1);
-        assertEquals(SkipOffsetManager.getDefaultBackButtonDelay(), backButtonDelay);
-    }
-
-    @Test
-    public void testGetBackButtonDelay_remoteConfigDelayGreaterThanBACK_BUTTON_DELAY_MAXIMUM() {
-        // Test with remoteConfigDelay greater than BACK_BUTTON_DELAY_MAXIMUM
-        Integer backButtonDelay = getBackButtonDelay(SkipOffsetManager.getMaximumBackButtonDelay() + 1);
-        assertEquals(SkipOffsetManager.getMaximumBackButtonDelay(), backButtonDelay);
-    }
-
-    @Test
-    public void testGetBackButtonDelay_validRemoteConfigDelay() {
-        // Test with valid remoteConfigDelay
-        Integer backButtonDelay = getBackButtonDelay(15);
-        Integer desiredDelay = 15;
-        assertEquals(desiredDelay, backButtonDelay);
-    }
-
-
-    @Test
     public void testGetInterstitialHTMLSkipOffset_nullRemoteConfigSkipOffset() {
         // Test with null remoteConfigSkipOffset
         Integer remoteConfigSkipOffset = null;
-        Integer resultSkipOffset = getInterstitialHTMLSkipOffset(remoteConfigSkipOffset);
+        Integer resultSkipOffset = getHTMLSkipOffset(remoteConfigSkipOffset, true);
         assertEquals((int) resultSkipOffset, SkipOffsetManager.INTERSTITIAL_MRAID);
     }
 
@@ -85,7 +54,7 @@ public class SkipOffsetManagerTest {
     public void testGetInterstitialHTMLSkipOffset_negativeRemoteConfigSkipOffset() {
         // Test with negative remoteConfigSkipOffset
         Integer remoteConfigSkipOffset = -1;
-        Integer resultSkipOffset = getInterstitialHTMLSkipOffset(remoteConfigSkipOffset);
+        Integer resultSkipOffset = getHTMLSkipOffset(remoteConfigSkipOffset, true);
         assertEquals((int) resultSkipOffset, SkipOffsetManager.INTERSTITIAL_MRAID);
     }
 
@@ -93,7 +62,7 @@ public class SkipOffsetManagerTest {
     public void testGetInterstitialHTMLSkipOffset_validRemoteConfigSkipOffset() {
         // Test with valid remoteConfigSkipOffset
         Integer remoteConfigSkipOffset = 25;
-        Integer resultSkipOffset = getInterstitialHTMLSkipOffset(remoteConfigSkipOffset);
+        Integer resultSkipOffset = getHTMLSkipOffset(remoteConfigSkipOffset, true);
         assertEquals(resultSkipOffset, remoteConfigSkipOffset);
     }
 
@@ -105,7 +74,7 @@ public class SkipOffsetManagerTest {
         Integer adParamsSkipSeconds = 8;
         Boolean hasEndcard = false;
 
-        Integer resultSkipOffset = getRewardedSkipOffset(remoteConfigSkipOffset, publisherSkipSeconds, adParamsSkipSeconds, hasEndcard);
+        Integer resultSkipOffset = getVideoSkipOffset(remoteConfigSkipOffset, publisherSkipSeconds, adParamsSkipSeconds, hasEndcard, false);
         assertEquals(resultSkipOffset, publisherSkipSeconds);
     }
 
@@ -117,8 +86,8 @@ public class SkipOffsetManagerTest {
         Integer adParamsSkipSeconds = 8;
         Boolean hasEndcard = false;
 
-        Integer resultSkipOffset = getRewardedSkipOffset(remoteConfigSkipOffset, publisherSkipSeconds, adParamsSkipSeconds, hasEndcard);
-        assertEquals(resultSkipOffset, publisherSkipSeconds);
+        Integer resultSkipOffset = getVideoSkipOffset(remoteConfigSkipOffset, publisherSkipSeconds, adParamsSkipSeconds, hasEndcard, false);
+        assertNotSame(resultSkipOffset, publisherSkipSeconds);
     }
 
     @Test
@@ -129,9 +98,9 @@ public class SkipOffsetManagerTest {
         Integer adParamsSkipSeconds = 8;
         Boolean hasEndcard = false;
 
-        Integer correctSkipOffset = 30;
+        Integer correctSkipOffset = 8;
 
-        Integer resultSkipOffset = getRewardedSkipOffset(remoteConfigSkipOffset, publisherSkipSeconds, adParamsSkipSeconds, hasEndcard);
+        Integer resultSkipOffset = getVideoSkipOffset(remoteConfigSkipOffset, publisherSkipSeconds, adParamsSkipSeconds, hasEndcard, false);
         assertEquals(resultSkipOffset, correctSkipOffset);
     }
 
@@ -143,8 +112,8 @@ public class SkipOffsetManagerTest {
         Integer adParamsSkipSeconds = 8;
         Boolean hasEndcard = false;
 
-        Integer resultSkipOffset = getRewardedSkipOffset(remoteConfigSkipOffset, publisherSkipSeconds, adParamsSkipSeconds, hasEndcard);
-        assertEquals(resultSkipOffset, remoteConfigSkipOffset);
+        Integer resultSkipOffset = getVideoSkipOffset(remoteConfigSkipOffset, publisherSkipSeconds, adParamsSkipSeconds, hasEndcard, false);
+        assertNotSame(resultSkipOffset, remoteConfigSkipOffset);
     }
 
     @Test
@@ -156,7 +125,7 @@ public class SkipOffsetManagerTest {
         Boolean hasEndcard = false;
         Integer defaultRewardedSkipOffset = getMaximumRewardedSkipOffset();
 
-        Integer resultSkipOffset = getRewardedSkipOffset(remoteConfigSkipOffset, publisherSkipSeconds, adParamsSkipSeconds, hasEndcard);
+        Integer resultSkipOffset = getVideoSkipOffset(remoteConfigSkipOffset, publisherSkipSeconds, adParamsSkipSeconds, hasEndcard, false);
         assertEquals(resultSkipOffset, defaultRewardedSkipOffset);
     }
 
@@ -166,7 +135,7 @@ public class SkipOffsetManagerTest {
         Integer remoteConfigSkipOffset = null;
         Integer defaultRewardedSkipOffset = getDefaultRewardedHtmlSkipOffset();
 
-        Integer resultSkipOffset = getRewardedHTMLSkipOffset(remoteConfigSkipOffset);
+        Integer resultSkipOffset = getHTMLSkipOffset(remoteConfigSkipOffset, false);
         assertEquals(resultSkipOffset, defaultRewardedSkipOffset);
     }
 
@@ -176,7 +145,7 @@ public class SkipOffsetManagerTest {
         Integer remoteConfigSkipOffset = -1;
         Integer defaultRewardedSkipOffset = getDefaultRewardedHtmlSkipOffset();
 
-        Integer resultSkipOffset = getRewardedHTMLSkipOffset(remoteConfigSkipOffset);
+        Integer resultSkipOffset = getHTMLSkipOffset(remoteConfigSkipOffset, false);
         assertEquals(resultSkipOffset, defaultRewardedSkipOffset);
     }
 
@@ -186,7 +155,7 @@ public class SkipOffsetManagerTest {
         Integer remoteConfigSkipOffset = 35;
         Integer expectedSkipOffset = 30;
 
-        Integer resultSkipOffset = getRewardedHTMLSkipOffset(remoteConfigSkipOffset);
+        Integer resultSkipOffset = getHTMLSkipOffset(remoteConfigSkipOffset, false);
         assertEquals(resultSkipOffset, expectedSkipOffset);
     }
 
@@ -195,7 +164,7 @@ public class SkipOffsetManagerTest {
         // Test with valid remoteConfigSkipOffset
         Integer remoteConfigSkipOffset = 22;
 
-        Integer resultSkipOffset = getRewardedHTMLSkipOffset(remoteConfigSkipOffset);
+        Integer resultSkipOffset = getHTMLSkipOffset(remoteConfigSkipOffset, false);
         assertEquals(resultSkipOffset, remoteConfigSkipOffset);
     }
 

@@ -34,7 +34,6 @@ import net.pubnative.lite.sdk.TopicManager;
 import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.models.bidstream.BidstreamConstants;
-import net.pubnative.lite.sdk.models.bidstream.Extension;
 import net.pubnative.lite.sdk.models.bidstream.GeoLocation;
 import net.pubnative.lite.sdk.models.bidstream.Impression;
 import net.pubnative.lite.sdk.models.bidstream.ImpressionBanner;
@@ -318,8 +317,8 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
         if (mLocationManager != null) {
             Location location = mLocationManager.getUserLocation();
             if (location != null && !HyBid.isCoppaEnabled() && !limitTracking && (mUserDataManager == null || !mUserDataManager.isConsentDenied()) && !isCCPAOptOut && HyBid.isLocationTrackingEnabled()) {
-                adRequest.latitude = String.format(Locale.ENGLISH, "%.6f", location.getLatitude());
-                adRequest.longitude = String.format(Locale.ENGLISH, "%.6f", location.getLongitude());
+                adRequest.latitude = String.format(Locale.ENGLISH, "%.2f", location.getLatitude());
+                adRequest.longitude = String.format(Locale.ENGLISH, "%.2f", location.getLongitude());
                 if (location.hasAccuracy() && location.getAccuracy() != 0) {
                     Signal signal = new GeoLocation((int) location.getAccuracy(), formatUTCTime());
                     adRequest.addSignal(signal);
@@ -380,7 +379,7 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
     }
 
     private String getDefaultMetaFields() {
-        String[] metaFields = new String[]{APIMeta.POINTS, APIMeta.REVENUE_MODEL, APIMeta.CONTENT_INFO, APIMeta.CREATIVE_ID, APIMeta.CAMPAIGN_ID};
+        String[] metaFields = new String[]{APIMeta.POINTS, APIMeta.REVENUE_MODEL, APIMeta.CONTENT_INFO, APIMeta.CREATIVE_ID, APIMeta.CAMPAIGN_ID, APIMeta.BUNDLE_ID, APIMeta.AD_EXPERIENCE};
         return TextUtils.join(",", metaFields);
     }
 

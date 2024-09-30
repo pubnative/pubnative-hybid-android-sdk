@@ -37,6 +37,10 @@ android {
         }
     }
 
+    buildFeatures {
+        buildConfig true
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
@@ -54,8 +58,10 @@ dependencies {
 
     implementation project(':hybid.sdk.reporting')
     implementation project(':hybid.sdk.topicsapi')
+    implementation project(':hybid.sdk.logger')
 
-    testImplementation 'org.mockito:mockito-core:3.9.0'
+    testImplementation 'org.mockito:mockito-core:4.5.1'
+    testImplementation 'org.robolectric:robolectric:4.10.3'
     testImplementation 'junit:junit:4.13.2'
 }
 

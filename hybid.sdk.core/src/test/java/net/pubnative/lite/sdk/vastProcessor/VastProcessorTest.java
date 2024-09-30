@@ -71,13 +71,13 @@ public class VastProcessorTest {
     @Test
     public void onAdResponseWithoutMediaFiles() {
         vastProcessor.parseResponse(response_without_media_files, listener);
-        verify(listener).onParseSuccess(any(AdParams.class), any(String.class));
+        verify(listener).onParseError(any(PlayerInfo.class));
     }
 
     @Test
     public void onAdResponseWithoutCreatives() {
         vastProcessor.parseResponse(response_without_media_files, listener);
-        verify(listener).onParseSuccess(any(AdParams.class), any(String.class));
+        verify(listener).onParseError(any(PlayerInfo.class));
     }
 
     @Test

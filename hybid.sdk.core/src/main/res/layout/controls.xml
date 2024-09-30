@@ -8,6 +8,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <FrameLayout
+            android:id="@+id/uxLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
         <net.pubnative.lite.sdk.vpaid.widget.LinearCountDownView
             android:id="@+id/linear_count_down"
             android:layout_width="wrap_content"
@@ -47,6 +52,7 @@
             android:textSize="16sp"
             android:visibility="gone" />
 
+        </FrameLayout>
     </FrameLayout>
 
 </FrameLayout>

@@ -50,6 +50,7 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
     private boolean mIsDestroyed = false;
     private boolean mImpressionTracked = false;
     private boolean mClickTracked = false;
+    private boolean mFinishTracked = false;
 
     private boolean mDefaultEndCardImpressionTracked = false;
     private boolean mDefaultEndCardClickTracked = false;
@@ -212,6 +213,11 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
         if (mIsDestroyed) {
             return;
         }
+
+        if (mFinishTracked) {
+            return;
+        }
+
         if (mReportingController != null) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.REWARDED_CLOSED);
@@ -228,6 +234,7 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             mReportingController.reportEvent(reportingEvent);
         }
         mListener.onRewardedFinished(rewardedPresenter);
+        mFinishTracked = true;
     }
 
     @Override

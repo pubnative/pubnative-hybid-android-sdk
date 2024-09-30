@@ -35,6 +35,9 @@ public class ImpressionVideo extends Signal {
         mimes = new ArrayList<>();
         mimes.add("video/mp4");
         mimes.add("video/webm");
+        mimes.add("video/3gpp");
+        mimes.add("video/3gpp2");
+        mimes.add("video/x-m4v");
 
         this.boxingallowed = 0; // No boxing
         this.linearity = 1; // Linear

@@ -1,6 +1,7 @@
 package net.pubnative.lite.sdk.analytics;
 
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 
 import net.pubnative.lite.sdk.analytics.tracker.ReportingTracker;
@@ -49,7 +50,11 @@ public class ReportingController {
     }
 
     public synchronized void reportEvent(ReportingEvent event) {
-        new Handler(Looper.getMainLooper()).post(() -> {
+        HandlerThread handlerThread = new HandlerThread("Thread-" + System.currentTimeMillis());
+        handlerThread.start();
+        Handler backgroundHandler = new Handler(handlerThread.getLooper());
+
+        backgroundHandler.post(() -> {
             for (int i = 0; i < mListeners.size(); i++) {
                 // Double check to handle multi-thread listener release
                 try {

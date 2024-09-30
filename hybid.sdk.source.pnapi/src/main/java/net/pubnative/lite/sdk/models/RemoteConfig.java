@@ -25,11 +25,25 @@ public enum RemoteConfig {
     CONTENT_INFO_TEXT("content_info_text", String.class),
     FULL_SCREEN_CLICKABILITY("fullscreen_clickability", Boolean.class),
     MRAID_EXPAND("mraid_expand", Boolean.class),
-    BACK_BUTTON_DELAY("back_button_delay", Integer.class),
     NATIVE_CLOSE_BUTTON_DELAY("close_button_delay", Integer.class),
     CUSTOM_CTA_ENABLED("custom_cta_enabled", Boolean.class),
+    CUSTOM_CTA_TYPE("custom_cta_type", String.class),
     CUSTOM_CTA_DELAY("custom_cta_delay", Integer.class),
-    TOPICS_API_ENABLED("topics_api_enabled", Boolean.class);
+    TOPICS_API_ENABLED("topics_api_enabled", Boolean.class),
+    ATOM_ENABLED("atom_enabled", Boolean.class),
+
+    PC_END_CARD_ENABLED("pc_endcardenabled", Boolean.class),
+    PC_HTML_SKIP_OFFSET("pc_html_skip_offset", Integer.class),
+    PC_VIDEO_SKIP_OFFSET("pc_video_skip_offset", Integer.class),
+    PC_REWARDED_HTML_SKIP_OFFSET("pc_rewarded_html_skip_offset", Integer.class),
+    PC_REWARDED_VIDEO_SKIP_OFFSET("pc_rewarded_video_skip_offset", Integer.class),
+    PC_END_CARD_CLOSE_DELAY("pc_endcard_close_delay", Integer.class),
+    PC_REDUCED_ICON_SIZES("pc_reduced_icon_sizes", Boolean.class),
+
+    BC_VIDEO_SKIP_OFFSET("bc_video_skip_offset", Integer.class),
+    BC_REWARDED_VIDEO_SKIP_OFFSET("bc_rewarded_video_skip_offset", Integer.class),
+    BC_END_CARD_CLOSE_DELAY("bc_endcard_close_delay", Integer.class),
+    BC_HIDE_CONTROLS("bc_hide_controls", Boolean.class);
 
     public final String fieldName;
     public final Class<?> type;

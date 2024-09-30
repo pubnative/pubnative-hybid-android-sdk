@@ -29,7 +29,11 @@ public class RemoteConfigRequest extends JsonModel {
     @BindField
     public String encoded_adm;
     @BindField
+    public String custom_cta_app_name;
+    @BindField
     public String custom_cta_value;
+    @BindField
+    public String bundle_id_value;
     @BindField
     public String custom_endcard_value;
     @BindField

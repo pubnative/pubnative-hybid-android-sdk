@@ -164,8 +164,8 @@ public class VideoAd extends BaseVideoAd {
     }
 
     /**
-     * Dismisses an banner ad
-     * This method dismisses an banner ad and only if it is currently presented.
+     * Dismisses a banner ad
+     * This method dismisses a banner ad and only if it is currently presented.
      * NOTE: should be called from UI thread
      * <p>
      * After it banner ad requires "loading process" to be ready for displaying
@@ -229,5 +229,9 @@ public class VideoAd extends BaseVideoAd {
 
     public void skip() {
         getAdController().skipVideo();
+    }
+
+    public void closeVideo() {
+        getAdController().closeSelf();
     }
 }

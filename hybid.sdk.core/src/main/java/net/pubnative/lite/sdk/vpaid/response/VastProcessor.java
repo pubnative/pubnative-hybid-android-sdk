@@ -44,11 +44,14 @@ import net.pubnative.lite.sdk.vpaid.xml.XmlParser;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class VastProcessor {
     private static final String LOG_TAG = VastProcessor.class.getSimpleName();
@@ -118,8 +121,13 @@ public class VastProcessor {
                 if (inLine != null) {
                     fillAdParams(mContext, inLine, adParams, mParseParams, response);
                     if (listener != null) {
-                        if(adParams.isVpaid()){
+                        if (adParams.isVpaid()) {
                             PlayerInfo info = new PlayerInfo("No ads found - Unsupported ad format");
+                            info.setNoAdsFound();
+                            listener.onParseError(info);
+                        } else if (adParams.getVideoFileUrlsList() == null || adParams.getVideoFileUrlsList().isEmpty()) {
+                            ErrorLog.postError(mContext, VastError.XML_PARSING);
+                            PlayerInfo info = new PlayerInfo("No video file found");
                             info.setNoAdsFound();
                             listener.onParseError(info);
                         } else {
@@ -129,8 +137,8 @@ public class VastProcessor {
                 } else if (wrapper != null) {
                     fillAdParams(mContext, wrapper, adParams, mParseParams, response);
 
-                    if(adParams.isVpaid()){
-                        if(listener != null){
+                    if (adParams.isVpaid()) {
+                        if (listener != null) {
                             PlayerInfo info = new PlayerInfo("No ads found - Unsupported ad format");
                             info.setNoAdsFound();
                             listener.onParseError(info);
@@ -371,7 +379,7 @@ public class VastProcessor {
                 } else {
                     durationText = "00:00:10";
                 }
-                int duration = Utils.parseDuration(durationText);
+                Integer duration = Utils.parseDuration(durationText);
                 adParams.setDuration(duration);
 
                 if (linear.getAdParameters() != null && !TextUtils.isEmpty(linear.getAdParameters().getText())) {
@@ -528,8 +536,11 @@ public class VastProcessor {
     private List<MediaFile> sortedMediaFiles(List<MediaFile> mediaFileList, AdSpotDimensions adSpotDimensions) {
         List<MediaFile> supportedMediaFilesList = new ArrayList<>();
         for (MediaFile mediaFile : mediaFileList) {
-            if (mediaFile.getType().equalsIgnoreCase("video/mp4") ||
-                    mediaFile.getType().equalsIgnoreCase("video/webm")) {
+            Set<String> supportedMimes = new HashSet<>(Arrays.asList(
+                    "video/mp4", "video/webm", "video/3gpp", "video/3gpp2", "video/x-m4v"
+            ));
+
+            if (supportedMimes.contains(mediaFile.getType())) {
                 supportedMediaFilesList.add(mediaFile);
             }
         }

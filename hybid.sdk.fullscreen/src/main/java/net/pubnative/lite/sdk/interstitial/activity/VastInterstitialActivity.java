@@ -24,7 +24,6 @@ import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.views.CloseableContainer;
 import net.pubnative.lite.sdk.vpaid.AdCloseButtonListener;
-import net.pubnative.lite.sdk.vpaid.BackButtonClickabilityListener;
 import net.pubnative.lite.sdk.vpaid.CloseButtonListener;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.VastActivityInteractor;
@@ -73,7 +72,6 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
                 mVideoAd.bindView(mVideoPlayer);
                 mVideoAd.setAdListener(mVideoAdListener);
                 mVideoAd.setAdCloseButtonListener(mCloseButtonListener);
-                mVideoAd.setBackButtonClickabilityListener(mBackButtonClickability);
                 setProgressBarVisible();
 
                 VideoAdCacheItem adCacheItem = HyBid.getVideoAdCache().remove(getZoneId());
@@ -166,7 +164,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            if (mIsVideoFinished && mIsSkippable && mIsBackEnabled) {
+            if (mIsBackEnabled) {
                 dismiss();
                 return true;
             }
@@ -323,8 +321,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
                 if (isCustomEndCard) {
                     hideContentInfo();
                     mLoadCustomEndCardTracked = true;
-                }
-                else mLoadDefaultEndCardTracked = true;
+                } else mLoadDefaultEndCardTracked = true;
                 Bundle extras = new Bundle();
                 extras.putBoolean(Reporting.Key.IS_CUSTOM_END_CARD, isCustomEndCard);
                 getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.END_CARD_LOAD_SUCCESS, extras);
@@ -394,28 +391,14 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
                 HyBid.getReportingController().reportEvent(reportingEvent);
             }
             if (mCustomCTATracker != null) {
-                mCustomCTATracker.trackClick();
+                mCustomCTATracker.trackImpression();
             }
             mCustomCTAImpressionTracked = true;
         }
 
         @Override
         public void onCustomCTALoadFail() {
-            ReportingEvent reportingEvent = new ReportingEvent();
-            reportingEvent.setEventType(Reporting.EventType.CUSTOM_CTA_LOAD_FAIL);
-            reportingEvent.setAdFormat(Reporting.AdFormat.FULLSCREEN);
-            reportingEvent.setCreativeType(Reporting.CreativeType.VIDEO);
-            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
-            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(IntegrationType.STANDALONE));
-            if (getAd() != null) {
-                reportingEvent.setImpId(getAd().getSessionId());
-                reportingEvent.setCampaignId(getAd().getCampaignId());
-                reportingEvent.setConfigId(getAd().getConfigId());
-            }
-            reportingEvent.setTimestamp(System.currentTimeMillis());
-            if (HyBid.getReportingController() != null) {
-                HyBid.getReportingController().reportEvent(reportingEvent);
-            }
+            Logger.e("onCustomCTALoadFail", "CTA Failed to load");
         }
 
         @Override
@@ -484,9 +467,6 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
     private final CloseButtonListener mCloseButtonListener = () -> {
         mIsVideoFinished = true;
         mIsSkippable = true;
-    };
-
-    private final BackButtonClickabilityListener mBackButtonClickability = () -> {
         mIsBackEnabled = true;
     };
 
@@ -520,8 +500,8 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity implemen
 
     private void initiateCustomCTAAdTrackers() {
         if (getAd() != null) {
-            mCustomCTATracker = new AdTracker(getAd().getBeacons(Ad.Beacon.CUSTOM_CTA_SHOW), getAd().getBeacons(Ad.Beacon.CUSTOM_CTA_CLICK));
-            mCustomCTAEndcardTracker = new AdTracker(null, getAd().getBeacons(Ad.Beacon.CUSTOM_CTA_ENDCARD_CLICK));
+            mCustomCTATracker = new AdTracker(getAd().getBeacons(Ad.Beacon.CUSTOM_CTA_SHOW), getAd().getBeacons(Ad.Beacon.CUSTOM_CTA_CLICK), false);
+            mCustomCTAEndcardTracker = new AdTracker(null, getAd().getBeacons(Ad.Beacon.CUSTOM_CTA_ENDCARD_CLICK), false);
         }
     }
 }

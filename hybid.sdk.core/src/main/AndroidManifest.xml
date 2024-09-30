@@ -1,11 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <application>
-        <receiver
-            android:name="net.pubnative.lite.sdk.receiver.VolumeChangedActionReceiver"
-            android:exported="true"></receiver>
+    <uses-permission android:name="android.permission.INTERNET" />
 
+    <application>
+        <receiver android:name="net.pubnative.lite.sdk.receiver.VolumeChangedActionReceiver" />
         <activity
             android:name="net.pubnative.lite.sdk.contentinfo.AdFeedbackActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"

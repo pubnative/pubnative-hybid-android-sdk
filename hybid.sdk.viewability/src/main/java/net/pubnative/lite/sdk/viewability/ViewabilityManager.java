@@ -9,6 +9,8 @@ import android.util.Base64;
 import com.iab.omid.library.pubnativenet.Omid;
 import com.iab.omid.library.pubnativenet.adsession.Partner;
 
+import net.pubnative.lite.sdk.utils.Logger;
+
 public class ViewabilityManager {
 
     private static final String TAG = ViewabilityManager.class.getSimpleName();
@@ -19,20 +21,41 @@ public class ViewabilityManager {
     private boolean mShouldMeasureViewability = true;
 
     public ViewabilityManager(final Application application) {
+        /*try {
+            if (!Omid.isActive()) {
+                Omid.activate(application);
+            }
+        } catch (IllegalArgumentException e) {
+            Logger.e(TAG,"Could not initialise Omid");
+        }
+
+        if (Omid.isActive() && mPubNativePartner == null) {
+            try {
+                mPubNativePartner = Partner.createPartner(VIEWABILITY_PARTNER_NAME, BuildConfig.SDK_VERSION);
+            } catch (IllegalArgumentException e) {
+                Logger.e(TAG,"Could not initialise Omid");
+            }
+        }
+
+        if (TextUtils.isEmpty(VIEWABILITY_JS_SERVICE_CONTENT)) {
+            String omsdkStr = Assets.omsdkjs;
+            byte[] omsdkBytes = Base64.decode(omsdkStr, Base64.DEFAULT);
+            VIEWABILITY_JS_SERVICE_CONTENT = new String(omsdkBytes);
+        }*/
         new Handler(Looper.getMainLooper()).post(() -> {
             try {
                 if (!Omid.isActive()) {
                     Omid.activate(application);
                 }
             } catch (IllegalArgumentException e) {
-                e.printStackTrace();
+                Logger.e(TAG,"Could not initialise Omid");
             }
 
             if (Omid.isActive() && mPubNativePartner == null) {
                 try {
                     mPubNativePartner = Partner.createPartner(VIEWABILITY_PARTNER_NAME, BuildConfig.SDK_VERSION);
                 } catch (IllegalArgumentException e) {
-                    e.printStackTrace();
+                    Logger.e(TAG,"Could not initialise Omid");
                 }
             }
 

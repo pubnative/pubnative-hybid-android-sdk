@@ -45,6 +45,7 @@ import net.pubnative.lite.sdk.models.ContentInfoDisplay;
 import net.pubnative.lite.sdk.models.ContentInfoIconXPosition;
 import net.pubnative.lite.sdk.source.pnapi.R;
 import net.pubnative.lite.sdk.utils.PNBitmapDownloader;
+import net.pubnative.lite.sdk.utils.WrapperURLDigger;
 import net.pubnative.lite.sdk.utils.ViewUtils;
 
 import java.util.List;
@@ -57,6 +58,7 @@ public class PNAPIContentInfoView extends FrameLayout {
     private ContentInfoIconXPosition contentInfoIconXPosition;
     private String iconClickURL = null;
     private List<String> clickTrackers = null;
+    private boolean isIconDownloading = false;
 
     public interface ContentInfoListener {
         void onIconClicked(List<String> clickTrackers);
@@ -118,11 +120,17 @@ public class PNAPIContentInfoView extends FrameLayout {
     }
 
     public void openLayout() {
-        mContentInfoText.setVisibility(VISIBLE);
-        mHandler.postDelayed(mCloseTask, 3000);
-        mContentInfoIcon.setOnClickListener(view -> {
-            openLink();
-        });
+        if (iconClickURL == null || TextUtils.isEmpty(iconClickURL)) {
+            if (mContentInfoListener != null && clickTrackers != null) {
+                mContentInfoListener.onIconClicked(clickTrackers);
+            }
+        } else {
+            mContentInfoText.setVisibility(VISIBLE);
+            mHandler.postDelayed(mCloseTask, 3000);
+            mContentInfoIcon.setOnClickListener(view -> {
+                openLink();
+            });
+        }
     }
 
     public void closeLayout() {
@@ -142,19 +150,26 @@ public class PNAPIContentInfoView extends FrameLayout {
         setIconUrl(iconUrl, false);
     }
 
-    public void setIconUrl(String iconUrl, boolean isDefault){
+    public void setIconUrl(String iconUrl, boolean isDefault) {
         setIconUrl(iconUrl, isDefault, false);
     }
 
     public void setIconUrl(String iconUrl, boolean isDefault, boolean isRemoteConfig) {
-        new PNBitmapDownloader().download(iconUrl, mContentInfoIcon.getWidth(), mContentInfoIcon.getHeight(), new PNBitmapDownloader.DownloadListener() {
+        if (iconUrl == null || TextUtils.isEmpty(iconUrl) || isIconDownloading)
+            return;
+
+        isIconDownloading = true;
+        String url = new WrapperURLDigger().getURL(iconUrl);
+
+        new PNBitmapDownloader().download(url.trim(), mContentInfoIcon.getWidth(), mContentInfoIcon.getHeight(), new PNBitmapDownloader.DownloadListener() {
             @Override
             public void onDownloadFinish(String url, Bitmap bitmap) {
+                isIconDownloading = false;
                 if (bitmap != null) {
                     mContentInfoIcon.setImageBitmap(bitmap);
                 } else if (!isDefault) {
                     setIconUrl(Ad.CONTENT_INFO_ICON_URL, true);
-                    if(!isRemoteConfig){
+                    if (!isRemoteConfig) {
                         setIconClickUrl(Ad.CONTENT_INFO_LINK_URL);
                     }
                 }
@@ -162,9 +177,10 @@ public class PNAPIContentInfoView extends FrameLayout {
 
             @Override
             public void onDownloadFailed(String url, Exception ex) {
+                isIconDownloading = false;
                 if (!isDefault) {
                     setIconUrl(Ad.CONTENT_INFO_ICON_URL, true);
-                    if(!isRemoteConfig){
+                    if (!isRemoteConfig) {
                         setIconClickUrl(Ad.CONTENT_INFO_LINK_URL);
                     }
                 }
@@ -173,7 +189,8 @@ public class PNAPIContentInfoView extends FrameLayout {
     }
 
     public void setIconClickUrl(final String iconClickUrl) {
-        this.iconClickURL = iconClickUrl;
+        this.iconClickURL = new WrapperURLDigger().getURL(iconClickUrl);
+
         mContentInfoText.setOnClickListener(view -> {
             openLink();
         });
@@ -195,7 +212,7 @@ public class PNAPIContentInfoView extends FrameLayout {
             try {
                 Intent openLink = new Intent(Intent.ACTION_VIEW);
                 openLink.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                openLink.setData(Uri.parse(iconClickURL));
+                openLink.setData(Uri.parse(iconClickURL.trim()));
                 getContext().startActivity(openLink);
             } catch (Exception e) {
                 Log.e(TAG, "error on click content info text", e);

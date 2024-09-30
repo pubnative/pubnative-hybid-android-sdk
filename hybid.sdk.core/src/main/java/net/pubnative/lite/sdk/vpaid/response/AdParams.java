@@ -15,7 +15,7 @@ import java.util.List;
 public class AdParams {
 
     private String id;
-    private int duration;
+    private Integer duration;
     private String endCardRedirectUrl;
     private String videoRedirectUrl;
     private boolean vpaid;
@@ -43,7 +43,7 @@ public class AdParams {
         return duration;
     }
 
-    public void setDuration(int duration) {
+    public void setDuration(Integer duration) {
         this.duration = duration;
     }
 

@@ -90,11 +90,13 @@ public class JsonOperations {
     }
 
     private static synchronized JSONObject merge(JSONObject target, JSONObject source) {
+        if (source == null || target == null || source.length() == 0) {
+            return target;
+        }
         JSONObject myTarget = target;
         JSONObject mySource = source;
-
-        JSONArray names = mySource.names();
         try {
+            JSONArray names = mySource.names();
             if (names != null) {
                 for (int i = 0; i < names.length(); i++) {
                     String name = names.getString(i);
@@ -102,6 +104,10 @@ public class JsonOperations {
                 }
             }
         } catch (JSONException ignored) {
+
+        } catch (ArrayIndexOutOfBoundsException ex) {
+
+        } catch (RuntimeException ex) {
 
         }
         return myTarget;

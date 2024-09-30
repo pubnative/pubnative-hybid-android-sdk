@@ -46,7 +46,6 @@ import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.views.CloseableContainer;
 import net.pubnative.lite.sdk.vpaid.AdCloseButtonListener;
-import net.pubnative.lite.sdk.vpaid.BackButtonClickabilityListener;
 import net.pubnative.lite.sdk.vpaid.CloseButtonListener;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.VastActivityInteractor;
@@ -91,7 +90,6 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
                 mVideoAd.bindView(mVideoPlayer);
                 mVideoAd.setAdListener(mVideoAdListener);
                 mVideoAd.setAdCloseButtonListener(mAdCloseButtonListener);
-                mVideoAd.setBackButtonClickabilityListener(mBackButtonClickability);
                 setProgressBarVisible();
 
                 VideoAdCacheItem adCacheItem = HyBid.getVideoAdCache().remove(getZoneId());
@@ -177,7 +175,7 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            if (mIsVideoFinished && mIsSkippable && mIsBackEnabled) {
+            if (mIsBackEnabled) {
                 dismiss();
                 return true;
             }
@@ -406,21 +404,7 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
 
         @Override
         public void onCustomCTALoadFail() {
-            ReportingEvent reportingEvent = new ReportingEvent();
-            reportingEvent.setEventType(Reporting.EventType.CUSTOM_CTA_LOAD_FAIL);
-            reportingEvent.setAdFormat(Reporting.AdFormat.REWARDED);
-            reportingEvent.setCreativeType(Reporting.CreativeType.VIDEO);
-            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
-            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(IntegrationType.STANDALONE));
-            if (getAd() != null) {
-                reportingEvent.setImpId(getAd().getSessionId());
-                reportingEvent.setCampaignId(getAd().getCampaignId());
-                reportingEvent.setConfigId(getAd().getConfigId());
-            }
-            reportingEvent.setTimestamp(System.currentTimeMillis());
-            if (HyBid.getReportingController() != null) {
-                HyBid.getReportingController().reportEvent(reportingEvent);
-            }
+            Logger.e("onCustomCTALoadFail", "CTA Failed to load");
         }
 
         @Override
@@ -510,9 +494,6 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
     private final CloseButtonListener mAdCloseButtonListener = () -> {
         mIsVideoFinished = true;
         mIsSkippable = true;
-    };
-
-    private final BackButtonClickabilityListener mBackButtonClickability = () -> {
         mIsBackEnabled = true;
     };
 
@@ -546,8 +527,8 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
 
     private void initiateCustomCTAAdTrackers() {
         if (getAd() != null) {
-            mCustomCTATracker = new AdTracker(getAd().getBeacons(Ad.Beacon.CUSTOM_CTA_SHOW), getAd().getBeacons(Ad.Beacon.CUSTOM_CTA_CLICK));
-            mCustomCTAEndcardTracker = new AdTracker(null, getAd().getBeacons(Ad.Beacon.CUSTOM_CTA_ENDCARD_CLICK));
+            mCustomCTATracker = new AdTracker(getAd().getBeacons(Ad.Beacon.CUSTOM_CTA_SHOW), getAd().getBeacons(Ad.Beacon.CUSTOM_CTA_CLICK), false);
+            mCustomCTAEndcardTracker = new AdTracker(null, getAd().getBeacons(Ad.Beacon.CUSTOM_CTA_ENDCARD_CLICK), false);
         }
     }
 }

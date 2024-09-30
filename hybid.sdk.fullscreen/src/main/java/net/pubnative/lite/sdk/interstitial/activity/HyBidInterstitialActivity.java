@@ -17,17 +17,21 @@ import android.widget.ProgressBar;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.Reporting;
+import net.pubnative.lite.sdk.analytics.ReportingController;
+import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.contentinfo.AdFeedbackFormHelper;
 import net.pubnative.lite.sdk.contentinfo.listeners.AdFeedbackLoadListener;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastSender;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.AdExperience;
 import net.pubnative.lite.sdk.models.ContentInfo;
 import net.pubnative.lite.sdk.models.ContentInfoIconXPosition;
 import net.pubnative.lite.sdk.models.ContentInfoIconYPosition;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.PositionX;
 import net.pubnative.lite.sdk.models.PositionY;
+import net.pubnative.lite.sdk.models.RemoteConfig;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.URLValidator;
 import net.pubnative.lite.sdk.utils.UrlHandler;
@@ -35,7 +39,6 @@ import net.pubnative.lite.sdk.views.CloseableContainer;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.vpaid.VideoAd;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
-import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
 import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
 
@@ -45,6 +48,7 @@ import java.util.List;
 
 public abstract class HyBidInterstitialActivity extends Activity implements PNAPIContentInfoView.ContentInfoListener {
     private static final String TAG = HyBidInterstitialActivity.class.getSimpleName();
+    private static final int REDUCED_CLOSE_BUTTON_SIZE = 20;
     public static final String EXTRA_ZONE_ID = "extra_pn_zone_id";
     public static final String EXTRA_BROADCAST_ID = "extra_pn_broadcast_id";
     public static final String EXTRA_SKIP_OFFSET = "extra_pn_skip_offset";
@@ -82,6 +86,7 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
     protected boolean mIsFinishing = false;
 
     protected boolean mIsVideoFinished = false;
+    protected boolean mIsContentInfoIconClickTracked = false;
 
     protected VideoAd mVideoAd;
 
@@ -90,6 +95,8 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
     protected abstract boolean shouldShowContentInfo();
 
     protected AdFeedbackFormHelper adFeedbackFormHelper;
+
+    ReportingController mReportingController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +112,8 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
 
         validateIntegrationType(intent.getStringExtra(INTEGRATION_TYPE));
 
+        mReportingController = HyBid.getReportingController();
+
         long broadcastId = intent.getLongExtra(EXTRA_BROADCAST_ID, -1);
 
         if (!TextUtils.isEmpty(mZoneId) && broadcastId != -1) {
@@ -115,6 +124,9 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
             if (adView != null) {
 
                 mCloseableContainer = new CloseableContainer(this);
+                if (hasReducedCloseSize()) {
+                    mCloseableContainer.setCloseSize(REDUCED_CLOSE_BUTTON_SIZE);
+                }
 
                 FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
                 params.gravity = Gravity.CENTER;
@@ -163,8 +175,6 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
             mIntegrationType = IntegrationType.IN_APP_BIDDING;
         }
     }
-
-    SimpleTimer backButtonTimer;
 
     protected void setupContentInfo() {
         setupContentInfo(null);
@@ -240,6 +250,7 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
             if (mIsVast && !mIsVideoFinished) {
                 mVideoAd.skip();
             } else {
+                if (mIsVast) mVideoAd.closeVideo();
                 getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
                 mIsFinishing = true;
                 finish();
@@ -270,7 +281,7 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            if (mIsSkippable)
+            if (mIsBackEnabled)
                 dismiss();
         } else {
             return super.onKeyDown(keyCode, event);
@@ -286,6 +297,7 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
         if (mCloseableContainer != null && !isFinishing()) {
             mCloseableContainer.setCloseVisible(true);
             mCloseableContainer.setOnCloseListener(mCloseListener);
+            mIsBackEnabled = true;
         }
     }
 
@@ -293,6 +305,7 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
         if (mCloseableContainer != null) {
             mCloseableContainer.setCloseVisible(false);
             mCloseableContainer.setOnCloseListener(null);
+            mIsBackEnabled = false;
         }
     }
 
@@ -319,9 +332,28 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
     @Override
     public void onIconClicked(List<String> clickTrackers) {
         if (clickTrackers != null && !clickTrackers.isEmpty()) {
-            for (int i=0; i < clickTrackers.size(); i++) {
+            for (int i = 0; i < clickTrackers.size(); i++) {
                 EventTracker.post(this, clickTrackers.get(i), null, false);
             }
+        }
+        invokeOnContentInfoClick();
+    }
+
+    private void invokeOnContentInfoClick() {
+        if (mReportingController != null) {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.CONTENT_INFO_CLICK);
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            reportingEvent.setAdFormat(Reporting.AdFormat.FULLSCREEN);
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
+            Ad ad = getAd();
+            if (ad != null) {
+                reportingEvent.setImpId(ad.getSessionId());
+                reportingEvent.setCampaignId(ad.getCampaignId());
+                reportingEvent.setConfigId(ad.getConfigId());
+            }
+            mReportingController.reportEvent(reportingEvent);
         }
     }
 
@@ -396,28 +428,13 @@ public abstract class HyBidInterstitialActivity extends Activity implements PNAP
         this.mIsVast = isVast;
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (backButtonTimer != null) {
-            backButtonTimer.pauseTimer();
+    private boolean hasReducedCloseSize() {
+        if (mAd != null) {
+            Boolean hasReducedIconSize = mAd.isIconSizeReduced();
+            String adExperience = mAd.getAdExperience();
+            return adExperience.equalsIgnoreCase(AdExperience.PERFORMANCE) &&
+                    hasReducedIconSize != null && hasReducedIconSize;
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (backButtonTimer != null) {
-            backButtonTimer.resumeTimer();
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (backButtonTimer != null) {
-            backButtonTimer.onFinish();
-            backButtonTimer = null;
-        }
+        return false;
     }
 }

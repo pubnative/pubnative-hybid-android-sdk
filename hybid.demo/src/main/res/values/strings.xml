@@ -21,6 +21,7 @@
     <string name="admob_settings">Admob Settings</string>
     <string name="ironsource_settings">IronSource Settings</string>
     <string name="fairbid_settings">Fairbid Settings</string>
+    <string name="chartboost_settings">Chartboost Settings</string>
 
     <string name="load">Load</string>
     <string name="prepare">Prepare</string>
@@ -46,9 +47,12 @@
     <string name="hint_maxads_sdk_key">App ID</string>
     <string name="hint_maxads_banner_ad_unit_id">Banner Ad Unit ID</string>
     <string name="hint_maxads_medium_ad_unit_id">Medium Ad Unit ID</string>
+    <string name="hint_maxads_medium_video_ad_unit_id">Medium Video Ad Unit ID</string>
     <string name="hint_maxads_interstitial_ad_unit_id">Interstitial Ad Unit ID</string>
+    <string name="hint_maxads_interstitial_video_ad_unit_id">Interstitial Video Ad Unit ID</string>
     <string name="hint_maxads_native_ad_unit_id">Native Ad Unit ID</string>
     <string name="hint_maxads_rewarded_ad_unit_id">Rewarded Ad Unit ID</string>
+    <string name="hint_maxads_rewarded_video_ad_unit_id">Rewarded Video Ad Unit ID</string>
     <string name="save_maxads_settings">Save MaxAds settings</string>
 
     <string name="hint_admob_app_id">App ID</string>
@@ -110,8 +114,11 @@
     <string name="maxads">MaxAds</string>
     <string name="maxads_banner">MaxAds Banner</string>
     <string name="maxads_mrect">MaxAds MRect</string>
+    <string name="maxads_mrect_video">MaxAds MRect Video</string>
     <string name="maxads_interstitial">MaxAds Interstitial</string>
+    <string name="maxads_interstitial_video">MaxAds Interstitial Video</string>
     <string name="maxads_rewarded">MaxAds Rewarded</string>
+    <string name="maxads_rewarded_video">MaxAds Rewarded Video</string>
     <string name="maxads_native">MaxAds Native</string>
 
     <string name="dfp_banner">DFP Banner</string>
@@ -147,8 +154,17 @@
     <string name="chartboost_mediation_leaderboard">Chartboost Mediation Leaderboard</string>
     <string name="chartboost_mediation_interstitial">Chartboost Mediation Interstitial</string>
     <string name="chartboost_mediation_interstitial_video">Chartboost Mediation Interstitial Video</string>
-    <string name="chartboost_mediation_rewarded">Chartboost Mediation Rewarded Video</string>
+    <string name="chartboost_mediation_rewarded_video">Chartboost Mediation Rewarded Video</string>
     <string name="chartboost_mediation_rewarded_html">Chartboost Mediation Rewarded Html</string>
+
+    <string name="hint_chartboost_app_id">Chartboost Mediation App Id</string>
+    <string name="hint_chartboost_app_signature">Chartboost Mediation App Signature</string>
+    <string name="hint_chartboost_banner_ad_unit_id">Chartboost Mediation Banner Ad Unit Id</string>
+    <string name="hint_chartboost_interstitial_ad_unit_id">Chartboost Mediation Interstitial Ad Unit Id</string>
+    <string name="hint_chartboost_interstitial_video_ad_unit_id">Chartboost Mediation Interstitial Video Ad Unit Id</string>
+    <string name="hint_chartboost_rewarded_html_ad_unit_id">Chartboost Mediation Rewarded Html Ad Unit Id</string>
+    <string name="hint_chartboost_rewarded_video_ad_unit_id">Chartboost Mediation Rewarded Video Ad Unit Id</string>
+    <string name="save_chartboost_settings">Save Chartboost Settings</string>
 
     <string name="hint_fairbid_app_id">Fairbid App Id</string>
 
@@ -246,6 +262,7 @@
     <string name="tracker_report_response">Response code:</string>
     <string name="tracker_report_url">Tracker url:</string>
     <string name="tracker_content">Content:</string>
+    <string name="beacon_list">Beacon List</string>
     <string name="action_dismiss">Dismiss</string>
     <string name="event_details">Event details</string>
     <string name="url_inspector">URL Inspector</string>
@@ -332,9 +349,10 @@
     <string name="countdown_style_pie_chart">Pie Chart</string>
     <string name="countdown_style_timer">Timer</string>
     <string name="countdown_style_progress">Progress</string>
+    <string name="reduced_close_skip_size">Reduced skip/close buttons size</string>
+    <string name="check_reduced_close_skip_buttons">Reduced skip/close buttons</string>
 
     <string name="mraid_custom_close">MRAID Custom Close</string>
-    <string name="hint_back_button_delay">Back Button Delay</string>
     <string name="hint_close_button_delay">Close Button Delay</string>
 
     <string name="openrtb_body">oRTB URL + body</string>
@@ -363,7 +381,17 @@
     <string name="check_enable_custom_endcard_display" tools:ignore="ExtraTranslation">Enable Custom endcard Display</string>
     <string name="custom_end_card">Custom EndCard</string>
     <string name="custom_end_card_html">Custom End Card HTML</string>
+    <string name="hint_custom_cta_app_name">Custom CTA Name</string>
     <string name="hint_custom_cta_icon">Custom CTA Icon</string>
     <string name="custom_cta_enabled">Custom CTA Enabled</string>
     <string name="custom_cta_delay">Custom CTA Delay</string>
+    <string name="custom_cta_type">Custom CTA Type</string>
+    <string name="radio_default">Default</string>
+    <string name="radio_extended">Extended</string>
+    <string name="rewarded_video">Rewarded Video</string>
+
+    <string name="bundle_id_label">Bundle Id</string>
+    <string name="custom_bundle_id_enabled">Custom Bundle Id Enabled</string>
+    <string name="hint_custom_bundle_id">Custom Bundle Id</string>
+    <string name="ad_customisation_title">Ad Customisation</string>
 </resources>

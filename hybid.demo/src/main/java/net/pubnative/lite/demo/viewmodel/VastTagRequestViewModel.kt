@@ -126,6 +126,8 @@ class VastTagRequestViewModel(application: Application) : AndroidViewModel(appli
             format,
             Constants.AdmType.MARKUP,
             prefs.getCustomCTAIconURL(),
+            prefs.getCustomCTAAppName(),
+            prefs.getBundleId(),
             prefs.getCustomEndCardHTML(),
             configs,
             object : RemoteConfigApiClient.OnConfigFetchListener {
@@ -133,7 +135,7 @@ class VastTagRequestViewModel(application: Application) : AndroidViewModel(appli
                     AdRequestRegistry.getInstance().setLastAdRequest("Customized", response, 0)
                     if (ad != null) {
                         ad.zoneId = zoneId
-                        if (isVideoAd(ad)) {
+                        if (isVideoAd(ad) || MarkupUtils.isVastXml(ad.vast)) {
                             runCacheProcessForVideoAd(ad, _loadAdInterstitial)
                         } else {
                             HyBid.getAdCache().put(ad.zoneId, ad)
@@ -164,6 +166,8 @@ class VastTagRequestViewModel(application: Application) : AndroidViewModel(appli
             format,
             Constants.AdmType.MARKUP,
             prefs.getCustomCTAIconURL(),
+            prefs.getCustomCTAAppName(),
+            prefs.getBundleId(),
             prefs.getCustomEndCardHTML(),
             configs,
             object : RemoteConfigApiClient.OnConfigFetchListener {
@@ -171,7 +175,7 @@ class VastTagRequestViewModel(application: Application) : AndroidViewModel(appli
                     AdRequestRegistry.getInstance().setLastAdRequest("Customized", response, 0)
                     if (ad != null) {
                         ad.zoneId = zoneId
-                        if (isVideoAd(ad)) {
+                        if (isVideoAd(ad) || MarkupUtils.isVastXml(ad.vast)) {
                             runCacheProcessForVideoAd(ad, _loadAdRewarded)
                         } else {
                             HyBid.getAdCache().put(ad.zoneId, ad)
@@ -210,7 +214,7 @@ class VastTagRequestViewModel(application: Application) : AndroidViewModel(appli
                     ad.setHasEndCard(hasEndCard)
                     HyBid.getAdCache().put(ad.zoneId, ad)
                     HyBid.getVideoAdCache().put(ad.zoneId, adCacheItem)
-                    loadLiveData.value = ad
+                    loadLiveData.postValue(ad)
                 }
 
                 override fun onCacheError(error: Throwable) {

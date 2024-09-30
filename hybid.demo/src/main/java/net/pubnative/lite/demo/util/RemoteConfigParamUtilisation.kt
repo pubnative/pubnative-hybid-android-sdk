@@ -129,17 +129,17 @@ object RemoteConfigParamUtilisation {
             configs.add(param)
         }
 
-        if (adCustomizationsManager.back_button_delay_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.BACK_BUTTON_DELAY.fieldName
-            param.value = adCustomizationsManager.back_button_delay_value
-            configs.add(param)
-        }
-
         if (adCustomizationsManager.close_button_delay_enabled) {
             param = RemoteConfigParam()
             param.name = RemoteConfig.NATIVE_CLOSE_BUTTON_DELAY.fieldName
             param.value = adCustomizationsManager.close_button_delay_value
+            configs.add(param)
+        }
+
+        if (adCustomizationsManager.reduced_buttons_enabled) {
+            param = RemoteConfigParam()
+            param.name = RemoteConfig.PC_REDUCED_ICON_SIZES.fieldName
+            param.value = adCustomizationsManager.reduced_buttons_value
             configs.add(param)
         }
 
@@ -182,6 +182,13 @@ object RemoteConfigParamUtilisation {
             param = RemoteConfigParam()
             param.name = "custom_cta_delay"
             param.value = adCustomizationsManager.custom_cta_delay_enabled_value
+            configs.add(param)
+        }
+
+        if (adCustomizationsManager.custom_cta_enabled) {
+            param = RemoteConfigParam()
+            param.name = RemoteConfig.CUSTOM_CTA_TYPE.fieldName
+            param.value = adCustomizationsManager.custom_cta_type_value
             configs.add(param)
         }
 

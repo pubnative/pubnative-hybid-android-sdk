@@ -109,19 +109,10 @@ public class HyBidMediationBannerCustomEvent extends HyBidMediationBaseCustomEve
                 return;
             }
 
-            if (HyBid.isInitialized()) {
-                if (TextUtils.isEmpty(appToken) || !appToken.equals(HyBid.getAppToken())) {
-                    Logger.e(TAG, "The provided app token doesn't match the one used to initialise HyBid");
-                    mAdLoadCallback.onFailure(new AdError(AdRequest.ERROR_CODE_NETWORK_ERROR,
-                            "The provided app token doesn't match the one used to initialise HyBid",
-                            AdError.UNDEFINED_DOMAIN
-                    ));
-                } else {
-                    loadBanner(mAdConfiguration.getContext(), hyBidAdSize, zoneId);
-                }
+            if (HyBid.getAppToken() != null && HyBid.getAppToken().equalsIgnoreCase(appToken) && HyBid.isInitialized()) {
+                loadBanner(mAdConfiguration.getContext(), hyBidAdSize, zoneId);
             } else {
-                HyBid.initialize(appToken, (Application) mAdConfiguration.getContext().getApplicationContext(), b ->
-                        loadBanner(mAdConfiguration.getContext(), hyBidAdSize, zoneId));
+                HyBid.initialize(appToken, (Application) mAdConfiguration.getContext().getApplicationContext(), b -> loadBanner(mAdConfiguration.getContext(), hyBidAdSize, zoneId));
             }
         }
 

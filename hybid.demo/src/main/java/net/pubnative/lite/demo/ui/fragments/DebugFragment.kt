@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.ui.activities.BeaconListActivity
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.ui.activities.UrlInspectorActivity
 import net.pubnative.lite.demo.ui.adapters.ReportingEventAdapter
@@ -21,6 +22,10 @@ import net.pubnative.lite.demo.ui.adapters.ReportingTrackerAdapter
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.analytics.ReportingEvent
+import net.pubnative.lite.sdk.analytics.tracker.ReportingTracker
+import net.pubnative.lite.sdk.utils.json.JsonOperations
+import org.json.JSONArray
+import org.json.JSONObject
 
 class DebugFragment : Fragment(R.layout.fragment_debug) {
 
@@ -32,6 +37,7 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
     private var eventReportButton: Button? = null
     private var trackerReportButton: Button? = null
     private var urlInspectorButton: Button? = null
+    private var beaconListButton: Button? = null
 
     private var eventReportDialog: AlertDialog? = null
     private var trackersReportDialog: AlertDialog? = null
@@ -63,6 +69,7 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
         eventReportButton = requireView().findViewById(R.id.button_event_report)
         trackerReportButton = requireView().findViewById(R.id.button_tracker_report)
         urlInspectorButton = requireView().findViewById(R.id.button_url_inspector)
+        beaconListButton = requireView().findViewById(R.id.button_beacon_list)
     }
 
     private fun setOnClickListeners() {
@@ -99,6 +106,9 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
         }
         urlInspectorButton?.setOnClickListener {
             displayUrlInspector()
+        }
+        beaconListButton?.setOnClickListener {
+            displayBeaconList()
         }
     }
 
@@ -210,6 +220,20 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
                 trackerReportAdapter?.submitData(it)
                 trackersReportDialog?.show()
                 isOpenedTrackerReport = true
+                trackerReportToClipboard(it)
+            }
+    }
+
+    private fun displayBeaconList() {
+        (requireActivity() as? TabActivity)?.debugViewModel?.getResponse()
+            ?.observe(viewLifecycleOwner) {
+            val intent = Intent(context, BeaconListActivity::class.java)
+                if (it != null) {
+                    intent.putExtra("response", it)
+                    context?.startActivity(intent)
+                } else {
+                    Toast.makeText(context, "A response must be received first", Toast.LENGTH_SHORT).show()
+                }
             }
     }
 
@@ -233,6 +257,20 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
         if (!postBodyView!!.text.isNullOrEmpty()) {
             intent.putExtra("requestBody", postBodyView!!.text.toString())
         }
+    }
+
+    private fun trackerReportToClipboard(reportingTrackerList: List<ReportingTracker>) {
+        val jsonArray = JSONArray()
+
+        for (reportingTracker in reportingTrackerList) {
+            val jsonObject = JSONObject()
+            JsonOperations.putJsonString(jsonObject, "beaconUrl", reportingTracker.url)
+            JsonOperations.putJsonString(jsonObject, "description", reportingTracker.type)
+            JsonOperations.putJsonString(jsonObject, "response_code", reportingTracker.responseCode.toString())
+            jsonArray.put(jsonObject)
+        }
+
+        context?.let { ClipboardUtils.copyToClipboard(it, jsonArray.toString()) }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

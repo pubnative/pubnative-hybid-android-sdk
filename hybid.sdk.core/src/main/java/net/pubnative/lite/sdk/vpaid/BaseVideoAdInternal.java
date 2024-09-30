@@ -19,9 +19,7 @@ import net.pubnative.lite.sdk.utils.AdCustomCTAManager;
 import net.pubnative.lite.sdk.utils.AdEndCardManager;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNBitmapDownloader;
-import net.pubnative.lite.sdk.utils.ViewUtils;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeVideoAdSession;
-import net.pubnative.lite.sdk.views.helpers.ImageHelper;
 import net.pubnative.lite.sdk.vpaid.enums.AdState;
 import net.pubnative.lite.sdk.vpaid.enums.VastError;
 import net.pubnative.lite.sdk.vpaid.helpers.AssetsLoader;
@@ -49,7 +47,6 @@ abstract class BaseVideoAdInternal {
     private VideoAdListener mVideoAdListener;
     private AdCloseButtonListener mAdCloseButtonListener;
     private CloseButtonListener mCloseButtonListener;
-    private BackButtonClickabilityListener mBackButtonClickabilityListener;
     private long mAdLoadingStartTime;
     private SimpleTimer mExpirationTimer;
     private VideoAdController mAdController;
@@ -128,10 +125,6 @@ abstract class BaseVideoAdInternal {
 
     void setAdCloseButtonListener(CloseButtonListener closeButtonListener) {
         mCloseButtonListener = closeButtonListener;
-    }
-
-    void setBackButtonClickabilityListener(BackButtonClickabilityListener listener) {
-        mBackButtonClickabilityListener = listener;
     }
 
     public void setVideoCacheItem(VideoAdCacheItem adCacheItem) {
@@ -545,11 +538,6 @@ abstract class BaseVideoAdInternal {
     void onAdCloseButtonVisible() {
         if (mCloseButtonListener != null)
             mCloseButtonListener.onCloseButtonVisible();
-    }
-
-    void onBackButtonClickable() {
-        if (mBackButtonClickabilityListener != null)
-            mBackButtonClickabilityListener.onBackButtonClickable();
     }
 
     void onEndCardSkipped(Boolean custom) {

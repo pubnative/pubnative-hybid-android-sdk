@@ -1,6 +1,7 @@
 package net.pubnative.lite.sdk.vpaid.helpers;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -20,7 +21,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.util.List;
 
 public class FileLoader {
 
@@ -38,10 +38,18 @@ public class FileLoader {
     private static class FileHeaders {
         final String eTag;
         final int fileLength;
+        final Bitmap bitmap;
 
         FileHeaders(String eTag, int fileLength) {
             this.eTag = eTag;
             this.fileLength = fileLength;
+            this.bitmap = null;
+        }
+
+        FileHeaders(String eTag, int fileLength, Bitmap bitmap) {
+            this.eTag = eTag;
+            this.fileLength = fileLength;
+            this.bitmap = bitmap;
         }
     }
 
@@ -64,11 +72,13 @@ public class FileLoader {
     private boolean firstQuartile;
     private boolean midpoint;
     private boolean thirdQuartile;
+    private boolean mIsEndCard;
 
-    public FileLoader(String fileUrl, Context context, Callback callback) {
+    public FileLoader(String fileUrl, Context context, Callback callback, Boolean isEndCard) {
         mCallback = callback;
         mContext = context;
         mRemoteFileUrl = fileUrl;
+        mIsEndCard = isEndCard;
         String shortFileName = FileUtils.obtainHashName(mRemoteFileUrl);
         mLoadingFile = new File(FileUtils.getParentDir(mContext), shortFileName);
     }
@@ -126,8 +136,10 @@ public class FileLoader {
             time = System.currentTimeMillis() - time;
             Logger.d(LOG_TAG, "Load time: " + time / 1000.0);
             Logger.d(LOG_TAG, "AttemptsCount: " + attemptsCount);
-
             if (downloadedBytes == headers.fileLength) {
+                handleFileFullDownloaded();
+            } else if (headers.bitmap != null) {
+                saveBitmapIntoFile(headers.bitmap);
                 handleFileFullDownloaded();
             } else {
                 if (mCallback != null) {
@@ -137,6 +149,10 @@ public class FileLoader {
         } catch (Exception e) {
             Logger.e(LOG_TAG, "Unexpected FileLoader error: " + e.getMessage());
         }
+    }
+
+    private void saveBitmapIntoFile(Bitmap bitmap) {
+        new AndroidBmpUtil().save(bitmap, mLoadingFile.getAbsolutePath());
     }
 
     /**
@@ -177,11 +193,17 @@ public class FileLoader {
                 ErrorLog.postError(mContext, VastError.TRAFFICKING);
                 return null;
             }
-            mConnection.setRequestMethod("HEAD");
+            mConnection.setRequestMethod("GET");
             if (mConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 String eTag = mConnection.getHeaderField("ETag");
                 int fileLength = mConnection.getContentLength();
-                return new FileHeaders(eTag, fileLength);
+                Bitmap bitmap = null;
+                if (fileLength == -1) {
+                    if (mIsEndCard) {
+                        bitmap = EndCardFileDownloader.INSTANCE.mLoad(mRemoteFileUrl);
+                    }
+                }
+                return new FileHeaders(eTag, fileLength, bitmap);
             } else if (mConnection.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN ||
                     mConnection.getResponseCode() == HttpURLConnection.HTTP_PARTIAL ||
                     mConnection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
@@ -213,8 +235,6 @@ public class FileLoader {
         connection.setReadTimeout(READ_TIMEOUT);
         connection.setConnectTimeout(CONNECT_TIMEOUT);
         connection.setRequestMethod("GET");
-        connection.setRequestProperty("Range", "bytes=" + downloadedBytes + "-" + headers.fileLength);
-        connection.setRequestProperty("If-Range", headers.eTag);
         return connection;
     }
 

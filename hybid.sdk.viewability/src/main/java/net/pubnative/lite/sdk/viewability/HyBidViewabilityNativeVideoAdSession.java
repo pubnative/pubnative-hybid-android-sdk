@@ -43,8 +43,10 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityNative
         mVerificationScriptResources.addAll(verificationScriptResources);
 
         try {
+            String customReferenceData = "";
+            String contentUrl = "";
             AdSessionContext adSessionContext = AdSessionContext.createNativeAdSessionContext(viewabilityManager.getPartner(),
-                    viewabilityManager.getServiceJs(), mVerificationScriptResources, "", "");
+                    viewabilityManager.getServiceJs(), mVerificationScriptResources, customReferenceData, contentUrl);
 
 
             AdSessionConfiguration adSessionConfiguration =

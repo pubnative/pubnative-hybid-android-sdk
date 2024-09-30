@@ -28,7 +28,6 @@ import android.preference.PreferenceManager
 import net.pubnative.lite.demo.*
 import net.pubnative.lite.demo.models.*
 import net.pubnative.lite.demo.util.SingletonHolder
-import net.pubnative.lite.sdk.CountdownStyle
 
 /**
  * Created by erosgarciaponte on 30.01.18.
@@ -234,12 +233,26 @@ class SettingsManager private constructor(context: Context) {
         preferences.edit().putString(SETTINGS_KEY_MAXADS_MRECT_AD_UNIT_ID, adUnitId).apply()
     }
 
+    fun setMaxAdsMRectVideoAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_MAXADS_MRECT_VIDEO_AD_UNIT_ID, adUnitId).apply()
+    }
+
     fun setMaxAdsInterstitialAdUnitId(adUnitId: String) {
         preferences.edit().putString(SETTINGS_KEY_MAXADS_INTERSTITIAL_AD_UNIT_ID, adUnitId).apply()
     }
 
+    fun setMaxAdsInterstitialVideoAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_MAXADS_INTERSTITIAL_VIDEO_AD_UNIT_ID, adUnitId)
+            .apply()
+    }
+
     fun setMaxAdsRewardedAdUnitId(adUnitId: String) {
         preferences.edit().putString(SETTINGS_KEY_MAXADS_REWARDED_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setMaxAdsRewardedVideoAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_MAXADS_REWARDED_VIDEO_AD_UNIT_ID, adUnitId)
+            .apply()
     }
 
     fun setMaxAdsNativeAdUnitId(adUnitId: String) {
@@ -264,6 +277,35 @@ class SettingsManager private constructor(context: Context) {
         preferences.edit().putString(SETTINGS_KEY_FAIRBID_MEDIATION_REWARDED_AD_UNIT_ID, adUnitId)
             .apply()
     }
+
+    fun setChartboostAppId(appId: String) {
+        preferences.edit().putString(SETTINGS_KEY_CHARTBOOST_APP_ID, appId).apply()
+    }
+
+    fun setChartboostSignature(signature: String) {
+        preferences.edit().putString(SETTINGS_KEY_CHARTBOOST_SIGNATURE, signature).apply()
+    }
+
+    fun setChartboostMediationBannerAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_CHARTBOOST_BANNER_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setChartboostMediationInterstitialAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_CHARTBOOST_INTERSTITIAL_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setChartboostMediationInterstitialVideoAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_CHARTBOOST_INTERSTITIAL_VIDEO_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setChartboostMediationRewardedHtmlAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_CHARTBOOST_REWARDED_HTML_AD_UNIT_ID, adUnitId).apply()
+    }
+
+    fun setChartboostMediationRewardedVideoAdUnitId(adUnitId: String) {
+        preferences.edit().putString(SETTINGS_KEY_CHARTBOOST_REWARDED_VIDEO_AD_UNIT_ID, adUnitId).apply()
+    }
+
 
     fun setFeedbackFormEnabled(enabled: Boolean) {
         preferences.edit().putBoolean(SETTINGS_KEY_FEEDBACK_FORM_ENABLED, enabled).apply()
@@ -378,10 +420,18 @@ class SettingsManager private constructor(context: Context) {
                 editor.putString(SETTINGS_KEY_MAXADS_SDK_KEY, it.sdkKey)
                 editor.putString(SETTINGS_KEY_MAXADS_BANNER_AD_UNIT_ID, it.bannerAdUnitId)
                 editor.putString(SETTINGS_KEY_MAXADS_MRECT_AD_UNIT_ID, it.mRectAdUnitId)
+                editor.putString(SETTINGS_KEY_MAXADS_MRECT_VIDEO_AD_UNIT_ID, it.mRectVideoAdUnitId)
                 editor.putString(
                     SETTINGS_KEY_MAXADS_INTERSTITIAL_AD_UNIT_ID, it.interstitialAdUnitId
                 )
+                editor.putString(
+                    SETTINGS_KEY_MAXADS_INTERSTITIAL_VIDEO_AD_UNIT_ID, it.interstitialVideoAdUnitId
+                )
                 editor.putString(SETTINGS_KEY_MAXADS_REWARDED_AD_UNIT_ID, it.rewardedAdUnitId)
+                editor.putString(
+                    SETTINGS_KEY_MAXADS_REWARDED_VIDEO_AD_UNIT_ID,
+                    it.rewardedVideoAdUnitId
+                )
                 editor.putString(SETTINGS_KEY_MAXADS_NATIVE_AD_UNIT_ID, it.nativeAdUnitId)
             }
 
@@ -397,6 +447,16 @@ class SettingsManager private constructor(context: Context) {
                 editor.putString(
                     SETTINGS_KEY_FAIRBID_MEDIATION_REWARDED_AD_UNIT_ID, it.mediationRewardedAdUnitId
                 )
+            }
+
+            model.chartboostSettings?.let {
+                editor.putString(SETTINGS_KEY_CHARTBOOST_APP_ID, it.heliumAppId)
+                editor.putString(SETTINGS_KEY_CHARTBOOST_SIGNATURE, it.heliumAppSignature)
+                editor.putString(SETTINGS_KEY_CHARTBOOST_BANNER_AD_UNIT_ID, it.mediationBannerAdUnitId)
+                editor.putString(SETTINGS_KEY_CHARTBOOST_INTERSTITIAL_AD_UNIT_ID, it.mediationInterstitialAdUnitId)
+                editor.putString(SETTINGS_KEY_CHARTBOOST_INTERSTITIAL_VIDEO_AD_UNIT_ID, it.mediationInterstitialVideoAdUnitId)
+                editor.putString(SETTINGS_KEY_CHARTBOOST_REWARDED_HTML_AD_UNIT_ID, it.mediationRewardedHtmlAdUnitId)
+                editor.putString(SETTINGS_KEY_CHARTBOOST_REWARDED_VIDEO_AD_UNIT_ID, it.mediationRewardedVideoAdUnitId)
             }
 
             editor.putBoolean(SETTINGS_KEY_INITIALISED, true)
@@ -420,7 +480,8 @@ class SettingsManager private constructor(context: Context) {
             preferences.getStringSet(SETTINGS_KEY_BROWSER_PRIORITIES, emptySet())?.toList()!!
         val coppa = preferences.getBoolean(SETTINGS_KEY_COPPA, Constants.COPPA_DEFAULT)
         val testMode = preferences.getBoolean(SETTINGS_KEY_TEST_MODE, Constants.TEST_MODE_DEFAULT)
-        val topicsApi = preferences.getBoolean(SETTINGS_KEY_TOPICS_API, Constants.TOPICS_API_DEFAULT)
+        val topicsApi =
+            preferences.getBoolean(SETTINGS_KEY_TOPICS_API, Constants.TOPICS_API_DEFAULT)
         val locationTracking = preferences.getBoolean(
             SETTINGS_KEY_LOCATION_TRACKING,
             Constants.LOCATION_TRACKING_DEFAULT
@@ -484,10 +545,17 @@ class SettingsManager private constructor(context: Context) {
         val maxAdsBannerAdUnitId =
             preferences.getString(SETTINGS_KEY_MAXADS_BANNER_AD_UNIT_ID, "")!!
         val maxAdsMRectAdUnitId = preferences.getString(SETTINGS_KEY_MAXADS_MRECT_AD_UNIT_ID, "")!!
+        val maxAdsMRectVideoAdUnitId = preferences.getString(
+            SETTINGS_KEY_MAXADS_MRECT_VIDEO_AD_UNIT_ID, ""
+        )!!
         val maxAdsInterstitialAdUnitId =
             preferences.getString(SETTINGS_KEY_MAXADS_INTERSTITIAL_AD_UNIT_ID, "")!!
+        val maxAdsInterstitialVideoAdUnitId =
+            preferences.getString(SETTINGS_KEY_MAXADS_INTERSTITIAL_VIDEO_AD_UNIT_ID, "")!!
         val maxAdsRewardedAdUnitId =
             preferences.getString(SETTINGS_KEY_MAXADS_REWARDED_AD_UNIT_ID, "")!!
+        val maxAdsRewardedVideoAdUnitId =
+            preferences.getString(SETTINGS_KEY_MAXADS_REWARDED_VIDEO_AD_UNIT_ID, "")!!
         val maxAdsNativeAdUnitId =
             preferences.getString(SETTINGS_KEY_MAXADS_NATIVE_AD_UNIT_ID, "")!!
         val fairbidAppId = preferences.getString(SETTINGS_KEY_FAIRBID_APP_ID, "")!!
@@ -504,6 +572,21 @@ class SettingsManager private constructor(context: Context) {
             preferences.getString(SETTINGS_KEY_FAIRBID_INTERSTITIAL_AD_UNIT_ID, "")!!
         val fairbidRewardedAdUnitId =
             preferences.getString(SETTINGS_KEY_FAIRBID_REWARDED_AD_UNIT_ID, "")!!
+
+        val chartboostAppId =
+            preferences.getString(SETTINGS_KEY_CHARTBOOST_APP_ID, "")!!
+        val chartboostSignature =
+            preferences.getString(SETTINGS_KEY_CHARTBOOST_SIGNATURE, "")!!
+        val chartboostBannerAdUnitId =
+            preferences.getString(SETTINGS_KEY_CHARTBOOST_BANNER_AD_UNIT_ID, "")!!
+        val chartboostInterstitialAdUnitId =
+            preferences.getString(SETTINGS_KEY_CHARTBOOST_INTERSTITIAL_AD_UNIT_ID, "")!!
+        val chartboostInterstitialVideoAdUnitId =
+            preferences.getString(SETTINGS_KEY_CHARTBOOST_INTERSTITIAL_VIDEO_AD_UNIT_ID, "")!!
+        val chartboostRewardedHtmlAdUnitId =
+            preferences.getString(SETTINGS_KEY_CHARTBOOST_REWARDED_HTML_AD_UNIT_ID, "")!!
+        val chartboostRewardedVideoAdUnitId =
+            preferences.getString(SETTINGS_KEY_CHARTBOOST_REWARDED_VIDEO_AD_UNIT_ID, "")!!
 
         val settings = Settings()
 
@@ -548,8 +631,21 @@ class SettingsManager private constructor(context: Context) {
 
         val maxAdsSettings =
             MaxAdsSettings.Builder().sdkKey(maxAdsSdkKey).bannerAdUnitId(maxAdsBannerAdUnitId)
+                .mRectVideoAdUnitId(maxAdsMRectVideoAdUnitId)
+                .interstitialVideoAdUnitId(maxAdsInterstitialVideoAdUnitId)
+                .rewardedVideoAdUnitId(maxAdsRewardedVideoAdUnitId)
                 .interstitialAdUnitId(maxAdsInterstitialAdUnitId).mRectAdUnitId(maxAdsMRectAdUnitId)
                 .rewardedAdUnitId(maxAdsRewardedAdUnitId).nativeAdUnitId(maxAdsNativeAdUnitId)
+                .build()
+
+        val chartboostSettings =
+            ChartboostSettings.Builder().heliumAppId(chartboostAppId)
+                .heliumAppSignature(chartboostSignature)
+                .mediationBannerAdUnitId(chartboostBannerAdUnitId)
+                .mediationInterstitialAdUnitId(chartboostInterstitialAdUnitId)
+                .mediationInterstitialVideoAdUnitId(chartboostInterstitialVideoAdUnitId)
+                .mediationRewardedVideoAdUnitId(chartboostRewardedVideoAdUnitId)
+                .mediationRewardedHtmlAdUnitId(chartboostRewardedHtmlAdUnitId)
                 .build()
 
         settings.hybidSettings = hybidSettings
@@ -559,6 +655,7 @@ class SettingsManager private constructor(context: Context) {
         settings.admobSettings = admobSettings
         settings.ironSourceSettings = ironSourceSettings
         settings.maxAdsSettings = maxAdsSettings
+        settings.chartboostSettings = chartboostSettings
 
         return settings
     }

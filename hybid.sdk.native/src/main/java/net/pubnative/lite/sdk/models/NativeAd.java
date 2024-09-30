@@ -30,7 +30,10 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.Reporting;
+import net.pubnative.lite.sdk.analytics.ReportingController;
+import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.contentinfo.AdFeedbackFormHelper;
 import net.pubnative.lite.sdk.contentinfo.listeners.AdFeedbackLoadListener;
 import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
@@ -48,6 +51,7 @@ import java.util.Map;
 
 public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoView.ContentInfoListener {
     private static final String TAG = NativeAd.class.getSimpleName();
+    private ReportingController mReportingController;
 
     /**
      * Interface definition for callbacks to be invoked when impression confirmed/failed, ad clicked/clickfailed
@@ -81,10 +85,12 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
 
     public NativeAd() {
         this.mAd = null;
+        mReportingController = HyBid.getReportingController();
     }
 
     public NativeAd(Ad ad) {
         this.mAd = ad;
+        mReportingController = HyBid.getReportingController();
     }
 
     /**
@@ -433,9 +439,26 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
     @Override
     public void onIconClicked(List<String> clickTrackers) {
         if (clickTrackers != null && !clickTrackers.isEmpty()) {
-            for (int i=0; i < clickTrackers.size(); i++) {
+            for (int i = 0; i < clickTrackers.size(); i++) {
                 EventTracker.post(mAdView.getContext(), clickTrackers.get(i), null, false);
             }
+        }
+        invokeOnContentInfoClick();
+    }
+
+    private void invokeOnContentInfoClick() {
+        if (mReportingController != null) {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.CONTENT_INFO_CLICK);
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            reportingEvent.setAdFormat(Reporting.AdFormat.NATIVE);
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            if (mAd != null) {
+                reportingEvent.setImpId(mAd.getSessionId());
+                reportingEvent.setCampaignId(mAd.getCampaignId());
+                reportingEvent.setConfigId(mAd.getConfigId());
+            }
+            mReportingController.reportEvent(reportingEvent);
         }
     }
 

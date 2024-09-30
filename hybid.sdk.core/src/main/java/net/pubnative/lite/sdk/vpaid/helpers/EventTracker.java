@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.analytics.tracker.ReportingTracker;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.vpaid.macros.MacroHelper;
 import net.pubnative.lite.sdk.vpaid.models.vast.Tracking;
@@ -30,9 +31,60 @@ public class EventTracker {
 
         for (Tracking event : events) {
             if (event.getEvent().equalsIgnoreCase(eventType)) {
-                post(context, event.getText(), macroHelper, ignoreIfExist);
+                postEvent(context, event.getText(), event.getEvent(), macroHelper, ignoreIfExist);
             }
         }
+    }
+
+    public static synchronized void postEvent(Context context, String eventUrl, String eventName, MacroHelper macroHelper, boolean ignoreIfExist) {
+        if (ignoreIfExist && sUsedEvents.contains(eventUrl)) {
+            return;
+        }
+
+        if (TextUtils.isEmpty(eventUrl)) {
+            return;
+        }
+
+        String processedUrl = eventUrl;
+        String name = eventName;
+
+        if (name == null) {
+            name = "";
+        }
+
+        if (macroHelper != null) {
+            processedUrl = macroHelper.processUrl(processedUrl);
+        }
+
+        Map<String, String> headers = new HashMap<>();
+        String userAgent = HyBid.getDeviceInfo().getUserAgent();
+        if (!TextUtils.isEmpty(userAgent)) {
+            headers.put("User-Agent", userAgent);
+        }
+
+        String finalEventName = name;
+        PNHttpClient.makeRequest(context, processedUrl, headers, null, false, new PNHttpClient.Listener() {
+            @Override
+            public void onSuccess(String response, Map<String, List<String>> headers) {
+                Log.d("onSuccess", response);
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Log.d("onFailure", error.toString());
+            }
+
+            @Override
+            public void onFinally(String requestUrl, int responseCode) {
+                if (HyBid.getReportingController() != null) {
+                    HyBid.getReportingController().reportFiredTracker(
+                            new ReportingTracker(finalEventName, requestUrl, responseCode)
+                    );
+                }
+            }
+        });
+
+        sUsedEvents.add(eventUrl);
     }
 
     public static synchronized void post(Context context, final String url, MacroHelper macroHelper, boolean ignoreIfExist) {

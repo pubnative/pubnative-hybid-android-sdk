@@ -47,7 +47,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AppLovinMediationVerveCustomNetworkAdapter extends MediationAdapterBase implements MaxAdViewAdapter,
         MaxInterstitialAdapter, MaxRewardedAdapter, MaxNativeAdAdapter {
     public static final String MAX_MEDIATION_VENDOR = "m";
-    public static final String MAX_ADAPTER_VERSION = "3.0.2.0";
+    public static final String MAX_ADAPTER_VERSION = "3.1.0.0";
     public static final String PARAM_APP_TOKEN = "pn_app_token";
     public static final String DUMMY_TOKEN = "dummytoken";
 
@@ -535,7 +535,6 @@ public class AppLovinMediationVerveCustomNetworkAdapter extends MediationAdapter
         public void onRewardedOpened() {
             log("Rewarded ad did track impression");
             listener.onRewardedAdDisplayed();
-            listener.onRewardedAdVideoStarted();
         }
 
         @Override
@@ -553,7 +552,6 @@ public class AppLovinMediationVerveCustomNetworkAdapter extends MediationAdapter
         @Override
         public void onRewardedClosed() {
             log("Rewarded ad did disappear");
-            listener.onRewardedAdVideoCompleted();
 
             if (hasGrantedReward || shouldAlwaysRewardUser()) {
                 MaxReward reward = getReward();

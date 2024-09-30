@@ -5,6 +5,8 @@ import android.text.TextUtils;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.VASTtag;
 
+import java.util.Locale;
+
 public class VastUrlUtils {
 
     public static String formatURL(String adValue) {
@@ -33,9 +35,9 @@ public class VastUrlUtils {
 
         if (HyBid.getLocationManager() != null && HyBid.getLocationManager().getUserLocation() != null) {
             if (HyBid.getLocationManager().getUserLocation().getLatitude() != 0.0)
-                latitude = String.valueOf(HyBid.getLocationManager().getUserLocation().getLatitude());
+                latitude = String.format(Locale.ENGLISH, "%.2f", HyBid.getLocationManager().getUserLocation().getLatitude());
             if (HyBid.getLocationManager().getUserLocation().getLongitude() != 0.0)
-                longitude = String.valueOf(HyBid.getLocationManager().getUserLocation().getLongitude());
+                longitude = String.format(Locale.ENGLISH, "%.2f", HyBid.getLocationManager().getUserLocation().getLongitude());
         }
 
         return getVastURL(adValue,

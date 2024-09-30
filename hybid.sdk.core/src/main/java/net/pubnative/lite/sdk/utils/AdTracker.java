@@ -75,6 +75,12 @@ public class AdTracker {
         this(HyBid.getApiClient(), HyBid.getDeviceInfo(), impressionUrls, clickUrls);
     }
 
+    public AdTracker(List<AdData> impressionUrls,
+                     List<AdData> clickUrls, boolean clickTrackedInitial) {
+        this(HyBid.getApiClient(), HyBid.getDeviceInfo(), impressionUrls, clickUrls);
+        mClickTracked = clickTrackedInitial;
+    }
+
     AdTracker(PNApiClient apiClient,
               DeviceInfo deviceInfo,
               List<AdData> impressionUrls,
@@ -98,7 +104,7 @@ public class AdTracker {
 
             @Override
             public void onFinally(String requestUrl, String trackTypeName, int responseCode) {
-                if(HyBid.getReportingController() != null){
+                if (HyBid.getReportingController() != null) {
                     HyBid.getReportingController().reportFiredTracker(
                             new ReportingTracker(trackTypeName, requestUrl, responseCode)
                     );
@@ -109,7 +115,7 @@ public class AdTracker {
         mTrackJSListener = new PNApiClient.TrackJSListener() {
             @Override
             public void onSuccess(String js) {
-                if(HyBid.getReportingController() != null){
+                if (HyBid.getReportingController() != null) {
                     HyBid.getReportingController().reportFiredTracker(
                             new ReportingTracker("JavaScript", js)
                     );

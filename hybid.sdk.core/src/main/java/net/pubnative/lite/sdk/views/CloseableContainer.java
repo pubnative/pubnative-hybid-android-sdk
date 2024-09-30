@@ -51,6 +51,7 @@ public class CloseableContainer extends FrameLayout {
     private static final float CLOSE_REGION_SIZE_DP = 30.0f;
     static final float CLOSE_BUTTON_PADDING_DP = 0.0f;
     static final float CLOSE_BUTTON_PADDING_BORDER_DP = 0.0f;
+    private Integer mCustomCloseSize = null;
 
     private OnCloseListener mOnCloseListener;
     private final ImageButton mCloseButton;
@@ -92,8 +93,16 @@ public class CloseableContainer extends FrameLayout {
     }
 
     private void positionButton() {
-        int buttonSize = (int) ViewUtils.convertDpToPixel(CLOSE_REGION_SIZE_DP, getContext());
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(buttonSize, buttonSize);
+        FrameLayout.LayoutParams layoutParams;
+        if (mCustomCloseSize != null) {
+            layoutParams = new FrameLayout.LayoutParams(mCustomCloseSize, mCustomCloseSize);
+            mCloseButton.setId(R.id.button_fullscreen_close_small);
+            int margins = (int) ViewUtils.convertDpToPixel(8f, getContext());
+            layoutParams.setMargins(margins, margins, margins, margins);
+        } else {
+            int buttonSize = (int) ViewUtils.convertDpToPixel(CLOSE_REGION_SIZE_DP, getContext());
+            layoutParams = new FrameLayout.LayoutParams(buttonSize, buttonSize);
+        }
         layoutParams.gravity = mClosePosition.getGravity();
         removeView(mCloseButton);
         addView(mCloseButton, layoutParams);
@@ -125,5 +134,13 @@ public class CloseableContainer extends FrameLayout {
                 positionButton();
             }
         }
+    }
+
+    public void setCloseSize(Integer size) {
+        mCustomCloseSize = (int) ViewUtils.convertDpToPixel(size.floatValue(), getContext());
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(mCustomCloseSize, mCustomCloseSize);
+        layoutParams.gravity = mClosePosition.getGravity();
+        removeView(mCloseButton);
+        addView(mCloseButton, layoutParams);
     }
 }

@@ -102,6 +102,8 @@ class AdCustomizationViewModel(application: Application) : AndroidViewModel(appl
             format,
             admType,
             prefs.getCustomCTAIconURL(),
+            prefs.getCustomCTAAppName(),
+            prefs.getBundleId(),
             prefs.getCustomEndCardHTML(),
             width,
             height,
@@ -118,6 +120,8 @@ class AdCustomizationViewModel(application: Application) : AndroidViewModel(appl
             format,
             admType,
             prefs.getCustomCTAIconURL(),
+            prefs.getCustomCTAAppName(),
+            prefs.getBundleId(),
             prefs.getCustomEndCardHTML(),
             configs,
             remoteConfigFetchListener
@@ -132,6 +136,8 @@ class AdCustomizationViewModel(application: Application) : AndroidViewModel(appl
             format,
             admType,
             prefs.getCustomCTAIconURL(),
+            prefs.getCustomCTAAppName(),
+            prefs.getBundleId(),
             prefs.getCustomEndCardHTML(),
             configs,
             remoteConfigFetchListener

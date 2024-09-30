@@ -317,7 +317,8 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
                     continue;
                 }
                 int sendEventTime = mAdParams.getDuration() - value;
-                if (Utils.parseDuration(tracking.getOffset()) == sendEventTime) {
+                Integer trackingOffset = Utils.parseDuration(tracking.getOffset());
+                if (trackingOffset != null && trackingOffset == sendEventTime) {
                     EventTracker.post(mBaseAdInternal.getContext(), event.url, mMacroHelper, ignoreIfExist);
                 }
             }

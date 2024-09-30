@@ -39,6 +39,7 @@ import net.pubnative.lite.sdk.utils.svgparser.SVG;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.RejectedExecutionException;
 
 public class PNBitmapDownloader {
 
@@ -163,7 +164,12 @@ public class PNBitmapDownloader {
     // Private methods
     //==============================================================================================
     private synchronized void downloadImage() {
-        BitmapDownloaderExecutor.getExecutor().submit(downloadTask);
+        try {
+            BitmapDownloaderExecutor.getExecutor().submit(downloadTask);
+        } catch (RejectedExecutionException e) {
+            Logger.e(TAG, "Task submission rejected: " + e.getMessage());
+            invokeFail(e);
+        }
     }
 
     private void loadCachedImage() {

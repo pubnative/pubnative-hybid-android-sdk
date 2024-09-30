@@ -1,6 +1,7 @@
 package com.ironsource.adapters.custom.verve;
 
 import android.app.Activity;
+import android.content.Context;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.widget.FrameLayout;
@@ -61,21 +62,20 @@ public class VerveCustomBanner extends BaseBanner<VerveCustomAdapter> implements
             return;
         }
 
-        if (appToken == null || !appToken.equals(HyBid.getAppToken())) {
-            String errorMessage = "The provided app token doesn't match the one used to initialise HyBid";
-            Logger.e(TAG, errorMessage);
-            listener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_INTERNAL,
-                    AdapterErrors.ADAPTER_ERROR_MISSING_PARAMS, errorMessage);
-            return;
-        }
-
         AdSize hyBidAdSize = getAdSize(isBannerSize);
 
-        mBannerAdListener = listener;
-        mAdView = new HyBidAdView(activity, hyBidAdSize);
+        if (HyBid.getAppToken() != null && HyBid.getAppToken().equalsIgnoreCase(appToken) && HyBid.isInitialized()) {
+            loadBanner(activity, hyBidAdSize, zoneID);
+        } else {
+            HyBid.initialize(appToken, activity.getApplication(), b -> loadBanner(activity, hyBidAdSize, zoneID));
+        }
+    }
+
+    private void loadBanner(Activity activity, net.pubnative.lite.sdk.models.AdSize adSize, String zoneId) {
+        mAdView = new HyBidAdView(activity, adSize);
         mAdView.setMediation(true);
         mAdView.setMediationVendor(VerveCustomAdapter.IRONSOURCE_MEDIATION_VENDOR);
-        mAdView.load(zoneID, this);
+        mAdView.load(zoneId, this);
     }
 
     protected AdSize getAdSize(ISBannerSize isBannerSize) {

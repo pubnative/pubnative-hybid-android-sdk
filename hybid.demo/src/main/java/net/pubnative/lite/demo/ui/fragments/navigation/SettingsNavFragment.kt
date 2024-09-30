@@ -1,7 +1,6 @@
 package net.pubnative.lite.demo.ui.fragments.navigation
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
@@ -17,7 +16,6 @@ import net.pubnative.lite.demo.ui.activities.creativetester.P161CreativeTesterAc
 import net.pubnative.lite.demo.ui.activities.markup.MarkupActivity
 import net.pubnative.lite.demo.ui.activities.signaldata.SignalDataActivity
 import net.pubnative.lite.demo.ui.activities.vast.VastTagRequestActivity
-import net.pubnative.lite.demo.ui.fragments.vast.VastTagRequestFragment
 
 class SettingsNavFragment : Fragment(R.layout.fragment_nav_settings) {
 
@@ -55,6 +53,11 @@ class SettingsNavFragment : Fragment(R.layout.fragment_nav_settings) {
 
         view.findViewById<TextView>(R.id.button_ironsource_settings).setOnClickListener {
             val intent = Intent(activity, IronSourceSettingsActivity::class.java)
+            startActivity(intent)
+        }
+
+        view.findViewById<TextView>(R.id.button_chartboost_settings).setOnClickListener {
+            val intent = Intent(activity, ChartboostSettingsActivity::class.java)
             startActivity(intent)
         }
 

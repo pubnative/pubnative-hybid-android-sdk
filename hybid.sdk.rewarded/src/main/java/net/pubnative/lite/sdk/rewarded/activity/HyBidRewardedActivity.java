@@ -39,26 +39,28 @@ import android.widget.ProgressBar;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.Reporting;
+import net.pubnative.lite.sdk.analytics.ReportingController;
+import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.contentinfo.AdFeedbackFormHelper;
 import net.pubnative.lite.sdk.contentinfo.listeners.AdFeedbackLoadListener;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.AdExperience;
 import net.pubnative.lite.sdk.models.ContentInfo;
 import net.pubnative.lite.sdk.models.ContentInfoIconXPosition;
 import net.pubnative.lite.sdk.models.ContentInfoIconYPosition;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.PositionX;
 import net.pubnative.lite.sdk.models.PositionY;
+import net.pubnative.lite.sdk.models.RemoteConfig;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastSender;
 import net.pubnative.lite.sdk.utils.Logger;
-import net.pubnative.lite.sdk.utils.SkipOffsetManager;
 import net.pubnative.lite.sdk.utils.URLValidator;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.views.CloseableContainer;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.vpaid.VideoAd;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
-import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
 import net.pubnative.lite.sdk.vpaid.models.vast.Icon;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
 
@@ -67,6 +69,7 @@ import java.util.List;
 
 public abstract class HyBidRewardedActivity extends Activity implements PNAPIContentInfoView.ContentInfoListener {
     private static final String TAG = HyBidRewardedActivity.class.getSimpleName();
+    private static final int REDUCED_CLOSE_BUTTON_SIZE = 20;
     public static final String EXTRA_ZONE_ID = "extra_pn_zone_id";
     public static final String EXTRA_BROADCAST_ID = "extra_pn_broadcast_id";
     public static final String EXTRA_SKIP_OFFSET = "extra_pn_skip_offset";
@@ -83,7 +86,6 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
     private boolean mIsFeedbackFormLoading = false;
     private AdFeedbackFormHelper adFeedbackFormHelper;
 
-    protected Integer backButtonDelay = -1;
     protected boolean mIsSkippable = false;
 
     protected boolean mIsBackEnabled = false;
@@ -110,6 +112,7 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
     protected boolean mIsVideoFinished = false;
 
     protected VideoAd mVideoAd;
+    private ReportingController mReportingController;
 
     public abstract View getAdView();
 
@@ -130,17 +133,19 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
         validateIntegrationType(intent.getStringExtra(INTEGRATION_TYPE));
         long broadcastId = intent.getLongExtra(EXTRA_BROADCAST_ID, -1);
 
+        mReportingController = HyBid.getReportingController();
+
         if (!TextUtils.isEmpty(mZoneId) && broadcastId != -1) {
             mBroadcastSender = new HyBidRewardedBroadcastSender(this, broadcastId);
 
             View adView = getAdView();
-            if (getAd() != null) {
-                backButtonDelay = SkipOffsetManager.getBackButtonDelay(getAd().getBackButtonDelay());
-            }
 
             if (adView != null) {
 
                 mCloseableContainer = new CloseableContainer(this);
+                if (hasReducedCloseSize()) {
+                    mCloseableContainer.setCloseSize(REDUCED_CLOSE_BUTTON_SIZE);
+                }
                 hideRewardedCloseButton();
 
                 FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
@@ -190,27 +195,6 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
         } else {
             mIntegrationType = IntegrationType.IN_APP_BIDDING;
         }
-    }
-
-    SimpleTimer backTimer;
-
-    protected void handleBackClickability() {
-        int delay = backButtonDelay * 1000;
-
-        backTimer = new SimpleTimer(delay, new SimpleTimer.Listener() {
-
-            @Override
-            public void onFinish() {
-                mIsSkippable = true;
-            }
-
-            @Override
-            public void onTick(long millisUntilFinished) {
-                mIsSkippable = false;
-            }
-        }, 1000);
-
-        backTimer.start();
     }
 
     protected void setupContentInfo() {
@@ -287,6 +271,7 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
             if (mIsVast && !mIsVideoFinished) {
                 mVideoAd.skip();
             } else {
+                if (mIsVast) mVideoAd.closeVideo();
                 getBroadcastSender().sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLOSE);
                 mIsFinishing = true;
                 finish();
@@ -322,6 +307,7 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
         if (mCloseableContainer != null) {
             mCloseableContainer.setCloseVisible(true);
             mCloseableContainer.setOnCloseListener(mCloseListener);
+            mIsBackEnabled = true;
         }
     }
 
@@ -351,9 +337,29 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
     @Override
     public void onIconClicked(List<String> clickTrackers) {
         if (clickTrackers != null && !clickTrackers.isEmpty()) {
-            for (int i=0; i < clickTrackers.size(); i++) {
+            for (int i = 0; i < clickTrackers.size(); i++) {
                 EventTracker.post(this, clickTrackers.get(i), null, false);
             }
+        }
+
+        invokeOnContentInfoClick();
+    }
+
+    private void invokeOnContentInfoClick() {
+        if (mReportingController != null) {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.CONTENT_INFO_CLICK);
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            reportingEvent.setAdFormat(Reporting.AdFormat.REWARDED);
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
+            Ad ad = getAd();
+            if (ad != null) {
+                reportingEvent.setImpId(ad.getSessionId());
+                reportingEvent.setCampaignId(ad.getCampaignId());
+                reportingEvent.setConfigId(ad.getConfigId());
+            }
+            mReportingController.reportEvent(reportingEvent);
         }
     }
 
@@ -420,17 +426,9 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        if (backTimer != null) {
-            backTimer.resumeTimer();
-        }
-    }
-
-    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            if (mIsSkippable) {
+            if (mIsBackEnabled) {
                 dismiss();
                 return true;
             }
@@ -440,20 +438,13 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
         return false;
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (backTimer != null) {
-            backTimer.pauseTimer();
+    private boolean hasReducedCloseSize() {
+        if (mAd != null) {
+            Boolean hasReducedIconSize = mAd.isIconSizeReduced();
+            String adExperience = mAd.getAdExperience();
+            return adExperience.equalsIgnoreCase(AdExperience.PERFORMANCE) &&
+                    hasReducedIconSize != null && hasReducedIconSize;
         }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (backTimer != null) {
-            backTimer.onFinish();
-            backTimer = null;
-        }
+        return false;
     }
 }

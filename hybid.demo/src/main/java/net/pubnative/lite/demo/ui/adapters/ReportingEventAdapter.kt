@@ -23,7 +23,9 @@ class ReportingEventAdapter() : RecyclerView.Adapter<ReportingEventViewHolder>()
     )
 
     override fun onBindViewHolder(holder: ReportingEventViewHolder, position: Int) {
-        holder.bind(events[position])
+        if (events[position] != null) {
+            holder.bind(events[position])
+        }
     }
 
     override fun getItemCount() = events.size

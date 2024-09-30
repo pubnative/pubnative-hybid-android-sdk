@@ -112,7 +112,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -131,17 +130,10 @@ public class MRAIDView extends FrameLayout {
     private Integer mSkipTimeMillis = -1;
 
     private Integer mNativeCloseButtonDelay = -1;
-
-    private Integer mBackButtonDelay = -1;
     private Boolean isBackClickable = false;
     private SimpleTimer mExpirationTimer;
     private SimpleTimer mNativeCloseButtonTimer;
-
-    private Runnable backButtonClickabilityHandler = null;
-
-    public void setBackButtonClickabilityHandler(Runnable handler) {
-        this.backButtonClickabilityHandler = handler;
-    }
+    private SimpleTimer mAntilockTimer;
 
     public void handleNativeCloseButtonDelay() {
         mNativeCloseButtonTimer = new SimpleTimer(mNativeCloseButtonDelay, new SimpleTimer.Listener() {
@@ -151,6 +143,7 @@ public class MRAIDView extends FrameLayout {
                 if (listener != null)
                     listener.mraidShowCloseButton();
                 showDefaultCloseButton();
+                isBackClickable = true;
             }
 
             @Override
@@ -159,10 +152,6 @@ public class MRAIDView extends FrameLayout {
         }, 1000);
 
         mNativeCloseButtonTimer.start();
-    }
-
-    public void setBackButtonDelay(Integer backButtonDelay) {
-        this.mBackButtonDelay = backButtonDelay;
     }
 
     // used to define state of the MRAID advertisement
@@ -239,7 +228,7 @@ public class MRAIDView extends FrameLayout {
     private boolean contentInfoAdded = false;
     private boolean webViewLoaded = false;
 
-    private final HyBidViewabilityWebAdSession mViewabilityAdSession;
+    private HyBidViewabilityWebAdSession mViewabilityAdSession;
     private final List<HyBidViewabilityFriendlyObstruction> mViewabilityFriendlyObstructions;
 
     private final boolean isInterstitial;
@@ -383,6 +372,7 @@ public class MRAIDView extends FrameLayout {
                     String processedHtml = MRAIDHtmlProcessor.processRawHtml(data);
                     MRAIDLog.d("hz-m loading mraid " + processedHtml);
                     webView.loadDataWithBaseURL(this.baseUrl, processedHtml, "text/html", "UTF-8", null);
+                    handleAntilockDelay();
                 } catch (Throwable e) {
                     HyBid.reportException(e);
                     this.listener.mraidViewError(this);
@@ -671,10 +661,9 @@ public class MRAIDView extends FrameLayout {
     // Expand an ad from banner to fullscreen
     // Note: This method is also used to present an interstitial ad.
     @Deprecated
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @JavascriptMRAIDCallback
     protected void expand(String url) {
-        if (isExpandEnabled) expandCreative(url, false, false);
+        if (isExpandEnabled && wasTouched) expandCreative(url, false, false);
     }
 
     private void expandCreative(String url, final boolean isCustomExpand, Boolean isCreatedByFeedbackForm) {
@@ -1502,8 +1491,8 @@ public class MRAIDView extends FrameLayout {
                 Location location = locationManager.getUserLocation();
                 JSONObject locationJson = new JSONObject();
                 try {
-                    locationJson.put("lat", location.getLatitude());
-                    locationJson.put("lon", location.getLongitude());
+                    locationJson.put("lat", Math.round(location.getLatitude() * 100.0) / 100.0);
+                    locationJson.put("lon", Math.round(location.getLongitude() * 100.0) / 100.0);
                     locationJson.put("type", 1); //GPS
                     locationJson.put("accuracy", location.getAccuracy());
                     long elapsedNanos = SystemClock.elapsedRealtimeNanos() - location.getElapsedRealtimeNanos();
@@ -1607,6 +1596,7 @@ public class MRAIDView extends FrameLayout {
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
+            cancelAntilockTimer();
             MRAIDLog.d(MRAID_LOG_TAG, "onPageFinished: " + url);
             if (state == STATE_LOADING) {
                 isPageFinished = true;
@@ -1640,16 +1630,18 @@ public class MRAIDView extends FrameLayout {
                 }
 
                 if (listener != null && !webViewLoaded) {
-                    mViewabilityAdSession.initAdSession(view, false);
-                    if (contentInfo != null && contentInfoAdded) {
-                        addViewabilityFriendlyObstruction(contentInfo, FriendlyObstructionPurpose.OTHER, "Content info description for the ad");
-                        for (HyBidViewabilityFriendlyObstruction obstruction : mViewabilityFriendlyObstructions) {
-                            mViewabilityAdSession.addFriendlyObstruction(obstruction.getView(), obstruction.getPurpose(), obstruction.getReason());
+                    if (mViewabilityAdSession != null) {
+                        mViewabilityAdSession.initAdSession(view, false);
+                        if (contentInfo != null && contentInfoAdded) {
+                            addViewabilityFriendlyObstruction(contentInfo, FriendlyObstructionPurpose.OTHER, "Content info description for the ad");
+                            for (HyBidViewabilityFriendlyObstruction obstruction : mViewabilityFriendlyObstructions) {
+                                mViewabilityAdSession.addFriendlyObstruction(obstruction.getView(), obstruction.getPurpose(), obstruction.getReason());
+                            }
                         }
+                        webViewLoaded = true;
+                        mViewabilityAdSession.fireLoaded();
+                        mViewabilityAdSession.fireImpression();
                     }
-                    webViewLoaded = true;
-                    mViewabilityAdSession.fireLoaded();
-                    mViewabilityAdSession.fireImpression();
 
                     listener.mraidViewLoaded(MRAIDView.this);
 
@@ -1794,6 +1786,7 @@ public class MRAIDView extends FrameLayout {
     public void stopAdSession() {
         if (mViewabilityAdSession != null) {
             mViewabilityAdSession.stopAdSession();
+            mViewabilityAdSession = null;
         }
     }
 
@@ -2126,9 +2119,6 @@ public class MRAIDView extends FrameLayout {
 
         if (useCustomClose) {
             handleNativeCloseButtonDelay();
-            if (backButtonClickabilityHandler != null) {
-                backButtonClickabilityHandler.run();
-            }
             skipTimerDelay = mNativeCloseButtonDelay;
             if (mSkipCountdownView != null) mSkipCountdownView.setVisibility(View.GONE);
         } else {
@@ -2143,6 +2133,7 @@ public class MRAIDView extends FrameLayout {
                 @Override
                 public void onFinish() {
                     listener.mraidShowCloseButton();
+                    isBackClickable = true;
                     if (mSkipCountdownView != null) mSkipCountdownView.setVisibility(View.GONE);
                 }
 
@@ -2156,42 +2147,52 @@ public class MRAIDView extends FrameLayout {
             mExpirationTimer.start();
         } else if (skipTimerDelay == 0) {
             listener.mraidShowCloseButton();
-        }
-
-        if (mBackButtonDelay > 0) {
-            SimpleTimer mBackButtonTimer = new SimpleTimer(mBackButtonDelay, new SimpleTimer.Listener() {
-
-                @Override
-                public void onFinish() {
-                    isBackClickable = true;
-                }
-
-                @Override
-                public void onTick(long millisUntilFinished) {
-                    isBackClickable = false;
-                }
-            }, 10);
-
-            mBackButtonTimer.start();
+            isBackClickable = true;
         }
     }
 
     public void pause() {
-        if (mExpirationTimer != null) mExpirationTimer.pauseTimer();
-        if (mNativeCloseButtonTimer != null) mNativeCloseButtonTimer.pauseTimer();
+        if (mExpirationTimer != null) mExpirationTimer.pause();
+        if (mNativeCloseButtonTimer != null) mNativeCloseButtonTimer.pause();
+        if (mAntilockTimer != null) mAntilockTimer.pause();
     }
 
     public void resume() {
         if (mExpirationTimer != null) mExpirationTimer.resume();
         if (mNativeCloseButtonTimer != null) mNativeCloseButtonTimer.resume();
-    }
-
-    public void cancel() {
-        if (mExpirationTimer != null) mExpirationTimer.cancel();
-        if (mNativeCloseButtonTimer != null) mNativeCloseButtonTimer.cancel();
+        if (mAntilockTimer != null) mAntilockTimer.resume();
     }
 
     private void closeOnMainThread() {
         new Handler(Looper.getMainLooper()).post(this::close);
+    }
+
+    // Timer to prevent locked black screen when HTML ads are broken
+    private void handleAntilockDelay() {
+        int antilockDelay = 5000;
+        mAntilockTimer = new SimpleTimer(antilockDelay, new SimpleTimer.Listener() {
+            @Override
+            public void onFinish() {
+                if (listener != null)
+                    listener.mraidShowCloseButton();
+                showDefaultCloseButton();
+                isBackClickable = true;
+            }
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+
+            }
+        }, 1000);
+
+        mAntilockTimer.start();
+    }
+
+    private void cancelAntilockTimer() {
+        if (mAntilockTimer != null) {
+            mAntilockTimer.pause();
+            mAntilockTimer.cancel();
+            mAntilockTimer = null;
+        }
     }
 }

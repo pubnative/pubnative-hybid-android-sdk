@@ -60,7 +60,6 @@ public class Constants {
     public static final int VIDEO_SKIP_OFFSET_DEFAULT = 8;
     public static final int ENDCARD_CLOSE_BUTTON_DELAY_DEFAULT = 5;
     public static final Boolean VIDEO_CLICK_BEHAVIOUR_DEFAULT = true;
-    public static final int MRAID_CUSTOM_CLOSE_BACK_BUTTON_DELAY_DEFAULT = 3;
     public static final int MRAID_CUSTOM_CLOSE_CLOSE_BUTTON_DELAY_DEFAULT = 15;
 
     public static final String DFP_MEDIATION_BANNER_AD_UNIT = "";
@@ -89,9 +88,13 @@ public class Constants {
     public static final String MAXADS_SDK_KEY = "sMRyqsHzbW5B55p5RLfJTNaXBH1rFzvkU5_LGa_Kerigolzf62Jl6iwzLtMIqn2XRt0tDol1bAc8g0N7C7c51N";
     public static final String MAXADS_BANNER_AD_UNIT = "a6eea664dbc57ba2";
     public static final String MAXADS_MRECT_AD_UNIT = "b530984eac9af2db";
-    public static final String MAXADS_NATIVE_AD_UNIT = "9052d6e7f6f0841a";
-    public static final String MAXADS_INTERSTITIAL_AD_UNIT = "d9c7ea61191f825a";
-    public static final String MAXADS_REWARDED_AD_UNIT = "8750fa87e3aaaea9";
+    public static final String MAXADS_MRECT_VIDEO_AD_UNIT = "95319bf36f0060eb";
+//    public static final String MAXADS_NATIVE_AD_UNIT = "9052d6e7f6f0841a";
+    public static final String MAXADS_NATIVE_AD_UNIT = "cea692bbbc299612";
+    public static final String MAXADS_INTERSTITIAL_HTML_AD_UNIT = "d9c7ea61191f825a";
+    public static final String MAXADS_INTERSTITIAL_VIDEO_AD_UNIT = "19c5ca80db9d56f0";
+    public static final String MAXADS_REWARDED_VIDEO_AD_UNIT = "8750fa87e3aaaea9";
+    public static final String MAXADS_REWARDED_HTML_AD_UNIT = "a8127cee3c1da24d";
 
     public static final String FAIRBID_APP_ID = "133232";
     public static final String FAIRBID_MEDIATION_BANNER_AD_UNIT = "681242";
@@ -101,18 +104,19 @@ public class Constants {
     public static final String CONTENT_INFO_URL = "https://pubnative.net/content-info";
     public static final String CONTENT_INFO_ICON_URL = "https://cdn.pubnative.net/static/adserver/contentinfo.png";
 
-    public static final String CHARTBOOST_APP_ID = "";
-    public static final String CHARTBOOST_APP_SIGNATURE = "";
-    public static final String CHARTBOOST_MEDIATION_BANNER_AD_UNIT = "";
-    public static final String CHARTBOOST_MEDIATION_MRECT_AD_UNIT = "";
+    public static final String CHARTBOOST_APP_ID = "64f5c7fb7ddfa7bc4080417b";
+    public static final String CHARTBOOST_APP_SIGNATURE = "72d9f2abbacdf32a49494390d9e8a0f89190f474";
+    public static final String CHARTBOOST_MEDIATION_BANNER_AD_UNIT = "hybid-android-banner";
+    /*public static final String CHARTBOOST_MEDIATION_MRECT_AD_UNIT = "";
     public static final String CHARTBOOST_MEDIATION_MRECT_VIDEO_AD_UNIT = "";
-    public static final String CHARTBOOST_MEDIATION_LEADERBOARD_AD_UNIT = "";
-    public static final String CHARTBOOST_MEDIATION_INTERSTITIAL_AD_UNIT = "";
-    public static final String CHARTBOOST_MEDIATION_INTERSTITIAL_VIDEO_AD_UNIT = "";
-    public static final String CHARTBOOST_MEDIATION_REWARDED_AD_UNIT = "";
-    public static final String CHARTBOOST_MEDIATION_REWARDED_HTML_AD_UNIT = "";
+    public static final String CHARTBOOST_MEDIATION_LEADERBOARD_AD_UNIT = "";*/
+    public static final String CHARTBOOST_MEDIATION_INTERSTITIAL_AD_UNIT = "hybid-android-interstitial-html";
+    public static final String CHARTBOOST_MEDIATION_INTERSTITIAL_VIDEO_AD_UNIT = "hybid-android-interstitial-video";
+    public static final String CHARTBOOST_MEDIATION_REWARDED_VIDEO_AD_UNIT = "hybid-android-rewarded-video";
+    public static final String CHARTBOOST_MEDIATION_REWARDED_HTML_AD_UNIT = "hybid-android-rewarded-html";
 
     public static final String APP_TOKEN = "dde3c298b47648459f8ada4a982fa92d";
+
     public static final List<String> ZONE_ID_LIST = Arrays.asList(NATIVE_ZONE_ID, MRAID_320x50_ZONE_ID, MRAID_300x250_ZONE_ID, INTERSTITIAL_MRAID_ZONE_ID, MEDIUM_VIDEO_ZONE_ID, INTERSTITIAL_VIDEO_ZONE_ID, MRAID_728x90_ZONE_ID, MRAID_160x600_ZONE_ID, MRAID_250x250_ZONE_ID, MRAID_300x600_ZONE_ID, MRAID_320x100_ZONE_ID, MRAID_480x320_ZONE_ID, MRAID_300x50_ZONE_ID);
 
     public static final String COUNTDOWN_STYLE_DEFAULT = CountdownStyle.PIE_CHART.getId();

@@ -129,6 +129,7 @@ public class DeviceInfo {
         mContext = context.getApplicationContext();
         mUserAgentProvider = new UserAgentProvider();
         getDeviceScreenDimensions();
+        updateChargingStatus();
     }
 
     public void initialize(Listener listener) {
@@ -591,7 +592,6 @@ public class DeviceInfo {
         return mIsCharging ? 1 : 0;
     }
 
-
     public Integer getBatteryLevel() {
         Integer batteryPercentage;
         if (Build.VERSION.SDK_INT >= 21) {
@@ -791,7 +791,7 @@ public class DeviceInfo {
             } else {
                 return 1;
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }

@@ -28,6 +28,8 @@ import android.util.Log
 import android.webkit.WebView
 import androidx.multidex.MultiDex
 import androidx.multidex.MultiDexApplication
+import com.chartboost.heliumsdk.HeliumInitializationOptions
+import com.chartboost.heliumsdk.HeliumSdk
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.initialization.InitializationStatus
 import net.pubnative.lite.demo.managers.AdCustomizationPrefs
@@ -43,7 +45,6 @@ import net.pubnative.lite.sdk.models.ContentInfoIconAction
 import net.pubnative.lite.sdk.models.CustomEndCardDisplay
 import net.pubnative.lite.sdk.models.ImpressionTrackingMethod
 import net.pubnative.lite.sdk.utils.Logger
-import net.pubnative.lite.sdk.visibility.ImpressionTracker
 import net.pubnative.lite.sdk.vpaid.enums.AudioState
 
 
@@ -131,6 +132,7 @@ class HyBidDemoApplication : MultiDexApplication() {
             }
         }
 
+        initChartboost()
         MobileAds.initialize(this) { initializationStatus: InitializationStatus? -> }
 
         manageAdCustomizationParams()
@@ -175,8 +177,6 @@ class HyBidDemoApplication : MultiDexApplication() {
                 false,
                 ContentInfoDisplay.SYSTEM_BROWSER.display.toString(),
                 false,
-                Constants.MRAID_CUSTOM_CLOSE_BACK_BUTTON_DELAY_DEFAULT.toString(),
-                false,
                 Constants.MRAID_CUSTOM_CLOSE_CLOSE_BUTTON_DELAY_DEFAULT.toString(),
                 false,
                 CountdownStyle.PIE_CHART.name,
@@ -189,7 +189,10 @@ class HyBidDemoApplication : MultiDexApplication() {
                 false,
                 false,
                 false,
-                "2"
+                "2",
+                0,
+                false,
+                false
             )
             prefs.setAdCustomizationData(adCustomizationsManager.toJson())
         }
@@ -248,21 +251,21 @@ class HyBidDemoApplication : MultiDexApplication() {
 
             val maxAdsSettings = MaxAdsSettings.Builder().sdkKey(Constants.MAXADS_SDK_KEY)
                 .bannerAdUnitId(Constants.MAXADS_BANNER_AD_UNIT)
-                .interstitialAdUnitId(Constants.MAXADS_INTERSTITIAL_AD_UNIT)
                 .mRectAdUnitId(Constants.MAXADS_MRECT_AD_UNIT)
-                .rewardedAdUnitId(Constants.MAXADS_REWARDED_AD_UNIT)
+                .mRectVideoAdUnitId(Constants.MAXADS_MRECT_VIDEO_AD_UNIT)
+                .interstitialAdUnitId(Constants.MAXADS_INTERSTITIAL_HTML_AD_UNIT)
+                .interstitialVideoAdUnitId(Constants.MAXADS_INTERSTITIAL_VIDEO_AD_UNIT)
+                .rewardedAdUnitId(Constants.MAXADS_REWARDED_HTML_AD_UNIT)
+                .rewardedVideoAdUnitId(Constants.MAXADS_REWARDED_VIDEO_AD_UNIT)
                 .nativeAdUnitId(Constants.MAXADS_NATIVE_AD_UNIT).build()
 
             val chartboostSettings =
                 ChartboostSettings.Builder().heliumAppId(Constants.CHARTBOOST_APP_ID)
                     .heliumAppSignature(Constants.CHARTBOOST_APP_SIGNATURE)
                     .mediationBannerAdUnitId(Constants.CHARTBOOST_MEDIATION_BANNER_AD_UNIT)
-                    .mediationMrectAdUnitId(Constants.CHARTBOOST_MEDIATION_MRECT_AD_UNIT)
-                    .mediationMrectVideoAdUnitId(Constants.CHARTBOOST_MEDIATION_MRECT_VIDEO_AD_UNIT)
-                    .mediationLeaderboardAdUnitId(Constants.CHARTBOOST_MEDIATION_LEADERBOARD_AD_UNIT)
                     .mediationInterstitialAdUnitId(Constants.CHARTBOOST_MEDIATION_INTERSTITIAL_AD_UNIT)
                     .mediationInterstitialVideoAdUnitId(Constants.CHARTBOOST_MEDIATION_INTERSTITIAL_VIDEO_AD_UNIT)
-                    .mediationRewardedAdUnitId(Constants.CHARTBOOST_MEDIATION_REWARDED_AD_UNIT)
+                    .mediationRewardedVideoAdUnitId(Constants.CHARTBOOST_MEDIATION_REWARDED_VIDEO_AD_UNIT)
                     .mediationRewardedHtmlAdUnitId(Constants.CHARTBOOST_MEDIATION_REWARDED_HTML_AD_UNIT)
                     .build()
 
@@ -294,26 +297,42 @@ class HyBidDemoApplication : MultiDexApplication() {
     }
 
     // todo Initiate chartboost once we have the required IDs
-    /*private fun initChartboost() {
+    private fun initChartboost() {
+        val skippedPartnerIds = mutableSetOf<String>()
+        skippedPartnerIds.add("admob")
+        skippedPartnerIds.add("amazon_aps")
+        skippedPartnerIds.add("applovin")
+        skippedPartnerIds.add("bidmachine")
+        skippedPartnerIds.add("facebook")
+        skippedPartnerIds.add("fyber")
+        skippedPartnerIds.add("google_googlebidding")
+        skippedPartnerIds.add("inmobi")
+        skippedPartnerIds.add("ironsource")
+        skippedPartnerIds.add("mintegral")
+        skippedPartnerIds.add("pangle")
+        skippedPartnerIds.add("unity")
+        skippedPartnerIds.add("vungle")
+        skippedPartnerIds.add("mobilefuse")
+        skippedPartnerIds.add("hyprmx")
+
+
+        val heliumSdkListener: HeliumSdk.HeliumSdkListener = object : HeliumSdk.HeliumSdkListener {
+            override fun didInitialize(error: java.lang.Error?) {
+                if (error != null) {
+                    Log.d("initChartboost", "Helium SDK failed to initialize. Reason: " + error.message)
+                } else {
+                    //SDK Started
+                    Log.d("initChartboost", "Helium SDK initialized successfully")
+                    HeliumSdk.setTestMode(true)
+                }
+            }
+        }
+
         HeliumSdk.start(
             this@HyBidDemoApplication,
             Constants.CHARTBOOST_APP_ID,
             Constants.CHARTBOOST_APP_SIGNATURE,
-            HeliumInitializationOptions(),
-            object : HeliumSdkListener() {
-                fun didInitialize(error: Error?) {
-                    if (error != null) {
-                        Log.d(
-                            "initChartboost",
-                            "Chartboost Mediation SDK failed to initialize. Reason: " + error.message
-                        )
-                    } else {
-                        //SDK Started,
-                        Log.d("initChartboost", "Chartboost Mediation SDK initialized successfully")
-                    }
-                }
-            }
-        )
-    }*/
-
+            HeliumInitializationOptions(skippedPartnerIds),
+            heliumSdkListener)
+    }
 }

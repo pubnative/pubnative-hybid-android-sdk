@@ -32,6 +32,7 @@ public interface APIMeta {
     String CAMPAIGN_ID = "campaignid";
     String CREATIVE_ID = "creativeid";
     String BUNDLE_ID = "bundleid";
+    String AD_EXPERIENCE = "adexperience";
     String CONTENT_INFO = "contentinfo";
     String REMOTE_CONFIGS = "remoteconfigs";
     String REMOTE_CONFIGS_DEBUG = "remoteconfigsdebug";

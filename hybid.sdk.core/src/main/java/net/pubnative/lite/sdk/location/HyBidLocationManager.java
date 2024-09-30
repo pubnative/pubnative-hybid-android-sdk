@@ -61,24 +61,12 @@ public class HyBidLocationManager implements LocationListener {
         return hasNetworkProvider() ? mManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) : null;
     }
 
-    private Location getLastKnownGPSLocation() {
-        return hasGPSProvider() ? mManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) : null;
-    }
-
-    private boolean hasFinePermission() {
-        return PNPermissionUtil.hasPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION);
-    }
-
     private boolean hasCoarsePermission() {
         return PNPermissionUtil.hasPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION);
     }
 
     private boolean hasPermission() {
-        return hasCoarsePermission() || hasFinePermission();
-    }
-
-    private boolean hasGPSProvider() {
-        return mManager != null && mManager.getProvider(LocationManager.GPS_PROVIDER) != null;
+        return hasCoarsePermission();
     }
 
     private boolean hasNetworkProvider() {
@@ -92,19 +80,12 @@ public class HyBidLocationManager implements LocationListener {
         Handler mainHandler = new Handler(Looper.getMainLooper());
 
         try {
-            if (hasFinePermission()) {
-                if (hasGPSProvider()) {
-                    mainHandler.post(() -> mManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, HyBidLocationManager.this));
-                }
-                if (hasNetworkProvider()) {
-                    mainHandler.post(() -> mManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, HyBidLocationManager.this));
-                }
-            } else if (hasCoarsePermission()) {
+            if (hasCoarsePermission()) {
                 if (hasNetworkProvider()) {
                     mainHandler.post(() -> mManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, HyBidLocationManager.this));
                 }
             }
-        }catch (Exception exception){
+        } catch (Exception exception) {
             Logger.e(TAG, "Can't request location updates: ".concat(String.valueOf(exception.getMessage())));
         }
 
@@ -165,18 +146,9 @@ public class HyBidLocationManager implements LocationListener {
     private Location getLocationFromProviders() {
         Location result = null;
 
-        Location networkLocation = hasCoarsePermission() || hasFinePermission() ? getLastKnownNetworkLocation() : null;
-        Location gpsLocation = hasFinePermission() ? getLastKnownGPSLocation() : null;
+        Location networkLocation = hasCoarsePermission() ? getLastKnownNetworkLocation() : null;
 
-        if (gpsLocation != null && networkLocation != null) {
-            if (isBetterLocation(gpsLocation, networkLocation)) {
-                result = gpsLocation;
-            } else {
-                result = networkLocation;
-            }
-        } else if (gpsLocation != null) {
-            result = gpsLocation;
-        } else if (networkLocation != null) {
+        if (networkLocation != null) {
             result = networkLocation;
         }
 
@@ -188,7 +160,7 @@ public class HyBidLocationManager implements LocationListener {
         if (hasPermission()) {
             Location locationFromProviders = getLocationFromProviders();
             if (locationFromProviders != null && isBetterLocation(locationFromProviders, mCurrentBestLocation)) {
-                    mCurrentBestLocation = locationFromProviders;
+                mCurrentBestLocation = locationFromProviders;
             }
             result = mCurrentBestLocation;
 

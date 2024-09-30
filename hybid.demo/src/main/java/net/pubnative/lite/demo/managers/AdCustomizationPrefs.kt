@@ -5,6 +5,8 @@ import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import net.pubnative.lite.demo.SETTINGS_KEY_AD_CUSTOMIZATION_DATA
 import net.pubnative.lite.demo.SETTINGS_KEY_AD_CUSTOMIZATION_INITIALISED
+import net.pubnative.lite.demo.SETTINGS_KEY_BUNDLE_ID
+import net.pubnative.lite.demo.SETTINGS_KEY_CUSTOM_CTA_APP_NAME
 import net.pubnative.lite.demo.SETTINGS_KEY_CUSTOM_CTA_ICON_URL
 import net.pubnative.lite.demo.SETTINGS_KEY_CUSTOM_END_CARD_HTML
 
@@ -47,6 +49,24 @@ class AdCustomizationPrefs(context: Context) {
 
     fun getCustomCTAIconURL(): String? {
         return preferences.getString(SETTINGS_KEY_CUSTOM_CTA_ICON_URL, "")
+    }
+
+    fun setCustomCTAAppName(name: String) {
+        preferences.edit().putString(SETTINGS_KEY_CUSTOM_CTA_APP_NAME, name)
+            .apply()
+    }
+
+    fun getCustomCTAAppName(): String? {
+        return preferences.getString(SETTINGS_KEY_CUSTOM_CTA_APP_NAME, "")
+    }
+
+    fun setBundleId(bundleId: String) {
+        preferences.edit().putString(SETTINGS_KEY_BUNDLE_ID, bundleId)
+            .apply()
+    }
+
+    fun getBundleId(): String? {
+        return preferences.getString(SETTINGS_KEY_BUNDLE_ID, "")
     }
 
     fun getAdCustomizationData(): String? {

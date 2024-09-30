@@ -40,8 +40,6 @@ data class AdCustomizationsManager(
     var content_info_icon_click_action_value: String,
     var content_info_display_enabled: Boolean,
     var content_info_display_value: String,
-    var back_button_delay_enabled: Boolean,
-    var back_button_delay_value: String,
     var close_button_delay_enabled: Boolean,
     var close_button_delay_value: String,
     var count_down_enabled: Boolean,
@@ -56,6 +54,9 @@ data class AdCustomizationsManager(
     var custom_cta_enabled_value: Boolean,
     var custom_cta_delay_enabled: Boolean,
     var custom_cta_delay_enabled_value: String,
+    var custom_cta_type_value: Int,
+    var reduced_buttons_value: Boolean,
+    var reduced_buttons_enabled: Boolean
 ) {
 
     fun toJson(): String {

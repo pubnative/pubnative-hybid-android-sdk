@@ -57,7 +57,6 @@ public class BannerPresenterFactory extends PresenterFactory {
         if (ad != null && ad.getImpressionTrackingMethod() != null &&
                 ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod()) != null) {
             trackingMethodFinal = ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod());
-            ;
         }
 
         switch (assetGroupId) {

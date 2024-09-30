@@ -1,6 +1,8 @@
 package com.ironsource.adapters.custom.verve;
 
 import android.app.Activity;
+import android.app.Application;
+import android.content.Context;
 import android.text.TextUtils;
 
 import com.ironsource.mediationsdk.adunit.adapter.BaseRewardedVideo;
@@ -27,7 +29,7 @@ public class VerveCustomRewardedVideo extends BaseRewardedVideo<VerveCustomAdapt
     @Override
     public void loadAd(AdData adData, Activity activity, RewardedVideoAdListener rewardedVideoAdListener) {
         String appToken;
-        String zoneID = "";
+        String zoneID;
         if (!TextUtils.isEmpty(adData.getString(VerveCustomAdapter.KEY_APP_TOKEN))
                 && !TextUtils.isEmpty(adData.getString(VerveCustomAdapter.KEY_ZONE_ID))) {
             zoneID = adData.getString(VerveCustomAdapter.KEY_ZONE_ID);
@@ -42,16 +44,17 @@ public class VerveCustomRewardedVideo extends BaseRewardedVideo<VerveCustomAdapt
             return;
         }
 
-        if (appToken == null || !appToken.equals(HyBid.getAppToken())) {
-            String errorMessage = "The provided app token doesn't match the one used to initialise HyBid";
-            Logger.e(TAG, errorMessage);
-            rewardedVideoAdListener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_INTERNAL,
-                    AdapterErrors.ADAPTER_ERROR_MISSING_PARAMS, errorMessage);
-            return;
-        }
-
         mRewardedVideoAdListener = rewardedVideoAdListener;
-        mHyBidRewardedAd = new HyBidRewardedAd(activity, zoneID, this);
+
+        if (HyBid.getAppToken() != null && HyBid.getAppToken().equalsIgnoreCase(appToken) && HyBid.isInitialized()) {
+            requestRewardedAd(activity, zoneID);
+        } else {
+            HyBid.initialize(appToken, activity.getApplication(), b -> requestRewardedAd(activity, zoneID));
+        }
+    }
+
+    private void requestRewardedAd(Activity activity, String zoneId) {
+        mHyBidRewardedAd = new HyBidRewardedAd(activity, zoneId, this);
         mHyBidRewardedAd.setMediation(true);
         mHyBidRewardedAd.setMediationVendor(VerveCustomAdapter.IRONSOURCE_MEDIATION_VENDOR);
         mHyBidRewardedAd.load();

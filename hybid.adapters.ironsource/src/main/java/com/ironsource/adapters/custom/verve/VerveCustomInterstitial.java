@@ -1,6 +1,7 @@
 package com.ironsource.adapters.custom.verve;
 
 import android.app.Activity;
+import android.content.Context;
 import android.text.TextUtils;
 
 import com.ironsource.mediationsdk.adunit.adapter.BaseInterstitial;
@@ -28,23 +29,15 @@ public class VerveCustomInterstitial extends BaseInterstitial<VerveCustomAdapter
     @Override
     public void loadAd(AdData adData, Activity activity, InterstitialAdListener interstitialAdListener) {
         String appToken;
-        String zoneID = "";
+        String zoneID;
         if (!TextUtils.isEmpty(adData.getString(VerveCustomAdapter.KEY_APP_TOKEN))
                 && !TextUtils.isEmpty(adData.getString(VerveCustomAdapter.KEY_ZONE_ID))) {
             zoneID = adData.getString(VerveCustomAdapter.KEY_ZONE_ID);
             appToken = adData.getString(VerveCustomAdapter.KEY_APP_TOKEN);
         } else {
             String errorMessage = "Could not find the required params in VerveCustomInterstitial ad data. " +
-                "Required params in VerveCustomInterstitial ad data must be provided as a valid JSON Object. " +
-                "Please consult HyBid documentation and update settings in your IronSource publisher dashboard.";
-            Logger.e(TAG, errorMessage);
-            interstitialAdListener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_INTERNAL,
-                    AdapterErrors.ADAPTER_ERROR_MISSING_PARAMS, errorMessage);
-            return;
-        }
-
-        if (appToken == null || !appToken.equals(HyBid.getAppToken())) {
-            String errorMessage = "The provided app token doesn't match the one used to initialise HyBid";
+                    "Required params in VerveCustomInterstitial ad data must be provided as a valid JSON Object. " +
+                    "Please consult HyBid documentation and update settings in your IronSource publisher dashboard.";
             Logger.e(TAG, errorMessage);
             interstitialAdListener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_INTERNAL,
                     AdapterErrors.ADAPTER_ERROR_MISSING_PARAMS, errorMessage);
@@ -52,7 +45,16 @@ public class VerveCustomInterstitial extends BaseInterstitial<VerveCustomAdapter
         }
 
         mInterstitialAdListener = interstitialAdListener;
-        mInterstitialAd = new HyBidInterstitialAd(activity, zoneID, this);
+
+        if (HyBid.getAppToken() != null && HyBid.getAppToken().equalsIgnoreCase(appToken) && HyBid.isInitialized()) {
+            loadInterstitial(activity, zoneID);
+        } else {
+            HyBid.initialize(appToken, activity.getApplication(), b -> loadInterstitial(activity, zoneID));
+        }
+    }
+
+    private void loadInterstitial(Activity activity, String zoneId) {
+        mInterstitialAd = new HyBidInterstitialAd(activity, zoneId, this);
         mInterstitialAd.setVideoListener(this);
         mInterstitialAd.setMediation(true);
         mInterstitialAd.setMediationVendor(VerveCustomAdapter.IRONSOURCE_MEDIATION_VENDOR);

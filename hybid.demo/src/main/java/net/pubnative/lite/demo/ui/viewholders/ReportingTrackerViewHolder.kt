@@ -3,12 +3,10 @@ package net.pubnative.lite.demo.ui.viewholders
 import android.text.TextUtils
 import android.view.View
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.util.ClipboardUtils
 import net.pubnative.lite.sdk.analytics.tracker.ReportingTracker
-import net.pubnative.lite.sdk.utils.AdTracker
 
 class ReportingTrackerViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     private var tracker: ReportingTracker? = null

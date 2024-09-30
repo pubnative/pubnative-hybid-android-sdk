@@ -162,6 +162,29 @@
                     android:background="@android:color/darker_gray" />
 
                 <TextView
+                    android:id="@+id/button_chartboost_settings"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:fontFamily="@font/roboto"
+                    android:paddingStart="16dp"
+                    android:paddingTop="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="16dp"
+                    android:text="@string/chartboost_settings"
+                    android:textColor="?colorPrimaryVariant"
+                    android:textSize="18sp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@android:color/darker_gray" />
+
+                <TextView
                     android:id="@+id/button_markup"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

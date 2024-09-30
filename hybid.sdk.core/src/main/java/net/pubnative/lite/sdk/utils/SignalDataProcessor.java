@@ -156,6 +156,7 @@ public class SignalDataProcessor {
         mAdCache.put(zoneId, ad);
 
         AdTopicsAPIManager.setTopicsAPIEnabled(mApiClient.getContext(), ad);
+        AtomManager.setAtomEnabled(mApiClient.getContext(), ad);
 
         switch (ad.assetgroupid) {
             case ApiAssetGroupType.VAST_INTERSTITIAL:

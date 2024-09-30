@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
+import net.pubnative.lite.demo.ui.activities.TabActivity
 
 class ChartboostMediationInterstitialVideoFragment : Fragment(R.layout.fragment_chartboost_interstitial_video),
     ChartboostMediationFullscreenAdListener {
@@ -77,6 +78,7 @@ class ChartboostMediationInterstitialVideoFragment : Fragment(R.layout.fragment_
     private fun showAd() {
         lifecycleScope.launch {
             loadResult.ad?.show(requireContext())
+            showButton.isEnabled = false
         }
     }
 
@@ -91,6 +93,7 @@ class ChartboostMediationInterstitialVideoFragment : Fragment(R.layout.fragment_
         error: ChartboostMediationAdException?
     ) {
         if (error != null) {
+            displayLogs()
             val errorMessage = error.message
             Log.e(TAG, "onAdLoadFailed: $errorMessage")
         } else {
@@ -106,9 +109,17 @@ class ChartboostMediationInterstitialVideoFragment : Fragment(R.layout.fragment_
 
     override fun onAdImpressionRecorded(ad: ChartboostMediationFullscreenAd) {
         Log.d(TAG, "onAdImpressionRecorded")
+        displayLogs()
     }
 
     override fun onAdRewarded(ad: ChartboostMediationFullscreenAd) {
         Log.d(TAG, "onAdRewarded")
+    }
+
+    private fun displayLogs() {
+        if (activity != null) {
+            val activity = activity as TabActivity
+            activity.notifyAdUpdated()
+        }
     }
 }

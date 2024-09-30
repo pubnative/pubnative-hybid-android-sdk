@@ -269,6 +269,8 @@ class MarkupViewModel(application: Application) : AndroidViewModel(application) 
             format,
             Constants.AdmType.MARKUP,
             prefs.getCustomCTAIconURL(),
+            prefs.getCustomCTAAppName(),
+            prefs.getBundleId(),
             prefs.getCustomEndCardHTML(),
             width,
             height,
@@ -302,7 +304,7 @@ class MarkupViewModel(application: Application) : AndroidViewModel(application) 
 
         mRemoteConfigApiClient.sendInterstitialRequest(
             getApplication(), adm, format, Constants.AdmType.MARKUP, prefs.getCustomCTAIconURL(),
-            prefs.getCustomEndCardHTML(),
+            prefs.getCustomCTAAppName(), prefs.getBundleId(), prefs.getCustomEndCardHTML(),
             configs, object : OnConfigFetchListener {
                 override fun onFetchSuccess(ad: Ad?, response: String?) {
                     AdRequestRegistry.getInstance().setLastAdRequest("Customized", response, 0)
@@ -339,7 +341,7 @@ class MarkupViewModel(application: Application) : AndroidViewModel(application) 
 
         mRemoteConfigApiClient.sendRewardedRequest(
             getApplication(), adm, format, Constants.AdmType.MARKUP, prefs.getCustomCTAIconURL(),
-            prefs.getCustomEndCardHTML(),
+            prefs.getCustomCTAAppName(), prefs.getBundleId(), prefs.getCustomEndCardHTML(),
             configs, object : OnConfigFetchListener {
                 override fun onFetchSuccess(ad: Ad?, response: String?) {
                     AdRequestRegistry.getInstance().setLastAdRequest("Customized", response, 0)
@@ -384,7 +386,7 @@ class MarkupViewModel(application: Application) : AndroidViewModel(application) 
                     ad.setHasEndCard(hasEndCard)
                     HyBid.getAdCache().put(ad.zoneId, ad)
                     HyBid.getVideoAdCache().put(ad.zoneId, adCacheItem)
-                    _loadLiveData.value = ad
+                    _loadLiveData.postValue(ad)
                 }
 
                 override fun onCacheError(error: Throwable) {

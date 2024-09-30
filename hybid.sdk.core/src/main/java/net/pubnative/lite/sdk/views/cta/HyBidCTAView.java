@@ -26,7 +26,7 @@ import net.pubnative.lite.sdk.views.helpers.ImageHelper;
 import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
 
 public class HyBidCTAView extends FrameLayout {
-    private static final long ANIMATION_DURATION = 1000;
+    private static final long ANIMATION_DURATION = 1500;
     private static final float CORNER_RADIUS = 18;
     private static final int COLOR_BACKGROUND = Color.argb(102, 0, 0, 0);
     private static final int COLOR_BUTTON = Color.argb(255, 0, 122, 255);
@@ -70,7 +70,6 @@ public class HyBidCTAView extends FrameLayout {
     }
 
     private void initViews() {
-
         LinearLayout rootLayout = new LinearLayout(getContext());
         rootLayout.setPadding(20, 20, 20, 20);
         rootLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -143,7 +142,6 @@ public class HyBidCTAView extends FrameLayout {
     }
 
     public void show(String iconUrl, String buttonText, Integer delay) {
-
         resetAll();
 
         if (delay == null || delay == 0) {

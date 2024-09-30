@@ -31,6 +31,8 @@ import android.view.View;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.analytics.Reporting;
+import net.pubnative.lite.sdk.analytics.ReportingController;
+import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.contentinfo.AdFeedbackFormHelper;
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
@@ -76,6 +78,7 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
     private boolean mIsDestroyed = false;
 
     private MRAIDViewListener mRaidListener;
+    private ReportingController mReportingController;
 
     public MraidAdPresenter(Context context, Ad ad, AdSize adSize, ImpressionTrackingMethod trackingMethod) {
         mContext = context;
@@ -83,6 +86,8 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
         mAd = ad;
 
         ImpressionTrackingMethod trackingMethodFinal = trackingMethod;
+
+        mReportingController = HyBid.getReportingController();
 
         if (ad != null && ad.getImpressionTrackingMethod() != null && ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod()) != null) {
             trackingMethodFinal = ImpressionTrackingMethod.fromString(ad.getImpressionTrackingMethod());
@@ -270,9 +275,32 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
     @Override
     public void onIconClicked(List<String> clickTrackers) {
         if (clickTrackers != null && !clickTrackers.isEmpty()) {
-            for (int i=0; i < clickTrackers.size(); i++) {
+            for (int i = 0; i < clickTrackers.size(); i++) {
                 EventTracker.post(mContext, clickTrackers.get(i), null, false);
             }
+        }
+
+        invokeOnContentInfoClick();
+    }
+
+    private void invokeOnContentInfoClick() {
+        if (mReportingController != null) {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.CONTENT_INFO_CLICK);
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            if (mAdSize == AdSize.SIZE_INTERSTITIAL) {
+                reportingEvent.setAdFormat(Reporting.AdFormat.FULLSCREEN);
+            } else {
+                reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
+            }
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            Ad ad = getAd();
+            if (ad != null) {
+                reportingEvent.setImpId(ad.getSessionId());
+                reportingEvent.setCampaignId(ad.getCampaignId());
+                reportingEvent.setConfigId(ad.getConfigId());
+            }
+            mReportingController.reportEvent(reportingEvent);
         }
     }
 

@@ -91,16 +91,8 @@ public class HyBidMediationInterstitialCustomEvent extends HyBidMediationBaseCus
                 return;
             }
 
-            if (HyBid.isInitialized()) {
-                if (TextUtils.isEmpty(appToken) || !appToken.equals(HyBid.getAppToken())) {
-                    Logger.e(TAG, "The provided app token doesn't match the one used to initialise HyBid");
-                    mAdLoadCallback.onFailure(new AdError(AdRequest.ERROR_CODE_NETWORK_ERROR,
-                            "The provided app token doesn't match the one used to initialise HyBid",
-                            AdError.UNDEFINED_DOMAIN
-                    ));
-                } else {
-                    loadInterstitial(mAdConfiguration.getContext(), zoneId);
-                }
+            if (HyBid.getAppToken() != null && HyBid.getAppToken().equalsIgnoreCase(appToken) && HyBid.isInitialized()) {
+                loadInterstitial(mAdConfiguration.getContext(), zoneId);
             } else {
                 HyBid.initialize(appToken, (Application) mAdConfiguration.getContext().getApplicationContext(), b ->
                         loadInterstitial(mAdConfiguration.getContext(), zoneId));

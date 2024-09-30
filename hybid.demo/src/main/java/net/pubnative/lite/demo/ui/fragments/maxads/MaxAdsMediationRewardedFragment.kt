@@ -89,14 +89,6 @@ class MaxAdsMediationRewardedFragment : Fragment(R.layout.fragment_maxads_reward
         Log.d(TAG, "onAdHidden")
     }
 
-    override fun onRewardedVideoStarted(ad: MaxAd) {
-        Log.d(TAG, "onRewardedVideoStarted")
-    }
-
-    override fun onRewardedVideoCompleted(ad: MaxAd) {
-        Log.d(TAG, "onRewardedVideoCompleted")
-    }
-
     override fun onUserRewarded(ad: MaxAd, reward: MaxReward) {
         Log.d(TAG, "onUserRewarded")
     }

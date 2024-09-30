@@ -110,9 +110,9 @@ public class AdRequestFactoryTest {
         Assert.assertEquals("Google", request.make);
         Assert.assertEquals("0", request.testMode);
         Assert.assertEquals("0", request.coppa);
-        Assert.assertEquals("12.126543", request.latitude);
-        Assert.assertEquals("15.151534", request.longitude);
-        Assert.assertEquals("points,revenuemodel,contentinfo,creativeid,campaignid", request.mf);
+        Assert.assertEquals("12.13", request.latitude);
+        Assert.assertEquals("15.15", request.longitude);
+        Assert.assertEquals("points,revenuemodel,contentinfo,creativeid,campaignid,bundleid,adexperience", request.mf);
         Assert.assertEquals("1,2,3,4,5,6,7,8,11,12,13,14", request.protocol);
         Assert.assertEquals("3,5,6,7", request.api);
         Assert.assertEquals("HyBid", request.displaymanager);

@@ -75,7 +75,7 @@ public class AssetsLoader {
                     String percent = String.format(Locale.US, "Loaded: %.2f%%", progress * 100);
                     Logger.d(LOG_TAG, percent);
                 }
-            });
+            }, false);
             mVideoLoader.start();
         }
     }
@@ -110,7 +110,7 @@ public class AssetsLoader {
                     String percent = String.format(Locale.US, "Loaded: %.2f%%", progress * 100);
                     Logger.d(LOG_TAG, percent);
                 }
-            });
+            }, true);
             mFileLoader.start();
         } else {
             mListener.onAssetsLoaded(mVideoFilePath, endCardData, null);

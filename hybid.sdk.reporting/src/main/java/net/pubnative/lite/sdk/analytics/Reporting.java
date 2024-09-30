@@ -120,7 +120,7 @@ public class Reporting {
         public static final String CUSTOM_CTA_SHOW = "custom_cta_show";
         public static final String CUSTOM_CTA_CLICK = "custom_cta_click";
         public static final String CUSTOM_CTA_ENDCARD_CLICK = "custom_cta_endcard_click";
-        public static final String CUSTOM_CTA_LOAD_FAIL = "custom_cta_load_fail";
+        public static final String CONTENT_INFO_CLICK = "content_info_click";
     }
 
     public static final class CreativeType {
