@@ -167,7 +167,7 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
             return;
         }
 
-        if (mReportingController != null) {
+        if (mReportingController != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.CLICK);
             reportingEvent.setTimestamp(String.valueOf(System.currentTimeMillis()));
@@ -230,7 +230,7 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
             return;
         }
 
-        if (mReportingController != null) {
+        if (mReportingController != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.IMPRESSION);
             reportingEvent.setTimestamp(String.valueOf(System.currentTimeMillis()));

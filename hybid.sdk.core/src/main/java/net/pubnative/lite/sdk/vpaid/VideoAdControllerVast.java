@@ -271,12 +271,16 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
         }
         mMediaPlayer = new MediaPlayer();
         try {
+            if (mVideoUri == null || mVideoUri.isEmpty()) {
+                mBaseAdInternal.onAdLoadFailInternal(new PlayerInfo("Invalid media file uri"));
+            }
+
             mMediaPlayer.setDataSource(mVideoUri);
             mMediaPlayer.setOnCompletionListener(mOnCompletionListener);
             mMediaPlayer.setOnErrorListener(mOnErrorListener);
             mMediaPlayer.setLooping(false);
             mMediaPlayer.prepare();
-        } catch (IOException e) {
+        } catch (IOException | RuntimeException e) {
             Logger.e(LOG_TAG, "startMediaPlayer: " + e.getMessage());
             mBaseAdInternal.onAdLoadFailInternal(new PlayerInfo("Error loading media file"));
         }
@@ -921,7 +925,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
 
         if (mCreativeViewEventsTracker != null && !isCreativeViewEventsTracked) {
             mCreativeViewEventsTracker.trackImpression();
-            if (HyBid.getReportingController() != null) {
+            if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
                 ReportingEvent reportingEvent = new ReportingEvent();
                 reportingEvent.setEventType(Reporting.EventType.CREATIVE_VIEW);
                 if (isRewarded()) {
@@ -1137,25 +1141,26 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
     }
 
     private void fireReportingEvent(String eventType) {
-        ReportingEvent event = new ReportingEvent();
-        event.setEventType(eventType);
-        if (isRewarded()) {
-            event.setAdFormat(Reporting.AdFormat.REWARDED);
-        } else if (isFullscreen) {
-            event.setAdFormat(Reporting.AdFormat.FULLSCREEN);
-        } else {
-            event.setAdFormat(Reporting.AdFormat.BANNER);
-        }
-        event.setCreativeType(Reporting.CreativeType.VIDEO);
-        event.setPlatform(Reporting.Platform.ANDROID);
-        event.setSdkVersion(HyBid.getSDKVersionInfo(IntegrationType.STANDALONE));
-        event.setTimestamp(System.currentTimeMillis());
-        if (mBaseAdInternal != null && mBaseAdInternal.getAd() != null) {
-            event.setImpId(mBaseAdInternal.getAd().getSessionId());
-            event.setCampaignId(mBaseAdInternal.getAd().getCampaignId());
-            event.setConfigId(mBaseAdInternal.getAd().getConfigId());
-        }
-        if (HyBid.getReportingController() != null) {
+        if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
+            ReportingEvent event = new ReportingEvent();
+            event.setEventType(eventType);
+            if (isRewarded()) {
+                event.setAdFormat(Reporting.AdFormat.REWARDED);
+            } else if (isFullscreen) {
+                event.setAdFormat(Reporting.AdFormat.FULLSCREEN);
+            } else {
+                event.setAdFormat(Reporting.AdFormat.BANNER);
+            }
+            event.setCreativeType(Reporting.CreativeType.VIDEO);
+            event.setPlatform(Reporting.Platform.ANDROID);
+            event.setSdkVersion(HyBid.getSDKVersionInfo(IntegrationType.STANDALONE));
+            event.setTimestamp(System.currentTimeMillis());
+            if (mBaseAdInternal != null && mBaseAdInternal.getAd() != null) {
+                event.setImpId(mBaseAdInternal.getAd().getSessionId());
+                event.setCampaignId(mBaseAdInternal.getAd().getCampaignId());
+                event.setConfigId(mBaseAdInternal.getAd().getConfigId());
+            }
+
             HyBid.getReportingController().reportEvent(event);
         }
     }

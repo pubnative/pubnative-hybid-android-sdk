@@ -85,42 +85,12 @@ class SettingsManager private constructor(context: Context) {
         preferences.edit().putBoolean(SETTINGS_KEY_TOPICS_API, enabled).apply()
     }
 
-    fun setMraidExpanded(enabled: Boolean) {
-        preferences.edit().putBoolean(SETTINGS_KEY_MRAID_EXPANDED, enabled).apply()
+    fun setReportingEnabled(enabled: Boolean) {
+        preferences.edit().putBoolean(SETTINGS_KEY_REPORTING_ENABLED, enabled).apply()
     }
 
     fun setInitialAudioState(state: Int) {
         preferences.edit().putInt(SETTINGS_KEY_INITIAL_AUDIO_STATE, state).apply()
-    }
-
-    fun setCloseVideoAfterFinish(enabled: Boolean) {
-        preferences.edit().putBoolean(SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH, enabled).apply()
-    }
-
-    fun setCloseVideoAfterFinishForRewardedVideo(enabled: Boolean) {
-        preferences.edit().putBoolean(SETTINGS_KEY_CLOSE_VIDEO_AFTER_FINISH_REWARDED, enabled)
-            .apply()
-    }
-
-    fun setEnableEndcard(enabled: Boolean) {
-        preferences.edit().putBoolean(SETTINGS_KEY_ENABLE_ENDCARD, enabled).apply()
-    }
-
-    fun setSkipOffset(skipOffset: Int) {
-        preferences.edit().putInt(SETTINGS_KEY_SKIP_OFFSET, skipOffset).apply()
-    }
-
-    fun setVideoSkipOffset(videoSkipOffset: Int) {
-        preferences.edit().putInt(SETTINGS_KEY_VIDEO_SKIP_OFFSET, videoSkipOffset).apply()
-    }
-
-    fun setEndCardCloseButtonDelay(endCardCloseButtonDelay: Int) {
-        preferences.edit().putInt(SETTINGS_KEY_ENDCARD_CLOSE_BUTTON_DELAY, endCardCloseButtonDelay)
-            .apply()
-    }
-
-    fun setVideoClickBehaviour(isCreative: Boolean) {
-        preferences.edit().putBoolean(SETTINGS_KEY_VIDEO_CLICK_BEHAVIOUR, isCreative).apply()
     }
 
     fun setGender(gender: String) {
@@ -291,19 +261,23 @@ class SettingsManager private constructor(context: Context) {
     }
 
     fun setChartboostMediationInterstitialAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_CHARTBOOST_INTERSTITIAL_AD_UNIT_ID, adUnitId).apply()
+        preferences.edit().putString(SETTINGS_KEY_CHARTBOOST_INTERSTITIAL_AD_UNIT_ID, adUnitId)
+            .apply()
     }
 
     fun setChartboostMediationInterstitialVideoAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_CHARTBOOST_INTERSTITIAL_VIDEO_AD_UNIT_ID, adUnitId).apply()
+        preferences.edit()
+            .putString(SETTINGS_KEY_CHARTBOOST_INTERSTITIAL_VIDEO_AD_UNIT_ID, adUnitId).apply()
     }
 
     fun setChartboostMediationRewardedHtmlAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_CHARTBOOST_REWARDED_HTML_AD_UNIT_ID, adUnitId).apply()
+        preferences.edit().putString(SETTINGS_KEY_CHARTBOOST_REWARDED_HTML_AD_UNIT_ID, adUnitId)
+            .apply()
     }
 
     fun setChartboostMediationRewardedVideoAdUnitId(adUnitId: String) {
-        preferences.edit().putString(SETTINGS_KEY_CHARTBOOST_REWARDED_VIDEO_AD_UNIT_ID, adUnitId).apply()
+        preferences.edit().putString(SETTINGS_KEY_CHARTBOOST_REWARDED_VIDEO_AD_UNIT_ID, adUnitId)
+            .apply()
     }
 
 
@@ -328,6 +302,14 @@ class SettingsManager private constructor(context: Context) {
                 it.coppa?.let { it1 -> editor.putBoolean(SETTINGS_KEY_COPPA, it1) }
                 it.testMode?.let { it1 -> editor.putBoolean(SETTINGS_KEY_TEST_MODE, it1) }
                 it.gender?.let { it1 -> editor.putString(SETTINGS_KEY_GENDER, it1) }
+                it.age?.let { it1 -> editor.putString(SETTINGS_KEY_AGE, it1) }
+                it.topicsApi?.let { it1 -> editor.putBoolean(SETTINGS_KEY_TOPICS_API, it1) }
+                it.reportingEnabled?.let { it1 ->
+                    editor.putBoolean(
+                        SETTINGS_KEY_REPORTING_ENABLED,
+                        it1
+                    )
+                }
                 it.age?.let { it1 -> editor.putString(SETTINGS_KEY_AGE, it1) }
                 it.zoneIds?.toSet()
                     ?.let { it1 -> editor.putStringSet(SETTINGS_KEY_ZONE_ID_LIST, it1) }
@@ -452,11 +434,26 @@ class SettingsManager private constructor(context: Context) {
             model.chartboostSettings?.let {
                 editor.putString(SETTINGS_KEY_CHARTBOOST_APP_ID, it.heliumAppId)
                 editor.putString(SETTINGS_KEY_CHARTBOOST_SIGNATURE, it.heliumAppSignature)
-                editor.putString(SETTINGS_KEY_CHARTBOOST_BANNER_AD_UNIT_ID, it.mediationBannerAdUnitId)
-                editor.putString(SETTINGS_KEY_CHARTBOOST_INTERSTITIAL_AD_UNIT_ID, it.mediationInterstitialAdUnitId)
-                editor.putString(SETTINGS_KEY_CHARTBOOST_INTERSTITIAL_VIDEO_AD_UNIT_ID, it.mediationInterstitialVideoAdUnitId)
-                editor.putString(SETTINGS_KEY_CHARTBOOST_REWARDED_HTML_AD_UNIT_ID, it.mediationRewardedHtmlAdUnitId)
-                editor.putString(SETTINGS_KEY_CHARTBOOST_REWARDED_VIDEO_AD_UNIT_ID, it.mediationRewardedVideoAdUnitId)
+                editor.putString(
+                    SETTINGS_KEY_CHARTBOOST_BANNER_AD_UNIT_ID,
+                    it.mediationBannerAdUnitId
+                )
+                editor.putString(
+                    SETTINGS_KEY_CHARTBOOST_INTERSTITIAL_AD_UNIT_ID,
+                    it.mediationInterstitialAdUnitId
+                )
+                editor.putString(
+                    SETTINGS_KEY_CHARTBOOST_INTERSTITIAL_VIDEO_AD_UNIT_ID,
+                    it.mediationInterstitialVideoAdUnitId
+                )
+                editor.putString(
+                    SETTINGS_KEY_CHARTBOOST_REWARDED_HTML_AD_UNIT_ID,
+                    it.mediationRewardedHtmlAdUnitId
+                )
+                editor.putString(
+                    SETTINGS_KEY_CHARTBOOST_REWARDED_VIDEO_AD_UNIT_ID,
+                    it.mediationRewardedVideoAdUnitId
+                )
             }
 
             editor.putBoolean(SETTINGS_KEY_INITIALISED, true)
@@ -482,6 +479,11 @@ class SettingsManager private constructor(context: Context) {
         val testMode = preferences.getBoolean(SETTINGS_KEY_TEST_MODE, Constants.TEST_MODE_DEFAULT)
         val topicsApi =
             preferences.getBoolean(SETTINGS_KEY_TOPICS_API, Constants.TOPICS_API_DEFAULT)
+        val reportingEnabled =
+            preferences.getBoolean(
+                SETTINGS_KEY_REPORTING_ENABLED,
+                Constants.REPORTING_ENABLED_DEFAULT
+            )
         val locationTracking = preferences.getBoolean(
             SETTINGS_KEY_LOCATION_TRACKING,
             Constants.LOCATION_TRACKING_DEFAULT
@@ -502,14 +504,7 @@ class SettingsManager private constructor(context: Context) {
             SETTINGS_KEY_INITIAL_AUDIO_STATE,
             Constants.INITIAL_AUDIO_STATE_DEFAULT
         )
-        val mraidExpanded =
-            preferences.getBoolean(SETTINGS_KEY_MRAID_EXPANDED, Constants.MRAID_EXPANDED_DEFAULT)
-        val dfpBannerAdUnitId = preferences.getString(SETTINGS_KEY_DFP_BANNER_AD_UNIT_ID, "")!!
-        val dfpMediumAdUnitId = preferences.getString(SETTINGS_KEY_DFP_MEDIUM_AD_UNIT_ID, "")!!
-        val dfpLeaderboardAdUnitId =
-            preferences.getString(SETTINGS_KEY_DFP_LEADERBOARD_AD_UNIT_ID, "")!!
-        val dfpInterstitialAdUnitId =
-            preferences.getString(SETTINGS_KEY_DFP_INTERSTITIAL_AD_UNIT_ID, "")!!
+
         val dfpMediationBannerAdUnitId =
             preferences.getString(SETTINGS_KEY_DFP_MEDIATION_BANNER_AD_UNIT_ID, "")!!
         val dfpMediationMediumAdUnitId =
@@ -566,13 +561,6 @@ class SettingsManager private constructor(context: Context) {
         val fairbidMediationRewardedAdUnitId =
             preferences.getString(SETTINGS_KEY_FAIRBID_MEDIATION_REWARDED_AD_UNIT_ID, "")!!
 
-        val fairbidBannerAdUnitId =
-            preferences.getString(SETTINGS_KEY_FAIRBID_BANNER_AD_UNIT_ID, "")!!
-        val fairbidInterstitialAdUnitId =
-            preferences.getString(SETTINGS_KEY_FAIRBID_INTERSTITIAL_AD_UNIT_ID, "")!!
-        val fairbidRewardedAdUnitId =
-            preferences.getString(SETTINGS_KEY_FAIRBID_REWARDED_AD_UNIT_ID, "")!!
-
         val chartboostAppId =
             preferences.getString(SETTINGS_KEY_CHARTBOOST_APP_ID, "")!!
         val chartboostSignature =
@@ -593,7 +581,8 @@ class SettingsManager private constructor(context: Context) {
         val hybidSettings =
             HyBidSettings.Builder().appToken(appToken).zoneIds(zoneIds).apiUrl(apiUrl).age(age)
                 .keywords(keywords).browserPriorities(browserPriorities).coppa(coppa)
-                .testMode(testMode).gender(gender).topicsApi(topicsApi).build()
+                .testMode(testMode).gender(gender).topicsApi(topicsApi)
+                .reportingEnabled(reportingEnabled).build()
 
         val adCustomizationSettings =
             AdCustomizationSettings.Builder()

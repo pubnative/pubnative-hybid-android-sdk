@@ -22,7 +22,6 @@
 //
 package net.pubnative.lite.sdk.views;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.os.Handler;
@@ -35,6 +34,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+
 import net.pubnative.lite.sdk.CacheListener;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
@@ -157,7 +157,6 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         init(getRequestManager(), getORTBRequestManager());
     }
 
-    @TargetApi(21)
     public HyBidAdView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init(getRequestManager(), getORTBRequestManager());
@@ -498,7 +497,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                 } else {
                     invokeOnLoadFailed(new HyBidError(HyBidErrorCode.UNSUPPORTED_ASSET));
 
-                    if (HyBid.getReportingController() != null) {
+                    if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
                         ReportingEvent renderErrorEvent = new ReportingEvent();
                         renderErrorEvent.setAppToken(HyBid.getAppToken());
                         renderErrorEvent.setEventType(Reporting.EventType.RENDER_ERROR);
@@ -552,7 +551,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         } else {
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_AD));
 
-            if (HyBid.getReportingController() != null) {
+            if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
                 ReportingEvent renderErrorEvent = new ReportingEvent();
                 renderErrorEvent.setAppToken(HyBid.getAppToken());
                 renderErrorEvent.setEventType(Reporting.EventType.RENDER_ERROR);
@@ -606,7 +605,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                     } else {
                         invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NULL_AD));
 
-                        if (HyBid.getReportingController() != null) {
+                        if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
                             ReportingEvent renderErrorEvent = new ReportingEvent();
                             renderErrorEvent.setAppToken(HyBid.getAppToken());
                             renderErrorEvent.setEventType(Reporting.EventType.RENDER_ERROR);
@@ -650,7 +649,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         } else {
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_SIGNAL_DATA));
 
-            if (HyBid.getReportingController() != null) {
+            if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
                 ReportingEvent renderErrorEvent = new ReportingEvent();
                 renderErrorEvent.setAppToken(HyBid.getAppToken());
                 renderErrorEvent.setEventType(Reporting.EventType.RENDER_ERROR);
@@ -819,7 +818,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
             addReportingKey(Reporting.Key.TIME_TO_LOAD, loadTime);
         }
 
-        if (HyBid.getReportingController() != null) {
+        if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
             ReportingEvent loadEvent = new ReportingEvent();
             loadEvent.setEventType(Reporting.EventType.LOAD);
             loadEvent.setAdFormat(Reporting.AdFormat.BANNER);
@@ -847,7 +846,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
             addReportingKey(Reporting.Key.TIME_TO_LOAD_FAILED, loadTime);
         }
 
-        if (HyBid.getReportingController() != null) {
+        if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
             ReportingEvent loadFailEvent = new ReportingEvent();
             loadFailEvent.setEventType(Reporting.EventType.LOAD_FAIL);
             loadFailEvent.setAdFormat(Reporting.AdFormat.BANNER);
@@ -885,10 +884,6 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     protected void invokeOnImpression() {
         if (mZoneId != null && !TextUtils.isEmpty(mZoneId)) {
             if (getContext() != null) {
-//                DBManager dbManager = new DBManager(getContext());
-//                dbManager.open();
-//                dbManager.insert(mZoneId);
-//                dbManager.close();
                 SessionImpressionPrefs prefs = new SessionImpressionPrefs(getContext());
                 prefs.insert(mZoneId);
             }
@@ -907,10 +902,13 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                 width = (int) ViewUtils.convertDpToPixel(mRequestManager.getAdSize().getWidth(), getContext());
                 height = (int) ViewUtils.convertDpToPixel(mRequestManager.getAdSize().getHeight(), getContext());
             }
-            FrameLayout.LayoutParams adLayoutParams = new FrameLayout.LayoutParams(width, height);
-            adLayoutParams.gravity = Gravity.CENTER;
 
-            addView(view, adLayoutParams);
+            if (view.getParent() == null) {
+                FrameLayout.LayoutParams adLayoutParams = new FrameLayout.LayoutParams(width, height);
+                adLayoutParams.gravity = Gravity.CENTER;
+
+                addView(view, adLayoutParams);
+            }
 
             if (mAutoShowOnLoad) {
                 invokeOnLoadFinished();
@@ -1120,20 +1118,21 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     }
 
     public void reportAdRender(String adFormat, JSONObject placementParams) {
-        ReportingEvent event = new ReportingEvent();
-        event.setEventType(Reporting.EventType.RENDER);
-        event.setPlatform(Reporting.Platform.ANDROID);
-        event.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
-        event.setAdFormat(adFormat);
-        event.setHasEndCard(hasEndCard());
-        if (mAd != null) {
-            event.setImpId(mAd.getSessionId());
-            event.setCampaignId(mAd.getCampaignId());
-            event.setConfigId(mAd.getConfigId());
-        }
-        event.mergeJSONObject(placementParams);
-        if (HyBid.getReportingController() != null)
+        if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
+            ReportingEvent event = new ReportingEvent();
+            event.setEventType(Reporting.EventType.RENDER);
+            event.setPlatform(Reporting.Platform.ANDROID);
+            event.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
+            event.setAdFormat(adFormat);
+            event.setHasEndCard(hasEndCard());
+            if (mAd != null) {
+                event.setImpId(mAd.getSessionId());
+                event.setCampaignId(mAd.getCampaignId());
+                event.setConfigId(mAd.getConfigId());
+            }
+            event.mergeJSONObject(placementParams);
             HyBid.getReportingController().reportEvent(event);
+        }
     }
 
     public boolean hasEndCard() {

@@ -401,7 +401,7 @@ public class RequestManager {
     }
 
     private void reportAdCache() {
-        if (mReportingController != null) {
+        if (mReportingController != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.CACHE);
             reportingEvent.setPlatform(Reporting.Platform.ANDROID);
@@ -413,7 +413,7 @@ public class RequestManager {
     }
 
     private void reportAdRequest(PNAdRequest adRequest) {
-        if (mReportingController != null) {
+        if (mReportingController != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.REQUEST);
             reportingEvent.setPlatform(Reporting.Platform.ANDROID);
@@ -435,7 +435,7 @@ public class RequestManager {
     }
 
     private void reportAdRequest(OpenRTBAdRequest adRequest) {
-        if (mReportingController != null) {
+        if (mReportingController != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.REQUEST);
             reportingEvent.setPlatform(Reporting.Platform.ANDROID);
@@ -454,7 +454,7 @@ public class RequestManager {
     }
 
     private void reportAdResponse(AdRequest adRequest, Ad adResponse, IntegrationType mIntegrationType) {
-        if (mReportingController != null) {
+        if (mReportingController != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.RESPONSE);
             reportingEvent.setPlatform(Reporting.Platform.ANDROID);

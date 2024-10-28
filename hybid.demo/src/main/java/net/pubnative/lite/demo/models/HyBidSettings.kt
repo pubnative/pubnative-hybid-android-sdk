@@ -13,6 +13,7 @@ class HyBidSettings private constructor(builder: Builder) {
     val coppa: Boolean?
     val testMode: Boolean?
     val topicsApi: Boolean?
+    val reportingEnabled: Boolean?
 
     init {
         this.appToken = builder.appToken
@@ -25,6 +26,7 @@ class HyBidSettings private constructor(builder: Builder) {
         this.coppa = builder.coppa
         this.testMode = builder.testMode
         this.topicsApi = builder.topicsApi
+        this.reportingEnabled = builder.reportingEnabled
     }
 
     class Builder {
@@ -49,6 +51,8 @@ class HyBidSettings private constructor(builder: Builder) {
             private set
         var topicsApi: Boolean? = null
             private set
+        var reportingEnabled: Boolean? = null
+            private set
 
         fun appToken(appToken: String) = apply { this.appToken = appToken }
         fun zoneIds(zoneIds: List<String>?) = apply { this.zoneIds = zoneIds }
@@ -62,6 +66,7 @@ class HyBidSettings private constructor(builder: Builder) {
         fun coppa(coppa: Boolean) = apply { this.coppa = coppa }
         fun testMode(testMode: Boolean) = apply { this.testMode = testMode }
         fun topicsApi(topicsApi: Boolean) = apply { this.topicsApi = topicsApi }
+        fun reportingEnabled(reportingEnabled: Boolean) = apply { this.reportingEnabled = reportingEnabled }
         fun build() = HyBidSettings(this)
     }
 }

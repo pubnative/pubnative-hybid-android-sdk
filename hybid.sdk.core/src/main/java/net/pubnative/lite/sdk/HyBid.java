@@ -92,6 +92,7 @@ public class HyBid {
     private static boolean isDiagnosticsEnabled = false;
     private static boolean sTopicsApiEnabled = false;
     private static boolean sAtomEnabled = false;
+    private static boolean sReportingEnabled = false;
     private static String sAge;
     private static String sGender;
     private static String sKeywords;
@@ -177,10 +178,12 @@ public class HyBid {
         if (sDeviceInfo == null) {
             sDeviceInfo = new DeviceInfo(application.getApplicationContext());
             sDeviceInfo.initialize(() -> {
-                ReportingEvent event = new ReportingEvent();
-                event.setEventType(Reporting.EventType.SDK_INIT);
-                event.setAppToken(appToken);
-                getReportingController().reportEvent(event);
+                if (getReportingController() != null && HyBid.isReportingEnabled()) {
+                    ReportingEvent event = new ReportingEvent();
+                    event.setEventType(Reporting.EventType.SDK_INIT);
+                    event.setAppToken(appToken);
+                    getReportingController().reportEvent(event);
+                }
 
                 if (initialisationListener != null) {
                     initialisationListener.onInitialisationFinished(true);
@@ -388,6 +391,14 @@ public class HyBid {
         return isDiagnosticsEnabled;
     }
 
+    public static void setReportingEnabled(Boolean enabled) {
+        sReportingEnabled = enabled;
+    }
+
+    public static Boolean isReportingEnabled() {
+        return sReportingEnabled;
+    }
+
     public static void setTopicsApiEnabled(Boolean enabled) {
         sTopicsApiEnabled = enabled;
     }
@@ -405,15 +416,17 @@ public class HyBid {
     }
 
     public static void reportException(Exception exception) {
-        if (sCrashController != null) {
+        if (sCrashController != null && getReportingController() != null && HyBid.isReportingEnabled()) {
             ReportingEvent event = sCrashController.formatException(exception);
             getReportingController().reportEvent(event);
         }
     }
 
     public static void reportException(Throwable exception) {
-        ReportingEvent event = sCrashController.formatException(exception);
-        getReportingController().reportEvent(event);
+        if (sCrashController != null && getReportingController() != null && HyBid.isReportingEnabled()) {
+            ReportingEvent event = sCrashController.formatException(exception);
+            getReportingController().reportEvent(event);
+        }
     }
 
     public interface InitialisationListener {

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/videoPlayerLayoutContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -13,46 +14,45 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-        <net.pubnative.lite.sdk.vpaid.widget.LinearCountDownView
-            android:id="@+id/linear_count_down"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|start" />
-
-        <ImageView
-            android:id="@+id/muteView"
-            android:layout_width="@dimen/mute_view_size"
-            android:layout_height="@dimen/mute_view_size"
-            android:layout_gravity="end"
-            android:contentDescription="@string/unmute_button"
-            android:padding="8dp"
-            android:scaleType="fitCenter"
-            android:src="@mipmap/unmute" />
-
-        <ImageView
-            android:id="@+id/skipView"
-            android:layout_width="@dimen/skip_view_size"
-            android:layout_height="@dimen/skip_view_size"
-            android:layout_gravity="start"
-            android:padding="8dp"
-            android:scaleType="fitCenter"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/progressSkipView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end|bottom"
-            android:layout_marginBottom="40dp"
-            android:background="@drawable/open_url_background"
-            android:paddingHorizontal="10dp"
-            android:paddingVertical="5dp"
-            android:text="@string/skip_ad"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:visibility="gone" />
-
+            <net.pubnative.lite.sdk.vpaid.widget.LinearCountDownView
+                android:id="@+id/linear_count_down"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|start" />
         </FrameLayout>
     </FrameLayout>
+
+    <ImageView
+        android:id="@+id/muteView"
+        android:layout_width="@dimen/mute_view_size"
+        android:layout_height="@dimen/mute_view_size"
+        android:layout_gravity="end"
+        android:contentDescription="@string/unmute_button"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
+        android:src="@mipmap/unmute" />
+
+    <ImageView
+        android:id="@+id/skipView"
+        android:layout_width="@dimen/skip_view_size"
+        android:layout_height="@dimen/skip_view_size"
+        android:layout_gravity="start"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/progressSkipView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_marginBottom="40dp"
+        android:background="@drawable/open_url_background"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="5dp"
+        android:text="@string/skip_ad"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:visibility="gone" />
 
 </FrameLayout>

@@ -146,7 +146,7 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             return;
         }
 
-        if (mReportingController != null) {
+        if (mReportingController != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.IMPRESSION);
             reportingEvent.setTimestamp(System.currentTimeMillis());
@@ -177,7 +177,7 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             return;
         }
 
-        if (mReportingController != null) {
+        if (mReportingController != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.CLICK);
             reportingEvent.setTimestamp(System.currentTimeMillis());
@@ -218,7 +218,7 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             return;
         }
 
-        if (mReportingController != null) {
+        if (mReportingController != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.REWARDED_CLOSED);
             reportingEvent.setTimestamp(System.currentTimeMillis());
@@ -292,7 +292,7 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             return;
         }
 
-        if (mReportingController != null) {
+        if (mReportingController != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.ERROR);
             reportingEvent.setTimestamp(System.currentTimeMillis());
@@ -330,7 +330,7 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             return;
         }
 
-        if (mReportingController != null) {
+        if (mReportingController != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.CUSTOM_ENDCARD_IMPRESSION);
             reportingEvent.setTimestamp(System.currentTimeMillis());
@@ -358,7 +358,7 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             return;
         }
 
-        if (mReportingController != null) {
+        if (mReportingController != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.CUSTOM_ENDCARD_CLICK);
             reportingEvent.setTimestamp(System.currentTimeMillis());
@@ -385,7 +385,7 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             return;
         }
 
-        if (mReportingController != null) {
+        if (mReportingController != null && HyBid.isReportingEnabled()) {
             reportCompanionView();
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.DEFAULT_ENDCARD_IMPRESSION);
@@ -412,7 +412,7 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             return;
         }
 
-        if (mReportingController != null) {
+        if (mReportingController != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.DEFAULT_ENDCARD_CLICK);
             reportingEvent.setTimestamp(System.currentTimeMillis());
@@ -443,7 +443,7 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
         else
             event_type = Reporting.EventType.DEFAULT_END_CARD_LOAD_SUCCESS;
 
-        if (mReportingController != null) {
+        if (mReportingController != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(event_type);
             reportingEvent.setTimestamp(System.currentTimeMillis());
@@ -470,7 +470,7 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             event_type = Reporting.EventType.CUSTOM_END_CARD_LOAD_FAILURE;
         else
             event_type = Reporting.EventType.DEFAULT_END_CARD_LOAD_FAILURE;
-        if (mReportingController != null) {
+        if (mReportingController != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(event_type);
             reportingEvent.setTimestamp(System.currentTimeMillis());
@@ -488,20 +488,21 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
     }
 
     private void reportCompanionView() {
-        ReportingEvent reportingEvent = new ReportingEvent();
-        reportingEvent.setEventType(Reporting.EventType.COMPANION_VIEW);
-        reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
-        reportingEvent.setCreativeType(Reporting.CreativeType.VIDEO);
-        reportingEvent.setPlatform(Reporting.Platform.ANDROID);
-        reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(IntegrationType.STANDALONE));
-        Ad ad = getAd();
-        if (ad != null) {
-            reportingEvent.setImpId(ad.getSessionId());
-            reportingEvent.setCampaignId(ad.getCampaignId());
-            reportingEvent.setConfigId(ad.getConfigId());
-        }
-        reportingEvent.setTimestamp(System.currentTimeMillis());
-        if (HyBid.getReportingController() != null) {
+        if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.COMPANION_VIEW);
+            reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
+            reportingEvent.setCreativeType(Reporting.CreativeType.VIDEO);
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(IntegrationType.STANDALONE));
+            Ad ad = getAd();
+            if (ad != null) {
+                reportingEvent.setImpId(ad.getSessionId());
+                reportingEvent.setCampaignId(ad.getCampaignId());
+                reportingEvent.setConfigId(ad.getConfigId());
+            }
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+
             HyBid.getReportingController().reportEvent(reportingEvent);
         }
     }

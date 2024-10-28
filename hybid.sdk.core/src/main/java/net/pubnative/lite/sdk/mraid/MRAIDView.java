@@ -23,7 +23,6 @@
 package net.pubnative.lite.sdk.mraid;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
@@ -125,7 +124,7 @@ public class MRAIDView extends FrameLayout {
     private static final CountdownStyle COUNTDOWN_STYLE_DEFAULT = CountdownStyle.PIE_CHART;
     private final boolean isExpandEnabled;
 
-    private Boolean showTimerBeforeEndCard = false;
+    private final Boolean showTimerBeforeEndCard;
 
     private Integer mSkipTimeMillis = -1;
 
@@ -378,8 +377,10 @@ public class MRAIDView extends FrameLayout {
                     this.listener.mraidViewError(this);
                 }
             } else {
-                MRAIDLog.d("hz-m loading mraid from url: " + baseUrl);
-                webView.loadUrl(baseUrl);
+                if (baseUrl != null) {
+                    MRAIDLog.d("hz-m loading mraid from url: " + baseUrl);
+                    webView.loadUrl(baseUrl);
+                }
             }
         }
     }
@@ -404,7 +405,10 @@ public class MRAIDView extends FrameLayout {
                     MRAIDLog.d(TAG, "onConfigurationChanged " + (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT ? "portrait" : "landscape"));
                     if (isInterstitial) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                            context.getDisplay().getMetrics(displayMetrics);
+                            if (context.getDisplay() != null) {
+                                context.getDisplay().getMetrics(displayMetrics);
+                            }
+
                         } else {
                             WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
                             if (windowManager != null) {
@@ -480,11 +484,7 @@ public class MRAIDView extends FrameLayout {
             wv.setWebChromeClient(mraidWebChromeClient);
             wv.setWebViewClient(mraidWebViewClient);
             wv.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                wv.getSettings().setMediaPlaybackRequiresUserGesture(false);
-            }
+            wv.getSettings().setMediaPlaybackRequiresUserGesture(false);
         } catch (RuntimeException exception) {
             wv = null;
             HyBid.reportException(exception);
@@ -573,32 +573,42 @@ public class MRAIDView extends FrameLayout {
                 try {
                     getClass().getDeclaredMethod(command).invoke(this);
                 } catch (NoSuchMethodException e) {
-                    getClass().getSuperclass().getDeclaredMethod(command).invoke(this);
+                    if (getClass().getSuperclass() != null) {
+                        getClass().getSuperclass().getDeclaredMethod(command).invoke(this);
+                    }
                 }
             } else if (Arrays.asList(COMMANDS_WITH_STRING).contains(command)) {
                 String key;
-                switch (command) {
-                    case "createCalendarEvent":
-                        key = "eventJSON";
-                        break;
-                    case "useCustomClose":
-                        key = "useCustomClose";
-                        break;
-                    default:
-                        key = "url";
-                        break;
+                if (command != null) {
+                    switch (command) {
+                        case "createCalendarEvent":
+                            key = "eventJSON";
+                            break;
+                        case "useCustomClose":
+                            key = "useCustomClose";
+                            break;
+                        default:
+                            key = "url";
+                            break;
+                    }
+                } else {
+                    key = "url";
                 }
                 String val = commandMap.get(key);
                 try {
                     getClass().getDeclaredMethod(command, String.class).invoke(this, val);
                 } catch (NoSuchMethodException e) {
-                    getClass().getSuperclass().getDeclaredMethod(command, String.class).invoke(this, val);
+                    if (getClass().getSuperclass() != null) {
+                        getClass().getSuperclass().getDeclaredMethod(command, String.class).invoke(this, val);
+                    }
                 }
             } else if (Arrays.asList(COMMANDS_WITH_MAP).contains(command)) {
                 try {
                     getClass().getDeclaredMethod(command, Map.class).invoke(this, commandMap);
                 } catch (NoSuchMethodException e) {
-                    getClass().getSuperclass().getDeclaredMethod(command, Map.class).invoke(this, commandMap);
+                    if (getClass().getSuperclass() != null) {
+                        getClass().getSuperclass().getDeclaredMethod(command, Map.class).invoke(this, commandMap);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -735,22 +745,19 @@ public class MRAIDView extends FrameLayout {
             if (isCustomExpand) {
                 if (context instanceof Activity) {
                     // Get back onto the main thread to create and load a new WebView.
-                    ((Activity) context).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (state == STATE_RESIZED) {
-                                removeResizeView();
-                                addView(webView);
-                            }
-                            webView.setWebChromeClient(null);
-                            webView.setWebViewClient(null);
-                            webViewPart2 = createWebView();
-                            webViewPart2.loadUrl(finalUrl);
-                            MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for " + webViewPart2);
-                            currentWebView = webViewPart2;
-                            isExpandingPart2 = true;
-                            expandHelper(currentWebView);
+                    ((Activity) context).runOnUiThread(() -> {
+                        if (state == STATE_RESIZED) {
+                            removeResizeView();
+                            addView(webView);
                         }
+                        webView.setWebChromeClient(null);
+                        webView.setWebViewClient(null);
+                        webViewPart2 = createWebView();
+                        webViewPart2.loadUrl(finalUrl);
+                        MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for " + webViewPart2);
+                        currentWebView = webViewPart2;
+                        isExpandingPart2 = true;
+                        expandHelper(currentWebView);
                     });
                 } else {
                     MRAIDLog.e("Could not load part 2 expanded content for URL: " + finalUrl);
@@ -759,22 +766,19 @@ public class MRAIDView extends FrameLayout {
                 final String content = getStringFromUrl(finalUrl);
                 if (!TextUtils.isEmpty(content) && context instanceof Activity) {
                     // Get back onto the main thread to create and load a new WebView.
-                    ((Activity) context).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (state == STATE_RESIZED) {
-                                removeResizeView();
-                                addView(webView);
-                            }
-                            webView.setWebChromeClient(null);
-                            webView.setWebViewClient(null);
-                            webViewPart2 = createWebView();
-                            webViewPart2.loadDataWithBaseURL(baseUrl, content, "text/html", "UTF-8", null);
-                            MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for " + webViewPart2);
-                            currentWebView = webViewPart2;
-                            isExpandingPart2 = true;
-                            expandHelper(currentWebView);
+                    ((Activity) context).runOnUiThread(() -> {
+                        if (state == STATE_RESIZED) {
+                            removeResizeView();
+                            addView(webView);
                         }
+                        webView.setWebChromeClient(null);
+                        webView.setWebViewClient(null);
+                        webViewPart2 = createWebView();
+                        webViewPart2.loadDataWithBaseURL(baseUrl, content, "text/html", "UTF-8", null);
+                        MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for " + webViewPart2);
+                        currentWebView = webViewPart2;
+                        isExpandingPart2 = true;
+                        expandHelper(currentWebView);
                     });
                 } else {
                     MRAIDLog.e("Could not load part 2 expanded content for URL: " + finalUrl);
@@ -1153,7 +1157,6 @@ public class MRAIDView extends FrameLayout {
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void forceFullScreen() {
         if (context instanceof Activity) {
             MRAIDLog.d(MRAID_LOG_TAG, "forceFullScreen");
@@ -1205,7 +1208,6 @@ public class MRAIDView extends FrameLayout {
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void restoreOriginalScreenState() {
         if (context instanceof Activity) {
             Activity activity = (Activity) context;
@@ -1217,7 +1219,9 @@ public class MRAIDView extends FrameLayout {
             }
             if (isActionBarShowing) {
                 ActionBar actionBar = activity.getActionBar();
-                actionBar.show();
+                if (actionBar != null) {
+                    actionBar.show();
+                }
             } else if (titleBar != null) {
                 titleBar.setVisibility(origTitleBarVisibility);
             }
@@ -1361,14 +1365,8 @@ public class MRAIDView extends FrameLayout {
 
     private static void injectJavaScript(WebView webView, String js) {
         if (webView != null && !TextUtils.isEmpty(js)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                MRAIDLog.d(MRAID_LOG_TAG, "evaluating js: " + js);
-                webView.evaluateJavascript(js, value -> MRAIDLog.d("Evaluated JS: " + value));
-
-            } else {
-                MRAIDLog.d(MRAID_LOG_TAG, "loading url: " + js);
-                webView.loadUrl("javascript:" + js);
-            }
+            MRAIDLog.d(MRAID_LOG_TAG, "evaluating js: " + js);
+            webView.evaluateJavascript(js, value -> MRAIDLog.d("Evaluated JS: " + value));
         }
     }
 
@@ -1411,7 +1409,7 @@ public class MRAIDView extends FrameLayout {
             HyBid.reportException(e);
             Logger.e(MRAID_LOG_TAG, e.getMessage());
         }
-        injectJavaScript("mraid.fireExposureChangeEvent(" + exposure + "," + jsonVisibleRectangle.toString() + "," + "null" + ");");
+        injectJavaScript("mraid.fireExposureChangeEvent(" + exposure + "," + jsonVisibleRectangle + "," + "null" + ");");
     }
 
 
@@ -1497,7 +1495,7 @@ public class MRAIDView extends FrameLayout {
                     locationJson.put("accuracy", location.getAccuracy());
                     long elapsedNanos = SystemClock.elapsedRealtimeNanos() - location.getElapsedRealtimeNanos();
                     locationJson.put("lastfix", elapsedNanos / 1000000000L);
-                    injectJavaScript("mraid.setLocation(" + locationJson.toString() + ");");
+                    injectJavaScript("mraid.setLocation(" + locationJson + ");");
                 } catch (JSONException exception) {
                     HyBid.reportException(exception);
                     Logger.e(MRAID_LOG_TAG, "Error passing location to MRAID interface");
@@ -1634,8 +1632,10 @@ public class MRAIDView extends FrameLayout {
                         mViewabilityAdSession.initAdSession(view, false);
                         if (contentInfo != null && contentInfoAdded) {
                             addViewabilityFriendlyObstruction(contentInfo, FriendlyObstructionPurpose.OTHER, "Content info description for the ad");
-                            for (HyBidViewabilityFriendlyObstruction obstruction : mViewabilityFriendlyObstructions) {
-                                mViewabilityAdSession.addFriendlyObstruction(obstruction.getView(), obstruction.getPurpose(), obstruction.getReason());
+                            if (mViewabilityFriendlyObstructions != null) {
+                                for (HyBidViewabilityFriendlyObstruction obstruction : mViewabilityFriendlyObstructions) {
+                                    mViewabilityAdSession.addFriendlyObstruction(obstruction.getView(), obstruction.getPurpose(), obstruction.getReason());
+                                }
                             }
                         }
                         webViewLoaded = true;
@@ -1890,7 +1890,7 @@ public class MRAIDView extends FrameLayout {
             calculatePosition(false);
         }
         if (state == STATE_RESIZED && changed) {
-            handler.post(() -> setResizedViewPosition());
+            handler.post(this::setResizedViewPosition);
         }
         isLaidOut = true;
         onLayoutCompleted();
@@ -2063,7 +2063,7 @@ public class MRAIDView extends FrameLayout {
             boolean isCurrentPortrait = (currentOrientation == Configuration.ORIENTATION_PORTRAIT);
             MRAIDLog.d(MRAID_LOG_TAG, "currentOrientation " + (isCurrentPortrait ? "portrait" : "landscape"));
 
-            int orientation = originalRequestedOrientation;
+            int orientation;
             if (orientationProperties.forceOrientation == MRAIDOrientationProperties.FORCE_ORIENTATION_PORTRAIT) {
                 orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
             } else if (orientationProperties.forceOrientation == MRAIDOrientationProperties.FORCE_ORIENTATION_LANDSCAPE) {
@@ -2101,7 +2101,7 @@ public class MRAIDView extends FrameLayout {
     }
 
     public void addViewabilityFriendlyObstruction(View view, FriendlyObstructionPurpose purpose, String reason) {
-        if (view != null && !TextUtils.isEmpty(reason)) {
+        if (mViewabilityFriendlyObstructions != null && view != null && !TextUtils.isEmpty(reason)) {
             mViewabilityFriendlyObstructions.add(new HyBidViewabilityFriendlyObstruction(view, purpose, reason));
         }
     }

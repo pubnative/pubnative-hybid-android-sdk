@@ -47,11 +47,6 @@ public class MRAIDInterstitial extends MRAIDView {
         close();
     }
 
-    @Override
-    protected void close() {
-        super.close();
-    }
-
     @Deprecated
     @Override
     protected void expand(String url, Boolean isCreatedByFeedbackForm, OnExpandCreativeFailListener listener) {

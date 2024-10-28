@@ -50,11 +50,7 @@ public class ReportingController {
     }
 
     public synchronized void reportEvent(ReportingEvent event) {
-        HandlerThread handlerThread = new HandlerThread("Thread-" + System.currentTimeMillis());
-        handlerThread.start();
-        Handler backgroundHandler = new Handler(handlerThread.getLooper());
-
-        backgroundHandler.post(() -> {
+        new Handler(Looper.getMainLooper()).post(() -> {
             for (int i = 0; i < mListeners.size(); i++) {
                 // Double check to handle multi-thread listener release
                 try {
@@ -84,7 +80,7 @@ public class ReportingController {
         if (this.adEventList != null) this.adEventList.clear();
     }
 
-    public synchronized void reportFiredTracker(ReportingTracker firedTracker){
+    public synchronized void reportFiredTracker(ReportingTracker firedTracker) {
         new Handler(Looper.getMainLooper()).post(() -> {
             for (int i = 0; i < mTrackerListeners.size(); i++) {
                 // Double check to handle multi-thread listener release

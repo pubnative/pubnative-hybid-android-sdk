@@ -346,7 +346,7 @@ public abstract class HyBidRewardedActivity extends Activity implements PNAPICon
     }
 
     private void invokeOnContentInfoClick() {
-        if (mReportingController != null) {
+        if (mReportingController != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.CONTENT_INFO_CLICK);
             reportingEvent.setTimestamp(System.currentTimeMillis());

@@ -54,11 +54,11 @@ public class ViewControllerVpaid {
         mEndCardView.show(imageUri);
         mWebView.setVisibility(View.GONE);
 
-        ReportingEvent event = new ReportingEvent();
-        event.setEventType(Reporting.EventType.COMPANION_VIEW);
-        event.setCreativeType(Reporting.CreativeType.VIDEO);
-        event.setTimestamp(System.currentTimeMillis());
-        if (HyBid.getReportingController() != null) {
+        if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
+            ReportingEvent event = new ReportingEvent();
+            event.setEventType(Reporting.EventType.COMPANION_VIEW);
+            event.setCreativeType(Reporting.CreativeType.VIDEO);
+            event.setTimestamp(System.currentTimeMillis());
             HyBid.getReportingController().reportEvent(event);
         }
     }

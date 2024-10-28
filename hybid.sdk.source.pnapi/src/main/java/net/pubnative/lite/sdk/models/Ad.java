@@ -516,8 +516,8 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
 
         String adExperience = adData.getStringField(DATA_TEXT_KEY);
 
-        if (adExperience.equalsIgnoreCase(AdExperience.BRAND) ||
-                adExperience.equalsIgnoreCase(AdExperience.PERFORMANCE)) {
+        if (!TextUtils.isEmpty(adExperience) && (adExperience.equalsIgnoreCase(AdExperience.BRAND) ||
+                adExperience.equalsIgnoreCase(AdExperience.PERFORMANCE))) {
             return adExperience;
         }
 

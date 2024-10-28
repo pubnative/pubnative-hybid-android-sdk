@@ -447,7 +447,7 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
     }
 
     private void invokeOnContentInfoClick() {
-        if (mReportingController != null) {
+        if (mReportingController != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.CONTENT_INFO_CLICK);
             reportingEvent.setTimestamp(System.currentTimeMillis());

@@ -56,7 +56,7 @@ public class ViewControllerVast implements View.OnClickListener {
     private LinearCountDownView mLinearCountdownView;
     private FrameLayout mVideoPlayerLayout;
     private TextureView mVideoPlayerLayoutTexture;
-    private View mControlsLayout;
+    private FrameLayout mControlsLayout;
     private View mOpenUrlLayout;
     private View mUxLayout;
     private HyBidEndCardView mEndCardView;
@@ -107,7 +107,7 @@ public class ViewControllerVast implements View.OnClickListener {
             bannerView.setVisibilityListener(mCreateVisibilityListener);
             bannerView.removeAllViews();
 
-            mControlsLayout = LayoutInflater.from(context).inflate(R.layout.controls, bannerView, false);
+            mControlsLayout = (FrameLayout) LayoutInflater.from(context).inflate(R.layout.controls, bannerView, false);
             mOpenUrlLayout = LayoutInflater.from(context).inflate(R.layout.open_url, bannerView, false);
             mUxLayout = mControlsLayout.findViewById(R.id.uxLayout);
 
@@ -163,9 +163,9 @@ public class ViewControllerVast implements View.OnClickListener {
 
             mOpenUrlLayout.findViewById(R.id.openURL).setOnClickListener(this);
 
-            mSkipCountdownView = new CountDownViewFactory().createCountdownView(context, COUNTDOWN_STYLE_DEFAULT, mVideoPlayerLayout);
-            if (mIsBrandAd && mHasHiddenUx) hideCountdown(true);
-            mVideoPlayerLayout.addView(mSkipCountdownView);
+            mSkipCountdownView = new CountDownViewFactory().createCountdownView(context, COUNTDOWN_STYLE_DEFAULT, mControlsLayout);
+
+            mControlsLayout.addView(mSkipCountdownView);
             mLinearCountdownView = mControlsLayout.findViewById(R.id.linear_count_down);
             if (mVideoPlayerLayoutTexture != null) {
                 mVideoPlayerLayoutTexture.setSurfaceTextureListener(mCreateTextureListener);
@@ -173,6 +173,12 @@ public class ViewControllerVast implements View.OnClickListener {
 
             mMuteView = mControlsLayout.findViewById(R.id.muteView);
             mMuteView.setOnClickListener(this);
+
+            if (mIsBrandAd && mHasHiddenUx) {
+                if (mMuteView != null) mMuteView.setVisibility(View.INVISIBLE);
+                hideCountdown(true);
+                hideMute(true);
+            }
 
             mSkipView = mControlsLayout.findViewById(R.id.skipView);
             if (mHasReducedCloseButton) {
@@ -276,9 +282,9 @@ public class ViewControllerVast implements View.OnClickListener {
             Logger.e(LOG_TAG, "ViewControllerVast.adjustLayoutParams: Log: mControlsLayout is null");
             return;
         }
-        FrameLayout.LayoutParams oldParams = (FrameLayout.LayoutParams) mControlsLayout.getLayoutParams();
+        FrameLayout.LayoutParams oldParams = (FrameLayout.LayoutParams) mVideoPlayerLayout.getLayoutParams();
         ViewGroup.LayoutParams newParams = Utils.calculateNewLayoutParams(oldParams, width, height, mBannerView.getWidth(), mBannerView.getHeight(), Utils.StretchOption.NO_STRETCH);
-        mControlsLayout.setLayoutParams(newParams);
+        mVideoPlayerLayout.setLayoutParams(newParams);
     }
 
     public void postDelayed(Runnable action, long delayMillis) {
@@ -498,8 +504,46 @@ public class ViewControllerVast implements View.OnClickListener {
 
     public void showSkipButton() {
         if (mSkipView != null) {
-            mSkipView.setVisibility(View.VISIBLE);
-            mSkipView.setClickable(true);
+            if (mIsBrandAd) {
+                if (mUxLayout.getVisibility() == View.VISIBLE) {
+                    mSkipView.setVisibility(View.VISIBLE);
+                    mSkipView.setClickable(true);
+                } else {
+                    mSkipView.setVisibility(View.INVISIBLE);
+                    mSkipView.setClickable(false);
+                }
+            } else {
+                mSkipView.setVisibility(View.VISIBLE);
+                mSkipView.setClickable(true);
+            }
+        }
+    }
+
+    private void hideMute(boolean hide) {
+        if (mMuteView != null) {
+            if (mMuteView.getVisibility() == View.GONE) {
+                return;
+            }
+            if (hide) {
+                mMuteView.setVisibility(View.INVISIBLE);
+            } else {
+                mMuteView.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    private void hideSkip(boolean hide) {
+        if (mSkipView != null) {
+            if (mSkipView.getVisibility() == View.GONE) {
+                return;
+            }
+            if (hide) {
+                mSkipView.setVisibility(View.INVISIBLE);
+                mSkipView.setClickable(false);
+            } else {
+                mSkipView.setVisibility(View.VISIBLE);
+                mSkipView.setClickable(true);
+            }
         }
     }
 
@@ -654,9 +698,13 @@ public class ViewControllerVast implements View.OnClickListener {
             if (mUxLayout.getVisibility() == View.VISIBLE) {
                 mUxLayout.setVisibility(View.INVISIBLE);
                 hideCountdown(true);
+                hideMute(true);
+                hideSkip(true);
             } else {
                 mUxLayout.setVisibility(View.VISIBLE);
                 hideCountdown(false);
+                hideMute(false);
+                hideSkip(false);
             }
         }
     }

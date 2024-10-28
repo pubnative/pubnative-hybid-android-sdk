@@ -316,6 +316,7 @@
     <string name="fullscreen_video">Fullscreen video</string>
     <string name="check_location_updates">Location Updates</string>
     <string name="check_topics_api">Topics API</string>
+    <string name="check_reporting">Reporting enabled</string>
     <string name="disable_ad_customization" formatted="false" translatable="false">Disable Ad Customization</string>
     <string name="enable_ad_customization" formatted="false" translatable="false">Enable Ad Customization</string>
     <string name="check_mraid_expand">MRAID Expand</string>

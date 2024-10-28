@@ -465,7 +465,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
             JsonOperations.putJsonLong(mPlacementParams, Reporting.Key.TIME_TO_LOAD, loadTime);
         }
 
-        if (HyBid.getReportingController() != null) {
+        if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
             ReportingEvent loadEvent = new ReportingEvent();
             loadEvent.setEventType(Reporting.EventType.LOAD);
             loadEvent.setAdFormat(Reporting.AdFormat.REWARDED);
@@ -493,7 +493,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
             JsonOperations.putJsonLong(mPlacementParams, Reporting.Key.TIME_TO_LOAD_FAILED, loadTime);
         }
 
-        if (HyBid.getReportingController() != null) {
+        if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
             ReportingEvent loadFailEvent = new ReportingEvent();
             loadFailEvent.setEventType(Reporting.EventType.LOAD_FAIL);
             loadFailEvent.setAdFormat(Reporting.AdFormat.REWARDED);
@@ -551,20 +551,22 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     }
 
     protected void invokeOnReward() {
-        ReportingEvent event = new ReportingEvent();
-        event.setEventType(Reporting.EventType.REWARD);
-        event.setAdFormat(Reporting.AdFormat.REWARDED);
-        event.setPlatform(Reporting.Platform.ANDROID);
-        event.setSdkVersion(HyBid.getSDKVersionInfo(mRequestManager.getIntegrationType()));
-        event.setHasEndCard(hasEndCard());
-        event.mergeJSONObject(mPlacementParams);
-        if (mAd != null) {
-            event.setImpId(mAd.getSessionId());
-            event.setCampaignId(mAd.getCampaignId());
-            event.setConfigId(mAd.getConfigId());
-        }
-        if (HyBid.getReportingController() != null)
+        if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
+            ReportingEvent event = new ReportingEvent();
+            event.setEventType(Reporting.EventType.REWARD);
+            event.setAdFormat(Reporting.AdFormat.REWARDED);
+            event.setPlatform(Reporting.Platform.ANDROID);
+            event.setSdkVersion(HyBid.getSDKVersionInfo(mRequestManager.getIntegrationType()));
+            event.setHasEndCard(hasEndCard());
+            event.mergeJSONObject(mPlacementParams);
+            if (mAd != null) {
+                event.setImpId(mAd.getSessionId());
+                event.setCampaignId(mAd.getCampaignId());
+                event.setConfigId(mAd.getConfigId());
+            }
+
             HyBid.getReportingController().reportEvent(event);
+        }
 
         if (mListener != null) {
             mListener.onReward();
@@ -711,20 +713,22 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     }
 
     public void reportAdRender(String adFormat, JSONObject placementParams) {
-        ReportingEvent event = new ReportingEvent();
-        event.setEventType(Reporting.EventType.RENDER);
-        event.setAdFormat(adFormat);
-        event.setPlatform(Reporting.Platform.ANDROID);
-        event.setSdkVersion(HyBid.getSDKVersionInfo(mRequestManager.getIntegrationType()));
-        event.setHasEndCard(hasEndCard());
-        if (mAd != null) {
-            event.setImpId(mAd.getSessionId());
-            event.setCampaignId(mAd.getCampaignId());
-            event.setConfigId(mAd.getConfigId());
-        }
-        event.mergeJSONObject(placementParams);
-        if (HyBid.getReportingController() != null)
+        if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
+            ReportingEvent event = new ReportingEvent();
+            event.setEventType(Reporting.EventType.RENDER);
+            event.setAdFormat(adFormat);
+            event.setPlatform(Reporting.Platform.ANDROID);
+            event.setSdkVersion(HyBid.getSDKVersionInfo(mRequestManager.getIntegrationType()));
+            event.setHasEndCard(hasEndCard());
+            if (mAd != null) {
+                event.setImpId(mAd.getSessionId());
+                event.setCampaignId(mAd.getCampaignId());
+                event.setConfigId(mAd.getConfigId());
+            }
+            event.mergeJSONObject(placementParams);
+
             HyBid.getReportingController().reportEvent(event);
+        }
     }
 
     public boolean hasEndCard() {

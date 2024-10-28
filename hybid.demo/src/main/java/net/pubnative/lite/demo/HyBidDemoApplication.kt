@@ -84,6 +84,8 @@ class HyBidDemoApplication : MultiDexApplication() {
             settings.hybidSettings!!.coppa?.let { HyBid.setCoppaEnabled(it) }
             settings.hybidSettings!!.age?.let { HyBid.setAge(it) }
             settings.hybidSettings!!.gender?.let { HyBid.setGender(it) }
+            settings.hybidSettings!!.topicsApi?.let { HyBid.setTopicsApiEnabled(it) }
+            settings.hybidSettings!!.reportingEnabled?.let { HyBid.setReportingEnabled(it) }
 
             settings.hybidSettings!!.keywords?.let {
                 val keywordsBuilder = StringBuilder()
@@ -210,7 +212,9 @@ class HyBidDemoApplication : MultiDexApplication() {
                 .zoneIds(Constants.ZONE_ID_LIST).apiUrl(BuildConfig.BASE_URL).age("")
                 .keywords(ArrayList()).browserPriorities(ArrayList()).coppa(Constants.COPPA_DEFAULT)
                 .testMode(Constants.TEST_MODE_DEFAULT).gender("")
-                .topicsApi(Constants.TOPICS_API_DEFAULT).build()
+                .topicsApi(Constants.TOPICS_API_DEFAULT)
+                .reportingEnabled(Constants.REPORTING_ENABLED_DEFAULT)
+                .build()
 
             val adCustomizationSettings = AdCustomizationSettings.Builder()
                 .initialAudioState(Constants.INITIAL_AUDIO_STATE_DEFAULT)
@@ -319,7 +323,10 @@ class HyBidDemoApplication : MultiDexApplication() {
         val heliumSdkListener: HeliumSdk.HeliumSdkListener = object : HeliumSdk.HeliumSdkListener {
             override fun didInitialize(error: java.lang.Error?) {
                 if (error != null) {
-                    Log.d("initChartboost", "Helium SDK failed to initialize. Reason: " + error.message)
+                    Log.d(
+                        "initChartboost",
+                        "Helium SDK failed to initialize. Reason: " + error.message
+                    )
                 } else {
                     //SDK Started
                     Log.d("initChartboost", "Helium SDK initialized successfully")
@@ -333,6 +340,7 @@ class HyBidDemoApplication : MultiDexApplication() {
             Constants.CHARTBOOST_APP_ID,
             Constants.CHARTBOOST_APP_SIGNATURE,
             HeliumInitializationOptions(skippedPartnerIds),
-            heliumSdkListener)
+            heliumSdkListener
+        )
     }
 }

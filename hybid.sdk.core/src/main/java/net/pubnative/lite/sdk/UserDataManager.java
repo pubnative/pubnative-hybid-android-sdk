@@ -43,15 +43,12 @@ public class UserDataManager {
     private static final String KEY_GDPR_PUBLIC_CONSENT = "IABConsent_ConsentString";
     private static final String KEY_GDPR_TCF_2_PUBLIC_CONSENT = "IABTCF_TCString";
     private static final String KEY_GDPR_APPLIES = "IABTCF_gdprApplies";
-    private static final String KEY_SUBJECT_TO_GDPR_PUBLIC = "IABConsent_SubjectToGDPR";
-    private static final String KEY_CMP_PRESENT_PUBLIC = "IABConsent_CMPPresent";
     private static final String KEY_CCPA_CONSENT = "ccpa_consent";
     private static final String KEY_GDPR_CONSENT = "gdpr_consent";
     private static final String KEY_PUBLIC_GPP_STRING = "IABGPP_HDR_GppString";
     private static final String KEY_PUBLIC_GPP_ID = "IABGPP_GppSID";
     private static final String KEY_GPP_STRING = "gpp_string";
     private static final String KEY_GPP_ID = "gpp_id";
-    private static final String DEVICE_ID_TYPE = "gaid";
     private static final int CONSENT_STATE_ACCEPTED = 1;
     private static final int CONSENT_STATE_DENIED = 0;
 
