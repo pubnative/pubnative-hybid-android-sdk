@@ -25,13 +25,11 @@ public class DeviceExtension extends JsonModel {
     @BindField
     public Integer airplane;
     @BindField
-    public Integer bluetooth;
-    @BindField
     public Integer headset;
     @BindField
     public Integer ringmute;
 
-    public DeviceExtension(List<String> inputlanguages, Integer charging, Integer batterylevel, Integer batterysaver, Integer diskspace, Integer totaldisk, Integer darkmode, Integer dnd, Integer airplane, Integer bluetooth, Integer headset, Integer ringmute) {
+    public DeviceExtension(List<String> inputlanguages, Integer charging, Integer batterylevel, Integer batterysaver, Integer diskspace, Integer totaldisk, Integer darkmode, Integer dnd, Integer airplane, Integer headset, Integer ringmute) {
         this.inputlanguages = inputlanguages;
         this.charging = charging;
         this.batterylevel = batterylevel;
@@ -41,7 +39,6 @@ public class DeviceExtension extends JsonModel {
         this.darkmode = darkmode;
         this.dnd = dnd;
         this.airplane = airplane;
-        this.bluetooth = bluetooth;
         this.headset = headset;
         this.ringmute = ringmute;
     }

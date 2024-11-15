@@ -62,6 +62,7 @@ public class VerveCustomBanner extends BaseBanner<VerveCustomAdapter> implements
             return;
         }
 
+        mBannerAdListener = listener;
         AdSize hyBidAdSize = getAdSize(isBannerSize);
 
         if (HyBid.getAppToken() != null && HyBid.getAppToken().equalsIgnoreCase(appToken) && HyBid.isInitialized()) {
@@ -93,6 +94,8 @@ public class VerveCustomBanner extends BaseBanner<VerveCustomAdapter> implements
         if (mAdView != null) {
             mAdView.destroy();
         }
+
+        mBannerAdListener = null;
     }
 
     //----------------------------------- HyBidAdView Callbacks ------------------------------------

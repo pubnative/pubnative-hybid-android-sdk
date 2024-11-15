@@ -37,7 +37,7 @@ public class HyBidMediationBaseCustomEvent extends Adapter {
     private static final String TAG = HyBidMediationBaseCustomEvent.class.getSimpleName();
     private static final int SDK_VERSION_MAJOR = 3;
     private static final int SDK_VERSION_MINOR = 2;
-    private static final int SDK_VERSION_MICRO = 0;
+    private static final int SDK_VERSION_MICRO = 1;
 
     @Override
     public void initialize(@NonNull Context context, @NonNull InitializationCompleteCallback initializationCompleteCallback, @NonNull List<MediationConfiguration> list) {

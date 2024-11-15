@@ -295,6 +295,7 @@ public class MRAIDView extends FrameLayout {
     // This is the contents of mraid.js. We keep it around in case we need to inject it
     // into webViewPart2 (2nd part of 2-part expanded ad).
     private String mraidJs;
+    private boolean mIsExpanding = false;
 
     protected final Handler handler;
 
@@ -763,8 +764,7 @@ public class MRAIDView extends FrameLayout {
                     MRAIDLog.e("Could not load part 2 expanded content for URL: " + finalUrl);
                 }
             } else {
-                final String content = getStringFromUrl(finalUrl);
-                if (!TextUtils.isEmpty(content) && context instanceof Activity) {
+                if (context instanceof Activity) {
                     // Get back onto the main thread to create and load a new WebView.
                     ((Activity) context).runOnUiThread(() -> {
                         if (state == STATE_RESIZED) {
@@ -774,7 +774,8 @@ public class MRAIDView extends FrameLayout {
                         webView.setWebChromeClient(null);
                         webView.setWebViewClient(null);
                         webViewPart2 = createWebView();
-                        webViewPart2.loadDataWithBaseURL(baseUrl, content, "text/html", "UTF-8", null);
+                        mIsExpanding = true;
+                        webViewPart2.loadUrl(finalUrl);
                         MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for " + webViewPart2);
                         currentWebView = webViewPart2;
                         isExpandingPart2 = true;
@@ -1634,13 +1635,18 @@ public class MRAIDView extends FrameLayout {
                             addViewabilityFriendlyObstruction(contentInfo, FriendlyObstructionPurpose.OTHER, "Content info description for the ad");
                             if (mViewabilityFriendlyObstructions != null) {
                                 for (HyBidViewabilityFriendlyObstruction obstruction : mViewabilityFriendlyObstructions) {
-                                    mViewabilityAdSession.addFriendlyObstruction(obstruction.getView(), obstruction.getPurpose(), obstruction.getReason());
+                                    // Second null check for concurrency
+                                    if (mViewabilityAdSession != null) {
+                                        mViewabilityAdSession.addFriendlyObstruction(obstruction.getView(), obstruction.getPurpose(), obstruction.getReason());
+                                    }
                                 }
                             }
                         }
                         webViewLoaded = true;
-                        mViewabilityAdSession.fireLoaded();
-                        mViewabilityAdSession.fireImpression();
+                        if (mViewabilityAdSession != null) {
+                            mViewabilityAdSession.fireLoaded();
+                            mViewabilityAdSession.fireImpression();
+                        }
                     }
 
                     listener.mraidViewLoaded(MRAIDView.this);
@@ -1747,6 +1753,9 @@ public class MRAIDView extends FrameLayout {
                     expandCreative(url, true, false, null);
                 } else if (isCloseSignal(url)) {
                     closeOnMainThread();
+                } else if (mIsExpanding) {
+                    mIsExpanding = false;
+                    return false;
                 } else {
                     try {
                         open(URLEncoder.encode(url, "UTF-8"));

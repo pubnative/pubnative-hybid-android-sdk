@@ -859,8 +859,23 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
 
     @Override
     public void openUrl(String url, Boolean isCustomEndCard, Boolean isCTAClick) {
-        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
-            url = trackVideoClicks();
+        if (mMediaPlayer != null) {
+            try {
+                if (mMediaPlayer.isPlaying()) {
+                    url = trackVideoClicks();
+                } else {
+                    if (!isCustomEndCard && TextUtils.isEmpty(url)) {
+                        url = trackEndCardClicks();
+                    }
+
+                    String videoClickUrl = trackVideoClicks();
+                    if (url == null) {
+                        url = videoClickUrl;
+                    }
+                }
+            } catch (IllegalStateException e) {
+                Logger.e(LOG_TAG, "MediaPlayer is in an invalid state: " + e.getMessage());
+            }
         } else {
             if (!isCustomEndCard && TextUtils.isEmpty(url)) {
                 url = trackEndCardClicks();

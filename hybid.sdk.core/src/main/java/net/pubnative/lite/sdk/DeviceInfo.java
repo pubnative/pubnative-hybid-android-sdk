@@ -26,8 +26,6 @@ import static android.content.Context.BATTERY_SERVICE;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -744,12 +742,6 @@ public class DeviceInfo {
                 AudioDeviceInfo[] devices = am.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
                 if (devices == null) return null;
                 for (AudioDeviceInfo device : devices) {
-//                if (device.getType() == AudioDeviceInfo.TYPE_WIRED_HEADSET
-//                        || device.getType() == AudioDeviceInfo.TYPE_WIRED_HEADPHONES
-//                        || device.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP
-//                        || device.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_SCO) {
-//                    return 1;
-//                }
                     if (device.getType() == AudioDeviceInfo.TYPE_WIRED_HEADSET
                             || device.getType() == AudioDeviceInfo.TYPE_WIRED_HEADPHONES) {
                         return 1;
@@ -758,40 +750,6 @@ public class DeviceInfo {
             }
             return 0;
         } else {
-            return null;
-        }
-    }
-
-    public Integer isBluetoothEnabled() {
-
-        if (mContext == null)
-            return null;
-
-        PackageManager packageManager = mContext.getPackageManager();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                && (!packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)
-                || mContext.checkSelfPermission(Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED)) {
-            return null;
-        }
-
-        BluetoothAdapter bluetoothAdapter;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            BluetoothManager bluetoothManager = mContext.getSystemService(BluetoothManager.class);
-            if (bluetoothManager != null)
-                bluetoothAdapter = bluetoothManager.getAdapter();
-            else
-                return null;
-        } else {
-            bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        }
-
-        try {
-            if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
-                return 0;
-            } else {
-                return 1;
-            }
-        } catch (Exception e) {
             return null;
         }
     }

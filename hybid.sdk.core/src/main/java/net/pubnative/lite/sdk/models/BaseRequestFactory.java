@@ -34,10 +34,9 @@ public class BaseRequestFactory {
                 }
             }
             Integer dndEnabled = deviceInfo.isDndEnabled();
-            Integer bluetooth = deviceInfo.isBluetoothEnabled();
             Integer airplaneModeEnabled = deviceInfo.isAirplaneModeEnabled();
             return new Extension(inputLanguages, isCharging, batteryLevel, batterySaver,
-                    freeSpace, totalSpace, darkMode, dndEnabled, airplaneModeEnabled, bluetooth, headset, ring_mute);
+                    freeSpace, totalSpace, darkMode, dndEnabled, airplaneModeEnabled, headset, ring_mute);
         } else {
             return null;
         }
@@ -61,10 +60,9 @@ public class BaseRequestFactory {
                 }
             }
             Integer dndEnabled = deviceInfo.isDndEnabled();
-            Integer bluetooth = deviceInfo.isBluetoothEnabled();
             Integer airplaneModeEnabled = deviceInfo.isAirplaneModeEnabled();
             return new DeviceExtension(inputLanguages, isCharging, batteryLevel, batterySaver,
-                    freeSpace, totalSpace, darkMode, dndEnabled, airplaneModeEnabled, bluetooth, headset, ring_mute);
+                    freeSpace, totalSpace, darkMode, dndEnabled, airplaneModeEnabled, headset, ring_mute);
         } else {
             return null;
         }
