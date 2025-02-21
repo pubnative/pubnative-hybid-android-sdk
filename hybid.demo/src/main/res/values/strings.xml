@@ -1,183 +1,183 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name">HyBid demo</string>
+    <string name="app_name" translatable="false">HyBid demo</string>
 
-    <string name="native_ad">"Native"</string>
-    <string name="banner">Banner</string>
-    <string name="interstitial">Interstitial</string>
-    <string name="interstitial_video">Interstitial Video</string>
-    <string name="medium">Medium</string>
-    <string name="medium_video">Medium Video</string>
-    <string name="leaderboard">Leaderboard</string>
-    <string name="rewarded">Rewarded</string>
-    <string name="rewarded_html">Rewarded html</string>
+    <string name="native_ad" translatable="false">"Native"</string>
+    <string name="banner" translatable="false">Banner</string>
+    <string name="interstitial" translatable="false">Interstitial</string>
+    <string name="interstitial_video" translatable="false">Interstitial Video</string>
+    <string name="medium" translatable="false">Medium</string>
+    <string name="medium_video" translatable="false">Medium Video</string>
+    <string name="leaderboard" translatable="false">Leaderboard</string>
+    <string name="rewarded" translatable="false">Rewarded</string>
+    <string name="rewarded_html" translatable="false">Rewarded html</string>
 
-    <string name="banner_in_feed">In-Feed Banner</string>
-    <string name="zone_id">Zone ID:</string>
-    <string name="chosen">Chosen:</string>
+    <string name="banner_in_feed" translatable="false">In-Feed Banner</string>
+    <string name="zone_id" translatable="false">Zone ID:</string>
+    <string name="chosen" translatable="false">Chosen:</string>
 
-    <string name="pn_settings">HyBid Settings</string>
-    <string name="maxads_settings">MaxAds Settings</string>
-    <string name="dfp_settings">DFP Settings</string>
-    <string name="admob_settings">Admob Settings</string>
-    <string name="ironsource_settings">IronSource Settings</string>
-    <string name="fairbid_settings">Fairbid Settings</string>
-    <string name="chartboost_settings">Chartboost Settings</string>
+    <string name="pn_settings" translatable="false">HyBid Settings</string>
+    <string name="maxads_settings" translatable="false">MaxAds Settings</string>
+    <string name="dfp_settings" translatable="false">DFP Settings</string>
+    <string name="admob_settings" translatable="false">Admob Settings</string>
+    <string name="ironsource_settings" translatable="false">IronSource Settings</string>
+    <string name="fairbid_settings" translatable="false">Fairbid Settings</string>
+    <string name="chartboost_settings" translatable="false">Chartboost Settings</string>
 
-    <string name="load">Load</string>
-    <string name="prepare">Prepare</string>
-    <string name="show">Show</string>
-    <string name="load_native">Load native</string>
-    <string name="clear">Clear</string>
-    <string name="add">Add</string>
-    <string name="ad_caching_enabled">Ad caching enabled</string>
+    <string name="load" translatable="false">Load</string>
+    <string name="prepare" translatable="false">Prepare</string>
+    <string name="show" translatable="false">Show</string>
+    <string name="load_native" translatable="false">Load native</string>
+    <string name="clear" translatable="false">Clear</string>
+    <string name="add" translatable="false">Add</string>
+    <string name="ad_caching_enabled" translatable="false">Ad caching enabled</string>
 
-    <string name="dfp">DFP</string>
-    <string name="admob">Admob</string>
-    <string name="ironsource">IronSource</string>
-    <string name="fairbid">Fairbid</string>
-    <string name="chartboost">Chartboost</string>
+    <string name="dfp" translatable="false">DFP</string>
+    <string name="admob" translatable="false">Admob</string>
+    <string name="ironsource" translatable="false">IronSource</string>
+    <string name="fairbid" translatable="false">Fairbid</string>
+    <string name="chartboost" translatable="false">Chartboost</string>
 
-    <string name="hint_dfp_banner_ad_unit_id">Banner Ad Unit ID</string>
-    <string name="hint_dfp_medium_ad_unit_id">Medium Ad Unit ID</string>
-    <string name="hint_dfp_leaderboard_ad_unit_id">Leaderboard Ad Unit ID</string>
-    <string name="hint_dfp_interstitial_ad_unit_id">Interstitial Ad Unit ID</string>
-    <string name="hint_dfp_rewarded_ad_unit_id">Rewarded Ad Unit ID</string>
-    <string name="save_dfp_settings">Save DFP settings</string>
+    <string name="hint_dfp_banner_ad_unit_id" translatable="false">Banner Ad Unit ID</string>
+    <string name="hint_dfp_medium_ad_unit_id" translatable="false">Medium Ad Unit ID</string>
+    <string name="hint_dfp_leaderboard_ad_unit_id" translatable="false">Leaderboard Ad Unit ID</string>
+    <string name="hint_dfp_interstitial_ad_unit_id" translatable="false">Interstitial Ad Unit ID</string>
+    <string name="hint_dfp_rewarded_ad_unit_id" translatable="false">Rewarded Ad Unit ID</string>
+    <string name="save_dfp_settings" translatable="false">Save DFP settings</string>
 
-    <string name="hint_maxads_sdk_key">App ID</string>
-    <string name="hint_maxads_banner_ad_unit_id">Banner Ad Unit ID</string>
-    <string name="hint_maxads_medium_ad_unit_id">Medium Ad Unit ID</string>
-    <string name="hint_maxads_medium_video_ad_unit_id">Medium Video Ad Unit ID</string>
-    <string name="hint_maxads_interstitial_ad_unit_id">Interstitial Ad Unit ID</string>
-    <string name="hint_maxads_interstitial_video_ad_unit_id">Interstitial Video Ad Unit ID</string>
-    <string name="hint_maxads_native_ad_unit_id">Native Ad Unit ID</string>
-    <string name="hint_maxads_rewarded_ad_unit_id">Rewarded Ad Unit ID</string>
-    <string name="hint_maxads_rewarded_video_ad_unit_id">Rewarded Video Ad Unit ID</string>
-    <string name="save_maxads_settings">Save MaxAds settings</string>
+    <string name="hint_maxads_sdk_key" translatable="false">App ID</string>
+    <string name="hint_maxads_banner_ad_unit_id" translatable="false">Banner Ad Unit ID</string>
+    <string name="hint_maxads_medium_ad_unit_id" translatable="false">Medium Ad Unit ID</string>
+    <string name="hint_maxads_medium_video_ad_unit_id" translatable="false">Medium Video Ad Unit ID</string>
+    <string name="hint_maxads_interstitial_ad_unit_id" translatable="false">Interstitial Ad Unit ID</string>
+    <string name="hint_maxads_interstitial_video_ad_unit_id" translatable="false">Interstitial Video Ad Unit ID</string>
+    <string name="hint_maxads_native_ad_unit_id" translatable="false">Native Ad Unit ID</string>
+    <string name="hint_maxads_rewarded_ad_unit_id" translatable="false">Rewarded Ad Unit ID</string>
+    <string name="hint_maxads_rewarded_video_ad_unit_id" translatable="false">Rewarded Video Ad Unit ID</string>
+    <string name="save_maxads_settings" translatable="false">Save MaxAds settings</string>
 
-    <string name="hint_admob_app_id">App ID</string>
-    <string name="hint_admob_banner_ad_unit_id">Banner Ad Unit ID</string>
-    <string name="hint_admob_medium_ad_unit_id">Medium Ad Unit ID</string>
-    <string name="hint_admob_medium_video_ad_unit_id">Medium Video Ad Unit ID</string>
-    <string name="hint_admob_leaderboard_ad_unit_id">Leaderboard Ad Unit ID</string>
-    <string name="hint_admob_interstitial_ad_unit_id">Interstitial Ad Unit ID</string>
-    <string name="hint_admob_interstitial_video_ad_unit_id">Interstitial Video Ad Unit ID</string>
-    <string name="hint_admob_native_ad_unit_id">Native Ad Unit ID</string>
-    <string name="hint_admob_rewarded_ad_unit_id">Rewarded Ad Unit ID</string>
-    <string name="save_admob_settings">Save Admob settings</string>
+    <string name="hint_admob_app_id" translatable="false">App ID</string>
+    <string name="hint_admob_banner_ad_unit_id" translatable="false">Banner Ad Unit ID</string>
+    <string name="hint_admob_medium_ad_unit_id" translatable="false">Medium Ad Unit ID</string>
+    <string name="hint_admob_medium_video_ad_unit_id" translatable="false">Medium Video Ad Unit ID</string>
+    <string name="hint_admob_leaderboard_ad_unit_id" translatable="false">Leaderboard Ad Unit ID</string>
+    <string name="hint_admob_interstitial_ad_unit_id" translatable="false">Interstitial Ad Unit ID</string>
+    <string name="hint_admob_interstitial_video_ad_unit_id" translatable="false">Interstitial Video Ad Unit ID</string>
+    <string name="hint_admob_native_ad_unit_id" translatable="false">Native Ad Unit ID</string>
+    <string name="hint_admob_rewarded_ad_unit_id" translatable="false">Rewarded Ad Unit ID</string>
+    <string name="save_admob_settings" translatable="false">Save Admob settings</string>
 
-    <string name="hint_ironsource_app_key">App key</string>
-    <string name="hint_ironsource_banner_ad_unit_id">Banner Ad Unit ID</string>
-    <string name="hint_ironsource_interstitial_ad_unit_id">Interstitial Ad Unit ID</string>
-    <string name="hint_ironsource_rewarded_ad_unit_id">Rewarded Ad Unit ID</string>
-    <string name="save_ironsouce_settings">Save IronSource settings</string>
-    <string name="init_ironsouce">Initialize IronSource SDK</string>
-    <string name="mediation_test_suite">Integration test suite</string>
+    <string name="hint_ironsource_app_key" translatable="false">App key</string>
+    <string name="hint_ironsource_banner_ad_unit_id" translatable="false">Banner Ad Unit ID</string>
+    <string name="hint_ironsource_interstitial_ad_unit_id" translatable="false">Interstitial Ad Unit ID</string>
+    <string name="hint_ironsource_rewarded_ad_unit_id" translatable="false">Rewarded Ad Unit ID</string>
+    <string name="save_ironsouce_settings" translatable="false">Save IronSource settings</string>
+    <string name="init_ironsouce" translatable="false">Initialize IronSource SDK</string>
+    <string name="mediation_test_suite" translatable="false">Integration test suite</string>
 
-    <string name="hint_pn_apptoken">App token</string>
-    <string name="hint_pn_age">Age</string>
-    <string name="hint_pn_api_url">API Url</string>
-    <string name="hint_pn_keyword">New keyword</string>
-    <string name="hint_pn_zone_id">New Zone Id</string>
-    <string name="hint_package_name">New package name</string>
-    <string name="check_coppa">COPPA Enabled</string>
-    <string name="check_test_mode">Test Mode Enabled</string>
-    <string name="check_location_tracking">Location Tracking Enabled</string>
-    <string name="title_pn_gender">Gender</string>
-    <string name="radio_gender_not_set">Not set</string>
-    <string name="radio_gender_male">Male</string>
-    <string name="radio_gender_female">Female</string>
-    <string name="title_pn_keywords">Keywords</string>
-    <string name="title_pn_zone_ids">Zone Ids</string>
-    <string name="title_browser_priority">Browser Priority</string>
-    <string name="title_geolocation_permission">Request Geolocation Permission</string>
-    <string name="title_geolocation_permission_status">Geolocation Permission Status</string>
-    <string name="geolocation_permission_enabled">"Tracking permission enabled"</string>
-    <string name="geolocation_permission_disabled">"Tracking permission disabled"</string>
-    <string name="precise_permission_enabled">"Precise location is enabled"</string>
-    <string name="precise_permission_disabled">"Precise location is disabled"</string>
-    <string name="geolocation_allowed_all_time">"Location is allowed all the time"</string>
-    <string name="geolocation_allowed_using_app">"Location is allowed while using the app"</string>
-    <string name="geolocation_not_allowed">"Location is not allowed"</string>
-    <string name="save_pn_settings">Save HyBid settings</string>
-    <string name="save_pn_zone_ids">Save Zone Ids</string>
-    <string name="save_pn_keywords">Save Keywords</string>
-    <string name="save_package_names">Save Package Names</string>
-    <string name="save_settings">Save settings</string>
+    <string name="hint_pn_apptoken" translatable="false">App token</string>
+    <string name="hint_pn_age" translatable="false">Age</string>
+    <string name="hint_pn_api_url" translatable="false">API Url</string>
+    <string name="hint_pn_keyword" translatable="false">New keyword</string>
+    <string name="hint_pn_zone_id" translatable="false">New Zone Id</string>
+    <string name="hint_package_name" translatable="false">New package name</string>
+    <string name="check_coppa" translatable="false">COPPA Enabled</string>
+    <string name="check_test_mode" translatable="false">Test Mode Enabled</string>
+    <string name="check_location_tracking" translatable="false">Location Tracking Enabled</string>
+    <string name="title_pn_gender" translatable="false">Gender</string>
+    <string name="radio_gender_not_set" translatable="false">Not set</string>
+    <string name="radio_gender_male" translatable="false">Male</string>
+    <string name="radio_gender_female" translatable="false">Female</string>
+    <string name="title_pn_keywords" translatable="false">Keywords</string>
+    <string name="title_pn_zone_ids" translatable="false">Zone Ids</string>
+    <string name="title_browser_priority" translatable="false">Browser Priority</string>
+    <string name="title_geolocation_permission" translatable="false">Request Geolocation Permission</string>
+    <string name="title_geolocation_permission_status" translatable="false">Geolocation Permission Status</string>
+    <string name="geolocation_permission_enabled" translatable="false">"Tracking permission enabled"</string>
+    <string name="geolocation_permission_disabled" translatable="false">"Tracking permission disabled"</string>
+    <string name="precise_permission_enabled" translatable="false">"Precise location is enabled"</string>
+    <string name="precise_permission_disabled" translatable="false">"Precise location is disabled"</string>
+    <string name="geolocation_allowed_all_time" translatable="false">"Location is allowed all the time"</string>
+    <string name="geolocation_allowed_using_app" translatable="false">"Location is allowed while using the app"</string>
+    <string name="geolocation_not_allowed" translatable="false">"Location is not allowed"</string>
+    <string name="save_pn_settings" translatable="false">Save HyBid settings</string>
+    <string name="save_pn_zone_ids" translatable="false">Save Zone Ids</string>
+    <string name="save_pn_keywords" translatable="false">Save Keywords</string>
+    <string name="save_package_names" translatable="false">Save Package Names</string>
+    <string name="save_settings" translatable="false">Save settings</string>
 
-    <string name="hybid_native">HyBid Native</string>
-    <string name="hybid_banner">HyBid Banner</string>
-    <string name="hybid_interstitial">HyBid Interstitial</string>
-    <string name="hybid_medium">HyBid Medium</string>
-    <string name="hybid_rewarded">HyBid Rewarded</string>
+    <string name="hybid_native" translatable="false">HyBid Native</string>
+    <string name="hybid_banner" translatable="false">HyBid Banner</string>
+    <string name="hybid_interstitial" translatable="false">HyBid Interstitial</string>
+    <string name="hybid_medium" translatable="false">HyBid Medium</string>
+    <string name="hybid_rewarded" translatable="false">HyBid Rewarded</string>
 
-    <string name="maxads">MaxAds</string>
-    <string name="maxads_banner">MaxAds Banner</string>
-    <string name="maxads_mrect">MaxAds MRect</string>
-    <string name="maxads_mrect_video">MaxAds MRect Video</string>
-    <string name="maxads_interstitial">MaxAds Interstitial</string>
-    <string name="maxads_interstitial_video">MaxAds Interstitial Video</string>
-    <string name="maxads_rewarded">MaxAds Rewarded</string>
-    <string name="maxads_rewarded_video">MaxAds Rewarded Video</string>
-    <string name="maxads_native">MaxAds Native</string>
+    <string name="maxads" translatable="false">MaxAds</string>
+    <string name="maxads_banner" translatable="false">MaxAds Banner</string>
+    <string name="maxads_mrect" translatable="false">MaxAds MRect</string>
+    <string name="maxads_mrect_video" translatable="false">MaxAds MRect Video</string>
+    <string name="maxads_interstitial" translatable="false">MaxAds Interstitial</string>
+    <string name="maxads_interstitial_video" translatable="false">MaxAds Interstitial Video</string>
+    <string name="maxads_rewarded" translatable="false">MaxAds Rewarded</string>
+    <string name="maxads_rewarded_video" translatable="false">MaxAds Rewarded Video</string>
+    <string name="maxads_native" translatable="false">MaxAds Native</string>
 
-    <string name="dfp_banner">DFP Banner</string>
-    <string name="dfp_interstitial">DFP Interstitial</string>
-    <string name="dfp_medium">DFP Medium</string>
-    <string name="dfp_leaderboard">DFP Leaderboard</string>
-    <string name="dfp_rewarded">DFP Rewarded</string>
+    <string name="dfp_banner" translatable="false">DFP Banner</string>
+    <string name="dfp_interstitial" translatable="false">DFP Interstitial</string>
+    <string name="dfp_medium" translatable="false">DFP Medium</string>
+    <string name="dfp_leaderboard" translatable="false">DFP Leaderboard</string>
+    <string name="dfp_rewarded" translatable="false">DFP Rewarded</string>
 
-    <string name="admob_native">Admob Native</string>
-    <string name="admob_banner">Admob Banner</string>
-    <string name="admob_interstitial">Admob Interstitial</string>
-    <string name="admob_interstitial_video">Admob Interstitial Video</string>
-    <string name="admob_medium">Admob Medium</string>
-    <string name="admob_medium_video">Admob Medium Video</string>
-    <string name="admob_leaderboard">Admob Leaderboard</string>
-    <string name="admob_rewarded">Admob Rewarded Video</string>
+    <string name="admob_native" translatable="false">Admob Native</string>
+    <string name="admob_banner" translatable="false">Admob Banner</string>
+    <string name="admob_interstitial" translatable="false">Admob Interstitial</string>
+    <string name="admob_interstitial_video" translatable="false">Admob Interstitial Video</string>
+    <string name="admob_medium" translatable="false">Admob Medium</string>
+    <string name="admob_medium_video" translatable="false">Admob Medium Video</string>
+    <string name="admob_leaderboard" translatable="false">Admob Leaderboard</string>
+    <string name="admob_rewarded" translatable="false">Admob Rewarded Video</string>
 
-    <string name="ironsource_banner">IronSource Banner</string>
-    <string name="ironsource_interstitial">IronSource Interstitial</string>
-    <string name="ironsource_rewarded">IronSource Rewarded Video</string>
+    <string name="ironsource_banner" translatable="false">IronSource Banner</string>
+    <string name="ironsource_interstitial" translatable="false">IronSource Interstitial</string>
+    <string name="ironsource_rewarded" translatable="false">IronSource Rewarded Video</string>
 
-    <string name="fairbid_banner">Fairbid Banner</string>
-    <string name="fairbid_interstitial">Fairbid Interstitial</string>
-    <string name="fairbid_rewarded">Fairbid Rewarded Video</string>
+    <string name="fairbid_banner" translatable="false">Fairbid Banner</string>
+    <string name="fairbid_interstitial" translatable="false">Fairbid Interstitial</string>
+    <string name="fairbid_rewarded" translatable="false">Fairbid Rewarded Video</string>
 
-    <string name="fairbid_mediation_banner">Fairbid Mediation Banner</string>
-    <string name="fairbid_mediation_interstitial">Fairbid Mediation Interstitial</string>
-    <string name="fairbid_mediation_rewarded">Fairbid Mediation Rewarded Video</string>
+    <string name="fairbid_mediation_banner" translatable="false">Fairbid Mediation Banner</string>
+    <string name="fairbid_mediation_interstitial" translatable="false">Fairbid Mediation Interstitial</string>
+    <string name="fairbid_mediation_rewarded" translatable="false">Fairbid Mediation Rewarded Video</string>
 
-    <string name="chartboost_mediation_banner">Chartboost Mediation Banner</string>
-    <string name="chartboost_mediation_mrect">Chartboost Mediation Mrect</string>
-    <string name="chartboost_mediation_mrect_video">Chartboost Mediation Mrect Video</string>
-    <string name="chartboost_mediation_leaderboard">Chartboost Mediation Leaderboard</string>
-    <string name="chartboost_mediation_interstitial">Chartboost Mediation Interstitial</string>
-    <string name="chartboost_mediation_interstitial_video">Chartboost Mediation Interstitial Video</string>
-    <string name="chartboost_mediation_rewarded_video">Chartboost Mediation Rewarded Video</string>
-    <string name="chartboost_mediation_rewarded_html">Chartboost Mediation Rewarded Html</string>
+    <string name="chartboost_mediation_banner" translatable="false">Chartboost Mediation Banner</string>
+    <string name="chartboost_mediation_mrect" translatable="false">Chartboost Mediation Mrect</string>
+    <string name="chartboost_mediation_mrect_video" translatable="false">Chartboost Mediation Mrect Video</string>
+    <string name="chartboost_mediation_leaderboard" translatable="false">Chartboost Mediation Leaderboard</string>
+    <string name="chartboost_mediation_interstitial" translatable="false">Chartboost Mediation Interstitial</string>
+    <string name="chartboost_mediation_interstitial_video" translatable="false">Chartboost Mediation Interstitial Video</string>
+    <string name="chartboost_mediation_rewarded_video" translatable="false">Chartboost Mediation Rewarded Video</string>
+    <string name="chartboost_mediation_rewarded_html" translatable="false">Chartboost Mediation Rewarded Html</string>
 
-    <string name="hint_chartboost_app_id">Chartboost Mediation App Id</string>
-    <string name="hint_chartboost_app_signature">Chartboost Mediation App Signature</string>
-    <string name="hint_chartboost_banner_ad_unit_id">Chartboost Mediation Banner Ad Unit Id</string>
-    <string name="hint_chartboost_interstitial_ad_unit_id">Chartboost Mediation Interstitial Ad Unit Id</string>
-    <string name="hint_chartboost_interstitial_video_ad_unit_id">Chartboost Mediation Interstitial Video Ad Unit Id</string>
-    <string name="hint_chartboost_rewarded_html_ad_unit_id">Chartboost Mediation Rewarded Html Ad Unit Id</string>
-    <string name="hint_chartboost_rewarded_video_ad_unit_id">Chartboost Mediation Rewarded Video Ad Unit Id</string>
-    <string name="save_chartboost_settings">Save Chartboost Settings</string>
+    <string name="hint_chartboost_app_id" translatable="false">Chartboost Mediation App Id</string>
+    <string name="hint_chartboost_app_signature" translatable="false">Chartboost Mediation App Signature</string>
+    <string name="hint_chartboost_banner_ad_unit_id" translatable="false">Chartboost Mediation Banner Ad Unit Id</string>
+    <string name="hint_chartboost_interstitial_ad_unit_id" translatable="false">Chartboost Mediation Interstitial Ad Unit Id</string>
+    <string name="hint_chartboost_interstitial_video_ad_unit_id" translatable="false">Chartboost Mediation Interstitial Video Ad Unit Id</string>
+    <string name="hint_chartboost_rewarded_html_ad_unit_id" translatable="false">Chartboost Mediation Rewarded Html Ad Unit Id</string>
+    <string name="hint_chartboost_rewarded_video_ad_unit_id" translatable="false">Chartboost Mediation Rewarded Video Ad Unit Id</string>
+    <string name="save_chartboost_settings" translatable="false">Save Chartboost Settings</string>
 
-    <string name="hint_fairbid_app_id">Fairbid App Id</string>
+    <string name="hint_fairbid_app_id" translatable="false">Fairbid App Id</string>
 
-    <string name="hint_fairbid_mediation_banner_ad_unit_id">Fairbid Mediation Banner Ad Unit Id</string>
-    <string name="hint_fairbid_mediation_interstitial_ad_unit_id">Fairbid Mediation Interstitial Ad Unit Id</string>
-    <string name="hint_fairbid_mediation_rewarded_ad_unit_id">Fairbid Mediation Rewarded Ad Unit Id</string>
+    <string name="hint_fairbid_mediation_banner_ad_unit_id" translatable="false">Fairbid Mediation Banner Ad Unit Id</string>
+    <string name="hint_fairbid_mediation_interstitial_ad_unit_id" translatable="false">Fairbid Mediation Interstitial Ad Unit Id</string>
+    <string name="hint_fairbid_mediation_rewarded_ad_unit_id" translatable="false">Fairbid Mediation Rewarded Ad Unit Id</string>
 
-    <string name="hint_fairbid_banner_ad_unit_id">Fairbid Banner Ad Unit Id</string>
-    <string name="hint_fairbid_interstitial_ad_unit_id">Fairbid Interstitial Ad Unit Id</string>
-    <string name="hint_fairbid_rewarded_ad_unit_id">Fairbid Rewarded Ad Unit Id</string>
+    <string name="hint_fairbid_banner_ad_unit_id" translatable="false">Fairbid Banner Ad Unit Id</string>
+    <string name="hint_fairbid_interstitial_ad_unit_id" translatable="false">Fairbid Interstitial Ad Unit Id</string>
+    <string name="hint_fairbid_rewarded_ad_unit_id" translatable="false">Fairbid Rewarded Ad Unit Id</string>
 
-    <string name="save_fairbid_settings">Save Fairbid Settings</string>
-    <string name="init_fairbid">Init Fairbid SDK</string>
+    <string name="save_fairbid_settings" translatable="false">Save Fairbid Settings</string>
+    <string name="init_fairbid" translatable="false">Init Fairbid SDK</string>
 
     <!--    <string name="pn_owned_consent">PN Owned</string>-->
     <!--    <string name="pn_accept_consent">Accept consent</string>-->
@@ -188,211 +188,229 @@
     <!--    <string name="yes">Yes</string>-->
     <!--    <string name="no">No</string>-->
 
-    <string name="action_ask_consent">Ask consent</string>
-    <string name="action_edit_consent">Edit consent</string>
-    <string name="action_request_consent_info">Request info</string>
-    <string name="action_load_form">Load form</string>
-    <string name="action_show_form">Show form</string>
-    <string name="action_get_consent_string">Show consent string</string>
-    <string name="action_check_purpose">Check purpose</string>
-    <string name="action_check_vendor">Check vendor</string>
-    <string name="action_check_vendor_purpose">Check all purposes for vendor</string>
-    <string name="action_set">Set</string>
-    <string name="action_remove">Remove</string>
-    <string name="action_delete">Delete</string>
-    <string name="action_delete_all_gpp_data">Delete all gpp data</string>
-    <string name="title_google_cmp">Funding Choices CMP</string>
-    <string name="title_consent_strings">Consent Strings</string>
-    <string name="title_vgi_id">VGI ID</string>
-    <string name="title_gdpr_applies">GDPR Applies</string>
-    <string name="title_gpp_settings">GPP Settings</string>
-    <string name="title_iab_v2_consent_string">TCF 2.0 Consent String:</string>
-    <string name="title_purpose">Purposes:</string>
-    <string name="title_consent_result">Consent result:</string>
-    <string name="hint_vendor_id">Vendor ID</string>
-    <string name="hint_ccpa_consent">CCPA consent string</string>
-    <string name="hint_gdpr_consent">GDPR consent string</string>
-    <string name="empty_gdpr_consent_field">Please input a valid GDPR consent string</string>
-    <string name="empty_ccpa_consent_field">Please input a valid CCPA consent string</string>
-    <string name="updated_gdpr_consent">GDPR consent string has been updated in the app shared preferences</string>
-    <string name="updated_ccpa_consent">CCPA consent string has been updated in the app shared preferences</string>
-    <string name="removed_gdpr_consent">GDPR consent string has been removed from the app shared preferences</string>
-    <string name="removed_ccpa_consent">CCPA consent string has been removed from the app shared preferences</string>
-    <string name="consent_string_not_set">Not set</string>
-    <string name="consent_info_update_success">Consent info update success</string>
-    <string name="consent_form_load_success">Consent form load success</string>
-    <string name="consent_info_not_available">Consent info not available</string>
-    <string name="consent_form_not_available">Consent form not available</string>
-    <string name="action_trigger_onetrust_consent">Trigger OneTrust consent dialog</string>
-    <string name="label_public_gpp_string">Public Gpps String</string>
-    <string name="label_public_gppsid_string">Public Gppsid String</string>
-    <string name="label_internal_gpp_string">Internal Gpps String</string>
-    <string name="label_internal_gppsid_string">Internal Gppsid String</string>
-    <string name="hint_gpp_string">Gpp String</string>
-    <string name="hint_gppsid_string">Gppsid</string>
-    <string name="purpose_tcf2_personalised_ads">Create personalised ads</string>
-    <string name="purpose_tcf2_personalised_content">Create personalised content</string>
-    <string name="purpose_tcf2_develop_improve_product">Develop and improve products</string>
-    <string name="purpose_tcf2_market_research">Market research</string>
-    <string name="purpose_tcf2_measure_ad_performance">Measure ad performance</string>
-    <string name="purpose_tcf2_measure_content_performance">Measure content performance</string>
-    <string name="purpose_tcf2_select_basic_ads">Select basic content</string>
-    <string name="purpose_tcf2_select_personalised_ads">Select personalised ads</string>
-    <string name="purpose_tcf2_select_personalised_content">Select personalised content</string>
-    <string name="purpose_tcf2_store_information">Store information</string>
+    <string name="action_ask_consent" translatable="false">Ask consent</string>
+    <string name="action_edit_consent" translatable="false">Edit consent</string>
+    <string name="action_request_consent_info" translatable="false">Request info</string>
+    <string name="action_load_form" translatable="false">Load form</string>
+    <string name="action_show_form" translatable="false">Show form</string>
+    <string name="action_get_consent_string" translatable="false">Show consent string</string>
+    <string name="action_check_purpose" translatable="false">Check purpose</string>
+    <string name="action_check_vendor" translatable="false">Check vendor</string>
+    <string name="action_check_vendor_purpose" translatable="false">Check all purposes for vendor</string>
+    <string name="action_set" translatable="false">Set</string>
+    <string name="action_remove" translatable="false">Remove</string>
+    <string name="action_delete" translatable="false">Delete</string>
+    <string name="action_delete_all_gpp_data" translatable="false">Delete all gpp data</string>
+    <string name="title_google_cmp" translatable="false">Funding Choices CMP</string>
+    <string name="title_consent_strings" translatable="false">Consent Strings</string>
+    <string name="title_vgi_id" translatable="false">VGI ID</string>
+    <string name="title_gdpr_applies" translatable="false">GDPR Applies</string>
+    <string name="title_gpp_settings" translatable="false">GPP Settings</string>
+    <string name="title_iab_v2_consent_string" translatable="false">TCF 2.0 Consent String:</string>
+    <string name="title_purpose" translatable="false">Purposes:</string>
+    <string name="title_consent_result" translatable="false">Consent result:</string>
+    <string name="hint_vendor_id" translatable="false">Vendor ID</string>
+    <string name="hint_ccpa_consent" translatable="false">CCPA consent string</string>
+    <string name="hint_gdpr_consent" translatable="false">GDPR consent string</string>
+    <string name="empty_gdpr_consent_field" translatable="false">Please input a valid GDPR consent string</string>
+    <string name="empty_ccpa_consent_field" translatable="false">Please input a valid CCPA consent string</string>
+    <string name="updated_gdpr_consent" translatable="false">GDPR consent string has been updated in the app shared preferences</string>
+    <string name="updated_ccpa_consent" translatable="false">CCPA consent string has been updated in the app shared preferences</string>
+    <string name="removed_gdpr_consent" translatable="false">GDPR consent string has been removed from the app shared preferences</string>
+    <string name="removed_ccpa_consent" translatable="false">CCPA consent string has been removed from the app shared preferences</string>
+    <string name="consent_string_not_set" translatable="false">Not set</string>
+    <string name="consent_info_update_success" translatable="false">Consent info update success</string>
+    <string name="consent_form_load_success" translatable="false">Consent form load success</string>
+    <string name="consent_info_not_available" translatable="false">Consent info not available</string>
+    <string name="consent_form_not_available" translatable="false">Consent form not available</string>
+    <string name="action_trigger_onetrust_consent" translatable="false">Trigger OneTrust consent dialog</string>
+    <string name="label_public_gpp_string" translatable="false">Public Gpps String</string>
+    <string name="label_public_gppsid_string" translatable="false">Public Gppsid String</string>
+    <string name="label_internal_gpp_string" translatable="false">Internal Gpps String</string>
+    <string name="label_internal_gppsid_string" translatable="false">Internal Gppsid String</string>
+    <string name="hint_gpp_string" translatable="false">Gpp String</string>
+    <string name="hint_gppsid_string" translatable="false">Gppsid</string>
+    <string name="purpose_tcf2_personalised_ads" translatable="false">Create personalised ads</string>
+    <string name="purpose_tcf2_personalised_content" translatable="false">Create personalised content</string>
+    <string name="purpose_tcf2_develop_improve_product" translatable="false">Develop and improve products</string>
+    <string name="purpose_tcf2_market_research" translatable="false">Market research</string>
+    <string name="purpose_tcf2_measure_ad_performance" translatable="false">Measure ad performance</string>
+    <string name="purpose_tcf2_measure_content_performance" translatable="false">Measure content performance</string>
+    <string name="purpose_tcf2_select_basic_ads" translatable="false">Select basic content</string>
+    <string name="purpose_tcf2_select_personalised_ads" translatable="false">Select personalised ads</string>
+    <string name="purpose_tcf2_select_personalised_content" translatable="false">Select personalised content</string>
+    <string name="purpose_tcf2_store_information" translatable="false">Store information</string>
 
-    <string name="mediation">Mediation</string>
+    <string name="mediation" translatable="false">Mediation</string>
 
-    <string name="creative_id">Creative ID:</string>
-    <string name="error_code">Error code:</string>
-    <string name="error">Error:</string>
-    <string name="banner_ad_size">Ad Size:</string>
-    <string name="api_type">API:</string>
-    <string name="ad_format">Ad Format:</string>
-    <string name="ad_format_video">Video</string>
-    <string name="ad_format_html">HTML</string>
-    <string name="api_v3">APIv3</string>
-    <string name="ortb">OpenRTB</string>
-    <string name="request_url">PubNative request url:</string>
-    <string name="response">PubNative response:</string>
-    <string name="latency">PubNative latency (milliseconds):</string>
-    <string name="sdk_event_report">SDK event report</string>
-    <string name="tracker_report">Fired tracker report</string>
-    <string name="tracker_report_type">Tracker type:</string>
-    <string name="tracker_report_response">Response code:</string>
-    <string name="tracker_report_url">Tracker url:</string>
-    <string name="tracker_content">Content:</string>
-    <string name="beacon_list">Beacon List</string>
-    <string name="action_dismiss">Dismiss</string>
-    <string name="event_details">Event details</string>
-    <string name="url_inspector">URL Inspector</string>
+    <string name="creative_id" translatable="false">Creative ID:</string>
+    <string name="error_code" translatable="false">Error code:</string>
+    <string name="error" translatable="false">Error:</string>
+    <string name="banner_ad_size" translatable="false">Ad Size:</string>
+    <string name="api_type" translatable="false">API:</string>
+    <string name="ad_format" translatable="false">Ad Format:</string>
+    <string name="ad_format_video" translatable="false">Video</string>
+    <string name="ad_format_html" translatable="false">HTML</string>
+    <string name="api_v3" translatable="false">APIv3</string>
+    <string name="ortb" translatable="false">OpenRTB</string>
+    <string name="request_url" translatable="false">PubNative request url:</string>
+    <string name="response" translatable="false">PubNative response:</string>
+    <string name="latency" translatable="false">PubNative latency (milliseconds):</string>
+    <string name="sdk_event_report" translatable="false">SDK event report</string>
+    <string name="tracker_report" translatable="false">Fired tracker report</string>
+    <string name="tracker_report_type" translatable="false">Tracker type:</string>
+    <string name="tracker_report_response" translatable="false">Response code:</string>
+    <string name="tracker_report_url" translatable="false">Tracker url:</string>
+    <string name="tracker_content" translatable="false">Content:</string>
+    <string name="beacon_list" translatable="false">Beacon List</string>
+    <string name="action_dismiss" translatable="false">Dismiss</string>
+    <string name="event_details" translatable="false">Event details</string>
+    <string name="url_inspector" translatable="false">URL Inspector</string>
 
-    <string name="nav_standalone">Standalone</string>
-    <string name="nav_pre_bid">Pre-Bid</string>
-    <string name="nav_mediation">Mediation</string>
-    <string name="nav_consent">Consent</string>
-    <string name="nav_markup">Markup</string>
-    <string name="nav_settings">Settings</string>
+    <string name="nav_standalone" translatable="false">Standalone</string>
+    <string name="nav_pre_bid" translatable="false">Pre-Bid</string>
+    <string name="nav_mediation" translatable="false">Mediation</string>
+    <string name="nav_consent" translatable="false">Consent</string>
+    <string name="nav_markup" translatable="false">Markup</string>
+    <string name="nav_settings" translatable="false">Settings</string>
 
-    <string name="ad">Ad</string>
-    <string name="debug">Debug</string>
+    <string name="ad" translatable="false">Ad</string>
+    <string name="debug" translatable="false">Debug</string>
 
-    <string name="title_markup">Custom markup</string>
-    <string name="title_creative_tester">Creative Tester</string>
-    <string name="title_signal_data_tester">Signal data tester</string>
-    <string name="ad_size">Ad size:</string>
-    <string name="universal_rendering">Universal rendering:</string>
-    <string name="wrap_universal_rendering">Wrap in UR</string>
-    <string name="creative_server">Creative server:</string>
-    <string name="p161">P161</string>
-    <string name="foundry">Foundry</string>
+    <string name="title_markup" translatable="false">Custom markup</string>
+    <string name="title_creative_tester" translatable="false">Creative Tester</string>
+    <string name="title_signal_data_tester" translatable="false">Signal data tester</string>
+    <string name="ad_size" translatable="false">Ad size:</string>
+    <string name="universal_rendering" translatable="false">Universal rendering:</string>
+    <string name="wrap_universal_rendering" translatable="false">Wrap in UR</string>
+    <string name="universal_rendering_template" translatable="false">Universal rendering template:</string>
+    <string name="creative_server" translatable="false">Creative server:</string>
+    <string name="p161" translatable="false">P161</string>
+    <string name="foundry" translatable="false">Foundry</string>
 
-    <string name="title_mediation_test_suite">Google Mediation Test Suite</string>
-    <string name="open_mediation_test_suite">Open Mediation Test Suite</string>
+    <string name="title_mediation_test_suite" translatable="false">Google Mediation Test Suite</string>
+    <string name="open_mediation_test_suite" translatable="false">Open Mediation Test Suite</string>
 
-    <string name="check_auto_refresh">Auto Refresh Enabled (30 sec)</string>
-    <string name="check_auto_show">Auto Show on Load</string>
+    <string name="check_auto_refresh" translatable="false">Auto Refresh Enabled (30 sec)</string>
+    <string name="check_auto_show" translatable="false">Auto Show on Load</string>
 
-    <string name="title_bundle_id">Bundle Id</string>
+    <string name="title_bundle_id" translatable="false">Bundle Id</string>
 
-    <string name="title_vast_tag">Vast Testing</string>
-    <string name="vast_tag_input">Enter Vast Adserver URL</string>
-    <string name="hint_signal_data">Signal data</string>
-    <string name="sticky">Sticky</string>
-    <string name="top">TOP</string>
-    <string name="bottom">BOTTOM</string>
-    <string name="position">Position</string>
-    <string name="sticky_banner">Sticky Banner</string>
-    <string name="zone_id_input">Zone Id</string>
+    <string name="title_vast_tag" translatable="false">Vast Testing</string>
+    <string name="vast_tag_input" translatable="false">Enter Vast Adserver URL</string>
+    <string name="hint_signal_data" translatable="false">Signal data</string>
+    <string name="sticky" translatable="false">Sticky</string>
+    <string name="top" translatable="false">TOP</string>
+    <string name="bottom" translatable="false">BOTTOM</string>
+    <string name="position" translatable="false">Position</string>
+    <string name="sticky_banner" translatable="false">Sticky Banner</string>
+    <string name="zone_id_input" translatable="false">Zone Id</string>
 
-    <string name="title_legacy_api">Legacy API Tester</string>
-    <string name="api_tester_input_hint">Response JSON</string>
+    <string name="title_legacy_api" translatable="false">Legacy API Tester</string>
+    <string name="api_tester_input_hint" translatable="false">Response JSON</string>
 
-    <string name="custom_sdk_data">Custom SDK Data</string>
+    <string name="custom_sdk_data" translatable="false">Custom SDK Data</string>
 
-    <string name="ad_customization">Ad Customization</string>
-    <string name="ad_customize_btn">Customize</string>
-    <string name="general">General</string>
-    <string name="fullscreen_video">Fullscreen video</string>
-    <string name="check_location_updates">Location Updates</string>
-    <string name="check_topics_api">Topics API</string>
-    <string name="check_reporting">Reporting enabled</string>
+    <string name="ad_customization" translatable="false">Ad Customization</string>
+    <string name="ad_customize_btn" translatable="false">Customize</string>
+    <string name="general" translatable="false">General</string>
+    <string name="fullscreen_video" translatable="false">Fullscreen video</string>
+    <string name="check_location_updates" translatable="false">Location Updates</string>
+    <string name="check_topics_api" translatable="false">Topics API</string>
+    <string name="check_reporting" translatable="false">Reporting enabled</string>
     <string name="disable_ad_customization" formatted="false" translatable="false">Disable Ad Customization</string>
     <string name="enable_ad_customization" formatted="false" translatable="false">Enable Ad Customization</string>
-    <string name="check_mraid_expand">MRAID Expand</string>
-    <string name="initial_audio">Initial Audio</string>
-    <string name="hint_html_mraid_skip_offset">HTML/MRAID Skip Offset</string>
-    <string name="hint_video_skip_offset">Video Skip Offset</string>
-    <string name="hint_rewarded_html_mraid_skip_offset">Rewarded HTML/MRAID Skip Offset</string>
-    <string name="hint_rewarded_video_skip_offset">Rewarded Video Skip Offset</string>
-    <string name="hint_endcard_close_button_delay">EndCard close button delay</string>
-    <string name="content_info">Content Info</string>
-    <string name="hint_content_info_url">Content Info URL</string>
-    <string name="hint_content_info_icon_url">Content Info Icon URL</string>
-    <string name="hint_content_info_icon_click_action">Content Info Icon Click Action</string>
-    <string name="hint_content_info_display">Content Info Display</string>
-    <string name="content_info_icon_click_action_expand">Expand</string>
-    <string name="content_info_icon_click_action_open">Open</string>
-    <string name="content_info_display_inapp">In App</string>
-    <string name="content_info_display_systembrowser">System Browser</string>
-    <string name="check_auto_close">Auto Close after Finish</string>
-    <string name="check_enable_endcard">Enable endcard</string>
-    <string name="click_behaviour">Click Behaviour</string>
-    <string name="radio_creative">Creative</string>
-    <string name="radio_action_button">Action Button</string>
-    <string name="radio_sound_on">On</string>
-    <string name="radio_sound_mute">Mute</string>
-    <string name="radio_sound_default">Default</string>
-    <string name="feedback_settings_title">Feedback</string>
-    <string name="feedback_settings_toggle">Enable feedback form</string>
-    <string name="feedback_settings_url_hint">Feedback form url</string>
-    <string name="countdown_style_title">Countdown Style</string>
-    <string name="countdown_style_pie_chart">Pie Chart</string>
-    <string name="countdown_style_timer">Timer</string>
-    <string name="countdown_style_progress">Progress</string>
-    <string name="reduced_close_skip_size">Reduced skip/close buttons size</string>
-    <string name="check_reduced_close_skip_buttons">Reduced skip/close buttons</string>
+    <string name="check_mraid_expand" translatable="false">MRAID Expand</string>
+    <string name="check_landing_page" translatable="false">Landing Page</string>
+    <string name="initial_audio" translatable="false">Initial Audio</string>
+    <string name="hint_html_mraid_skip_offset" translatable="false">HTML/MRAID Skip Offset</string>
+    <string name="hint_video_skip_offset" translatable="false">Video Skip Offset</string>
+    <string name="hint_rewarded_html_mraid_skip_offset" translatable="false">Rewarded HTML/MRAID Skip Offset</string>
+    <string name="hint_rewarded_video_skip_offset" translatable="false">Rewarded Video Skip Offset</string>
+    <string name="hint_endcard_close_button_delay" translatable="false">EndCard close button delay</string>
+    <string name="content_info" translatable="false">Content Info</string>
+    <string name="hint_content_info_url" translatable="false">Content Info URL</string>
+    <string name="hint_content_info_icon_url" translatable="false">Content Info Icon URL</string>
+    <string name="hint_content_info_icon_click_action" translatable="false">Content Info Icon Click Action</string>
+    <string name="hint_content_info_display" translatable="false">Content Info Display</string>
+    <string name="content_info_icon_click_action_expand" translatable="false">Expand</string>
+    <string name="content_info_icon_click_action_open" translatable="false">Open</string>
+    <string name="content_info_display_inapp" translatable="false">In App</string>
+    <string name="content_info_display_systembrowser" translatable="false">System Browser</string>
+    <string name="check_auto_close" translatable="false">Auto Close after Finish</string>
+    <string name="check_enable_endcard" translatable="false">Enable endcard</string>
+    <string name="click_behaviour" translatable="false">Click Behaviour</string>
+    <string name="radio_creative" translatable="false">Creative</string>
+    <string name="radio_action_button" translatable="false">Action Button</string>
+    <string name="radio_sound_on" translatable="false">On</string>
+    <string name="radio_sound_mute" translatable="false">Mute</string>
+    <string name="radio_sound_default" translatable="false">Default</string>
+    <string name="feedback_settings_title" translatable="false">Feedback</string>
+    <string name="feedback_settings_toggle" translatable="false">Enable feedback form</string>
+    <string name="feedback_settings_url_hint" translatable="false">Feedback form url</string>
+    <string name="countdown_style_title" translatable="false">Countdown Style</string>
+    <string name="countdown_style_pie_chart" translatable="false">Pie Chart</string>
+    <string name="countdown_style_timer" translatable="false">Timer</string>
+    <string name="countdown_style_progress" translatable="false">Progress</string>
+    <string name="reduced_close_skip_size" translatable="false">Reduced skip/close buttons size</string>
+    <string name="check_reduced_close_skip_buttons" translatable="false">Reduced skip/close buttons</string>
 
-    <string name="mraid_custom_close">MRAID Custom Close</string>
-    <string name="hint_close_button_delay">Close Button Delay</string>
+    <string name="mraid_custom_close" translatable="false">MRAID Custom Close</string>
+    <string name="hint_close_button_delay" translatable="false">Close Button Delay</string>
 
-    <string name="openrtb_body">oRTB URL + body</string>
-    <string name="body">oRTB body</string>
-    <string name="hint_creative_id">Enter creative ID</string>
-    <string name="sdk_and_build_versions">SDK and Build versions</string>
-    <string name="sdk_and_build_version_concat">SDK Version: %s build: %s</string>
-    <string name="markup_type">Markup Type</string>
-    <string name="custom_markup">Custom Markup</string>
-    <string name="url">URL</string>
-    <string name="custom_skip_offset_disabled">Custom Skip Offset Disabled</string>
-    <string name="response_source">Response source</string>
-    <string name="post_body">Pubnative Request Body:</string>
+    <string name="hint_navigation_mode" translatable="false">Navigation mode</string>
 
-    <string name="viewability_tracking_label">Viewability Tracking</string>
-    <string name="imp_tracking_hint">Impression tracking</string>
-    <string name="min_visible_time_hint">Min visible time</string>
-    <string name="min_visible_percent_hint">Min visible percent</string>
+    <string name="openrtb_body" translatable="false">oRTB URL + body</string>
+    <string name="body" translatable="false">oRTB body</string>
+    <string name="hint_creative_id" translatable="false">Enter creative ID</string>
+    <string name="sdk_and_build_versions" translatable="false">SDK and Build versions</string>
+    <string name="sdk_and_build_version_concat" translatable="false">SDK Version: %s build: %s</string>
+    <string name="markup_type" translatable="false">Markup Type</string>
+    <string name="custom_markup" translatable="false">Custom Markup</string>
+    <string name="url" translatable="false">URL</string>
+    <string name="custom_skip_offset_disabled" translatable="false">Custom Skip Offset Disabled</string>
+    <string name="response_source" translatable="false">Response source</string>
+    <string name="post_body" translatable="false">Pubnative Request Body:</string>
 
-    <string name="key">Key</string>
-    <string name="value">Value</string>
-    <string name="fallback">Fallback</string>
-    <string name="extension">Extension</string>
+    <string name="viewability_tracking_label" translatable="false">Viewability Tracking</string>
+    <string name="imp_tracking_hint" translatable="false">Impression tracking</string>
+    <string name="min_visible_time_hint" translatable="false">Min visible time</string>
+    <string name="min_visible_percent_hint" translatable="false">Min visible percent</string>
 
-    <string name="check_enable_custom_endcard" tools:ignore="ExtraTranslation">Enable Custom endcard</string>
-    <string name="check_enable_custom_endcard_display" tools:ignore="ExtraTranslation">Enable Custom endcard Display</string>
-    <string name="custom_end_card">Custom EndCard</string>
-    <string name="custom_end_card_html">Custom End Card HTML</string>
-    <string name="hint_custom_cta_app_name">Custom CTA Name</string>
-    <string name="hint_custom_cta_icon">Custom CTA Icon</string>
-    <string name="custom_cta_enabled">Custom CTA Enabled</string>
-    <string name="custom_cta_delay">Custom CTA Delay</string>
-    <string name="custom_cta_type">Custom CTA Type</string>
-    <string name="radio_default">Default</string>
-    <string name="radio_extended">Extended</string>
-    <string name="rewarded_video">Rewarded Video</string>
+    <string name="key" translatable="false">Key</string>
+    <string name="value" translatable="false">Value</string>
+    <string name="fallback" translatable="false">Fallback</string>
+    <string name="extension" translatable="false">Extension</string>
 
-    <string name="bundle_id_label">Bundle Id</string>
-    <string name="custom_bundle_id_enabled">Custom Bundle Id Enabled</string>
-    <string name="hint_custom_bundle_id">Custom Bundle Id</string>
-    <string name="ad_customisation_title">Ad Customisation</string>
+    <string name="check_enable_custom_endcard" tools:ignore="ExtraTranslation" translatable="false">Enable Custom endcard</string>
+    <string name="check_enable_custom_endcard_display" tools:ignore="ExtraTranslation" translatable="false">Enable Custom endcard Display</string>
+    <string name="custom_end_card" translatable="false">Custom EndCard</string>
+    <string name="custom_end_card_html" translatable="false">Custom End Card HTML</string>
+    <string name="hint_custom_cta_app_name" translatable="false">Custom CTA Name</string>
+    <string name="hint_custom_cta_icon" translatable="false">Custom CTA Icon</string>
+    <string name="custom_cta_enabled" translatable="false">Custom CTA Enabled</string>
+    <string name="custom_cta_delay" translatable="false">Custom CTA Delay</string>
+    <string name="custom_cta_type" translatable="false">Custom CTA Type</string>
+    <string name="radio_default" translatable="false">Default</string>
+    <string name="radio_extended" translatable="false">Extended</string>
+    <string name="rewarded_video" translatable="false">Rewarded Video</string>
+
+    <string name="bundle_id_label" translatable="false">Bundle Id</string>
+    <string name="custom_bundle_id_enabled" translatable="false">Custom Bundle Id Enabled</string>
+    <string name="hint_custom_bundle_id" translatable="false">Custom Bundle Id</string>
+    <string name="ad_customisation_title" translatable="false">Ad Customisation</string>
+
+    <string name="template_default" translatable="false">Default Template</string>
+    <string name="template_final" translatable="false">Final Template</string>
+    <string name="template_one" translatable="false">Template one</string>
+    <string name="template_two" translatable="false">Template two</string>
+    <string name="template_three" translatable="false">Template three</string>
+    <string name="template_four" translatable="false">Template four</string>
+    <string name="template_five" translatable="false">Template five</string>
+    <string name="template_six" translatable="false">Template six</string>
+    <string name="template_seven" translatable="false">Template seven</string>
+    <string name="template_new" translatable="false">Template new</string>
+    <string name="template_one_pre_rendering" translatable="false">Template one - Pre rendering</string>
+    <string name="template_four_without_container" translatable="false">Template four w/o container</string>
+    <string name="pnadtag" translatable="false">pn-ad-tag</string>
 </resources>

@@ -1,9 +1,7 @@
 plugins {
     id 'com.android.library'
-    id 'kotlin-android'
     id 'com.jfrog.artifactory'
     id 'maven-publish'
-    id "org.sonarqube" version "3.3"
 }
 
 def project_name = project.name
@@ -36,10 +34,6 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
     }
 
     namespace 'net.pubnative.lite.sdk.rewarded'
@@ -148,19 +142,6 @@ artifactory {
             username = System.getenv("ARTIFACTORY_USER")
             password = System.getenv("ARTIFACTORY_PASSWORD")
             maven = true
-        }
-    }
-}
-
-sonarqube {
-    sonarqube {
-        properties {
-            property "sonar.projectName", "HyBidDemo"
-            property "sonar.projectKey", "HyBidDemoSample"
-            property "sonar.host.url", "http://localhost:9000"
-            property "sonar.projectVersion", version
-            property "sonar.language", "java"
-            property "sonar.sources", "src/main/"
         }
     }
 }

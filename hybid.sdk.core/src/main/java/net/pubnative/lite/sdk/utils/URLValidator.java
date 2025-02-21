@@ -7,6 +7,8 @@ public class URLValidator {
 
     public static boolean isValidURL(String stringURL) {
         if (stringURL.trim().isEmpty()) return false;
-        return URLUtil.isValidUrl(stringURL) && Patterns.WEB_URL.matcher(stringURL).matches();
+        // Encode square brackets for validation purposes
+        String encodedUrl = stringURL.replace("[", "%5B").replace("]", "%5D");
+        return URLUtil.isValidUrl(encodedUrl) && Patterns.WEB_URL.matcher(encodedUrl).matches();
     }
 }

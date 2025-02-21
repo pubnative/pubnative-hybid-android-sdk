@@ -48,10 +48,10 @@ public abstract class PresenterFactory {
 
     public AdPresenter createPresenter(Ad ad, AdSize adSize,
                                        AdPresenter.Listener bannerPresenterListener, AdPresenter.ImpressionListener impressionListener) {
-        return createPresenter(ad, adSize, ImpressionTrackingMethod.AD_VIEWABLE, bannerPresenterListener, impressionListener);
+        return createPresenter(ad, null, adSize, ImpressionTrackingMethod.AD_VIEWABLE, bannerPresenterListener, impressionListener);
     }
 
-    public AdPresenter createPresenter(Ad ad, AdSize adSize, ImpressionTrackingMethod trackingMethod,
+    public AdPresenter createPresenter(Ad ad, AdTracker adTracker, AdSize adSize, ImpressionTrackingMethod trackingMethod,
                                        AdPresenter.Listener bannerPresenterListener, AdPresenter.ImpressionListener impressionListener) {
         if (ad == null) {
             return null;
@@ -62,8 +62,25 @@ public abstract class PresenterFactory {
             return null;
         }
 
-        final AdPresenterDecorator bannerPresenterDecorator = new AdPresenterDecorator(adPresenter,
-                new AdTracker(ad.getBeacons(Ad.Beacon.IMPRESSION), ad.getBeacons(Ad.Beacon.CLICK)), HyBid.getReportingController(), bannerPresenterListener, impressionListener, mIntegrationType);
+        final AdTracker tracker;
+        if (adTracker != null) {
+            tracker = adTracker;
+        } else {
+            tracker = new AdTracker(
+                    ad.getBeacons(Ad.Beacon.IMPRESSION),
+                    ad.getBeacons(Ad.Beacon.CLICK),
+                    ad.getBeacons(Ad.Beacon.SDK_EVENT),
+                    ad.getBeacons(Ad.Beacon.COMPANION_AD_EVENT),
+                    ad.getBeacons(Ad.Beacon.CUSTOM_ENDCARD_EVENT));
+        }
+
+        final AdPresenterDecorator bannerPresenterDecorator = new AdPresenterDecorator(
+                adPresenter,
+                tracker,
+                HyBid.getReportingController(),
+                bannerPresenterListener,
+                impressionListener,
+                mIntegrationType);
         adPresenter.setListener(bannerPresenterDecorator);
         adPresenter.setImpressionListener(bannerPresenterDecorator);
         adPresenter.setVideoListener(bannerPresenterDecorator);

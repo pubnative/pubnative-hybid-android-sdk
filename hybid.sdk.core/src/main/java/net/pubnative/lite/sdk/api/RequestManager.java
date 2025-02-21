@@ -96,7 +96,6 @@ public class RequestManager {
     private boolean mAutoCacheOnLoad = true;
     private boolean mCacheStarted = false;
     private boolean mCacheFinished = false;
-    private String mAdFormat = null;
 
     final JSONObject jsonCacheParams;
     private Long mRequestTimeMilliseconds = 0L;

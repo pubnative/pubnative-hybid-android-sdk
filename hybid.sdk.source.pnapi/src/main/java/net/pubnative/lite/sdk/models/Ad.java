@@ -95,6 +95,9 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         String CUSTOM_CTA_SHOW = "custom_cta_show";
         String CUSTOM_CTA_CLICK = "custom_cta_click";
         String CUSTOM_CTA_ENDCARD_CLICK = "custom_cta_endcard_click";
+        String SDK_EVENT = "sdk_event";
+        String COMPANION_AD_EVENT = "companion_ad_event";
+        String CUSTOM_ENDCARD_EVENT = "custom_endcard_event";
     }
 
     public enum AdType {
@@ -891,6 +894,14 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
 
     public Integer getCustomCTADelay() {
         return getRemoteConfig(RemoteConfig.CUSTOM_CTA_DELAY);
+    }
+
+    public String getNavigationMode() {
+        return getRemoteConfig(RemoteConfig.NAVIGATION_MODE);
+    }
+
+    public Boolean isLandingPage() {
+        return getRemoteConfig(RemoteConfig.LANDING_PAGE);
     }
 
     @Override

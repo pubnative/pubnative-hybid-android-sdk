@@ -26,12 +26,15 @@ import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.CustomEndCardListener;
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.AuxiliaryAdEventType;
 import net.pubnative.lite.sdk.models.IntegrationType;
+import net.pubnative.lite.sdk.models.SdkEventType;
 import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.Logger;
@@ -150,6 +153,7 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             return;
         }
 
+        mAdTrackingDelegate.trackSdkEvent(SdkEventType.LOAD, null);
         mListener.onInterstitialLoaded(interstitialPresenter);
     }
 
@@ -179,6 +183,7 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             mReportingController.reportEvent(reportingEvent);
         }
 
+        mAdTrackingDelegate.trackSdkEvent(SdkEventType.SHOW, null);
         mAdTrackingDelegate.trackImpression();
         mListener.onInterstitialShown(interstitialPresenter);
         mImpressionTracked = true;
@@ -273,6 +278,7 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
 
         String errorMessage = "Interstitial error for zone id: ";
         Logger.d(TAG, errorMessage);
+        mAdTrackingDelegate.trackSdkEvent(SdkEventType.LOAD, HyBidErrorCode.UNKNOWN_ERROR.getCode());
         mListener.onInterstitialError(interstitialPresenter);
     }
 
@@ -339,6 +345,7 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             mReportingController.reportEvent(reportingEvent);
         }
 
+        mAdTrackingDelegate.trackCustomEndcardEvent(AuxiliaryAdEventType.IMPRESSION, null);
         mCustomEndCardTrackingDelegate.trackImpression();
         mCustomEndCardImpressionTracked = true;
     }
@@ -367,6 +374,8 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             mReportingController.reportEvent(reportingEvent);
         }
 
+        mAdTrackingDelegate.trackClick();
+        mAdTrackingDelegate.trackCustomEndcardEvent(AuxiliaryAdEventType.CLICK, null);
         mCustomEndCardTrackingDelegate.trackClick();
         mCustomEndCardClickTracked = true;
     }
@@ -395,6 +404,8 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             mReportingController.reportEvent(reportingEvent);
         }
 
+        mAdTrackingDelegate.trackCompanionAdEvent(AuxiliaryAdEventType.IMPRESSION, null);
+
         mDefaultEndCardImpressionTracked = true;
     }
 
@@ -421,6 +432,7 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             mReportingController.reportEvent(reportingEvent);
         }
 
+        mAdTrackingDelegate.trackCompanionAdEvent(AuxiliaryAdEventType.CLICK, null);
         mDefaultEndCardClickTracked = true;
     }
 
@@ -458,10 +470,13 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             return;
         }
         String event_type = "";
-        if (isCustomEndCard)
+        if (isCustomEndCard) {
             event_type = Reporting.EventType.CUSTOM_END_CARD_LOAD_FAILURE;
-        else
+            mAdTrackingDelegate.trackCustomEndcardEvent(AuxiliaryAdEventType.ERROR, HyBidErrorCode.UNKNOWN_ERROR.getCode());
+        } else {
             event_type = Reporting.EventType.DEFAULT_END_CARD_LOAD_FAILURE;
+            mAdTrackingDelegate.trackCompanionAdEvent(AuxiliaryAdEventType.ERROR, HyBidErrorCode.UNKNOWN_ERROR.getCode());
+        }
 
         if (mReportingController != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();

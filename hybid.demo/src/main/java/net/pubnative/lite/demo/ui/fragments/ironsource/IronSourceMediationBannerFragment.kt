@@ -7,23 +7,27 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.ironsource.mediationsdk.ISBannerSize
-import com.ironsource.mediationsdk.IronSource
-import com.ironsource.mediationsdk.IronSourceBannerLayout
-import com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo
-import com.ironsource.mediationsdk.logger.IronSourceError
-import com.ironsource.mediationsdk.sdk.LevelPlayBannerListener
+import com.unity3d.mediation.LevelPlay
+import com.unity3d.mediation.LevelPlayAdError
+import com.unity3d.mediation.LevelPlayAdInfo
+import com.unity3d.mediation.LevelPlayAdSize
+import com.unity3d.mediation.LevelPlayConfiguration
+import com.unity3d.mediation.LevelPlayInitError
+import com.unity3d.mediation.LevelPlayInitListener
+import com.unity3d.mediation.LevelPlayInitRequest
+import com.unity3d.mediation.banner.LevelPlayBannerAdView
+import com.unity3d.mediation.banner.LevelPlayBannerAdViewListener
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
 
 class IronSourceMediationBannerFragment : Fragment(R.layout.fragment_ironsource_banner),
-    LevelPlayBannerListener {
+    LevelPlayBannerAdViewListener {
     val TAG = IronSourceMediationBannerFragment::class.java.simpleName
 
-    private lateinit var ironSourceBanner: IronSourceBannerLayout
-    private lateinit var ironSourceBannerContainer: FrameLayout
+    private lateinit var levelPlayBanner: LevelPlayBannerAdView
+    private lateinit var levelPlayBannerContainer: FrameLayout
     private lateinit var loadButton: Button
     private lateinit var errorView: TextView
 
@@ -32,21 +36,22 @@ class IronSourceMediationBannerFragment : Fragment(R.layout.fragment_ironsource_
 
         errorView = view.findViewById(R.id.view_error)
         loadButton = view.findViewById(R.id.button_load)
-        ironSourceBannerContainer = view.findViewById(R.id.ironsource_banner_container)
+        levelPlayBannerContainer = view.findViewById(R.id.ironsource_banner_container)
 
         val adUnitId =
             SettingsManager.getInstance(requireActivity())
                 .getSettings().ironSourceSettings?.bannerAdUnitId
 
-        ironSourceBanner = IronSource.createBanner(requireActivity(), ISBannerSize.BANNER)
-        ironSourceBanner.levelPlayBannerListener = this
-        ironSourceBannerContainer.addView(ironSourceBanner)
-
         initializeIronSource()
+
+        levelPlayBanner = LevelPlayBannerAdView(requireActivity(), adUnitId!!)
+        levelPlayBanner.setAdSize(LevelPlayAdSize.BANNER)
+        levelPlayBanner.setBannerListener(this)
+        levelPlayBannerContainer.addView(levelPlayBanner)
 
         loadButton.setOnClickListener {
             errorView.text = ""
-            IronSource.loadBanner(ironSourceBanner, adUnitId)
+            levelPlayBanner.loadAd()
         }
 
         errorView.setOnClickListener {
@@ -58,36 +63,49 @@ class IronSourceMediationBannerFragment : Fragment(R.layout.fragment_ironsource_
     }
 
     override fun onDestroy() {
-        ironSourceBanner.removeBannerListener()
-        IronSource.destroyBanner(ironSourceBanner)
+        levelPlayBanner.destroy()
         super.onDestroy()
     }
 
-    override fun onAdLoaded(info: AdInfo?) {
+    override fun onAdLoaded(adInfo: LevelPlayAdInfo) {
         displayLogs()
         Log.d(TAG, "onAdLoaded")
     }
 
-    override fun onAdLoadFailed(error: IronSourceError?) {
+    override fun onAdLoadFailed(error: LevelPlayAdError) {
         displayLogs()
-        errorView.text = error?.errorMessage
+        errorView.text = error.getErrorMessage()
         Log.d(TAG, "onAdLoadFailed")
     }
 
-    override fun onAdClicked(info: AdInfo?) {
+    override fun onAdDisplayed(adInfo: LevelPlayAdInfo) {
+        Log.d(TAG, "onAdDisplayed")
+        super.onAdDisplayed(adInfo)
+    }
+
+    override fun onAdDisplayFailed(adInfo: LevelPlayAdInfo, error: LevelPlayAdError) {
+        Log.e(TAG, "onAdDisplayFailed: " + error.getErrorMessage())
+        super.onAdDisplayFailed(adInfo, error)
+    }
+
+    override fun onAdClicked(adInfo: LevelPlayAdInfo) {
         Log.d(TAG, "onAdClicked")
+        super.onAdClicked(adInfo)
     }
 
-    override fun onAdLeftApplication(info: AdInfo?) {
+    override fun onAdExpanded(adInfo: LevelPlayAdInfo) {
+        Log.d(TAG, "onAdExpanded")
+        super.onAdExpanded(adInfo)
+    }
+
+    override fun onAdCollapsed(adInfo: LevelPlayAdInfo) {
+        Log.d(TAG, "onAdCollapsed")
+        super.onAdCollapsed(adInfo)
+    }
+
+    override fun onAdLeftApplication(adInfo: LevelPlayAdInfo) {
         Log.d(TAG, "onAdLeftApplication")
-    }
-
-    override fun onAdScreenPresented(info: AdInfo?) {
-        Log.d(TAG, "onAdScreenPresented")
-    }
-
-    override fun onAdScreenDismissed(info: AdInfo?) {
-        Log.d(TAG, "onAdScreenDismissed")
+        super.onAdLeftApplication(adInfo)
     }
 
     private fun displayLogs() {
@@ -102,11 +120,16 @@ class IronSourceMediationBannerFragment : Fragment(R.layout.fragment_ironsource_
             SettingsManager.getInstance(requireContext()).getSettings().ironSourceSettings
         val appKey = settings?.appKey
         if (!appKey.isNullOrEmpty()) {
-            IronSource.setMetaData("is_test_suite", "enable")
-            IronSource.init(
-                requireActivity(), appKey, IronSource.AD_UNIT.BANNER,
-                IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.REWARDED_VIDEO
-            )
+            val initRequest = LevelPlayInitRequest.Builder(appKey).build()
+            LevelPlay.init(requireActivity(), initRequest, object : LevelPlayInitListener {
+                override fun onInitSuccess(configuration: LevelPlayConfiguration) {
+
+                }
+
+                override fun onInitFailed(error: LevelPlayInitError) {
+
+                }
+            })
         }
     }
 }

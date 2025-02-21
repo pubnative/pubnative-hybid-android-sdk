@@ -52,6 +52,7 @@ import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.OpenRTBAdRequestFactory;
+import net.pubnative.lite.sdk.models.SdkEventType;
 import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.mraid.utils.MraidCloseAdRepo;
@@ -59,6 +60,7 @@ import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.AdEndCardManager;
+import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.MarkupUtils;
 import net.pubnative.lite.sdk.utils.SignalDataProcessor;
@@ -116,6 +118,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
 
     protected MRAIDViewListener mRaidListener;
     private AdPresenter mPresenter;
+    private AdTracker mAdTracker;
     protected Ad mAd;
 
     private boolean mAutoShowOnLoad = true;
@@ -306,7 +309,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         if (HyBid.getAppToken() != null)
             //AppToken
             addReportingKey(Reporting.Key.APP_TOKEN, HyBid.getAppToken());
-        if (mRequestManager.getAdSize() != null)
+        if (mRequestManager != null && mRequestManager.getAdSize() != null)
             //Ad Size
             addReportingKey(Reporting.Key.AD_SIZE, mRequestManager.getAdSize().toString());
         //Integration Type
@@ -381,6 +384,10 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         if (mPresenter != null) {
             mPresenter.destroy();
             mPresenter = null;
+        }
+
+        if (mAdTracker != null) {
+            mAdTracker = null;
         }
 
         if (mSignalDataProcessor != null) {
@@ -479,7 +486,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         if (mRequestManager != null && mRequestManager.getAdSize() != null) {
             adSize = mRequestManager.getAdSize();
         }
-        return new BannerPresenterFactory(getContext(), mIntegrationType).createPresenter(mAd, adSize, mTrackingMethod, this, this);
+        return new BannerPresenterFactory(getContext(), mIntegrationType).createPresenter(mAd, mAdTracker, adSize, mTrackingMethod, this, this);
     }
 
     public void renderAd() {
@@ -547,6 +554,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
             mInitialLoadTime = System.currentTimeMillis();
             mListener = listener;
             mAd = ad;
+            initializeAdTracker(ad);
             renderAd();
         } else {
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_AD));
@@ -601,6 +609,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                     if (ad != null) {
                         mTrackingMethod = ImpressionTrackingMethod.AD_VIEWABLE;
                         mAd = ad;
+                        initializeAdTracker(ad);
                         renderAd();
                     } else {
                         invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NULL_AD));
@@ -716,7 +725,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         mInitialLoadTime = System.currentTimeMillis();
         mListener = listener;
 
-        if (!TextUtils.isEmpty(adValue)) {
+        if (!TextUtils.isEmpty(adValue) && mRequestManager != null) {
             int assetGroup;
             String zoneId;
             Ad.AdType type;
@@ -834,6 +843,10 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
             HyBid.getReportingController().reportEvent(loadEvent);
         }
 
+        if (mAdTracker != null) {
+            mAdTracker.trackSdkEvent(SdkEventType.LOAD, null);
+        }
+
         if (mListener != null) {
             mListener.onAdLoaded();
         }
@@ -869,6 +882,14 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
             } else {
                 Logger.e(getLogTag(), exception.getMessage());
             }
+
+            if (mAdTracker != null) {
+                mAdTracker.trackSdkEvent(SdkEventType.LOAD, hyBidError.getErrorCode().getCode());
+            }
+        } else {
+            if (mAdTracker != null) {
+                mAdTracker.trackSdkEvent(SdkEventType.LOAD, HyBidErrorCode.UNKNOWN_ERROR.getCode());
+            }
         }
         if (mListener != null) {
             mListener.onAdLoadFailed(exception);
@@ -887,6 +908,10 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                 SessionImpressionPrefs prefs = new SessionImpressionPrefs(getContext());
                 prefs.insert(mZoneId);
             }
+        }
+
+        if (mAdTracker != null) {
+            mAdTracker.trackSdkEvent(SdkEventType.SHOW, null);
         }
 
         if (mListener != null) {
@@ -1132,6 +1157,17 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
             }
             event.mergeJSONObject(placementParams);
             HyBid.getReportingController().reportEvent(event);
+        }
+    }
+
+    private void initializeAdTracker(Ad ad) {
+        if (ad != null) {
+            mAdTracker = new AdTracker(
+                    ad.getBeacons(Ad.Beacon.IMPRESSION),
+                    ad.getBeacons(Ad.Beacon.CLICK),
+                    ad.getBeacons(Ad.Beacon.SDK_EVENT),
+                    ad.getBeacons(Ad.Beacon.COMPANION_AD_EVENT),
+                    ad.getBeacons(Ad.Beacon.CUSTOM_ENDCARD_EVENT));
         }
     }
 

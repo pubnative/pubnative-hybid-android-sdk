@@ -1,0 +1,191 @@
+<style id="stl">html, body, #ctr, #bgblr {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+body {
+    background: black;
+}</style>
+<div style="display:none" id="adm">{[{ .Adm | base64EncodeString | safeHTML }]}</div>
+<div id="bgblr"
+     style="z-index:0;background:center/cover;-webkit-filter:saturate(0.5) blur(15px);filter:saturate(0.5) blur(15px);"></div>
+<iframe id="ctr" frameborder="0" scrolling="no" width="100%" height="100%" style="z-index:1"></iframe>
+<script type="text/javascript">(function () {
+    function MRAID() {
+        function k(b) {
+            try {
+                if ("object" === typeof b.mraid && b.mraid.getState) var g = b.mraid
+            } catch (l) {
+            }
+            return b.parent !== b ? g || k(b.parent) : g
+        }
+
+        var h = window, e = k(h) || {ntfnd: !0},
+            c = "{offsetX:0,offsetY:0,x:0,y:0,width:" + h.innerWidth + ",height:" + h.innerHeight + ",useCustomClose:!1}",
+            L = "addEventListener", V = "isViewable", d = this, f = {
+                removeEventListener: 0,
+                open: "window.top.open(a)",
+                close: 0,
+                unload: 0,
+                useCustomClose: 0,
+                expand: 0,
+                playVideo: 0,
+                resize: 0,
+                storePicture: 0,
+                createCalendarEvent: 0,
+                supports: "{sms:!1,tel:!1,calendar:!1,storePicture:!1,inlineVideo:!1,orientation:!1,vpaid:!1,location:!1}",
+                VERSIONS: {},
+                STATES: {LOADING: "loading", DEFAULT: "default"},
+                PLACEMENTS: {},
+                ORIENTATIONS: {},
+                FEATURES: {},
+                EVENTS: {READY: "ready", ERROR: "error"},
+                CLOSEPOSITIONS: {}
+            };
+        c = {
+            Version: '"2.0"',
+            PlacementType: '"unknown"',
+            OrientationProperties: "{allowOrientationChange:!1}",
+            CurrentAppOrientation: '{orientation:""}',
+            CurrentPosition: c,
+            DefaultPosition: c,
+            State: '"default"',
+            ExpandProperties: c,
+            MaxSize: c,
+            ScreenSize: c,
+            ResizeProperties: c,
+            Location: "{}"
+        };
+        d._L = [];
+        d[L] = function (b, g) {
+            "ready" === b || "viewableChange" === b ? d._L.push({c: g, a: !0}) :
+                "stateChange" === b && d._L.push({c: g, a: "default"});
+            "function" === typeof e[L] && e[L].apply(h, arguments)
+        };
+        for (var a in c) f["get" + a] = c[a], f["set" + a] = "undefined";
+        for (a in f) e[a] ? d[a] = e[a] : (d[a] = f[a] ? "object" === typeof f[a] ? f[a] : new Function("return " + f[a]) : function () {
+        }, e[a] = d[a]);
+        d[V] = function () {
+            return !!e.ntfnd || e[V]() === true || e[V]() === "true"
+        };
+        d.getState = function () {
+            var s = e.getState();
+            "object" === typeof s && s.state && (s = s.state);
+            return e.ntfnd || d[V]() && s === "loading" ? "default" : s
+        };
+        return e.ntfnd ? (setTimeout(function () {
+            d._L.forEach(function (b) {
+                b.c.call(window, b.a)
+            })
+        }, 1), d.ntfnd = !0, d) : e
+    };
+
+    function P(a) {
+        return decodeURIComponent(escape(atob(a)))
+    }
+
+    var D = document, PC = !0, CR = !1, Q = "querySelector", E = "replace", M = "mraid", T = "addEventListener",
+        ctr = D[Q]("\x23ctr"), A = P(D[Q]("\x23adm").innerText),
+        O = JSON.parse(P("e30=")), F = !1, CF = !1, L = "<",
+        R = [[P("PHNjcmlwdFtePl0qIHNyYz1bJyJdP21yYWlkLmpzWyciXT9bXj5dKj48L3NjcmlwdD4="), ""], [P("W+KAmOKAmV0="), "'"]],
+        B = [], CB = [], i;
+    for (i in B) B[i] = P(B[i])[E](P("JHtBVUNUSU9OX1BSSUNFfQ=="), "${AUCTION_PRICE}");
+    for (i in CB) CB[i] = P(CB[i]);
+
+    function RN() {
+        if (!ctr || !A) return;
+        window[M] = new MRAID;
+        for (r in R) A = A[E](new RegExp(R[r][0], "g"), R[r][1]);
+        A = L + "style>html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;border:none;}" + L + "/style>" + L + 'script type="text/javascript">' + MRAID.toString() + "window.mraid=new MRAID();" + L + "/script>" + A;
+        if (O.aqh && O.aqf) {
+            var a = function (b) {
+                return (b || "")[E](P("JWN1c3RfaW1wIQ=="), O.impID)[E](P("JURFTUFORF9JRCE="), O.dspID)[E](P("JWRzcE5hbWUh"),
+                    O.dspName)[E](P("JURFTUFORF9DUkVBVElWRV9JRCE="), O.crid)[E](P("JVBVQkxJU0hFUl9JRCE="), O.pubID)[E](P("JXB1Yk5hbWUh"), O.pubName)[E](P("JSVXSURUSCUl"), (ctr.contentWindow || window).innerWidth)[E](P("JSVIRUlHSFQlJQ=="), (ctr.contentWindow || window).innerHeight)
+            };
+            O.aqh = a(O.aqh);
+            O.aqf = a(O.aqf);
+            A = O.aqh + A + O.aqf
+        }
+        A = L + "!DOCTYPE html>\n" + A;
+        window[M][T]("ready", MR);
+        window[M][T]("viewableChange", MV);
+        CR && FA();
+        MV();
+        PC && setTimeout(EX, 1)
+    }
+
+    function FA() {
+        if (!F) {
+            for (var i in B) (new Image).src = B[i];
+            F = !0
+        }
+    }
+
+    function MR() {
+        window[M][T]("viewableChange", MV);
+        MV()
+    }
+
+    function MV() {
+        "true" === window[M].isViewable() || !0 === window[M].isViewable() ? (CR || FA(), PC || setTimeout(EX, 1), setInterval(FS, 100)) : setTimeout(MV, 100)
+    };
+
+    function FS() {
+        var a = ctr.contentWindow;
+        if (a) {
+            var b = window.innerWidth, h = window.innerHeight, g = ctr.style, k = !1, l = 10, m = 10,
+                e = a.document.querySelectorAll("body,div,span,p,section,article,a,img,canvas,video,iframe");
+            for (a = 0; a < e.length; a++) {
+                var c = e[a].offsetWidth;
+                var d = e[a].offsetHeight;
+                if ((c === 320 && d === 480 || c === 480 && d === 320 || c === 300 && d === 250 && b !== 300 && h !== 250 || (c === 300 || c === 320) && d === 50 && h === 50 && c !== b) && !k) {
+                    var f = d * b / c > h ? h / d : b / c;
+                    if (f !== 0) {
+                        k = !0;
+                        g.width = c + "px";
+                        g.height = d + "px";
+                        g.transform = "scale(" + f + "," + f + ")";
+                        d * b / c > h ?
+                            (g.top = (f - 1) * d / 2 + "px", g.left = (b - c) / 2 + "px") : (g.top = (h - d) / 2 + "px", g.left = (f - 1) * c / 2 + "px")
+                    }
+                }
+                f = (e[a].style.backgroundImage || "").match(P("XnVybFwoIihodHRwLispIlwpJA=="));
+                if (k && ("IMG" === e[a].nodeName && e[a].src || f && f[1]) && c > l && d > m) {
+                    l = c;
+                    m = d;
+                    var n = e[a].src ? e[a].src : f[1]
+                }
+            }
+            n && (document[Q]("\x23bgblr").style.backgroundImage = "url(" + n + ")")
+        }
+    }
+
+    function EX() {
+        if (A) {
+            try {
+                var a = ctr.contentWindow, b = a.document;
+                b.open();
+                a[T]("click", function (e) {
+                    if (!CF) {
+                        for (var i in CB) (new Image).src = CB[i];
+                        CF = true
+                    }
+                }, true);
+                a[T]("load", FS);
+                b.write(A);
+                b.close()
+            } catch (h) {
+            }
+            A = ""
+        }
+    }
+
+    RN();
+})();</script>

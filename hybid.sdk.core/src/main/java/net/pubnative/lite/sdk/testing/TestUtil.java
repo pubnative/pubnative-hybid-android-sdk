@@ -155,6 +155,45 @@ public class TestUtil {
         return clickBeacons;
     }
 
+    public static List<AdData> createMockLoadEventBeacons() {
+        List<AdData> clickBeacons = new ArrayList<>(1);
+
+        AdData clickBeacon = new AdData();
+        clickBeacon.type = "load_event";
+        clickBeacon.data = new HashMap<>(1);
+        clickBeacon.data.put("url", "https://got.pubnative.net/loadevent/rtb?eventtype=[EVENT_TYPE]&error=[ERRORCODE]");
+
+        clickBeacons.add(clickBeacon);
+
+        return clickBeacons;
+    }
+
+    public static List<AdData> createMockCompanionAdEventsBeacons() {
+        List<AdData> clickBeacons = new ArrayList<>(1);
+
+        AdData clickBeacon = new AdData();
+        clickBeacon.type = "companion_ad_event";
+        clickBeacon.data = new HashMap<>(1);
+        clickBeacon.data.put("url", "https://got.pubnative.net/companionadevent/rtb?eventtype=[EVENTTYPE]&error=[ERRORCODE]");
+
+        clickBeacons.add(clickBeacon);
+
+        return clickBeacons;
+    }
+
+    public static List<AdData> createMockCustomEndcardBeacons() {
+        List<AdData> clickBeacons = new ArrayList<>(1);
+
+        AdData clickBeacon = new AdData();
+        clickBeacon.type = "custom_endcard_event";
+        clickBeacon.data = new HashMap<>(1);
+        clickBeacon.data.put("url", "https://got.pubnative.net/customendcardevent/rtb?eventtype=[EVENTTYPE]&error=[ERRORCODE]");
+
+        clickBeacons.add(clickBeacon);
+
+        return clickBeacons;
+    }
+
     public static SessionImpression createTestSessionImpression() {
         SessionImpression sessionImpression = new SessionImpression();
         sessionImpression.setZoneId("4");

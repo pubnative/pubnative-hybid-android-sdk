@@ -44,14 +44,13 @@ import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.HyBidTimeUtils;
 import net.pubnative.lite.sdk.utils.Logger;
-import net.pubnative.lite.sdk.utils.PNAsyncUtils;
 
 import org.json.JSONObject;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.RejectedExecutionException;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
@@ -88,25 +87,29 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
             mDeviceInfo = HyBid.getDeviceInfo();
         }
 
-        String advertisingId = null;
+        String deviceInfoAdvertisingId = null;
         boolean limitTracking = false;
         Context context = null;
         if (mDeviceInfo != null) {
-            advertisingId = mDeviceInfo.getAdvertisingId();
+            deviceInfoAdvertisingId = mDeviceInfo.getAdvertisingId();
             limitTracking = mDeviceInfo.limitTracking();
             context = mDeviceInfo.getContext();
         }
         mIsRewarded = isRewarded;
-        if (TextUtils.isEmpty(advertisingId) && context != null) {
+        if (TextUtils.isEmpty(deviceInfoAdvertisingId) && context != null) {
             try {
 //                DBManager dbManager = new DBManager(mDeviceInfo.getContext());
 //                dbManager.open();
 //                int impDepth = dbManager.getImpressionDepth(zoneid);
 //                dbManager.close();
-
                 SessionImpressionPrefs prefs = new SessionImpressionPrefs(mDeviceInfo.getContext());
                 int impDepth = prefs.getImpressionDepth(zoneid);
-                PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(context, (advertisingId1, limitTracking1) -> processAdvertisingId(appToken, zoneid, adSize, advertisingId1, limitTracking1, impDepth, protectedAudiencesAvailable, callback)));
+                HyBidAdvertisingId hyBidAdvertisingIdTask = new HyBidAdvertisingId(context);
+                hyBidAdvertisingIdTask.execute((advertisingId, limitTracking1) ->
+                        processAdvertisingId(appToken, zoneid, adSize, advertisingId,
+                                limitTracking1, impDepth, protectedAudiencesAvailable, callback));
+            } catch (RejectedExecutionException exception) {
+                Logger.e(TAG, "createAdRequest", exception);
             } catch (Exception exception) {
                 Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
             }
@@ -120,7 +123,7 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
                 SessionImpressionPrefs prefs = new SessionImpressionPrefs(mDeviceInfo.getContext());
                 int impDepth = prefs.getImpressionDepth(zoneid);
 
-                processAdvertisingId(appToken, zoneid, adSize, advertisingId, limitTracking, impDepth, protectedAudiencesAvailable, callback);
+                processAdvertisingId(appToken, zoneid, adSize, deviceInfoAdvertisingId, limitTracking, impDepth, protectedAudiencesAvailable, callback);
             }
         }
     }
@@ -345,7 +348,7 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
         }
         adRequest.sessionduration = new HyBidTimeUtils().getSeconds(calculateSessionDuration());
 
-        if(mTopicManager != null){
+        if (mTopicManager != null) {
             adRequest.topics = mTopicManager.getTopics();
         }
 

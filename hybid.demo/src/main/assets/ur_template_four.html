@@ -1,0 +1,128 @@
+<script src="mraid.js"></script>
+<style id="stl">html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+body {
+    background: black;
+}</style>
+<script type="text/javascript">(function () {
+    function MRAID() {
+        function k(b) {
+            try {
+                if ("object" === typeof b.mraid && b.mraid.getState) var g = b.mraid
+            } catch (l) {
+            }
+            return b.parent !== b ? g || k(b.parent) : g
+        }
+
+        var h = window, e = k(h) || {ntfnd: !0},
+            c = "{offsetX:0,offsetY:0,x:0,y:0,width:" + h.innerWidth + ",height:" + h.innerHeight + ",useCustomClose:!1}",
+            L = "addEventListener", V = "isViewable", d = this, f = {
+                removeEventListener: 0,
+                open: "window.top.open(a)",
+                close: 0,
+                unload: 0,
+                useCustomClose: 0,
+                expand: 0,
+                playVideo: 0,
+                resize: 0,
+                storePicture: 0,
+                createCalendarEvent: 0,
+                supports: "{sms:!1,tel:!1,calendar:!1,storePicture:!1,inlineVideo:!1,orientation:!1,vpaid:!1,location:!1}",
+                VERSIONS: {},
+                STATES: {LOADING: "loading", DEFAULT: "default"},
+                PLACEMENTS: {},
+                ORIENTATIONS: {},
+                FEATURES: {},
+                EVENTS: {READY: "ready", ERROR: "error"},
+                CLOSEPOSITIONS: {}
+            };
+        c = {
+            Version: '"2.0"',
+            PlacementType: '"unknown"',
+            OrientationProperties: "{allowOrientationChange:!1}",
+            CurrentAppOrientation: '{orientation:""}',
+            CurrentPosition: c,
+            DefaultPosition: c,
+            State: '"default"',
+            ExpandProperties: c,
+            MaxSize: c,
+            ScreenSize: c,
+            ResizeProperties: c,
+            Location: "{}"
+        };
+        d._L = [];
+        d[L] = function (b, g) {
+            "ready" === b || "viewableChange" === b ? d._L.push({c: g, a: !0}) :
+                "stateChange" === b && d._L.push({c: g, a: "default"});
+            "function" === typeof e[L] && e[L].apply(h, arguments)
+        };
+        for (var a in c) f["get" + a] = c[a], f["set" + a] = "undefined";
+        for (a in f) e[a] ? d[a] = e[a] : (d[a] = f[a] ? "object" === typeof f[a] ? f[a] : new Function("return " + f[a]) : function () {
+        }, e[a] = d[a]);
+        d[V] = function () {
+            return !!e.ntfnd || e[V]() === true || e[V]() === "true"
+        };
+        d.getState = function () {
+            var s = e.getState();
+            "object" === typeof s && s.state && (s = s.state);
+            return e.ntfnd || d[V]() && s === "loading" ? "default" : s
+        };
+        return e.ntfnd ? (setTimeout(function () {
+            d._L.forEach(function (b) {
+                b.c.call(window, b.a)
+            })
+        }, 1), d.ntfnd = !0, d) : e
+    };
+
+    function P(a) {
+        return decodeURIComponent(escape(atob(a)))
+    }
+
+    var D = document, CR = !1, Q = "querySelector", E = "replace", M = "mraid", T = "addEventListener",
+        O = JSON.parse(P("e30=")), F = !1, CF = !1,
+        B = [], CB = [], i;
+    for (i in B) B[i] = P(B[i])[E](P("JHtBVUNUSU9OX1BSSUNFfQ=="), "${AUCTION_PRICE}");
+    for (i in CB) CB[i] = P(CB[i]);
+
+    function RN() {
+        window[M] = new MRAID;
+        window[M][T]("ready", MR);
+        window[M][T]("viewableChange", MV);
+        CR && FA();
+        MV();
+        window[T]("click", function (e) {
+            if (!CF) {
+                for (var i in CB) (new Image).src = CB[i];
+                CF = true
+            }
+        }, true);
+    }
+
+    function FA() {
+        if (!F) {
+            for (var i in B) (new Image).src = B[i];
+            F = !0
+        }
+    }
+
+    function MR() {
+        window[M][T]("viewableChange", MV);
+        MV()
+    }
+
+    function MV() {
+        "true" === window[M].isViewable() || !0 === window[M].isViewable() ? (CR || FA()) : setTimeout(MV, 100)
+    };
+    RN();
+})();</script>
+{[{ .Adm | base64EncodeString | safeHTML }]}

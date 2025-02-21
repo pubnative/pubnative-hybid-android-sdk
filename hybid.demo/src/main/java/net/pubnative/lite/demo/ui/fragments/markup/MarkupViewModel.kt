@@ -35,7 +35,8 @@ class MarkupViewModel(application: Application) : AndroidViewModel(application) 
     private var width: Int = AdSize.SIZE_300x50.width
     private var height: Int = AdSize.SIZE_300x50.height
 
-    private val ADM_MACRO = "{[{ .Adm | base64EncodeString | safeHTML }]}"
+    private val ADM_ENCODED_MACRO = "{[{ .Adm | base64EncodeString | safeHTML }]}"
+    private val ADM_MACRO = "{[{ .Adm | safeHTML }]}"
 
     private var customMarkup: MarkupType = MarkupType.CUSTOM_MARKUP
     private var customMarkupSize: MarkupSize = MarkupSize.BANNER
@@ -228,7 +229,7 @@ class MarkupViewModel(application: Application) : AndroidViewModel(application) 
 
     private fun wrapInUR(adm: String): String {
         val encodedAdm = Base64.encodeToString(adm.toByteArray(Charsets.UTF_8), Base64.DEFAULT)
-        return urTemplate.replace(ADM_MACRO, encodedAdm, false)
+        return urTemplate.replace(ADM_ENCODED_MACRO, encodedAdm, false).replace(ADM_MACRO, adm, false)
     }
 
     private fun capsuleRemoteConfigParams() {

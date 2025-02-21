@@ -4,26 +4,16 @@ import static android.view.ViewGroup.*;
 import static net.pubnative.lite.sdk.models.Ad.CONTENT_INFO_LINK_URL;
 
 import android.app.Activity;
-import android.app.DialogFragment;
-import android.app.Fragment;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.text.TextUtils;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import net.pubnative.lite.sdk.core.R;
 import net.pubnative.lite.sdk.mraid.MRAIDInterstitial;
@@ -33,7 +23,6 @@ import net.pubnative.lite.sdk.mraid.MRAIDView;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.utils.URLValidator;
 import net.pubnative.lite.sdk.utils.UrlHandler;
-import net.pubnative.lite.sdk.views.ProgressDialogFragment;
 import net.pubnative.lite.sdk.views.ProgressDialogView;
 import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
 
@@ -191,7 +180,7 @@ public class AdFeedbackActivity extends Activity implements MRAIDViewListener, M
 
     @Override
     public void mraidNativeFeatureOpenBrowser(String url) {
-        mUrlHandlerDelegate.handleUrl(url);
+        mUrlHandlerDelegate.handleUrl(url, null);
     }
 
     @Override

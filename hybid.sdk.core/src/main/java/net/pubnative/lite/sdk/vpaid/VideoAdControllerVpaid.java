@@ -294,7 +294,7 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
         if (Utils.isOnline(mBaseAdInternal.getContext())) {
             Context context = mBaseAdInternal.getContext();
             UrlHandler urlHandler = new UrlHandler(context);
-            urlHandler.handleUrl(url);
+            urlHandler.handleUrl(url, null);
         } else {
             Logger.e(LOG_TAG, "No internet connection");
         }

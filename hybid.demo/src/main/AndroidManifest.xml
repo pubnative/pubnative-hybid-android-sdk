@@ -27,6 +27,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
+        tools:replace="android:allowBackup"
         tools:ignore="GoogleAppIndexingWarning,UnusedAttribute">
 
         <activity
@@ -187,22 +188,6 @@
             android:label="@string/ironsource_rewarded"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.activities.fairbid.FairbidMediationBannerActivity"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:label="@string/fairbid_banner"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.activities.fairbid.FairbidMediationInterstitialActivity"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:label="@string/fairbid_interstitial"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".ui.activities.fairbid.FairbidMediationRewardedActivity"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:label="@string/fairbid_rewarded"
-            android:theme="@style/AppTheme.NoActionBar" />
-
-        <activity
             android:name=".ui.activities.chartboost.ChartboostMediationBannerActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:label="@string/chartboost_mediation_banner"
@@ -277,12 +262,6 @@
             android:name=".ui.activities.config.IronSourceSettingsActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:label="@string/ironsource_settings"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
-        <activity
-            android:name=".ui.activities.config.FairbidSettingsActivity"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:label="@string/fairbid_settings"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
         <activity
@@ -439,6 +418,7 @@
             android:value="sMRyqsHzbW5B55p5RLfJTNaXBH1rFzvkU5_LGa_Kerigolzf62Jl6iwzLtMIqn2XRt0tDol1bAc8g0N7C7c51N" />
 
         <property android:name="android.adservices.AD_SERVICES_CONFIG"
-            android:resource="@xml/ad_services_config" />
+            android:resource="@xml/ad_services_config"
+            tools:replace="android:resource"/>
     </application>
 </manifest>

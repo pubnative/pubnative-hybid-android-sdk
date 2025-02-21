@@ -6,20 +6,27 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.ironsource.mediationsdk.IronSource
-import com.ironsource.mediationsdk.adunit.adapter.utility.AdInfo
-import com.ironsource.mediationsdk.logger.IronSourceError
-import com.ironsource.mediationsdk.model.Placement
-import com.ironsource.mediationsdk.sdk.LevelPlayRewardedVideoListener
+import com.unity3d.mediation.LevelPlay
+import com.unity3d.mediation.LevelPlayAdError
+import com.unity3d.mediation.LevelPlayAdInfo
+import com.unity3d.mediation.LevelPlayConfiguration
+import com.unity3d.mediation.LevelPlayInitError
+import com.unity3d.mediation.LevelPlayInitListener
+import com.unity3d.mediation.LevelPlayInitRequest
+import com.unity3d.mediation.rewarded.LevelPlayReward
+import com.unity3d.mediation.rewarded.LevelPlayRewardedAd
+import com.unity3d.mediation.rewarded.LevelPlayRewardedAdListener
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
 
 class IronSourceMediationRewardedFragment : Fragment(R.layout.fragment_ironsource_rewarded),
-    LevelPlayRewardedVideoListener {
+    LevelPlayRewardedAdListener {
     val TAG = IronSourceMediationRewardedFragment::class.java.simpleName
 
+    private lateinit var levelPlayRewarded: LevelPlayRewardedAd
+    private lateinit var loadButton: Button
     private lateinit var showButton: Button
     private lateinit var errorView: TextView
 
@@ -27,7 +34,9 @@ class IronSourceMediationRewardedFragment : Fragment(R.layout.fragment_ironsourc
         super.onViewCreated(view, savedInstanceState)
 
         errorView = view.findViewById(R.id.view_error)
+        loadButton = view.findViewById(R.id.button_load)
         showButton = view.findViewById(R.id.button_show)
+        showButton.isEnabled = false
 
         val adUnitId =
             SettingsManager.getInstance(requireActivity())
@@ -35,11 +44,17 @@ class IronSourceMediationRewardedFragment : Fragment(R.layout.fragment_ironsourc
 
         initializeIronSource()
 
-        showButton.isEnabled = IronSource.isRewardedVideoAvailable()
+        levelPlayRewarded = LevelPlayRewardedAd(adUnitId!!)
+        levelPlayRewarded.setListener(this)
+
+        loadButton.setOnClickListener {
+            errorView.text = ""
+            levelPlayRewarded.loadAd()
+        }
 
         showButton.setOnClickListener {
-            if (IronSource.isRewardedVideoAvailable()) {
-                IronSource.showRewardedVideo(adUnitId)
+            if (levelPlayRewarded.isAdReady()) {
+                levelPlayRewarded.showAd(requireActivity())
             }
         }
 
@@ -51,47 +66,46 @@ class IronSourceMediationRewardedFragment : Fragment(R.layout.fragment_ironsourc
         }
     }
 
-    override fun onAdShowFailed(error: IronSourceError?, info: AdInfo?) {
-        Log.d(TAG, "onAdShowFailed")
+    override fun onAdLoaded(adInfo: LevelPlayAdInfo) {
+        Log.d(TAG, "onAdLoaded")
+        displayLogs()
+        showButton.isEnabled = true
+    }
+
+    override fun onAdLoadFailed(error: LevelPlayAdError) {
+        Log.d(TAG, "onAdLoadFailed")
         activity?.let {
-            errorView.text = error?.errorMessage
+            errorView.text = error.getErrorMessage()
             showButton.isEnabled = false
         }
     }
 
-    override fun onAdOpened(info: AdInfo?) {
-        Log.d(TAG, "onAdOpened")
+    override fun onAdInfoChanged(adInfo: LevelPlayAdInfo) {
+        Log.d(TAG, "onAdInfoChanged")
+        super.onAdInfoChanged(adInfo)
     }
 
-    override fun onAdClosed(info: AdInfo?) {
-        activity?.let {
+    override fun onAdDisplayed(adInfo: LevelPlayAdInfo) {
+        Log.d(TAG, "onAdDisplayed")
+    }
+
+    override fun onAdDisplayFailed(error: LevelPlayAdError, adInfo: LevelPlayAdInfo) {
+        Log.e(TAG, "onAdDisplayFailed: " + error.getErrorMessage())
+        super.onAdDisplayFailed(error, adInfo)
+    }
+
+    override fun onAdClicked(adInfo: LevelPlayAdInfo) {
+        Log.d(TAG, "onAdClicked")
+        super.onAdClicked(adInfo)
+    }
+
+    override fun onAdClosed(adInfo: LevelPlayAdInfo) {
             Log.d(TAG, "onAdClosed")
             showButton.isEnabled = false
-        }
     }
 
-    override fun onAdClicked(placement: Placement?, info: AdInfo?) {
-        Log.d(TAG, "onAdClicked")
-    }
-
-    override fun onAdRewarded(placement: Placement?, info: AdInfo?) {
-        Log.d(TAG, "onAdRewarded")
-    }
-
-    override fun onAdAvailable(info: AdInfo?) {
-        activity?.let {
-            Log.d(TAG, "onAdAvailable")
-            displayLogs()
-            showButton.isEnabled = true
-        }
-    }
-
-    override fun onAdUnavailable() {
-        activity?.let {
-            Log.d(TAG, "onAdUnavailable")
-            displayLogs()
-            showButton.isEnabled = false
-        }
+    override fun onAdRewarded(reward: LevelPlayReward, adInfo: LevelPlayAdInfo) {
+        Log.d(TAG, "onAdRewarded: ${reward.amount} ${reward.name}")
     }
 
     private fun displayLogs() {
@@ -102,26 +116,21 @@ class IronSourceMediationRewardedFragment : Fragment(R.layout.fragment_ironsourc
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        IronSource.setLevelPlayRewardedVideoListener(this)
-    }
-
-    override fun onStop() {
-        IronSource.removeRewardedVideoListener()
-        super.onStop()
-    }
-
     private fun initializeIronSource() {
         val settings =
             SettingsManager.getInstance(requireContext()).getSettings().ironSourceSettings
         val appKey = settings?.appKey
         if (!appKey.isNullOrEmpty()) {
-            IronSource.setMetaData("is_test_suite", "enable")
-            IronSource.init(
-                requireActivity(), appKey, IronSource.AD_UNIT.BANNER,
-                IronSource.AD_UNIT.INTERSTITIAL, IronSource.AD_UNIT.REWARDED_VIDEO
-            )
+            val initRequest = LevelPlayInitRequest.Builder(appKey).build()
+            LevelPlay.init(requireActivity(), initRequest, object : LevelPlayInitListener {
+                override fun onInitSuccess(configuration: LevelPlayConfiguration) {
+
+                }
+
+                override fun onInitFailed(error: LevelPlayInitError) {
+
+                }
+            })
         }
     }
 }

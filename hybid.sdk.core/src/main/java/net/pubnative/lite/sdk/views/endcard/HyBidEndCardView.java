@@ -339,10 +339,16 @@ public class HyBidEndCardView extends FrameLayout {
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height);
         lp.gravity = Gravity.CENTER_VERTICAL;
         mHtmlEndCardView.setLayoutParams(lp);
-        htmlEndCardContainer.addView(mHtmlEndCardView);
-        if (endcardViewListener != null) {
-            endcardViewListener.onLoadSuccess(isCustomEndCard);
-            endcardViewListener.onShow(isCustomEndCard, endCardType);
+        if (htmlEndCardContainer != null) {
+            htmlEndCardContainer.addView(mHtmlEndCardView);
+            if (endcardViewListener != null) {
+                endcardViewListener.onLoadSuccess(isCustomEndCard);
+                endcardViewListener.onShow(isCustomEndCard, endCardType);
+            }
+        } else {
+            if (endcardViewListener != null) {
+                endcardViewListener.onLoadFail(isCustomEndCard);
+            }
         }
     }
 

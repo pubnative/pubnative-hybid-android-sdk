@@ -110,7 +110,7 @@ public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureList
 
     @Override
     public void mraidNativeFeatureOpenBrowser(String url) {
-        mUrlHandlerDelegate.handleUrl(url);
+        mUrlHandlerDelegate.handleUrl(url, null);
     }
 
     @Override

@@ -54,6 +54,7 @@ import net.pubnative.lite.sdk.utils.PNApiUrlComposer;
 import net.pubnative.lite.sdk.viewability.ViewabilityManager;
 import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 import net.pubnative.lite.sdk.vpaid.enums.AudioState;
+import net.pubnative.lite.sdk.vpaid.utils.FileUtils;
 
 public class HyBid {
     private static final String TAG = HyBid.class.getSimpleName();
@@ -150,6 +151,8 @@ public class HyBid {
 
         //sSDKConfigAPiClient = new SDKConfigAPiClient(application.getApplicationContext());
         //sSDKConfigAPiClient.setAppToken(appToken);
+
+        FileUtils.initParentDirAsync(application.getApplicationContext());
 
         if (application.getSystemService(Context.LOCATION_SERVICE) != null) {
             sLocationManager = new HyBidLocationManager(application);

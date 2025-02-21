@@ -41,12 +41,14 @@ import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.OpenRTBAdRequestFactory;
+import net.pubnative.lite.sdk.models.SdkEventType;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
 import net.pubnative.lite.sdk.rewarded.presenter.RewardedPresenter;
 import net.pubnative.lite.sdk.rewarded.presenter.RewardedPresenterFactory;
 import net.pubnative.lite.sdk.utils.AdEndCardManager;
 import net.pubnative.lite.sdk.utils.AdRequestRegistry;
+import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.SignalDataProcessor;
 import net.pubnative.lite.sdk.utils.MarkupUtils;
@@ -84,6 +86,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     private RequestManager mRequestManager;
     private RequestManager mORTBRequestManager;
     private RewardedPresenter mPresenter;
+    private AdTracker mAdTracker;
     private final Listener mListener;
     private final Context mContext;
     private final String mAppToken;
@@ -326,6 +329,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     public void prepareAd(Ad ad) {
         if (ad != null) {
             mAd = ad;
+            initializeAdTracker();
             if (!mAd.getZoneId().equalsIgnoreCase(mZoneId)) {
                 mZoneId = mAd.getZoneId();
                 JsonOperations.putJsonString(mPlacementParams, Reporting.Key.ZONE_ID, mZoneId);
@@ -416,6 +420,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
                         mAd = new Ad(assetGroupId, adValue, type);
                         mAd.setZoneId(mZoneId);
                         mAd.setHasEndCard(hasEndCard);
+                        initializeAdTracker();
                         HyBid.getAdCache().put(mZoneId, mAd);
                         HyBid.getVideoAdCache().put(mZoneId, adCacheItem);
                         mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, HyBidRewardedAd.this, mRequestManager.getIntegrationType());
@@ -444,6 +449,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
                 assetGroupId = 21;
                 type = Ad.AdType.HTML;
                 mAd = new Ad(assetGroupId, adValue, type);
+                initializeAdTracker();
                 HyBid.getAdCache().put(mZoneId, mAd);
                 mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, HyBidRewardedAd.this, mRequestManager.getIntegrationType());
                 if (mPresenter != null) {
@@ -516,6 +522,9 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
             } else {
                 Logger.e(TAG, exception.getMessage());
             }
+            sendLoadTracker(hyBidError.getErrorCode().getCode());
+        } else {
+            sendLoadTracker(HyBidErrorCode.UNKNOWN_ERROR.getCode());
         }
         if (mListener != null) {
             mListener.onRewardedLoadFailed(exception);
@@ -655,6 +664,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NULL_AD));
         } else {
             mAd = ad;
+            initializeAdTracker();
             renderAd();
         }
     }
@@ -735,5 +745,22 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
         if (mAd != null)
             return AdEndCardManager.isEndCardEnabled(mAd);
         return false;
+    }
+
+    private void initializeAdTracker() {
+        if (mAd != null) {
+            mAdTracker = new AdTracker(
+                    null,
+                    null,
+                    mAd.getBeacons(Ad.Beacon.SDK_EVENT),
+                    null,
+                    null);
+        }
+    }
+
+    private void sendLoadTracker(Integer errorCode) {
+        if (mAdTracker != null) {
+            mAdTracker.trackSdkEvent(SdkEventType.LOAD, errorCode);
+        }
     }
 }

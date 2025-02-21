@@ -13,9 +13,6 @@ import net.pubnative.lite.demo.ui.activities.chartboost.ChartboostMediationInter
 import net.pubnative.lite.demo.ui.activities.chartboost.ChartboostMediationRewardedVideoActivity
 import net.pubnative.lite.demo.ui.activities.chartboost.ChartboostMediationRewardedHtmlActivity
 import net.pubnative.lite.demo.ui.activities.dfp.*
-import net.pubnative.lite.demo.ui.activities.fairbid.FairbidMediationBannerActivity
-import net.pubnative.lite.demo.ui.activities.fairbid.FairbidMediationInterstitialActivity
-import net.pubnative.lite.demo.ui.activities.fairbid.FairbidMediationRewardedActivity
 import net.pubnative.lite.demo.ui.activities.ironsource.IronSourceMediationBannerActivity
 import net.pubnative.lite.demo.ui.activities.ironsource.IronSourceMediationInterstitialActivity
 import net.pubnative.lite.demo.ui.activities.ironsource.IronSourceMediationRewardedActivity
@@ -141,7 +138,7 @@ class MediationNavFragment : Fragment(R.layout.fragment_nav_mediation) {
             startActivity(intent)
         }
 
-        view.findViewById<Button>(R.id.button_fairbid_banner).setOnClickListener {
+        /*view.findViewById<Button>(R.id.button_fairbid_banner).setOnClickListener {
             val intent = Intent(activity, FairbidMediationBannerActivity::class.java)
             startActivity(intent)
         }
@@ -154,7 +151,7 @@ class MediationNavFragment : Fragment(R.layout.fragment_nav_mediation) {
         view.findViewById<Button>(R.id.button_fairbid_rewarded).setOnClickListener {
             val intent = Intent(activity, FairbidMediationRewardedActivity::class.java)
             startActivity(intent)
-        }
+        }*/
 
         view.findViewById<Button>(R.id.button_chartboost_banner).setOnClickListener {
             val intent = Intent(activity, ChartboostMediationBannerActivity::class.java)

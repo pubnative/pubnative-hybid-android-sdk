@@ -79,10 +79,7 @@ public class MRAIDBanner extends MRAIDView {
             state = STATE_DEFAULT;
             fireStateChangeEvent();
             fireReadyEvent();
-            if (isViewable) {
-                fireViewableChangeEvent();
-            }
-            fireExposureChangeEvent();
+            setViewable(getVisibility());
         }
     }
 }

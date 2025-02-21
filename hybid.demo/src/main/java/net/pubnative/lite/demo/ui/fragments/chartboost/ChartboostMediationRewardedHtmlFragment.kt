@@ -7,29 +7,32 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.chartboost.heliumsdk.HeliumSdk
-import com.chartboost.heliumsdk.ad.ChartboostMediationAdLoadRequest
-import com.chartboost.heliumsdk.ad.ChartboostMediationFullscreenAd
-import com.chartboost.heliumsdk.ad.ChartboostMediationFullscreenAdListener
-import com.chartboost.heliumsdk.ad.ChartboostMediationFullscreenAdLoadResult
-import com.chartboost.heliumsdk.domain.ChartboostMediationAdException
-import com.chartboost.heliumsdk.domain.Keywords
+import com.chartboost.chartboostmediationsdk.ad.ChartboostMediationAdShowResult
+import com.chartboost.chartboostmediationsdk.ad.ChartboostMediationFullscreenAd
+import com.chartboost.chartboostmediationsdk.ad.ChartboostMediationFullscreenAdListener
+import com.chartboost.chartboostmediationsdk.ad.ChartboostMediationFullscreenAdLoadRequest
+import com.chartboost.chartboostmediationsdk.ad.ChartboostMediationFullscreenAdLoadResult
+import com.chartboost.chartboostmediationsdk.ad.ChartboostMediationFullscreenAdShowListener
+import com.chartboost.chartboostmediationsdk.domain.ChartboostMediationAdException
+import com.chartboost.chartboostmediationsdk.domain.Keywords
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
+import net.pubnative.lite.demo.ui.fragments.chartboost.ChartboostMediationInterstitialFragment.Companion
 
-class ChartboostMediationRewardedHtmlFragment : Fragment(R.layout.fragment_chartboost_rewarded_html),
-    ChartboostMediationFullscreenAdListener {
+class ChartboostMediationRewardedHtmlFragment :
+    Fragment(R.layout.fragment_chartboost_rewarded_html),
+    ChartboostMediationFullscreenAdListener, ChartboostMediationFullscreenAdShowListener {
 
     companion object {
         private val TAG = ChartboostMediationInterstitialFragment::class.java.simpleName
     }
 
-    private var adRequest : ChartboostMediationAdLoadRequest? = null
-    private var heliumPlacementName : String? = null
+    private var adRequest: ChartboostMediationFullscreenAdLoadRequest? = null
+    private var chartboostPlacementName: String? = null
     private lateinit var loadButton: Button
     private lateinit var showButton: Button
     private lateinit var errorView: TextView
@@ -43,11 +46,11 @@ class ChartboostMediationRewardedHtmlFragment : Fragment(R.layout.fragment_chart
         showButton = view.findViewById(R.id.button_show)
         showButton.isEnabled = false
 
-        heliumPlacementName = SettingsManager.getInstance(requireActivity()).getSettings()
+        chartboostPlacementName = SettingsManager.getInstance(requireActivity()).getSettings()
             .chartboostSettings?.mediationRewardedHtmlAdUnitId
 
-        adRequest = heliumPlacementName?.let {
-            ChartboostMediationAdLoadRequest(
+        adRequest = chartboostPlacementName?.let {
+            ChartboostMediationFullscreenAdLoadRequest(
                 it,
                 Keywords()
             )
@@ -64,7 +67,11 @@ class ChartboostMediationRewardedHtmlFragment : Fragment(R.layout.fragment_chart
     private fun loadAd() {
         if (adRequest != null) {
             lifecycleScope.launch(Dispatchers.IO) {
-                loadResult = HeliumSdk.loadFullscreenAd(requireContext(), adRequest!!, this@ChartboostMediationRewardedHtmlFragment)
+                loadResult = ChartboostMediationFullscreenAd.loadFullscreenAd(
+                    requireContext(),
+                    adRequest!!,
+                    this@ChartboostMediationRewardedHtmlFragment
+                )
                 if (loadResult.ad != null) {
                     withContext(Dispatchers.Main) {
                         showButton.isEnabled = true
@@ -77,7 +84,10 @@ class ChartboostMediationRewardedHtmlFragment : Fragment(R.layout.fragment_chart
 
     private fun showAd() {
         lifecycleScope.launch {
-            loadResult.ad?.show(requireContext())
+            loadResult.ad?.showFullscreenAdFromJava(
+                requireActivity(),
+                this@ChartboostMediationRewardedHtmlFragment
+            )
             showButton.isEnabled = false
         }
     }
@@ -86,6 +96,10 @@ class ChartboostMediationRewardedHtmlFragment : Fragment(R.layout.fragment_chart
     // Chartboost Listeners
     override fun onAdClicked(ad: ChartboostMediationFullscreenAd) {
         Log.d(TAG, "onAdClicked")
+    }
+
+    override fun onAdShown(result: ChartboostMediationAdShowResult) {
+        Log.d(TAG, "onAdShown")
     }
 
     override fun onAdClosed(

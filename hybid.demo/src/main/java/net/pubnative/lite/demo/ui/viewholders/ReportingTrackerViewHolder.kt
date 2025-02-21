@@ -14,11 +14,13 @@ class ReportingTrackerViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     fun bind(tracker: ReportingTracker) {
         this.tracker = tracker
         var content = "";
-        if(TextUtils.isEmpty(tracker.url)){
-            itemView.findViewById<TextView>(R.id.trackerContentLabel).text = itemView.context.getText(R.string.tracker_content)
+        if (TextUtils.isEmpty(tracker.url)) {
+            itemView.findViewById<TextView>(R.id.trackerContentLabel).text =
+                itemView.context.getText(R.string.tracker_content)
             content = tracker.js
-        }else{
-            itemView.findViewById<TextView>(R.id.trackerContentLabel).text = itemView.context.getText(R.string.tracker_report_url)
+        } else {
+            itemView.findViewById<TextView>(R.id.trackerContentLabel).text =
+                itemView.context.getText(R.string.tracker_report_url)
             content = tracker.url
         }
         itemView.findViewById<TextView>(R.id.trackerUrl).text = content
@@ -27,7 +29,7 @@ class ReportingTrackerViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         initOnClicks()
     }
 
-    private fun initOnClicks(){
+    private fun initOnClicks() {
         itemView.findViewById<TextView>(R.id.trackerUrl).setOnClickListener {
             ClipboardUtils.copyToClipboard(
                 itemView.context,

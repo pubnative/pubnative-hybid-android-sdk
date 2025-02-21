@@ -78,9 +78,9 @@ public class Constants {
     public static final String ADMOB_NATIVE_AD_UNIT = "ca-app-pub-8741261465579918/3727382007";
 
     public static final String IRONSOURCE_APP_KEY = "120ac03ad";
-    public static final String IRONSOURCE_BANNER_AD_UNIT = "HyBid_Banner";
-    public static final String IRONSOURCE_INTERSTITIAL_AD_UNIT = "HyBid_Interstitial";
-    public static final String IRONSOURCE_REWARDED_AD_UNIT = "HyBid_Rewarded";
+    public static final String IRONSOURCE_BANNER_AD_UNIT = "bxqhgzgostg09aki";
+    public static final String IRONSOURCE_INTERSTITIAL_AD_UNIT = "1xqd67gqauwp3ahd";
+    public static final String IRONSOURCE_REWARDED_AD_UNIT = "5k15zfnuea4iuovp";
 
     public static final String MAXADS_SDK_KEY = "sMRyqsHzbW5B55p5RLfJTNaXBH1rFzvkU5_LGa_Kerigolzf62Jl6iwzLtMIqn2XRt0tDol1bAc8g0N7C7c51N";
     public static final String MAXADS_BANNER_AD_UNIT = "a6eea664dbc57ba2";

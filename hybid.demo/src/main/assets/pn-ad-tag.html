@@ -1,0 +1,62 @@
+<script class="pn-ad-tag" type="text/javascript">
+    (function(beacons, trackerURL, options){
+      var delay = 1, passed = 0, fired = false, readyBinded = false, viewableBinded = false;
+      function fire(url) {
+        (new Image).src = url;
+        return true
+      }
+      function fireAll() {
+        if (fired) return;
+        fired = true;
+        for (var i = 0; i < beacons.length; i++) fire(beacons[i]);
+      }
+      function findMraidScript() {
+        var a = document.createElement("a");
+        for (var i = 0; i < document.scripts.length; i++) {
+          a.href = document.scripts[i].src;
+          if (a.pathname.endsWith("/mraid.js") || a.pathname.endsWith("/mraid-main.js")) return true
+        }
+        return false
+      }
+      function bindToViewableChange() {
+        if (!viewableBinded) {
+          viewableBinded = true;
+          mraid.addEventListener("viewableChange", handleViewableChange)
+        }
+        handleViewableChange()
+      }
+      function handleViewableChange() {
+        if (typeof mraid.isViewable === "function" && (mraid.isViewable() === "true" || mraid.isViewable() === true)) fireAll()
+      }
+      function bindEvents() {
+        if (typeof mraid === "object" && typeof mraid.getState === "function" && typeof mraid.addEventListener === "function") {
+          if (mraid.getState() === "loading") {
+            if (!readyBinded) {
+              readyBinded = true;
+              mraid.addEventListener("ready", bindToViewableChange)
+            }
+          } else if (!viewableBinded) mraid.addEventListener("viewableChange", handleViewableChange);
+          handleViewableChange();
+        } else if (findMraidScript()) {
+          if (passed > 1E4) {
+            return
+          }
+        } else if (passed > 500) {
+          fireAll();
+          return
+        } else {
+        }
+        if (!fired) {
+          passed += delay;
+          setTimeout(bindEvents, delay);
+          delay = 100
+        }
+      }
+      if (typeof window.mraid === "object") {
+        bindEvents();
+      } else {
+        fireAll();
+      }
+      bindEvents();
+    })([],"https://got.pubnative.net/imp/error?t=Qd-nn8Zn3YQ4QMbaZ84gdpf6fDoIvKSaQtKNStrFTGKx3VKXPramg3Axj78AcooSYEyYxiIYIVGIg8tu5GlhVSTxo498Js1aZKq4KsI9P8Bipuu43-uJIJvKNh18TxuP1eUCva1YxO3VWS_oHD9hg5wYvRjKSZT2vbUsKm8qj-LB4SxO1pbFYvrA-knLOh88&msg=", {"pubAppID":2578887,"pubID":1008880,"dspID":986,"dspName":"","impID":"62218062-2f83-4bf2-9130-6182376c245e","crid":"vtcfuub8","pubName":"","isMRAID":false,"isHTML5":false});</script>
+{[{ .Adm | safeHTML }]}

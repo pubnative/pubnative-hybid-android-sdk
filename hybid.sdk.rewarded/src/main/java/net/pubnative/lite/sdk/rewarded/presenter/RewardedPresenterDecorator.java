@@ -26,12 +26,15 @@ import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.CustomEndCardListener;
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.AuxiliaryAdEventType;
 import net.pubnative.lite.sdk.models.IntegrationType;
+import net.pubnative.lite.sdk.models.SdkEventType;
 import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.Logger;
@@ -133,6 +136,8 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             return;
         }
 
+        mAdTrackingDelegate.trackSdkEvent(SdkEventType.LOAD, null);
+
         mListener.onRewardedLoaded(rewardedPresenter);
     }
 
@@ -163,6 +168,7 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
         }
 
         mAdTrackingDelegate.trackImpression();
+        mAdTrackingDelegate.trackSdkEvent(SdkEventType.SHOW, null);
         mListener.onRewardedOpened(rewardedPresenter);
         mImpressionTracked = true;
     }
@@ -320,6 +326,7 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
         }
 
         Logger.d(TAG, errorMessage);
+        mAdTrackingDelegate.trackSdkEvent(SdkEventType.LOAD, HyBidErrorCode.UNKNOWN_ERROR.getCode());
         mListener.onRewardedError(rewardedPresenter);
     }
 
@@ -347,6 +354,7 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             mReportingController.reportEvent(reportingEvent);
         }
 
+        mAdTrackingDelegate.trackCustomEndcardEvent(AuxiliaryAdEventType.IMPRESSION, null);
         mCustomEndCardTrackingDelegate.trackImpression();
         mCustomEndCardImpressionTracked = true;
     }
@@ -375,6 +383,8 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             mReportingController.reportEvent(reportingEvent);
         }
 
+        mAdTrackingDelegate.trackClick();
+        mAdTrackingDelegate.trackCustomEndcardEvent(AuxiliaryAdEventType.CLICK, null);
         mCustomEndCardTrackingDelegate.trackClick();
         mCustomEndCardClickTracked = true;
     }
@@ -403,6 +413,7 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             mReportingController.reportEvent(reportingEvent);
         }
 
+        mAdTrackingDelegate.trackCompanionAdEvent(AuxiliaryAdEventType.IMPRESSION, null);
         mDefaultEndCardImpressionTracked = true;
     }
 
@@ -429,6 +440,7 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             mReportingController.reportEvent(reportingEvent);
         }
 
+        mAdTrackingDelegate.trackCompanionAdEvent(AuxiliaryAdEventType.CLICK, null);
         mDefaultEndCardClickTracked = true;
     }
 
@@ -466,10 +478,13 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             return;
         }
         String event_type = "";
-        if (isCustomEndCard)
+        if (isCustomEndCard) {
             event_type = Reporting.EventType.CUSTOM_END_CARD_LOAD_FAILURE;
-        else
+            mAdTrackingDelegate.trackCustomEndcardEvent(AuxiliaryAdEventType.ERROR, HyBidErrorCode.UNKNOWN_ERROR.getCode());
+        } else {
             event_type = Reporting.EventType.DEFAULT_END_CARD_LOAD_FAILURE;
+            mAdTrackingDelegate.trackCompanionAdEvent(AuxiliaryAdEventType.ERROR, HyBidErrorCode.UNKNOWN_ERROR.getCode());
+        }
         if (mReportingController != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(event_type);

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:left="4sp"
+        android:top="4sp">
+
+        <bitmap android:src="@drawable/browser_core_lock" />
+
+    </item>
+
+</layer-list>

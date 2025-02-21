@@ -7,16 +7,18 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.chartboost.heliumsdk.ad.HeliumBannerAd
-import com.chartboost.heliumsdk.ad.HeliumBannerAdListener
-import com.chartboost.heliumsdk.domain.ChartboostMediationAdException
+import com.chartboost.chartboostmediationsdk.ad.ChartboostMediationBannerAdLoadListener
+import com.chartboost.chartboostmediationsdk.ad.ChartboostMediationBannerAdLoadRequest
+import com.chartboost.chartboostmediationsdk.ad.ChartboostMediationBannerAdLoadResult
+import com.chartboost.chartboostmediationsdk.ad.ChartboostMediationBannerAdView
+import com.chartboost.chartboostmediationsdk.ad.ChartboostMediationBannerAdViewListener
+import com.chartboost.chartboostmediationsdk.domain.Keywords
 import net.pubnative.lite.demo.R
-import net.pubnative.lite.demo.managers.SettingsManager
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.util.ClipboardUtils
 
 class ChartboostMediationLeaderboardFragment : Fragment(R.layout.fragment_chartboost_leaderboard),
-    HeliumBannerAdListener {
+    ChartboostMediationBannerAdLoadListener, ChartboostMediationBannerAdViewListener {
 
     companion object {
         private val TAG = ChartboostMediationLeaderboardFragment::class.java.simpleName
@@ -25,9 +27,10 @@ class ChartboostMediationLeaderboardFragment : Fragment(R.layout.fragment_chartb
     private lateinit var loadButton: Button
     private lateinit var chartboostBannerContainer: FrameLayout
     private lateinit var errorView: TextView
-    private var adView: HeliumBannerAd? = null
-    private var heliumPlacementName : String? = null
-    private val bannerSize = HeliumBannerAd.HeliumBannerSize.LEADERBOARD
+    private var adView: ChartboostMediationBannerAdView? = null
+    private var chartboostPlacementName: String? = null
+    private val bannerSize =
+        ChartboostMediationBannerAdView.ChartboostMediationBannerSize.LEADERBOARD
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -39,15 +42,26 @@ class ChartboostMediationLeaderboardFragment : Fragment(R.layout.fragment_chartb
         /*heliumPlacementName = SettingsManager.getInstance(requireActivity())
             .getSettings().chartboostSettings?.mediationMrectVideoAdUnitId*/
 
-        if (heliumPlacementName != null) {
-            adView = HeliumBannerAd(requireContext(), heliumPlacementName!!, bannerSize, this)
+        if (chartboostPlacementName != null) {
+            adView = ChartboostMediationBannerAdView(
+                requireContext(),
+                chartboostPlacementName!!,
+                bannerSize,
+                this
+            )
             if (adView != null) {
                 chartboostBannerContainer.addView(adView)
             }
         }
 
         loadButton.setOnClickListener {
-            adView?.load()
+            adView?.loadFromJava(
+                ChartboostMediationBannerAdLoadRequest(
+                    chartboostPlacementName!!,
+                    Keywords(),
+                    bannerSize
+                ), this
+            )
         }
 
         errorView.setOnClickListener {
@@ -63,15 +77,14 @@ class ChartboostMediationLeaderboardFragment : Fragment(R.layout.fragment_chartb
         adView?.destroy()
     }
 
-    // Helium Listener
-    override fun onAdCached(
-        placementName: String,
-        loadId: String,
-        winningBidInfo: Map<String, String>,
-        error: ChartboostMediationAdException?
-    ) {
-        Log.d(TAG, "onAdCached")
+    // Chartboost Listener
+    override fun onAdLoaded(result: ChartboostMediationBannerAdLoadResult) {
+        Log.d(TAG, "onAdLoaded")
         displayLogs()
+    }
+
+    override fun onAdViewAdded(placement: String, child: View?) {
+        Log.d(TAG, "onAdViewAdded")
     }
 
     override fun onAdClicked(placementName: String) {

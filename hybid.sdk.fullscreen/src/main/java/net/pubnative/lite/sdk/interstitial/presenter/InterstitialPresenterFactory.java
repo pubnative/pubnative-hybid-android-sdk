@@ -69,11 +69,20 @@ public class InterstitialPresenterFactory {
         }
 
         final InterstitialPresenterDecorator interstitialPresenterDecorator =
-                new InterstitialPresenterDecorator(interstitialPresenter,
-                        new AdTracker(ad.getBeacons(Ad.Beacon.IMPRESSION), ad.getBeacons(Ad.Beacon.CLICK)),
-                        new AdTracker(ad.getBeacons(Ad.Beacon.CUSTOM_END_CARD_IMPRESSION), ad.getBeacons(Ad.Beacon.CUSTOM_END_CARD_CLICK)),
+                new InterstitialPresenterDecorator(
+                        interstitialPresenter,
+                        new AdTracker(
+                                ad.getBeacons(Ad.Beacon.IMPRESSION),
+                                ad.getBeacons(Ad.Beacon.CLICK),
+                                ad.getBeacons(Ad.Beacon.SDK_EVENT),
+                                ad.getBeacons(Ad.Beacon.COMPANION_AD_EVENT),
+                                ad.getBeacons(Ad.Beacon.CUSTOM_ENDCARD_EVENT)),
+                        new AdTracker(
+                                ad.getBeacons(Ad.Beacon.CUSTOM_END_CARD_IMPRESSION),
+                                ad.getBeacons(Ad.Beacon.CUSTOM_END_CARD_CLICK)),
                         HyBid.getReportingController(),
-                        interstitialPresenterListener, integrationType);
+                        interstitialPresenterListener,
+                        integrationType);
         interstitialPresenter.setListener(interstitialPresenterDecorator);
         interstitialPresenter.setVideoListener(interstitialPresenterDecorator);
         interstitialPresenter.setCustomEndCardListener(interstitialPresenterDecorator);

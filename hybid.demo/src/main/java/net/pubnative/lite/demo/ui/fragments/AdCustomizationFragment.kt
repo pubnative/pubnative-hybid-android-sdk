@@ -34,6 +34,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
     private lateinit var rewardedHtmlSkipOffsetInput: EditText
     private lateinit var rewardedVideoSkipOffsetInput: EditText
     private lateinit var endCardCloseButtonDelayInput: EditText
+    private lateinit var navigationModeInput: EditText
     private lateinit var contentInfoUrlInput: EditText
     private lateinit var contentInfoIconUrlInput: EditText
     private lateinit var contentInfoIconClickActionGroup: RadioGroup
@@ -65,6 +66,8 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
     private lateinit var cbInputRewardedSkipOffset: CheckBox
     private lateinit var cbInputRewardedVideoSkipOffset: CheckBox
     private lateinit var cbInputEndcardCloseButtonDelay: CheckBox
+    private lateinit var cbInputNavigationMode: CheckBox
+    private lateinit var cbLandingPage: CheckBox
     private lateinit var cbGroupClickBehaviour: CheckBox
     private lateinit var cbContentInfoUrl: CheckBox
     private lateinit var cbContentInfoIconUrl: CheckBox
@@ -86,6 +89,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
     private lateinit var enableCustomEndcardSwitch: SwitchCompat
     private lateinit var enableCustomCTASwitch: SwitchCompat
     private lateinit var enableReducedButtonsSwitch: SwitchCompat
+    private lateinit var landingPageSwitch: SwitchCompat
 
     private lateinit var adCustomizationsManager: AdCustomizationsManager
     private lateinit var prefs: AdCustomizationPrefs
@@ -110,7 +114,9 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
         enableEndcardSwitch = requireView().findViewById(R.id.check_enable_endcard)
         enableCustomEndcardSwitch = requireView().findViewById(R.id.check_enable_custom_endcard)
         enableCustomCTASwitch = requireView().findViewById(R.id.check_custom_cta_enabled)
-        enableReducedButtonsSwitch = requireView().findViewById(R.id.check_reduced_close_skip_buttons)
+        enableReducedButtonsSwitch =
+            requireView().findViewById(R.id.check_reduced_close_skip_buttons)
+        landingPageSwitch = requireView().findViewById(R.id.check_landing_page)
 
         htmlSkipOffsetInput = requireView().findViewById(R.id.input_skip_offset)
         videoSkipOffsetInput = requireView().findViewById(R.id.input_video_skip_offset)
@@ -119,6 +125,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
             requireView().findViewById(R.id.input_rewarded_video_skip_offset)
         endCardCloseButtonDelayInput =
             requireView().findViewById(R.id.input_endcard_close_button_delay)
+        navigationModeInput = requireView().findViewById(R.id.input_navigation_mode)
         clickBehaviourGroup = requireView().findViewById(R.id.group_click_behaviour)
         countdownStyleGroup = requireView().findViewById(R.id.countdown_style)
         impTracking = requireView().findViewById(R.id.input_imp_tracking)
@@ -154,6 +161,8 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
             requireView().findViewById(R.id.cb_input_rewarded_video_skip_offset)
         cbInputEndcardCloseButtonDelay =
             requireView().findViewById(R.id.cb_input_endcard_close_button_delay)
+        cbInputNavigationMode = requireView().findViewById(R.id.cb_input_navigation_mode)
+        cbLandingPage = requireView().findViewById(R.id.cb_landing_page)
         cbGroupClickBehaviour = requireView().findViewById(R.id.cb_group_click_behaviour)
         cbInputCloseButtonDelay = requireView().findViewById(R.id.cb_input_close_button_delay)
         cbContentInfoUrl = requireView().findViewById(R.id.cb_input_content_info_url)
@@ -230,6 +239,14 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
 
         cbInputEndcardCloseButtonDelay.setOnCheckedChangeListener { p0, checked ->
             endCardCloseButtonDelayInput.isEnabled = checked
+        }
+
+        cbInputNavigationMode.setOnCheckedChangeListener { p0, checked ->
+            navigationModeInput.isEnabled = checked
+        }
+
+        cbLandingPage.setOnCheckedChangeListener { p0, checked ->
+            landingPageSwitch.isEnabled = checked
         }
 
         cbImpTracking.setOnCheckedChangeListener { p0, checked ->
@@ -373,12 +390,20 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
         rewardedVideoSkipOffsetInput.setText(adCustomizationsManager.rewarded_video_skip_offset_value)
         rewardedVideoSkipOffsetInput.isEnabled =
             adCustomizationsManager.rewarded_video_skip_offset_enabled
-        //End CArd Close Button Delay
+        //End Card Close Button Delay
         cbInputEndcardCloseButtonDelay.isChecked =
             adCustomizationsManager.end_card_close_delay_skip_offset_enabled
         endCardCloseButtonDelayInput.setText(adCustomizationsManager.end_card_close_delay_skip_offset_value)
         endCardCloseButtonDelayInput.isEnabled =
             adCustomizationsManager.end_card_close_delay_skip_offset_enabled
+        // Navigation mode
+        navigationModeInput.setText(adCustomizationsManager.navigation_mode_value)
+        navigationModeInput.isEnabled = adCustomizationsManager.navigation_mode_enabled
+        cbInputNavigationMode.isChecked = adCustomizationsManager.navigation_mode_enabled
+        // Landing page
+        cbLandingPage.isChecked = adCustomizationsManager.landing_page_enabled
+        landingPageSwitch.isEnabled = adCustomizationsManager.landing_page_enabled
+        landingPageSwitch.isChecked = adCustomizationsManager.landing_page_value
         //Click Behaviour
         cbGroupClickBehaviour.isChecked = adCustomizationsManager.click_behaviour_enabled
         cbImpTracking.isChecked = adCustomizationsManager.imp_tracking_enabled
@@ -463,8 +488,6 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
 
         customEndCardHTML.setText(prefs.getCustomEndCardHTML())
 
-
-
         bundleId.setText(prefs.getBundleId())
 
         //Custom CTA
@@ -485,7 +508,6 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
             }
         }
         customCTATypeGroup.check(selectedCustomCTAType)
-
     }
 
     private fun isValidCustomisation(): Boolean {
@@ -530,6 +552,12 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
                         return false
                     }
                 }
+            }
+
+            if (cbInputNavigationMode.isChecked &&
+                navigationModeInput.text.toString().trim().isEmpty()
+            ) {
+                return false
             }
 
             if (cbInputCustomCTADelay.isChecked && customCTADelay.text.toString().trim()
@@ -679,6 +707,10 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
                 enableCustomEndcardSwitch.isChecked,
                 cbEnableCustomEndcardDisplay.isChecked,
                 customEndCardDisplay,
+                cbInputNavigationMode.isChecked,
+                navigationModeInput.text.toString(),
+                cbLandingPage.isChecked,
+                landingPageSwitch.isChecked,
                 cbAutoCloseRewarded.isChecked,
                 enableAutoCloseSwitchRewarded.isChecked,
                 cbInputSkipOffset.isChecked,

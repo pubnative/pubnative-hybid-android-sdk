@@ -6,6 +6,8 @@ import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.VpaidConstants;
 
 import java.io.File;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class FileUtils {
 
@@ -56,6 +58,14 @@ public class FileUtils {
         }
 
         return cachedParentDir;
+    }
+
+    public static void initParentDirAsync(Context context) {
+        if (context != null && cachedParentDir == null) {
+            Executor executor = Executors.newSingleThreadExecutor();
+            executor.execute(() ->
+                    cachedParentDir = context.getExternalFilesDir(VpaidConstants.FILE_FOLDER));
+        }
     }
 
     public static void clearCache(Context context) {

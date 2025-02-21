@@ -3,6 +3,8 @@ package net.pubnative.lite.demo.ui.fragments.markup
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.*
 import androidx.fragment.app.Fragment
@@ -33,6 +35,8 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
     private lateinit var creativeIdView: TextView
     private lateinit var markupList: RecyclerView
     private lateinit var urWrapCheckbox: CheckBox
+    private lateinit var urTitleView: TextView
+    private lateinit var urTemplateRadioGroup: RadioGroup
     private lateinit var loadButton: MaterialButton
     private lateinit var showButton: MaterialButton
     private lateinit var adCustomization: MaterialButton
@@ -56,6 +60,8 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
         creativeIdLabel = view.findViewById(R.id.label_creative_id)
         creativeIdView = view.findViewById(R.id.view_creative_id)
         urWrapCheckbox = view.findViewById(R.id.check_ur_wrap)
+        urTitleView = view.findViewById(R.id.universal_rendering_templates_title)
+        urTemplateRadioGroup = view.findViewById(R.id.group_rendering_templates)
         markupList = view.findViewById(R.id.list_markup)
         markupList.isNestedScrollingEnabled = false
         loadButton = view.findViewById(R.id.button_load)
@@ -200,6 +206,17 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
 
         urWrapCheckbox.setOnCheckedChangeListener { _, isChecked ->
             markupViewModel.setURWrap(isChecked)
+            if (isChecked) {
+                urTitleView.visibility = View.VISIBLE
+                urTemplateRadioGroup.visibility = View.VISIBLE
+            } else {
+                urTitleView.visibility = View.GONE
+                urTemplateRadioGroup.visibility = View.GONE
+            }
+        }
+
+        urTemplateRadioGroup.setOnCheckedChangeListener { _, checkedId ->
+           fetchCustomURTemplate(checkedId)
         }
 
         fetchURTemplate()
@@ -217,8 +234,14 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
         val interstitialListener = object : HyBidInterstitialAd.Listener {
             override fun onInterstitialLoaded() {
                 Logger.d(TAG, "onInterstitialLoaded")
-                displayLogs()
-                showButton.isEnabled = true
+                val mainHandler = Handler(Looper.getMainLooper())
+
+                val runnable = Runnable {
+                    displayLogs()
+                    showButton.isEnabled = true
+                }
+
+                mainHandler.post(runnable)
             }
 
             override fun onInterstitialLoadFailed(error: Throwable?) {
@@ -258,8 +281,14 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
         val rewardedListener = object : HyBidRewardedAd.Listener {
             override fun onRewardedLoaded() {
                 Logger.d(TAG, "onRewardedLoaded")
-                displayLogs()
-                showButton.isEnabled = true
+                val mainHandler = Handler(Looper.getMainLooper())
+
+                val runnable = Runnable {
+                    displayLogs()
+                    showButton.isEnabled = true
+                }
+
+                mainHandler.post(runnable)
             }
 
             override fun onRewardedLoadFailed(error: Throwable?) {
@@ -331,6 +360,34 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
         }
         markupViewModel.setURTemplate(urTemplate)
     }
+
+    private fun fetchCustomURTemplate(checkedId: Int) {
+        val templateFileName = when (checkedId) {
+            R.id.radio_template_default -> "ur.html"
+            R.id.radio_template_final -> "ur_template_final.html"
+            R.id.radio_template_one -> "ur_template_one.html"
+            R.id.radio_template_two -> "ur_template_two.html"
+            R.id.radio_template_three -> "ur_template_three.html"
+            R.id.radio_template_four -> "ur_template_four.html"
+            R.id.radio_template_five -> "ur_template_five.html"
+            R.id.radio_template_six -> "ur_template_six.html"
+            R.id.radio_template_seven -> "ur_template_seven.html"
+            R.id.radio_template_new -> "ur_template_new.html"
+            R.id.radio_template_four_without_container -> "ur_template_four_without_container.html"
+            R.id.radio_template_one_pre_rendering -> "ur_template_one_pre_rendering.html"
+            R.id.radio_pnadtag -> "pn-ad-tag.html"
+
+            else -> "ur.html"
+        }
+
+        val urlTemplate =
+            requireContext().assets.open(templateFileName).bufferedReader().use {
+                it.readText()
+            }
+
+        markupViewModel.setURTemplate(urlTemplate)
+    }
+
 
     private fun openUrlInExternalBrowser() {
         if (groupMarkupType.checkedRadioButtonId == R.id.radio_url) {

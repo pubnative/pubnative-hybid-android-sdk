@@ -122,17 +122,25 @@ public class MRAIDView extends FrameLayout {
     // used to differentiate logging
     private static final String MRAID_LOG_TAG = MRAIDView.class.getSimpleName();
     private static final CountdownStyle COUNTDOWN_STYLE_DEFAULT = CountdownStyle.PIE_CHART;
+    private static final int LANDING_PAGE_CLOSE_DELAY = 30000;
     private final boolean isExpandEnabled;
+    private boolean isLandingPageEnabled;
 
     private final Boolean showTimerBeforeEndCard;
 
     private Integer mSkipTimeMillis = -1;
 
     private Integer mNativeCloseButtonDelay = -1;
+    private Integer mClickCounter = 0;
     private Boolean isBackClickable = false;
     private SimpleTimer mExpirationTimer;
     private SimpleTimer mNativeCloseButtonTimer;
     private SimpleTimer mAntilockTimer;
+
+    private String setCustomisationString;
+    private String landingBehaviourString;
+    private Integer landingPageDelay = 30000;
+    private boolean isFinalPage = false;
 
     public void handleNativeCloseButtonDelay() {
         mNativeCloseButtonTimer = new SimpleTimer(mNativeCloseButtonDelay, new SimpleTimer.Listener() {
@@ -273,6 +281,7 @@ public class MRAIDView extends FrameLayout {
     // state to help set positions and sizes
     protected boolean isPageFinished;
     protected boolean isLaidOut;
+    protected boolean isViewabilityConfirmed = false;
     private boolean isForcingFullScreen;
     private boolean isExpandingFromDefault;
     private boolean isExpandingPart2;
@@ -615,6 +624,51 @@ public class MRAIDView extends FrameLayout {
         } catch (Exception e) {
             HyBid.reportException(e);
             Logger.e(MRAID_LOG_TAG, e.getMessage());
+        }
+    }
+
+    private void parseAdExperienceUrl(String commandUrl) {
+        MRAIDLog.d(MRAID_LOG_TAG, "parseAdExperienceUrl " + commandUrl);
+
+        String setCustomisationPattern = "verveadexperience://setcustomisation\\?text=(.+)";
+        String landingBehaviourPattern = "verveadexperience://landingbehaviour\\?text=(.+)";
+        String closeDelayPattern = "verveadexperience://closedelay\\?text=(.+)";
+        String finalPagePattern = "verveadexperience://setfinalpage";
+
+        try {
+            if (commandUrl.matches(setCustomisationPattern)) {
+                String base64Text = commandUrl.replaceFirst(setCustomisationPattern, "$1");
+                byte[] decodedBytes = Base64.decode(base64Text, Base64.DEFAULT);
+                this.setCustomisationString = new String(decodedBytes);
+                if (!setCustomisationString.isEmpty()) {
+                    useCustomClose = false;
+                    if (mNativeCloseButtonTimer != null) {
+                        mNativeCloseButtonTimer.cancel();
+                        mNativeCloseButtonTimer = null;
+                        postDelayed(MRAIDView.this::startSkipTimer, 1000);
+                    }
+                }
+            } else if (commandUrl.matches(landingBehaviourPattern)) {
+                String base64Text = commandUrl.replaceFirst(landingBehaviourPattern, "$1");
+                byte[] decodedBytes = Base64.decode(base64Text, Base64.DEFAULT);
+                this.landingBehaviourString = new String(decodedBytes);
+            } else if (commandUrl.matches(closeDelayPattern)) {
+                String base64Text = commandUrl.replaceFirst(closeDelayPattern, "$1");
+                byte[] decodedBytes = Base64.decode(base64Text, Base64.DEFAULT);
+                String delayString = new String(decodedBytes);
+                try {
+                    landingPageDelay = Integer.parseInt(delayString);
+                }
+                catch (NumberFormatException e) {
+                    // do nothing
+                }
+                validateDelay();
+            } else if (commandUrl.matches(finalPagePattern)) {
+                isFinalPage = true;
+                handleLandingPageBehavior();
+            }
+        } catch (RuntimeException e) {
+            Logger.d(MRAID_LOG_TAG, "Error parsing Ad Experience: " + e);
         }
     }
 
@@ -1395,7 +1449,6 @@ public class MRAIDView extends FrameLayout {
     protected void fireExposureChangeEvent() {
 
         //TODO: We should validate it later in terms of exposure
-
         double exposure = 0.0;
         if (isViewable) exposure = 100.0;
 
@@ -1595,6 +1648,9 @@ public class MRAIDView extends FrameLayout {
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
+            if (hasLandingPage()) {
+                handleSetCustomisationInjection();
+            }
             cancelAntilockTimer();
             MRAIDLog.d(MRAID_LOG_TAG, "onPageFinished: " + url);
             if (state == STATE_LOADING) {
@@ -1618,9 +1674,10 @@ public class MRAIDView extends FrameLayout {
                         state = STATE_DEFAULT;
                         fireStateChangeEvent();
                         fireReadyEvent();
-                        if (isViewable) {
+                        setViewable(isViewable ? VISIBLE : GONE);
+                        /*if (isViewable) {
                             fireViewableChangeEvent();
-                        }
+                        }*/
                     }
                 }
 
@@ -1672,10 +1729,7 @@ public class MRAIDView extends FrameLayout {
                     MRAIDLog.d(MRAID_LOG_TAG, "calling fireStateChangeEvent 2");
                     fireStateChangeEvent();
                     fireReadyEvent();
-                    if (isViewable) {
-                        fireViewableChangeEvent();
-                    }
-                    fireExposureChangeEvent();
+                    setViewable(isViewable ? VISIBLE : GONE);
                 });
             }
         }
@@ -1745,8 +1799,17 @@ public class MRAIDView extends FrameLayout {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             MRAIDLog.d(MRAID_LOG_TAG, "shouldOverrideUrlLoading: " + url);
+            if (isFinalPage) {
+                cancelLandingPageBehaviour();
+            }
             if (url.startsWith("mraid://")) {
                 parseCommandUrl(url);
+            } else if (url.startsWith("verveadexperience://")) {
+                if (isLandingPageEnabled) {
+                    parseAdExperienceUrl(url);
+                }
+            } else if (hasLandingPage() && !isFinalPage) {
+                return false;
             } else {
                 // Fix for Verve custom creatives
                 if (isVerveCustomExpand(url)) {
@@ -1867,15 +1930,18 @@ public class MRAIDView extends FrameLayout {
         setViewable(actualVisibility);
     }
 
-    private void setViewable(int visibility) {
-        boolean isCurrentlyViewable = visibility == View.VISIBLE;
-        if (isCurrentlyViewable != isViewable) {
-            isViewable = isCurrentlyViewable;
-            if (isPageFinished && isLaidOut) {
-                fireViewableChangeEvent();
-                fireExposureChangeEvent();
+    protected void setViewable(int visibility) {
+        post(() -> {
+            boolean isCurrentlyViewable = visibility == View.VISIBLE;
+            if (isCurrentlyViewable != isViewable || !isViewabilityConfirmed) {
+                isViewable = isCurrentlyViewable;
+                if (isPageFinished && isLaidOut) {
+                    fireViewableChangeEvent();
+                    fireExposureChangeEvent();
+                    isViewabilityConfirmed = true;
+                }
             }
-        }
+        });
     }
 
     @SuppressLint("DrawAllocation")
@@ -1906,6 +1972,7 @@ public class MRAIDView extends FrameLayout {
     }
 
     protected void onLayoutCompleted() {
+
     }
 
     private void onLayoutWebView(WebView wv, boolean changed, int left, int top, int right, int bottom) {
@@ -1943,10 +2010,7 @@ public class MRAIDView extends FrameLayout {
             }
             if (isInterstitial) {
                 fireReadyEvent();
-                if (isViewable) {
-                    fireViewableChangeEvent();
-                }
-                fireExposureChangeEvent();
+                setViewable(isViewable ? VISIBLE : GONE);
             }
             if (listener != null) {
                 listener.mraidViewExpand(this);
@@ -2123,10 +2187,23 @@ public class MRAIDView extends FrameLayout {
         this.mNativeCloseButtonDelay = nativeCloseButtonDelay * 1000;
     }
 
+    public void setIsLandingPageEnabled(boolean isLandingPageEnabled) {
+        this.isLandingPageEnabled = isLandingPageEnabled;
+    }
+
     private void startSkipTimer() {
         Integer skipTimerDelay;
-
-        if (useCustomClose) {
+        // todo make sure timer logic works, cause we receive setCustomisation after the page has finished.
+        if (hasLandingPage()) {
+            // Deduct the second that is taken from postDelayed function
+            if (landingPageDelay >= 1000) landingPageDelay = landingPageDelay - 1000;
+            mNativeCloseButtonDelay = landingPageDelay;
+            skipTimerDelay = mNativeCloseButtonDelay;
+            handleNativeCloseButtonDelay();
+            useCustomClose = false;
+            mSkipTimeMillis = landingPageDelay;
+            if (mSkipCountdownView != null) mSkipCountdownView.setVisibility(View.INVISIBLE);
+        } else if (useCustomClose) {
             handleNativeCloseButtonDelay();
             skipTimerDelay = mNativeCloseButtonDelay;
             if (mSkipCountdownView != null) mSkipCountdownView.setVisibility(View.GONE);
@@ -2174,6 +2251,64 @@ public class MRAIDView extends FrameLayout {
 
     private void closeOnMainThread() {
         new Handler(Looper.getMainLooper()).post(this::close);
+    }
+
+    private void handleSetCustomisationInjection() {
+        webView.evaluateJavascript(setCustomisationString, null);
+    }
+
+    private void handleLandingPageBehavior() {
+        if (landingBehaviourString != null) {
+            switch (landingBehaviourString) {
+                case "ic":
+                    cancelLandingPageBehaviour();
+                    break;
+                case "c":
+                    if (mSkipCountdownView != null) {
+                        mSkipCountdownView.setVisibility(View.VISIBLE);
+                    }
+                    break;
+                case "nc":
+                    if(mSkipCountdownView != null) {
+                        mSkipCountdownView.setVisibility(View.GONE);
+                    }
+                    break;
+            }
+        } else {
+            if (mSkipCountdownView != null) {
+                mSkipCountdownView.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    private void cancelLandingPageBehaviour() {
+        if (mSkipCountdownView != null) {
+            mSkipCountdownView.setVisibility(View.GONE);
+            mSkipCountdownView = null;
+        }
+        postDelayed(MRAIDView.this::showClose, 600);
+    }
+
+    private void showClose() {
+        if (mNativeCloseButtonTimer != null) {
+            mNativeCloseButtonTimer.onFinish();
+            mNativeCloseButtonTimer = null;
+        }
+        if (listener != null)
+            listener.mraidShowCloseButton();
+        showDefaultCloseButton();
+        isBackClickable = true;
+    }
+
+    private void validateDelay() {
+        if (landingPageDelay < 0 || landingPageDelay > 30000) {
+            landingPageDelay = 30000;
+        }
+    }
+
+    private boolean hasLandingPage() {
+        return isLandingPageEnabled && setCustomisationString != null
+                && !setCustomisationString.isEmpty();
     }
 
     // Timer to prevent locked black screen when HTML ads are broken

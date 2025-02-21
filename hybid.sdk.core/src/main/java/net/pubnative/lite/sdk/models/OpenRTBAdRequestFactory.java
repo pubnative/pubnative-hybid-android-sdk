@@ -29,7 +29,6 @@ import net.pubnative.lite.sdk.models.request.User;
 import net.pubnative.lite.sdk.models.request.Video;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.Logger;
-import net.pubnative.lite.sdk.utils.PNAsyncUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -37,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.RejectedExecutionException;
 
 public class OpenRTBAdRequestFactory extends BaseRequestFactory implements AdRequestFactory {
     private static final String TAG = OpenRTBAdRequestFactory.class.getSimpleName();
@@ -74,14 +74,14 @@ public class OpenRTBAdRequestFactory extends BaseRequestFactory implements AdReq
         mIsRewarded = isRewarded;
         if (TextUtils.isEmpty(mAdvertisingId) && context != null) {
             try {
-                PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(context, new HyBidAdvertisingId.Listener() {
-                    @Override
-                    public void onHyBidAdvertisingIdFinish(String advertisingId, Boolean limitTracking) {
-                        processAdvertisingId(appToken, zoneid, adSize, advertisingId, limitTracking, protectedAudiencesAvailable, callback);
-                    }
-                }));
+                HyBidAdvertisingId hyBidAdvertisingIdTask = new HyBidAdvertisingId(context);
+                hyBidAdvertisingIdTask.execute((advertisingId, limitTracking) ->
+                        processAdvertisingId(appToken, zoneid, adSize, advertisingId, limitTracking,
+                                protectedAudiencesAvailable, callback));
+            } catch (RejectedExecutionException exception) {
+                Logger.e(TAG, "createAdRequest", exception);
             } catch (Exception exception) {
-                Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
+                Logger.e(TAG, "Error executing HyBidAdvertisingId Executor");
             }
         } else {
             processAdvertisingId(appToken, zoneid, adSize, mAdvertisingId, mLimitTracking, protectedAudiencesAvailable, callback);

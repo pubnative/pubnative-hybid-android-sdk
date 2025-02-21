@@ -44,7 +44,7 @@ public class UrlHandler {
     /**
      * https://developer.android.com/distribute/marketing-tools/linking-to-google-play.html
      */
-    public void handleUrl(String url) {
+    public void handleUrl(String url, String navigationMode) {
         if (url == null) {
             return;
         }
@@ -69,7 +69,11 @@ public class UrlHandler {
 
         // Device browser
         else if ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme)) {
-            mIntentHandler.handleBrowserLink(uri);
+            if (navigationMode != null && navigationMode.equalsIgnoreCase("internal")) {
+                mIntentHandler.handleBrowserLinkBrowserActivity(uri);
+            } else {
+                mIntentHandler.handleBrowserLink(uri);
+            }
         }
 
         // App deep links

@@ -28,8 +28,12 @@ import android.util.Log
 import android.webkit.WebView
 import androidx.multidex.MultiDex
 import androidx.multidex.MultiDexApplication
-import com.chartboost.heliumsdk.HeliumInitializationOptions
-import com.chartboost.heliumsdk.HeliumSdk
+import com.chartboost.chartboostmediationsdk.ChartboostMediationPreinitializationConfiguration
+import com.chartboost.chartboostmediationsdk.ChartboostMediationSdk
+import com.chartboost.core.ChartboostCore
+import com.chartboost.core.initialization.ModuleInitializationResult
+import com.chartboost.core.initialization.ModuleObserver
+import com.chartboost.core.initialization.SdkConfiguration
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.initialization.InitializationStatus
 import net.pubnative.lite.demo.managers.AdCustomizationPrefs
@@ -156,6 +160,10 @@ class HyBidDemoApplication : MultiDexApplication() {
                 false,
                 false,
                 CustomEndCardDisplay.FALLBACK.display,
+                false,
+                "external",
+                false,
+                false,
                 false,
                 false,
                 false,
@@ -319,28 +327,31 @@ class HyBidDemoApplication : MultiDexApplication() {
         skippedPartnerIds.add("mobilefuse")
         skippedPartnerIds.add("hyprmx")
 
+        ChartboostMediationSdk.setPreinitializationConfiguration(
+            ChartboostMediationPreinitializationConfiguration(skippedPartnerIds)
+        )
 
-        val heliumSdkListener: HeliumSdk.HeliumSdkListener = object : HeliumSdk.HeliumSdkListener {
-            override fun didInitialize(error: java.lang.Error?) {
-                if (error != null) {
+        val listener = object : ModuleObserver {
+            override fun onModuleInitializationCompleted(result: ModuleInitializationResult) {
+                // Use this to action off of a specific module initialization
+                val moduleId = result.moduleId
+                if (result.exception != null) {
                     Log.d(
                         "initChartboost",
-                        "Helium SDK failed to initialize. Reason: " + error.message
+                        "Chartboost Mediation SDK failed to initialize. Reason: " + result.exception?.message
                     )
                 } else {
                     //SDK Started
-                    Log.d("initChartboost", "Helium SDK initialized successfully")
-                    HeliumSdk.setTestMode(true)
+                    Log.d("initChartboost", "Chartboost Mediation SDK initialized successfully")
+                    ChartboostMediationSdk.setTestMode(this@HyBidDemoApplication, true)
                 }
             }
         }
 
-        HeliumSdk.start(
-            this@HyBidDemoApplication,
-            Constants.CHARTBOOST_APP_ID,
-            Constants.CHARTBOOST_APP_SIGNATURE,
-            HeliumInitializationOptions(skippedPartnerIds),
-            heliumSdkListener
+        ChartboostCore.initializeSdkFromJava(
+            this,
+            SdkConfiguration(Constants.CHARTBOOST_APP_ID, listOf()),
+            listener
         )
     }
 }

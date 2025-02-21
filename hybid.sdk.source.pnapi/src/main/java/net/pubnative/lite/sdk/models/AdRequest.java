@@ -28,6 +28,7 @@ import net.pubnative.lite.sdk.utils.json.JsonModel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by erosgarciaponte on 10.01.18.
@@ -38,11 +39,11 @@ public class AdRequest extends JsonModel {
     public String zoneId;
     public Boolean isInterstitial = false;
     public List<Topic> topics;
-    private final Collection<Signal> signals = new ArrayList<>();
+    private final List<Signal> signals = new CopyOnWriteArrayList<>();
     public void addSignal(Signal signal){
         signals.add(signal);
     }
-    public Collection<Signal> getSignals(){
+    public List<Signal> getSignals(){
         return signals;
     }
 }

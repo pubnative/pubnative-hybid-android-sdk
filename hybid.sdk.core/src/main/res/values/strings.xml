@@ -8,4 +8,13 @@
     <string name="mute_button">muteButton</string>
     <string name="unmute_button">unmuteButton</string>
     <bool name="is_tablet">false</bool>
+
+    <!--Internal Browser-->
+    <string name="btn_browser_backward_content_description">Backward</string>
+    <string name="btn_browser_forward_content_description">Forward</string>
+    <string name="btn_browser_close_content_description">Close</string>
+    <string name="btn_browser_refresh_content_description">Refresh</string>
+    <string name="btn_browser_open_content_description">Open in external browser</string>
+    <string name="browser_hostname_content_description">Host name</string>
+    <string name="no_external_browser_found">No browser app found</string>
 </resources>

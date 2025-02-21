@@ -30,6 +30,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.utils.browser.BrowserActivity;
 
 import java.util.Iterator;
 import java.util.List;
@@ -104,4 +105,16 @@ public class IntentHandler {
             return handleDeepLink(uri);
         }
     }
+
+    public boolean handleBrowserLinkBrowserActivity(Uri uri) {
+        try {
+            Intent intent = BrowserActivity.createIntent(context, uri.toString());
+            context.startActivity(intent);
+        } catch (RuntimeException e) {
+            Logger.e(TAG, e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
 }

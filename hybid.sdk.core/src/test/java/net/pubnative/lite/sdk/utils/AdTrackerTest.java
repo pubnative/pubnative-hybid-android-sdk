@@ -31,7 +31,12 @@ public class AdTrackerTest {
     @Before
     public void setup() {
         initMocks(this);
-        mSubject = new AdTracker(mMockApiClient, mMockDeviceInfo, TestUtil.createMockImpressionBeacons(), TestUtil.createMockClickBeacons());
+        mSubject = new AdTracker(mMockApiClient, mMockDeviceInfo,
+                TestUtil.createMockImpressionBeacons(),
+                TestUtil.createMockClickBeacons(),
+                TestUtil.createMockLoadEventBeacons(),
+                TestUtil.createMockCompanionAdEventsBeacons(),
+                TestUtil.createMockCustomEndcardBeacons());
         mSubject.setTrackUrlListener(mListener);
     }
 
@@ -40,7 +45,7 @@ public class AdTrackerTest {
         mSubject.trackClick();
         mSubject.trackClick();
 
-        verify(mMockApiClient, times(1)).trackUrl("https://got.pubnative.net/click/rtb?aid=1036637",  null, "CLICK", mListener);
+        verify(mMockApiClient, times(1)).trackUrl("https://got.pubnative.net/click/rtb?aid=1036637", null, "CLICK", mListener);
     }
 
     @Test
@@ -48,6 +53,6 @@ public class AdTrackerTest {
         mSubject.trackImpression();
         mSubject.trackImpression();
 
-        verify(mMockApiClient, times(1)).trackUrl("https://mock-dsp.pubnative.net/tracker/nurl?app_id=1036637&p=0.01",  null, "IMPRESSION", mListener);
+        verify(mMockApiClient, times(1)).trackUrl("https://mock-dsp.pubnative.net/tracker/nurl?app_id=1036637&p=0.01", null, "IMPRESSION", mListener);
     }
 }

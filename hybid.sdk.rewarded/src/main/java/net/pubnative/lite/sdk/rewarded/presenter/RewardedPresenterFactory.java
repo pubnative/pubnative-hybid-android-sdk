@@ -51,11 +51,20 @@ public class RewardedPresenterFactory {
         }
 
         final RewardedPresenterDecorator rewardedPresenterDecorator =
-                new RewardedPresenterDecorator(rewardedPresenter,
-                        new AdTracker(ad.getBeacons(Ad.Beacon.IMPRESSION), ad.getBeacons(Ad.Beacon.CLICK)),
-                        new AdTracker(ad.getBeacons(Ad.Beacon.CUSTOM_END_CARD_IMPRESSION), ad.getBeacons(Ad.Beacon.CUSTOM_END_CARD_CLICK)),
+                new RewardedPresenterDecorator(
+                        rewardedPresenter,
+                        new AdTracker(
+                                ad.getBeacons(Ad.Beacon.IMPRESSION),
+                                ad.getBeacons(Ad.Beacon.CLICK),
+                                ad.getBeacons(Ad.Beacon.SDK_EVENT),
+                                ad.getBeacons(Ad.Beacon.COMPANION_AD_EVENT),
+                                ad.getBeacons(Ad.Beacon.CUSTOM_ENDCARD_EVENT)),
+                        new AdTracker(
+                                ad.getBeacons(Ad.Beacon.CUSTOM_END_CARD_IMPRESSION),
+                                ad.getBeacons(Ad.Beacon.CUSTOM_END_CARD_CLICK)),
                         HyBid.getReportingController(),
-                        rewardedPresenterListener, integrationType);
+                        rewardedPresenterListener,
+                        integrationType);
         rewardedPresenter.setListener(rewardedPresenterDecorator);
         rewardedPresenter.setCustomEndCardListener(rewardedPresenterDecorator);
         return rewardedPresenterDecorator;

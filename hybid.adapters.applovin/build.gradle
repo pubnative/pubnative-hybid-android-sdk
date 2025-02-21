@@ -1,9 +1,7 @@
 plugins {
     id 'com.android.library'
-    id 'kotlin-android'
     id 'com.jfrog.artifactory'
     id 'maven-publish'
-    id "org.sonarqube" version "3.3"
 }
 
 def project_name = project.name
@@ -38,10 +36,6 @@ android {
         targetCompatibility JavaVersion.VERSION_11
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
-    }
-
     testOptions {
         unitTests {
             includeAndroidResources = true
@@ -54,7 +48,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':hybid.sdk')
-    compileOnly 'com.applovin:applovin-sdk:13.0.0'
+    compileOnly 'com.applovin:applovin-sdk:13.1.0'
 
     implementation project(':hybid.sdk.core')
     implementation project(':hybid.sdk.logger')
@@ -115,19 +109,6 @@ artifactory {
             username = System.getenv("ARTIFACTORY_USER")
             password = System.getenv("ARTIFACTORY_PASSWORD")
             maven = true
-        }
-    }
-}
-
-sonarqube {
-    sonarqube {
-        properties {
-            property "sonar.projectName", "HyBidDemo"
-            property "sonar.projectKey", "HyBidDemoSample"
-            property "sonar.host.url", "http://localhost:9000"
-            property "sonar.projectVersion", version
-            property "sonar.language", "java"
-            property "sonar.sources", "src/main/"
         }
     }
 }

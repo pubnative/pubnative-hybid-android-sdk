@@ -31,7 +31,8 @@ import android.text.TextUtils;
 import net.pubnative.lite.sdk.consent.UserConsentActivity;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.Logger;
-import net.pubnative.lite.sdk.utils.PNAsyncUtils;
+
+import java.util.concurrent.RejectedExecutionException;
 
 public class UserDataManager {
     private static final String TAG = UserDataManager.class.getSimpleName();
@@ -143,22 +144,22 @@ public class UserDataManager {
     }
 
     private void processConsent(final boolean given) {
-        String advertisingId = HyBid.getDeviceInfo().getAdvertisingId();
-        if (!TextUtils.isEmpty(advertisingId)) {
-
-            notifyConsentGiven(advertisingId, given);
+        String deviceInfoAdvertisingId = HyBid.getDeviceInfo().getAdvertisingId();
+        if (!TextUtils.isEmpty(deviceInfoAdvertisingId)) {
+            notifyConsentGiven(deviceInfoAdvertisingId, given);
         } else {
             try {
-                PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(mContext, new HyBidAdvertisingId.Listener() {
-                    @Override
-                    public void onHyBidAdvertisingIdFinish(String advertisingId, Boolean limitTracking) {
-                        if (TextUtils.isEmpty(advertisingId)) {
-                            Logger.e(TAG, "Consent request failed with an empty advertising ID.");
-                        } else {
-                            notifyConsentGiven(advertisingId, given);
-                        }
+                HyBidAdvertisingId advertisingIdTask = new HyBidAdvertisingId(mContext);
+                advertisingIdTask.execute((advertisingId, limitTracking) -> {
+                    if (TextUtils.isEmpty(advertisingId)) {
+                        Logger.e(TAG, "Consent request failed with an empty advertising ID.");
+                    } else {
+                        notifyConsentGiven(advertisingId, given);
                     }
-                }));
+                });
+            } catch (RejectedExecutionException exception) {
+                Logger.e(TAG, "processConsent", exception);
+                HyBid.reportException(exception);
             } catch (Exception exception) {
                 Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
                 HyBid.reportException(exception);

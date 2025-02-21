@@ -38,6 +38,7 @@ import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.AuxiliaryAdEventType;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
@@ -62,6 +63,7 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
     private VideoAdView mVideoPlayer;
 
     VastActivityInteractor vastActivityInteractor;
+    private AdTracker mAdEventTracker;
     private AdTracker mCustomCTATracker;
     private AdTracker mCustomCTAEndcardTracker;
 
@@ -82,6 +84,7 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
         vastActivityInteractor = VastActivityInteractor.getInstance();
         vastActivityInteractor.activityStarted();
         initiateCustomCTAAdTrackers();
+        initiateEventTrackers();
 
         try {
             if (getAd() != null) {
@@ -187,7 +190,7 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
 
     @Override
     protected void resumeAd() {
-        if (!mIsFeedbackFormOpen) {
+        if (!mIsFeedbackFormOpen && mVideoAd != null) {
             if (mReady) {
                 if (mVideoAd.isAdStarted()) {
                     mVideoAd.resume();
@@ -205,12 +208,14 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
 
     @Override
     protected void pauseAd() {
-        if (mReady && mVideoAd.isAdStarted()) {
-            mVideoAd.pause();
-        }
+        if (mVideoAd != null) {
+            if (mReady && mVideoAd.isAdStarted()) {
+                mVideoAd.pause();
+            }
 
-        if (mIsVideoFinished) {
-            mVideoAd.pauseEndCardCloseButtonTimer();
+            if (mIsVideoFinished) {
+                mVideoAd.pauseEndCardCloseButtonTimer();
+            }
         }
     }
 
@@ -455,6 +460,9 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
 
             if (!isCustom) {
                 mDefaultEndCardSkipTracked = true;
+                mAdEventTracker.trackCompanionAdEvent(AuxiliaryAdEventType.SKIP, null);
+            } else {
+                mAdEventTracker.trackCustomEndcardEvent(AuxiliaryAdEventType.SKIP, null);
             }
 
             if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
@@ -478,8 +486,10 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
 
             if (!isCustom) {
                 mDefaultEndCardCloseTracked = true;
+                mAdEventTracker.trackCompanionAdEvent(AuxiliaryAdEventType.CLOSE, null);
             } else {
                 mCustomEndCardCloseTracked = true;
+                mAdEventTracker.trackCustomEndcardEvent(AuxiliaryAdEventType.CLOSE, null);
             }
 
             if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
@@ -536,6 +546,12 @@ public class VastRewardedActivity extends HyBidRewardedActivity implements AdPre
         if (getAd() != null) {
             mCustomCTATracker = new AdTracker(getAd().getBeacons(Ad.Beacon.CUSTOM_CTA_SHOW), getAd().getBeacons(Ad.Beacon.CUSTOM_CTA_CLICK), false);
             mCustomCTAEndcardTracker = new AdTracker(null, getAd().getBeacons(Ad.Beacon.CUSTOM_CTA_ENDCARD_CLICK), false);
+        }
+    }
+
+    private void initiateEventTrackers() {
+        if (getAd() != null) {
+            mAdEventTracker = new AdTracker(null, null, null, getAd().getBeacons(Ad.Beacon.COMPANION_AD_EVENT), getAd().getBeacons(Ad.Beacon.CUSTOM_ENDCARD_EVENT));
         }
     }
 }

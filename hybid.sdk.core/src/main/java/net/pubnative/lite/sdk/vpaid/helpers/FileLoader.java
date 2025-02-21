@@ -200,7 +200,7 @@ public class FileLoader {
                 Bitmap bitmap = null;
                 if (fileLength == -1) {
                     if (mIsEndCard) {
-                        bitmap = EndCardFileDownloader.INSTANCE.mLoad(mRemoteFileUrl);
+                        bitmap = EndCardFileDownloader.mLoad(mRemoteFileUrl);
                     }
                 }
                 return new FileHeaders(eTag, fileLength, bitmap);

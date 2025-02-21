@@ -39,6 +39,7 @@ import net.pubnative.lite.sdk.contentinfo.AdFeedbackFormHelper;
 import net.pubnative.lite.sdk.contentinfo.listeners.AdFeedbackLoadListener;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdSize;
+import net.pubnative.lite.sdk.models.AuxiliaryAdEventType;
 import net.pubnative.lite.sdk.models.ContentInfo;
 import net.pubnative.lite.sdk.models.ContentInfoIconXPosition;
 import net.pubnative.lite.sdk.models.ContentInfoIconYPosition;
@@ -107,6 +108,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
     private Boolean mCustomEndCardCloseTracked = false;
     private IntegrationType mIntegrationType;
 
+    private AdTracker mAdEventTracker;
     private AdTracker mCustomCTATracker;
     private AdTracker mCustomCTAEndcardTracker;
     private ReportingController mReportingController;
@@ -135,6 +137,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
         videoVisibilityManager.addCallback(this);
         mIntegrationType = integrationType;
         initiateCustomCTAAdTrackers();
+        initiateEventTrackers();
     }
 
     @Override
@@ -169,28 +172,29 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
         }
 
         try {
-            mVideoAd = new VideoAd(mContext, mAd, false, false, mVideoImpressionListener);
-            mVideoPlayer = new VideoAdView(mContext);
-            mVideoAd.bindView(mVideoPlayer);
-            mVideoAd.setAdListener(mVideoAdListener);
-            mVideoAd.setAdCloseButtonListener(mAdCloseButtonListener);
-            mDefaultEndCardClickTracked = false;
-            mCustomEndCardClickTracked = false;
-            mDefaultEndCardImpressionTracked = false;
-            mCustomEndCardImpressionTracked = false;
-            mLoadDefaultEndCardTracked = false;
-            mLoadCustomEndCardTracked = false;
-            if (!TextUtils.isEmpty(getAd().getZoneId())) {
-                VideoAdCacheItem adCacheItem = HyBid.getVideoAdCache().remove(getAd().getZoneId());
-                if (adCacheItem != null) {
-                    mVideoAd.setVideoCacheItem(adCacheItem);
-                    if (adCacheItem.getAdParams() != null && adCacheItem.getAdParams().getAdIcon() != null) {
-                        mVastIcon = adCacheItem.getAdParams().getAdIcon();
+            if (mAd != null) {
+                mVideoAd = new VideoAd(mContext, mAd, false, false, mVideoImpressionListener);
+                mVideoPlayer = new VideoAdView(mContext);
+                mVideoAd.bindView(mVideoPlayer);
+                mVideoAd.setAdListener(mVideoAdListener);
+                mVideoAd.setAdCloseButtonListener(mAdCloseButtonListener);
+                mDefaultEndCardClickTracked = false;
+                mCustomEndCardClickTracked = false;
+                mDefaultEndCardImpressionTracked = false;
+                mCustomEndCardImpressionTracked = false;
+                mLoadDefaultEndCardTracked = false;
+                mLoadCustomEndCardTracked = false;
+                if (!TextUtils.isEmpty(getAd().getZoneId())) {
+                    VideoAdCacheItem adCacheItem = HyBid.getVideoAdCache().remove(getAd().getZoneId());
+                    if (adCacheItem != null) {
+                        mVideoAd.setVideoCacheItem(adCacheItem);
+                        if (adCacheItem.getAdParams() != null && adCacheItem.getAdParams().getAdIcon() != null) {
+                            mVastIcon = adCacheItem.getAdParams().getAdIcon();
+                        }
                     }
                 }
+                mVideoAd.load(mIntegrationType);
             }
-
-            mVideoAd.load(mIntegrationType);
         } catch (Exception exception) {
             Logger.e(TAG, exception.getMessage());
             if (mListener != null) {
@@ -215,7 +219,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
 
     @Override
     public void startTracking() {
-        if (mTrackingMethod == ImpressionTrackingMethod.AD_VIEWABLE) {
+        if (mTrackingMethod == ImpressionTrackingMethod.AD_VIEWABLE && mAd != null) {
             ImpressionManager.startTrackingView(mVideoPlayer, mAdSize, mAd.getImpressionMinVisibleTime(), mAd.getImpressionVisiblePercent(), mNativeTrackerListener);
         } else {
             if (mVideoAd != null) {
@@ -441,7 +445,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
                     reportingEvent.setCampaignId(mAd.getCampaignId());
                     reportingEvent.setConfigId(mAd.getConfigId());
                 }
-                if (!mLoadDefaultEndCardTracked) {
+                if (mLoadDefaultEndCardTracked) {
                     reportingEvent.setEventType(Reporting.EventType.DEFAULT_END_CARD_LOAD_SUCCESS);
                     reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE, Reporting.Key.END_CARD_TYPE_DEFAULT);
                 } else {
@@ -498,6 +502,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
 
                     HyBid.getReportingController().reportEvent(reportingEvent);
                 }
+                mAdEventTracker.trackCompanionAdEvent(AuxiliaryAdEventType.IMPRESSION, null);
                 mDefaultEndCardImpressionTracked = true;
             }
         }
@@ -523,7 +528,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
 
                     HyBid.getReportingController().reportEvent(reportingEvent);
                 }
-
+                mAdEventTracker.trackCustomEndcardEvent(AuxiliaryAdEventType.IMPRESSION, null);
                 mCustomEndCardImpressionTracked = true;
             }
         }
@@ -548,6 +553,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
 
                     HyBid.getReportingController().reportEvent(reportingEvent);
                 }
+                mAdEventTracker.trackCompanionAdEvent(AuxiliaryAdEventType.CLICK, null);
                 mDefaultEndCardClickTracked = true;
             }
         }
@@ -571,6 +577,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
 
                     HyBid.getReportingController().reportEvent(reportingEvent);
                 }
+                mAdEventTracker.trackCustomEndcardEvent(AuxiliaryAdEventType.CLICK, null);
                 mCustomEndCardClickTracked = true;
             }
         }
@@ -644,6 +651,9 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
 
             if (!isCustom) {
                 mDefaultEndCardSkipTracked = true;
+                mAdEventTracker.trackCompanionAdEvent(AuxiliaryAdEventType.SKIP, null);
+            } else {
+                mAdEventTracker.trackCustomEndcardEvent(AuxiliaryAdEventType.SKIP, null);
             }
 
             if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
@@ -667,8 +677,10 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
 
             if (!isCustom) {
                 mDefaultEndCardCloseTracked = true;
+                mAdEventTracker.trackCompanionAdEvent(AuxiliaryAdEventType.CLOSE, null);
             } else {
                 mCustomEndCardCloseTracked = true;
+                mAdEventTracker.trackCustomEndcardEvent(AuxiliaryAdEventType.CLOSE, null);
             }
 
             if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
@@ -713,15 +725,12 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
         }
     }
 
-
-    String processedURL = "";
-
     @Override
     public synchronized void onLinkClicked(String url) {
         if (!isLinkClickRunning) {
             isLinkClickRunning = true;
             AdFeedbackFormHelper adFeedbackFormHelper = new AdFeedbackFormHelper();
-            if (URLValidator.isValidURL(url)) {
+            if (URLValidator.isValidURL(url) && mAd != null) {
                 adFeedbackFormHelper.showFeedbackForm(mContext, url, mAd, Reporting.AdFormat.BANNER, IntegrationType.STANDALONE, new AdFeedbackLoadListener() {
 
                     @Override
@@ -776,6 +785,12 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
         if (mAd != null) {
             mCustomCTATracker = new AdTracker(mAd.getBeacons(Ad.Beacon.CUSTOM_CTA_SHOW), mAd.getBeacons(Ad.Beacon.CUSTOM_CTA_CLICK), false);
             mCustomCTAEndcardTracker = new AdTracker(null, mAd.getBeacons(Ad.Beacon.CUSTOM_CTA_ENDCARD_CLICK), false);
+        }
+    }
+
+    private void initiateEventTrackers() {
+        if (mAd != null) {
+            mAdEventTracker = new AdTracker(null, null, null, mAd.getBeacons(Ad.Beacon.COMPANION_AD_EVENT), mAd.getBeacons(Ad.Beacon.CUSTOM_ENDCARD_EVENT));
         }
     }
 

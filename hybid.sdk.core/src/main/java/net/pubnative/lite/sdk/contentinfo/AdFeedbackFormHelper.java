@@ -16,7 +16,7 @@ import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.utils.Logger;
 
-public class AdFeedbackFormHelper extends ResultReceiver{
+public class AdFeedbackFormHelper extends ResultReceiver {
     private static final String TAG = AdFeedbackFormHelper.class.getSimpleName();
 
     private AdFeedbackLoadListener mListener;
@@ -48,7 +48,7 @@ public class AdFeedbackFormHelper extends ResultReceiver{
 
         String parsedUrl = parseUrl(url);
 
-        if(parsedUrl == null){
+        if (parsedUrl == null) {
             if (mListener != null) {
                 mListener.onLoadFailed(new HyBidError(HyBidErrorCode.ERROR_LOADING_FEEDBACK));
             }
@@ -60,21 +60,21 @@ public class AdFeedbackFormHelper extends ResultReceiver{
         parsedUrl = macroHelper.processUrl(parsedUrl, mAdFeedbackData);
 
         try {
-            Intent intent = new Intent(context, AdFeedbackActivity.class);;
+            Intent intent = new Intent(context, AdFeedbackActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.putExtra(AdFeedbackActivity.EXTRA_FEEDBACK_FORM_URL, parsedUrl);
             intent.putExtra(AdFeedbackActivity.EXTRA_FEEDBACK_FORM_CALLBACK, this);
             intent.putExtra(AdFeedbackActivity.EXTRA_FEEDBACK_FORM_DATA, mAdFeedbackData);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             context.startActivity(intent);
-        } catch (Exception exception){
+        } catch (Exception exception) {
             if (mListener != null) {
                 mListener.onLoadFailed(new HyBidError(HyBidErrorCode.ERROR_LOADING_FEEDBACK, "The feedback form requires an Activity context"));
             }
         }
     }
 
-    private String parseUrl(String url){
+    private String parseUrl(String url) {
         String parsedUrl = null;
         if (!TextUtils.isEmpty(url)) {
             try {
@@ -100,16 +100,16 @@ public class AdFeedbackFormHelper extends ResultReceiver{
         handleResult(resultCode, resultData);
     }
 
-    private void handleResult(int resultCode, Bundle resultData){
-        if(resultCode == FeedbackFormAction.OPEN.code){
+    private void handleResult(int resultCode, Bundle resultData) {
+        if (resultCode == FeedbackFormAction.OPEN.code) {
             if (mListener != null) {
                 mListener.onLoad("");
             }
-        } else if (resultCode == FeedbackFormAction.CLOSE.code){
+        } else if (resultCode == FeedbackFormAction.CLOSE.code) {
             if (mListener != null) {
                 mListener.onFormClosed();
             }
-        } else if (resultCode == FeedbackFormAction.ERROR.code){
+        } else if (resultCode == FeedbackFormAction.ERROR.code) {
             if (mListener != null) {
                 mListener.onLoadFailed(new HyBidError(HyBidErrorCode.ERROR_LOADING_FEEDBACK));
             }
@@ -121,6 +121,7 @@ public class AdFeedbackFormHelper extends ResultReceiver{
         ERROR(-1),
         CLOSE(0);
         final int code;
+
         FeedbackFormAction(int i) {
             code = i;
         }

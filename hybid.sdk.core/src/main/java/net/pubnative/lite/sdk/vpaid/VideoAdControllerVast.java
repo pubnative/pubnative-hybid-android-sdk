@@ -439,7 +439,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
         initSkipTime(duration);
         createProgressPoints(duration);
         addMissingDefaultEvents(duration);
-        hasEndcard = AdEndCardManager.isEndCardEnabled(mBaseAdInternal.getAd());
+        hasEndcard = (AdEndCardManager.isEndCardEnabled(mBaseAdInternal.getAd()) && hasNextEndCard());
 
         mTimerWithPause = new TimerWithPause(duration, 10) {
             @Override
@@ -479,7 +479,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
         }.create();
 
         if (mSkipTimeMillis > 0 && isFullscreen) {
-            mSkipTimerWithPause = new TimerWithPause(mSkipTimeMillis, 1) {
+            mSkipTimerWithPause = new TimerWithPause(mSkipTimeMillis, 10) {
                 @Override
                 public void onTick(long millisUntilFinished) {
                     mViewControllerVast.setSkipProgress((int) millisUntilFinished, mSkipTimeMillis);
@@ -492,7 +492,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
                     }
                 }
             }.create();
-        } else if (mSkipTimeMillis == 0) {
+        } else if (mSkipTimeMillis == 0 && isFullscreen) {
             if (mViewControllerVast != null) {
                 mViewControllerVast.endSkip(isAutoClose, hasEndcard);
             }
@@ -500,10 +500,19 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
     }
 
     private void fireViewabilityTrackingEvent(String name) {
+        if (getViewabilityAdSession() == null)
+            return;
         if (!TextUtils.isEmpty(name)) {
             switch (name) {
                 case EventConstants.START:
-                    getViewabilityAdSession().fireStart(getAdParams().getDuration(), true);
+                    try {
+                        getViewabilityAdSession().fireStart(getAdParams().getDuration(), true);
+                    } catch (Exception ex) {
+                        if (mDuration > 0)
+                            getViewabilityAdSession().fireStart((float) mDuration, true);
+                        else if (mSkipTimeMillis > 0)
+                            getViewabilityAdSession().fireStart((float) mSkipTimeMillis, true);
+                    }
                     if (!startFired) {
                         fireReportingEvent(Reporting.EventType.VIDEO_STARTED);
                         startFired = true;
@@ -558,7 +567,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
             }
         }
 
-        hasEndcard = AdEndCardManager.isEndCardEnabled(mBaseAdInternal.getAd());
+        hasEndcard = (AdEndCardManager.isEndCardEnabled(mBaseAdInternal.getAd()) && hasNextEndCard());
 
         if (isRewarded()) {
             if (adParamsSkipTimeToMilliseconds && adParamsSkipTime != null) {
@@ -897,8 +906,12 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
         if (Utils.isOnline(mBaseAdInternal.getContext())) {
             Context context = mBaseAdInternal.getContext();
             trackClickThroughEvent(url);
+            String navigationMode = null;
+            if (mBaseAdInternal.getAd() != null) {
+                navigationMode = mBaseAdInternal.getAd().getNavigationMode();
+            }
             UrlHandler urlHandler = new UrlHandler(context);
-            urlHandler.handleUrl(url);
+            urlHandler.handleUrl(url, navigationMode);
         } else {
             Logger.e(LOG_TAG, "No internet connection");
         }

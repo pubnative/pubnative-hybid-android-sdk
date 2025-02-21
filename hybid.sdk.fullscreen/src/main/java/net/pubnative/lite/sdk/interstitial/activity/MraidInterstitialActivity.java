@@ -49,6 +49,9 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
                 mIsSkippable = mSkipOffset != null && mSkipOffset == 0;
                 adView.setSkipOffset(mSkipOffset);
                 adView.setNativeCloseButtonDelay(nativeCloseButtonDelay);
+                if (getAd().isLandingPage() != null) {
+                    adView.setIsLandingPageEnabled(getAd().isLandingPage());
+                }
             }
         }
         mView = adView;
@@ -117,7 +120,9 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
 
     @Override
     public void mraidNativeFeatureCallTel(String url) {
-
+        if (getBroadcastSender() != null) {
+            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CLICK);
+        }
     }
 
     @Override
@@ -135,7 +140,11 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
         if (getBroadcastSender() != null) {
             getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CLICK);
         }
-        getUrlHandler().handleUrl(url);
+        String navigationMode = null;
+        if (getAd() != null) {
+            navigationMode = getAd().getNavigationMode();
+        }
+        getUrlHandler().handleUrl(url, navigationMode);
     }
 
     @Override
@@ -145,7 +154,9 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
 
     @Override
     public void mraidNativeFeatureSendSms(String url) {
-
+        if (getBroadcastSender() != null) {
+            getBroadcastSender().sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CLICK);
+        }
     }
 
     // ------------------------------ MRAIDViewCloseLayoutListener ---------------------------------
@@ -185,12 +196,14 @@ public class MraidInterstitialActivity extends HyBidInterstitialActivity impleme
 
     @Override
     protected void pauseAd() {
-        mView.pause();
+        if (mView != null) {
+            mView.pause();
+        }
     }
 
     @Override
     protected void resumeAd() {
-        if (!mIsFeedbackFormOpen) {
+        if (!mIsFeedbackFormOpen && mView != null) {
             mView.resume();
         }
     }

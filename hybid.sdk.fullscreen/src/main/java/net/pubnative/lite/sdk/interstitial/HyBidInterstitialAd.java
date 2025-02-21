@@ -43,11 +43,13 @@ import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.OpenRTBAdRequestFactory;
+import net.pubnative.lite.sdk.models.SdkEventType;
 import net.pubnative.lite.sdk.models.SkipOffset;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
 import net.pubnative.lite.sdk.utils.AdEndCardManager;
 import net.pubnative.lite.sdk.utils.AdRequestRegistry;
+import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.MarkupUtils;
 import net.pubnative.lite.sdk.utils.SkipOffsetManager;
@@ -86,6 +88,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     private RequestManager mRequestManager;
     private RequestManager mORTBRequestManager;
     private InterstitialPresenter mPresenter;
+    private AdTracker mAdTracker;
     private final Listener mListener;
     private VideoListener mVideoListener;
     private final Context mContext;
@@ -349,6 +352,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     public void prepareAd(Ad ad) {
         if (ad != null) {
             mAd = ad;
+            initializeAdTracker();
             checkRemoteConfigs();
             if (mAd != null && mAd.getZoneId() != null && !mAd.getZoneId().equalsIgnoreCase(mZoneId)) {
                 mZoneId = mAd.getZoneId();
@@ -404,6 +408,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
                         VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardData, endCardFilePath);
                         mAd = new Ad(assetGroupId, adValue, type);
                         mAd.setHasEndCard(hasEndCard);
+                        initializeAdTracker();
                         HyBid.getAdCache().put(mZoneId, mAd);
                         HyBid.getVideoAdCache().put(mZoneId, adCacheItem);
                         checkRemoteConfigs();
@@ -438,6 +443,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
                 mAd = new Ad(assetGroupId, adValue, type);
                 mAd.setZoneId(mZoneId);
                 mAd.setHasEndCard(hasEndCard());
+                initializeAdTracker();
                 HyBid.getAdCache().put(mZoneId, mAd);
                 checkRemoteConfigs();
                 IntegrationType integrationType = IntegrationType.IN_APP_BIDDING;
@@ -578,6 +584,9 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
             } else {
                 Logger.e(TAG, exception.getMessage());
             }
+            sendLoadTracker(hyBidError.getErrorCode().getCode());
+        } else {
+            sendLoadTracker(HyBidErrorCode.UNKNOWN_ERROR.getCode());
         }
         if (mListener != null) {
             mListener.onInterstitialLoadFailed(exception);
@@ -649,6 +658,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
             invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NULL_AD));
         } else {
             mAd = ad;
+            initializeAdTracker();
             checkRemoteConfigs();
             renderAd();
         }
@@ -776,5 +786,22 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         if (mAd != null)
             return AdEndCardManager.isEndCardEnabled(mAd);
         return false;
+    }
+
+    private void initializeAdTracker() {
+        if (mAd != null) {
+            mAdTracker = new AdTracker(
+                    null,
+                    null,
+                    mAd.getBeacons(Ad.Beacon.SDK_EVENT),
+                    null,
+                    null);
+        }
+    }
+
+    private void sendLoadTracker(Integer errorCode) {
+        if (mAdTracker != null) {
+            mAdTracker.trackSdkEvent(SdkEventType.LOAD, errorCode);
+        }
     }
 }

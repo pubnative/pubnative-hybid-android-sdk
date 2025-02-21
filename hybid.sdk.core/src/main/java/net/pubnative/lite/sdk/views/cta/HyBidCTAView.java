@@ -7,7 +7,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -234,6 +233,7 @@ public class HyBidCTAView extends FrameLayout {
                     if (showImmediately) show();
                 } else {
                     invokeFail();
+                    invokeInvalidCTAUrl();
                     isLoaded = false;
                 }
             }
@@ -294,6 +294,11 @@ public class HyBidCTAView extends FrameLayout {
         }
     }
 
+    private void invokeInvalidCTAUrl() {
+        if(listener != null)
+            listener.onInvalidCTAIconUrl();
+    }
+
     public interface CTAViewListener {
 
         void onClick();
@@ -301,10 +306,7 @@ public class HyBidCTAView extends FrameLayout {
         void onShow();
 
         void onFail();
-    }
 
-    public float getScreenWidthInDP() {
-        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
-        return displayMetrics.widthPixels / displayMetrics.density;
+        void onInvalidCTAIconUrl();
     }
 }

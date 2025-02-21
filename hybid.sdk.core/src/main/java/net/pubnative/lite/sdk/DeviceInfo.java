@@ -56,7 +56,6 @@ import net.pubnative.lite.sdk.core.R;
 import net.pubnative.lite.sdk.models.request.UserAgent;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.Logger;
-import net.pubnative.lite.sdk.utils.PNAsyncUtils;
 import net.pubnative.lite.sdk.utils.PNCrypto;
 import net.pubnative.lite.sdk.utils.ScreenDimensionsUtils;
 import net.pubnative.lite.sdk.utils.SoundUtils;
@@ -64,6 +63,7 @@ import net.pubnative.lite.sdk.utils.SoundUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.RejectedExecutionException;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
@@ -118,6 +118,7 @@ public class DeviceInfo {
     private String mAdvertisingIdSha1;
     private boolean mLimitTracking = false;
     private boolean mIsCharging = false;
+    private boolean mIsChangingReceiverRegistered = false;
     private Listener mListener;
     private String deviceHeight;
     private String deviceWidth;
@@ -127,7 +128,6 @@ public class DeviceInfo {
         mContext = context.getApplicationContext();
         mUserAgentProvider = new UserAgentProvider();
         getDeviceScreenDimensions();
-        updateChargingStatus();
     }
 
     public void initialize(Listener listener) {
@@ -137,23 +137,30 @@ public class DeviceInfo {
         updateChargingStatus();
     }
 
-    public void updateChargingStatus() {
-        BroadcastReceiver batteryStatusReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-                mIsCharging = status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL;
-                context.unregisterReceiver(this);
+    private final BroadcastReceiver mBatteryStatusReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+            mIsCharging = status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL;
+            if (mContext != null) {
+                mContext.unregisterReceiver(this);
+                mIsChangingReceiverRegistered = false;
             }
-        };
+        }
+    };
 
-        IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        mContext.registerReceiver(batteryStatusReceiver, filter);
+    public void updateChargingStatus() {
+        if (!mIsChangingReceiverRegistered) {
+            IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+            mContext.registerReceiver(mBatteryStatusReceiver, filter);
+            mIsChangingReceiverRegistered = true;
+        }
     }
 
     private void fetchAdvertisingId() {
         try {
-            PNAsyncUtils.safeExecuteOnExecutor(new HyBidAdvertisingId(mContext, (advertisingId, limitTracking) -> {
+            HyBidAdvertisingId advertisingIdTask = new HyBidAdvertisingId(mContext);
+            advertisingIdTask.execute((advertisingId, limitTracking) -> {
                 mLimitTracking = limitTracking;
                 if (!TextUtils.isEmpty(advertisingId)) {
                     mAdvertisingId = advertisingId;
@@ -162,13 +169,18 @@ public class DeviceInfo {
                 } else {
                     fetchFireOSAdvertisingId();
                 }
-
                 if (mListener != null) {
                     mListener.onInfoLoaded();
                 }
-            }));
+            });
+        } catch (RejectedExecutionException exception) {
+            Logger.e(TAG, "fetchAdvertisingId", exception);
+            if (mListener != null) {
+                mListener.onInfoLoaded();
+            }
+            HyBid.reportException(exception);
         } catch (Exception exception) {
-            Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
+            Logger.e(TAG, "Error executing HyBidAdvertisingId Executor");
             if (mListener != null) {
                 mListener.onInfoLoaded();
             }
@@ -561,25 +573,38 @@ public class DeviceInfo {
     public List<String> getInputLanguages() {
         ArrayList<String> inputLanguages = new ArrayList<>();
         if (mContext != null) {
-            InputMethodManager inputMethodManager = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-            if (inputMethodManager != null && inputMethodManager.getEnabledInputMethodList() != null
-                    && !inputMethodManager.getEnabledInputMethodList().isEmpty()) {
-                List<InputMethodInfo> inputMethodInfoList = inputMethodManager.getEnabledInputMethodList();
-                if (inputMethodInfoList != null) {
-                    for (InputMethodInfo inputMethodInfo : inputMethodInfoList) {
-                        List<InputMethodSubtype> subtypeList = inputMethodManager.getEnabledInputMethodSubtypeList(inputMethodInfo, true);
-                        if (subtypeList != null) {
-                            for (InputMethodSubtype subtype : subtypeList) {
-                                if (subtype.getMode() != null && subtype.getMode().equals("keyboard")) {
-                                    String currentLocale = subtype.getLocale();
-                                    if (currentLocale == null || !currentLocale.isEmpty()) {
-                                        inputLanguages.add(currentLocale);
+            try {
+                InputMethodManager inputMethodManager = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+
+                if (inputMethodManager != null) {
+                    List<InputMethodInfo> inputMethodInfoList = inputMethodManager.getEnabledInputMethodList();
+
+                    if (inputMethodInfoList != null && !inputMethodInfoList.isEmpty()) {
+                        for (InputMethodInfo inputMethodInfo : inputMethodInfoList) {
+                            if (inputMethodInfo == null) {
+                                continue;
+                            }
+
+                            List<InputMethodSubtype> subtypeList = inputMethodManager.getEnabledInputMethodSubtypeList(inputMethodInfo, true);
+                            if (subtypeList != null) {
+                                for (InputMethodSubtype subtype : subtypeList) {
+                                    if (subtype == null) {
+                                        continue;
+                                    }
+                                    String mode = subtype.getMode();
+                                    if (mode != null && mode.equals("keyboard")) {
+                                        String currentLocale = subtype.getLocale();
+                                        if (currentLocale != null && !currentLocale.isEmpty()) {
+                                            inputLanguages.add(currentLocale);
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
+            } catch (Exception exception) {
+                Logger.e(TAG, "Error getting input languages", exception);
             }
         }
         return inputLanguages;
@@ -591,38 +616,31 @@ public class DeviceInfo {
     }
 
     public Integer getBatteryLevel() {
-        Integer batteryPercentage;
-        if (Build.VERSION.SDK_INT >= 21) {
+        if (mContext != null) {
             BatteryManager batteryManager = (BatteryManager) mContext.getSystemService(BATTERY_SERVICE);
-            batteryPercentage = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
-        } else {
-            IntentFilter intentFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-            Intent batteryStatus = mContext.registerReceiver(null, intentFilter);
-            int level = batteryStatus != null ? batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) : -1;
-            int scale = batteryStatus != null ? batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1) : -1;
-            double batteryPct = level / (double) scale;
-            batteryPercentage = (int) (batteryPct * 100);
-        }
+            if (batteryManager != null) {
+                int batteryPercentage = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
 
-        if (batteryPercentage >= 85) {
-            return 8;
-        } else if (batteryPercentage >= 70) {
-            return 7;
-        } else if (batteryPercentage >= 55) {
-            return 6;
-        } else if (batteryPercentage >= 40) {
-            return 5;
-        } else if (batteryPercentage >= 25) {
-            return 4;
-        } else if (batteryPercentage >= 10) {
-            return 3;
-        } else if (batteryPercentage >= 5) {
-            return 2;
-        } else if (batteryPercentage >= 0) {
-            return 1;
-        } else {
-            return null;
+                if (batteryPercentage >= 85) {
+                    return 8;
+                } else if (batteryPercentage >= 70) {
+                    return 7;
+                } else if (batteryPercentage >= 55) {
+                    return 6;
+                } else if (batteryPercentage >= 40) {
+                    return 5;
+                } else if (batteryPercentage >= 25) {
+                    return 4;
+                } else if (batteryPercentage >= 10) {
+                    return 3;
+                } else if (batteryPercentage >= 5) {
+                    return 2;
+                } else if (batteryPercentage >= 0) {
+                    return 1;
+                }
+            }
         }
+        return null;
     }
 
     public Integer isPowerSaveMode() {

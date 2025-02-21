@@ -2,13 +2,11 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-parcelize'
-    id 'com.fyber.fairbid-sdk-plugin' version '3.50.0'
+    //id 'com.fyber.fairbid-sdk-plugin' version '3.54.0'
     id 'com.google.firebase.appdistribution'
     id 'com.google.firebase.firebase-perf'
     id 'com.google.firebase.crashlytics'
     id 'com.google.gms.google-services'
-    id "org.sonarqube" version "3.3"
-    id "com.github.kt3k.coveralls" version "2.12.2"
     id 'org.jetbrains.kotlin.plugin.serialization'
 }
 
@@ -105,36 +103,36 @@ dependencies {
     implementation project(':hybid.sdk.topicsapi')
 
     implementation 'androidx.appcompat:appcompat:1.7.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
     implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.multidex:multidex:2.0.1'
 
-    implementation 'com.ironsource.sdk:mediationsdk:8.4.0'
-    implementation 'com.applovin:applovin-sdk:13.0.0'
+    implementation 'com.ironsource.sdk:mediationsdk:8.7.0'
+    implementation 'com.applovin:applovin-sdk:13.1.0'
 
-    implementation 'com.chartboost:chartboost-mediation-sdk:4.9.1'
-    implementation 'com.chartboost:chartboost-mediation-adapter-verve:4.3.0.2.0'
+    implementation 'com.chartboost:chartboost-mediation-sdk:5.1.0'
+    implementation 'com.chartboost:chartboost-mediation-adapter-verve:5.3.0.4.0'
     implementation 'com.google.android.gms:play-services-base:18.5.0'
-    implementation 'com.google.android.gms:play-services-ads-identifier:18.1.0'
+    implementation 'com.google.android.gms:play-services-ads-identifier:18.2.0'
     implementation 'com.google.android.gms:play-services-appset:16.1.0'
 
-    implementation 'com.google.android.gms:play-services-ads:23.3.0'
+    implementation 'com.google.android.gms:play-services-ads:23.6.0'
     implementation 'com.google.android.ads:mediation-test-suite:3.0.0'
-    implementation "androidx.navigation:navigation-fragment-ktx:2.7.7"
-    implementation "androidx.navigation:navigation-ui-ktx:2.7.7"
+    implementation "androidx.navigation:navigation-fragment-ktx:2.8.6"
+    implementation "androidx.navigation:navigation-ui-ktx:2.8.6"
     implementation "androidx.preference:preference-ktx:1.2.1"
 
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.google.code.gson:gson:2.11.0'
     implementation 'androidx.vectordrawable:vectordrawable:1.2.0'
-    implementation 'com.google.android.ump:user-messaging-platform:2.2.0'
+    implementation 'com.google.android.ump:user-messaging-platform:3.1.0'
 
-    implementation platform('com.google.firebase:firebase-bom:33.3.0')
+    implementation platform('com.google.firebase:firebase-bom:33.6.0')
     implementation 'com.google.firebase:firebase-perf'
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
 
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3"
 
     // coroutine
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3"
@@ -148,18 +146,5 @@ dependencies {
         exclude group: 'androidx.constraintlayout'
         exclude group: 'com.google.android.material'
         exclude group: 'com.google.android.gms'
-    }
-}
-
-sonarqube {
-    sonarqube {
-        properties {
-            property "sonar.projectName", "HyBidDemo"
-            property "sonar.projectKey", "HyBidDemoSample"
-            property "sonar.host.url", "http://localhost:9000"
-            property "sonar.projectVersion", "1.0"
-            property "sonar.language", "java"
-            property "sonar.sources", "src/main/"
-        }
     }
 }

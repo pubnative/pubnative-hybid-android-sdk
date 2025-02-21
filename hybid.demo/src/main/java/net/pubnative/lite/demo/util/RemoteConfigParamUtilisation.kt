@@ -38,6 +38,20 @@ object RemoteConfigParamUtilisation {
             configs.add(param)
         }
 
+        if (adCustomizationsManager.navigation_mode_enabled) {
+            param = RemoteConfigParam()
+            param.name = RemoteConfig.NAVIGATION_MODE.fieldName
+            param.value = adCustomizationsManager.navigation_mode_value
+            configs.add(param)
+        }
+
+        if (adCustomizationsManager.landing_page_enabled) {
+            param = RemoteConfigParam()
+            param.name = RemoteConfig.LANDING_PAGE.fieldName
+            param.value = adCustomizationsManager.landing_page_value
+            configs.add(param)
+        }
+
         if (adCustomizationsManager.end_card_close_delay_skip_offset_enabled) {
             param = RemoteConfigParam()
             param.name = RemoteConfig.END_CARD_CLOSE_DELAY.fieldName

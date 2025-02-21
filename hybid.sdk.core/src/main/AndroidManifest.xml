@@ -9,5 +9,10 @@
             android:name="net.pubnative.lite.sdk.contentinfo.AdFeedbackActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             tools:ignore="LockedOrientationActivity" />
+
+        <activity
+            android:name="net.pubnative.lite.sdk.utils.browser.BrowserActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize"
+            android:exported="false" />
     </application>
 </manifest>

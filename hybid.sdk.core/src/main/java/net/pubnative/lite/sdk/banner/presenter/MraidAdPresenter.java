@@ -229,7 +229,12 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
 
     @Override
     public void mraidNativeFeatureCallTel(String url) {
-
+        if (mIsDestroyed) {
+            return;
+        }
+        if (mListener != null) {
+            mListener.onAdClicked(this);
+        }
     }
 
     @Override
@@ -247,8 +252,11 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
         if (mIsDestroyed) {
             return;
         }
-
-        mUrlHandlerDelegate.handleUrl(url);
+        String navigationMode = null;
+        if (mAd != null) {
+            navigationMode = mAd.getNavigationMode();
+        }
+        mUrlHandlerDelegate.handleUrl(url, navigationMode);
         if (mListener != null) {
             mListener.onAdClicked(this);
         }
@@ -261,7 +269,12 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
 
     @Override
     public void mraidNativeFeatureSendSms(String url) {
-
+        if (mIsDestroyed) {
+            return;
+        }
+        if (mListener != null) {
+            mListener.onAdClicked(this);
+        }
     }
 
     @Override

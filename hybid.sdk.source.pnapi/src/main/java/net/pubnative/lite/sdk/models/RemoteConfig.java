@@ -29,6 +29,8 @@ public enum RemoteConfig {
     CUSTOM_CTA_ENABLED("custom_cta_enabled", Boolean.class),
     CUSTOM_CTA_TYPE("custom_cta_type", String.class),
     CUSTOM_CTA_DELAY("custom_cta_delay", Integer.class),
+    NAVIGATION_MODE("navigation_mode", String.class),
+    LANDING_PAGE("landing_page", Boolean.class),
     TOPICS_API_ENABLED("topics_api_enabled", Boolean.class),
     ATOM_ENABLED("atom_enabled", Boolean.class),
 

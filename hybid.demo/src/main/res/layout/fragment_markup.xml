@@ -112,6 +112,112 @@
                 android:text="@string/wrap_universal_rendering" />
 
             <TextView
+                android:id="@+id/universal_rendering_templates_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:fontFamily="@font/roboto"
+                android:text="@string/universal_rendering_template"
+                android:textColor="?colorPrimaryVariant"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:visibility="gone"/>
+
+            <RadioGroup
+                android:id="@+id/group_rendering_templates"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <RadioButton
+                    android:id="@+id/radio_template_default"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/template_default" />
+
+                <RadioButton
+                    android:id="@+id/radio_template_final"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="false"
+                    android:text="@string/template_final" />
+
+                <RadioButton
+                    android:id="@+id/radio_template_one"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/template_one" />
+
+                <RadioButton
+                    android:id="@+id/radio_template_two"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/template_two" />
+
+                <RadioButton
+                    android:id="@+id/radio_template_three"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/template_three" />
+
+                <RadioButton
+                    android:id="@+id/radio_template_four"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/template_four" />
+
+                <RadioButton
+                    android:id="@+id/radio_template_five"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/template_five" />
+
+                <RadioButton
+                    android:id="@+id/radio_template_six"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/template_six" />
+
+                <RadioButton
+                    android:id="@+id/radio_template_seven"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/template_seven" />
+
+                <RadioButton
+                    android:id="@+id/radio_template_new"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/template_new" />
+
+                <RadioButton
+                    android:id="@+id/radio_template_one_pre_rendering"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/template_one_pre_rendering" />
+
+                <RadioButton
+                    android:id="@+id/radio_template_four_without_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/template_four_without_container" />
+
+
+
+                <RadioButton
+                    android:id="@+id/radio_pnadtag"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pnadtag" />
+
+            </RadioGroup>
+
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -177,7 +283,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="32dp"
                 android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton

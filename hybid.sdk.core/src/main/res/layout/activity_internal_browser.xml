@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/btnLayoutTop"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/browser_top_button_layout_bg"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="1dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="3dp">
+
+            <ImageView
+                android:id="@+id/btnClose"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/browser_background_selector"
+                android:contentDescription="@string/btn_browser_close_content_description"
+                android:src="@drawable/browser_close" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@+id/btnClose"
+                android:layout_toLeftOf="@id/btnRefresh"
+                android:layout_toRightOf="@+id/btnClose"
+                android:layout_toStartOf="@id/btnRefresh"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal"
+                android:paddingEnd="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingStart="5dp">
+
+                <TextView
+                    android:id="@+id/tvHostname"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/browser_hostname_content_description"
+                    android:drawablePadding="2dp"
+                    android:ellipsize="end"
+                    android:lines="1"
+                    android:textAlignment="center"
+                    android:textColor="@color/ui_ctrl_black"
+                    android:textSize="16sp"
+                    tools:drawableLeft="@drawable/browser_secure_connection"
+                    tools:text="example.com"
+                    android:gravity="center_horizontal" />
+
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/btnRefresh"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/browser_background_selector"
+                android:contentDescription="@string/btn_browser_refresh_content_description"
+                android:src="@drawable/browser_core_refresh" />
+
+        </RelativeLayout>
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="@style/browserProgressBar"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:max="100"
+            tools:progress="80" />
+
+    </LinearLayout>
+
+    <net.pubnative.lite.sdk.utils.browser.BaseWebView
+        android:id="@+id/webView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/btnLayoutBottom"
+        android:layout_below="@+id/btnLayoutTop" />
+
+    <RelativeLayout
+        android:id="@+id/btnLayoutBottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/browser_bottom_button_layout_bg"
+        android:paddingBottom="3dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="3dp">
+
+        <ImageView
+            android:id="@+id/btnBackward"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/browser_background_selector"
+            android:contentDescription="@string/btn_browser_backward_content_description"
+            android:src="@drawable/browser_backward_selector" />
+
+        <ImageView
+            android:id="@+id/btnForward"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_toEndOf="@+id/btnBackward"
+            android:layout_toRightOf="@+id/btnBackward"
+            android:background="@drawable/browser_background_selector"
+            android:contentDescription="@string/btn_browser_forward_content_description"
+            android:src="@drawable/browser_forward_selector" />
+
+        <!--<ImageView
+            android:id="@+id/btnOpenExternal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/browser_background_selector"
+            android:contentDescription="@string/btn_browser_open_content_description"
+            android:src="@drawable/browser_open_in_browser" />-->
+
+    </RelativeLayout>
+
+</RelativeLayout>
