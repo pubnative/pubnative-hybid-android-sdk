@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.demo.ui.fragments.admob
 
 import android.content.pm.PackageManager
@@ -11,7 +15,6 @@ import androidx.fragment.app.Fragment
 import com.google.android.ads.mediationtestsuite.MediationTestSuite
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.sdk.HyBid
-
 
 class MediationTestSuiteFragment : Fragment(R.layout.fragment_mediation_test_suite) {
     val TAG = MediationTestSuiteFragment::class.java.simpleName

@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.demo.ui.fragments.consent
 
 import android.content.SharedPreferences
@@ -13,6 +17,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.sdk.HyBid
+import net.pubnative.lite.sdk.api.ApiManager
 
 class ConsentStringsFragment : Fragment() {
     companion object {
@@ -41,6 +46,7 @@ class ConsentStringsFragment : Fragment() {
                 Toast.makeText(requireContext(), R.string.empty_gdpr_consent_field, Toast.LENGTH_SHORT).show()
             } else {
                 sharedPreferences.edit().putString(KEY_GDPR_PUBLIC_CONSENT, gdprConsentString).apply()
+                ApiManager.fetchConfigs()
                 Toast.makeText(requireContext(), R.string.updated_gdpr_consent, Toast.LENGTH_SHORT).show()
             }
         }
@@ -48,6 +54,7 @@ class ConsentStringsFragment : Fragment() {
         view.findViewById<Button>(R.id.button_remove_gdpr_consent).setOnClickListener {
             sharedPreferences.edit().remove(KEY_GDPR_PUBLIC_CONSENT).apply()
             gdprConsentInput.setText("")
+            ApiManager.fetchConfigs()
             Toast.makeText(requireContext(), R.string.removed_gdpr_consent, Toast.LENGTH_SHORT).show()
         }
 

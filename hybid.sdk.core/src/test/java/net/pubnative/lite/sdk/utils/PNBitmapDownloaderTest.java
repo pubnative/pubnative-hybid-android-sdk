@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.utils;
 
 import android.graphics.Bitmap;
@@ -20,9 +24,6 @@ import static org.mockito.Mockito.verify;
 
 import net.pubnative.lite.sdk.HyBid;
 
-/**
- * Created by erosgarciaponte on 24.01.18.
- */
 @RunWith(RobolectricTestRunner.class)
 public class PNBitmapDownloaderTest {
     @Test

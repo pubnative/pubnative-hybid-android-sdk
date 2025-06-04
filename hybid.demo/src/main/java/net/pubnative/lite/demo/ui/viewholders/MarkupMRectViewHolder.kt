@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.demo.ui.viewholders
 
 import android.graphics.Color
@@ -25,16 +29,13 @@ class MarkupMRectViewHolder(
         if (!TextUtils.isEmpty(markup)) {
             val container = itemView.findViewById<FrameLayout>(R.id.mrect_container)
             container.removeAllViews()
-
             val mRect = HyBidAdView(itemView.context, AdSize.SIZE_300x250)
-
             val adLayoutParams = RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
             )
             adLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
             container.addView(mRect, adLayoutParams)
             container.setBackgroundColor(Color.BLACK)
-
             mRect.renderCustomMarkup(markup, this)
         }
     }
@@ -43,17 +44,18 @@ class MarkupMRectViewHolder(
         if (ad != null) {
             val container = itemView.findViewById<FrameLayout>(R.id.mrect_container)
             container.removeAllViews()
+            container.postDelayed({
+                val mRect = HyBidAdView(itemView.context, AdSize.SIZE_300x250)
 
-            val mRect = HyBidAdView(itemView.context, AdSize.SIZE_300x250)
+                val adLayoutParams = RelativeLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+                adLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
+                container.addView(mRect, adLayoutParams)
+                container.setBackgroundColor(Color.BLACK)
 
-            val adLayoutParams = RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-            adLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
-            container.addView(mRect, adLayoutParams)
-            container.setBackgroundColor(Color.BLACK)
-
-            mRect.renderAd(ad, this)
+                mRect.renderAd(ad, this)
+            }, 2000)
         }
     }
 

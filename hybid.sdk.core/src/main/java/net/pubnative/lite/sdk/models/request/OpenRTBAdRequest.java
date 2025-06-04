@@ -1,5 +1,8 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.models.request;
-
 
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.utils.json.BindField;

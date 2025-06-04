@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.visibility;
 
 import android.app.Activity;
@@ -39,7 +43,7 @@ public class ImpressionTrackerTest {
         impressionTracker.mHandler = new Handler();
         impressionTracker.mVisibilityListener = listener;
         View view = new View(activity);
-        impressionTracker.addView(view);
+        impressionTracker.addView(view, null);
         verify(impressionTracker, times(1)).getVisibilityTracker();
     }
 
@@ -50,7 +54,7 @@ public class ImpressionTrackerTest {
         impressionTracker.mHandler = new Handler();
         impressionTracker.mVisibilityListener = null;
         View view = new View(activity);
-        impressionTracker.addView(view);
+        impressionTracker.addView(view, null);
         verify(impressionTracker, times(1)).getVisibilityTracker();
     }
 }

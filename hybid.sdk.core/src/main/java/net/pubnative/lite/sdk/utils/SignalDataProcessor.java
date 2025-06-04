@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.utils;
 
 import android.text.TextUtils;
@@ -156,7 +160,7 @@ public class SignalDataProcessor {
         mAdCache.put(zoneId, ad);
 
         AdTopicsAPIManager.setTopicsAPIEnabled(mApiClient.getContext(), ad);
-        AtomManager.setAtomEnabled(mApiClient.getContext(), ad);
+//        AtomManager.setAtomEnabled(mApiClient.getContext(), ad);
 
         switch (ad.assetgroupid) {
             case ApiAssetGroupType.VAST_INTERSTITIAL:

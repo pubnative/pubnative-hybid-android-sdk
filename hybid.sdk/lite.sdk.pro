@@ -1,2 +1,3 @@
 -keep class net.pubnative.** { *; }
 -keep class com.iab.omid.library.pubnativenet.** { *; }
+-keep class com.verve.atom.** { *; }

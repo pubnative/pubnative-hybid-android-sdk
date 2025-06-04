@@ -1,24 +1,6 @@
-// The MIT License (MIT)
+// HyBid SDK License
 //
-// Copyright (c) 2018 PubNative GmbH
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
 //
 package net.pubnative.lite.sdk.mraid;
 
@@ -131,6 +113,8 @@ public class MRAIDView extends FrameLayout {
     private Integer mSkipTimeMillis = -1;
 
     private Integer mNativeCloseButtonDelay = -1;
+    private Boolean mIsAdPlayable;
+    private int mPlayableSkipOffset = -1;
     private Integer mClickCounter = 0;
     private Boolean isBackClickable = false;
     private SimpleTimer mExpirationTimer;
@@ -159,6 +143,10 @@ public class MRAIDView extends FrameLayout {
         }, 1000);
 
         mNativeCloseButtonTimer.start();
+    }
+
+    public void setIsAdPlayable(Boolean adPlayable) {
+        mIsAdPlayable = adPlayable;
     }
 
     // used to define state of the MRAID advertisement
@@ -658,8 +646,7 @@ public class MRAIDView extends FrameLayout {
                 String delayString = new String(decodedBytes);
                 try {
                     landingPageDelay = Integer.parseInt(delayString);
-                }
-                catch (NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     // do nothing
                 }
                 validateDelay();
@@ -687,7 +674,8 @@ public class MRAIDView extends FrameLayout {
 
     //////////////////////////////////////////////////////
     // These are methods in the MRAID API.
-    //////////////////////////////////////////////////////
+
+    /// ///////////////////////////////////////////////////
 
     @JavascriptMRAIDCallback
     protected void close() {
@@ -2187,6 +2175,10 @@ public class MRAIDView extends FrameLayout {
         this.mNativeCloseButtonDelay = nativeCloseButtonDelay * 1000;
     }
 
+    public void setPlayableSkipOffset(Integer playableSkipOffset) {
+        this.mPlayableSkipOffset = playableSkipOffset * 1000;
+    }
+
     public void setIsLandingPageEnabled(boolean isLandingPageEnabled) {
         this.isLandingPageEnabled = isLandingPageEnabled;
     }
@@ -2269,7 +2261,7 @@ public class MRAIDView extends FrameLayout {
                     }
                     break;
                 case "nc":
-                    if(mSkipCountdownView != null) {
+                    if (mSkipCountdownView != null) {
                         mSkipCountdownView.setVisibility(View.GONE);
                     }
                     break;

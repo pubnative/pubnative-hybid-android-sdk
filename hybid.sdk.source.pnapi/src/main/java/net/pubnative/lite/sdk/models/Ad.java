@@ -1,24 +1,6 @@
-// The MIT License (MIT)
+// HyBid SDK License
 //
-// Copyright (c) 2018 PubNative GmbH
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
 //
 package net.pubnative.lite.sdk.models;
 
@@ -226,6 +208,8 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     }
 
     public View getContentInfo(Context context, PNAPIContentInfoView.ContentInfoListener listener) {
+        if (context == null)
+            return null;
         String configClickUrl = getRemoteConfig(RemoteConfig.CONTENT_INFO_URL);
         String configIconUrl = getRemoteConfig(RemoteConfig.CONTENT_INFO_ICON_URL);
         String contentInfoText = getRemoteConfig(RemoteConfig.CONTENT_INFO_TEXT);
@@ -498,6 +482,14 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         return TextUtils.isEmpty(creativeId) ? "" : creativeId;
     }
 
+    public Boolean isAdPlayable() {
+        AdData adData = getMeta(APIMeta.PLAYABLE);
+        if (adData == null) {
+            return false;
+        }
+        return adData.getBooleanField("boolean");
+    }
+
     public String getBundleId() {
         AdData adData = getMeta(APIMeta.BUNDLE_ID);
 
@@ -674,14 +666,14 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     }
 
     public Integer getHtmlSkipOffset() {
-        if (isPerformanceAd()){
+        if (isPerformanceAd()) {
             return getPcHtmlSkipOffset();
         } else
             return getSkipOffset(RemoteConfig.HTML_SKIP_OFFSET);
     }
 
     public Integer getVideoSkipOffset() {
-        if (isPerformanceAd()){
+        if (isPerformanceAd()) {
             return getPcVideoSkipOffset();
         } else if (isBrandAd()) {
             return getBcVideoSkipOffset();
@@ -690,14 +682,14 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     }
 
     public Integer getMraidRewardedSkipOffset() {
-        if (isPerformanceAd()){
+        if (isPerformanceAd()) {
             return getPcMraidRewardedSkipOffset();
         } else
             return getSkipOffset(RemoteConfig.REWARDED_HTML_SKIP_OFFSET);
     }
 
     public Integer getVideoRewardedSkipOffset() {
-        if (isPerformanceAd()){
+        if (isPerformanceAd()) {
             return getPcVideoRewardedSkipOffset();
         } else if (isBrandAd()) {
             return getBcVideoRewardedSkipOffset();
@@ -884,6 +876,14 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         return hasHiddenControls;
     }
 
+    public String getBcLearnMoreSize() {
+        return getRemoteConfig(RemoteConfig.BC_LEARN_MORE_SIZE);
+    }
+
+    public String getBcLearnMoreLocation() {
+        return getRemoteConfig(RemoteConfig.BC_LEARN_MORE_LOCATION);
+    }
+
     public boolean isBrandAd() {
         return AdExperienceManager.isBrandAd(assetgroupid, getAdExperience());
     }
@@ -902,6 +902,10 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
 
     public Boolean isLandingPage() {
         return getRemoteConfig(RemoteConfig.LANDING_PAGE);
+    }
+
+    public Integer getPlayableSkipOffset() {
+        return getRemoteConfig(RemoteConfig.PLAYABLE_SKIP_OFFSET);
     }
 
     @Override

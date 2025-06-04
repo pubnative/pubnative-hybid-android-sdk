@@ -1,24 +1,6 @@
-// The MIT License (MIT)
+// HyBid SDK License
 //
-// Copyright (c) 2018 PubNative GmbH
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
 //
 package net.pubnative.lite.sdk.visibility;
 
@@ -27,6 +9,8 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
+
+import net.pubnative.lite.sdk.utils.HybidConsumer;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -38,6 +22,7 @@ public class VisibilityTracker {
     private static final int VISIBILITY_CHECK_DELAY = 100;
 
     protected WeakReference<View> mDeviceView = null;
+    private WeakReference<HybidConsumer<Double>> mPercentageConsumer;
     protected WeakReference<Listener> mListener = null;
     protected final List<PubnativeVisibilityTrackerItem> mTrackedViews = new ArrayList<>();
     protected Handler mHandler = new Handler();
@@ -81,7 +66,7 @@ public class VisibilityTracker {
      * @param minVisibilityPercent min amount percent of the view shown to be considered visible
      *                             from 0 to 1
      */
-    public void addView(View view, double minVisibilityPercent) {
+    public void addView(View view, double minVisibilityPercent, HybidConsumer<Double> percentageConsumer) {
         if (mDeviceView == null) {
             mDeviceView = new WeakReference<>(view);
             ViewTreeObserver observer = view.getViewTreeObserver();
@@ -91,7 +76,7 @@ public class VisibilityTracker {
                 Log.d(TAG, "Unable to start tracking, Window ViewTreeObserver is not alive");
             }
         }
-
+        mPercentageConsumer = new WeakReference<>(percentageConsumer);
         if (containsTrackedView(view)) {
             // Already tracking this view, drop the call
             return;
@@ -120,6 +105,7 @@ public class VisibilityTracker {
      */
     public void clear() {
         mHandler.removeMessages(0);
+        mPercentageConsumer.clear();
         mTrackedViews.clear();
         mIsVisibilityCheckScheduled = false;
         if (mDeviceView != null) {
@@ -187,6 +173,7 @@ public class VisibilityTracker {
         private final ArrayList<View> mVisibleViews;
         private final ArrayList<View> mInvisibleViews;
         private final Rect mVisibleRect;
+        private boolean mHasReportedVisibility = false;
 
         VisibilityRunnable() {
             mVisibleRect = new Rect();
@@ -233,8 +220,11 @@ public class VisibilityTracker {
                 double percentVisible = (double) visibleArea / (double) viewArea;
 
                 result = percentVisible >= item.mMinVisibilityPercent;
+                if (result && mPercentageConsumer.get() != null && !mHasReportedVisibility) {
+                    mPercentageConsumer.get().accept(percentVisible);
+                    mHasReportedVisibility = true;
+                }
             }
-
             return result;
         }
     }

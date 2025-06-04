@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.models;
 
 import net.pubnative.lite.sdk.testing.TestUtil;
@@ -11,9 +15,6 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.util.List;
 
-/**
- * Created by erosgarciaponte on 24.01.18.
- */
 @RunWith(RobolectricTestRunner.class)
 public class AdTest {
     private Ad mSubject;
@@ -42,5 +43,29 @@ public class AdTest {
         List<AdData> impressionBeacons = parsedAd.getBeacons(Ad.Beacon.IMPRESSION);
 
         Assert.assertEquals("https://mock-dsp.pubnative.net/tracker/nurl?app_id=1036637&p=0.01", impressionBeacons.get(0).getURL());
+    }
+
+    @Test
+    public void validateAdPlayableSkipOffsetRemoteConfigResponse() throws Exception {
+        mSubject = TestUtil.createTestInterstitialAd();
+        Ad parsedAd = new Ad(mSubject.toJson());
+        Assert.assertNotNull(parsedAd.getMeta("remoteconfigs"));
+        Assert.assertEquals(4, parsedAd.getPlayableSkipOffset().intValue());
+    }
+
+    @Test
+    public void validateAdIsPlayable() throws Exception {
+        mSubject = TestUtil.createMraidPlayableAd(true);
+        Ad parsedAd = new Ad(mSubject.toJson());
+        Assert.assertNotNull(parsedAd.getMeta("playable_ux"));
+        Assert.assertTrue(parsedAd.isAdPlayable());
+    }
+
+    @Test
+    public void validateAdIsNotPlayable() throws Exception {
+        mSubject = TestUtil.createMraidPlayableAd(false);
+        Ad parsedAd = new Ad(mSubject.toJson());
+        Assert.assertNotNull(parsedAd.getMeta("playable_ux"));
+        Assert.assertFalse(parsedAd.isAdPlayable());
     }
 }

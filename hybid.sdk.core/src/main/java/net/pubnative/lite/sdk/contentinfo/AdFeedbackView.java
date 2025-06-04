@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.contentinfo;
 
 import static net.pubnative.lite.sdk.models.Ad.CONTENT_INFO_LINK_URL;

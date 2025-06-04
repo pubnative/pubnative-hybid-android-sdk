@@ -1,24 +1,6 @@
-// The MIT License (MIT)
+// HyBid SDK License
 //
-// Copyright (c) 2018 PubNative GmbH
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
 //
 package net.pubnative.lite.sdk;
 
@@ -54,6 +36,7 @@ import android.view.inputmethod.InputMethodSubtype;
 
 import net.pubnative.lite.sdk.core.R;
 import net.pubnative.lite.sdk.models.request.UserAgent;
+import net.pubnative.lite.sdk.utils.BatteryUtils;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNCrypto;
@@ -76,9 +59,7 @@ public class DeviceInfo {
     }
 
     public enum Orientation {
-        PORTRAIT("portrait"),
-        LANDSCAPE("landscape"),
-        NONE("none");
+        PORTRAIT("portrait"), LANDSCAPE("landscape"), NONE("none");
 
         private final String mOrientation;
 
@@ -93,10 +74,7 @@ public class DeviceInfo {
     }
 
     public enum Connectivity {
-        ETHERNET("ethernet"),
-        WIFI("wifi"),
-        WWAN("wwan"),
-        NONE("none");
+        ETHERNET("ethernet"), WIFI("wifi"), WWAN("wwan"), NONE("none");
 
         private final String mConnectivity;
 
@@ -617,27 +595,23 @@ public class DeviceInfo {
 
     public Integer getBatteryLevel() {
         if (mContext != null) {
-            BatteryManager batteryManager = (BatteryManager) mContext.getSystemService(BATTERY_SERVICE);
-            if (batteryManager != null) {
-                int batteryPercentage = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
-
-                if (batteryPercentage >= 85) {
-                    return 8;
-                } else if (batteryPercentage >= 70) {
-                    return 7;
-                } else if (batteryPercentage >= 55) {
-                    return 6;
-                } else if (batteryPercentage >= 40) {
-                    return 5;
-                } else if (batteryPercentage >= 25) {
-                    return 4;
-                } else if (batteryPercentage >= 10) {
-                    return 3;
-                } else if (batteryPercentage >= 5) {
-                    return 2;
-                } else if (batteryPercentage >= 0) {
-                    return 1;
-                }
+            int batteryPercentage = BatteryUtils.getBatteryPercentageSync(mContext);
+            if (batteryPercentage >= 85) {
+                return 8;
+            } else if (batteryPercentage >= 70) {
+                return 7;
+            } else if (batteryPercentage >= 55) {
+                return 6;
+            } else if (batteryPercentage >= 40) {
+                return 5;
+            } else if (batteryPercentage >= 25) {
+                return 4;
+            } else if (batteryPercentage >= 10) {
+                return 3;
+            } else if (batteryPercentage >= 5) {
+                return 2;
+            } else if (batteryPercentage >= 0) {
+                return 1;
             }
         }
         return null;
@@ -752,16 +726,14 @@ public class DeviceInfo {
         boolean readPhoneStatePermission = hasPermission(Manifest.permission.READ_PHONE_STATE);
         if (readPhoneStatePermission) {
             AudioManager am = (AudioManager) this.mContext.getSystemService(Context.AUDIO_SERVICE);
-            if (am == null)
-                return null;
+            if (am == null) return null;
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
                 return (am.isWiredHeadsetOn() || am.isBluetoothScoOn() || am.isBluetoothA2dpOn()) ? 1 : 0;
             } else {
                 AudioDeviceInfo[] devices = am.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
                 if (devices == null) return null;
                 for (AudioDeviceInfo device : devices) {
-                    if (device.getType() == AudioDeviceInfo.TYPE_WIRED_HEADSET
-                            || device.getType() == AudioDeviceInfo.TYPE_WIRED_HEADPHONES) {
+                    if (device.getType() == AudioDeviceInfo.TYPE_WIRED_HEADSET || device.getType() == AudioDeviceInfo.TYPE_WIRED_HEADPHONES) {
                         return 1;
                     }
                 }

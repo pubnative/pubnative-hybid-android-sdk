@@ -1,24 +1,6 @@
-// The MIT License (MIT)
+// HyBid SDK License
 //
-// Copyright (c) 2018 PubNative GmbH
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
 //
 package net.pubnative.lite.sdk.banner.presenter;
 
@@ -51,6 +33,7 @@ import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.CheckUtils;
+import net.pubnative.lite.sdk.utils.HybidConsumer;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.URLValidator;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
@@ -86,6 +69,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
     private Icon mVastIcon;
     private boolean mIsDestroyed;
     private boolean mLoaded = false;
+    private boolean wasClicked = false;
     private AdSize mAdSize;
 
     private VideoAdView mVideoPlayer;
@@ -108,6 +92,8 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
     private Boolean mCustomEndCardCloseTracked = false;
     private IntegrationType mIntegrationType;
 
+    private AdTracker mAdTracker;
+    private AdTracker mCustomEndcardTracker;
     private AdTracker mAdEventTracker;
     private AdTracker mCustomCTATracker;
     private AdTracker mCustomCTAEndcardTracker;
@@ -136,6 +122,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
         videoVisibilityManager = VideoVisibilityManager.getInstance();
         videoVisibilityManager.addCallback(this);
         mIntegrationType = integrationType;
+        initiateAdTrackers();
         initiateCustomCTAAdTrackers();
         initiateEventTrackers();
     }
@@ -219,8 +206,14 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
 
     @Override
     public void startTracking() {
-        if (mTrackingMethod == ImpressionTrackingMethod.AD_VIEWABLE && mAd != null) {
-            ImpressionManager.startTrackingView(mVideoPlayer, mAdSize, mAd.getImpressionMinVisibleTime(), mAd.getImpressionVisiblePercent(), mNativeTrackerListener);
+        startTracking(null);
+    }
+
+    @Override
+    public void startTracking(HybidConsumer<Double> percentConsumer) {
+        if (mTrackingMethod == ImpressionTrackingMethod.AD_VIEWABLE) {
+            ImpressionManager.startTrackingView(mVideoPlayer, mAdSize, mAd.getImpressionMinVisibleTime(), mAd.getImpressionVisiblePercent()
+                    , mNativeTrackerListener, percentConsumer);
         } else {
             if (mVideoAd != null) {
                 mVideoAd.show();
@@ -381,6 +374,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
             if (mListener != null) {
                 mListener.onAdClicked(VastAdPresenter.this);
             }
+            wasClicked = true;
         }
 
         @Override
@@ -528,6 +522,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
 
                     HyBid.getReportingController().reportEvent(reportingEvent);
                 }
+                mCustomEndcardTracker.trackImpression();
                 mAdEventTracker.trackCustomEndcardEvent(AuxiliaryAdEventType.IMPRESSION, null);
                 mCustomEndCardImpressionTracked = true;
             }
@@ -577,6 +572,10 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
 
                     HyBid.getReportingController().reportEvent(reportingEvent);
                 }
+                if (!wasClicked) {
+                    mAdTracker.trackClick();
+                }
+                mCustomEndcardTracker.trackClick();
                 mAdEventTracker.trackCustomEndcardEvent(AuxiliaryAdEventType.CLICK, null);
                 mCustomEndCardClickTracked = true;
             }
@@ -778,6 +777,13 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
             reportingEvent.setTimestamp(System.currentTimeMillis());
 
             HyBid.getReportingController().reportEvent(reportingEvent);
+        }
+    }
+
+    private void initiateAdTrackers() {
+        if (mAd != null) {
+            mAdTracker = new AdTracker(mAd.getBeacons(Ad.Beacon.IMPRESSION), mAd.getBeacons(Ad.Beacon.CLICK));
+            mCustomEndcardTracker = new AdTracker(mAd.getBeacons(Ad.Beacon.CUSTOM_END_CARD_IMPRESSION), mAd.getBeacons(Ad.Beacon.CUSTOM_END_CARD_CLICK));
         }
     }
 

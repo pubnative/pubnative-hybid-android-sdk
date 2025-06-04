@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.visibility;
 
 import android.os.Handler;
@@ -22,7 +26,7 @@ public class VisibilityTrackerTest {
         visibilityTracker.mHandler = new Handler();
         visibilityTracker.setListener(listener);
         View view = new View(RuntimeEnvironment.application.getApplicationContext());
-        visibilityTracker.addView(view, 100);
+        visibilityTracker.addView(view, 100, null);
         verify(visibilityTracker, times(1)).scheduleVisibilityCheck();
     }
 
@@ -33,7 +37,7 @@ public class VisibilityTrackerTest {
         visibilityTracker.mHandler = new Handler();
         visibilityTracker.setListener(null);
         View view = new View(RuntimeEnvironment.application.getApplicationContext());
-        visibilityTracker.addView(view, 100);
+        visibilityTracker.addView(view, 100, null);
         verify(visibilityTracker, times(1)).scheduleVisibilityCheck();
     }
 }

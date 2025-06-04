@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.demo.viewmodel
 
 import android.app.Application
@@ -15,7 +19,6 @@ import net.pubnative.lite.sdk.analytics.ReportingEventCallback
 import net.pubnative.lite.sdk.analytics.tracker.ReportingTracker
 import net.pubnative.lite.sdk.analytics.tracker.ReportingTrackerCallback
 import net.pubnative.lite.sdk.utils.AdRequestRegistry
-
 
 class DebugViewModel(application: Application) : AndroidViewModel(application),
     ReportingEventCallback, ReportingTrackerCallback {

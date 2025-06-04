@@ -30,7 +30,6 @@ buildscript {
 }
 
 subprojects {
-
     ext {
         branchName = null
         if (System.getenv("CIRCLE_BRANCH") != null) {
@@ -46,8 +45,9 @@ subprojects {
         android_api = 34
         android_build_tools = '34.0.0'
         omid_version = '1.5.1'
+        atom_version = '3.6.1'
     }
-    version = "3.3.0"
+    version = "3.6.0"
     group = "net.pubnative"
 }
 
@@ -56,8 +56,9 @@ allprojects {
         google()
         mavenCentral()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-        maven { url 'https://verve.jfrog.io/artifactory/verve-gradle-dev' }
+        maven { url 'https://verve.jfrog.io/artifactory/verve-gradle-dev-local' }
         maven { url 'https://verve.jfrog.io/artifactory/verve-gradle-release' }
+        maven { url 'https://s3.amazonaws.com/smaato-sdk-releases/'}
         maven { url 'https://android-sdk.is.com/' }
         maven { url "https://plugins.gradle.org/m2/" }
         maven { url "https://cboost.jfrog.io/artifactory/chartboost-mediation" }

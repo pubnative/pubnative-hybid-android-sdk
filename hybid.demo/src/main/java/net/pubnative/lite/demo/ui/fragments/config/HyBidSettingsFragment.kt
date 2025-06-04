@@ -1,24 +1,6 @@
-// The MIT License (MIT)
+// HyBid SDK License
 //
-// Copyright (c) 2018 PubNative GmbH
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
 //
 package net.pubnative.lite.demo.ui.fragments.config
 
@@ -41,7 +23,6 @@ import net.pubnative.lite.demo.ui.activities.config.BrowserPriorityActivity
 import net.pubnative.lite.demo.ui.activities.config.KeywordsActivity
 import net.pubnative.lite.demo.ui.activities.config.ZoneIdsActivity
 import net.pubnative.lite.sdk.HyBid
-import net.pubnative.lite.sdk.api.ApiManager
 
 /**
  * Created by erosgarciaponte on 30.01.18.
@@ -65,6 +46,7 @@ class HyBidSettingsFragment : Fragment(R.layout.fragment_hybid_settings) {
     private lateinit var permissionLauncher: ActivityResultLauncher<String>
     private lateinit var precisePermissionStatus: TextView
     private lateinit var permissionStatusText: TextView
+    private lateinit var tvAtomStatus: TextView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -83,6 +65,7 @@ class HyBidSettingsFragment : Fragment(R.layout.fragment_hybid_settings) {
         genderRadioGroup = view.findViewById(R.id.group_gender)
         precisePermissionStatus = view.findViewById(R.id.tv_precise_permission_status)
         permissionStatusText = view.findViewById(R.id.tv_geo_permission_status)
+        tvAtomStatus = view.findViewById(R.id.tv_atom_status)
 
         settingManager = SettingsManager.getInstance(requireContext())
 
@@ -116,7 +99,6 @@ class HyBidSettingsFragment : Fragment(R.layout.fragment_hybid_settings) {
                 updateGeolocationPermissionStatus()
             }
         }
-
         view.findViewById<Button>(R.id.button_save_pn_settings).setOnClickListener {
             saveData()
             Toast.makeText(activity, "PubNative settings saved successfully.", Toast.LENGTH_SHORT)
@@ -124,10 +106,17 @@ class HyBidSettingsFragment : Fragment(R.layout.fragment_hybid_settings) {
             HyBid.initialize(appTokenInput.text.toString(), activity?.application)
             activity?.finish()
         }
-
         updateGeolocationPermissionStatus()
-
+        updateAtomStatus()
         fillSavedValues()
+    }
+
+    private fun updateAtomStatus() {
+        val atomStatus = when (HyBid.isAtomStarted()) {
+            true -> "started"
+            else -> "stopped"
+        }
+        tvAtomStatus.text = "Atom is $atomStatus"
     }
 
     private fun fillSavedValues() {
@@ -179,6 +168,7 @@ class HyBidSettingsFragment : Fragment(R.layout.fragment_hybid_settings) {
         }
 
         settingManager.setAppToken(appToken)
+
         settingManager.setApiUrl(apiUrl)
         settingManager.setAge(age)
         settingManager.setCoppa(coppa)
@@ -190,19 +180,6 @@ class HyBidSettingsFragment : Fragment(R.layout.fragment_hybid_settings) {
         settingManager.setLocationTrackingEnabled(locationTrackingEnabled)
         settingManager.setLocationUpdates(locationUpdates)
         settingManager.setLocationUpdatesEnabled(locationUpdatesEnabled)
-
-        HyBid.setLocationTrackingEnabled(locationTracking)
-        HyBid.setLocationUpdatesEnabled(locationUpdates)
-        HyBid.setTopicsApiEnabled(topicsApi)
-        HyBid.setReportingEnabled(reportingEnabled)
-
-        HyBid.setAppToken(appToken)
-        HyBid.setAge(age)
-        HyBid.setCoppaEnabled(coppa)
-        HyBid.setTestMode(testMode)
-        HyBid.setLocationTrackingEnabled(locationTrackingEnabled)
-        HyBid.setGender(gender)
-        ApiManager.setApiUrl(apiUrl)
     }
 
     private fun checkPermissions() {

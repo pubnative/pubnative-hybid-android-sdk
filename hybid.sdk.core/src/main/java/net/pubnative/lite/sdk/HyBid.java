@@ -1,24 +1,6 @@
-// The MIT License (MIT)
+// HyBid SDK License
 //
-// Copyright (c) 2020 PubNative GmbH
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
 //
 package net.pubnative.lite.sdk;
 
@@ -64,6 +46,7 @@ public class HyBid {
     public static final String HYBID_VERSION = BuildConfig.SDK_VERSION;
 
     private static String sAppToken;
+    private static Application sApplication;
     @SuppressLint("StaticFieldLeak")
     private static PNApiClient sApiClient;
     @SuppressLint("StaticFieldLeak")
@@ -94,6 +77,7 @@ public class HyBid {
     private static boolean sTopicsApiEnabled = false;
     private static boolean sAtomEnabled = false;
     private static boolean sReportingEnabled = false;
+    private static boolean sAtomInitialized;
     private static String sAge;
     private static String sGender;
     private static String sKeywords;
@@ -103,6 +87,7 @@ public class HyBid {
     private static String sAppVersion;
     private static String sDeveloperDomain;
     private static String sContentAgeRating;
+    private static String sSDKConfigURL = "";
 
     private static Integer skipXmlResource = R.mipmap.skip;
 
@@ -112,7 +97,8 @@ public class HyBid {
     private static AudioState sVideoAudioState = AudioState.ON;
 
     private static final boolean sEventLoggingEndpointEnabled = false;
-    private static Boolean mIsSDKConfigFetched = false;
+    private static HyBidPreferences preferences;
+    private static boolean sIsAtomEnabled = false;
 
     public static void initialize(String appToken, Application application) {
         initialize(appToken, application, null);
@@ -122,21 +108,20 @@ public class HyBid {
      * This method must be called to initialize the SDK before request ads.
      */
     public static void initialize(final String appToken, final Application application, final InitialisationListener initialisationListener) {
-
         sAppToken = appToken;
-
+        sApplication = application;
+        if (sAppToken == null || application == null) {
+            initialisationListener.onInitialisationFinished(false);
+        }
         long installed;
-
         try {
             installed = application.getApplicationContext().getPackageManager().getPackageInfo(application.getApplicationContext().getPackageName(), 0).firstInstallTime;
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
             installed = System.currentTimeMillis();
         }
-
-        HyBidPreferences preferences = new HyBidPreferences(application.getApplicationContext());
+        preferences = new HyBidPreferences(application.getApplicationContext());
         preferences.setAppFirstInstalledTime(String.valueOf(installed));
-
         preferences.setSessionTimeStamp(System.currentTimeMillis(), () -> {
 //            DBManager dbManager = new DBManager(application.getApplicationContext());
 //            dbManager.open();
@@ -149,9 +134,6 @@ public class HyBid {
         sBundleId = application.getPackageName();
         sApiClient = new PNApiClient(application);
 
-        //sSDKConfigAPiClient = new SDKConfigAPiClient(application.getApplicationContext());
-        //sSDKConfigAPiClient.setAppToken(appToken);
-
         FileUtils.initParentDirAsync(application.getApplicationContext());
 
         if (application.getSystemService(Context.LOCATION_SERVICE) != null) {
@@ -162,13 +144,11 @@ public class HyBid {
         }
         sUserDataManager = new UserDataManager(application.getApplicationContext());
         sAdCache = new AdCache();
-
         sVideoAdCache = new VideoAdCache();
         sBrowserManager = new BrowserManager();
         sVgiIdManager = new VgiIdManager(application.getApplicationContext());
         sDiagnosticsManager = new DiagnosticsManager(application.getApplicationContext(), getReportingController());
         sViewabilityManager = new ViewabilityManager(application);
-
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             Boolean topicsEnabled = AdTopicsAPIManager.isTopicsAPIEnabled(application.getApplicationContext());
             if (topicsEnabled != null && topicsEnabled) {
@@ -176,8 +156,8 @@ public class HyBid {
                 sTopicManager = new TopicManager(application.getApplicationContext());
             }
         }
-
-        if (sCrashController == null) sCrashController = new CrashController();
+        if (sCrashController == null)
+            sCrashController = new CrashController();
         if (sDeviceInfo == null) {
             sDeviceInfo = new DeviceInfo(application.getApplicationContext());
             sDeviceInfo.initialize(() -> {
@@ -187,27 +167,29 @@ public class HyBid {
                     event.setAppToken(appToken);
                     getReportingController().reportEvent(event);
                 }
-
-                if (initialisationListener != null) {
-                    initialisationListener.onInitialisationFinished(true);
-                }
             });
-        } else {
-            if (initialisationListener != null) {
-                initialisationListener.onInitialisationFinished(true);
-            }
         }
-
-        //fetchSDKConfig();
-
+        if (sSDKConfigAPiClient == null) {
+            sSDKConfigAPiClient = new SDKConfigAPiClient(application.getApplicationContext());
+            sSDKConfigAPiClient.setAppToken(appToken);
+        }
+        if (!BuildConfig.DEBUG) {
+            fetchConfigs(appToken, application, initialisationListener);
+        }
         sInitialized = true;
     }
 
-    private static void fetchSDKConfig() {
-        if (!mIsSDKConfigFetched) {
+    private static void fetchConfigs(String appToken, Application application, InitialisationListener initialisationListener) {
+        fetchSDKConfig(application, appToken, initialisationListener);
+    }
+
+    private static synchronized void fetchSDKConfig(Application application, String appToken, InitialisationListener initialisationListener) {
+        if (sSDKConfigAPiClient != null) {
             sSDKConfigAPiClient.fetchConfig(isAtomEnabled -> {
-                mIsSDKConfigFetched = true;
-                AtomManager.setAtomSDKConfig(isAtomEnabled);
+                validateAtomStart(isAtomEnabled, application);
+                if (initialisationListener != null) {
+                    initialisationListener.onInitialisationFinished(true);
+                }
             });
         }
     }
@@ -410,12 +392,12 @@ public class HyBid {
         return sTopicsApiEnabled;
     }
 
-    public static void setAtomEnabled(Boolean enabled) {
-        sAtomEnabled = enabled;
+    public static void setAtomStarted(Boolean started) {
+        sAtomInitialized = started;
     }
 
-    public static Boolean isAtomEnabled() {
-        return sAtomEnabled;
+    public static Boolean isAtomStarted() {
+        return sAtomInitialized;
     }
 
     public static void reportException(Exception exception) {
@@ -430,6 +412,26 @@ public class HyBid {
             ReportingEvent event = sCrashController.formatException(exception);
             getReportingController().reportEvent(event);
         }
+    }
+
+    private static void validateAtomStart(Boolean isAtomEnabled, Application application) {
+        if (isAtomStarted()) {
+            return;
+        }
+        setAtomStarted(isAtomEnabled);
+        if (isAtomEnabled != null && application != null && isAtomEnabled) {
+            AtomManager.initializeAtom(application.getApplicationContext());
+        } else {
+            AtomManager.stopAtom();
+        }
+    }
+
+    public static SDKConfigAPiClient getSDKConfigApiClient() {
+        return sSDKConfigAPiClient;
+    }
+
+    public static void validateAtom() {
+        fetchConfigs(sAppToken, sApplication, null);
     }
 
     public interface InitialisationListener {
@@ -556,5 +558,14 @@ public class HyBid {
 
     public static Integer getPressedCloseXmlResource() {
         return pressedCloseXmlResource;
+    }
+
+    public static void setSDKConfigURL(String url) {
+        if (BuildConfig.DEBUG && sInitialized) {
+            if (sSDKConfigAPiClient != null) {
+                sSDKConfigAPiClient.setURL(url, SDKConfigAPiClient.ConfigType.TESTING);
+                fetchConfigs(sAppToken, sApplication, null);
+            }
+        }
     }
 }

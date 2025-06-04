@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.demo.ui.fragments.creativetester
 
 import android.app.Activity
@@ -32,7 +36,6 @@ import net.pubnative.lite.sdk.views.HyBidAdView
 import net.pubnative.lite.sdk.views.HyBidBannerAdView
 import net.pubnative.lite.sdk.views.HyBidLeaderboardAdView
 import net.pubnative.lite.sdk.views.HyBidMRectAdView
-
 
 class CreativeTesterFragment : Fragment(R.layout.fragment_creative_tester), HyBidAdView.Listener {
     private val TAG = CreativeTesterFragment::class.java.simpleName

@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.utils.browser;
 
 import android.annotation.TargetApi;
@@ -7,7 +11,6 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 
 import net.pubnative.lite.sdk.utils.Logger;
-
 
 /*package*/ class BrowserModel {
     private static final String TAG = BrowserModel.class.getSimpleName();

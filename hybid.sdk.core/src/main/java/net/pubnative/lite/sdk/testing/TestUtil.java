@@ -1,6 +1,11 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.testing;
 
 import net.pubnative.lite.sdk.db.SessionImpression;
+import net.pubnative.lite.sdk.models.APIMeta;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdData;
 import net.pubnative.lite.sdk.models.AdRequest;
@@ -8,15 +13,27 @@ import net.pubnative.lite.sdk.models.AdResponse;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 import net.pubnative.lite.sdk.models.PNAdRequest;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * Created by erosgarciaponte on 24.01.18.
- */
-
 public class TestUtil {
+
+    public static Ad createMraidPlayableAd(Boolean isPlayable) {
+        Ad ad = new Ad();
+        ad.assetgroupid = ApiAssetGroupType.MRAID_320x480;
+        ad.assets = createMockAssets();
+        try {
+            ad.meta = createPlayableMockMeta(isPlayable);
+        } catch (JSONException e) {
+            ad.meta = null;
+        }
+        ad.beacons = createMockBeacons();
+        return ad;
+    }
 
     public static Ad createTestInterstitialAd() {
         return createTestAd(ApiAssetGroupType.MRAID_320x480);
@@ -57,6 +74,10 @@ public class TestUtil {
         return createTestAd(ApiAssetGroupType.MRAID_320x50);
     }
 
+    public static Ad createTestAdForAtomAdSession() {
+        return createTestAdForAtomAdSession(ApiAssetGroupType.MRAID_320x50);
+    }
+
     public static Ad createTestMRectAd() {
         return createTestAd(ApiAssetGroupType.MRAID_300x250);
     }
@@ -73,7 +94,20 @@ public class TestUtil {
         Ad ad = new Ad();
         ad.assetgroupid = assetGroupId;
         ad.assets = createMockAssets();
-        ad.meta = createMockMeta();
+        try {
+            ad.meta = createMockMeta();
+        } catch (JSONException e) {
+            ad.meta = null;
+        }
+        ad.beacons = createMockBeacons();
+        return ad;
+    }
+
+    public static Ad createTestAdForAtomAdSession(int assetGroupId) {
+        Ad ad = new Ad();
+        ad.assetgroupid = assetGroupId;
+        ad.assets = createMockAssets();
+        ad.meta = createMockMetaForAtomAdSession();
         ad.beacons = createMockBeacons();
         return ad;
     }
@@ -93,7 +127,17 @@ public class TestUtil {
         return assets;
     }
 
-    private static List<AdData> createMockMeta() {
+    private static List<AdData> createPlayableMockMeta(Boolean isPlayable) throws JSONException {
+        List<AdData> meta = new ArrayList<>(3);
+        AdData playableMeta = new AdData();
+        playableMeta.type = "playable_ux";
+        playableMeta.data = new HashMap<>(1);
+        playableMeta.data.put("boolean", isPlayable);
+        meta.add(playableMeta);
+        return meta;
+    }
+
+    private static List<AdData> createMockMeta() throws JSONException {
         List<AdData> meta = new ArrayList<>(3);
 
         AdData pointsMeta = new AdData();
@@ -113,10 +157,60 @@ public class TestUtil {
         contentInfoMeta.data.put("icon", "https://cdn.pubnative.net/static/adserver/contentinfo.png");
         contentInfoMeta.data.put("text", "Learn about this ad");
 
+        AdData remoteConfigAdData = new AdData();
+        remoteConfigAdData.type = "remoteconfigs";
+        remoteConfigAdData.data = new HashMap<>(1);
+
+        JSONObject remoteConfigJsonData = new JSONObject();
+        remoteConfigJsonData.put("audiostate", "on");
+        remoteConfigJsonData.put("close_inter_after_finished", false);
+        remoteConfigJsonData.put("creative_autostorekit", true);
+        remoteConfigJsonData.put("endcard_close_delay", 2);
+        remoteConfigJsonData.put("endcardenabled", true);
+        remoteConfigJsonData.put("fullscreen_clickability", true);
+        remoteConfigJsonData.put("html_skip_offset", 5);
+        remoteConfigJsonData.put("rewarded_html_skip_offset", 30);
+        remoteConfigJsonData.put("rewarded_video_skip_offset", 30);
+        remoteConfigJsonData.put("video_skip_offset", 5);
+        remoteConfigJsonData.put("playable_skip_offset", 4);
+
+        remoteConfigAdData.data.put("jsondata", remoteConfigJsonData);
+
         meta.add(pointsMeta);
         meta.add(revenueModelMeta);
         meta.add(contentInfoMeta);
+        meta.add(remoteConfigAdData);
 
+        return meta;
+    }
+
+    private static List<AdData> createMockMetaForAtomAdSession() {
+        List<AdData> meta = new ArrayList<>(4);
+
+        AdData pointsMeta = new AdData();
+        pointsMeta.type = "points";
+        pointsMeta.data = new HashMap<>(1);
+        pointsMeta.data.put("number", 9);
+
+        AdData creativeIdMeta = new AdData();
+        creativeIdMeta.type = APIMeta.CREATIVE_ID;
+        creativeIdMeta.data = new HashMap<>(1);
+        creativeIdMeta.data.put("text", "creative_test_123");
+
+        AdData campaignIdMeta = new AdData();
+        campaignIdMeta.type = APIMeta.CAMPAIGN_ID;
+        campaignIdMeta.data = new HashMap<>(1);
+        campaignIdMeta.data.put("text", "campaign_test_123");
+
+        AdData revenueModelMeta = new AdData();
+        revenueModelMeta.type = "revenuemodel";
+        revenueModelMeta.data = new HashMap<>(1);
+        revenueModelMeta.data.put("text", "cpm");
+
+        meta.add(pointsMeta);
+        meta.add(creativeIdMeta);
+        meta.add(campaignIdMeta);
+        meta.add(revenueModelMeta);
         return meta;
     }
 

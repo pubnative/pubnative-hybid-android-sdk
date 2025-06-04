@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.vpaid;
 
 import android.annotation.SuppressLint;
@@ -163,18 +167,15 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
     @Override
     public void destroy() {
         if (mWebView != null) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (mWebView.getParent() != null) {
-                        ((ViewGroup) mWebView.getParent()).removeAllViews();
-                    }
-                    mWebView.clearHistory();
-                    mWebView.clearCache(true);
-                    mWebView.loadUrl("about:blank");
-                    mWebView.pauseTimers();
-                    mWebView = null;
+            runOnUiThread(() -> {
+                if (mWebView.getParent() != null) {
+                    ((ViewGroup) mWebView.getParent()).removeAllViews();
                 }
+                mWebView.clearHistory();
+                mWebView.clearCache(true);
+                mWebView.loadUrl("about:blank");
+                mWebView.pauseTimers();
+                mWebView = null;
             });
         }
     }
@@ -196,12 +197,7 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
     @Override
     public void skipVideo() {
         mIsStarted = false;
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mBaseAdInternal.dismiss();
-            }
-        });
+        runOnUiThread(mBaseAdInternal::dismiss);
 
     }
 
@@ -222,12 +218,9 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
 
     @Override
     public void callJsMethod(final String url) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (mWebView != null) {
-                    mWebView.loadUrl("javascript:" + url);
-                }
+        runOnUiThread(() -> {
+            if (mWebView != null) {
+                mWebView.loadUrl("javascript:" + url);
             }
         });
     }
@@ -365,13 +358,10 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
 
     @Override
     public void closeSelf() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mIsWaitingForWebView = false;
-                mVpaidBridge.stopAd();
-                mBaseAdInternal.dismiss();
-            }
+        runOnUiThread(() -> {
+            mIsWaitingForWebView = false;
+            mVpaidBridge.stopAd();
+            mBaseAdInternal.dismiss();
         });
     }
 

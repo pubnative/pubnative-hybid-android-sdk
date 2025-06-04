@@ -1,26 +1,17 @@
-// The MIT License (MIT)
+// HyBid SDK License
 //
-// Copyright (c) 2020 PubNative GmbH
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
 //
 package net.pubnative.lite.sdk.api;
+
+import static net.pubnative.lite.sdk.utils.AtomManager.AD_FORMAT;
+import static net.pubnative.lite.sdk.utils.AtomManager.AD_SESSION_DATA;
+import static net.pubnative.lite.sdk.utils.AtomManager.BID_PRICE;
+import static net.pubnative.lite.sdk.utils.AtomManager.CAMPAIGN_ID;
+import static net.pubnative.lite.sdk.utils.AtomManager.CREATIVE_ID;
+import static net.pubnative.lite.sdk.utils.AtomManager.RENDERING_STATUS;
+import static net.pubnative.lite.sdk.utils.AtomManager.RENDERING_SUCCESS;
+import static net.pubnative.lite.sdk.utils.AtomManager.VIEWABILITY;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -59,6 +50,7 @@ import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -96,6 +88,7 @@ public class RequestManager {
     private boolean mAutoCacheOnLoad = true;
     private boolean mCacheStarted = false;
     private boolean mCacheFinished = false;
+    private String mAdFormat;
 
     final JSONObject jsonCacheParams;
     private Long mRequestTimeMilliseconds = 0L;
@@ -296,7 +289,7 @@ public class RequestManager {
         ad.setZoneId(adRequest.zoneId);
         mAdCache.put(adRequest.zoneId, ad);
         AdTopicsAPIManager.setTopicsAPIEnabled(mApiClient.getContext(), ad);
-        AtomManager.setAtomEnabled(mApiClient.getContext(), ad);
+//        AtomManager.setAtomEnabled(mApiClient.getContext(), ad);
 
         switch (ad.assetgroupid) {
             case ApiAssetGroupType.VAST_INTERSTITIAL:
@@ -452,6 +445,32 @@ public class RequestManager {
         }
     }
 
+    public void sendAdSessionDataToAtom(Ad response, Double percentage) {
+        if (response != null) {
+            try {
+                JSONObject jsonData = new JSONObject();
+                if (response.getCreativeId() != null && !response.getCreativeId().isEmpty()) {
+
+                    jsonData.put(CREATIVE_ID, response.getCreativeId());
+                }
+                if (response.getCampaignId() != null && !response.getCampaignId().isEmpty()) {
+                    jsonData.put(CAMPAIGN_ID, response.getCampaignId());
+                }
+                jsonData.put(BID_PRICE, HeaderBiddingUtils.getBidFromPoints(
+                        response.getECPM(), PrebidUtils.KeywordMode.THREE_DECIMALS));
+                jsonData.put(AD_FORMAT, mAdFormat == null ? Reporting.AdFormat.NATIVE : mAdFormat);
+                jsonData.put(RENDERING_STATUS, RENDERING_SUCCESS);
+                jsonData.put(VIEWABILITY, percentage != null ? percentage : 0);
+                HashMap<String, Object> adSessionData = new HashMap<>();
+                adSessionData.put(AD_SESSION_DATA, jsonData.toString());
+
+                AtomManager.setAdSessionData(adSessionData);
+            } catch (JSONException e) {
+                Logger.d(TAG, "Error while sending ad session data to Atom: " + e.getMessage());
+            }
+        }
+    }
+
     private void reportAdResponse(AdRequest adRequest, Ad adResponse, IntegrationType mIntegrationType) {
         if (mReportingController != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();
@@ -480,7 +499,8 @@ public class RequestManager {
                 case ApiAssetGroupType.MRAID_250x250:
                 case ApiAssetGroupType.MRAID_300x600:
                 case ApiAssetGroupType.MRAID_320x100: {
-                    reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
+                    mAdFormat = Reporting.AdFormat.BANNER;
+                    reportingEvent.setAdFormat(mAdFormat);
                     reportingEvent.setCreativeType(Reporting.CreativeType.STANDARD);
                     break;
                 }
@@ -490,9 +510,11 @@ public class RequestManager {
                 case ApiAssetGroupType.MRAID_768x1024:
                 case ApiAssetGroupType.MRAID_480x320: {
                     if (isRewarded()) {
-                        reportingEvent.setAdFormat(Reporting.AdFormat.REWARDED);
+                        mAdFormat = Reporting.AdFormat.REWARDED;
+                        reportingEvent.setAdFormat(mAdFormat);
                     } else {
-                        reportingEvent.setAdFormat(Reporting.AdFormat.FULLSCREEN);
+                        mAdFormat = Reporting.AdFormat.FULLSCREEN;
+                        reportingEvent.setAdFormat(mAdFormat);
                     }
                     reportingEvent.setCreativeType(Reporting.CreativeType.STANDARD);
                     break;
@@ -500,21 +522,25 @@ public class RequestManager {
 
                 case ApiAssetGroupType.VAST_INTERSTITIAL: {
                     if (isRewarded()) {
-                        reportingEvent.setAdFormat(Reporting.AdFormat.REWARDED);
+                        mAdFormat = Reporting.AdFormat.REWARDED;
+                        reportingEvent.setAdFormat(mAdFormat);
                     } else {
-                        reportingEvent.setAdFormat(Reporting.AdFormat.FULLSCREEN);
+                        mAdFormat = Reporting.AdFormat.FULLSCREEN;
+                        reportingEvent.setAdFormat(mAdFormat);
                     }
                     reportingEvent.setCreativeType(Reporting.CreativeType.VIDEO);
                     break;
                 }
 
                 case ApiAssetGroupType.VAST_MRECT: {
-                    reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
+                    mAdFormat = Reporting.AdFormat.BANNER;
+                    reportingEvent.setAdFormat(mAdFormat);
                     reportingEvent.setCreativeType(Reporting.CreativeType.VIDEO);
                     break;
                 }
                 default: {
-                    reportingEvent.setAdFormat(Reporting.AdFormat.NATIVE);
+                    mAdFormat = Reporting.AdFormat.NATIVE;
+                    reportingEvent.setAdFormat(mAdFormat);
                 }
             }
             mReportingController.reportEvent(reportingEvent);

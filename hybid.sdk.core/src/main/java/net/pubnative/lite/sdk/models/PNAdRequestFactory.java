@@ -1,24 +1,6 @@
-// The MIT License (MIT)
+// HyBid SDK License
 //
-// Copyright (c) 2020 PubNative GmbH
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
 //
 package net.pubnative.lite.sdk.models;
 
@@ -41,12 +23,16 @@ import net.pubnative.lite.sdk.models.bidstream.Signal;
 import net.pubnative.lite.sdk.models.bidstream.ImpressionVideo;
 import net.pubnative.lite.sdk.prefs.HyBidPreferences;
 import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
+import net.pubnative.lite.sdk.utils.AtomManager;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.HyBidTimeUtils;
 import net.pubnative.lite.sdk.utils.Logger;
 
 import org.json.JSONObject;
 
+import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -188,6 +174,11 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
         adRequest.omidpv = HyBid.OMSDK_VERSION;
         adRequest.isInterstitial = adSize == AdSize.SIZE_INTERSTITIAL;
         adRequest.ae = paAvailable ? "1" : "0";
+
+        String atomCohorts = getAtomCohorts();
+        if (!TextUtils.isEmpty(atomCohorts)) {
+            adRequest.vg = atomCohorts;
+        }
 
         if (adSize != null) {
             List<Integer> expDirs = new ArrayList<>();
@@ -417,5 +408,33 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
         supportedApis.add(Api.OMID_1);
 
         return TextUtils.join(",", supportedApis.toArray(new String[0]));
+    }
+
+    private String getAtomCohorts() {
+        String encodedCohorts = null;
+        if (!AtomManager.isAtomSdkDisabled()
+                && AtomManager.isAtomSdkConfigurationFetchSuccessful()) {
+            List<Object> cohorts = AtomManager.getAtomCohorts();
+            if (!cohorts.isEmpty()) {
+                List<String> cohortIdList = new ArrayList<>();
+
+                for (Object cohort : cohorts) {
+                    try {
+                        Method getIdMethod = cohort.getClass().getDeclaredMethod(AtomManager.ATOM_GET_ID_METHOD_NAME);
+                        Object id = getIdMethod.invoke(cohort);
+                        if (id != null) {
+                            cohortIdList.add(String.valueOf(id));
+                        }
+                    } catch (Exception e) {
+                        Logger.d(TAG, AtomManager.ATOM_NOT_FOUND_MESSAGE);
+                    }
+                }
+                if (!cohortIdList.isEmpty()) {
+                    String cohortsString = "[" + TextUtils.join(",", cohortIdList) + "]";
+                    encodedCohorts = Base64.encodeToString(cohortsString.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
+                }
+            }
+        }
+        return encodedCohorts;
     }
 }

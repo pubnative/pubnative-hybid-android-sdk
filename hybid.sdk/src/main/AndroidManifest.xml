@@ -8,19 +8,23 @@
         <activity android:name=".consent.UserConsentActivity" />
         <activity
             android:name=".interstitial.activity.MraidInterstitialActivity"
-            android:configChanges="keyboardHidden|screenSize"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:resizeableActivity="true"
             android:screenOrientation="behind" />
         <activity
             android:name=".interstitial.activity.VastInterstitialActivity"
-            android:configChanges="keyboardHidden|screenSize"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:resizeableActivity="true"
             android:screenOrientation="behind" />
         <activity
             android:name=".rewarded.activity.MraidRewardedActivity"
-            android:configChanges="keyboardHidden|screenSize"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:resizeableActivity="true"
             android:screenOrientation="behind" />
         <activity
             android:name=".rewarded.activity.VastRewardedActivity"
-            android:configChanges="keyboardHidden|screenSize"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:resizeableActivity="true"
             android:screenOrientation="behind" />
     </application>
 

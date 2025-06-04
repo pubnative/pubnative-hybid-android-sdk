@@ -1,8 +1,8 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.contentinfo.listeners;
-
-import android.os.Parcelable;
-
-import java.io.Serializable;
 
 public interface AdFeedbackLoadListener {
 

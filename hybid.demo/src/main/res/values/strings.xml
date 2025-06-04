@@ -325,6 +325,7 @@
     <string name="initial_audio" translatable="false">Initial Audio</string>
     <string name="hint_html_mraid_skip_offset" translatable="false">HTML/MRAID Skip Offset</string>
     <string name="hint_video_skip_offset" translatable="false">Video Skip Offset</string>
+    <string name="hint_playable_skip_offset" translatable="false">Playable Skip Offset</string>
     <string name="hint_rewarded_html_mraid_skip_offset" translatable="false">Rewarded HTML/MRAID Skip Offset</string>
     <string name="hint_rewarded_video_skip_offset" translatable="false">Rewarded Video Skip Offset</string>
     <string name="hint_endcard_close_button_delay" translatable="false">EndCard close button delay</string>
@@ -395,10 +396,15 @@
     <string name="radio_extended" translatable="false">Extended</string>
     <string name="rewarded_video" translatable="false">Rewarded Video</string>
 
-    <string name="bundle_id_label" translatable="false">Bundle Id</string>
-    <string name="custom_bundle_id_enabled" translatable="false">Custom Bundle Id Enabled</string>
-    <string name="hint_custom_bundle_id" translatable="false">Custom Bundle Id</string>
-    <string name="ad_customisation_title" translatable="false">Ad Customisation</string>
+    <string name="branding_configs_label" translatable="false">Branding Configs</string>
+    <string name="learn_more_size_title" translatable="false">Learn more size</string>
+    <string name="learn_more_location_title" translatable="false">Learn more location</string>
+    <string name="learn_more_size_default" translatable="false">default</string>
+    <string name="learn_more_size_medium" translatable="false">medium</string>
+    <string name="learn_more_size_large" translatable="false">large</string>
+    <string name="learn_more_location_default" translatable="false">default</string>
+    <string name="learn_more_location_bottom_down" translatable="false">bottom-down</string>
+    <string name="learn_more_location_bottom_up" translatable="false">bottom-up</string>
 
     <string name="template_default" translatable="false">Default Template</string>
     <string name="template_final" translatable="false">Final Template</string>
@@ -413,4 +419,19 @@
     <string name="template_one_pre_rendering" translatable="false">Template one - Pre rendering</string>
     <string name="template_four_without_container" translatable="false">Template four w/o container</string>
     <string name="pnadtag" translatable="false">pn-ad-tag</string>
+
+    <string name="bundle_id_label" translatable="false">Bundle Id</string>
+    <string name="custom_bundle_id_enabled" translatable="false">Custom Bundle Id Enabled</string>
+    <string name="hint_custom_bundle_id" translatable="false">Custom Bundle Id</string>
+    <string name="ad_customisation_title" translatable="false">Ad Customisation</string>
+    <string name="hint_tcf_consent" translatable="false">TCF Consent String\n</string>
+    <string name="hybid_sdk_config_settings" translatable="false">HyBid SDK Config</string>
+    <string name="sdk_config_dialog_title" translatable="false">SDK Config Selection</string>
+    <string name="sdk_config_production_url" translatable="false">Production URL</string>
+    <string name="sdk_config_testing_url" translatable="false">Testing URL</string>
+    <string name="sdk_config_choose_title" translatable="false">"Please choose SDK Config URL to use: "</string>
+    <string name="save_url" translatable="false">Save URL</string>
+    <string name="cancel" translatable="false">Cancel</string>
+    <string name="production_choice_note" translatable="false">- Production: Tap \"Production URL\"</string>
+    <string name="testing_choice_note" translatable="false">- Testing: Provide the SDK Config URL, then tap \"Testing URL\"</string>
 </resources>

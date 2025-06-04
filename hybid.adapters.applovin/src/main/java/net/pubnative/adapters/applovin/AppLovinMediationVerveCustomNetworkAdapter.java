@@ -1,3 +1,8 @@
+
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.adapters.applovin;
 
 import android.app.Activity;
@@ -47,7 +52,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AppLovinMediationVerveCustomNetworkAdapter extends MediationAdapterBase implements MaxAdViewAdapter,
         MaxInterstitialAdapter, MaxRewardedAdapter, MaxNativeAdAdapter {
     public static final String MAX_MEDIATION_VENDOR = "m";
-    public static final String MAX_ADAPTER_VERSION = "3.3.0.0";
+    public static final String MAX_ADAPTER_VERSION = "3.6.0.0";
     public static final String PARAM_APP_TOKEN = "pn_app_token";
     public static final String DUMMY_TOKEN = "dummytoken";
 
@@ -650,12 +655,12 @@ public class AppLovinMediationVerveCustomNetworkAdapter extends MediationAdapter
                     if (!TextUtils.isEmpty(mNativeAd.getCallToActionText())) {
                         builder.setCallToAction(mNativeAd.getCallToActionText());
                     }
-
-                    View contentInfo = mNativeAd.getContentInfo(activity);
-                    if (contentInfo != null) {
-                        builder.setOptionsView(contentInfo);
+                    if (mNativeAd != null) {
+                        View contentInfo = mNativeAd.getContentInfo(activity);
+                        if (contentInfo != null) {
+                            builder.setOptionsView(contentInfo);
+                        }
                     }
-
                     MaxNativeAd maxNativeAd = new MaxVerveNativeAd(builder);
                     listener.onNativeAdLoaded(maxNativeAd, null);
                 }

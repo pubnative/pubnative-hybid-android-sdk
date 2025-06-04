@@ -1,24 +1,6 @@
-// The MIT License (MIT)
+// HyBid SDK License
 //
-// Copyright (c) 2018 PubNative GmbH
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
 //
 package net.pubnative.lite.demo;
 
@@ -100,6 +82,7 @@ public class Constants {
 
     public static final String CONTENT_INFO_URL = "https://pubnative.net/content-info";
     public static final String CONTENT_INFO_ICON_URL = "https://cdn.pubnative.net/static/adserver/contentinfo.png";
+    public static final String SDK_CONFIG_PRODUCTION_URL = "https://sdkc.vervegroupinc.net/config?app_token=543027b8e954474cbcd9a98481622a3b";
 
     public static final String CHARTBOOST_APP_ID = "64f5c7fb7ddfa7bc4080417b";
     public static final String CHARTBOOST_APP_SIGNATURE = "72d9f2abbacdf32a49494390d9e8a0f89190f474";
@@ -113,6 +96,7 @@ public class Constants {
     public static final String CHARTBOOST_MEDIATION_REWARDED_HTML_AD_UNIT = "hybid-android-rewarded-html";
 
     public static final String APP_TOKEN = "dde3c298b47648459f8ada4a982fa92d";
+    public static final String TCF_CONSENT_STRING = "";
 
     public static final List<String> ZONE_ID_LIST = Arrays.asList(NATIVE_ZONE_ID, MRAID_320x50_ZONE_ID, MRAID_300x250_ZONE_ID, INTERSTITIAL_MRAID_ZONE_ID, MEDIUM_VIDEO_ZONE_ID, INTERSTITIAL_VIDEO_ZONE_ID, MRAID_728x90_ZONE_ID, MRAID_160x600_ZONE_ID, MRAID_250x250_ZONE_ID, MRAID_300x600_ZONE_ID, MRAID_320x100_ZONE_ID, MRAID_480x320_ZONE_ID, MRAID_300x50_ZONE_ID);
 

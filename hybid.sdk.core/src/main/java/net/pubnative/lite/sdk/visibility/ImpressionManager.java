@@ -1,24 +1,6 @@
-// The MIT License (MIT)
+// HyBid SDK License
 //
-// Copyright (c) 2018 PubNative GmbH
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
 //
 package net.pubnative.lite.sdk.visibility;
 
@@ -26,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 
 import net.pubnative.lite.sdk.models.AdSize;
+import net.pubnative.lite.sdk.utils.HybidConsumer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +48,7 @@ public class ImpressionManager {
      * @param listener valid listener for impressions
      */
     public static void startTrackingView(View view, Integer visibleTimeMillisecond, Double visiblePercent, ImpressionTracker.Listener listener) {
-        startTrackingView(view, null, visibleTimeMillisecond, visiblePercent, listener);
+        startTrackingView(view, null, visibleTimeMillisecond, visiblePercent, listener, null);
     }
 
     /**
@@ -76,8 +59,9 @@ public class ImpressionManager {
      * @param adSize    size of the view to be tracked
      * @param listener  valid listener for impressions
      */
-    public static void startTrackingView(View view, AdSize adSize, Integer visibleTimeMillisecond, Double visiblePercent, ImpressionTracker.Listener listener) {
-        getInstance().addView(view, adSize, visibleTimeMillisecond, visiblePercent, listener);
+    public static void startTrackingView(View view, AdSize adSize, Integer visibleTimeMillisecond, Double visiblePercent
+            , ImpressionTracker.Listener listener, HybidConsumer<Double> hybidConsumer) {
+        getInstance().addView(view, adSize, visibleTimeMillisecond, visiblePercent, listener, hybidConsumer);
     }
 
     /**
@@ -101,7 +85,8 @@ public class ImpressionManager {
     //==============================================================================================
     // PRIVATE
     //==============================================================================================
-    protected void addView(View view, AdSize adSize, Integer visibleTimeMillisecond, Double visiblePercent, ImpressionTracker.Listener listener) {
+    protected void addView(View view, AdSize adSize, Integer visibleTimeMillisecond, Double visiblePercent
+            , ImpressionTracker.Listener listener, HybidConsumer<Double> percentageConsumer) {
         // Adds view to tracker, removing any previous instance of the view on other trackers
         // This should also create an independent tracker for each listener
         if (view == null) {
@@ -134,7 +119,7 @@ public class ImpressionManager {
                 tracker.setListener(listener);
                 mTrackers.add(tracker);
             }
-            tracker.addView(view);
+            tracker.addView(view, percentageConsumer);
         }
     }
 

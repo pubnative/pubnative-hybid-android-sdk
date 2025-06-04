@@ -1,13 +1,11 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.utils;
-
-import android.os.SystemClock;
-
-import net.pubnative.lite.sdk.HyBid;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Locale;
 
 public class HyBidTimeUtils {
 

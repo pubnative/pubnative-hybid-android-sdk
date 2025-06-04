@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.demo.ui.fragments.navigation
 
 import android.content.Intent
@@ -16,8 +20,12 @@ import net.pubnative.lite.demo.ui.activities.creativetester.P161CreativeTesterAc
 import net.pubnative.lite.demo.ui.activities.markup.MarkupActivity
 import net.pubnative.lite.demo.ui.activities.signaldata.SignalDataActivity
 import net.pubnative.lite.demo.ui.activities.vast.VastTagRequestActivity
+import net.pubnative.lite.demo.ui.dialogs.SDKConfigDialog
+import net.pubnative.lite.demo.ui.dialogs.SDKConfigDialogManager
+import net.pubnative.lite.sdk.api.ApiManager
 
-class SettingsNavFragment : Fragment(R.layout.fragment_nav_settings) {
+class SettingsNavFragment : Fragment(R.layout.fragment_nav_settings),
+    SDKConfigDialog.OnDismissListener {
 
     private lateinit var versionTextView: TextView
 
@@ -29,6 +37,10 @@ class SettingsNavFragment : Fragment(R.layout.fragment_nav_settings) {
         view.findViewById<TextView>(R.id.button_pn_settings).setOnClickListener {
             val intent = Intent(activity, HyBidSettingsActivity::class.java)
             startActivity(intent)
+        }
+
+        view.findViewById<TextView>(R.id.button_sdk_config_settings).setOnClickListener {
+            showSDKConfigDialog()
         }
 
         view.findViewById<TextView>(R.id.button_maxads_settings).setOnClickListener {
@@ -104,6 +116,11 @@ class SettingsNavFragment : Fragment(R.layout.fragment_nav_settings) {
         setBuildAndVersion()
     }
 
+    private fun showSDKConfigDialog() {
+        val instance = SDKConfigDialogManager.getInstance()
+        instance?.showDialog(this, childFragmentManager)
+    }
+
     private fun setBuildAndVersion() {
         val buildVersion = BuildConfig.VERSION_CODE
         val sdkVersion = net.pubnative.lite.sdk.BuildConfig.SDK_VERSION
@@ -111,7 +128,11 @@ class SettingsNavFragment : Fragment(R.layout.fragment_nav_settings) {
         versionTextView.text = String.format(
             getString(R.string.sdk_and_build_version_concat),
             sdkVersion,
-            buildVersion
+            buildVersion.toString()
         )
+    }
+
+    override fun onDismiss(url: String?) {
+        ApiManager.setSDKConfigURL(url)
     }
 }

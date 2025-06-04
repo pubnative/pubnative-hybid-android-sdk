@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.demo.util
 
 import net.pubnative.lite.demo.managers.AdCustomizationsManager
@@ -10,202 +14,252 @@ object RemoteConfigParamUtilisation {
         val configs = ArrayList<RemoteConfigParam>()
         var param: RemoteConfigParam
 
-        if (adCustomizationsManager.initial_audio_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.AUDIO_STATE.fieldName
-            param.value = adCustomizationsManager.initial_audio_value
-            configs.add(param)
+        adCustomizationsManager.audioSettings?.apply {
+            if (enabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.AUDIO_STATE.fieldName
+                param.value = adCustomizationsManager.audioSettings.value
+                configs.add(param)
+            }
         }
 
-        if (adCustomizationsManager.end_card_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.END_CARD_ENABLED.fieldName
-            param.value = adCustomizationsManager.end_card_value
-            configs.add(param)
+        adCustomizationsManager.endCardSettings?.apply {
+            if (enabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.END_CARD_ENABLED.fieldName
+                param.value = adCustomizationsManager.endCardSettings.value
+                configs.add(param)
+            }
+
+            if (customEnabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.CUSTOM_END_CARD_ENABLED.fieldName
+                param.value = adCustomizationsManager.endCardSettings.customValue
+                configs.add(param)
+            }
+
+            if (customDisplayEnabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.CUSTOM_END_CARD_DISPLAY.fieldName
+                param.value = adCustomizationsManager.endCardSettings.customDisplayValue
+                configs.add(param)
+            }
         }
 
-        if (adCustomizationsManager.custom_end_card_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.CUSTOM_END_CARD_ENABLED.fieldName
-            param.value = adCustomizationsManager.custom_end_card_value
-            configs.add(param)
+        adCustomizationsManager.navigationSettings?.apply {
+            if (enabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.NAVIGATION_MODE.fieldName
+                param.value = adCustomizationsManager.navigationSettings.value
+                configs.add(param)
+            }
         }
 
-        if (adCustomizationsManager.custom_end_card_display_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.CUSTOM_END_CARD_DISPLAY.fieldName
-            param.value = adCustomizationsManager.custom_end_card_display_value
-            configs.add(param)
+        adCustomizationsManager.landingPageSettings?.apply {
+            if (enabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.LANDING_PAGE.fieldName
+                param.value = adCustomizationsManager.landingPageSettings.value
+                configs.add(param)
+            }
         }
 
-        if (adCustomizationsManager.navigation_mode_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.NAVIGATION_MODE.fieldName
-            param.value = adCustomizationsManager.navigation_mode_value
-            configs.add(param)
+        adCustomizationsManager.skipOffsetSettings?.apply {
+            if (endCardCloseDelay?.first == true) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.END_CARD_CLOSE_DELAY.fieldName
+                param.value = adCustomizationsManager.skipOffsetSettings.endCardCloseDelay?.second
+                configs.add(param)
+            }
+
+            if (html?.first == true) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.HTML_SKIP_OFFSET.fieldName
+                param.value = adCustomizationsManager.skipOffsetSettings.html?.second
+                configs.add(param)
+            }
+
+            if (rewardedHtml?.first == true) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.REWARDED_HTML_SKIP_OFFSET.fieldName
+                param.value = adCustomizationsManager.skipOffsetSettings.rewardedHtml?.second
+                configs.add(param)
+            }
+
+            if (video?.first == true) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.VIDEO_SKIP_OFFSET.fieldName
+                param.value = adCustomizationsManager.skipOffsetSettings.video?.second
+                configs.add(param)
+            }
+
+            if (rewardedVideo?.first == true) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.REWARDED_VIDEO_SKIP_OFFSET.fieldName
+                param.value = adCustomizationsManager.skipOffsetSettings.rewardedVideo?.second
+                configs.add(param)
+            }
+
+            if (playable?.first == true) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.PLAYABLE_SKIP_OFFSET.fieldName
+                param.value = adCustomizationsManager.skipOffsetSettings.playable?.second
+                configs.add(param)
+            }
         }
 
-        if (adCustomizationsManager.landing_page_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.LANDING_PAGE.fieldName
-            param.value = adCustomizationsManager.landing_page_value
-            configs.add(param)
+        adCustomizationsManager.autoCloseSettings?.apply {
+            if (interstitialEnabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.CLOSE_INTER_AFTER_FINISH.fieldName
+                param.value = adCustomizationsManager.autoCloseSettings.interstitialValue
+                configs.add(param)
+            }
+
+            if (rewardedEnabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.CLOSE_REWARD_AFTER_FINISH.fieldName
+                param.value = adCustomizationsManager.autoCloseSettings.rewardedValue
+                configs.add(param)
+            }
         }
 
-        if (adCustomizationsManager.end_card_close_delay_skip_offset_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.END_CARD_CLOSE_DELAY.fieldName
-            param.value = adCustomizationsManager.end_card_close_delay_skip_offset_value
-            configs.add(param)
+        adCustomizationsManager.mraidSettings?.apply {
+            if (expandEnabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.MRAID_EXPAND.fieldName
+                param.value = adCustomizationsManager.mraidSettings.expandValue
+                configs.add(param)
+            }
         }
 
-        if (adCustomizationsManager.html_skip_offset_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.HTML_SKIP_OFFSET.fieldName
-            param.value = adCustomizationsManager.html_skip_offset_value
-            configs.add(param)
+        adCustomizationsManager.clickBehaviourSettings?.apply {
+            if (enabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.FULL_SCREEN_CLICKABILITY.fieldName
+                param.value = adCustomizationsManager.clickBehaviourSettings.value
+                configs.add(param)
+            }
         }
 
-        if (adCustomizationsManager.rewarded_html_skip_offset_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.REWARDED_HTML_SKIP_OFFSET.fieldName
-            param.value = adCustomizationsManager.rewarded_html_skip_offset_value
-            configs.add(param)
+        adCustomizationsManager.contentInfoSettings?.apply {
+            if (urlEnabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.CONTENT_INFO_URL.fieldName
+                param.value = adCustomizationsManager.contentInfoSettings.urlValue
+                configs.add(param)
+            }
+
+            if (iconUrlEnabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.CONTENT_INFO_ICON_URL.fieldName
+                param.value = adCustomizationsManager.contentInfoSettings.iconUrlValue
+                configs.add(param)
+            }
+
+            if (iconClickActionEnabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.CONTENT_INFO_ICON_CLICK_ACTION.fieldName
+                param.value = adCustomizationsManager.contentInfoSettings.iconClickActionValue
+                configs.add(param)
+            }
+
+            if (displayEnabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.CONTENT_INFO_DISPLAY.fieldName
+                param.value = adCustomizationsManager.contentInfoSettings.displayValue
+                configs.add(param)
+            }
         }
 
-        if (adCustomizationsManager.rewarded_video_skip_offset_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.REWARDED_VIDEO_SKIP_OFFSET.fieldName
-            param.value = adCustomizationsManager.rewarded_video_skip_offset_value
-            configs.add(param)
+        adCustomizationsManager.closeButtonSettings?.apply {
+            if (enabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.NATIVE_CLOSE_BUTTON_DELAY.fieldName
+                param.value = adCustomizationsManager.closeButtonSettings.value
+                configs.add(param)
+            }
         }
 
-        if (adCustomizationsManager.video_skip_offset_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.VIDEO_SKIP_OFFSET.fieldName
-            param.value = adCustomizationsManager.video_skip_offset_value
-            configs.add(param)
+        adCustomizationsManager.reducedButtonsSettings?.apply {
+            if (enabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.PC_REDUCED_ICON_SIZES.fieldName
+                param.value = adCustomizationsManager.reducedButtonsSettings.value
+                configs.add(param)
+            }
         }
 
-        if (adCustomizationsManager.auto_close_interstitial_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.CLOSE_INTER_AFTER_FINISH.fieldName
-            param.value = adCustomizationsManager.auto_close_interstitial_value
-            configs.add(param)
+        adCustomizationsManager.countdownSettings?.apply {
+            if (enabled) {
+                param = RemoteConfigParam()
+                param.name = "count_down_style"
+                param.value = adCustomizationsManager.countdownSettings.value
+                configs.add(param)
+            }
         }
 
-        if (adCustomizationsManager.auto_close_rewarded_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.CLOSE_REWARD_AFTER_FINISH.fieldName
-            param.value = adCustomizationsManager.auto_close_rewarded_value
-            configs.add(param)
+//        adCustomizationsManager.learnMoreSettings?.apply {
+//            if (sizeEnabled) {
+//                param = RemoteConfigParam()
+//                param.name = RemoteConfig.BC_LEARN_MORE_SIZE.fieldName
+//                param.value = adCustomizationsManager.learnMoreSettings.sizeValue
+//                configs.add(param)
+//            }
+//
+//            if (locationEnabled) {
+//                param = RemoteConfigParam()
+//                param.name = RemoteConfig.BC_LEARN_MORE_LOCATION.fieldName
+//                param.value = adCustomizationsManager.learnMoreSettings.locationValue
+//                configs.add(param)
+//            }
+//        }
+
+        adCustomizationsManager.impressionTrackingSettings?.apply {
+            if (enabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.IMP_TRACKING_METHOD.fieldName
+                param.value = adCustomizationsManager.impressionTrackingSettings.value
+                configs.add(param)
+            }
         }
 
-        if (adCustomizationsManager.mraid_expand_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.MRAID_EXPAND.fieldName
-            param.value = adCustomizationsManager.mraid_expand_value
-            configs.add(param)
+        adCustomizationsManager.visibilitySettings?.apply {
+            if (minTimeEnabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.IMP_TRACKING_VISIBLE_TIME.fieldName
+                param.value = adCustomizationsManager.visibilitySettings.minTimeValue
+                configs.add(param)
+            }
+
+            if (minPercentEnabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.IMP_TRACKING_VISIBLE_PERCENT.fieldName
+                param.value = adCustomizationsManager.visibilitySettings.minPercentValue
+                configs.add(param)
+            }
         }
 
-        if (adCustomizationsManager.click_behaviour_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.FULL_SCREEN_CLICKABILITY.fieldName
-            param.value = adCustomizationsManager.click_behaviour_value
-            configs.add(param)
-        }
+        adCustomizationsManager.customCtaSettings?.apply {
+            if (enabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.CUSTOM_CTA_ENABLED.fieldName
+                param.value = adCustomizationsManager.customCtaSettings.enabledValue
+                configs.add(param)
 
-        if (adCustomizationsManager.content_info_url_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.CONTENT_INFO_URL.fieldName
-            param.value = adCustomizationsManager.content_info_url_value
-            configs.add(param)
-        }
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.CUSTOM_CTA_TYPE.fieldName
+                param.value = adCustomizationsManager.customCtaSettings.typeValue
+                configs.add(param)
+            }
 
-        if (adCustomizationsManager.content_info_icon_url_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.CONTENT_INFO_ICON_URL.fieldName
-            param.value = adCustomizationsManager.content_info_icon_url_value
-            configs.add(param)
+            if (delayEnabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.CUSTOM_CTA_DELAY.fieldName
+                param.value = adCustomizationsManager.customCtaSettings.delayEnabledValue
+                configs.add(param)
+            }
         }
-
-        if (adCustomizationsManager.content_info_icon_click_action_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.CONTENT_INFO_ICON_CLICK_ACTION.fieldName
-            param.value = adCustomizationsManager.content_info_icon_click_action_value
-            configs.add(param)
-        }
-
-        if (adCustomizationsManager.content_info_display_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.CONTENT_INFO_DISPLAY.fieldName
-            param.value = adCustomizationsManager.content_info_display_value
-            configs.add(param)
-        }
-
-        if (adCustomizationsManager.close_button_delay_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.NATIVE_CLOSE_BUTTON_DELAY.fieldName
-            param.value = adCustomizationsManager.close_button_delay_value
-            configs.add(param)
-        }
-
-        if (adCustomizationsManager.reduced_buttons_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.PC_REDUCED_ICON_SIZES.fieldName
-            param.value = adCustomizationsManager.reduced_buttons_value
-            configs.add(param)
-        }
-
-        if (adCustomizationsManager.count_down_enabled) {
-            param = RemoteConfigParam()
-            param.name = "count_down_style"
-            param.value = adCustomizationsManager.count_down_value
-            configs.add(param)
-        }
-
-        if (adCustomizationsManager.imp_tracking_enabled) {
-            param = RemoteConfigParam()
-            param.name = "imp_tracking"
-            param.value = adCustomizationsManager.imp_tracking_value
-            configs.add(param)
-        }
-
-        if (adCustomizationsManager.min_visibility_time_enabled) {
-            param = RemoteConfigParam()
-            param.name = "min_visible_time"
-            param.value = adCustomizationsManager.min_visibility_time_value
-            configs.add(param)
-        }
-
-        if (adCustomizationsManager.min_visibility_percent_enabled) {
-            param = RemoteConfigParam()
-            param.name = "min_visible_percent"
-            param.value = adCustomizationsManager.min_visibility_percent_value
-            configs.add(param)
-        }
-
-        if (adCustomizationsManager.custom_cta_enabled) {
-            param = RemoteConfigParam()
-            param.name = "custom_cta_enabled"
-            param.value = adCustomizationsManager.custom_cta_enabled_value
-            configs.add(param)
-        }
-
-        if (adCustomizationsManager.custom_cta_delay_enabled) {
-            param = RemoteConfigParam()
-            param.name = "custom_cta_delay"
-            param.value = adCustomizationsManager.custom_cta_delay_enabled_value
-            configs.add(param)
-        }
-
-        if (adCustomizationsManager.custom_cta_enabled) {
-            param = RemoteConfigParam()
-            param.name = RemoteConfig.CUSTOM_CTA_TYPE.fieldName
-            param.value = adCustomizationsManager.custom_cta_type_value
-            configs.add(param)
-        }
-
         return configs
     }
 }

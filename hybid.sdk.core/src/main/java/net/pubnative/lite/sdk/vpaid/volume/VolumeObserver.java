@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.vpaid.volume;
 
 import android.content.Context;
@@ -38,7 +42,6 @@ public class VolumeObserver {
 
     public void unregisterVolumeObserver(IVolumeObserver iVolumeObserver, Context context) {
         observerList.remove(iVolumeObserver);
-
         if (observerList.isEmpty()) {
             unregisterMediaButtonReceiver(context);
         }

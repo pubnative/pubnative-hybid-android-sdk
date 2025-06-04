@@ -7,6 +7,8 @@ import android.view.View;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
@@ -30,9 +32,12 @@ public class NativeAdTest {
     Context applicationContext;
     Activity activity;
 
+    @Spy
+    NativeAd mNativeAd = new NativeAd();
+
     @Before
     public void setUp() {
-
+        MockitoAnnotations.initMocks(this);
         this.applicationContext = RuntimeEnvironment.application.getApplicationContext();
         activity = Robolectric.buildActivity(Activity.class)
                 .create()
@@ -42,72 +47,61 @@ public class NativeAdTest {
 
     @Test
     public void testImpressionCallbackWithValidListener() {
-
-        NativeAd model = spy(NativeAd.class);
         NativeAd.Listener listener = mock(NativeAd.Listener.class);
         View adView = spy(new View(applicationContext));
-        model.mListener = listener;
-        model.invokeOnImpression(adView);
-        verify(listener, times(1)).onAdImpression(eq(model), eq(adView));
+        mNativeAd.mAd = spy(AdTestModel.class);
+        mNativeAd.mListener = listener;
+        mNativeAd.invokeOnImpression(adView);
+        verify(listener, times(1)).onAdImpression(eq(mNativeAd), eq(adView));
     }
 
     @Test
     public void testClickCallbackWithValidListener() {
 
-        NativeAd model = spy(NativeAd.class);
         NativeAd.Listener listener = mock(NativeAd.Listener.class);
         View adView = spy(new View(applicationContext));
-        model.mListener = listener;
-        model.invokeOnClick(adView);
-        verify(listener, times(1)).onAdClick(eq(model), eq(adView));
+        mNativeAd.mListener = listener;
+        mNativeAd.invokeOnClick(adView);
+        verify(listener, times(1)).onAdClick(eq(mNativeAd), eq(adView));
     }
 
     @Test
     public void testCallbacksWithNullListener() {
-
-        NativeAd model = spy(NativeAd.class);
-        model.mListener = null;
-        model.invokeOnClick(null);
-        model.invokeOnImpression(null);
+        mNativeAd.mListener = null;
+        mNativeAd.invokeOnClick(null);
+        mNativeAd.invokeOnImpression(null);
     }
 
     @Test
     public void testStartTrackingWithClickableView() {
-
         Ad adDataModel = spy(AdTestModel.class);
         adDataModel.link = "http://www.google.com";
-        NativeAd model = spy(NativeAd.class);
-        model.mAd = adDataModel;
+        mNativeAd.mAd = adDataModel;
         NativeAd.Listener listener = mock(NativeAd.Listener.class);
         View adView = spy(new View(activity));
         View clickableView = spy(new View(activity));
-        model.startTracking(adView, clickableView, listener);
+        mNativeAd.startTracking(adView, clickableView, listener);
         verify(clickableView, times(1)).setOnClickListener(any(View.OnClickListener.class));
     }
 
     @Test
     public void testStartTrackingWithClickableViewForValidClickListener() {
-
-        Ad adDataModel = spy(AdTestModel.class);
-        NativeAd model = spy(NativeAd.class);
-        model.mAd = adDataModel;
+        mNativeAd.mAd = spy(AdTestModel.class);
         NativeAd.Listener listener = mock(NativeAd.Listener.class);
         View adView = spy(new View(activity));
         View clickableView = spy(new View(activity));
-        model.startTracking(adView, clickableView, listener);
+        mNativeAd.startTracking(adView, clickableView, listener);
         verify(adView, never()).setOnClickListener(any(View.OnClickListener.class));
     }
 
     @Test
     public void testStartTrackingWithoutClickableView() {
-
         Ad adDataModel = spy(AdTestModel.class);
         adDataModel.link = "http://www.google.com";
-        NativeAd model = spy(NativeAd.class);
-        model.mAd = adDataModel;
+        mNativeAd.mAd = adDataModel;
         NativeAd.Listener listener = mock(NativeAd.Listener.class);
         View adView = spy(new View(activity));
-        model.startTracking(adView, listener);
+        mNativeAd.startTracking(adView, listener);
         verify(adView, times(1)).setOnClickListener(any(View.OnClickListener.class));
     }
 
@@ -118,7 +112,6 @@ public class NativeAdTest {
 
         Ad adModel = spy(AdTestModel.class);
         AdData adDataModel = spy(AdData.class);
-        NativeAd model = spy(NativeAd.class);
         adDataModel.data = new HashMap<>();
         adModel.assets = new ArrayList<>();
         adModel.meta = new ArrayList<>();
@@ -128,8 +121,8 @@ public class NativeAdTest {
         adModel.assets.add(adDataModel);
         adModel.meta.add(adDataModel);
         adModel.beacons.add(adDataModel);
-        model.mAd = adModel;
+        mNativeAd.mAd = adModel;
 
-        assertThat(model.mAd.getAsset(assetName)).isEqualTo(adDataModel);
+        assertThat(mNativeAd.mAd.getAsset(assetName)).isEqualTo(adDataModel);
     }
 }

@@ -1,5 +1,8 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.utils.svgparser.utils;
-
 
 import static net.pubnative.lite.sdk.utils.svgparser.utils.SVGBase.Box;
 import static net.pubnative.lite.sdk.utils.svgparser.utils.SVGBase.Circle;
@@ -84,7 +87,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.Stack;
-
 
 /*
  * The rendering part of AndroidSVG.

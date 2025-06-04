@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.models;
 
 import net.pubnative.lite.sdk.utils.json.BindField;
@@ -5,12 +9,12 @@ import net.pubnative.lite.sdk.utils.json.JsonModel;
 
 import org.json.JSONObject;
 
-public class AtomConfigResponse extends JsonModel {
+public class RemoteConfigResponse extends JsonModel {
 
     @BindField
     public String status;
     @BindField
-    public AtomConfig configs;
+    public SdkConfig configs;
     @BindField
     public String error_message;
 
@@ -19,10 +23,10 @@ public class AtomConfigResponse extends JsonModel {
         String OK = "ok";
     }
 
-    public AtomConfigResponse() {
+    public RemoteConfigResponse() {
     }
 
-    public AtomConfigResponse(JSONObject jsonObject) throws Exception {
+    public RemoteConfigResponse(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
     }
 }

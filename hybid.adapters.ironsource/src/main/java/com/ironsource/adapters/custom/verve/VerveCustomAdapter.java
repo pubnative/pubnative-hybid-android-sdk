@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package com.ironsource.adapters.custom.verve;
 
 import android.app.Application;
@@ -16,7 +20,7 @@ public class VerveCustomAdapter extends BaseAdapter {
     public static final String KEY_APP_TOKEN = "appToken";
     public static final String KEY_ZONE_ID = "zoneId";
 
-    private static final String NETWORK_SDK_VERSION = "3.3.0";
+    private static final String NETWORK_SDK_VERSION = "3.6.0";
     private static final String ADAPTER_VERSION = NETWORK_SDK_VERSION + ".0";
 
     @Override

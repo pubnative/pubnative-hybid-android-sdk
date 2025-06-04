@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.demo.ui.activities
 
 import android.content.pm.PackageManager
@@ -14,10 +18,15 @@ import androidx.navigation.ui.NavigationUI
 import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.databinding.ActivityNavigationBinding
+import net.pubnative.lite.demo.ui.dialogs.SDKConfigDialog
+import net.pubnative.lite.demo.ui.dialogs.SDKConfigDialogManager
 import net.pubnative.lite.demo.util.OneTrustManager
+import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.TopicManager
+import net.pubnative.lite.sdk.api.ApiManager
+import net.pubnative.lite.sdk.api.SDKConfigAPiClient
 
-class NavigationActivity : AppCompatActivity() {
+class NavigationActivity : AppCompatActivity(), SDKConfigDialog.OnDismissListener {
 
     private val PERMISSION_REQUEST = 1000
 
@@ -53,6 +62,13 @@ class NavigationActivity : AppCompatActivity() {
         NavigationUI.setupWithNavController(binding.navigation, navController)
 
         initializeOpenTrustSDK()
+
+        showSDKConfigDialog()
+    }
+
+    private fun showSDKConfigDialog() {
+        val instance = SDKConfigDialogManager.getInstance()
+        instance?.showDialog(this, supportFragmentManager)
     }
 
     override fun onSupportNavigateUp() = findNavController(R.id.fragment_nav_host).navigateUp()
@@ -81,4 +97,7 @@ class NavigationActivity : AppCompatActivity() {
         OneTrustManager.getInstance(this).initializeOpenTrustSDK()
     }
 
+    override fun onDismiss(url: String?) {
+        ApiManager.setSDKConfigURL(url)
+    }
 }

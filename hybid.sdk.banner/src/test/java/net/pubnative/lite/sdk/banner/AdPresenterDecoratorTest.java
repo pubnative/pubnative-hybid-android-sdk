@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.banner;
 
 import android.view.View;
@@ -22,9 +26,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-/**
- * Created by erosgarciaponte on 24.01.18.
- */
 @RunWith(RobolectricTestRunner.class)
 public class AdPresenterDecoratorTest {
     @Mock
@@ -68,7 +69,7 @@ public class AdPresenterDecoratorTest {
     public void startTracking() {
         mSubject.startTracking();
 
-        verify(mMockPresenter).startTracking();
+        verify(mMockPresenter).startTracking(null);
     }
 
     @Test

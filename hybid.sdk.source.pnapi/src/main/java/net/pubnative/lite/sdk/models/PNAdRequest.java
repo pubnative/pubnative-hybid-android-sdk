@@ -1,6 +1,10 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.models;
 
-public class PNAdRequest extends AdRequest{
+public class PNAdRequest extends AdRequest {
     public String os;
     public String osver;
     public String devicemodel;
@@ -54,4 +58,5 @@ public class PNAdRequest extends AdRequest{
     public String geofetch;
     public String sua;
     public String ae;
+    public String vg;
 }

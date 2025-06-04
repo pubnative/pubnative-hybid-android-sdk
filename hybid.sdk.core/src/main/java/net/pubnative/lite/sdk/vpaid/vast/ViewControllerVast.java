@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.vpaid.vast;
 
 import android.content.Context;
@@ -34,7 +38,7 @@ import net.pubnative.lite.sdk.views.endcard.HyBidEndCardView;
 import net.pubnative.lite.sdk.vpaid.AdCloseButtonListener;
 import net.pubnative.lite.sdk.vpaid.CloseButtonListener;
 import net.pubnative.lite.sdk.vpaid.InvalidCTAUrlListener;
-import net.pubnative.lite.sdk.vpaid.VastActivityInteractor;
+import net.pubnative.lite.sdk.vpaid.HyBidActivityInteractor;
 import net.pubnative.lite.sdk.vpaid.VideoAdController;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
 import net.pubnative.lite.sdk.vpaid.VideoVisibilityManager;
@@ -74,7 +78,7 @@ public class ViewControllerVast implements View.OnClickListener {
     private final Integer mRemoteEndCardCloseDelay;
 
     VideoVisibilityManager videoVisibilityManager;
-    VastActivityInteractor interactor;
+    HyBidActivityInteractor interactor;
     AdCloseButtonListener mcloseButtonListener;
 
     private InterstitialActionBehaviour remoteConfigInterstitialClickBehaviour = null;
@@ -109,122 +113,120 @@ public class ViewControllerVast implements View.OnClickListener {
             }
         }
         mHasReducedCloseButton = reducedCloseButton;
-        interactor = VastActivityInteractor.getInstance();
+        interactor = HyBidActivityInteractor.getInstance();
     }
 
     public void buildVideoAdView(VideoAdView bannerView) {
-        if (interactor.isActivityVisible() || !mIsFullscreen) {
-            Context context = bannerView.getContext();
-            mBannerView = bannerView;
-            bannerView.setVisibilityListener(mCreateVisibilityListener);
-            bannerView.removeAllViews();
+        Context context = bannerView.getContext();
+        mBannerView = bannerView;
+        bannerView.setVisibilityListener(mCreateVisibilityListener);
+        bannerView.removeAllViews();
 
-            mControlsLayout = (FrameLayout) LayoutInflater.from(context).inflate(R.layout.controls, bannerView, false);
-            mOpenUrlLayout = LayoutInflater.from(context).inflate(R.layout.open_url, bannerView, false);
-            mUxLayout = mControlsLayout.findViewById(R.id.uxLayout);
+        mControlsLayout = (FrameLayout) LayoutInflater.from(context).inflate(R.layout.controls, bannerView, false);
+        mOpenUrlLayout = LayoutInflater.from(context).inflate(R.layout.open_url, bannerView, false);
+        mUxLayout = mControlsLayout.findViewById(R.id.uxLayout);
 
-            initCustomCta(context);
+        initCustomCta(context);
 
-            if (mIsFullscreen && mIsBrandAd) {
+        if (mIsFullscreen && mIsBrandAd) {
+            if (mOpenUrlLayout != null) {
+                mOpenUrlLayout.setVisibility(View.VISIBLE);
+            }
+            if (mHasHiddenUx) {
+                mBannerView.setOnClickListener(v -> changeUxVisibility());
+                mUxLayout.setVisibility(View.INVISIBLE);
+            }
+        } else {
+            InterstitialActionBehaviour interstitialClickBehaviour;
+
+            if (remoteConfigInterstitialClickBehaviour != null) {
+                interstitialClickBehaviour = remoteConfigInterstitialClickBehaviour;
+            } else {
+                interstitialClickBehaviour = INTERSTITIAL_CLICK_BEHAVIOUR_DEFAULT;
+            }
+
+            if (mCustomCTAData != null && mIsFullscreen) {
                 if (mOpenUrlLayout != null) {
-                    mOpenUrlLayout.setVisibility(View.VISIBLE);
+                    mOpenUrlLayout.setVisibility(View.GONE);
                 }
-                if (mHasHiddenUx) {
-                    mBannerView.setOnClickListener(v -> changeUxVisibility());
-                    mUxLayout.setVisibility(View.INVISIBLE);
-                }
+                mBannerView.setOnClickListener(v -> validateOpenURLClicked(false));
+                showCTAButton(mCustomCTAData, mCustomCTADelay,
+                        () -> showHideLearnMore(interstitialClickBehaviour));
             } else {
-                InterstitialActionBehaviour interstitialClickBehaviour;
-
-                if (remoteConfigInterstitialClickBehaviour != null) {
-                    interstitialClickBehaviour = remoteConfigInterstitialClickBehaviour;
-                } else {
-                    interstitialClickBehaviour = INTERSTITIAL_CLICK_BEHAVIOUR_DEFAULT;
-                }
-
-                if (mCustomCTAData != null && mIsFullscreen) {
-                    if (mOpenUrlLayout != null) {
-                        mOpenUrlLayout.setVisibility(View.GONE);
-                    }
-                    mBannerView.setOnClickListener(v -> validateOpenURLClicked(false));
-                    showCTAButton(mCustomCTAData, mCustomCTADelay,
-                            () -> showHideLearnMore(interstitialClickBehaviour));
-                } else {
-                    showHideLearnMore(interstitialClickBehaviour);
-                }
+                showHideLearnMore(interstitialClickBehaviour);
             }
-
-            mVideoPlayerLayout = mControlsLayout.findViewById(R.id.videoPlayerLayout);
-
-            if (hasCTAExtension(mAdController.getAdParams())) {
-                RelativeLayout mMediaLayout = new RelativeLayout(mVideoPlayerLayout.getContext());
-                mVideoPlayerLayoutTexture = new TextureView(mMediaLayout.getContext());
-                mVideoPlayerLayoutTexture.setId(R.id.textureView);
-                mMediaLayout.addView(mVideoPlayerLayoutTexture, new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
-                mVideoPlayerLayout.addView(mMediaLayout, 0, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-            } else {
-                mVideoPlayerLayoutTexture = new TextureView(mVideoPlayerLayout.getContext());
-                mVideoPlayerLayoutTexture.setId(R.id.textureView);
-                mVideoPlayerLayout.addView(mVideoPlayerLayoutTexture, 0, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-            }
-
-            mEndCardView = new HyBidEndCardView(context, mHasReducedCloseButton);
-            mEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            mEndCardView.setVisibility(View.GONE);
-
-            mLastCustomEndCardView = new HyBidEndCardView(context, mHasReducedCloseButton);
-            mLastCustomEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            mLastCustomEndCardView.setVisibility(View.GONE);
-
-            mOpenUrlLayout.findViewById(R.id.openURL).setOnClickListener(this);
-
-            mSkipCountdownView = new CountDownViewFactory().createCountdownView(context, COUNTDOWN_STYLE_DEFAULT, mControlsLayout);
-
-            mControlsLayout.addView(mSkipCountdownView);
-            mLinearCountdownView = mControlsLayout.findViewById(R.id.linear_count_down);
-            if (mVideoPlayerLayoutTexture != null) {
-                mVideoPlayerLayoutTexture.setSurfaceTextureListener(mCreateTextureListener);
-            }
-
-            mMuteView = mControlsLayout.findViewById(R.id.muteView);
-            mMuteView.setOnClickListener(this);
-
-            if (mIsBrandAd && mHasHiddenUx) {
-                if (mMuteView != null) {
-                    mMuteView.setVisibility(View.INVISIBLE);
-                }
-                hideCountdown(true);
-                hideMute(true);
-            }
-
-            mSkipView = mControlsLayout.findViewById(R.id.skipView);
-            if (mHasReducedCloseButton) {
-                int reducedSkipSize = (int) ViewUtils.convertDpToPixel(20f, context);
-                int margins = (int) ViewUtils.convertDpToPixel(8f, context);
-                FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(reducedSkipSize, reducedSkipSize);
-                layoutParams.setMargins(margins, margins, 0, 0);
-                mSkipView.setId(R.id.skipView_small);
-                mSkipView.setLayoutParams(layoutParams);
-                mSkipView.setPadding(0, 0, 0, 0);
-                mSkipView.requestLayout();
-            }
-            Bitmap skipBitmap = BitmapHelper.toBitmap(mSkipView.getContext(), HyBid.getSkipXmlResource(), R.mipmap.skip);
-            if (skipBitmap != null) {
-                ((ImageView) mSkipView).setImageBitmap(skipBitmap);
-            } else {
-                ((ImageView) mSkipView).setImageBitmap(BitmapHelper.decodeResource(mSkipView.getContext(), R.mipmap.skip));
-            }
-
-            mSkipView.setOnClickListener(this);
-
-            mAdController.addViewabilityFriendlyObstruction(mControlsLayout, FriendlyObstructionPurpose.VIDEO_CONTROLS, "Video controls");
-
-            bannerView.addView(mControlsLayout);
-            bannerView.addView(mEndCardView);
-            bannerView.addView(mLastCustomEndCardView);
-            bannerView.addView(ctaView);
-            bannerView.addView(mOpenUrlLayout);
         }
+
+        mVideoPlayerLayout = mControlsLayout.findViewById(R.id.videoPlayerLayout);
+
+        if (hasCTAExtension(mAdController.getAdParams())) {
+            RelativeLayout mMediaLayout = new RelativeLayout(mVideoPlayerLayout.getContext());
+            mVideoPlayerLayoutTexture = new TextureView(mMediaLayout.getContext());
+            mVideoPlayerLayoutTexture.setId(R.id.textureView);
+            mMediaLayout.addView(mVideoPlayerLayoutTexture, new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
+            mVideoPlayerLayout.addView(mMediaLayout, 0, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        } else {
+            mVideoPlayerLayoutTexture = new TextureView(mVideoPlayerLayout.getContext());
+            mVideoPlayerLayoutTexture.setId(R.id.textureView);
+            mVideoPlayerLayout.addView(mVideoPlayerLayoutTexture, 0, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        }
+
+        mEndCardView = new HyBidEndCardView(context, mHasReducedCloseButton);
+        mEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        mEndCardView.setVisibility(View.GONE);
+
+        mLastCustomEndCardView = new HyBidEndCardView(context, mHasReducedCloseButton);
+        mLastCustomEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        mLastCustomEndCardView.setVisibility(View.GONE);
+
+        mOpenUrlLayout.findViewById(R.id.openURL).setOnClickListener(this);
+
+        mSkipCountdownView = new CountDownViewFactory().createCountdownView(context, COUNTDOWN_STYLE_DEFAULT, mControlsLayout);
+
+        mControlsLayout.addView(mSkipCountdownView);
+        mLinearCountdownView = mControlsLayout.findViewById(R.id.linear_count_down);
+        if (mVideoPlayerLayoutTexture != null) {
+            mVideoPlayerLayoutTexture.setSurfaceTextureListener(mCreateTextureListener);
+        }
+
+        mMuteView = mControlsLayout.findViewById(R.id.muteView);
+        mMuteView.setOnClickListener(this);
+
+        if (mIsBrandAd && mHasHiddenUx) {
+            if (mMuteView != null) {
+                mMuteView.setVisibility(View.INVISIBLE);
+            }
+            hideCountdown(true);
+            hideMute(true);
+        }
+
+        mSkipView = mControlsLayout.findViewById(R.id.skipView);
+        if (mHasReducedCloseButton) {
+            int reducedSkipSize = (int) ViewUtils.convertDpToPixel(20f, context);
+            int margins = (int) ViewUtils.convertDpToPixel(8f, context);
+            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(reducedSkipSize, reducedSkipSize);
+            layoutParams.setMargins(margins, margins, 0, 0);
+            mSkipView.setId(R.id.skipView_small);
+            mSkipView.setLayoutParams(layoutParams);
+            mSkipView.setPadding(0, 0, 0, 0);
+            mSkipView.requestLayout();
+        }
+        Bitmap skipBitmap = BitmapHelper.toBitmap(mSkipView.getContext(), HyBid.getSkipXmlResource(), R.mipmap.skip);
+        if (skipBitmap != null) {
+            ((ImageView) mSkipView).setImageBitmap(skipBitmap);
+        } else {
+            ((ImageView) mSkipView).setImageBitmap(BitmapHelper.decodeResource(mSkipView.getContext(), R.mipmap.skip));
+        }
+
+        mSkipView.setOnClickListener(this);
+
+        mAdController.addViewabilityFriendlyObstruction(mControlsLayout, FriendlyObstructionPurpose.VIDEO_CONTROLS, "Video controls");
+
+        bannerView.addView(mControlsLayout);
+        bannerView.addView(mEndCardView);
+        bannerView.addView(mLastCustomEndCardView);
+        bannerView.addView(ctaView);
+        bannerView.addView(mOpenUrlLayout);
     }
 
     private void showHideLearnMore(InterstitialActionBehaviour interstitialClickBehaviour) {
@@ -317,6 +319,13 @@ public class ViewControllerVast implements View.OnClickListener {
         FrameLayout.LayoutParams oldParams = (FrameLayout.LayoutParams) mVideoPlayerLayout.getLayoutParams();
         ViewGroup.LayoutParams newParams = Utils.calculateNewLayoutParams(oldParams, width, height, mBannerView.getWidth(), mBannerView.getHeight(), Utils.StretchOption.NO_STRETCH);
         mVideoPlayerLayout.setLayoutParams(newParams);
+        mVideoPlayerLayout.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+            mVideoPlayerLayout.post(() -> {
+                FrameLayout.LayoutParams oldParams1 = (FrameLayout.LayoutParams) mVideoPlayerLayout.getLayoutParams();
+                ViewGroup.LayoutParams newParams1 = Utils.calculateNewLayoutParams(oldParams1, width, height, mBannerView.getWidth(), mBannerView.getHeight(), Utils.StretchOption.NO_STRETCH);
+                mVideoPlayerLayout.setLayoutParams(newParams1);
+            });
+        });
     }
 
     public void postDelayed(Runnable action, long delayMillis) {
@@ -430,6 +439,11 @@ public class ViewControllerVast implements View.OnClickListener {
             SkipOffset endCardCloseDelay = getEndCardCloseDelay();
             mEndCardView.setSkipOffset(endCardCloseDelay);
             mEndCardView.show(endCardData, imageUri);
+
+            mEndCardView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                mEndCardView.post(() -> mEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)));
+            });
+
             if (mIsFullscreen) {
                 if (isLastEndCard) {
                     mEndCardView.showCloseButton(closeButtonListener);
@@ -505,6 +519,9 @@ public class ViewControllerVast implements View.OnClickListener {
             mLastCustomEndCardView.setSkipOffset(endCardCloseDelay);
             mEndCardView.hideSkipButton();
             mLastCustomEndCardView.show(endCardData, imageUri);
+            mLastCustomEndCardView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                mLastCustomEndCardView.post(() -> mLastCustomEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)));
+            });
             if (mIsFullscreen) {
                 mLastCustomEndCardView.showCloseButton(closeButtonListener);
             }
@@ -611,16 +628,6 @@ public class ViewControllerVast implements View.OnClickListener {
         }
     }
 
-    public void hideCloseButton() {
-        if (mcloseButtonListener != null) {
-            mcloseButtonListener.hideButton();
-        }
-    }
-
-    public VideoAdView getVideoView() {
-        return mBannerView;
-    }
-
     public void hideSkipButton() {
         if (mSkipView != null) {
             mSkipView.setVisibility(View.GONE);
@@ -684,11 +691,11 @@ public class ViewControllerVast implements View.OnClickListener {
         mAdController.closeSelf();
     }
 
-    private void replayVideo() {
-        mEndCardView.hide();
-        mVideoPlayerLayout.setVisibility(View.VISIBLE);
-        mAdController.playAd();
-    }
+//    private void replayVideo() {
+//        mEndCardView.hide();
+//        mVideoPlayerLayout.setVisibility(View.VISIBLE);
+//        mAdController.playAd();
+//    }
 
     public void pauseEndCardCloseButtonTimer() {
         if (mEndCardView != null) {

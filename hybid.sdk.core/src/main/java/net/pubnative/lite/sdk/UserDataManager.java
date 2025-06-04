@@ -1,24 +1,6 @@
-// The MIT License (MIT)
+// HyBid SDK License
 //
-// Copyright (c) 2020 PubNative GmbH
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
 //
 package net.pubnative.lite.sdk;
 
@@ -109,7 +91,7 @@ public class UserDataManager {
      *
      * @return if consent has explicitly been denied.
      */
-    public boolean isConsentDenied() {
+    public synchronized boolean isConsentDenied() {
         return mPreferences.contains(KEY_GDPR_CONSENT_STATE) && mPreferences.getInt(KEY_GDPR_CONSENT_STATE, CONSENT_STATE_DENIED) == CONSENT_STATE_DENIED;
     }
 
@@ -143,7 +125,7 @@ public class UserDataManager {
         denyConsent();
     }
 
-    private void processConsent(final boolean given) {
+    private synchronized void processConsent(final boolean given) {
         String deviceInfoAdvertisingId = HyBid.getDeviceInfo().getAdvertisingId();
         if (!TextUtils.isEmpty(deviceInfoAdvertisingId)) {
             notifyConsentGiven(deviceInfoAdvertisingId, given);
@@ -167,24 +149,34 @@ public class UserDataManager {
         }
     }
 
-    private void notifyConsentGiven(String advertisingId, final boolean given) {
+    private synchronized void notifyConsentGiven(String advertisingId, final boolean given) {
         setConsentState(given ? CONSENT_STATE_ACCEPTED : CONSENT_STATE_DENIED);
     }
 
-    public boolean gdprApplies() {
-        int gdprApplies;
+    public synchronized boolean gdprApplies() {
+        if (mAppPreferences == null || !mAppPreferences.contains(KEY_GDPR_APPLIES))
+            return false;
 
+        int gdprApplies;
         try {
-            String gdprAppliesString = mAppPreferences.getString(KEY_GDPR_APPLIES, "0");
-            gdprApplies = Integer.parseInt(gdprAppliesString);
+            Object gdprValue = mAppPreferences.getAll().get(KEY_GDPR_APPLIES);
+            if (gdprValue instanceof String) {
+                String gdprAppliesString = mAppPreferences.getString(KEY_GDPR_APPLIES, "0");
+                gdprApplies = Integer.parseInt(gdprAppliesString);
+            } else if (gdprValue instanceof Integer) {
+                gdprApplies = mAppPreferences.getInt(KEY_GDPR_APPLIES, 0);
+            } else if (gdprValue instanceof Boolean) {
+                gdprApplies = mAppPreferences.getBoolean(KEY_GDPR_APPLIES, false) ? 1 : 0;
+            } else {
+                gdprApplies = 0;
+            }
         } catch (Exception e) {
             gdprApplies = mAppPreferences.getInt(KEY_GDPR_APPLIES, 0);
         }
-
         return gdprApplies == 1;
     }
 
-    private boolean askedForGDPRConsent() {
+    private synchronized boolean askedForGDPRConsent() {
         boolean askedForConsent = mPreferences.contains(KEY_GDPR_CONSENT_STATE);
 
         if (askedForConsent) {
@@ -220,19 +212,19 @@ public class UserDataManager {
         }
     }
 
-    private String getPublicTCFConsent(SharedPreferences sharedPreferences) {
+    private synchronized String getPublicTCFConsent(SharedPreferences sharedPreferences) {
         return sharedPreferences.getString(KEY_GDPR_PUBLIC_CONSENT, "");
     }
 
-    private String getPublicTCF2Consent(SharedPreferences sharedPreferences) {
+    private synchronized String getPublicTCF2Consent(SharedPreferences sharedPreferences) {
         return sharedPreferences.getString(KEY_GDPR_TCF_2_PUBLIC_CONSENT, "");
     }
 
-    private String getPublicCCPAConsent(SharedPreferences sharedPreferences) {
+    private synchronized String getPublicCCPAConsent(SharedPreferences sharedPreferences) {
         return sharedPreferences.getString(KEY_CCPA_PUBLIC_CONSENT, "");
     }
 
-    private void updatePublicConsent(SharedPreferences publicPrefs) {
+    private synchronized void updatePublicConsent(SharedPreferences publicPrefs) {
         if (publicPrefs != null) {
             String tcf2Consent = getPublicTCF2Consent(publicPrefs);
             String tcf1Consent = getPublicTCFConsent(publicPrefs);
@@ -317,13 +309,13 @@ public class UserDataManager {
 
     //------------------------------------------- CCPA ---------------------------------------------
 
-    public void setIABUSPrivacyString(String IABUSPrivacyString) {
+    public synchronized void setIABUSPrivacyString(String IABUSPrivacyString) {
         if (mPreferences != null) {
             mPreferences.edit().putString(KEY_CCPA_CONSENT, IABUSPrivacyString).apply();
         }
     }
 
-    public String getIABUSPrivacyString() {
+    public synchronized String getIABUSPrivacyString() {
         if (mPreferences != null) {
             return mPreferences.getString(KEY_CCPA_CONSENT, null);
         } else {
@@ -332,13 +324,13 @@ public class UserDataManager {
 
     }
 
-    public void removeIABUSPrivacyString() {
+    public synchronized void removeIABUSPrivacyString() {
         if (mPreferences != null) {
             mPreferences.edit().remove(KEY_CCPA_CONSENT).apply();
         }
     }
 
-    public boolean isCCPAOptOut() {
+    public synchronized boolean isCCPAOptOut() {
         String usPrivacyString = getIABUSPrivacyString();
         if (!TextUtils.isEmpty(usPrivacyString) && usPrivacyString.length() >= 3) {
             char optOutChar = usPrivacyString.charAt(2);
@@ -350,13 +342,13 @@ public class UserDataManager {
 
     //------------------------------------------- GDPR ---------------------------------------------
 
-    public void setIABGDPRConsentString(String gdprConsentString) {
+    public synchronized void setIABGDPRConsentString(String gdprConsentString) {
         if (mPreferences != null) {
             mPreferences.edit().putString(KEY_GDPR_CONSENT, gdprConsentString).apply();
         }
     }
 
-    public String getIABGDPRConsentString() {
+    public synchronized String getIABGDPRConsentString() {
         if (mPreferences != null) {
             String consentString = mPreferences.getString(KEY_GDPR_CONSENT, null);
             if (TextUtils.isEmpty(consentString)) {
@@ -371,7 +363,7 @@ public class UserDataManager {
         }
     }
 
-    public void removeIABGDPRConsentString() {
+    public synchronized void removeIABGDPRConsentString() {
         if (mPreferences != null) {
             mPreferences.edit().remove(KEY_GDPR_CONSENT).apply();
         }
@@ -379,15 +371,15 @@ public class UserDataManager {
 
     //------------------------------------------- GPP ---------------------------------------------
 
-    private String getPublicGppString(SharedPreferences sharedPreferences) {
+    private synchronized String getPublicGppString(SharedPreferences sharedPreferences) {
         return sharedPreferences.getString(KEY_PUBLIC_GPP_STRING, null);
     }
 
-    private String getPublicGppId(SharedPreferences sharedPreferences) {
+    private synchronized String getPublicGppId(SharedPreferences sharedPreferences) {
         return sharedPreferences.getString(KEY_PUBLIC_GPP_ID, null);
     }
 
-    public String getGppString() {
+    public synchronized String getGppString() {
         if (mPreferences != null) {
             return mPreferences.getString(KEY_GPP_STRING, null);
         } else {
@@ -395,7 +387,7 @@ public class UserDataManager {
         }
     }
 
-    public void setGppString(String gppString) {
+    public synchronized void setGppString(String gppString) {
         if (mPreferences != null) {
             mPreferences.edit().putString(KEY_GPP_STRING, gppString).apply();
         }
@@ -433,5 +425,4 @@ public class UserDataManager {
             mPreferences.edit().remove(KEY_GPP_ID).apply();
         }
     }
-
 }

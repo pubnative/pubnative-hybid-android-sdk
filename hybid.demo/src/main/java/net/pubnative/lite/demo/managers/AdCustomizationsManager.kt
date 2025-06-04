@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.demo.managers
 
 import kotlinx.serialization.Serializable
@@ -6,72 +10,146 @@ import kotlinx.serialization.json.Json
 
 @Serializable
 data class AdCustomizationsManager(
-    var initial_audio_enabled: Boolean,
-    var initial_audio_value: Int,
-    var mraid_expand_enabled: Boolean,
-    var mraid_expand_value: Boolean,
-    var auto_close_interstitial_enabled: Boolean,
-    var auto_close_interstitial_value: Boolean,
-    var end_card_enabled: Boolean,
-    var end_card_value: Boolean,
-    var custom_end_card_enabled: Boolean,
-    var custom_end_card_value: Boolean,
-    var custom_end_card_display_enabled: Boolean,
-    var custom_end_card_display_value: String,
-    var navigation_mode_enabled: Boolean,
-    var navigation_mode_value: String,
-    var landing_page_enabled: Boolean,
-    var landing_page_value: Boolean,
-    var auto_close_rewarded_enabled: Boolean,
-    var auto_close_rewarded_value: Boolean,
-    var html_skip_offset_enabled: Boolean,
-    var html_skip_offset_value: String,
-    var video_skip_offset_enabled: Boolean,
-    var video_skip_offset_value: String,
-    var rewarded_html_skip_offset_enabled: Boolean,
-    var rewarded_html_skip_offset_value: String,
-    var rewarded_video_skip_offset_enabled: Boolean,
-    var rewarded_video_skip_offset_value: String,
-    var end_card_close_delay_skip_offset_enabled: Boolean,
-    var end_card_close_delay_skip_offset_value: String,
-    var click_behaviour_enabled: Boolean,
-    var click_behaviour_value: Boolean,
-    var content_info_url_enabled: Boolean,
-    var content_info_url_value: String,
-    var content_info_icon_url_enabled: Boolean,
-    var content_info_icon_url_value: String,
-    var content_info_icon_click_action_enabled: Boolean,
-    var content_info_icon_click_action_value: String,
-    var content_info_display_enabled: Boolean,
-    var content_info_display_value: String,
-    var close_button_delay_enabled: Boolean,
-    var close_button_delay_value: String,
-    var count_down_enabled: Boolean,
-    var count_down_value: String,
-    var imp_tracking_enabled: Boolean,
-    var imp_tracking_value: String,
-    var min_visibility_time_enabled: Boolean,
-    var min_visibility_time_value: String,
-    var min_visibility_percent_enabled: Boolean,
-    var min_visibility_percent_value: String,
-    var custom_cta_enabled: Boolean,
-    var custom_cta_enabled_value: Boolean,
-    var custom_cta_delay_enabled: Boolean,
-    var custom_cta_delay_enabled_value: String,
-    var custom_cta_type_value: Int,
-    var reduced_buttons_value: Boolean,
-    var reduced_buttons_enabled: Boolean
+    val audioSettings: AudioSettings?,
+    val mraidSettings: MraidSettings?,
+    val autoCloseSettings: AutoCloseSettings?,
+    val endCardSettings: EndCardSettings?,
+    val navigationSettings: NavigationSettings?,
+    val landingPageSettings: LandingPageSettings?,
+    val skipOffsetSettings: SkipOffsetSettings?,
+    val clickBehaviourSettings: ClickBehaviourSettings?,
+    val contentInfoSettings: ContentInfoSettings?,
+    val closeButtonSettings: CloseButtonSettings?,
+    val countdownSettings: CountdownSettings?,
+//    val learnMoreSettings: LearnMoreSettings?,
+    val impressionTrackingSettings: ImpressionTrackingSettings?,
+    val visibilitySettings: VisibilitySettings?,
+    val customCtaSettings: CustomCtaSettings?,
+    val reducedButtonsSettings: ReducedButtonsSettings?
 ) {
-
-    fun toJson(): String {
-        return Json.encodeToString(this)
-    }
+    fun toJson(): String = Json.encodeToString(this)
 
     companion object {
-        fun fromJson(string: String?): AdCustomizationsManager? {
-            if (string == null)
-                return null
-            return Json.decodeFromString<AdCustomizationsManager>(string)
-        }
+        fun fromJson(json: String?): AdCustomizationsManager? =
+            json?.let { Json.decodeFromString<AdCustomizationsManager>(it) }
     }
 }
+
+@Serializable
+data class AudioSettings(
+    var enabled: Boolean,
+    var value: Int
+)
+
+@Serializable
+data class MraidSettings(
+    var expandEnabled: Boolean,
+    var expandValue: Boolean
+)
+
+@Serializable
+data class AutoCloseSettings(
+    var interstitialEnabled: Boolean,
+    var interstitialValue: Boolean,
+    var rewardedEnabled: Boolean,
+    var rewardedValue: Boolean
+)
+
+@Serializable
+data class EndCardSettings(
+    var enabled: Boolean,
+    var value: Boolean,
+    var customEnabled: Boolean,
+    var customValue: Boolean,
+    var customDisplayEnabled: Boolean,
+    var customDisplayValue: String
+)
+
+@Serializable
+data class NavigationSettings(
+    var enabled: Boolean,
+    var value: String
+)
+
+@Serializable
+data class LandingPageSettings(
+    var enabled: Boolean,
+    var value: Boolean
+)
+
+@Serializable
+data class SkipOffsetSettings(
+    var html: Pair<Boolean, String>?,
+    var video: Pair<Boolean, String>?,
+    var playable: Pair<Boolean, String>?,
+    var rewardedHtml: Pair<Boolean, String>?,
+    var rewardedVideo: Pair<Boolean, String>?,
+    var endCardCloseDelay: Pair<Boolean, String>?
+)
+
+@Serializable
+data class ClickBehaviourSettings(
+    var enabled: Boolean,
+    var value: Boolean
+)
+
+@Serializable
+data class ContentInfoSettings(
+    var urlEnabled: Boolean,
+    var urlValue: String,
+    var iconUrlEnabled: Boolean,
+    var iconUrlValue: String,
+    var iconClickActionEnabled: Boolean,
+    var iconClickActionValue: String,
+    var displayEnabled: Boolean,
+    var displayValue: String
+)
+
+@Serializable
+data class CloseButtonSettings(
+    var enabled: Boolean,
+    var value: String
+)
+
+@Serializable
+data class CountdownSettings(
+    var enabled: Boolean,
+    var value: String
+)
+
+//@Serializable
+//data class LearnMoreSettings(
+//    var sizeEnabled: Boolean,
+//    var sizeValue: String,
+//    var locationEnabled: Boolean,
+//    var locationValue: String
+//)
+
+@Serializable
+data class ImpressionTrackingSettings(
+    var enabled: Boolean,
+    var value: String
+)
+
+@Serializable
+data class VisibilitySettings(
+    var minTimeEnabled: Boolean,
+    var minTimeValue: String,
+    var minPercentEnabled: Boolean,
+    var minPercentValue: String
+)
+
+@Serializable
+data class CustomCtaSettings(
+    var enabled: Boolean,
+    var enabledValue: Boolean,
+    var delayEnabled: Boolean,
+    var delayEnabledValue: String,
+    var typeValue: Int
+)
+
+@Serializable
+data class ReducedButtonsSettings(
+    var enabled: Boolean,
+    var value: Boolean
+)

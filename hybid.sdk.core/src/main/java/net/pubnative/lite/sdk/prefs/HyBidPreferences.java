@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.prefs;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -41,20 +45,6 @@ public class HyBidPreferences {
         return sharedPreferences.getBoolean(Key.TOPICS_API_ENABLED, false);
     }
 
-    public void setAtomEnabled(Boolean isEnabled) {
-        if (sharedPreferences != null && isEnabled != null) {
-            editor = sharedPreferences.edit();
-            editor.putBoolean(Key.ATOM_ENABLED, isEnabled);
-            editor.commit();
-        }
-    }
-
-    public Boolean isAtomEnabled() {
-        if (sharedPreferences == null) return null;
-        if (!sharedPreferences.contains(Key.ATOM_ENABLED)) return null;
-        return sharedPreferences.getBoolean(Key.ATOM_ENABLED, false);
-    }
-
     public void setSessionTimeStamp(long milliseconds, OnDatabaseResetListener listener, TIMESTAMP timestamp) {
         long sessionTimestamp = getSessionTimeStamp();
         if (sessionTimestamp != 0L) {
@@ -93,7 +83,6 @@ public class HyBidPreferences {
         public static final String SESSION_TIMESTAMP = "session_timestamp";
         public static final String IS_App_FIRST_INSTALLED_TRACKED = "is_app_first_installed_tracked";
         public static final String TOPICS_API_ENABLED = "topics_api_enabled";
-        public static final String ATOM_ENABLED = "atom_enabled";
     }
 
     public enum TIMESTAMP {

@@ -1,24 +1,6 @@
-// The MIT License (MIT)
+// HyBid SDK License
 //
-// Copyright (c) 2018 PubNative GmbH
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
 //
 package net.pubnative.lite.demo
 
@@ -39,7 +21,22 @@ import com.google.android.gms.ads.initialization.InitializationStatus
 import net.pubnative.lite.demo.managers.AdCustomizationPrefs
 import net.pubnative.lite.demo.managers.AdCustomizationsManager
 import net.pubnative.lite.demo.managers.AnalyticsSubscriber.eventCallback
+import net.pubnative.lite.demo.managers.AudioSettings
+import net.pubnative.lite.demo.managers.AutoCloseSettings
+import net.pubnative.lite.demo.managers.ClickBehaviourSettings
+import net.pubnative.lite.demo.managers.CloseButtonSettings
+import net.pubnative.lite.demo.managers.ContentInfoSettings
+import net.pubnative.lite.demo.managers.CountdownSettings
+import net.pubnative.lite.demo.managers.CustomCtaSettings
+import net.pubnative.lite.demo.managers.EndCardSettings
+import net.pubnative.lite.demo.managers.ImpressionTrackingSettings
+import net.pubnative.lite.demo.managers.LandingPageSettings
+import net.pubnative.lite.demo.managers.MraidSettings
+import net.pubnative.lite.demo.managers.NavigationSettings
+import net.pubnative.lite.demo.managers.ReducedButtonsSettings
 import net.pubnative.lite.demo.managers.SettingsManager
+import net.pubnative.lite.demo.managers.SkipOffsetSettings
+import net.pubnative.lite.demo.managers.VisibilitySettings
 import net.pubnative.lite.demo.models.*
 import net.pubnative.lite.sdk.CountdownStyle
 import net.pubnative.lite.sdk.HyBid
@@ -148,61 +145,93 @@ class HyBidDemoApplication : MultiDexApplication() {
         val prefs = AdCustomizationPrefs(applicationContext)
         if (!prefs.isInitialised()) {
             val adCustomizationsManager = AdCustomizationsManager(
-                false,
-                1,
-                false,
-                true,
-                false,
-                false,
-                false,
-                true,
-                false,
-                false,
-                false,
-                CustomEndCardDisplay.FALLBACK.display,
-                false,
-                "external",
-                false,
-                false,
-                false,
-                false,
-                false,
-                Constants.SKIP_OFFSET_DEFAULT.toString(),
-                false,
-                Constants.VIDEO_SKIP_OFFSET_DEFAULT.toString(),
-                false,
-                "5",
-                false,
-                "15",
-                false,
-                Constants.ENDCARD_CLOSE_BUTTON_DELAY_DEFAULT.toString(),
-                false,
-                true,
-                false,
-                Constants.CONTENT_INFO_URL,
-                false,
-                Constants.CONTENT_INFO_ICON_URL,
-                false,
-                ContentInfoIconAction.EXPAND.action.toString(),
-                false,
-                ContentInfoDisplay.SYSTEM_BROWSER.display.toString(),
-                false,
-                Constants.MRAID_CUSTOM_CLOSE_CLOSE_BUTTON_DELAY_DEFAULT.toString(),
-                false,
-                CountdownStyle.PIE_CHART.name,
-                false,
-                ImpressionTrackingMethod.AD_VIEWABLE.methodName,
-                false,
-                "0",
-                false,
-                "0.0",
-                false,
-                false,
-                false,
-                "2",
-                0,
-                false,
-                false
+                audioSettings = AudioSettings(
+                    enabled = false,
+                    value = 1
+                ),
+                mraidSettings = MraidSettings(
+                    expandEnabled = false,
+                    expandValue = true
+                ),
+                autoCloseSettings = AutoCloseSettings(
+                    interstitialEnabled = false,
+                    interstitialValue = false,
+                    rewardedEnabled = false,
+                    rewardedValue = true
+                ),
+                endCardSettings = EndCardSettings(
+                    enabled = false,
+                    value = true,
+                    customEnabled = false,
+                    customValue = false,
+                    customDisplayEnabled = false,
+                    customDisplayValue = CustomEndCardDisplay.FALLBACK.display
+                ),
+                navigationSettings = NavigationSettings(
+                    enabled = false,
+                    value = "external"
+                ),
+                landingPageSettings = LandingPageSettings(
+                    enabled = false,
+                    value = false
+                ),
+                skipOffsetSettings = SkipOffsetSettings(
+                    html = false to Constants.SKIP_OFFSET_DEFAULT.toString(),
+                    video = false to Constants.VIDEO_SKIP_OFFSET_DEFAULT.toString(),
+                    playable = false to "5",
+                    rewardedHtml = false to "5",
+                    rewardedVideo = false to "15",
+                    endCardCloseDelay = false to Constants.ENDCARD_CLOSE_BUTTON_DELAY_DEFAULT.toString()
+                ),
+                clickBehaviourSettings = ClickBehaviourSettings(
+                    enabled = false,
+                    value = true
+                ),
+                contentInfoSettings = ContentInfoSettings(
+                    urlEnabled = false,
+                    urlValue = Constants.CONTENT_INFO_URL,
+                    iconUrlEnabled = false,
+                    iconUrlValue = Constants.CONTENT_INFO_ICON_URL,
+                    iconClickActionEnabled = false,
+                    iconClickActionValue = ContentInfoIconAction.EXPAND.action.toString(),
+                    displayEnabled = false,
+                    displayValue = ContentInfoDisplay.SYSTEM_BROWSER.display.toString()
+                ),
+                closeButtonSettings = CloseButtonSettings(
+                    enabled = false,
+                    value = Constants.MRAID_CUSTOM_CLOSE_CLOSE_BUTTON_DELAY_DEFAULT.toString()
+                ),
+                countdownSettings = CountdownSettings(
+                    enabled = false,
+                    value = CountdownStyle.PIE_CHART.name
+                ),
+//                learnMoreSettings = LearnMoreSettings(
+//                    sizeEnabled = false,
+//                    sizeValue = LearnMoreSize.DEFAULT.name,
+//                    locationEnabled = false,
+//                    locationValue = LearnMoreLocation.DEFAULT.name
+//                ),
+                impressionTrackingSettings = ImpressionTrackingSettings(
+                    enabled = false,
+                    value = ImpressionTrackingMethod.AD_VIEWABLE.methodName
+                ),
+                visibilitySettings = VisibilitySettings(
+                    minTimeEnabled = false,
+                    minTimeValue = "0",
+                    minPercentEnabled = false,
+                    minPercentValue = "0.0"
+                ),
+                customCtaSettings = CustomCtaSettings(
+                    enabled = false,
+                    enabledValue = false,
+                    delayEnabled = false,
+                    delayEnabledValue = "2",
+                    typeValue = 0
+                ),
+                reducedButtonsSettings = ReducedButtonsSettings(
+                    enabled = false,
+                    value = false
+                )
             )
             prefs.setAdCustomizationData(adCustomizationsManager.toJson())
         }

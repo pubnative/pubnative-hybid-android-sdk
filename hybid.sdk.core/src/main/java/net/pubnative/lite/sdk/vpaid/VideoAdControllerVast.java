@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.vpaid;
 
 import android.content.Context;
@@ -181,7 +185,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
     }
 
     private synchronized void addPendingAction(Action action, Action waitingAction) {
-        if (mPendingActions.containsKey(waitingAction) && mPendingActions.get(waitingAction) != null) {
+        if (action != null && waitingAction != null && mPendingActions.containsKey(waitingAction) && mPendingActions.get(waitingAction) != null) {
             mPendingActions.get(waitingAction).add(action);
         } else {
             LinkedList<Action> newList = new LinkedList<>();
@@ -287,7 +291,6 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
     }
 
     private void processPlayAction() {
-
         if (mMediaPlayer == null) return;
         muteVideo(mViewControllerVast.isMute(), false);
         mViewControllerVast.adjustLayoutParams(mMediaPlayer.getVideoWidth(), mMediaPlayer.getVideoHeight());
@@ -405,6 +408,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
             addAction(Action.PAUSE);
         }
         mViewControllerVast.pause();
+        observer.unregisterVolumeObserver(this, mBaseAdInternal.getContext());
         processActions();
     }
 
@@ -1016,7 +1020,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
 
     @Override
     public void destroy() {
-
+        observer.unregisterVolumeObserver(this, mBaseAdInternal.getContext());
         if (mMediaPlayer != null) {
             try {
                 mMediaPlayer.release();
@@ -1044,8 +1048,6 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
         mViewControllerVast.destroy();
 
         clearAllActions();
-
-        observer.unregisterVolumeObserver(this, mBaseAdInternal.getContext());
     }
 
 
@@ -1060,13 +1062,14 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver {
         } else {
             resumeAd();
         }
+        observer.registerVolumeObserver(this, mBaseAdInternal.getContext());
     }
 
     private final TextureView.SurfaceTextureListener mCreateTextureListener = new TextureView.SurfaceTextureListener() {
         @Override
-        public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-            Surface asd = new Surface(surface);
-            mMediaPlayer.setSurface(asd);
+        public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
+            Surface surface = new Surface(surfaceTexture);
+            mMediaPlayer.setSurface(surface);
             if (!adFinishedPlaying()) resumeAd();
         }
 

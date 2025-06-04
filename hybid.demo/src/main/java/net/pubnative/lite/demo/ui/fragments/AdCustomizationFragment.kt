@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.demo.ui.fragments
 
 import android.os.Bundle
@@ -13,7 +17,22 @@ import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.managers.AdCustomizationPrefs
 import net.pubnative.lite.demo.managers.AdCustomizationsManager
+import net.pubnative.lite.demo.managers.AudioSettings
+import net.pubnative.lite.demo.managers.AutoCloseSettings
+import net.pubnative.lite.demo.managers.ClickBehaviourSettings
+import net.pubnative.lite.demo.managers.CloseButtonSettings
+import net.pubnative.lite.demo.managers.ContentInfoSettings
+import net.pubnative.lite.demo.managers.CountdownSettings
+import net.pubnative.lite.demo.managers.CustomCtaSettings
+import net.pubnative.lite.demo.managers.EndCardSettings
+import net.pubnative.lite.demo.managers.ImpressionTrackingSettings
+import net.pubnative.lite.demo.managers.LandingPageSettings
+import net.pubnative.lite.demo.managers.MraidSettings
+import net.pubnative.lite.demo.managers.NavigationSettings
+import net.pubnative.lite.demo.managers.ReducedButtonsSettings
 import net.pubnative.lite.demo.managers.SettingsManager
+import net.pubnative.lite.demo.managers.SkipOffsetSettings
+import net.pubnative.lite.demo.managers.VisibilitySettings
 import net.pubnative.lite.sdk.CountdownStyle
 import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.models.ContentInfoDisplay
@@ -31,6 +50,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
 
     private lateinit var htmlSkipOffsetInput: EditText
     private lateinit var videoSkipOffsetInput: EditText
+    private lateinit var playableSkipOffsetInput: EditText
     private lateinit var rewardedHtmlSkipOffsetInput: EditText
     private lateinit var rewardedVideoSkipOffsetInput: EditText
     private lateinit var endCardCloseButtonDelayInput: EditText
@@ -53,6 +73,8 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
     private lateinit var customCTADelay: EditText
     private lateinit var customCTATypeGroup: RadioGroup
     private lateinit var bundleId: EditText
+//    private lateinit var bcLearnMoreSizeGroup: RadioGroup
+//    private lateinit var bcLearnMoreLocationGroup: RadioGroup
 
     private lateinit var cbInitialAudio: CheckBox
     private lateinit var cbMraidExpand: CheckBox
@@ -63,6 +85,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
     private lateinit var cbAutoCloseRewarded: CheckBox
     private lateinit var cbInputSkipOffset: CheckBox
     private lateinit var cbInputVideoSkipOffset: CheckBox
+    private lateinit var cbInputPlayableSkipOffset: CheckBox
     private lateinit var cbInputRewardedSkipOffset: CheckBox
     private lateinit var cbInputRewardedVideoSkipOffset: CheckBox
     private lateinit var cbInputEndcardCloseButtonDelay: CheckBox
@@ -81,6 +104,8 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
     private lateinit var cbCustomCTAEnabled: CheckBox
     private lateinit var cbInputCustomCTADelay: CheckBox
     private lateinit var cbEnableReducedButtons: CheckBox
+//    private lateinit var cbBcLearnMoreSize: CheckBox
+//    private lateinit var cbBcLearnMoreLocation: CheckBox
 
     private lateinit var mraidExpandSwitch: SwitchCompat
     private lateinit var enableAutoCloseSwitch: SwitchCompat
@@ -120,6 +145,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
 
         htmlSkipOffsetInput = requireView().findViewById(R.id.input_skip_offset)
         videoSkipOffsetInput = requireView().findViewById(R.id.input_video_skip_offset)
+        playableSkipOffsetInput = requireView().findViewById(R.id.input_playable_skip_offset)
         rewardedHtmlSkipOffsetInput = requireView().findViewById(R.id.input_rewarded_skip_offset)
         rewardedVideoSkipOffsetInput =
             requireView().findViewById(R.id.input_rewarded_video_skip_offset)
@@ -141,6 +167,8 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
         customCTADelay = requireView().findViewById(R.id.input_custom_cta_delay)
         customCTATypeGroup = requireView().findViewById(R.id.group_custom_cta_type)
         bundleId = requireView().findViewById(R.id.input_bundle_id)
+//        bcLearnMoreSizeGroup = requireView().findViewById(R.id.group_learn_more_size)
+//        bcLearnMoreLocationGroup = requireView().findViewById(R.id.group_learn_more_location)
 
         contentInfoIconClickActionGroup =
             requireView().findViewById(R.id.group_content_info_icon_click_action)
@@ -156,6 +184,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
         cbAutoCloseRewarded = requireView().findViewById(R.id.cb_auto_close_rewarded)
         cbInputSkipOffset = requireView().findViewById(R.id.cb_input_skip_offset)
         cbInputVideoSkipOffset = requireView().findViewById(R.id.cb_input_video_skip_offset)
+        cbInputPlayableSkipOffset = requireView().findViewById(R.id.cb_input_playable_skip_offset)
         cbInputRewardedSkipOffset = requireView().findViewById(R.id.cb_input_rewarded_skip_offset)
         cbInputRewardedVideoSkipOffset =
             requireView().findViewById(R.id.cb_input_rewarded_video_skip_offset)
@@ -177,6 +206,8 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
         cbCustomCTAEnabled = requireView().findViewById(R.id.cb_custom_cta_enabled)
         cbInputCustomCTADelay = requireView().findViewById(R.id.cb_input_custom_cta_delay)
         cbEnableReducedButtons = requireView().findViewById(R.id.cb_reduced_skip_close_buttons)
+//        cbBcLearnMoreSize = requireView().findViewById(R.id.cb_learn_more_size)
+//        cbBcLearnMoreLocation = requireView().findViewById(R.id.cb_learn_more_location)
 
         cbInitialAudio.setOnCheckedChangeListener { p0, checked ->
             requireView().findViewById<RadioButton>(R.id.radio_sound_default).isEnabled = checked
@@ -229,6 +260,10 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
             videoSkipOffsetInput.isEnabled = checked
         }
 
+        cbInputPlayableSkipOffset.setOnCheckedChangeListener { p0, checked ->
+            playableSkipOffsetInput.isEnabled = checked
+        }
+
         cbInputRewardedSkipOffset.setOnCheckedChangeListener { p0, checked ->
             rewardedHtmlSkipOffsetInput.isEnabled = checked
         }
@@ -279,17 +314,17 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
         }
 
         cbContentInfoIconClickAction.setOnCheckedChangeListener { p0, checked ->
-            requireView().findViewById<RadioButton>(R.id.radio_content_info_icon_click_action_expand)
-                .isEnabled = checked
-            requireView().findViewById<RadioButton>(R.id.radio_content_info_icon_click_action_open)
-                .isEnabled = checked
+            requireView().findViewById<RadioButton>(R.id.radio_content_info_icon_click_action_expand).isEnabled =
+                checked
+            requireView().findViewById<RadioButton>(R.id.radio_content_info_icon_click_action_open).isEnabled =
+                checked
         }
 
         cbContentInfoDisplay.setOnCheckedChangeListener { p0, checked ->
-            requireView().findViewById<RadioButton>(R.id.radio_content_info_display_inapp)
-                .isEnabled = checked
-            requireView().findViewById<RadioButton>(R.id.radio_content_info_display_systembrowser)
-                .isEnabled = checked
+            requireView().findViewById<RadioButton>(R.id.radio_content_info_display_inapp).isEnabled =
+                checked
+            requireView().findViewById<RadioButton>(R.id.radio_content_info_display_systembrowser).isEnabled =
+                checked
         }
 
         cbCountdownStyle.setOnCheckedChangeListener { p0, checked ->
@@ -300,6 +335,25 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
             requireView().findViewById<RadioButton>(R.id.radio_countdown_style_progress).isEnabled =
                 checked
         }
+
+//        cbBcLearnMoreSize.setOnCheckedChangeListener { p0, checked ->
+//            requireView().findViewById<RadioButton>(R.id.radio_learn_more_size_default).isEnabled =
+//                checked
+//            requireView().findViewById<RadioButton>(R.id.radio_learn_more_size_medium).isEnabled =
+//                checked
+//            requireView().findViewById<RadioButton>(R.id.radio_learn_more_size_large).isEnabled =
+//                checked
+//        }
+//
+//        cbBcLearnMoreLocation.setOnCheckedChangeListener { p0, checked ->
+//            requireView().findViewById<RadioButton>(R.id.radio_learn_more_location_default).isEnabled =
+//                checked
+//            requireView().findViewById<RadioButton>(R.id.radio_learn_more_location_bottom_down).isEnabled =
+//                checked
+//            requireView().findViewById<RadioButton>(R.id.radio_learn_more_location_bottom_up).isEnabled =
+//                checked
+//        }
+
     }
 
     private fun fillSavedValues() {
@@ -310,204 +364,272 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
     }
 
     private fun fillAdCustomizationData(adCustomizationsManager: AdCustomizationsManager) {
-        //Initial Audio
-        cbInitialAudio.isChecked = adCustomizationsManager.initial_audio_enabled
-        val selectedInitialAudio = when (adCustomizationsManager.initial_audio_value) {
+        // Initial Audio
+        cbInitialAudio.isChecked = adCustomizationsManager.audioSettings?.enabled == true
+        val selectedInitialAudio = when (adCustomizationsManager.audioSettings?.value) {
             0 -> R.id.radio_sound_default
             1 -> R.id.radio_sound_on
             2 -> R.id.radio_sound_mute
-            else -> {
-                R.id.radio_sound_default
-            }
+            else -> R.id.radio_sound_default
         }
         initialAudioGroup.check(selectedInitialAudio)
-
         requireView().findViewById<RadioButton>(R.id.radio_sound_default).isEnabled =
-            adCustomizationsManager.initial_audio_enabled
+            adCustomizationsManager.audioSettings?.enabled == true
         requireView().findViewById<RadioButton>(R.id.radio_sound_on).isEnabled =
-            adCustomizationsManager.initial_audio_enabled
+            adCustomizationsManager.audioSettings?.enabled == true
         requireView().findViewById<RadioButton>(R.id.radio_sound_mute).isEnabled =
-            adCustomizationsManager.initial_audio_enabled
+            adCustomizationsManager.audioSettings?.enabled == true
 
-        //Mraid Expand
-        cbMraidExpand.isChecked = adCustomizationsManager.mraid_expand_enabled
-        mraidExpandSwitch.isEnabled = adCustomizationsManager.mraid_expand_enabled
-        mraidExpandSwitch.isChecked = adCustomizationsManager.mraid_expand_value
-        //Auto Close Interstitial
-        cbAutoClose.isChecked = adCustomizationsManager.auto_close_interstitial_enabled
-        enableAutoCloseSwitch.isEnabled = adCustomizationsManager.auto_close_interstitial_enabled
-        enableAutoCloseSwitch.isChecked = adCustomizationsManager.auto_close_interstitial_value
-        //End Card
-        cbEnableEndcard.isChecked = adCustomizationsManager.end_card_enabled
-        enableEndcardSwitch.isEnabled = adCustomizationsManager.end_card_enabled
-        enableEndcardSwitch.isChecked = adCustomizationsManager.end_card_value
-        //Custom End Card
-        cbEnableCustomEndcard.isChecked = adCustomizationsManager.custom_end_card_enabled
-        enableCustomEndcardSwitch.isEnabled = adCustomizationsManager.custom_end_card_enabled
-        enableCustomEndcardSwitch.isChecked = adCustomizationsManager.custom_end_card_value
-        //Custom End Card Display
+        // MRAID Expand
+        cbMraidExpand.isChecked = adCustomizationsManager.mraidSettings?.expandEnabled == true
+        mraidExpandSwitch.isEnabled = adCustomizationsManager.mraidSettings?.expandEnabled == true
+        mraidExpandSwitch.isChecked = adCustomizationsManager.mraidSettings?.expandValue == true
+
+        // Auto Close Interstitial
+        cbAutoClose.isChecked =
+            adCustomizationsManager.autoCloseSettings?.interstitialEnabled == true
+        enableAutoCloseSwitch.isEnabled =
+            adCustomizationsManager.autoCloseSettings?.interstitialEnabled == true
+        enableAutoCloseSwitch.isChecked =
+            adCustomizationsManager.autoCloseSettings?.interstitialValue == true
+
+        // End Card
+        cbEnableEndcard.isChecked = adCustomizationsManager.endCardSettings?.enabled == true
+        enableEndcardSwitch.isEnabled = adCustomizationsManager.endCardSettings?.enabled == true
+        enableEndcardSwitch.isChecked = adCustomizationsManager.endCardSettings?.value == true
+
+        cbEnableCustomEndcard.isChecked =
+            adCustomizationsManager.endCardSettings?.customEnabled == true
+        enableCustomEndcardSwitch.isEnabled =
+            adCustomizationsManager.endCardSettings?.customEnabled == true
+        enableCustomEndcardSwitch.isChecked =
+            adCustomizationsManager.endCardSettings?.customValue == true
+
         cbEnableCustomEndcardDisplay.isChecked =
-            adCustomizationsManager.custom_end_card_display_enabled
+            adCustomizationsManager.endCardSettings?.customDisplayEnabled == true
         requireView().findViewById<RadioButton>(R.id.radio_fallback).isEnabled =
-            adCustomizationsManager.custom_end_card_display_enabled
+            adCustomizationsManager.endCardSettings?.customDisplayEnabled == true
         requireView().findViewById<RadioButton>(R.id.radio_extension).isEnabled =
-            adCustomizationsManager.custom_end_card_display_enabled
-        when (adCustomizationsManager.custom_end_card_display_value) {
-            CustomEndCardDisplay.FALLBACK.display -> {
-                customEndCardGroup.check(R.id.radio_fallback)
-            }
-
-            CustomEndCardDisplay.EXTENSION.display -> {
-                customEndCardGroup.check(R.id.radio_extension)
-            }
-
-            else -> {
-                customEndCardGroup.check(R.id.radio_fallback)
-            }
+            adCustomizationsManager.endCardSettings?.customDisplayEnabled == true
+        when (adCustomizationsManager.endCardSettings?.customDisplayValue) {
+            CustomEndCardDisplay.FALLBACK.display -> customEndCardGroup.check(R.id.radio_fallback)
+            CustomEndCardDisplay.EXTENSION.display -> customEndCardGroup.check(R.id.radio_extension)
+            else -> customEndCardGroup.check(R.id.radio_fallback)
         }
-        //Auto Close Rewarded
-        cbAutoCloseRewarded.isChecked = adCustomizationsManager.auto_close_rewarded_enabled
+
+        // Auto Close Rewarded
+        cbAutoCloseRewarded.isChecked =
+            adCustomizationsManager.autoCloseSettings?.rewardedEnabled == true
         enableAutoCloseSwitchRewarded.isEnabled =
-            adCustomizationsManager.auto_close_rewarded_enabled
-        enableAutoCloseSwitchRewarded.isChecked = adCustomizationsManager.auto_close_rewarded_value
-        //Skip Offset
-        cbInputSkipOffset.isChecked = adCustomizationsManager.html_skip_offset_enabled
-        htmlSkipOffsetInput.isEnabled = adCustomizationsManager.html_skip_offset_enabled
-        htmlSkipOffsetInput.setText(adCustomizationsManager.html_skip_offset_value)
-        //Video Skip Offset
-        cbInputVideoSkipOffset.isChecked = adCustomizationsManager.video_skip_offset_enabled
-        videoSkipOffsetInput.isEnabled = adCustomizationsManager.video_skip_offset_enabled
-        videoSkipOffsetInput.setText(adCustomizationsManager.video_skip_offset_value)
-        // Rewarded Skip Offset
+            adCustomizationsManager.autoCloseSettings?.rewardedEnabled == true
+        enableAutoCloseSwitchRewarded.isChecked =
+            adCustomizationsManager.autoCloseSettings?.rewardedValue == true
+
+        // Skip Offsets
+        cbInputSkipOffset.isChecked =
+            adCustomizationsManager.skipOffsetSettings?.html?.first == true
+        htmlSkipOffsetInput.isEnabled =
+            adCustomizationsManager.skipOffsetSettings?.html?.first == true
+        htmlSkipOffsetInput.setText(adCustomizationsManager.skipOffsetSettings?.html?.second)
+
+        cbInputVideoSkipOffset.isChecked =
+            adCustomizationsManager.skipOffsetSettings?.video?.first == true
+        videoSkipOffsetInput.isEnabled =
+            adCustomizationsManager.skipOffsetSettings?.video?.first == true
+        videoSkipOffsetInput.setText(adCustomizationsManager.skipOffsetSettings?.video?.second)
+
+        cbInputPlayableSkipOffset.isChecked =
+            adCustomizationsManager.skipOffsetSettings?.playable?.first == true
+        playableSkipOffsetInput.isEnabled =
+            adCustomizationsManager.skipOffsetSettings?.playable?.first == true
+        playableSkipOffsetInput.setText(adCustomizationsManager.skipOffsetSettings?.playable?.second)
+
         cbInputRewardedSkipOffset.isChecked =
-            adCustomizationsManager.rewarded_html_skip_offset_enabled
-        rewardedHtmlSkipOffsetInput.setText(adCustomizationsManager.rewarded_html_skip_offset_value)
+            adCustomizationsManager.skipOffsetSettings?.rewardedHtml?.first == true
         rewardedHtmlSkipOffsetInput.isEnabled =
-            adCustomizationsManager.rewarded_html_skip_offset_enabled
-        //Rewarded Video Skip Offset
+            adCustomizationsManager.skipOffsetSettings?.rewardedHtml?.first == true
+        rewardedHtmlSkipOffsetInput.setText(adCustomizationsManager.skipOffsetSettings?.rewardedHtml?.second)
+
         cbInputRewardedVideoSkipOffset.isChecked =
-            adCustomizationsManager.rewarded_video_skip_offset_enabled
-        rewardedVideoSkipOffsetInput.setText(adCustomizationsManager.rewarded_video_skip_offset_value)
+            adCustomizationsManager.skipOffsetSettings?.rewardedVideo?.first == true
         rewardedVideoSkipOffsetInput.isEnabled =
-            adCustomizationsManager.rewarded_video_skip_offset_enabled
-        //End Card Close Button Delay
+            adCustomizationsManager.skipOffsetSettings?.rewardedVideo?.first == true
+        rewardedVideoSkipOffsetInput.setText(adCustomizationsManager.skipOffsetSettings?.rewardedVideo?.second)
+
         cbInputEndcardCloseButtonDelay.isChecked =
-            adCustomizationsManager.end_card_close_delay_skip_offset_enabled
-        endCardCloseButtonDelayInput.setText(adCustomizationsManager.end_card_close_delay_skip_offset_value)
+            adCustomizationsManager.skipOffsetSettings?.endCardCloseDelay?.first == true
         endCardCloseButtonDelayInput.isEnabled =
-            adCustomizationsManager.end_card_close_delay_skip_offset_enabled
-        // Navigation mode
-        navigationModeInput.setText(adCustomizationsManager.navigation_mode_value)
-        navigationModeInput.isEnabled = adCustomizationsManager.navigation_mode_enabled
-        cbInputNavigationMode.isChecked = adCustomizationsManager.navigation_mode_enabled
-        // Landing page
-        cbLandingPage.isChecked = adCustomizationsManager.landing_page_enabled
-        landingPageSwitch.isEnabled = adCustomizationsManager.landing_page_enabled
-        landingPageSwitch.isChecked = adCustomizationsManager.landing_page_value
-        //Click Behaviour
-        cbGroupClickBehaviour.isChecked = adCustomizationsManager.click_behaviour_enabled
-        cbImpTracking.isChecked = adCustomizationsManager.imp_tracking_enabled
-        impTracking.setText(adCustomizationsManager.imp_tracking_value)
-        impTracking.isEnabled = adCustomizationsManager.imp_tracking_enabled
-        cbMinVisibilityTime.isChecked = adCustomizationsManager.min_visibility_time_enabled
-        minVisibilityTime.setText(adCustomizationsManager.min_visibility_time_value)
-        minVisibilityTime.isEnabled = adCustomizationsManager.min_visibility_time_enabled
-        cbMinVisibilityPercent.isChecked = adCustomizationsManager.min_visibility_percent_enabled
-        minVisibilityPercent.setText(adCustomizationsManager.min_visibility_percent_value)
-        minVisibilityPercent.isEnabled = adCustomizationsManager.min_visibility_percent_enabled
+            adCustomizationsManager.skipOffsetSettings?.endCardCloseDelay?.first == true
+        endCardCloseButtonDelayInput.setText(adCustomizationsManager.skipOffsetSettings?.endCardCloseDelay?.second)
+
+        // Navigation
+        cbInputNavigationMode.isChecked =
+            adCustomizationsManager.navigationSettings?.enabled == true
+        navigationModeInput.isEnabled = adCustomizationsManager.navigationSettings?.enabled == true
+        navigationModeInput.setText(adCustomizationsManager.navigationSettings?.value)
+
+        // Landing Page
+        cbLandingPage.isChecked = adCustomizationsManager.landingPageSettings?.enabled == true
+        landingPageSwitch.isEnabled = adCustomizationsManager.landingPageSettings?.enabled == true
+        landingPageSwitch.isChecked = adCustomizationsManager.landingPageSettings?.value == true
+
+        // Click Behaviour
+        cbGroupClickBehaviour.isChecked =
+            adCustomizationsManager.clickBehaviourSettings?.enabled == true
+        clickBehaviourGroup.check(if (adCustomizationsManager.clickBehaviourSettings?.value == true) R.id.radio_creative else R.id.radio_action_button)
         requireView().findViewById<RadioButton>(R.id.radio_creative).isEnabled =
-            adCustomizationsManager.click_behaviour_enabled
+            adCustomizationsManager.clickBehaviourSettings?.enabled == true
         requireView().findViewById<RadioButton>(R.id.radio_action_button).isEnabled =
-            adCustomizationsManager.click_behaviour_enabled
-        // Reduced skip/close button size
-        cbEnableReducedButtons.isChecked = adCustomizationsManager.reduced_buttons_enabled
-        enableReducedButtonsSwitch.isEnabled = adCustomizationsManager.reduced_buttons_enabled
-        enableReducedButtonsSwitch.isChecked = adCustomizationsManager.reduced_buttons_value
+            adCustomizationsManager.clickBehaviourSettings?.enabled == true
 
+        // Reduced Buttons
+        cbEnableReducedButtons.isChecked =
+            adCustomizationsManager.reducedButtonsSettings?.enabled == true
+        enableReducedButtonsSwitch.isEnabled =
+            adCustomizationsManager.reducedButtonsSettings?.enabled == true
+        enableReducedButtonsSwitch.isChecked =
+            adCustomizationsManager.reducedButtonsSettings?.value == true
 
-        when (adCustomizationsManager.click_behaviour_value) {
-            true -> clickBehaviourGroup.check(R.id.radio_creative)
-            false -> clickBehaviourGroup.check(R.id.radio_action_button)
-        }
+        // Content Info
+        cbContentInfoUrl.isChecked = adCustomizationsManager.contentInfoSettings?.urlEnabled == true
+        contentInfoUrlInput.isEnabled =
+            adCustomizationsManager.contentInfoSettings?.urlEnabled == true
+        contentInfoUrlInput.setText(adCustomizationsManager.contentInfoSettings?.urlValue)
 
-        //Content Info URL
-        contentInfoUrlInput.setText(adCustomizationsManager.content_info_url_value)
-        contentInfoUrlInput.isEnabled = adCustomizationsManager.content_info_url_enabled
-        cbContentInfoUrl.isChecked = adCustomizationsManager.content_info_url_enabled
+        cbContentInfoIconUrl.isChecked =
+            adCustomizationsManager.contentInfoSettings?.iconUrlEnabled == true
+        contentInfoIconUrlInput.isEnabled =
+            adCustomizationsManager.contentInfoSettings?.iconUrlEnabled == true
+        contentInfoIconUrlInput.setText(adCustomizationsManager.contentInfoSettings?.iconUrlValue)
 
-        //Content Info Icon URL
-        contentInfoIconUrlInput.setText(adCustomizationsManager.content_info_icon_url_value)
-        contentInfoIconUrlInput.isEnabled = adCustomizationsManager.content_info_icon_url_enabled
-        cbContentInfoIconUrl.isChecked = adCustomizationsManager.content_info_icon_url_enabled
-
-        //Content Info Icon Click Action
         cbContentInfoIconClickAction.isChecked =
-            adCustomizationsManager.content_info_icon_click_action_enabled
+            adCustomizationsManager.contentInfoSettings?.iconClickActionEnabled == true
         requireView().findViewById<RadioButton>(R.id.radio_content_info_icon_click_action_open).isEnabled =
-            adCustomizationsManager.content_info_icon_click_action_enabled
+            adCustomizationsManager.contentInfoSettings?.iconClickActionEnabled == true
         requireView().findViewById<RadioButton>(R.id.radio_content_info_icon_click_action_expand).isEnabled =
-            adCustomizationsManager.content_info_icon_click_action_enabled
+            adCustomizationsManager.contentInfoSettings?.iconClickActionEnabled == true
+        contentInfoIconClickActionGroup.check(
+            when (adCustomizationsManager.contentInfoSettings?.iconClickActionValue) {
+                ContentInfoIconAction.EXPAND.action -> R.id.radio_content_info_icon_click_action_expand
+                ContentInfoIconAction.OPEN.action -> R.id.radio_content_info_icon_click_action_open
+                else -> R.id.radio_content_info_icon_click_action_expand
+            }
+        )
 
-        when (adCustomizationsManager.content_info_icon_click_action_value) {
-            ContentInfoIconAction.EXPAND.action -> contentInfoIconClickActionGroup.check(R.id.radio_content_info_icon_click_action_expand)
-            ContentInfoIconAction.OPEN.action -> contentInfoIconClickActionGroup.check(R.id.radio_content_info_icon_click_action_open)
-            else -> contentInfoIconClickActionGroup.check(R.id.radio_content_info_icon_click_action_expand)
-        }
-
-        //Content Info Display
-        cbContentInfoDisplay.isChecked = adCustomizationsManager.content_info_display_enabled
+        cbContentInfoDisplay.isChecked =
+            adCustomizationsManager.contentInfoSettings?.displayEnabled == true
         requireView().findViewById<RadioButton>(R.id.radio_content_info_display_inapp).isEnabled =
-            adCustomizationsManager.content_info_display_enabled
+            adCustomizationsManager.contentInfoSettings?.displayEnabled == true
         requireView().findViewById<RadioButton>(R.id.radio_content_info_display_systembrowser).isEnabled =
-            adCustomizationsManager.content_info_display_enabled
+            adCustomizationsManager.contentInfoSettings?.displayEnabled == true
+        contentInfoDisplayGroup.check(
+            when (adCustomizationsManager.contentInfoSettings?.displayValue) {
+                ContentInfoDisplay.IN_APP.display -> R.id.radio_content_info_display_inapp
+                ContentInfoDisplay.SYSTEM_BROWSER.display -> R.id.radio_content_info_display_systembrowser
+                else -> R.id.radio_content_info_display_systembrowser
+            }
+        )
 
-        when (adCustomizationsManager.content_info_display_value) {
-            ContentInfoDisplay.IN_APP.display -> contentInfoDisplayGroup.check(R.id.radio_content_info_display_inapp)
-            ContentInfoDisplay.SYSTEM_BROWSER.display -> contentInfoDisplayGroup.check(R.id.radio_content_info_display_systembrowser)
-            else -> contentInfoDisplayGroup.check(R.id.radio_content_info_display_systembrowser)
-        }
+        // Close Button Delay
+        cbInputCloseButtonDelay.isChecked =
+            adCustomizationsManager.closeButtonSettings?.enabled == true
+        closeButtonDelayInput.isEnabled =
+            adCustomizationsManager.closeButtonSettings?.enabled == true
+        closeButtonDelayInput.setText(adCustomizationsManager.closeButtonSettings?.value)
 
-        cbInputCloseButtonDelay.isChecked = adCustomizationsManager.close_button_delay_enabled
-        closeButtonDelayInput.isEnabled = adCustomizationsManager.close_button_delay_enabled
-        closeButtonDelayInput.setText(adCustomizationsManager.close_button_delay_value)
-
-        //Count Down Style
-        cbCountdownStyle.isChecked = adCustomizationsManager.count_down_enabled
+        // Countdown Style
+        cbCountdownStyle.isChecked = adCustomizationsManager.countdownSettings?.enabled == true
         requireView().findViewById<RadioButton>(R.id.radio_countdown_style_pie_chart).isEnabled =
-            adCustomizationsManager.count_down_enabled
+            adCustomizationsManager.countdownSettings?.enabled == true
         requireView().findViewById<RadioButton>(R.id.radio_countdown_style_timer).isEnabled =
-            adCustomizationsManager.count_down_enabled
+            adCustomizationsManager.countdownSettings?.enabled == true
         requireView().findViewById<RadioButton>(R.id.radio_countdown_style_progress).isEnabled =
-            adCustomizationsManager.count_down_enabled
-        when (adCustomizationsManager.count_down_value) {
-            CountdownStyle.PIE_CHART.name -> countdownStyleGroup.check(R.id.radio_countdown_style_pie_chart)
-            CountdownStyle.TIMER.name -> countdownStyleGroup.check(R.id.radio_countdown_style_timer)
-            CountdownStyle.PROGRESS.name -> countdownStyleGroup.check(R.id.radio_countdown_style_progress)
-            else -> countdownStyleGroup.check(R.id.radio_countdown_style_timer)
-        }
+            adCustomizationsManager.countdownSettings?.enabled == true
+        countdownStyleGroup.check(
+            when (adCustomizationsManager.countdownSettings?.value) {
+                CountdownStyle.PIE_CHART.name -> R.id.radio_countdown_style_pie_chart
+                CountdownStyle.TIMER.name -> R.id.radio_countdown_style_timer
+                CountdownStyle.PROGRESS.name -> R.id.radio_countdown_style_progress
+                else -> R.id.radio_countdown_style_timer
+            }
+        )
 
-        customEndCardHTML.setText(prefs.getCustomEndCardHTML())
+        // Learn More
+//        cbBcLearnMoreSize.isChecked = adCustomizationsManager.learnMoreSettings?.sizeEnabled == true
+//        requireView().findViewById<RadioButton>(R.id.radio_learn_more_size_default).isEnabled =
+//            adCustomizationsManager.learnMoreSettings?.sizeEnabled == true
+//        requireView().findViewById<RadioButton>(R.id.radio_learn_more_size_medium).isEnabled =
+//            adCustomizationsManager.learnMoreSettings?.sizeEnabled == true
+//        requireView().findViewById<RadioButton>(R.id.radio_learn_more_size_large).isEnabled =
+//            adCustomizationsManager.learnMoreSettings?.sizeEnabled == true
+//        bcLearnMoreSizeGroup.check(
+//            when (adCustomizationsManager.learnMoreSettings?.sizeValue) {
+//                LearnMoreSize.DEFAULT.name -> R.id.radio_learn_more_size_default
+//                LearnMoreSize.MEDIUM.name -> R.id.radio_learn_more_size_medium
+//                LearnMoreSize.LARGE.name -> R.id.radio_learn_more_size_large
+//                else -> R.id.radio_learn_more_size_default
+//            }
+//        )
 
-        bundleId.setText(prefs.getBundleId())
+//        cbBcLearnMoreLocation.isChecked =
+//            adCustomizationsManager.learnMoreSettings?.locationEnabled == true
+//        requireView().findViewById<RadioButton>(R.id.radio_learn_more_location_default).isEnabled =
+//            adCustomizationsManager.learnMoreSettings?.locationEnabled == true
+//        requireView().findViewById<RadioButton>(R.id.radio_learn_more_location_bottom_down).isEnabled =
+//            adCustomizationsManager.learnMoreSettings?.locationEnabled == true
+//        requireView().findViewById<RadioButton>(R.id.radio_learn_more_location_bottom_up).isEnabled =
+//            adCustomizationsManager.learnMoreSettings?.locationEnabled == true
+//        bcLearnMoreLocationGroup.check(
+//            when (adCustomizationsManager.learnMoreSettings?.locationValue) {
+//                LearnMoreLocation.DEFAULT.name -> R.id.radio_learn_more_location_default
+//                LearnMoreLocation.BOTTOM_DOWN.name -> R.id.radio_learn_more_location_bottom_down
+//                LearnMoreLocation.BOTTOM_UP.name -> R.id.radio_learn_more_location_bottom_up
+//                else -> R.id.radio_learn_more_location_default
+//            }
+//        )
 
-        //Custom CTA
-        cbCustomCTAEnabled.isChecked = adCustomizationsManager.custom_cta_enabled
-        enableCustomCTASwitch.isEnabled = adCustomizationsManager.custom_cta_enabled
-        enableCustomCTASwitch.isChecked = adCustomizationsManager.custom_cta_enabled_value
-        cbInputCustomCTADelay.isChecked = adCustomizationsManager.custom_cta_delay_enabled
-        customCTADelay.isEnabled = adCustomizationsManager.custom_cta_delay_enabled
-        customCTADelay.setText(adCustomizationsManager.custom_cta_delay_enabled_value)
-        customCTAIconURL.setText(prefs.getCustomCTAIconURL())
-        customCTAAppName.setText(prefs.getCustomCTAAppName())
+        // Impression Tracking
+        cbImpTracking.isChecked =
+            adCustomizationsManager.impressionTrackingSettings?.enabled == true
+        impTracking.isEnabled = adCustomizationsManager.impressionTrackingSettings?.enabled == true
+        impTracking.setText(adCustomizationsManager.impressionTrackingSettings?.value)
 
-        val selectedCustomCTAType = when (adCustomizationsManager.custom_cta_type_value) {
+        // Visibility Settings
+        cbMinVisibilityTime.isChecked =
+            adCustomizationsManager.visibilitySettings?.minTimeEnabled == true
+        minVisibilityTime.isEnabled =
+            adCustomizationsManager.visibilitySettings?.minTimeEnabled == true
+        minVisibilityTime.setText(adCustomizationsManager.visibilitySettings?.minTimeValue)
+
+        cbMinVisibilityPercent.isChecked =
+            adCustomizationsManager.visibilitySettings?.minPercentEnabled == true
+        minVisibilityPercent.isEnabled =
+            adCustomizationsManager.visibilitySettings?.minPercentEnabled == true
+        minVisibilityPercent.setText(adCustomizationsManager.visibilitySettings?.minPercentValue)
+
+        // Custom CTA
+        cbCustomCTAEnabled.isChecked = adCustomizationsManager.customCtaSettings?.enabled == true
+        enableCustomCTASwitch.isEnabled = adCustomizationsManager.customCtaSettings?.enabled == true
+        enableCustomCTASwitch.isChecked =
+            adCustomizationsManager.customCtaSettings?.enabledValue == true
+
+        cbInputCustomCTADelay.isChecked =
+            adCustomizationsManager.customCtaSettings?.delayEnabled == true
+        customCTADelay.isEnabled = adCustomizationsManager.customCtaSettings?.delayEnabled == true
+        customCTADelay.setText(adCustomizationsManager.customCtaSettings?.delayEnabledValue)
+
+        val selectedCustomCTAType = when (adCustomizationsManager.customCtaSettings?.typeValue) {
             0 -> R.id.radio_default
             1 -> R.id.radio_extended
-            else -> {
-                R.id.radio_default
-            }
+            else -> R.id.radio_default
         }
         customCTATypeGroup.check(selectedCustomCTAType)
+
+        // Custom fields from prefs
+        customEndCardHTML.setText(prefs.getCustomEndCardHTML())
+        bundleId.setText(prefs.getBundleId())
+        customCTAIconURL.setText(prefs.getCustomCTAIconURL())
+        customCTAAppName.setText(prefs.getCustomCTAAppName())
     }
 
     private fun isValidCustomisation(): Boolean {
@@ -540,6 +662,20 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
                 }
             }
 
+            if (cbInputPlayableSkipOffset.isChecked && playableSkipOffsetInput.text.toString()
+                    .trim().isEmpty()
+            ) {
+                return false
+            } else {
+                if (cbInputPlayableSkipOffset.isChecked) {
+                    val offset = playableSkipOffsetInput.text.toString().trim().toDouble()
+                    if (offset > Int.MAX_VALUE) {
+                        isMaximumIntegerValueMessageDisplayed = true
+                        return false
+                    }
+                }
+            }
+
             if (cbInputEndcardCloseButtonDelay.isChecked && endCardCloseButtonDelayInput.text.toString()
                     .trim().isEmpty()
             ) {
@@ -554,8 +690,8 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
                 }
             }
 
-            if (cbInputNavigationMode.isChecked &&
-                navigationModeInput.text.toString().trim().isEmpty()
+            if (cbInputNavigationMode.isChecked && navigationModeInput.text.toString().trim()
+                    .isEmpty()
             ) {
                 return false
             }
@@ -602,8 +738,8 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
                 }
             }
 
-            if (cbInputCloseButtonDelay.isChecked && closeButtonDelayInput.text.toString()
-                    .trim().isEmpty()
+            if (cbInputCloseButtonDelay.isChecked && closeButtonDelayInput.text.toString().trim()
+                    .isEmpty()
             ) {
                 return false
             } else {
@@ -616,15 +752,17 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
                 }
             }
 
-            if (cbContentInfoUrl.isChecked &&
-                !URLValidator.isValidURL(contentInfoUrlInput.text.toString().trim())
+            if (cbContentInfoUrl.isChecked && !URLValidator.isValidURL(
+                    contentInfoUrlInput.text.toString().trim()
+                )
             ) {
                 isWrongUrlUsed = true
                 return false
             }
 
-            if (cbContentInfoIconUrl.isChecked &&
-                !URLValidator.isValidURL(contentInfoIconUrlInput.text.toString().trim())
+            if (cbContentInfoIconUrl.isChecked && !URLValidator.isValidURL(
+                    contentInfoIconUrlInput.text.toString().trim()
+                )
             ) {
                 isWrongUrlUsed = true
                 return false
@@ -637,7 +775,6 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
     }
 
     private fun saveData() {
-
         isMaximumIntegerValueMessageDisplayed = false
 
         if (isValidCustomisation()) {
@@ -660,6 +797,20 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
                 R.id.radio_countdown_style_progress -> CountdownStyle.PROGRESS
                 else -> CountdownStyle.TIMER
             }
+
+//            val learnMoreSize = when (bcLearnMoreSizeGroup.checkedRadioButtonId) {
+//                R.id.radio_learn_more_size_default -> LearnMoreSize.DEFAULT
+//                R.id.radio_learn_more_size_medium -> LearnMoreSize.MEDIUM
+//                R.id.radio_learn_more_size_large -> LearnMoreSize.LARGE
+//                else -> LearnMoreSize.DEFAULT
+//            }
+//
+//            val learnMoreLocation = when (bcLearnMoreLocationGroup.checkedRadioButtonId) {
+//                R.id.radio_learn_more_location_default -> LearnMoreLocation.DEFAULT
+//                R.id.radio_learn_more_location_bottom_down -> LearnMoreLocation.BOTTOM_DOWN
+//                R.id.radio_learn_more_location_bottom_up -> LearnMoreLocation.BOTTOM_UP
+//                else -> LearnMoreLocation.DEFAULT
+//            }
 
             val contentInfoIconClickAction =
                 when (contentInfoIconClickActionGroup.checkedRadioButtonId) {
@@ -695,61 +846,75 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
             }
 
             adCustomizationsManager = AdCustomizationsManager(
-                cbInitialAudio.isChecked,
-                getAudioStateInt(initialAudioState),
-                cbMraidExpand.isChecked,
-                mraidExpandSwitch.isChecked,
-                cbAutoClose.isChecked,
-                enableAutoCloseSwitch.isChecked,
-                cbEnableEndcard.isChecked,
-                enableEndcardSwitch.isChecked,
-                cbEnableCustomEndcard.isChecked,
-                enableCustomEndcardSwitch.isChecked,
-                cbEnableCustomEndcardDisplay.isChecked,
-                customEndCardDisplay,
-                cbInputNavigationMode.isChecked,
-                navigationModeInput.text.toString(),
-                cbLandingPage.isChecked,
-                landingPageSwitch.isChecked,
-                cbAutoCloseRewarded.isChecked,
-                enableAutoCloseSwitchRewarded.isChecked,
-                cbInputSkipOffset.isChecked,
-                htmlSkipOffsetInput.text.toString(),
-                cbInputVideoSkipOffset.isChecked,
-                videoSkipOffsetInput.text.toString(),
-                cbInputRewardedSkipOffset.isChecked,
-                rewardedHtmlSkipOffsetInput.text.toString(),
-                cbInputRewardedVideoSkipOffset.isChecked,
-                rewardedVideoSkipOffsetInput.text.toString(),
-                cbInputEndcardCloseButtonDelay.isChecked,
-                endCardCloseButtonDelayInput.text.toString(),
-                cbGroupClickBehaviour.isChecked,
-                clickBehaviour,
-                cbContentInfoUrl.isChecked,
-                contentInfoUrlInput.text.toString(),
-                cbContentInfoIconUrl.isChecked,
-                contentInfoIconUrlInput.text.toString(),
-                cbContentInfoIconClickAction.isChecked,
-                contentInfoIconClickAction,
-                cbContentInfoDisplay.isChecked,
-                contentInfoDisplay,
-                cbInputCloseButtonDelay.isChecked,
-                closeButtonDelayInput.text.toString(),
-                cbCountdownStyle.isChecked,
-                countdownStyle.name,
-                cbImpTracking.isChecked,
-                impTracking.text.toString(),
-                cbMinVisibilityTime.isChecked,
-                minVisibilityTime.text.toString(),
-                cbMinVisibilityPercent.isChecked,
-                minVisibilityPercent.text.toString(),
-                cbCustomCTAEnabled.isChecked,
-                enableCustomCTASwitch.isChecked,
-                cbInputCustomCTADelay.isChecked,
-                customCTADelay.text.toString(),
-                getCustomCtaTypeInt(),
-                enableReducedButtonsSwitch.isChecked,
-                cbEnableReducedButtons.isChecked
+                audioSettings = AudioSettings(
+                    enabled = cbInitialAudio.isChecked, value = getAudioStateInt(initialAudioState)
+                ), mraidSettings = MraidSettings(
+                    expandEnabled = cbMraidExpand.isChecked,
+                    expandValue = mraidExpandSwitch.isChecked
+                ), autoCloseSettings = AutoCloseSettings(
+                    interstitialEnabled = cbAutoClose.isChecked,
+                    interstitialValue = enableAutoCloseSwitch.isChecked,
+                    rewardedEnabled = cbAutoCloseRewarded.isChecked,
+                    rewardedValue = enableAutoCloseSwitchRewarded.isChecked
+                ), endCardSettings = EndCardSettings(
+                    enabled = cbEnableEndcard.isChecked,
+                    value = enableEndcardSwitch.isChecked,
+                    customEnabled = cbEnableCustomEndcard.isChecked,
+                    customValue = enableCustomEndcardSwitch.isChecked,
+                    customDisplayEnabled = cbEnableCustomEndcardDisplay.isChecked,
+                    customDisplayValue = customEndCardDisplay
+                ), navigationSettings = NavigationSettings(
+                    enabled = cbInputNavigationMode.isChecked,
+                    value = navigationModeInput.text.toString()
+                ), landingPageSettings = LandingPageSettings(
+                    enabled = cbLandingPage.isChecked, value = landingPageSwitch.isChecked
+                ), skipOffsetSettings = SkipOffsetSettings(
+                    html = cbInputSkipOffset.isChecked to htmlSkipOffsetInput.text.toString(),
+                    video = cbInputVideoSkipOffset.isChecked to videoSkipOffsetInput.text.toString(),
+                    playable = cbInputPlayableSkipOffset.isChecked to playableSkipOffsetInput.text.toString(),
+                    rewardedHtml = cbInputRewardedSkipOffset.isChecked to rewardedHtmlSkipOffsetInput.text.toString(),
+                    rewardedVideo = cbInputRewardedVideoSkipOffset.isChecked to rewardedVideoSkipOffsetInput.text.toString(),
+                    endCardCloseDelay = cbInputEndcardCloseButtonDelay.isChecked to endCardCloseButtonDelayInput.text.toString()
+                ), clickBehaviourSettings = ClickBehaviourSettings(
+                    enabled = cbGroupClickBehaviour.isChecked, value = clickBehaviour
+                ), contentInfoSettings = ContentInfoSettings(
+                    urlEnabled = cbContentInfoUrl.isChecked,
+                    urlValue = contentInfoUrlInput.text.toString(),
+                    iconUrlEnabled = cbContentInfoIconUrl.isChecked,
+                    iconUrlValue = contentInfoIconUrlInput.text.toString(),
+                    iconClickActionEnabled = cbContentInfoIconClickAction.isChecked,
+                    iconClickActionValue = contentInfoIconClickAction,
+                    displayEnabled = cbContentInfoDisplay.isChecked,
+                    displayValue = contentInfoDisplay
+                ), closeButtonSettings = CloseButtonSettings(
+                    enabled = cbInputCloseButtonDelay.isChecked,
+                    value = closeButtonDelayInput.text.toString()
+                ), countdownSettings = CountdownSettings(
+                    enabled = cbCountdownStyle.isChecked, value = countdownStyle.name
+                ),
+//                learnMoreSettings = LearnMoreSettings(
+//                    sizeEnabled = cbBcLearnMoreSize.isChecked,
+//                    sizeValue = learnMoreSize.name,
+//                    locationEnabled = cbBcLearnMoreLocation.isChecked,
+//                    locationValue = learnMoreLocation.name
+//                )
+                impressionTrackingSettings = ImpressionTrackingSettings(
+                    enabled = cbImpTracking.isChecked, value = impTracking.text.toString()
+                ), visibilitySettings = VisibilitySettings(
+                    minTimeEnabled = cbMinVisibilityTime.isChecked,
+                    minTimeValue = minVisibilityTime.text.toString(),
+                    minPercentEnabled = cbMinVisibilityPercent.isChecked,
+                    minPercentValue = minVisibilityPercent.text.toString()
+                ), customCtaSettings = CustomCtaSettings(
+                    enabled = cbCustomCTAEnabled.isChecked,
+                    enabledValue = enableCustomCTASwitch.isChecked,
+                    delayEnabled = cbInputCustomCTADelay.isChecked,
+                    delayEnabledValue = customCTADelay.text.toString(),
+                    typeValue = getCustomCtaTypeInt()
+                ), reducedButtonsSettings = ReducedButtonsSettings(
+                    enabled = cbEnableReducedButtons.isChecked,
+                    value = enableReducedButtonsSwitch.isChecked
+                )
             )
             prefs.setAdCustomizationData(adCustomizationsManager.toJson())
             prefs.setCustomEndCardHTML(
@@ -774,12 +939,9 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
                 ).show()
             } else {
                 Toast.makeText(
-                    requireActivity(),
-                    "Please fill mandatory fields above",
-                    Toast.LENGTH_SHORT
+                    requireActivity(), "Please fill mandatory fields above", Toast.LENGTH_SHORT
                 ).show()
             }
-
         }
     }
 

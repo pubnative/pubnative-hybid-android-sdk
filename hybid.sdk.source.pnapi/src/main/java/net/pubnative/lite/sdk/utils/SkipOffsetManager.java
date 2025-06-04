@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.utils;
 
 import java.util.ArrayList;
@@ -7,6 +11,7 @@ public class SkipOffsetManager {
     //All the below skip offsets are represented in seconds
     //TODO : Check the default values for interstitial and rewarded ads
 
+    private static final int PLAYABLE_SKIP_OFFSET = 5;
     private static final int NATIVE_CLOSE_BUTTON_DELAY = 15;
 
     private static final int REWARDED_HTML_SKIP_OFFSET = 30;
@@ -34,6 +39,13 @@ public class SkipOffsetManager {
 
     private static final int globalMaximumSkipOffset = 30;
 
+    public static Integer getPlayableSkipOffset(Integer remoteConfigSkipOffset) {
+        Integer skipOffset = remoteConfigSkipOffset;
+        if (remoteConfigSkipOffset == null || remoteConfigSkipOffset < 0 || remoteConfigSkipOffset > SkipOffsetManager.NATIVE_CLOSE_BUTTON_DELAY) {
+            skipOffset = SkipOffsetManager.PLAYABLE_SKIP_OFFSET;
+        }
+        return skipOffset;
+    }
 
     public static Integer getNativeCloseButtonDelay(Integer remoteConfigDelay) {
         Integer nativeCloseButtonDelay = remoteConfigDelay;

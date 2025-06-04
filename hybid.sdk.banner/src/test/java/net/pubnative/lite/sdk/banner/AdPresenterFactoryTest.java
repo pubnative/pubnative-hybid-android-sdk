@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.banner;
 
 import com.google.common.truth.Truth;
@@ -20,9 +24,6 @@ import org.robolectric.RobolectricTestRunner;
 
 import static org.mockito.MockitoAnnotations.initMocks;
 
-/**
- * Created by erosgarciaponte on 24.01.18.
- */
 @RunWith(RobolectricTestRunner.class)
 public class AdPresenterFactoryTest {
     @Mock

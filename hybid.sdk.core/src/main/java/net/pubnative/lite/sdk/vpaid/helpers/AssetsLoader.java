@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.vpaid.helpers;
 
 import android.content.Context;
@@ -97,8 +101,13 @@ public class AssetsLoader {
                 @Override
                 public void onError(PlayerInfo info) {
                     ErrorLog.postError(mContext, VastError.COMPANION);
-                    endCardFileIndex--;
-                    if (endCardFileIndex >= 0) {
+                    int endCardListSize = mAdParams.getEndCardList().size();
+                    if (endCardFileIndex >= endCardListSize) {
+                        endCardFileIndex = endCardListSize - 1;
+                    }
+                    if (endCardFileIndex >= 0 && endCardListSize > endCardFileIndex) {
+                        mAdParams.getEndCardList().remove(endCardFileIndex);
+                        endCardFileIndex--;
                         loadEndCard();
                     } else {
                         mListener.onAssetsLoaded(mVideoFilePath, null, null);

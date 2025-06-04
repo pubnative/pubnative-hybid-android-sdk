@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.demo.ui.fragments.hybid
 
 import android.os.Bundle
@@ -19,9 +23,6 @@ import net.pubnative.lite.sdk.mraid.utils.MraidCloseAdRepo
 import net.pubnative.lite.sdk.views.HyBidAdView
 import net.pubnative.lite.sdk.views.PNAdView
 
-/**
- * Created by erosgarciaponte on 30.01.18.
- */
 class HyBidStickyBannerFragment : Fragment(R.layout.fragment_sticky_top_bottom), PNAdView.Listener,
     RadioGroup.OnCheckedChangeListener, AdapterView.OnItemSelectedListener {
 

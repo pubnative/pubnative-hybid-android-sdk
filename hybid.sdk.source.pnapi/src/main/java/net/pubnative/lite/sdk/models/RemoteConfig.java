@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.models;
 
 public enum RemoteConfig {
@@ -33,7 +37,6 @@ public enum RemoteConfig {
     LANDING_PAGE("landing_page", Boolean.class),
     TOPICS_API_ENABLED("topics_api_enabled", Boolean.class),
     ATOM_ENABLED("atom_enabled", Boolean.class),
-
     PC_END_CARD_ENABLED("pc_endcardenabled", Boolean.class),
     PC_HTML_SKIP_OFFSET("pc_html_skip_offset", Integer.class),
     PC_VIDEO_SKIP_OFFSET("pc_video_skip_offset", Integer.class),
@@ -41,11 +44,13 @@ public enum RemoteConfig {
     PC_REWARDED_VIDEO_SKIP_OFFSET("pc_rewarded_video_skip_offset", Integer.class),
     PC_END_CARD_CLOSE_DELAY("pc_endcard_close_delay", Integer.class),
     PC_REDUCED_ICON_SIZES("pc_reduced_icon_sizes", Boolean.class),
-
     BC_VIDEO_SKIP_OFFSET("bc_video_skip_offset", Integer.class),
     BC_REWARDED_VIDEO_SKIP_OFFSET("bc_rewarded_video_skip_offset", Integer.class),
     BC_END_CARD_CLOSE_DELAY("bc_endcard_close_delay", Integer.class),
-    BC_HIDE_CONTROLS("bc_hide_controls", Boolean.class);
+    BC_HIDE_CONTROLS("bc_hide_controls", Boolean.class),
+    BC_LEARN_MORE_SIZE("bc_learn_more_size", String.class),
+    BC_LEARN_MORE_LOCATION("bc_learn_more_location", String.class),
+    PLAYABLE_SKIP_OFFSET("playable_skip_offset", Integer.class);
 
     public final String fieldName;
     public final Class<?> type;

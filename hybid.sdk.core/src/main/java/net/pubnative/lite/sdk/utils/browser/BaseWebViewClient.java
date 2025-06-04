@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.utils.browser;
 
 import android.annotation.TargetApi;
@@ -18,7 +22,6 @@ import net.pubnative.lite.sdk.utils.Logger;
 
 import java.util.List;
 import java.util.Locale;
-
 
 public class BaseWebViewClient extends WebViewClient {
     private static final String TAG = BaseWebViewClient.class.getName();

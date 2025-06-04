@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.demo.ui.fragments
 
 import android.net.Uri
@@ -13,7 +17,6 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.TreeMap
-
 
 class UrlInspectorFragment : Fragment(R.layout.fragment_url_inspector) {
     private lateinit var itemList: RecyclerView

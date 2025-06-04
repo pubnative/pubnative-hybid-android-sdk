@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.viewability;
 
 import android.webkit.WebView;
@@ -19,34 +23,29 @@ public class HyBidViewabilityWebAdSession extends HyBidViewabilityAdSession {
     }
 
     public void initAdSession(WebView webView, boolean isVideoAd) {
-        if (!viewabilityManager.isViewabilityMeasurementEnabled())
-            return;
+        if (!viewabilityManager.isViewabilityMeasurementEnabled()) return;
 
         try {
             String customReferenceData = "";
             String contentUrl = "";
-            AdSessionContext adSessionContext = AdSessionContext.createHtmlAdSessionContext(
-                    viewabilityManager.getPartner(), webView,
-                    contentUrl, customReferenceData);
+            AdSessionContext adSessionContext = AdSessionContext.createHtmlAdSessionContext(viewabilityManager.getPartner(), webView, contentUrl, customReferenceData);
 
             Owner owner = isVideoAd ? Owner.JAVASCRIPT : Owner.NATIVE;
 
-            AdSessionConfiguration adSessionConfiguration =
-                    AdSessionConfiguration.createAdSessionConfiguration(
-                            isVideoAd ? CreativeType.DEFINED_BY_JAVASCRIPT : CreativeType.HTML_DISPLAY,
-                            isVideoAd ? ImpressionType.DEFINED_BY_JAVASCRIPT : ImpressionType.BEGIN_TO_RENDER,
-                            owner,
-                            isVideoAd ? owner : Owner.NONE, false);
+            AdSessionConfiguration adSessionConfiguration = AdSessionConfiguration.createAdSessionConfiguration(isVideoAd ? CreativeType.DEFINED_BY_JAVASCRIPT : CreativeType.HTML_DISPLAY, isVideoAd ? ImpressionType.DEFINED_BY_JAVASCRIPT : ImpressionType.BEGIN_TO_RENDER, owner, isVideoAd ? owner : Owner.NONE, false);
 
+            if (adSessionConfiguration == null || adSessionContext == null) {
+                Logger.e(TAG, "AdSessionConfiguration or AdSessionContext is null!");
+                return;
+            }
 
             mAdSession = AdSession.createAdSession(adSessionConfiguration, adSessionContext);
             mAdSession.registerAdView(webView);
             createAdEvents();
             mAdSession.start();
-
         } catch (IllegalArgumentException e) {
             Logger.e("", e.getMessage());
-        } catch (NullPointerException exception) {
+        } catch (ClassCastException | NullPointerException exception) {
             Logger.e(TAG, "OM SDK Ad Session - Exception", exception);
         }
     }

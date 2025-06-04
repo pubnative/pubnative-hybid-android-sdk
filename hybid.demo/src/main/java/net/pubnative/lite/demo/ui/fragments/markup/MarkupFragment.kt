@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.demo.ui.fragments.markup
 
 import android.content.Intent
@@ -9,7 +13,6 @@ import android.view.View
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
@@ -223,7 +226,6 @@ class MarkupFragment : Fragment(R.layout.fragment_markup), OnLogDisplayListener,
 
         adapter = MarkupAdapter(this, this)
         markupList.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
-        markupList.itemAnimator = DefaultItemAnimator()
         markupList.adapter = adapter
     }
 

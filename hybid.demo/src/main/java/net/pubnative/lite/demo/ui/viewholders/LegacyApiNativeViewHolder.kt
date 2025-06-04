@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.demo.ui.viewholders
 
 import android.view.View
@@ -55,8 +59,9 @@ class LegacyApiNativeViewHolder(itemView: View, val mListener: OnLogDisplayListe
             adTitle.text = ad.title
             adDescription.text = ad.description
             adCallToAction.text = ad.callToActionText
-            adChoices.addView(ad.getContentInfo(itemView.context))
-
+            itemView.context?.let {
+                adChoices.addView(ad.getContentInfo(itemView.context))
+            }
             val rating = ad.rating.toFloat()
             adRating.rating = rating
 

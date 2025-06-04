@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.vpaid;
 
 import android.content.Context;
@@ -5,7 +9,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 
-import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.AdAudioStateManager;
@@ -26,7 +29,6 @@ public class VideoAd extends BaseVideoAd {
 
     private boolean mIsAdStarted = false;
 
-    VastActivityInteractor vastActivityInteractor;
     public VideoAd(Context context, Ad ad, boolean isInterstitial, boolean isFullscreen,
                    AdPresenter.ImpressionListener impressionListener) throws Exception {
         super(context, ad, isInterstitial, isFullscreen, impressionListener, null);
@@ -63,7 +65,6 @@ public class VideoAd extends BaseVideoAd {
     public void show() {
 
         Handler handler = new Handler(Looper.getMainLooper());
-        vastActivityInteractor = VastActivityInteractor.getInstance();
 
         handler.postDelayed(new Runnable() {
             @Override
@@ -71,15 +72,7 @@ public class VideoAd extends BaseVideoAd {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        boolean isDependentOnActivityLifecycle = vastActivityInteractor.isDependentOnActivityLifecycle();
-
-                        if (isDependentOnActivityLifecycle) {
-                            if (vastActivityInteractor.isActivityVisible()) {
-                                showAd();
-                            }
-                        } else {
-                            showAd();
-                        }
+                        showAd();
                     }
 
                     private void showAd() {
