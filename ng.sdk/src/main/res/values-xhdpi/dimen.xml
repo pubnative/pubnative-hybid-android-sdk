@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="replay_view_size">40dp</dimen>
+    <dimen name="close_view_size">40dp</dimen>
+    <dimen name="mute_view_size">40dp</dimen>
+    <dimen name="skip_view_size">40dp</dimen>
+    <dimen name="cta_font_size">18sp</dimen>
+
+    <!-- Margins for location -->
+    <dimen name="learn_more_margin_default">8dp</dimen>
+    <dimen name="learn_more_bottom_down_margin_bottom">8dp</dimen>
+    <dimen name="learn_more_bottom_down_margin_end">16dp</dimen>
+    <dimen name="learn_more_bottom_up_margin_bottom">160dp</dimen>
+    <dimen name="learn_more_bottom_up_margin_end">16dp</dimen>
+
+    <!-- Padding and Text Sizes for sizes -->
+    <!-- DEFAULT -->
+    <dimen name="learn_more_default_padding_start">0dp</dimen>
+    <dimen name="learn_more_default_padding_top">8dp</dimen>
+    <dimen name="learn_more_default_padding_end">8dp</dimen>
+    <dimen name="learn_more_default_padding_bottom">8dp</dimen>
+    <dimen name="learn_more_default_text_size">16sp</dimen>
+
+    <!-- MEDIUM -->
+    <dimen name="learn_more_medium_padding_start">30dp</dimen>
+    <dimen name="learn_more_medium_padding_top">12dp</dimen>
+    <dimen name="learn_more_medium_padding_end">0dp</dimen>
+    <dimen name="learn_more_medium_padding_bottom">12dp</dimen>
+    <dimen name="learn_more_medium_text_size">18sp</dimen>
+    <dimen name="learn_more_icon_medium_padding_start">10dp</dimen>
+    <dimen name="learn_more_icon_medium_padding_top">10dp</dimen>
+    <dimen name="learn_more_icon_medium_padding_end">0dp</dimen>
+    <dimen name="learn_more_icon_medium_padding_bottom">8dp</dimen>
+
+    <!-- LARGE -->
+    <dimen name="learn_more_large_padding_start">36dp</dimen>
+    <dimen name="learn_more_large_padding_top">16dp</dimen>
+    <dimen name="learn_more_large_padding_end">0dp</dimen>
+    <dimen name="learn_more_large_padding_bottom">16dp</dimen>
+    <dimen name="learn_more_large_text_size">22sp</dimen>
+    <dimen name="learn_more_icon_large_padding_start">16dp</dimen>
+    <dimen name="learn_more_icon_large_padding_top">14dp</dimen>
+    <dimen name="learn_more_icon_large_padding_end">6dp</dimen>
+    <dimen name="learn_more_icon_large_padding_bottom">12dp</dimen>
+</resources>

@@ -15,48 +15,183 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.android.tools.build:gradle:7.4.2"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
-        classpath "com.android.tools:r8:8.7.18"
+        classpath "com.android.tools.build:gradle:8.9.0"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.21"
+        classpath "org.jetbrains.kotlin:kotlin-serialization:2.1.21"
+        classpath "com.android.tools:r8:8.9.35"
         classpath 'net.saliman:gradle-cobertura-plugin:4.0.0'
-
         classpath 'com.google.firebase:firebase-appdistribution-gradle:5.1.1'
-        classpath 'com.google.firebase:perf-plugin:1.4.2'  // Performance Monitoring plugin
+        classpath 'com.google.firebase:perf-plugin:1.4.2'
         classpath 'com.google.gms:google-services:4.4.2'
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9'
-        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.33.22'
+        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:5.2.5'
     }
 }
 
+plugins {
+    id "org.sonarqube" version "4.4.1.3373"
+    id 'jacoco'
+}
+
+apply plugin: 'jacoco'
+
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+configurations {
+    jacocoAnt
+}
+
+dependencies {
+    jacocoAnt "org.jacoco:org.jacoco.ant:${jacoco.toolVersion}"
+}
+
+tasks.register("jacocoTestReport", JacocoReport) {
+    group = "verification"
+    description = "Generates aggregated JaCoCo coverage report for debug unit tests"
+
+    dependsOn subprojects.collect { it.tasks.matching { it.name == 'testDebugUnitTest' } }
+
+    jacocoClasspath = configurations.jacocoAnt
+
+    def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*', '**/*Test*.*', '**/module-info.class', 'android/**/*.*']
+    def classDirs = files()
+    def srcDirs = files()
+    def execDataFiles = files()
+
+    def includedProjects = subprojects.findAll { it.name != "atom.demo" }
+
+    includedProjects.each { subproject ->
+        def javaDebugDir = "${subproject.buildDir}/intermediates/javac/debug/classes"
+        def legacyJavaDir = "${subproject.buildDir}/intermediates/classes/debug"
+        def kotlinDebugDir = "${subproject.buildDir}/tmp/kotlin-classes/debug"
+
+        def subprojectClassDirs = []
+
+        if (file(javaDebugDir).exists()) {
+            println "✅ Java classes found in: $javaDebugDir"
+            subprojectClassDirs += fileTree(dir: javaDebugDir, excludes: fileFilter)
+        }
+        if (file(legacyJavaDir).exists()) {
+            println "✅ Java legacy classes found in: $legacyJavaDir"
+            subprojectClassDirs += fileTree(dir: legacyJavaDir, excludes: fileFilter)
+        }
+        if (file(kotlinDebugDir).exists()) {
+            println "✅ Kotlin classes found in: $kotlinDebugDir"
+            subprojectClassDirs += fileTree(dir: kotlinDebugDir, excludes: fileFilter)
+        }
+
+        if (subprojectClassDirs.isEmpty()) {
+            println "⚠️  No class files found for ${subproject.name}"
+        }
+
+        classDirs += files(subprojectClassDirs)
+        srcDirs += fileTree(dir: "${subproject.projectDir}/src/main/java")
+        srcDirs += fileTree(dir: "${subproject.projectDir}/src/main/kotlin")
+
+        execDataFiles += fileTree(dir: subproject.buildDir, includes: [
+                "jacoco/testDebugUnitTest.exec",
+                "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec"
+        ])
+    }
+
+    classDirectories.setFrom(classDirs)
+    sourceDirectories.setFrom(srcDirs)
+    executionData.setFrom(execDataFiles)
+
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+        xml.outputLocation = file("$buildDir/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
+        html.outputLocation = file("$buildDir/reports/jacoco/jacocoTestReport/html")
+    }
+
+    doLast {
+        println "📂 Execution data files:"
+        executionData.files.each { println " - " + it }
+        println "📂 Class directories:"
+        classDirectories.files.each { println " - " + it }
+        if (!executionData.files.any { it.exists() }) {
+            println "⚠️  WARNING: No JaCoCo .exec files found. Coverage report will be empty."
+        } else {
+            println "✅ JaCoCo coverage report generated: $buildDir/reports/jacoco/jacocoTestReport"
+        }
+    }
+}
+
+gradle.taskGraph.whenReady {
+    if (tasks.findByName("sonarqube") != null) {
+        tasks.named("sonarqube") {
+            dependsOn jacocoTestReport
+        }
+    }
+}
+
+
+subprojects {
+    afterEvaluate { project ->
+        if (project.plugins.hasPlugin("com.android.library") || project.plugins.hasPlugin("com.android.application")) {
+            project.android {
+                buildTypes {
+                    debug {
+                        testCoverageEnabled = true
+                    }
+                }
+            }
+        }
+    }
+
+    tasks.withType(Test).configureEach {
+        testLogging {
+            events "passed", "skipped", "failed"
+            exceptionFormat "full"
+            showStandardStreams = true
+        }
+    }
+}
+
+sonarqube {
+    properties {
+        property "sonar.sources", "hybid.sdk/src/main/java,hybid.sdk/src/main/kotlin"
+        property "sonar.tests", "hybid.sdk/src/test/java,hybid.sdk/src/test/kotlin"
+        property "sonar.java.binaries", "hybid.sdk/build/intermediates/javac/debug,hybid.sdk/build/tmp/kotlin-classes/debug"
+        property "sonar.coverage.jacoco.xmlReportPaths", "hybid.sdk/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+        property "sonar.coverage.exclusions", "**/testutils/**,**/*Mock*.java"
+    }
+}
+
+// Global properties
 subprojects {
     ext {
         branchName = null
-        if (System.getenv("CIRCLE_BRANCH") != null) {
-            branchName = "${System.getenv("CIRCLE_BRANCH")}"
+        if (System.getenv("GITHUB_REF_NAME") != null) {
+            branchName = "${System.getenv("GITHUB_REF_NAME")}"
         }
 
         buildNumber = null
-        if (System.getenv("CIRCLE_BUILD_NUM") != null) {
-            buildNumber = "${System.getenv("CIRCLE_BUILD_NUM")}"
+        if (System.getenv("GITHUB_RUN_NUMBER") != null) {
+            buildNumber = "${System.getenv("GITHUB_RUN_NUMBER")}"
         }
 
         min_android_api = 21
         android_api = 34
-        android_build_tools = '34.0.0'
+        android_build_tools = '35.0.0'
         omid_version = '1.5.1'
         atom_version = '3.6.1'
     }
-    version = "3.6.0"
+    version = "3.6.1"
     group = "net.pubnative"
 }
 
+// Common repositories
 allprojects {
     repositories {
         google()
         mavenCentral()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-        maven { url 'https://verve.jfrog.io/artifactory/verve-gradle-dev-local' }
+        maven { url 'https://verve.jfrog.io/artifactory/verve-gradle-dev' }
         maven { url 'https://verve.jfrog.io/artifactory/verve-gradle-release' }
         maven { url 'https://s3.amazonaws.com/smaato-sdk-releases/'}
         maven { url 'https://android-sdk.is.com/' }
@@ -66,6 +201,49 @@ allprojects {
     }
 }
 
-task clean(type: Delete) {
+tasks.register('clean', Delete) {
     delete rootProject.buildDir
+}
+
+/**
+ * Custom Gradle task to iterate through subprojects and check their package names.
+ * It move packages from subprojects 'nextgen' directory to root ng.sdk project
+ */
+
+tasks.register('moveNextgenDirectoriesFilesToNgSdkProject') {
+    doLast {
+        println "--- Starting movePackagesToNgSdkProject ---"
+        def destinationDir = project(':ng.sdk').file('src/main/java')
+
+        // Iterate through all subprojects defined in settings.gradle
+        subprojects.each { project ->
+            def packageName = ""
+            def isLibraryProject = false
+
+            // Check if the project applies an Android library plugin
+            if (project.plugins.hasPlugin('com.android.library')) {
+                isLibraryProject = true
+                // For Android library modules, the package name is typically the namespace
+                packageName = project.android.namespace
+            }
+
+            // Process only if it's an Android project and a package name was found
+            if (isLibraryProject && packageName) {
+
+                // Check if the package name contains the specified text
+                if (packageName.contains('net.pubnative.lite.sdk')) {
+                    def flavourSourceDir = project.file('src/nextgen/java')
+                    if (flavourSourceDir.exists() && flavourSourceDir.isDirectory()) {
+                        copy {
+                            from flavourSourceDir
+                            into destinationDir
+                        }
+                        //delete flavourSourceDir after copying
+                        flavourSourceDir.deleteDir()
+                    }
+                }
+            }
+        }
+        println "--- movePackagesToNgSdkProject Complete ---"
+    }
 }

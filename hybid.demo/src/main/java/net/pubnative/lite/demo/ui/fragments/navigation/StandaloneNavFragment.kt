@@ -106,6 +106,7 @@ class StandaloneNavFragment : Fragment(R.layout.fragment_nav_standalone) {
             intent.putExtra(Constants.IntentParams.ZONE_ID, zoneId)
             startActivity(intent)
         }
+
         enableZones()
     }
 

@@ -1,0 +1,26 @@
+name: Setup Gradle
+description: Setup Gradle build environment (checkout, JDK, caching, permissions)
+runs:
+  using: "composite"
+  steps:
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Grant execute permission for gradlew
+      shell: bash
+      run: chmod +x ./gradlew
+
+    - name: Setup Gradle cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+          ~/.gradle
+          ~/.m2
+        key: ${{ runner.os }}-gradle-${{ hashFiles('./gradle/wrapper/gradle-wrapper.properties', 'build.gradle', './hybid.sdk/build.gradle') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-

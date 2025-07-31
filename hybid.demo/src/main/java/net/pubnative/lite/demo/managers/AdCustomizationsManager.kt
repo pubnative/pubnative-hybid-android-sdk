@@ -21,7 +21,7 @@ data class AdCustomizationsManager(
     val contentInfoSettings: ContentInfoSettings?,
     val closeButtonSettings: CloseButtonSettings?,
     val countdownSettings: CountdownSettings?,
-//    val learnMoreSettings: LearnMoreSettings?,
+    val learnMoreSettings: LearnMoreSettings?,
     val impressionTrackingSettings: ImpressionTrackingSettings?,
     val visibilitySettings: VisibilitySettings?,
     val customCtaSettings: CustomCtaSettings?,
@@ -117,13 +117,13 @@ data class CountdownSettings(
     var value: String
 )
 
-//@Serializable
-//data class LearnMoreSettings(
-//    var sizeEnabled: Boolean,
-//    var sizeValue: String,
-//    var locationEnabled: Boolean,
-//    var locationValue: String
-//)
+@Serializable
+data class LearnMoreSettings(
+    var sizeEnabled: Boolean,
+    var sizeValue: String,
+    var locationEnabled: Boolean,
+    var locationValue: String
+)
 
 @Serializable
 data class ImpressionTrackingSettings(

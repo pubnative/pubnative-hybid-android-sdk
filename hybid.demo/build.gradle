@@ -2,12 +2,13 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-parcelize'
-    //id 'com.fyber.fairbid-sdk-plugin' version '3.54.0'
+    //id 'com.fyber.fairbid-sdk-plugin' version '3.58.0'
     id 'com.google.firebase.appdistribution'
     id 'com.google.firebase.firebase-perf'
     id 'com.google.firebase.crashlytics'
     id 'com.google.gms.google-services'
     id 'org.jetbrains.kotlin.plugin.serialization'
+    id 'jacoco'
 }
 
 android {
@@ -17,7 +18,7 @@ android {
         applicationId "net.pubnative.lite.demo"
         minSdkVersion min_android_api
         targetSdkVersion android_api
-        versionCode System.getenv("CIRCLE_BUILD_NUM") ? System.getenv("CIRCLE_BUILD_NUM").toInteger() : 1
+        versionCode System.getenv("GITHUB_RUN_NUMBER") ? System.getenv("GITHUB_RUN_NUMBER").toInteger() : 1
         versionName project.version
         multiDexEnabled true
 
@@ -38,7 +39,7 @@ android {
             minifyEnabled false
             firebaseAppDistribution {
                 appId = "1:786277539067:android:6bb4032ad6f571ab"
-                artifactPath = "/root/hybid.sdk/hybid.demo/build/outputs/apk/debug/hybid.demo-debug.apk"
+                artifactPath = "hybid.demo/build/outputs/apk/debug/hybid.demo-debug.apk"
                 artifactType = "APK"
             }
             buildConfigField "String", "BASE_URL", "\"https://api.pubnative.net/\""
@@ -48,8 +49,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     buildFeatures {
@@ -61,7 +62,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     lint {
@@ -91,16 +92,6 @@ dependencies {
 
     //Hybid SDK modules
     implementation project(':hybid.sdk')
-    implementation project(':hybid.sdk.native')
-    implementation project(':hybid.sdk.core')
-    implementation project(':hybid.sdk.fullscreen')
-    implementation project(':hybid.sdk.banner')
-    implementation project(':hybid.sdk.rewarded')
-    implementation project(':hybid.sdk.reporting')
-    implementation project(':hybid.sdk.viewability')
-    implementation project(':hybid.sdk.logger')
-    implementation project(':hybid.sdk.source.pnapi')
-    implementation project(':hybid.sdk.topicsapi')
 
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
@@ -127,7 +118,7 @@ dependencies {
     implementation 'androidx.vectordrawable:vectordrawable:1.2.0'
     implementation 'com.google.android.ump:user-messaging-platform:3.2.0'
 
-    implementation platform('com.google.firebase:firebase-bom:33.6.0')
+    implementation platform('com.google.firebase:firebase-bom:33.7.0')
     implementation 'com.google.firebase:firebase-perf'
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
@@ -137,14 +128,56 @@ dependencies {
     // coroutine
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
+    implementation 'androidx.activity:activity:1.9.3'
 
     testImplementation 'com.google.truth:truth:1.1.3'
     testImplementation 'org.mockito:mockito-core:4.5.1'
+    testImplementation 'org.mockito:mockito-inline:4.5.1'
 
     implementation("com.onetrust.cmp:native-sdk:202309.1.0.0") {
         exclude group: 'androidx.appcompat'
         exclude group: 'androidx.constraintlayout'
         exclude group: 'com.google.android.material'
         exclude group: 'com.google.android.gms'
+    }
+}
+
+
+//--------------------------------------------------------------------------------------------------
+// JACOCO COVERAGE
+//--------------------------------------------------------------------------------------------------
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+tasks.register("jacocoTestReport", JacocoReport) {
+    dependsOn 'testDebugUnitTest'
+
+    reports {
+        xml.required = true
+        html.required = true
+    }
+
+    def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*']
+    def debugTree = fileTree(dir: "$buildDir/intermediates/javac/debug", excludes: fileFilter)
+    def kotlinDebugTree = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug", excludes: fileFilter)
+
+    sourceDirectories.setFrom(files(["src/main/java"]))
+    classDirectories.setFrom(files([debugTree, kotlinDebugTree]))
+    executionData.setFrom(fileTree(dir: buildDir, includes: [
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec"
+    ]))
+}
+
+tasks.withType(Test).configureEach {
+    jacoco {
+        includeNoLocationClasses = true
+        excludes = ['jdk.internal.*']
+    }
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat = 'full'
+        showStandardStreams = true
     }
 }

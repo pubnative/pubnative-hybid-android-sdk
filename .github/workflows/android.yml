@@ -1,0 +1,363 @@
+# This GitHub Actions workflow
+# Includes jobs for running unit tests, lint checks, sending coverage reports,
+# storing build artifacts, deploying to Firebase App Distribution, and publishing to Artifactory.
+
+name: HyBid SDK CI
+
+on:
+  # Run on push to any branch
+  push:
+    branches: ['*']
+
+  # Run on PRs only when targeting these specific branches
+  pull_request:
+    branches:
+      - master
+      - beta
+      - beta-rc
+      - beta-atom
+      - development
+
+jobs:
+  lint-check:
+    name: Android Lint Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Gradle
+        uses: ./.github/actions/gradle-setup
+
+      - name: Run Android Lint
+        run: ./gradlew lint
+
+      - name: Upload Lint Report (Optional)
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report
+          path: hybid.demo/build/reports/lint-results-debug.html
+
+  unit-tests:
+    name: Run Unit Tests
+    needs: lint-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Gradle
+        uses: ./.github/actions/gradle-setup
+
+      - name: Run Unit Tests
+        run: ./gradlew test
+
+      - name: Upload Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: ./hybid.sdk/build/reports/
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: ./hybid.sdk/build/test-results/
+
+  build_store_artifact:
+    name: Build And Store Debug Artifact
+    needs: unit-tests
+    # Only run this job for push on master, development OR start with beta, release
+    if: github.ref_name == 'master' || github.ref_name == 'development' || startsWith(github.ref_name, 'beta/') || startsWith(github.ref_name, 'release/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Gradle
+        uses: ./.github/actions/gradle-setup
+
+      - name: Clean Project
+        run: ./gradlew clean
+
+      - name: Build Project
+        run: ./gradlew build
+
+      - name: Assemble Debug APK
+        run: ./gradlew assembleDebug
+
+      # Upload the debug APK as an artifact.
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-apk
+          path: ./hybid.demo/build/outputs/apk/debug/hybid.demo-debug.apk
+
+  deploy_firebase:
+    name: Deploy Test App to Firebase
+    runs-on: ubuntu-latest
+    needs: build_store_artifact
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Gradle
+        uses: ./.github/actions/gradle-setup
+
+      - name: Create service account key file
+        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > ${{ github.workspace }}/service-account-key.json
+
+      # Download the pre-built APK from the previous job
+      - name: Download Debug APK
+        uses: actions/download-artifact@v4
+        with:
+          name: debug-apk
+          path: ./hybid.demo/build/outputs/apk/debug/
+
+      # Run Gradle tasks directly for Firebase App Distribution.
+      - name: Upload to App Distribution
+        run: ./gradlew appDistributionUploadDebug
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/service-account-key.json
+
+      # Slack notification for Firebase App Distribution success
+      - name: Notify Firebase Success
+        if: success()
+        uses: ./.github/actions/slack-notification
+        with:
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          channel: ${{ secrets.SLACK_CHANNEL }}
+          release_env: "firebase"
+          status: "success"
+          message: "🚀 ✅ HyBid Demo App Android - Firebase Deployment Successful:tada:"
+          repository: ${{ github.repository }}
+          branch: ${{ github.ref_name }}
+          commit_sha: ${{ github.sha }}
+          run_id: ${{ github.run_id }}
+
+      # Slack notification for Firebase App Distribution failure
+      - name: Notify Firebase Failure
+        if: failure()
+        uses: ./.github/actions/slack-notification
+        with:
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          channel: ${{ secrets.SLACK_CHANNEL }}
+          release_env: "firebase"
+          status: "failure"
+          message: "❌ HyBid Demo App Android - Firebase Deployment Failed"
+          repository: ${{ github.repository }}
+          branch: ${{ github.ref_name }}
+          commit_sha: ${{ github.sha }}
+          run_id: ${{ github.run_id }}
+
+  publish_to_jfrog_dev:
+    name: Publish build to JFROG Development
+    runs-on: ubuntu-latest
+    needs: build_store_artifact
+
+    environment:
+      name: development
+      url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Gradle
+        uses: ./.github/actions/gradle-setup
+
+      # Publish to Artifactory using the Gradle task directly Excluding NG SDK Namespaced module
+      - name: Publish Artifactory to JFROG verve-gradle-dev-local repository
+        run: ./gradlew artifactoryPublish -x :ng.sdk:artifactoryPublish
+        env:
+          ARTIFACTORY_CONTEXT_URL: ${{ vars.ARTIFACTORY_CONTEXT_URL }}
+          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+          ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+          ARTIFACTORY_REPOKEY: ${{ vars.ARTIFACTORY_REPOKEY }}
+
+      # Slack notification for JFrog success
+      - name: Notify JFrog Success
+        if: success()
+        uses: ./.github/actions/slack-notification
+        with:
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          channel: ${{ secrets.SLACK_CHANNEL }}
+          release_env: "jfrog"
+          status: "success"
+          message: "🚀 ✅ HyBid SDK Android - Jfrog Deployment Successful:tada:"
+          repository: ${{ github.repository }}
+          branch: ${{ github.ref_name }}
+          commit_sha: ${{ github.sha }}
+          run_id: ${{ github.run_id }}
+
+      # Slack notification for JFrog failure
+      - name: Notify JFrog Failure
+        if: failure()
+        uses: ./.github/actions/slack-notification
+        with:
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          channel: ${{ secrets.SLACK_CHANNEL }}
+          release_env: "jfrog"
+          status: "failure"
+          message: "❌ HyBid SDK Android - Jfrog Deployment Failed"
+          repository: ${{ github.repository }}
+          branch: ${{ github.ref_name }}
+          commit_sha: ${{ github.sha }}
+          run_id: ${{ github.run_id }}
+
+  create_verve_namespaced_build_and_publish_s3_test_bucket:
+    name: Create Verve NG SDK Namespaced build and publish to S3 Test Bucket
+    runs-on: ubuntu-latest
+    needs: publish_to_jfrog_dev
+    permissions:
+      id-token: write
+      contents: read
+
+    environment:
+      name: development
+      url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Gradle
+        uses: ./.github/actions/gradle-setup
+
+      - name: Clean Project
+        run: ./gradlew clean
+
+      - name: Build Project
+        run: ./gradlew build
+
+      - name: Repackage SDK Modules into Nextgen directory
+        run: ./gradlew repackageNG
+
+      - name: Move Nextgen directory and files to root level NG SDK Project
+        run: ./gradlew moveNextgenDirectoriesFilesToNgSdkProject
+
+      - name: Correct import statements in to NG SDK Project
+        run: ./gradlew :ng.sdk:correctNgSdkImportStatements
+
+      - name: Clean NG SDK Project
+        run: ./gradlew :ng.sdk:clean
+
+      - name: Assemble NG SDK Project
+        run: ./gradlew :ng.sdk:assemble
+
+      - name: Configure AWS Credentials (Development)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_TEST_BUCKET }}
+          aws-region: us-east-1
+
+      # Publish NG SDK Namespaced libraries to Artifactory using the Gradle task directly.
+      - name: Upload to Development S3
+        run: ./gradlew :ng.sdk:publishReleasePublicationToDevelopmentRepository
+
+  publish_to_jfrog_prod:
+    name: Publish build to JFROG Production
+    runs-on: ubuntu-latest
+    # Only run this job for push on master OR start with release
+    if: github.ref_name == 'master' || startsWith(github.ref_name, 'release/')
+    needs: build_store_artifact
+
+    environment:
+      name: production
+      url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Gradle
+        uses: ./.github/actions/gradle-setup
+
+      # Publish to Artifactory using the Gradle task directly Excluding NG SDK Namespaced module
+      - name: Publish Artifactory to JFROG verve-gradle-release-local repository
+        run: ./gradlew artifactoryPublish -x :ng.sdk:artifactoryPublish
+        env:
+          ARTIFACTORY_CONTEXT_URL: ${{ vars.ARTIFACTORY_CONTEXT_URL }}
+          ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+          ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+          ARTIFACTORY_REPOKEY: ${{ vars.ARTIFACTORY_REPOKEY }}
+
+      # Slack notification for JFrog success
+      - name: Notify JFrog Success
+        if: success()
+        uses: ./.github/actions/slack-notification
+        with:
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          channel: ${{ secrets.SLACK_CHANNEL }}
+          release_env: "jfrog"
+          status: "success"
+          message: "🚀 ✅ HyBid SDK Android - Jfrog Deployment Successful:tada:"
+          repository: ${{ github.repository }}
+          branch: ${{ github.ref_name }}
+          commit_sha: ${{ github.sha }}
+          run_id: ${{ github.run_id }}
+
+      # Slack notification for JFrog failure
+      - name: Notify JFrog Failure
+        if: failure()
+        uses: ./.github/actions/slack-notification
+        with:
+          webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          channel: ${{ secrets.SLACK_CHANNEL }}
+          release_env: "jfrog"
+          status: "failure"
+          message: "❌ HyBid SDK Android - Jfrog Deployment Failed"
+          repository: ${{ github.repository }}
+          branch: ${{ github.ref_name }}
+          commit_sha: ${{ github.sha }}
+          run_id: ${{ github.run_id }}
+
+  create_verve_namespaced_build_and_publish_s3_production_bucket:
+    name: Create Verve NG SDK Namespaced build and publish to S3 Production Bucket
+    runs-on: ubuntu-latest
+    needs: publish_to_jfrog_prod
+    permissions:
+      id-token: write
+      contents: read
+
+    environment:
+      name: production
+      url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Gradle
+        uses: ./.github/actions/gradle-setup
+
+      - name: Clean Project
+        run: ./gradlew clean
+
+      - name: Build Project
+        run: ./gradlew build
+
+      - name: Repackage SDK Modules into Nextgen directory
+        run: ./gradlew repackageNG
+
+      - name: Move Nextgen directory and files to root level NG SDK Project
+        run: ./gradlew moveNextgenDirectoriesFilesToNgSdkProject
+
+      - name: Correct import statements in to NG SDK Project
+        run: ./gradlew :ng.sdk:correctNgSdkImportStatements
+
+      - name: Clean NG SDK Project
+        run: ./gradlew :ng.sdk:clean
+
+      - name: Assemble NG SDK Project
+        run: ./gradlew :ng.sdk:assemble
+
+      - name: Configure AWS Credentials (Production)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_PROD_BUCKET }}
+          aws-region: us-east-1
+
+      # Publish NG SDK Namespaced libraries to Artifactory using the Gradle task directly.
+      - name: Upload to Production S3
+        run: ./gradlew :ng.sdk:publishReleasePublicationToProductionRepository

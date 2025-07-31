@@ -1,0 +1,160 @@
+name: SonarCloud-hybid.sdk
+
+on:
+  push:
+    branches:
+      - development
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  sonarqube-hybid-sdk:
+    name: SonarCloud – hybid.sdk only
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*','**/gradle-wrapper.properties') }}
+
+      - name: Generate debug keystore
+        run: |
+          mkdir -p ~/.android
+          keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android \
+            -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
+
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
+
+      - name: Run Tests, Compile & Generate Coverage for hybid.sdk
+        run: |
+          ./gradlew :hybid.sdk:clean :hybid.sdk:testDebugUnitTest \
+            :hybid.sdk:assembleDebug :hybid.sdk:jacocoTestReport \
+            --no-daemon --no-build-cache --stacktrace
+
+      - name: Upload hybid.sdk Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: hybid-sdk-jacoco-report
+          path: hybid.sdk/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+
+      - name: Extract and Count Test Stats for hybid.sdk
+        id: test-summary
+        run: |
+          set -e
+          echo "📦 Listing test result files:"
+          find hybid.sdk/build/test-results/testDebugUnitTest -name "TEST-*.xml"
+
+          ROBO_CLASSES=()
+          UNIT_CLASSES=()
+          ROBO_METHODS=0
+          UNIT_METHODS=0
+
+          for file in $(find hybid.sdk/src/test/java -name "*.java"); do
+            cls="${file#hybid.sdk/src/test/java/}"
+            cls="${cls%.java}"
+            cls="${cls//\//.}"
+            if grep -q "@RunWith(RobolectricTestRunner.class)" "$file"; then
+              ROBO_CLASSES+=("$cls")
+            else
+              UNIT_CLASSES+=("$cls")
+            fi
+          done
+
+          for cls in "${ROBO_CLASSES[@]:-}"; do
+            c=$(grep -c "<testcase" hybid.sdk/build/test-results/testDebugUnitTest/TEST-${cls}.xml 2>/dev/null || echo 0)
+            ROBO_METHODS=$((ROBO_METHODS + c))
+          done
+          for cls in "${UNIT_CLASSES[@]:-}"; do
+            c=$(grep -c "<testcase" hybid.sdk/build/test-results/testDebugUnitTest/TEST-${cls}.xml 2>/dev/null || echo 0)
+            UNIT_METHODS=$((UNIT_METHODS + c))
+          done
+
+          echo "robolectric_methods=$ROBO_METHODS" >> $GITHUB_OUTPUT
+          echo "unit_methods=$UNIT_METHODS" >> $GITHUB_OUTPUT
+
+      - name: 💬 Post hybid.sdk Test Summary Comment
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## ✅ hybid.sdk Test Execution Summary
+
+            | Test Type     | Method Count |
+            |---------------|--------------|
+            | Robolectric   | ${{ steps.test-summary.outputs.robolectric_methods }} |
+            | Unit Tests    | ${{ steps.test-summary.outputs.unit_methods }} |
+
+            📄 [JaCoCo Coverage Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts)
+
+      - name: SonarCloud PR Analysis for hybid.sdk
+        if: github.event_name == 'pull_request'
+        uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          projectBaseDir: hybid.sdk
+          args: >
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.projectKey=vervegroup_pubnative-hybid-android-sdk-private
+            -Dsonar.organization=verve
+            -Dsonar.projectVersion=pr-${{ github.event.pull_request.number }}-${{ github.run_number }}
+            -Dsonar.sources=src/main/java
+            -Dsonar.tests=src/test/java
+            -Dsonar.java.binaries=build/intermediates/javac/**/classes/**
+            -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+            -Dsonar.sourceEncoding=UTF-8
+            -Dsonar.java.sourceCompatibility=11
+            -Dsonar.java.targetCompatibility=11
+            -Dsonar.exclusions=**/build/**,**/tmp/**,**/reports/**,**/*.html,**/*.xml,**/testutils/**,**/*Mock*.java,**/androidTest/**
+            -Dsonar.coverage.exclusions=**/testutils/**,**/*Mock*.java
+            -Dsonar.verbose=true
+            -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
+            -Dsonar.pullrequest.branch=${{ github.head_ref }}
+            -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: SonarCloud Scan for hybid.sdk (development branch)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/development'
+        uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          projectBaseDir: hybid.sdk
+          args: >
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.projectKey=vervegroup_pubnative-hybid-android-sdk-private
+            -Dsonar.organization=verve
+            -Dsonar.projectVersion=develop-${{ github.run_number }}
+            -Dsonar.sources=src/main/java
+            -Dsonar.tests=src/test/java
+            -Dsonar.java.binaries=build/intermediates/javac/**/classes/**
+            -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+            -Dsonar.sourceEncoding=UTF-8
+            -Dsonar.java.sourceCompatibility=11
+            -Dsonar.java.targetCompatibility=11
+            -Dsonar.exclusions=**/build/**,**/tmp/**,**/reports/**,**/*.html,**/*.xml,**/testutils/**,**/*Mock*.java,**/androidTest/**
+            -Dsonar.coverage.exclusions=**/testutils/**,**/*Mock*.java
+            -Dsonar.verbose=true
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

@@ -31,6 +31,7 @@ import net.pubnative.lite.demo.managers.CustomCtaSettings
 import net.pubnative.lite.demo.managers.EndCardSettings
 import net.pubnative.lite.demo.managers.ImpressionTrackingSettings
 import net.pubnative.lite.demo.managers.LandingPageSettings
+import net.pubnative.lite.demo.managers.LearnMoreSettings
 import net.pubnative.lite.demo.managers.MraidSettings
 import net.pubnative.lite.demo.managers.NavigationSettings
 import net.pubnative.lite.demo.managers.ReducedButtonsSettings
@@ -45,6 +46,8 @@ import net.pubnative.lite.sdk.models.ContentInfoDisplay
 import net.pubnative.lite.sdk.models.ContentInfoIconAction
 import net.pubnative.lite.sdk.models.CustomEndCardDisplay
 import net.pubnative.lite.sdk.models.ImpressionTrackingMethod
+import net.pubnative.lite.sdk.models.LearnMoreLocation
+import net.pubnative.lite.sdk.models.LearnMoreSize
 import net.pubnative.lite.sdk.utils.Logger
 import net.pubnative.lite.sdk.vpaid.enums.AudioState
 
@@ -157,7 +160,7 @@ class HyBidDemoApplication : MultiDexApplication() {
                     interstitialEnabled = false,
                     interstitialValue = false,
                     rewardedEnabled = false,
-                    rewardedValue = true
+                    rewardedValue = false
                 ),
                 endCardSettings = EndCardSettings(
                     enabled = false,
@@ -205,12 +208,12 @@ class HyBidDemoApplication : MultiDexApplication() {
                     enabled = false,
                     value = CountdownStyle.PIE_CHART.name
                 ),
-//                learnMoreSettings = LearnMoreSettings(
-//                    sizeEnabled = false,
-//                    sizeValue = LearnMoreSize.DEFAULT.name,
-//                    locationEnabled = false,
-//                    locationValue = LearnMoreLocation.DEFAULT.name
-//                ),
+                learnMoreSettings = LearnMoreSettings(
+                    sizeEnabled = false,
+                    sizeValue = LearnMoreSize.DEFAULT.name,
+                    locationEnabled = false,
+                    locationValue = LearnMoreLocation.DEFAULT.name
+                ),
                 impressionTrackingSettings = ImpressionTrackingSettings(
                     enabled = false,
                     value = ImpressionTrackingMethod.AD_VIEWABLE.methodName

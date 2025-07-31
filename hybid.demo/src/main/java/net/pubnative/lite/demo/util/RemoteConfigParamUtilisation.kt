@@ -199,21 +199,21 @@ object RemoteConfigParamUtilisation {
             }
         }
 
-//        adCustomizationsManager.learnMoreSettings?.apply {
-//            if (sizeEnabled) {
-//                param = RemoteConfigParam()
-//                param.name = RemoteConfig.BC_LEARN_MORE_SIZE.fieldName
-//                param.value = adCustomizationsManager.learnMoreSettings.sizeValue
-//                configs.add(param)
-//            }
-//
-//            if (locationEnabled) {
-//                param = RemoteConfigParam()
-//                param.name = RemoteConfig.BC_LEARN_MORE_LOCATION.fieldName
-//                param.value = adCustomizationsManager.learnMoreSettings.locationValue
-//                configs.add(param)
-//            }
-//        }
+        adCustomizationsManager.learnMoreSettings?.apply {
+            if (sizeEnabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.BC_LEARN_MORE_SIZE.fieldName
+                param.value = adCustomizationsManager.learnMoreSettings.sizeValue
+                configs.add(param)
+            }
+
+            if (locationEnabled) {
+                param = RemoteConfigParam()
+                param.name = RemoteConfig.BC_LEARN_MORE_LOCATION.fieldName
+                param.value = adCustomizationsManager.learnMoreSettings.locationValue
+                configs.add(param)
+            }
+        }
 
         adCustomizationsManager.impressionTrackingSettings?.apply {
             if (enabled) {

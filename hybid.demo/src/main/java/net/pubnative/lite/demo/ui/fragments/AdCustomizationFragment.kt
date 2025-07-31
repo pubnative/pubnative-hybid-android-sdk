@@ -27,6 +27,7 @@ import net.pubnative.lite.demo.managers.CustomCtaSettings
 import net.pubnative.lite.demo.managers.EndCardSettings
 import net.pubnative.lite.demo.managers.ImpressionTrackingSettings
 import net.pubnative.lite.demo.managers.LandingPageSettings
+import net.pubnative.lite.demo.managers.LearnMoreSettings
 import net.pubnative.lite.demo.managers.MraidSettings
 import net.pubnative.lite.demo.managers.NavigationSettings
 import net.pubnative.lite.demo.managers.ReducedButtonsSettings
@@ -38,6 +39,8 @@ import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.models.ContentInfoDisplay
 import net.pubnative.lite.sdk.models.ContentInfoIconAction
 import net.pubnative.lite.sdk.models.CustomEndCardDisplay
+import net.pubnative.lite.sdk.models.LearnMoreLocation
+import net.pubnative.lite.sdk.models.LearnMoreSize
 import net.pubnative.lite.sdk.utils.URLValidator
 import net.pubnative.lite.sdk.vpaid.enums.AudioState
 
@@ -50,7 +53,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
 
     private lateinit var htmlSkipOffsetInput: EditText
     private lateinit var videoSkipOffsetInput: EditText
-    private lateinit var playableSkipOffsetInput: EditText
+
     private lateinit var rewardedHtmlSkipOffsetInput: EditText
     private lateinit var rewardedVideoSkipOffsetInput: EditText
     private lateinit var endCardCloseButtonDelayInput: EditText
@@ -73,8 +76,8 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
     private lateinit var customCTADelay: EditText
     private lateinit var customCTATypeGroup: RadioGroup
     private lateinit var bundleId: EditText
-//    private lateinit var bcLearnMoreSizeGroup: RadioGroup
-//    private lateinit var bcLearnMoreLocationGroup: RadioGroup
+    private lateinit var bcLearnMoreSizeGroup: RadioGroup
+    private lateinit var bcLearnMoreLocationGroup: RadioGroup
 
     private lateinit var cbInitialAudio: CheckBox
     private lateinit var cbMraidExpand: CheckBox
@@ -85,7 +88,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
     private lateinit var cbAutoCloseRewarded: CheckBox
     private lateinit var cbInputSkipOffset: CheckBox
     private lateinit var cbInputVideoSkipOffset: CheckBox
-    private lateinit var cbInputPlayableSkipOffset: CheckBox
+
     private lateinit var cbInputRewardedSkipOffset: CheckBox
     private lateinit var cbInputRewardedVideoSkipOffset: CheckBox
     private lateinit var cbInputEndcardCloseButtonDelay: CheckBox
@@ -104,8 +107,8 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
     private lateinit var cbCustomCTAEnabled: CheckBox
     private lateinit var cbInputCustomCTADelay: CheckBox
     private lateinit var cbEnableReducedButtons: CheckBox
-//    private lateinit var cbBcLearnMoreSize: CheckBox
-//    private lateinit var cbBcLearnMoreLocation: CheckBox
+    private lateinit var cbBcLearnMoreSize: CheckBox
+    private lateinit var cbBcLearnMoreLocation: CheckBox
 
     private lateinit var mraidExpandSwitch: SwitchCompat
     private lateinit var enableAutoCloseSwitch: SwitchCompat
@@ -145,7 +148,6 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
 
         htmlSkipOffsetInput = requireView().findViewById(R.id.input_skip_offset)
         videoSkipOffsetInput = requireView().findViewById(R.id.input_video_skip_offset)
-        playableSkipOffsetInput = requireView().findViewById(R.id.input_playable_skip_offset)
         rewardedHtmlSkipOffsetInput = requireView().findViewById(R.id.input_rewarded_skip_offset)
         rewardedVideoSkipOffsetInput =
             requireView().findViewById(R.id.input_rewarded_video_skip_offset)
@@ -167,8 +169,8 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
         customCTADelay = requireView().findViewById(R.id.input_custom_cta_delay)
         customCTATypeGroup = requireView().findViewById(R.id.group_custom_cta_type)
         bundleId = requireView().findViewById(R.id.input_bundle_id)
-//        bcLearnMoreSizeGroup = requireView().findViewById(R.id.group_learn_more_size)
-//        bcLearnMoreLocationGroup = requireView().findViewById(R.id.group_learn_more_location)
+        bcLearnMoreSizeGroup = requireView().findViewById(R.id.group_learn_more_size)
+        bcLearnMoreLocationGroup = requireView().findViewById(R.id.group_learn_more_location)
 
         contentInfoIconClickActionGroup =
             requireView().findViewById(R.id.group_content_info_icon_click_action)
@@ -184,7 +186,6 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
         cbAutoCloseRewarded = requireView().findViewById(R.id.cb_auto_close_rewarded)
         cbInputSkipOffset = requireView().findViewById(R.id.cb_input_skip_offset)
         cbInputVideoSkipOffset = requireView().findViewById(R.id.cb_input_video_skip_offset)
-        cbInputPlayableSkipOffset = requireView().findViewById(R.id.cb_input_playable_skip_offset)
         cbInputRewardedSkipOffset = requireView().findViewById(R.id.cb_input_rewarded_skip_offset)
         cbInputRewardedVideoSkipOffset =
             requireView().findViewById(R.id.cb_input_rewarded_video_skip_offset)
@@ -206,8 +207,8 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
         cbCustomCTAEnabled = requireView().findViewById(R.id.cb_custom_cta_enabled)
         cbInputCustomCTADelay = requireView().findViewById(R.id.cb_input_custom_cta_delay)
         cbEnableReducedButtons = requireView().findViewById(R.id.cb_reduced_skip_close_buttons)
-//        cbBcLearnMoreSize = requireView().findViewById(R.id.cb_learn_more_size)
-//        cbBcLearnMoreLocation = requireView().findViewById(R.id.cb_learn_more_location)
+        cbBcLearnMoreSize = requireView().findViewById(R.id.cb_learn_more_size)
+        cbBcLearnMoreLocation = requireView().findViewById(R.id.cb_learn_more_location)
 
         cbInitialAudio.setOnCheckedChangeListener { p0, checked ->
             requireView().findViewById<RadioButton>(R.id.radio_sound_default).isEnabled = checked
@@ -258,10 +259,6 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
 
         cbInputVideoSkipOffset.setOnCheckedChangeListener { p0, checked ->
             videoSkipOffsetInput.isEnabled = checked
-        }
-
-        cbInputPlayableSkipOffset.setOnCheckedChangeListener { p0, checked ->
-            playableSkipOffsetInput.isEnabled = checked
         }
 
         cbInputRewardedSkipOffset.setOnCheckedChangeListener { p0, checked ->
@@ -336,24 +333,23 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
                 checked
         }
 
-//        cbBcLearnMoreSize.setOnCheckedChangeListener { p0, checked ->
-//            requireView().findViewById<RadioButton>(R.id.radio_learn_more_size_default).isEnabled =
-//                checked
-//            requireView().findViewById<RadioButton>(R.id.radio_learn_more_size_medium).isEnabled =
-//                checked
-//            requireView().findViewById<RadioButton>(R.id.radio_learn_more_size_large).isEnabled =
-//                checked
-//        }
-//
-//        cbBcLearnMoreLocation.setOnCheckedChangeListener { p0, checked ->
-//            requireView().findViewById<RadioButton>(R.id.radio_learn_more_location_default).isEnabled =
-//                checked
-//            requireView().findViewById<RadioButton>(R.id.radio_learn_more_location_bottom_down).isEnabled =
-//                checked
-//            requireView().findViewById<RadioButton>(R.id.radio_learn_more_location_bottom_up).isEnabled =
-//                checked
-//        }
+        cbBcLearnMoreSize.setOnCheckedChangeListener { p0, checked ->
+            requireView().findViewById<RadioButton>(R.id.radio_learn_more_size_default).isEnabled =
+                checked
+            requireView().findViewById<RadioButton>(R.id.radio_learn_more_size_medium).isEnabled =
+                checked
+            requireView().findViewById<RadioButton>(R.id.radio_learn_more_size_large).isEnabled =
+                checked
+        }
 
+        cbBcLearnMoreLocation.setOnCheckedChangeListener { p0, checked ->
+            requireView().findViewById<RadioButton>(R.id.radio_learn_more_location_default).isEnabled =
+                checked
+            requireView().findViewById<RadioButton>(R.id.radio_learn_more_location_bottom_down).isEnabled =
+                checked
+            requireView().findViewById<RadioButton>(R.id.radio_learn_more_location_bottom_up).isEnabled =
+                checked
+        }
     }
 
     private fun fillSavedValues() {
@@ -437,12 +433,6 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
         videoSkipOffsetInput.isEnabled =
             adCustomizationsManager.skipOffsetSettings?.video?.first == true
         videoSkipOffsetInput.setText(adCustomizationsManager.skipOffsetSettings?.video?.second)
-
-        cbInputPlayableSkipOffset.isChecked =
-            adCustomizationsManager.skipOffsetSettings?.playable?.first == true
-        playableSkipOffsetInput.isEnabled =
-            adCustomizationsManager.skipOffsetSettings?.playable?.first == true
-        playableSkipOffsetInput.setText(adCustomizationsManager.skipOffsetSettings?.playable?.second)
 
         cbInputRewardedSkipOffset.isChecked =
             adCustomizationsManager.skipOffsetSettings?.rewardedHtml?.first == true
@@ -555,38 +545,38 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
         )
 
         // Learn More
-//        cbBcLearnMoreSize.isChecked = adCustomizationsManager.learnMoreSettings?.sizeEnabled == true
-//        requireView().findViewById<RadioButton>(R.id.radio_learn_more_size_default).isEnabled =
-//            adCustomizationsManager.learnMoreSettings?.sizeEnabled == true
-//        requireView().findViewById<RadioButton>(R.id.radio_learn_more_size_medium).isEnabled =
-//            adCustomizationsManager.learnMoreSettings?.sizeEnabled == true
-//        requireView().findViewById<RadioButton>(R.id.radio_learn_more_size_large).isEnabled =
-//            adCustomizationsManager.learnMoreSettings?.sizeEnabled == true
-//        bcLearnMoreSizeGroup.check(
-//            when (adCustomizationsManager.learnMoreSettings?.sizeValue) {
-//                LearnMoreSize.DEFAULT.name -> R.id.radio_learn_more_size_default
-//                LearnMoreSize.MEDIUM.name -> R.id.radio_learn_more_size_medium
-//                LearnMoreSize.LARGE.name -> R.id.radio_learn_more_size_large
-//                else -> R.id.radio_learn_more_size_default
-//            }
-//        )
+        cbBcLearnMoreSize.isChecked = adCustomizationsManager.learnMoreSettings?.sizeEnabled == true
+        requireView().findViewById<RadioButton>(R.id.radio_learn_more_size_default).isEnabled =
+            adCustomizationsManager.learnMoreSettings?.sizeEnabled == true
+        requireView().findViewById<RadioButton>(R.id.radio_learn_more_size_medium).isEnabled =
+            adCustomizationsManager.learnMoreSettings?.sizeEnabled == true
+        requireView().findViewById<RadioButton>(R.id.radio_learn_more_size_large).isEnabled =
+            adCustomizationsManager.learnMoreSettings?.sizeEnabled == true
+        bcLearnMoreSizeGroup.check(
+            when (adCustomizationsManager.learnMoreSettings?.sizeValue) {
+                LearnMoreSize.DEFAULT.name -> R.id.radio_learn_more_size_default
+                LearnMoreSize.MEDIUM.name -> R.id.radio_learn_more_size_medium
+                LearnMoreSize.LARGE.name -> R.id.radio_learn_more_size_large
+                else -> R.id.radio_learn_more_size_default
+            }
+        )
 
-//        cbBcLearnMoreLocation.isChecked =
-//            adCustomizationsManager.learnMoreSettings?.locationEnabled == true
-//        requireView().findViewById<RadioButton>(R.id.radio_learn_more_location_default).isEnabled =
-//            adCustomizationsManager.learnMoreSettings?.locationEnabled == true
-//        requireView().findViewById<RadioButton>(R.id.radio_learn_more_location_bottom_down).isEnabled =
-//            adCustomizationsManager.learnMoreSettings?.locationEnabled == true
-//        requireView().findViewById<RadioButton>(R.id.radio_learn_more_location_bottom_up).isEnabled =
-//            adCustomizationsManager.learnMoreSettings?.locationEnabled == true
-//        bcLearnMoreLocationGroup.check(
-//            when (adCustomizationsManager.learnMoreSettings?.locationValue) {
-//                LearnMoreLocation.DEFAULT.name -> R.id.radio_learn_more_location_default
-//                LearnMoreLocation.BOTTOM_DOWN.name -> R.id.radio_learn_more_location_bottom_down
-//                LearnMoreLocation.BOTTOM_UP.name -> R.id.radio_learn_more_location_bottom_up
-//                else -> R.id.radio_learn_more_location_default
-//            }
-//        )
+        cbBcLearnMoreLocation.isChecked =
+            adCustomizationsManager.learnMoreSettings?.locationEnabled == true
+        requireView().findViewById<RadioButton>(R.id.radio_learn_more_location_default).isEnabled =
+            adCustomizationsManager.learnMoreSettings?.locationEnabled == true
+        requireView().findViewById<RadioButton>(R.id.radio_learn_more_location_bottom_down).isEnabled =
+            adCustomizationsManager.learnMoreSettings?.locationEnabled == true
+        requireView().findViewById<RadioButton>(R.id.radio_learn_more_location_bottom_up).isEnabled =
+            adCustomizationsManager.learnMoreSettings?.locationEnabled == true
+        bcLearnMoreLocationGroup.check(
+            when (adCustomizationsManager.learnMoreSettings?.locationValue) {
+                LearnMoreLocation.DEFAULT.name -> R.id.radio_learn_more_location_default
+                LearnMoreLocation.BOTTOM_DOWN.name -> R.id.radio_learn_more_location_bottom_down
+                LearnMoreLocation.BOTTOM_UP.name -> R.id.radio_learn_more_location_bottom_up
+                else -> R.id.radio_learn_more_location_default
+            }
+        )
 
         // Impression Tracking
         cbImpTracking.isChecked =
@@ -655,20 +645,6 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
             } else {
                 if (cbInputVideoSkipOffset.isChecked) {
                     val offset = videoSkipOffsetInput.text.toString().trim().toDouble()
-                    if (offset > Int.MAX_VALUE) {
-                        isMaximumIntegerValueMessageDisplayed = true
-                        return false
-                    }
-                }
-            }
-
-            if (cbInputPlayableSkipOffset.isChecked && playableSkipOffsetInput.text.toString()
-                    .trim().isEmpty()
-            ) {
-                return false
-            } else {
-                if (cbInputPlayableSkipOffset.isChecked) {
-                    val offset = playableSkipOffsetInput.text.toString().trim().toDouble()
                     if (offset > Int.MAX_VALUE) {
                         isMaximumIntegerValueMessageDisplayed = true
                         return false
@@ -798,19 +774,19 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
                 else -> CountdownStyle.TIMER
             }
 
-//            val learnMoreSize = when (bcLearnMoreSizeGroup.checkedRadioButtonId) {
-//                R.id.radio_learn_more_size_default -> LearnMoreSize.DEFAULT
-//                R.id.radio_learn_more_size_medium -> LearnMoreSize.MEDIUM
-//                R.id.radio_learn_more_size_large -> LearnMoreSize.LARGE
-//                else -> LearnMoreSize.DEFAULT
-//            }
-//
-//            val learnMoreLocation = when (bcLearnMoreLocationGroup.checkedRadioButtonId) {
-//                R.id.radio_learn_more_location_default -> LearnMoreLocation.DEFAULT
-//                R.id.radio_learn_more_location_bottom_down -> LearnMoreLocation.BOTTOM_DOWN
-//                R.id.radio_learn_more_location_bottom_up -> LearnMoreLocation.BOTTOM_UP
-//                else -> LearnMoreLocation.DEFAULT
-//            }
+            val learnMoreSize = when (bcLearnMoreSizeGroup.checkedRadioButtonId) {
+                R.id.radio_learn_more_size_default -> LearnMoreSize.DEFAULT
+                R.id.radio_learn_more_size_medium -> LearnMoreSize.MEDIUM
+                R.id.radio_learn_more_size_large -> LearnMoreSize.LARGE
+                else -> LearnMoreSize.DEFAULT
+            }
+
+            val learnMoreLocation = when (bcLearnMoreLocationGroup.checkedRadioButtonId) {
+                R.id.radio_learn_more_location_default -> LearnMoreLocation.DEFAULT
+                R.id.radio_learn_more_location_bottom_down -> LearnMoreLocation.BOTTOM_DOWN
+                R.id.radio_learn_more_location_bottom_up -> LearnMoreLocation.BOTTOM_UP
+                else -> LearnMoreLocation.DEFAULT
+            }
 
             val contentInfoIconClickAction =
                 when (contentInfoIconClickActionGroup.checkedRadioButtonId) {
@@ -871,7 +847,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
                 ), skipOffsetSettings = SkipOffsetSettings(
                     html = cbInputSkipOffset.isChecked to htmlSkipOffsetInput.text.toString(),
                     video = cbInputVideoSkipOffset.isChecked to videoSkipOffsetInput.text.toString(),
-                    playable = cbInputPlayableSkipOffset.isChecked to playableSkipOffsetInput.text.toString(),
+                    playable = false to "3",
                     rewardedHtml = cbInputRewardedSkipOffset.isChecked to rewardedHtmlSkipOffsetInput.text.toString(),
                     rewardedVideo = cbInputRewardedVideoSkipOffset.isChecked to rewardedVideoSkipOffsetInput.text.toString(),
                     endCardCloseDelay = cbInputEndcardCloseButtonDelay.isChecked to endCardCloseButtonDelayInput.text.toString()
@@ -892,12 +868,12 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
                 ), countdownSettings = CountdownSettings(
                     enabled = cbCountdownStyle.isChecked, value = countdownStyle.name
                 ),
-//                learnMoreSettings = LearnMoreSettings(
-//                    sizeEnabled = cbBcLearnMoreSize.isChecked,
-//                    sizeValue = learnMoreSize.name,
-//                    locationEnabled = cbBcLearnMoreLocation.isChecked,
-//                    locationValue = learnMoreLocation.name
-//                )
+                learnMoreSettings = LearnMoreSettings(
+                    sizeEnabled = cbBcLearnMoreSize.isChecked,
+                    sizeValue = learnMoreSize.name,
+                    locationEnabled = cbBcLearnMoreLocation.isChecked,
+                    locationValue = learnMoreLocation.name
+                ),
                 impressionTrackingSettings = ImpressionTrackingSettings(
                     enabled = cbImpTracking.isChecked, value = impTracking.text.toString()
                 ), visibilitySettings = VisibilitySettings(

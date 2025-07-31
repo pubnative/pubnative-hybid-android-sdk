@@ -1,0 +1,89 @@
+name: 'Slack Notification'
+description: 'Send notification to Slack channel'
+inputs:
+  webhook_url:
+    description: 'Slack webhook URL'
+    required: true
+  channel:
+    description: 'Slack channel name'
+    required: true
+  release_env:
+    description: 'Release environment (firebase/jfrog)'
+    required: true
+  status:
+    description: 'Build status (success/failure)'
+    required: false
+    default: 'success'
+  repository:
+    description: 'Repository name'
+    required: true
+  branch:
+    description: 'Branch name'
+    required: true
+  commit_sha:
+    description: 'Commit SHA'
+    required: true
+  run_id:
+    description: 'Run ID'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Send Slack notification
+      shell: bash
+      run: |
+        if [ "${{ inputs.status }}" == "success" ]; then
+          COLOR="good"
+          EMOJI="✅"
+        else
+          COLOR="danger"
+          EMOJI="❌"
+        fi
+        
+        curl -X POST -H 'Content-type: application/json' \
+        --data "{
+          \"channel\": \"${{ inputs.channel }}\",
+          \"unfurl_links\": false,
+          \"text\": \"${{ inputs.message }}\",
+          \"attachments\": [
+            {
+              \"color\": \"$COLOR\",
+              \"fields\": [
+                {
+                  \"title\": \"Repository\",
+                  \"value\": \"${{ inputs.repository }}\",
+                  \"short\": true
+                },
+                {
+                  \"title\": \"Branch\",
+                  \"value\": \"${{ inputs.branch }}\",
+                  \"short\": true
+                },
+                {
+                  \"title\": \"Released by\",
+                  \"value\": \"${{ github.actor }}\",
+                  \"short\": true
+                },
+                {
+                  \"title\": \"Status\",
+                  \"value\": \"$EMOJI ${{ inputs.jobs_status }}\",
+                  \"short\": true
+                },
+                {
+                  \"title\": \"Go to workflow\",
+                  \"value\": \"<https://github.com/${{ inputs.repository }}/actions/runs/${{ inputs.run_id }}|*Click here to see it on GitHub*>\",
+                  \"short\": true
+                },
+                {
+                  \"title\": \"Commit\",
+                  \"value\": \"${{ inputs.commit_sha }}\",
+                  \"short\": true
+                }
+              ],
+              \"footer\": \"GitHub Actions\",
+              \"ts\": $(date +%s)
+            }
+          ]
+        }" \
+        ${{ inputs.webhook_url }}

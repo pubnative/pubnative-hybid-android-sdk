@@ -59,6 +59,16 @@ class LegacyApiAdapter(private var mListener: OnLogDisplayListener) :
         }
     }
 
+    override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
+        when (holder) {
+            is LegacyApiBannerViewHolder -> holder.destroy()
+            is LegacyApiMRectViewHolder -> holder.destroy()
+            is LegacyApiLeaderboardViewHolder -> holder.destroy()
+            is LegacyApiNativeViewHolder -> holder.destroy()
+        }
+        super.onViewRecycled(holder)
+    }
+
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is LegacyApiBannerViewHolder -> holder.bind(ad)

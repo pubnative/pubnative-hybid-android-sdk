@@ -6,7 +6,6 @@ package net.pubnative.lite.demo.ui.fragments.apitester
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.CheckBox
 import android.widget.EditText
@@ -29,19 +28,14 @@ import net.pubnative.lite.demo.ui.adapters.LegacyApiAdapter
 import net.pubnative.lite.demo.ui.adapters.OnLogDisplayListener
 import net.pubnative.lite.demo.ui.fragments.apitester.LegacyApiTesterSize.*
 import net.pubnative.lite.demo.ui.fragments.markup.MarkupType
+import net.pubnative.lite.demo.util.Destroyable
 import net.pubnative.lite.demo.viewmodel.AdCustomizationViewModel
 import net.pubnative.lite.demo.viewmodel.ApiTesterViewModel
-import net.pubnative.lite.sdk.HyBid
-import net.pubnative.lite.sdk.VideoListener
-import net.pubnative.lite.sdk.analytics.Reporting
-import net.pubnative.lite.sdk.analytics.ReportingEvent
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd
 import net.pubnative.lite.sdk.models.Ad
 import net.pubnative.lite.sdk.models.AdSize
-import net.pubnative.lite.sdk.models.IntegrationType
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedAd
 import net.pubnative.lite.sdk.utils.Logger
-import java.util.Locale
 
 class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester),
     OnLogDisplayListener {
@@ -119,7 +113,6 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester),
     }
 
     private fun initViews(view: View) {
-
         responseInput = view.findViewById(R.id.input_response)
         oRTBBodyInput = view.findViewById(R.id.input_ortb_body)
         adSizeGroup = view.findViewById(R.id.group_ad_size)
@@ -139,8 +132,6 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester),
     }
 
     private fun initObservers() {
-
-
         viewModel.clipboard.observe(viewLifecycleOwner) {
             responseInput.setText(it)
         }
@@ -150,8 +141,8 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester),
         }
 
         viewModel.listVisibility.observe(viewLifecycleOwner) {
-            if (it) markupList.visibility = View.VISIBLE
-            else markupList.visibility = View.GONE
+            if (it) showRecyclerView()
+            else hideAndCleanRecyclerView()
         }
 
         viewModel.showButtonVisibility.observe(viewLifecycleOwner) {
@@ -386,6 +377,7 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester),
     override fun onDestroy() {
         interstitial?.destroy()
         rewardedAd?.destroy()
+        cleanRecyclerView()
         super.onDestroy()
     }
 
@@ -425,5 +417,24 @@ class LegacyApiTesterFragment : Fragment(R.layout.fragment_legacy_api_tester),
     override fun onResume() {
         super.onResume()
         adCustomizationViewModel.refetchAdCustomisationParams()
+    }
+
+    private fun hideAndCleanRecyclerView() {
+        markupList.visibility = View.GONE
+
+        cleanRecyclerView()
+    }
+
+    private fun cleanRecyclerView() {
+        for (i in 0 until markupList.childCount) {
+            val childView = markupList.getChildAt(i)
+            val holder = markupList.getChildViewHolder(childView)
+
+            (holder as? Destroyable)?.destroy()
+        }
+    }
+
+    private fun showRecyclerView() {
+        markupList.visibility = View.VISIBLE
     }
 }

@@ -24,7 +24,7 @@ android {
     defaultConfig {
         minSdkVersion min_android_api
         targetSdkVersion android_api
-        versionCode System.getenv("CIRCLE_BUILD_NUM") ? System.getenv("CIRCLE_BUILD_NUM").toInteger() : 1
+        versionCode System.getenv("GITHUB_RUN_NUMBER") ? System.getenv("GITHUB_RUN_NUMBER").toInteger() : 1
         versionName version_name
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -37,12 +37,15 @@ android {
             buildConfigField "String", "OMIDPN", "\"pubnativenet\""
             buildConfigField "String", "SDK_VERSION", "\"$version_name\""
             buildConfigField "String", "BASE_URL", "\"https://api.pubnative.net/\""
+            buildConfigField "String", "BASE_RTB_URL", "\"https://dsp.pubnative.net/\""
         }
         debug {
+            testCoverageEnabled = true
             buildConfigField "String", "OMIDPV", "\"$omid_version\""
             buildConfigField "String", "OMIDPN", "\"pubnativenet\""
             buildConfigField "String", "SDK_VERSION", "\"$version_name\""
             buildConfigField "String", "BASE_URL", "\"https://api.pubnative.net/\""
+            buildConfigField "String", "BASE_RTB_URL", "\"https://dsp.pubnative.net/\""
         }
     }
 
@@ -63,27 +66,42 @@ android {
     namespace 'net.pubnative.lite.sdk'
 }
 
+tasks.register('repackageNG') {
+    doLast {
+        def smaatoDir = file("src/nextgen/java/com/verve/ng/sdk")
+        smaatoDir.mkdirs()
+        def sourceDir = file("src/main/java/net/pubnative/lite/sdk")
+        if (sourceDir.exists()) {
+            fileTree(dir: sourceDir).include("**/*.java").each { File file ->
+                def relativePath = file.path.substring(sourceDir.path.length())
+                def targetFile = new File(smaatoDir, relativePath)
+                targetFile.parentFile.mkdirs()
+                def content = file.text
+                content = content.replaceAll("package net.pubnative.lite.sdk", "package com.verve.ng.sdk")
+                content = content.replaceAll("import net.pubnative.lite.sdk", "import com.verve.ng.sdk")
+                content = content.replaceAll("import static net.pubnative.lite.sdk", "import static com.verve.ng.sdk")
+                content = content.replaceAll("net.pubnative.lite.sdk.BuildConfig", "com.verve.ng.sdk.BuildConfig")
+                targetFile.text = content
+            }
+        } else {
+            println "Source directory not found: ${sourceDir.path}"
+        }
+    }
+}
+
 dependencies {
 
-    implementation project(':hybid.sdk.core')
-    implementation project(':hybid.sdk.banner')
-    implementation project(':hybid.sdk.fullscreen')
-    implementation project(':hybid.sdk.native')
-    implementation project(':hybid.sdk.rewarded')
-    implementation project(':hybid.sdk.reporting')
-    implementation project(':hybid.sdk.source.pnapi')
-    implementation project(':hybid.sdk.viewability')
-    implementation project(':hybid.sdk.logger')
-
-    // Remember to update OMSDK version constant found in HyBid.java
     implementation "net.pubnative:hybid.omsdk:$omid_version"
 
     testImplementation 'com.google.truth:truth:1.1.3'
 
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.robolectric:robolectric:4.10.3'
-    testImplementation 'org.mockito:mockito-core:4.5.1'
+    testImplementation 'org.robolectric:robolectric:4.14.1'
+    testImplementation 'org.mockito:mockito-core:5.16.1'
+    testImplementation 'org.mockito:mockito-inline:4.5.1'
+    testImplementation 'org.hamcrest:hamcrest:2.2'
     testImplementation 'com.google.truth:truth:1.1.3'
+    implementation "com.verve:atom.sdk:+"
     testImplementation 'com.squareup.assertj:assertj-android:1.2.0'
     androidTestImplementation "androidx.test:runner:1.1.0-beta01", {
         exclude group: 'com.android.support', module: 'support-annotations'
@@ -93,6 +111,54 @@ dependencies {
     }
     androidTestImplementation "androidx.test.espresso:espresso-core:3.1.0-beta01", {
         exclude group: 'com.android.support', module: 'support-annotations'
+    }
+}
+//--------------------------------------------------------------------------------------------------
+// sonar
+//--------------------------------------------------------------------------------------------------
+apply plugin: 'jacoco'
+
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+tasks.register("jacocoTestReport", JacocoReport) {
+    group = "verification"
+    description = "Generates JaCoCo coverage report for hybid.sdk"
+
+    dependsOn "testDebugUnitTest"
+
+    reports {
+        xml.required = true
+        html.required = true
+    }
+
+    def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*']
+    def debugTree = fileTree(dir: "$buildDir/intermediates/javac/debug", excludes: fileFilter)
+    def kotlinDebugTree = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug", excludes: fileFilter)
+
+    sourceDirectories.setFrom(files([
+            "$projectDir/src/main/java",
+            "$projectDir/src/main/kotlin"
+    ]))
+
+    classDirectories.setFrom(files([debugTree, kotlinDebugTree]))
+
+    executionData.setFrom(fileTree(dir: buildDir, includes: [
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec"
+    ]))
+}
+
+tasks.withType(Test).configureEach {
+    jacoco {
+        includeNoLocationClasses = true
+        excludes = ['jdk.internal.*']
+    }
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat = 'full'
+        showStandardStreams = true
     }
 }
 
@@ -108,7 +174,8 @@ task sourcesJar(type: Jar) {
 
 task javadoc(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
-    classpath += project.rootProject.files(android.getBootClasspath().join(File.pathSeparator))
+    def bootClasspathFiles = android.getBootClasspath().findAll { it != null && it.toString().trim() }
+    classpath += project.rootProject.files(bootClasspathFiles)
     options.memberLevel = JavadocMemberLevel.PUBLIC
     failOnError false
 }
@@ -164,33 +231,21 @@ publishing {
             }
         }
     }
-
-    artifactoryPublish {
-        publications(publishing.publications.aar)
-    }
 }
 
 artifactory {
     contextUrl = System.getenv("ARTIFACTORY_CONTEXT_URL")
     publish {
         repository {
-            repoKey = (branchName.toString() == 'master') ? 'verve-gradle-release-local' : 'verve-gradle-dev-local'
+            repoKey = System.getenv("ARTIFACTORY_REPOKEY")
             username = System.getenv("ARTIFACTORY_USER")
             password = System.getenv("ARTIFACTORY_PASSWORD")
-            maven = true
         }
 
         defaults {
-            publishArtifacts = branchName.toString() != "master"
+            publications('aar')
+            publishArtifacts = true
             publishPom = true
-        }
-    }
-    resolve {
-        repository {
-            repoKey = (branchName.toString() == 'master') ? 'verve-gradle-release' : 'verve-gradle-dev'
-            username = System.getenv("ARTIFACTORY_USER")
-            password = System.getenv("ARTIFACTORY_PASSWORD")
-            maven = true
         }
     }
 }

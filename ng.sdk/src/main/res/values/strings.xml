@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="content_info_icon" translatable="false">Ad content info icon</string>
+    <string name="ad_customisation_title" translatable="false">Ad Customisation</string>
+    <string name="custom_cta_label" translatable="false">GET</string>
+    <string name="custom_cta_button">Install</string>
+    <string name="custom_cta_ad_customisation_label" translatable="false">Custom CTA</string>
+    <string name="learn_more" translatable="false">Learn More</string>
+    <string name="learn_more_default_content_desc" translatable="false">default-default</string>
+    <string name="learn_more_icon_default" translatable="false">default</string>
+    <string name="skip_ad" translatable="false">Skip Ad ▶</string>
+    <string name="close_card_votes" translatable="false">( %1$d )</string>
+    <string name="feedback_form" translatable="false">Feedback Form</string>
+    <string name="loading" translatable="false">Loading ...</string>
+    <string name="mute_button" translatable="false">muteButton</string>
+    <string name="unmute_button" translatable="false">unmuteButton</string>
+    <bool name="is_tablet">false</bool>
+
+    <!--Internal Browser-->
+    <string name="btn_browser_backward_content_description" translatable="false">Backward</string>
+    <string name="btn_browser_forward_content_description" translatable="false">Forward</string>
+    <string name="btn_browser_close_content_description" translatable="false">Close</string>
+    <string name="btn_browser_refresh_content_description" translatable="false">Refresh</string>
+    <string name="btn_browser_open_content_description" translatable="false">Open in external browser</string>
+    <string name="browser_hostname_content_description" translatable="false">Host name</string>
+    <string name="no_external_browser_found" translatable="false">No browser app found</string>
+</resources>

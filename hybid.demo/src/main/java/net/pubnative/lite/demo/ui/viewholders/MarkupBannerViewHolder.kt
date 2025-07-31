@@ -87,6 +87,10 @@ class MarkupBannerViewHolder(
         onExpandedAdCloseListener.onExpandedAdClosed()
     }
 
+    override fun onReplayClicked() {
+
+    }
+
     override fun mraidViewLoaded(mraidView: MRAIDView?) {
     }
 

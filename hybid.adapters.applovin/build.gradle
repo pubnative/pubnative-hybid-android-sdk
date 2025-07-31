@@ -2,6 +2,8 @@ plugins {
     id 'com.android.library'
     id 'com.jfrog.artifactory'
     id 'maven-publish'
+    id 'kotlin-android'
+    id 'jacoco'
 }
 
 def project_name = project.name
@@ -21,12 +23,15 @@ android {
     defaultConfig {
         minSdkVersion min_android_api
         targetSdkVersion android_api
-        versionCode System.getenv("CIRCLE_BUILD_NUM") ? System.getenv("CIRCLE_BUILD_NUM").toInteger() : 1
+        versionCode System.getenv("GITHUB_RUN_NUMBER") ? System.getenv("GITHUB_RUN_NUMBER").toInteger() : 1
         versionName version_name
     }
 
     buildTypes {
         release {
+            minifyEnabled false
+        }
+        debug {
             minifyEnabled false
         }
     }
@@ -41,8 +46,8 @@ android {
             includeAndroidResources = true
         }
     }
-    namespace 'com.applovin.mediation.adapters'
 
+    namespace 'com.applovin.mediation.adapters'
 }
 
 dependencies {
@@ -50,13 +55,7 @@ dependencies {
     implementation project(':hybid.sdk')
     compileOnly 'com.applovin:applovin-sdk:13.2.0'
 
-    implementation project(':hybid.sdk.core')
-    implementation project(':hybid.sdk.logger')
-    implementation project(':hybid.sdk.fullscreen')
-    implementation project(':hybid.sdk.banner')
-    implementation project(':hybid.sdk.rewarded')
-    implementation project(':hybid.sdk.native')
-    implementation project(':hybid.sdk.source.pnapi')
+    implementation project(':hybid.sdk')
 }
 
 
@@ -82,33 +81,21 @@ publishing {
             }
         }
     }
-
-    artifactoryPublish {
-        publications(publishing.publications.aar)
-    }
 }
 
 artifactory {
     contextUrl = System.getenv("ARTIFACTORY_CONTEXT_URL")
     publish {
         repository {
-            repoKey = (branchName.toString() == 'master') ? 'verve-gradle-release-local' : 'verve-gradle-dev-local'
+            repoKey = System.getenv("ARTIFACTORY_REPOKEY")
             username = System.getenv("ARTIFACTORY_USER")
             password = System.getenv("ARTIFACTORY_PASSWORD")
-            maven = true
         }
 
         defaults {
-            publishArtifacts = branchName.toString() != "master"
+            publications('aar')
+            publishArtifacts = true
             publishPom = true
-        }
-    }
-    resolve {
-        repository {
-            repoKey = (branchName.toString() == 'master') ? 'verve-gradle-release' : 'verve-gradle-dev'
-            username = System.getenv("ARTIFACTORY_USER")
-            password = System.getenv("ARTIFACTORY_PASSWORD")
-            maven = true
         }
     }
 }
