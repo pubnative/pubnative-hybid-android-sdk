@@ -22,7 +22,7 @@ public class IdModel extends JsonModel {
     @BindField
     public List<IdUser> users;
 
-    public IdModel(){
+    public IdModel() {
 
     }
 

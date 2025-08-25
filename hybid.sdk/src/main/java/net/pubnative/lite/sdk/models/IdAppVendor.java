@@ -21,11 +21,11 @@ public class IdAppVendor extends JsonModel {
     public IdTtd TTD;
 
 
-    public IdAppVendor(){
+    public IdAppVendor() {
 
     }
 
-    public IdAppVendor(JSONObject jsonObject) throws Exception{
+    public IdAppVendor(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
     }
 }

@@ -30,11 +30,11 @@ public class IdDevice extends JsonModel {
     public IdBattery battery;
 
 
-    public IdDevice(){
+    public IdDevice() {
 
     }
 
-    public IdDevice(JSONObject jsonObject)throws Exception {
+    public IdDevice(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
     }
 }

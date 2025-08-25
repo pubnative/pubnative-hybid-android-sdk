@@ -9,11 +9,12 @@ import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.ui.activities.HybidDemoMainActivity
 
 /**
  * Created by erosgarciaponte on 30.01.18.
  */
-class KeywordsActivity : AppCompatActivity() {
+class KeywordsActivity : HybidDemoMainActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_keywords)

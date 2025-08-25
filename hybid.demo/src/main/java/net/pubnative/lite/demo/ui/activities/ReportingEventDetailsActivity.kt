@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import net.pubnative.lite.demo.R
 
-class ReportingEventDetailsActivity : AppCompatActivity() {
+class ReportingEventDetailsActivity : HybidDemoMainActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_reporting_event_details)

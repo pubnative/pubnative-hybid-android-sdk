@@ -7,7 +7,8 @@
     tools:context="net.pubnative.lite.demo.ui.fragments.BeaconListFragment"
     tools:showIn="@layout/activity_beacon_list">
 
-    <Button
+    <com.google.android.material.button.MaterialButton
+        style="@style/CustomButton"
         android:id="@+id/button_json"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

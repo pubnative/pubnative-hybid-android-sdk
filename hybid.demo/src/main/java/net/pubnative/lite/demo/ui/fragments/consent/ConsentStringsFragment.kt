@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.api.ApiManager
+import net.pubnative.lite.sdk.utils.AtomManager
 
 class ConsentStringsFragment : Fragment() {
     companion object {
@@ -46,6 +47,7 @@ class ConsentStringsFragment : Fragment() {
                 Toast.makeText(requireContext(), R.string.empty_gdpr_consent_field, Toast.LENGTH_SHORT).show()
             } else {
                 sharedPreferences.edit().putString(KEY_GDPR_PUBLIC_CONSENT, gdprConsentString).apply()
+                AtomManager.stopAtom()
                 ApiManager.fetchConfigs()
                 Toast.makeText(requireContext(), R.string.updated_gdpr_consent, Toast.LENGTH_SHORT).show()
             }

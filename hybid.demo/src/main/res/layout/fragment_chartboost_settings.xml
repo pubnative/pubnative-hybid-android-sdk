@@ -137,7 +137,8 @@
 
 
 
-        <com.google.android.material.button.MaterialButton
+         <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
             android:id="@+id/button_save_chartboost_settings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

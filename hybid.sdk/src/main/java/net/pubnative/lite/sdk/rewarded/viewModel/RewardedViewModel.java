@@ -299,4 +299,6 @@ public abstract class RewardedViewModel extends BaseViewModel implements PNAPICo
     public abstract View getAdView();
 
     public abstract void destroyAd();
+
+    public abstract void resetVolumeChangeTracker();
 }

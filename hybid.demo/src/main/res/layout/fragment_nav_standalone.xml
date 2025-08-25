@@ -67,7 +67,8 @@
             </LinearLayout>
         </LinearLayout>
 
-        <com.google.android.material.button.MaterialButton
+         <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
             android:id="@+id/button_banner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -76,7 +77,8 @@
             android:layout_marginEnd="16dp"
             android:text="@string/banner" />
 
-        <com.google.android.material.button.MaterialButton
+         <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
             android:id="@+id/sticky_banner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -85,7 +87,8 @@
             android:layout_marginEnd="16dp"
             android:text="@string/sticky" />
 
-        <com.google.android.material.button.MaterialButton
+         <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
             android:id="@+id/button_banner_infeed"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -94,7 +97,8 @@
             android:layout_marginEnd="16dp"
             android:text="@string/banner_in_feed" />
 
-        <com.google.android.material.button.MaterialButton
+         <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
             android:id="@+id/button_interstitial"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -103,7 +107,8 @@
             android:layout_marginEnd="16dp"
             android:text="@string/interstitial" />
 
-        <com.google.android.material.button.MaterialButton
+         <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
             android:id="@+id/button_native"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -112,7 +117,8 @@
             android:layout_marginEnd="16dp"
             android:text="@string/native_ad" />
 
-        <com.google.android.material.button.MaterialButton
+         <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
             android:id="@+id/button_rewarded"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

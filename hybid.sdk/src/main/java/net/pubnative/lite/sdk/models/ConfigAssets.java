@@ -5,6 +5,6 @@
 package net.pubnative.lite.sdk.models;
 
 public class ConfigAssets {
-    public static String ATOM_ENABLED = "atom_enabled";
-    public static String EXPERIENCE_ENABLED = "experience_enabled";
+    public static final String ATOM_ENABLED = "atom_enabled";
+    public static final String EXPERIENCE_ENABLED = "experience_enabled";
 }

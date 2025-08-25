@@ -18,11 +18,11 @@ public class IdApl extends JsonModel {
     public String IDFV;
 
 
-    public IdApl(){
+    public IdApl() {
 
     }
 
-    public IdApl(JSONObject jsonObject) throws Exception{
+    public IdApl(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
     }
 }

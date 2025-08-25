@@ -185,4 +185,9 @@ public class MraidInterstitialViewModel extends InterstitialViewModel implements
             mView.destroy();
         }
     }
+
+    @Override
+    public void resetVolumeChangeTracker() {
+        //No volume tracker for mraid ads
+    }
 }

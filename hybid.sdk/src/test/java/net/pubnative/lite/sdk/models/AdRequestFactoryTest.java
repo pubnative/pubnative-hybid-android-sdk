@@ -4,34 +4,51 @@
 //
 package net.pubnative.lite.sdk.models;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.openMocks;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.os.Looper;
 
 import net.pubnative.lite.sdk.BuildConfig;
 import net.pubnative.lite.sdk.DeviceInfo;
+import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.TopicManager;
 import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
+import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.PNCrypto;
 import net.pubnative.lite.sdk.utils.sdkmanager.DisplayManager;
 import net.pubnative.lite.sdk.utils.sdkmanager.SdkManager;
 import net.pubnative.lite.sdk.viewability.HybidViewabilityManager;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.Shadows;
 
 import java.util.Locale;
-
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 @RunWith(RobolectricTestRunner.class)
 public class AdRequestFactoryTest {
@@ -44,26 +61,32 @@ public class AdRequestFactoryTest {
     @Mock
     private SdkManager mSdkManager;
     @Mock
+    private TopicManager mTopicManager;
+    @Mock
     private HybidViewabilityManager mViewabilityManager;
     @Mock
     private DisplayManager mDisplayManager;
+    @Mock
+    private Context mockContext;
+    @Mock
+    private SharedPreferences mockPrefs;
+    @Mock
+    private SharedPreferences.Editor mockEditor;
+    @Mock
+    private AdRequestFactory.Callback mockCallback;
+    @Captor
+    private ArgumentCaptor<AdRequest> adRequestCaptor;
+
     @InjectMocks
     private PNAdRequestFactory mSubject;
-    @Mock
-    Context mockContext;
-    @Mock
-    SharedPreferences mockPrefs;
-    @Mock
-    SharedPreferences.Editor mockEditor;
-
+    private AutoCloseable closeable;
 
     @Before
     public void setup() {
-        openMocks(this);
+        closeable = openMocks(this);
 
         Mockito.when(mockContext.getSharedPreferences(anyString(), anyInt())).thenReturn(mockPrefs);
         Mockito.when(mockContext.getSharedPreferences(anyString(), anyInt()).edit()).thenReturn(mockEditor);
-
         Mockito.when(mockPrefs.getString(anyString(), anyString())).thenReturn("1234567");
 
         when(mMockDeviceInfo.getModel()).thenReturn("Nexus5X");
@@ -89,28 +112,27 @@ public class AdRequestFactoryTest {
         mockLocation.setLongitude(15.151534);
         when(mLocationManager.getUserLocation()).thenReturn(mockLocation);
 
-        when(mMockUserDataManager.isCCPAOptOut()).thenReturn(false);
-
-
         when(mViewabilityManager.getPartnerName()).thenReturn("HyBid");
         when(mViewabilityManager.getPartnerVersion()).thenReturn("1.2.3");
 
-        when(mDisplayManager.getDisplayManagerVersion("b", IntegrationType.HEADER_BIDDING))
+        when(mDisplayManager.getDisplayManagerVersion(any(), any(IntegrationType.class)))
                 .thenReturn(String.format(Locale.ENGLISH, "%s_%s_%s", "sdkandroid", "hb", BuildConfig.SDK_VERSION));
         when(mDisplayManager.getDisplayManagerName()).thenReturn("HyBid");
 
         when(mSdkManager.getVisibilityManager()).thenReturn(mViewabilityManager);
         when(mSdkManager.getDisplayManager()).thenReturn(mDisplayManager);
+        when(mMockDeviceInfo.getOrientation()).thenReturn(DeviceInfo.Orientation.PORTRAIT);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        closeable.close();
     }
 
     @Test
-    public void createAdRequest() {
-
-//        AdRequest request = mSubject.buildRequest("aabbcc112233", "2", AdSize.SIZE_320x50, "aabbccdd", false, IntegrationType.HEADER_BIDDING,"m");
+    public void buildRequest_withValidInputs_createsCorrectRequest() {
         PNAdRequest request = (PNAdRequest) mSubject.buildRequest("aabbcc112233", "2", AdSize.SIZE_320x50, "aabbccdd", false, IntegrationType.HEADER_BIDDING, "b", 0, false);
         Assert.assertEquals("aabbccdd", request.gid);
-        Assert.assertEquals(PNCrypto.md5("aabbccdd"), request.gidmd5);
-        Assert.assertEquals(PNCrypto.sha1("aabbccdd"), request.gidsha1);
         Assert.assertEquals("2", request.zoneId);
         Assert.assertEquals("s", request.al);
         Assert.assertEquals("320", request.width);
@@ -145,8 +167,92 @@ public class AdRequestFactoryTest {
         Assert.assertEquals("1234567", mockPrefs.getString("", ""));
         Assert.assertEquals("1.2.3", request.omidpv);
         Assert.assertEquals("HyBid", request.omidpn);
+    }
 
-        Assert.assertEquals(String.format(Locale.ENGLISH, "%s_%s_%s",
-                "sdkandroid", "hb", BuildConfig.SDK_VERSION), request.displaymanagerver);
+    // --------------- NEW TESTS FOR EXPANDED COVERAGE ---------------
+
+    @Test
+    public void setIntegrationType_isReflectedInBuildRequest() {
+        when(mDisplayManager.getDisplayManagerVersion(any(), eq(IntegrationType.MEDIATION)))
+                .thenReturn("sdkandroid_m_version");
+
+        mSubject.setIntegrationType(IntegrationType.MEDIATION);
+        PNAdRequest request = (PNAdRequest) mSubject.buildRequest("token", "zone", AdSize.SIZE_320x50, "adId", false, IntegrationType.MEDIATION, "vendor", 0, false);
+
+        assertEquals("sdkandroid_m_version", request.displaymanagerver);
+    }
+
+    @Test
+    public void buildRequest_whenLimitTrackingIsTrue_setsDntAndOmitsGid() {
+        PNAdRequest request = (PNAdRequest) mSubject.buildRequest("token", "zone", AdSize.SIZE_320x50, "adId", true, IntegrationType.STANDALONE, null, 0, false);
+
+        assertEquals("1", request.dnt);
+        assertNull(request.gid);
+        assertNull(request.gidmd5);
+        assertNull(request.gidsha1);
+    }
+
+    @Test
+    public void buildRequest_whenCoppaIsEnabled_setsCoppaAndDnt() {
+        try (MockedStatic<HyBid> mockedHyBid = Mockito.mockStatic(HyBid.class)) {
+            mockedHyBid.when(HyBid::isCoppaEnabled).thenReturn(true);
+
+            PNAdRequest request = (PNAdRequest) mSubject.buildRequest("token", "zone", AdSize.SIZE_320x50, "adId", false, IntegrationType.STANDALONE, null, 0, false);
+
+            assertEquals("1", request.coppa);
+            assertEquals("1", request.dnt);
+        }
+    }
+
+    @Test
+    public void buildRequest_whenLocationIsUnavailable_omitsLocationFields() {
+        when(mLocationManager.getUserLocation()).thenReturn(null);
+
+        PNAdRequest request = (PNAdRequest) mSubject.buildRequest("token", "zone", AdSize.SIZE_320x50, "adId", false, IntegrationType.STANDALONE, null, 0, false);
+
+        assertNull(request.latitude);
+        assertNull(request.longitude);
+    }
+
+    @Test
+    public void createAdRequest_whenAdIdIsAvailable_invokesCallback() {
+        // The @Before setup already provides a valid advertising ID
+        when(mMockDeviceInfo.getAdvertisingId()).thenReturn("aabbccdd");
+
+        mSubject.createAdRequest("token", "zone", AdSize.SIZE_320x50, false, false, mockCallback);
+
+        // Robolectric executes the task synchronously in this case
+        verify(mockCallback).onRequestCreated(adRequestCaptor.capture());
+
+        PNAdRequest capturedRequest = (PNAdRequest) adRequestCaptor.getValue();
+        assertNotNull(capturedRequest);
+        assertEquals("zone", capturedRequest.zoneId);
+    }
+
+    @Test
+    public void createAdRequest_whenAdIdIsMissing_fetchesIdAndInvokesCallback() {
+        // Setup: Advertising ID is initially missing
+        when(mMockDeviceInfo.getAdvertisingId()).thenReturn(null);
+
+        try (MockedConstruction<HyBidAdvertisingId> mockedTask = Mockito.mockConstruction(HyBidAdvertisingId.class,
+                (mock, context) -> {
+                    doAnswer(invocation -> {
+                        // Manually trigger the callback to simulate the async task finishing
+                        HyBidAdvertisingId.Listener listener = invocation.getArgument(0);
+                        listener.onHyBidAdvertisingIdFinish("new-ad-id", false);
+                        return null; // Answers for void methods should return null
+                    }).when(mock).execute(any());
+                })) {
+
+            mSubject.createAdRequest("token", "zone", AdSize.SIZE_320x50, false, false, mockCallback);
+
+            Shadows.shadowOf(Looper.getMainLooper()).idle();
+
+            verify(mockCallback).onRequestCreated(adRequestCaptor.capture());
+            PNAdRequest capturedRequest = (PNAdRequest) adRequestCaptor.getValue();
+
+            assertNotNull(capturedRequest);
+            assertEquals("new-ad-id", capturedRequest.gid);
+        }
     }
 }

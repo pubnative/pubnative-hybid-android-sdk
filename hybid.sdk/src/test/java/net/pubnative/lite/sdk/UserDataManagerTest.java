@@ -33,7 +33,6 @@ import java.util.Map;
  * This test class is specifically designed to handle the complex dependencies of UserDataManager,
  * including multiple SharedPreferences instances and static method calls.
  */
-@Ignore("Temporarily excluded")
 @RunWith(RobolectricTestRunner.class)
 public class UserDataManagerTest {
 

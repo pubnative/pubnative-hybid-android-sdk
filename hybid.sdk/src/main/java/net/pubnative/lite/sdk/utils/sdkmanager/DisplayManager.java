@@ -11,13 +11,13 @@ public class DisplayManager {
 
     private final String displayManagerName;
     private final String displayManagerVer;
-    private final Boolean isHybid;
+    private final Boolean isWrapped;
     private static final String DISPLAY_MANAGER_ENGINE = "sdkandroid";
 
     private DisplayManager(Builder builder) {
         this.displayManagerName = builder.displayManagerName;
         this.displayManagerVer = builder.displayManagerVer;
-        this.isHybid = builder.isHybid;
+        this.isWrapped = builder.isWrapped;
     }
 
     public String getDisplayManagerName() {
@@ -33,8 +33,12 @@ public class DisplayManager {
     }
 
     public String getDisplayManagerVersion(String mediationVendor, IntegrationType integrationType) {
-        if (!isHybid) {
-            return displayManagerVer;
+        if (isWrapped) {
+            if (!TextUtils.isEmpty(displayManagerVer)) {
+                return displayManagerVer;
+            } else {
+                return String.format("%s_%s", "sdk", BuildConfig.SDK_WRAPPER_VERSION);
+            }
         }
         String mediationValue = "";
 
@@ -43,7 +47,7 @@ public class DisplayManager {
         }
 
         return String.format(Locale.ENGLISH, "%s_%s%s_%s",
-                DISPLAY_MANAGER_ENGINE, integrationType.getCode(), mediationValue, BuildConfig.SDK_VERSION);
+                DISPLAY_MANAGER_ENGINE, integrationType.getCode(), mediationValue, BuildConfig.SDK_WRAPPER_VERSION);
     }
 
     public static Builder builder() {
@@ -51,7 +55,7 @@ public class DisplayManager {
     }
 
     public static class Builder {
-        private Boolean isHybid;
+        private Boolean isWrapped = false;
         private String displayManagerName;
         private String displayManagerVer;
 
@@ -65,8 +69,8 @@ public class DisplayManager {
             return this;
         }
 
-        public Builder setIsHybid(Boolean isHybid) {
-            this.isHybid = isHybid;
+        public Builder setIsWrapped(Boolean isWrapped) {
+            this.isWrapped = isWrapped;
             return this;
         }
 

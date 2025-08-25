@@ -28,11 +28,11 @@ public class IdUser extends JsonModel {
     @BindField
     public List<IdAudience> audiences;
 
-    public IdUser(){
+    public IdUser() {
 
     }
 
-    public IdUser(JSONObject jsonObject) throws Exception{
+    public IdUser(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
     }
 

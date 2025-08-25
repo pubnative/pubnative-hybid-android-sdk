@@ -9,8 +9,8 @@ plugins {
 //==================================================================================================
 def project_name = project.name
 def version_name = project.version
-if (branchName != null && buildNumber != null && branchName.toString() != "master") {
-    version_name = "${version_name}-${branchName}.${buildNumber}"
+if (branchName != null && buildNumber != null && branchName.toString() != "master" && !branchName.toString().contains("/")) {
+    version_name = "${version_name}-${branchName}"
     project_name = "${project_name}.beta"
 }
 version = version_name
@@ -34,16 +34,22 @@ android {
             minifyEnabled System.getenv("CI") ? true : false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'lite.sdk.pro'
             buildConfigField "String", "OMIDPV", "\"$omid_version\""
-            buildConfigField "String", "OMIDPN", "\"pubnativenet\""
+            buildConfigField "String", "OMIDPN", "\"Pubnativenet\""
             buildConfigField "String", "SDK_VERSION", "\"$version_name\""
+            buildConfigField "String", "SDK_WRAPPER_VERSION", "\"$version_name\""
+            buildConfigField "String", "DISPLAY_MANAGER_NAME", "\"HyBid\""
+            buildConfigField "Boolean", "IS_WRAPPED", "false"
             buildConfigField "String", "BASE_URL", "\"https://api.pubnative.net/\""
             buildConfigField "String", "BASE_RTB_URL", "\"https://dsp.pubnative.net/\""
         }
         debug {
             testCoverageEnabled = true
             buildConfigField "String", "OMIDPV", "\"$omid_version\""
-            buildConfigField "String", "OMIDPN", "\"pubnativenet\""
+            buildConfigField "String", "OMIDPN", "\"Pubnativenet\""
             buildConfigField "String", "SDK_VERSION", "\"$version_name\""
+            buildConfigField "String", "SDK_WRAPPER_VERSION", "\"$version_name\""
+            buildConfigField "String", "DISPLAY_MANAGER_NAME", "\"HyBid\""
+            buildConfigField "Boolean", "IS_WRAPPED", "false"
             buildConfigField "String", "BASE_URL", "\"https://api.pubnative.net/\""
             buildConfigField "String", "BASE_RTB_URL", "\"https://dsp.pubnative.net/\""
         }
@@ -92,16 +98,16 @@ tasks.register('repackageNG') {
 dependencies {
 
     implementation "net.pubnative:hybid.omsdk:$omid_version"
-
-    testImplementation 'com.google.truth:truth:1.1.3'
+    implementation "com.verve:atom.sdk:+"
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.robolectric:robolectric:4.14.1'
     testImplementation 'org.mockito:mockito-core:5.16.1'
-    testImplementation 'org.mockito:mockito-inline:4.5.1'
     testImplementation 'org.hamcrest:hamcrest:2.2'
     testImplementation 'com.google.truth:truth:1.1.3'
-    implementation "com.verve:atom.sdk:+"
+    testImplementation 'org.mockito:mockito-inline:4.5.1'
+
+
     testImplementation 'com.squareup.assertj:assertj-android:1.2.0'
     androidTestImplementation "androidx.test:runner:1.1.0-beta01", {
         exclude group: 'com.android.support', module: 'support-annotations'

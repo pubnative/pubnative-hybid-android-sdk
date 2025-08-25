@@ -15,11 +15,11 @@ public class IdGgl extends JsonModel {
     public String GAID;
 
 
-    public IdGgl(){
+    public IdGgl() {
 
     }
 
-    public IdGgl(JSONObject jsonObject) throws Exception{
+    public IdGgl(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
     }
 }

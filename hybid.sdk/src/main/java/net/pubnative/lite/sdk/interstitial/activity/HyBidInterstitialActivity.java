@@ -21,8 +21,10 @@ import net.pubnative.lite.sdk.interstitial.InterstitialActivityInteractor;
 import net.pubnative.lite.sdk.interstitial.viewModel.InterstitialViewModel;
 import net.pubnative.lite.sdk.interstitial.viewModel.MraidInterstitialViewModel;
 import net.pubnative.lite.sdk.interstitial.viewModel.VastInterstitialViewModel;
+import net.pubnative.lite.sdk.receiver.VolumeChangedActionReceiver;
 import net.pubnative.lite.sdk.views.CloseableContainer;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
+import net.pubnative.lite.sdk.vpaid.volume.VolumeObserver;
 
 public abstract class HyBidInterstitialActivity extends Activity implements InterstitialActivityInteractor {
 
@@ -65,6 +67,7 @@ public abstract class HyBidInterstitialActivity extends Activity implements Inte
     protected void dismiss() {
         mViewModel.sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
         mIsFinishing = true;
+        mViewModel.resetVolumeChangeTracker();
         finish();
     }
 
@@ -129,6 +132,8 @@ public abstract class HyBidInterstitialActivity extends Activity implements Inte
     @Override
     public void finishActivity() {
         mIsFinishing = true;
+        if (mViewModel != null)
+            mViewModel.resetVolumeChangeTracker();
         finish();
     }
 
@@ -165,6 +170,7 @@ public abstract class HyBidInterstitialActivity extends Activity implements Inte
         if (mCloseableContainer != null) {
             mCloseableContainer.removeAllViews();
         }
+        VolumeObserver.getInstance().reset();
         super.onDestroy();
     }
 
@@ -179,6 +185,18 @@ public abstract class HyBidInterstitialActivity extends Activity implements Inte
             return super.onKeyDown(keyCode, event);
         }
         return false;
+    }
+
+    @Override
+    protected void onPause() {
+        VolumeChangedActionReceiver.getInstance().unregister(this);
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        VolumeChangedActionReceiver.getInstance().register(this);
     }
 
     //For testing purposes

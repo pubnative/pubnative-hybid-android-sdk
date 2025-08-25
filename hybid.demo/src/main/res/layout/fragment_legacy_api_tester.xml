@@ -226,7 +226,8 @@
 
                 </LinearLayout>
 
-                <com.google.android.material.button.MaterialButton
+                 <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
                     android:id="@+id/customize_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -245,7 +246,8 @@
                 android:layout_marginBottom="8dp"
                 android:orientation="horizontal">
 
-                <com.google.android.material.button.MaterialButton
+                 <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
                     android:id="@+id/button_load"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -254,7 +256,8 @@
                     android:layout_weight="1"
                     android:text="@string/load" />
 
-                <com.google.android.material.button.MaterialButton
+                 <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
                     android:id="@+id/button_show"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

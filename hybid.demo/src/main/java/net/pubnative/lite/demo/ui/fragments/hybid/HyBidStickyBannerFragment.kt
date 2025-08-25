@@ -160,7 +160,7 @@ class HyBidStickyBannerFragment : Fragment(R.layout.fragment_sticky_top_bottom),
         super.onDestroy()
     }
 
-    override fun onCheckedChanged(group: RadioGroup?, checkedId: Int) {
+    override fun onCheckedChanged(group: RadioGroup, checkedId: Int) {
         if (checkedId == R.id.radioTop) {
             mPosition = HyBidAdView.Position.TOP
         } else if (checkedId == R.id.radioBottom) {

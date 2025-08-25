@@ -10,7 +10,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
             android:id="@+id/button_event_report"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -19,7 +20,8 @@
             android:layout_marginEnd="16dp"
             android:text="@string/sdk_event_report" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
             android:id="@+id/button_tracker_report"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -28,7 +30,8 @@
             android:layout_marginEnd="16dp"
             android:text="@string/tracker_report" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
             android:id="@+id/button_beacon_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -37,7 +40,8 @@
             android:layout_marginEnd="16dp"
             android:text="@string/beacon_list" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
             android:id="@+id/button_url_inspector"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

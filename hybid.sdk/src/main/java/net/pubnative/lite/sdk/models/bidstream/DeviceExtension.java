@@ -9,6 +9,8 @@ import net.pubnative.lite.sdk.utils.json.JsonModel;
 
 import java.util.List;
 
+import org.json.JSONObject;
+
 public class DeviceExtension extends JsonModel {
     @BindField
     public List<String> inputlanguages;
@@ -32,6 +34,13 @@ public class DeviceExtension extends JsonModel {
     public Integer headset;
     @BindField
     public Integer ringmute;
+
+    public DeviceExtension() {
+    }
+
+    public DeviceExtension(JSONObject jsonObject) throws Exception {
+        fromJson(jsonObject);
+    }
 
     public DeviceExtension(List<String> inputlanguages, Integer charging, Integer batterylevel, Integer batterysaver, Integer diskspace, Integer totaldisk, Integer darkmode, Integer dnd, Integer airplane, Integer headset, Integer ringmute) {
         this.inputlanguages = inputlanguages;

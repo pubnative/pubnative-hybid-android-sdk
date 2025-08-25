@@ -221,7 +221,8 @@
             android:textColor="@android:color/black"
             android:textSize="14sp" />
 
-        <com.google.android.material.button.MaterialButton
+         <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
             android:id="@+id/button_keywords"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -230,7 +231,8 @@
             android:layout_marginEnd="16dp"
             android:text="@string/title_pn_keywords" />
 
-        <com.google.android.material.button.MaterialButton
+         <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
             android:id="@+id/button_zone_ids"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -239,7 +241,8 @@
             android:layout_marginEnd="16dp"
             android:text="@string/title_pn_zone_ids" />
 
-        <com.google.android.material.button.MaterialButton
+         <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
             android:id="@+id/button_browser_priority"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -248,7 +251,8 @@
             android:layout_marginEnd="16dp"
             android:text="@string/title_browser_priority" />
 
-        <com.google.android.material.button.MaterialButton
+         <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
             android:id="@+id/button_geolocation_permission"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -257,7 +261,8 @@
             android:layout_marginEnd="16dp"
             android:text="@string/title_geolocation_permission" />
 
-        <com.google.android.material.button.MaterialButton
+         <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
             android:id="@+id/button_save_pn_settings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

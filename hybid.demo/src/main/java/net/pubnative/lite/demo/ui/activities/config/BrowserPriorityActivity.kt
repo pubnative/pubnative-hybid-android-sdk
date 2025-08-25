@@ -9,8 +9,9 @@ import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.ui.activities.HybidDemoMainActivity
 
-class BrowserPriorityActivity : AppCompatActivity() {
+class BrowserPriorityActivity : HybidDemoMainActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_browser_priorities)

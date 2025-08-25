@@ -263,7 +263,7 @@
     <string name="tracker_report_url" translatable="false">Tracker url:</string>
     <string name="tracker_content" translatable="false">Content:</string>
     <string name="beacon_list" translatable="false">Beacon List</string>
-    <string name="action_dismiss" translatable="false">Dismiss</string>
+    <string name="action_dismiss" translatable="false">DISMISS</string>
     <string name="event_details" translatable="false">Event details</string>
     <string name="url_inspector" translatable="false">URL Inspector</string>
 

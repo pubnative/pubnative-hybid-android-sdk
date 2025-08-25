@@ -25,7 +25,6 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.util.HashMap;
 
-@Ignore("Temporarily excluded")
 @RunWith(RobolectricTestRunner.class)
 public class RequestManagerTest {
     private RequestManager mSubject;

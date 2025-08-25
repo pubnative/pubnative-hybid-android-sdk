@@ -115,8 +115,8 @@ public class MRAIDView extends FrameLayout {
     private Integer mNativeCloseButtonDelay = -1;
     private Boolean mIsAdPlayable;
     private int mPlayableSkipOffset = -1;
-    private Integer mClickCounter = 0;
     private Boolean isBackClickable = false;
+    private boolean isTimerFinished = false;
     private SimpleTimer mExpirationTimer;
     private SimpleTimer mNativeCloseButtonTimer;
     private SimpleTimer mAntilockTimer;
@@ -2239,6 +2239,7 @@ public class MRAIDView extends FrameLayout {
                 public void onFinish() {
                     listener.mraidShowCloseButton();
                     isBackClickable = true;
+                    isTimerFinished = true;
                     if (mSkipCountdownView != null) mSkipCountdownView.setVisibility(View.GONE);
                 }
 
@@ -2283,7 +2284,7 @@ public class MRAIDView extends FrameLayout {
                     cancelLandingPageBehaviour();
                     break;
                 case "c":
-                    if (mSkipCountdownView != null) {
+                    if (mSkipCountdownView != null && !isTimerFinished) {
                         mSkipCountdownView.setVisibility(View.VISIBLE);
                     }
                     break;

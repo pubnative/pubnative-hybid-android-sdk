@@ -15,11 +15,11 @@ public class IdLr extends JsonModel {
     public String IDL;
 
 
-    public IdLr(){
+    public IdLr() {
 
     }
 
-    public IdLr(JSONObject jsonObject) throws Exception{
+    public IdLr(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
     }
 

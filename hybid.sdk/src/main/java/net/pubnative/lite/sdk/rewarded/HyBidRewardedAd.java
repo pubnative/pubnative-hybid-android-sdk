@@ -39,6 +39,7 @@ import net.pubnative.lite.sdk.utils.json.JsonOperations;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
+import net.pubnative.lite.sdk.vpaid.vast.VastUrlParameters;
 import net.pubnative.lite.sdk.vpaid.vast.VastUrlUtils;
 
 import org.json.JSONObject;
@@ -341,8 +342,8 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     }
 
     public void prepareVideoTag(final String zoneId, final String adValue) {
-
-        String url = VastUrlUtils.formatURL(adValue);
+        VastUrlParameters params = VastUrlUtils.buildParameters();
+        String url = VastUrlUtils.formatURL(adValue, params);
 
         Map<String, String> headers = new HashMap<>();
         String userAgent = HyBid.getDeviceInfo().getUserAgent();
@@ -529,11 +530,6 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
 
     protected void invokeOnOpened() {
         if (mContext != null) {
-//            DBManager dbManager = new DBManager(mContext);
-//            dbManager.open();
-//            dbManager.insert(mZoneId);
-//            dbManager.close();
-
             SessionImpressionPrefs prefs = new SessionImpressionPrefs(mContext);
             prefs.insert(mAd.getZoneId());
 

@@ -18,11 +18,11 @@ public class IdUserVendor extends JsonModel {
     public IdApl APL;
 
 
-    public IdUserVendor(){
+    public IdUserVendor() {
 
     }
 
-    public IdUserVendor(JSONObject jsonObject) throws Exception{
+    public IdUserVendor(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
     }
 }

@@ -23,11 +23,11 @@ public class IdApp extends JsonModel {
     public IdPrivacy privacy;
 
 
-    public IdApp(){
+    public IdApp() {
 
     }
 
-    public IdApp(JSONObject jsonObject) throws Exception{
+    public IdApp(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
     }
 

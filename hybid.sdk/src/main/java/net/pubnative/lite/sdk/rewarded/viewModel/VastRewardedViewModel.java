@@ -30,11 +30,12 @@ import net.pubnative.lite.sdk.vpaid.VideoAd;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdListener;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
+import net.pubnative.lite.sdk.vpaid.volume.VolumeObserver;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class VastRewardedViewModel extends RewardedViewModel implements AdPresenter.ImpressionListener, AdCloseButtonListener {
+public class VastRewardedViewModel extends RewardedViewModel implements AdPresenter.ImpressionListener, AdCloseButtonListener, VolumeObserver.VolumeChangeListener {
 
     private static final String TAG = VastRewardedViewModel.class.getSimpleName();
 
@@ -74,6 +75,11 @@ public class VastRewardedViewModel extends RewardedViewModel implements AdPresen
         initiateEventTrackers();
         processRewardedAd();
         listener.setContentLayout();
+        initVolumeTracker();
+    }
+
+    private void initVolumeTracker() {
+        VolumeObserver.getInstance().setListener(this);
     }
 
     private void initiateCustomCTAAdTrackers() {
@@ -440,5 +446,15 @@ public class VastRewardedViewModel extends RewardedViewModel implements AdPresen
             mIsAdPausedBeforeRender = false;
             mReady = false;
         }
+    }
+
+    @Override
+    public void onVolumeChanged() {
+        mVideoAd.onVolumeChanged();
+    }
+
+    @Override
+    public void resetVolumeChangeTracker() {
+        VolumeObserver.getInstance().reset();
     }
 }

@@ -35,7 +35,8 @@
             android:orientation="horizontal"
             android:weightSum="2">
 
-            <com.google.android.material.button.MaterialButton
+             <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
                 android:id="@+id/button_set_gdpr_consent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -43,7 +44,8 @@
                 android:layout_weight="1"
                 android:text="@string/action_set" />
 
-            <com.google.android.material.button.MaterialButton
+             <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
                 android:id="@+id/button_remove_gdpr_consent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -76,7 +78,8 @@
             android:orientation="horizontal"
             android:weightSum="2">
 
-            <com.google.android.material.button.MaterialButton
+             <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
                 android:id="@+id/button_set_ccpa_consent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -84,7 +87,8 @@
                 android:layout_weight="1"
                 android:text="@string/action_set" />
 
-            <com.google.android.material.button.MaterialButton
+             <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
                 android:id="@+id/button_remove_ccpa_consent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

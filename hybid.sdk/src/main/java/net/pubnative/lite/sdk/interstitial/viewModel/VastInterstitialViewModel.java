@@ -30,11 +30,12 @@ import net.pubnative.lite.sdk.vpaid.VideoAd;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdListener;
 import net.pubnative.lite.sdk.vpaid.VideoAdView;
+import net.pubnative.lite.sdk.vpaid.volume.VolumeObserver;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class VastInterstitialViewModel extends InterstitialViewModel implements AdPresenter.ImpressionListener, AdCloseButtonListener {
+public class VastInterstitialViewModel extends InterstitialViewModel implements AdPresenter.ImpressionListener, AdCloseButtonListener, VolumeObserver.VolumeChangeListener {
 
     private static final String TAG = VastInterstitialViewModel.class.getSimpleName();
 
@@ -73,6 +74,11 @@ public class VastInterstitialViewModel extends InterstitialViewModel implements 
         initiateEventTrackers();
         processInterstitialAd();
         listener.setContentLayout();
+        initVolumeTracker();
+    }
+
+    private void initVolumeTracker() {
+        VolumeObserver.getInstance().setListener(this);
     }
 
     @Override
@@ -141,6 +147,11 @@ public class VastInterstitialViewModel extends InterstitialViewModel implements 
             mIsAdPausedBeforeRender = false;
             mReady = false;
         }
+    }
+
+    @Override
+    public void resetVolumeChangeTracker() {
+        VolumeObserver.getInstance().reset();
     }
 
     private void initiateCustomCTAAdTrackers() {
@@ -436,5 +447,10 @@ public class VastInterstitialViewModel extends InterstitialViewModel implements 
     public void showButton() {
         if (!mHasEndCard) mIsSkippable = true;
         mListener.showInterstitialCloseButton(mCloseListener);
+    }
+
+    @Override
+    public void onVolumeChanged() {
+        mVideoAd.onVolumeChanged();
     }
 }

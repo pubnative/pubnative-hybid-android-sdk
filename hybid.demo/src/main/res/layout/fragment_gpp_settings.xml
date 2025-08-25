@@ -10,7 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.google.android.material.button.MaterialButton
+         <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
             android:id="@+id/button_trigger_onetrust_consent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -170,7 +171,8 @@
                 android:orientation="horizontal"
                 android:weightSum="2">
 
-                <com.google.android.material.button.MaterialButton
+                 <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
                     android:id="@+id/button_set_gpp_string"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -178,7 +180,8 @@
                     android:layout_weight="1"
                     android:text="@string/action_set" />
 
-                <com.google.android.material.button.MaterialButton
+                 <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
                     android:id="@+id/button_delete_gpp_string"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -213,7 +216,8 @@
                 android:orientation="horizontal"
                 android:weightSum="2">
 
-                <com.google.android.material.button.MaterialButton
+                 <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
                     android:id="@+id/button_set_gppsid"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -221,7 +225,8 @@
                     android:layout_weight="1"
                     android:text="@string/action_set" />
 
-                <com.google.android.material.button.MaterialButton
+                 <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
                     android:id="@+id/button_delete_gppsid"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -230,7 +235,8 @@
                     android:text="@string/action_delete" />
             </LinearLayout>
 
-            <com.google.android.material.button.MaterialButton
+             <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
                 android:id="@+id/button_delete_gpp_data"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"

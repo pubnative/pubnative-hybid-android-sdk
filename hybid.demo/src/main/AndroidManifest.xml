@@ -29,10 +29,10 @@
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning,UnusedAttribute"
         tools:replace="android:allowBackup">
-
         <activity
             android:name=".ui.activities.NavigationActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
+            android:theme="@style/HyBidDemoAppTheme"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -46,366 +46,366 @@
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/hybid_native"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.hybid.HyBidBannerActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/hybid_banner"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.hybid.HyBidStickyBannerActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/hybid_banner"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.hybid.HyBidInFeedBannerActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/hybid_medium"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.hybid.HyBidInterstitialActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/hybid_interstitial"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.hybid.HyBidRewardedActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/hybid_rewarded"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.maxads.MaxAdsMediationBannerActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/maxads_banner"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.maxads.MaxAdsMediationMRectActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/maxads_mrect"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.maxads.MaxAdsMediationMRectVideoActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/maxads_mrect_video"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.maxads.MaxAdsMediationInterstitialActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/maxads_interstitial"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.maxads.MaxAdsMediationInterstitialVideoActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/maxads_interstitial_video"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.maxads.MaxAdsMediationRewardedActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/maxads_rewarded"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.maxads.MaxAdsMediationRewardedVideoActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/maxads_rewarded"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.maxads.MaxAdsMediationNativeActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/maxads_native"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.dfp.DFPMediationBannerActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/dfp_banner"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.dfp.DFPMediationMRectActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/dfp_medium"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.dfp.DFPMediationLeaderboardActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/dfp_leaderboard"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.dfp.DFPMediationInterstitialActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/dfp_interstitial"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.admob.AdmobMediationBannerActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/admob_banner"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.admob.AdmobMediationMRectActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/admob_medium"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.admob.AdmobMediationMRectVideoActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/admob_medium"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.admob.AdmobMediationLeaderboardActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/admob_leaderboard"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.admob.AdmobMediationInterstitialActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/admob_interstitial"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.admob.AdmobMediationInterstitialVideoActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/admob_interstitial_video"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.admob.AdmobMediationRewardedActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/admob_rewarded"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.admob.AdmobMediationNativeActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/admob_native"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.ironsource.IronSourceMediationBannerActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/ironsource_banner"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.ironsource.IronSourceMediationInterstitialActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/ironsource_interstitial"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.ironsource.IronSourceMediationRewardedActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/ironsource_rewarded"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.chartboost.ChartboostMediationBannerActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/chartboost_mediation_banner"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.chartboost.ChartboostMediationMRectActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/chartboost_mediation_mrect"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.chartboost.ChartboostMediationMRectVideoActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/chartboost_mediation_mrect_video"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.chartboost.ChartboostMediationLeaderboardActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/chartboost_mediation_leaderboard"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.chartboost.ChartboostMediationInterstitialActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/chartboost_mediation_interstitial"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.chartboost.ChartboostMediationInterstitialVideoActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/chartboost_mediation_interstitial_video"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.chartboost.ChartboostMediationRewardedVideoActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/chartboost_mediation_rewarded_video"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.chartboost.ChartboostMediationRewardedHtmlActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/chartboost_mediation_rewarded_html"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.config.HyBidSettingsActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/pn_settings"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/HyBidDemoAppTheme"
             android:resizeableActivity="true"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.activities.AdCustomizationActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/pn_settings"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/HyBidDemoAppTheme"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.activities.config.MaxAdsSettingsActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/maxads_settings"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/HyBidDemoAppTheme"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.activities.config.DFPSettingsActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/dfp_settings"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/HyBidDemoAppTheme"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.activities.config.AdmobSettingsActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/admob_settings"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/HyBidDemoAppTheme"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.activities.config.IronSourceSettingsActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/ironsource_settings"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/HyBidDemoAppTheme"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.activities.config.ChartboostSettingsActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/chartboost_settings"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/HyBidDemoAppTheme"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.activities.config.KeywordsActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/title_pn_keywords"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/HyBidDemoAppTheme"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.activities.config.ZoneIdsActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/title_pn_zone_ids"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/HyBidDemoAppTheme"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.activities.config.BrowserPriorityActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/title_browser_priority"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/HyBidDemoAppTheme"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.activities.markup.MarkupActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/title_markup"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.apitester.LegacyApiTesterActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
             android:label="@string/title_legacy_api"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.creativetester.P161CreativeTesterActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
             android:label="@string/title_creative_tester"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
         <activity
             android:name=".ui.activities.signaldata.SignalDataActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
             android:label="@string/title_signal_data_tester"
             android:resizeableActivity="true"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/HyBidDemoAppTheme" />
 
         <activity
             android:name=".ui.activities.CustomSDKDataActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/custom_sdk_data"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/HyBidDemoAppTheme"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.activities.ReportingEventDetailsActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/event_details"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/HyBidDemoAppTheme"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.activities.UrlInspectorActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/url_inspector"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/HyBidDemoAppTheme"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.activities.BeaconListActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/beacon_list"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/HyBidDemoAppTheme"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.activities.consent.VgiIdActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/title_vgi_id"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/HyBidDemoAppTheme"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.activities.consent.GoogleCMPActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/title_google_cmp"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/HyBidDemoAppTheme"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.activities.consent.ConsentStringsActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/title_consent_strings"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/HyBidDemoAppTheme"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.activities.consent.GppSettingsActivity"
             android:label="@string/title_gpp_settings"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/HyBidDemoAppTheme"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.activities.vast.VastTagRequestActivity"
             android:label="@string/title_vast_tag"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/HyBidDemoAppTheme"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.activities.admob.MediationTestSuiteActivity"
             android:label="@string/admob_settings"
-            android:theme="@style/AppTheme.NoActionBar"
+            android:theme="@style/HyBidDemoAppTheme"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name="com.ironsource.sdk.controller.ControllerActivity"

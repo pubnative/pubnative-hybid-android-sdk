@@ -103,6 +103,19 @@ public class TestUtil {
         return ad;
     }
 
+    public static Ad createHeaderBiddingTestAd(int assetGroupId,Integer eCPM) {
+        Ad ad = new Ad();
+        ad.assetgroupid = assetGroupId;
+        ad.assets = createMockAssets();
+        try {
+            ad.meta = createMockHeaderBiddingMeta(eCPM);
+        } catch (JSONException e) {
+            ad.meta = null;
+        }
+        ad.beacons = createMockBeacons();
+        return ad;
+    }
+
     public static Ad createTestAdForAtomAdSession(int assetGroupId) {
         Ad ad = new Ad();
         ad.assetgroupid = assetGroupId;
@@ -141,7 +154,7 @@ public class TestUtil {
         List<AdData> meta = new ArrayList<>(3);
 
         AdData pointsMeta = new AdData();
-        pointsMeta.type = "points";
+        createPointsMetaData(pointsMeta);
         pointsMeta.data = new HashMap<>(1);
         pointsMeta.data.put("number", 9);
 
@@ -186,11 +199,28 @@ public class TestUtil {
         return meta;
     }
 
+    private static void createPointsMetaData(AdData pointsMeta) {
+        pointsMeta.type = "points";
+    }
+
+    public static List<AdData> createMockHeaderBiddingMeta(Integer eCPM) throws JSONException {
+        List<AdData> meta = new ArrayList<>(1);
+
+        AdData pointsMeta = new AdData();
+        createPointsMetaData(pointsMeta);
+        pointsMeta.data = new HashMap<>(1);
+        pointsMeta.data.put("number", eCPM);
+
+        meta.add(pointsMeta);
+
+        return meta;
+    }
+
     private static List<AdData> createMockMetaForAtomAdSession() {
         List<AdData> meta = new ArrayList<>(4);
 
         AdData pointsMeta = new AdData();
-        pointsMeta.type = "points";
+        createPointsMetaData(pointsMeta);
         pointsMeta.data = new HashMap<>(1);
         pointsMeta.data.put("number", 9);
 

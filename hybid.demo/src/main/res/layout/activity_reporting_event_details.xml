@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="net.pubnative.lite.demo.ui.activities.ReportingEventDetailsActivity">
+    android:fitsSystemWindows="true"
+    tools:context=".ui.activities.signaldata.SignalDataActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -26,7 +27,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:layout="@layout/fragment_reporting_event_details"
-        tools:ignore="FragmentTagUsage" />
+        tools:ignore="FragmentTagUsage"
+        tools:layout="@layout/fragment_reporting_event_details" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

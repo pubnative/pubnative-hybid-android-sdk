@@ -4,6 +4,8 @@
 //
 package net.pubnative.lite.sdk.utils;
 
+import android.text.TextUtils;
+
 import net.pubnative.lite.sdk.HyBid;
 
 import java.io.UnsupportedEncodingException;
@@ -13,6 +15,8 @@ public class EncodingUtils {
     private static final String TAG = EncodingUtils.class.getSimpleName();
 
     public static String urlEncode(String value) {
+        if (TextUtils.isEmpty(value))
+            return "";
         try {
             return URLEncoder.encode(value, "utf-8");
         } catch (UnsupportedEncodingException e) {

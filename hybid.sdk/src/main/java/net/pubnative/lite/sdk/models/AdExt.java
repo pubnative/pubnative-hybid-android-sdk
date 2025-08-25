@@ -14,7 +14,10 @@ import java.util.Map;
 public class AdExt extends JsonModel {
 
     @BindField
-    protected Map meta;
+    protected Map<String, Object> meta;
+
+    public AdExt() {
+    }
 
     public AdExt(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);

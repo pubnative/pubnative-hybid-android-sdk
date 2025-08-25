@@ -7,7 +7,6 @@ package net.pubnative.lite.demo.ui.activities.apitester
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.ui.activities.TabActivity
 import net.pubnative.lite.demo.ui.fragments.apitester.LegacyApiTesterFragment
-import net.pubnative.lite.demo.ui.fragments.vast.VastTagRequestFragment
 
 class LegacyApiTesterActivity : TabActivity() {
 

@@ -18,12 +18,11 @@ public class IdBattery extends JsonModel {
     public Boolean charging;
 
 
-
-    public IdBattery(){
+    public IdBattery() {
 
     }
 
-    public IdBattery(JSONObject jsonObject) throws Exception{
+    public IdBattery(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
     }
 

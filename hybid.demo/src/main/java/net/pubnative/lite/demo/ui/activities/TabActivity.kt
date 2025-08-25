@@ -2,63 +2,51 @@
 //
 // https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
 //
-
 package net.pubnative.lite.demo.ui.activities
 
 import android.os.Bundle
 import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.tabs.TabLayout
 import net.pubnative.lite.demo.R
+import net.pubnative.lite.demo.databinding.ActivityTabBinding
 import net.pubnative.lite.demo.ui.fragments.DebugFragment
 import net.pubnative.lite.demo.viewmodel.DebugViewModel
 import net.pubnative.lite.sdk.mraid.utils.MraidCloseAdRepo
 
-abstract class TabActivity : AppCompatActivity() {
+abstract class TabActivity() : HybidDemoMainActivity() {
 
-    /**
-     * The [android.support.v4.view.PagerAdapter] that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * [android.support.v4.app.FragmentStatePagerAdapter].
-     */
     private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
 
     lateinit var debugViewModel: DebugViewModel
-
-    private lateinit var container: androidx.viewpager.widget.ViewPager
-    private lateinit var tabs: TabLayout
+    lateinit var binding: ActivityTabBinding
 
     private lateinit var debugFragment: DebugFragment
     private lateinit var adFragment: androidx.fragment.app.Fragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_tab)
+        binding = ActivityTabBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        setupEdgeToEdge()
+        setupToolbar()
+        setupTabs()
+        setupViewPager()
+        debugViewModel = ViewModelProvider(this).get(DebugViewModel::class.java)
+        debugFragment = DebugFragment()
+        adFragment = getAdFragment()
+    }
 
-        setSupportActionBar(findViewById(R.id.toolbar))
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setDisplayShowHomeEnabled(true)
-
-        supportActionBar?.title = getActivityTitle()
-
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
-        mSectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
-
-        // Set up the ViewPager with the sections adapter.
-        container = findViewById(R.id.container)
-        tabs = findViewById(R.id.tabs)
-
-        container.adapter = mSectionsPagerAdapter
-
-        container.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabs))
-        tabs.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(container))
-        tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+    private fun setupTabs() {
+        binding.tabs.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(binding.container))
+        binding.tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 MraidCloseAdRepo.getInstance().notifyTabChanged()
             }
@@ -71,10 +59,20 @@ abstract class TabActivity : AppCompatActivity() {
                 // Tab reselected
             }
         })
-        debugViewModel = ViewModelProvider(this).get(DebugViewModel::class.java)
+    }
 
-        debugFragment = DebugFragment()
-        adFragment = getAdFragment()
+    private fun setupViewPager() {
+        mSectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
+        binding.container.adapter = mSectionsPagerAdapter
+        binding.container.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(binding.tabs))
+    }
+
+    private fun setupEdgeToEdge() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.rootLayout) { view, insets ->
+            val sysBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(0, sysBars.top, 0, sysBars.bottom)
+            insets
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -129,6 +127,13 @@ abstract class TabActivity : AppCompatActivity() {
 
     fun notifyAdUpdated() {
         debugViewModel.updateLogs()
+    }
+
+    private fun setupToolbar() {
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
+        supportActionBar?.title = getActivityTitle()
     }
 
     abstract fun getAdFragment(): androidx.fragment.app.Fragment

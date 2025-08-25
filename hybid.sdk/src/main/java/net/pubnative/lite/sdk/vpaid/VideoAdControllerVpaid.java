@@ -103,6 +103,11 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
 
     }
 
+    @Override
+    public void onVolumeChanged() {
+
+    }
+
     //region VideoAdController methods
     @Override
     public void prepare(OnPreparedListener listener) {

@@ -15,11 +15,11 @@ public class IdTtd extends JsonModel {
     public String IDL;
 
 
-    public IdTtd(){
+    public IdTtd() {
 
     }
 
-    public IdTtd(JSONObject jsonObject) throws Exception{
+    public IdTtd(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
     }
 

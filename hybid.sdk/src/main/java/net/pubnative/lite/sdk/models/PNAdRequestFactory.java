@@ -85,10 +85,6 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
         mIsRewarded = isRewarded;
         if (TextUtils.isEmpty(deviceInfoAdvertisingId) && context != null) {
             try {
-//                DBManager dbManager = new DBManager(mDeviceInfo.getContext());
-//                dbManager.open();
-//                int impDepth = dbManager.getImpressionDepth(zoneid);
-//                dbManager.close();
                 SessionImpressionPrefs prefs = new SessionImpressionPrefs(mDeviceInfo.getContext());
                 int impDepth = prefs.getImpressionDepth(zoneid);
                 HyBidAdvertisingId hyBidAdvertisingIdTask = new HyBidAdvertisingId(context);
@@ -102,11 +98,6 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
             }
         } else {
             if (mDeviceInfo != null && mDeviceInfo.getContext() != null) {
-//                DBManager dbManager = new DBManager(mDeviceInfo.getContext());
-//                dbManager.open();
-//                int impDepth = dbManager.getImpressionDepth(zoneid);
-//                dbManager.close();
-
                 SessionImpressionPrefs prefs = new SessionImpressionPrefs(mDeviceInfo.getContext());
                 int impDepth = prefs.getImpressionDepth(zoneid);
 

@@ -227,4 +227,10 @@ public class VideoAd extends BaseVideoAd {
     public void closeVideo() {
         getAdController().closeSelf();
     }
+
+    public void onVolumeChanged() {
+        if (getAdController() != null) {
+            getAdController().onVolumeChanged();
+        }
+    }
 }

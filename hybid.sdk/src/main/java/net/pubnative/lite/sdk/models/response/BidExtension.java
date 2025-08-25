@@ -20,6 +20,9 @@ public class BidExtension extends JsonModel {
     @BindField
     private String signaldata;
 
+    public BidExtension() {
+    }
+
     public BidExtension(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
     }

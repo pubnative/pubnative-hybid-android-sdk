@@ -75,7 +75,8 @@
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.button.MaterialButton
+         <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
             android:id="@+id/button_init_ironsource"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -84,7 +85,8 @@
             android:layout_marginEnd="16dp"
             android:text="@string/init_ironsouce" />
 
-        <com.google.android.material.button.MaterialButton
+         <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
             android:id="@+id/button_ironsource_mediation_test"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -93,7 +95,8 @@
             android:layout_marginEnd="16dp"
             android:text="@string/mediation_test_suite" />
 
-        <com.google.android.material.button.MaterialButton
+         <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
             android:id="@+id/button_save_ironsource_settings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

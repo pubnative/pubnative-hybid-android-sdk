@@ -24,6 +24,8 @@ public interface VideoAdController {
 
     void onEndCardClosed(Boolean isCustomEndCard);
 
+    void onVolumeChanged();
+
     interface OnPreparedListener {
         void onPrepared();
     }

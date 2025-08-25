@@ -24,11 +24,11 @@ public class IdPrivacy extends JsonModel {
     public String iab_ccpa;
 
 
-    public IdPrivacy(){
+    public IdPrivacy() {
 
     }
 
-    public IdPrivacy(JSONObject jsonObject) throws Exception{
+    public IdPrivacy(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
     }
 }

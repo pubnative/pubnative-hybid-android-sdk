@@ -46,7 +46,6 @@ import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.utils.UrlClickSource;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
 import net.pubnative.lite.sdk.vpaid.vast.ViewControllerVast;
-import net.pubnative.lite.sdk.vpaid.volume.IVolumeObserver;
 import net.pubnative.lite.sdk.vpaid.volume.VolumeObserver;
 
 import java.io.IOException;
@@ -58,7 +57,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Vector;
 
-class VideoAdControllerVast implements VideoAdController, IVolumeObserver, ReplayListener {
+class VideoAdControllerVast implements VideoAdController, ReplayListener {
 
     private static final String LOG_TAG = VideoAdControllerVast.class.getSimpleName();
     private static final int DELAY_UNTIL_EXECUTE = 100;
@@ -107,8 +106,6 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver, Repla
     private final List<HyBidViewabilityFriendlyObstruction> mViewabilityFriendlyObstructions;
     private Boolean isAndroid6VersionDevice = false;
 
-    private final VolumeObserver observer;
-
     private final Map<Action, List<Action>> mPendingActions = new LinkedHashMap<>();
     private final List<Action> mActions = new Vector<>();
     private final Handler mActionsProcessingHandler = new Handler(Looper.getMainLooper());
@@ -152,8 +149,6 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver, Repla
             this.videoVisible = true;
         }
         this.isFullscreen = isFullscreen;
-        observer = VolumeObserver.getInstance();
-        observer.registerVolumeObserver(this, mBaseAdInternal.getContext());
         this.mImpressionListener = impressionListener;
 
         if (mBaseAdInternal.getAd().isBrandAd()) {
@@ -416,7 +411,6 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver, Repla
             addAction(Action.PAUSE);
         }
         mViewControllerVast.pause();
-        observer.unregisterVolumeObserver(this, mBaseAdInternal.getContext());
         processActions();
     }
 
@@ -1074,12 +1068,10 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver, Repla
     @Override
     public void dismiss() {
         mViewControllerVast.dismiss();
-        observer.unregisterVolumeObserver(this, mBaseAdInternal.getContext());
     }
 
     @Override
     public void destroy() {
-        observer.unregisterVolumeObserver(this, mBaseAdInternal.getContext());
         if (mMediaPlayer != null) {
             try {
                 mMediaPlayer.release();
@@ -1121,7 +1113,6 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver, Repla
         } else {
             resumeAd();
         }
-        observer.registerVolumeObserver(this, mBaseAdInternal.getContext());
     }
 
     private final TextureView.SurfaceTextureListener mCreateTextureListener = new TextureView.SurfaceTextureListener() {
@@ -1313,7 +1304,7 @@ class VideoAdControllerVast implements VideoAdController, IVolumeObserver, Repla
     }
 
     @Override
-    public void onSystemVolumeChanged() {
+    public void onVolumeChanged() {
         muteVideo(mViewControllerVast.isMute(), false);
     }
 

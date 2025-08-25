@@ -5,70 +5,69 @@
 package net.pubnative.lite.demo.ui.activities
 
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
 import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI
-import net.pubnative.lite.demo.Constants
 import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.databinding.ActivityNavigationBinding
 import net.pubnative.lite.demo.ui.dialogs.SDKConfigDialog
 import net.pubnative.lite.demo.ui.dialogs.SDKConfigDialogManager
 import net.pubnative.lite.demo.util.OneTrustManager
-import net.pubnative.lite.sdk.HyBid
-import net.pubnative.lite.sdk.TopicManager
 import net.pubnative.lite.sdk.api.ApiManager
-import net.pubnative.lite.sdk.api.SDKConfigAPiClient
 
-class NavigationActivity : AppCompatActivity(), SDKConfigDialog.OnDismissListener {
+
+class NavigationActivity : HybidDemoMainActivity(), SDKConfigDialog.OnDismissListener {
 
     private val PERMISSION_REQUEST = 1000
 
     private lateinit var binding: ActivityNavigationBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            enableEdgeToEdge()
-        }
         super.onCreate(savedInstanceState)
         binding = ActivityNavigationBinding.inflate(layoutInflater)
-        val view = binding.root
-
-        setContentView(view)
-
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
-                val bars = insets.getInsets(
-                    WindowInsetsCompat.Type.systemBars()
-                            or WindowInsetsCompat.Type.displayCutout()
-                )
-                v.updatePadding(
-                    left = bars.left,
-                    top = bars.top,
-                    right = bars.right,
-                    bottom = bars.bottom,
-                )
-                WindowInsetsCompat.CONSUMED
-            }
+        setContentView(binding.root)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            binding.appBarLayout.setPadding(0, systemBars.top, 0, 0)
+            binding.navigation.setPadding(0, 0, 0, systemBars.bottom)
+            insets
         }
+        setupToolbar()
+        setupNavigationController()
+        initializeOpenTrustSDK()
+        showSDKConfigDialog()
+    }
+
+    private fun setupNavigationController() {
         val navController = findNavController(R.id.fragment_nav_host)
         NavigationUI.setupActionBarWithNavController(this, navController)
         NavigationUI.setupWithNavController(binding.navigation, navController)
-
-        initializeOpenTrustSDK()
-
-        showSDKConfigDialog()
     }
 
     private fun showSDKConfigDialog() {
         val instance = SDKConfigDialogManager.getInstance()
         instance?.showDialog(this, supportFragmentManager)
+    }
+
+    private fun initializeOpenTrustSDK() {
+        OneTrustManager.getInstance(this).initializeOpenTrustSDK()
+    }
+
+    override fun onDismiss(url: String?) {
+        ApiManager.setSDKConfigURL(url)
+    }
+
+    private fun setupToolbar() {
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
     }
 
     override fun onSupportNavigateUp() = findNavController(R.id.fragment_nav_host).navigateUp()
@@ -91,13 +90,5 @@ class NavigationActivity : AppCompatActivity(), SDKConfigDialog.OnDismissListene
 
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
-    }
-
-    private fun initializeOpenTrustSDK() {
-        OneTrustManager.getInstance(this).initializeOpenTrustSDK()
-    }
-
-    override fun onDismiss(url: String?) {
-        ApiManager.setSDKConfigURL(url)
     }
 }

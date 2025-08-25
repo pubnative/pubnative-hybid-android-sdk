@@ -179,4 +179,9 @@ public class MraidRewardedViewModel extends RewardedViewModel implements MRAIDVi
             mView.destroy();
         }
     }
+
+    @Override
+    public void resetVolumeChangeTracker() {
+        // No Volume Tracker is needed here
+    }
 }

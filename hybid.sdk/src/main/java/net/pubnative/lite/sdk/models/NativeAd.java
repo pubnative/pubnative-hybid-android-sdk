@@ -374,10 +374,6 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
     public synchronized void invokeOnImpression(View view) {
         mIsImpressionConfirmed = true;
         if (view != null && view.getContext() != null) {
-//            DBManager dbManager = new DBManager(view.getContext());
-//            dbManager.open();
-//            dbManager.insert(mAd.getZoneId());
-//            dbManager.close();
 
             if (mAd != null && !TextUtils.isEmpty(mAd.getZoneId())) {
                 SessionImpressionPrefs prefs = new SessionImpressionPrefs(view.getContext());

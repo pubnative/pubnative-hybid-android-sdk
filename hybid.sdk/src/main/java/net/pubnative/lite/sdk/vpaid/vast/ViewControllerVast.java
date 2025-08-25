@@ -25,8 +25,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.iab.omid.library.pubnativenet.adsession.FriendlyObstructionPurpose;
-
 import net.pubnative.lite.sdk.CountdownStyle;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.InterstitialActionBehaviour;
@@ -76,7 +74,7 @@ public class ViewControllerVast implements View.OnClickListener {
     private TextureView mVideoPlayerLayoutTexture;
     private FrameLayout mControlsLayout;
     private View mOpenUrlLayout;
-    private View mUxLayout;
+    private FrameLayout mUxLayout;
     private HyBidEndCardView mEndCardView;
     private HyBidEndCardView mLastCustomEndCardView;
     private HyBidCTAView ctaView;
@@ -211,7 +209,17 @@ public class ViewControllerVast implements View.OnClickListener {
         mSkipCountdownView = new CountDownViewFactory().createCountdownView(context, COUNTDOWN_STYLE_DEFAULT, mControlsLayout);
 
         mControlsLayout.addView(mSkipCountdownView);
-        mLinearCountdownView = mControlsLayout.findViewById(R.id.linear_count_down);
+
+        //Creating and adding LinearCountDownView to FrameLayout dynamically.
+        mLinearCountdownView = new LinearCountDownView(mControlsLayout.getContext());
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.gravity = Gravity.BOTTOM | Gravity.START;
+        mLinearCountdownView.setLayoutParams(params);
+        mUxLayout.addView(mLinearCountdownView);
+
         if (mVideoPlayerLayoutTexture != null) {
             mVideoPlayerLayoutTexture.setSurfaceTextureListener(mCreateTextureListener);
         }

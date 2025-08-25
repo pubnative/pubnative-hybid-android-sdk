@@ -5,29 +5,26 @@
 package net.pubnative.lite.sdk.vpaid.vast;
 
 import android.text.TextUtils;
-
+import java.util.Locale;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.VASTtag;
 
-import java.util.Locale;
-
 public class VastUrlUtils {
 
-    public static String formatURL(String adValue) {
+    public static VastUrlParameters buildParameters() {
         String gdpr = "0";
         boolean isCCPAOptOut = false;
         boolean isConsentDenied = false;
 
         if (HyBid.getUserDataManager() != null) {
-            boolean isApplied = HyBid.getUserDataManager().gdprApplies();
-            if (isApplied)
+            if (HyBid.getUserDataManager().gdprApplies()) {
                 gdpr = "1";
+            }
             isCCPAOptOut = HyBid.getUserDataManager().isCCPAOptOut();
             isConsentDenied = HyBid.getUserDataManager().isConsentDenied();
         }
 
         String dnt = "0";
-
         if (HyBid.isCoppaEnabled() || isCCPAOptOut || isConsentDenied ||
                 HyBid.getDeviceInfo().limitTracking() ||
                 TextUtils.isEmpty(HyBid.getDeviceInfo().getAdvertisingId())) {
@@ -36,7 +33,6 @@ public class VastUrlUtils {
 
         String latitude = null;
         String longitude = null;
-
         if (HyBid.getLocationManager() != null && HyBid.getLocationManager().getUserLocation() != null) {
             if (HyBid.getLocationManager().getUserLocation().getLatitude() != 0.0)
                 latitude = String.format(Locale.ENGLISH, "%.2f", HyBid.getLocationManager().getUserLocation().getLatitude());
@@ -44,48 +40,39 @@ public class VastUrlUtils {
                 longitude = String.format(Locale.ENGLISH, "%.2f", HyBid.getLocationManager().getUserLocation().getLongitude());
         }
 
-        return getVastURL(adValue,
-                HyBid.getDeviceInfo().getAdvertisingId(),
-                HyBid.getBundleId(),
-                dnt,
-                latitude,
-                longitude,
-                HyBid.getDeviceInfo().getUserAgent(),
-                HyBid.getDeviceInfo().getDeviceWidth(),
-                HyBid.getDeviceInfo().getDeviceHeight(),
-                gdpr,
-                HyBid.getUserDataManager().getIABGDPRConsentString(),
-                HyBid.getUserDataManager().getIABUSPrivacyString());
+        return new VastUrlParameters.Builder()
+                .advertisingId(HyBid.getDeviceInfo().getAdvertisingId())
+                .bundleId(HyBid.getBundleId())
+                .dnt(dnt)
+                .latitude(latitude)
+                .longitude(longitude)
+                .userAgent(HyBid.getDeviceInfo().getUserAgent())
+                .deviceWidth(HyBid.getDeviceInfo().getDeviceWidth())
+                .deviceHeight(HyBid.getDeviceInfo().getDeviceHeight())
+                .gdpr(gdpr)
+                .gdprConsent(HyBid.getUserDataManager().getIABGDPRConsentString())
+                .usPrivacy(HyBid.getUserDataManager().getIABUSPrivacyString())
+                .build();
     }
 
-    private static String getVastURL(String url,
-                                     String ad_id,
-                                     String bundle,
-                                     String dnt,
-                                     String lat,
-                                     String lon,
-                                     String user_agent,
-                                     String width,
-                                     String height,
-                                     String gdpr,
-                                     String gdpr_consent,
-                                     String us_privacy) {
+    public static String formatURL(String adValue, VastUrlParameters params) {
+        if (params == null) {
+            params = new VastUrlParameters.Builder().build();
+        }
 
-        VASTtag vasTtag =
-                new VASTtag.VASTtagBuilder(url)
-                        .adId(ad_id)
-                        .bundle(bundle)
-                        .connection("wifi")
-                        .dnt(dnt)
-                        .gdpr(gdpr)
-                        .gdprConsent(gdpr_consent)
-                        .width(width)
-                        .height(height)
-                        .lat(lat)
-                        .lon(lon)
-                        .userAgent(user_agent)
-                        .usPrivacy(us_privacy)
-                        .build();
+        VASTtag vasTtag = new VASTtag.VASTtagBuilder(adValue)
+                .adId(params.advertisingId)
+                .bundle(params.bundleId)
+                .dnt(params.dnt)
+                .lat(params.latitude)
+                .lon(params.longitude)
+                .userAgent(params.userAgent)
+                .width(params.deviceWidth)
+                .height(params.deviceHeight)
+                .gdpr(params.gdpr)
+                .gdprConsent(params.gdprConsent)
+                .usPrivacy(params.usPrivacy)
+                .build();
 
         return vasTtag.getFormattedURL();
     }

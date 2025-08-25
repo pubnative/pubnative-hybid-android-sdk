@@ -7,6 +7,8 @@ package net.pubnative.lite.sdk.models.request;
 import net.pubnative.lite.sdk.utils.json.BindField;
 import net.pubnative.lite.sdk.utils.json.JsonModel;
 
+import org.json.JSONObject;
+
 import java.util.List;
 
 public class Ext extends JsonModel {
@@ -21,6 +23,10 @@ public class Ext extends JsonModel {
     private String us_privacy;
 
     public Ext() {}
+
+    public Ext(JSONObject jsonObject) throws Exception {
+        fromJson(jsonObject);
+    }
 
     public Ext(Integer gdpr, String gpp, List<Integer> gpp_sid, String us_privacy) {
         this.gdpr = gdpr;

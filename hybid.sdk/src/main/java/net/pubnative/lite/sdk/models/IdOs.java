@@ -20,11 +20,11 @@ public class IdOs extends JsonModel {
     @BindField
     public String build_signature;
 
-    public IdOs(){
+    public IdOs() {
 
     }
 
-    public IdOs(JSONObject jsonObject) throws Exception{
+    public IdOs(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
     }
 }

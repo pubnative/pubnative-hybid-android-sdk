@@ -30,11 +30,11 @@ public class IdLocation extends JsonModel {
     public String ts;
 
 
-    public IdLocation(){
+    public IdLocation() {
 
     }
 
-    public IdLocation(JSONObject jsonObject) throws Exception{
+    public IdLocation(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
     }
 }

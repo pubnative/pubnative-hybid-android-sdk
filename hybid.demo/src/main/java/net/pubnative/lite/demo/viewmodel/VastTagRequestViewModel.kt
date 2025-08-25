@@ -76,7 +76,8 @@ class VastTagRequestViewModel(application: Application) : AndroidViewModel(appli
     }
 
     fun prepareVideoTag(zoneId: String?, adValue: String?) {
-        val url = VastUrlUtils.formatURL(adValue)
+        val params = VastUrlUtils.buildParameters()
+        val url = VastUrlUtils.formatURL(adValue, params)
         val headers: MutableMap<String, String> = HashMap()
         val userAgent = HyBid.getDeviceInfo().userAgent
         if (!TextUtils.isEmpty(userAgent)) {

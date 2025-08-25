@@ -7,7 +7,8 @@ name: HyBid SDK CI
 on:
   # Run on push to any branch
   push:
-    branches: ['*']
+    branches:
+      - '**'
 
   # Run on PRs only when targeting these specific branches
   pull_request:
@@ -15,7 +16,6 @@ on:
       - master
       - beta
       - beta-rc
-      - beta-atom
       - development
 
 jobs:
@@ -68,8 +68,8 @@ jobs:
   build_store_artifact:
     name: Build And Store Debug Artifact
     needs: unit-tests
-    # Only run this job for push on master, development OR start with beta, release
-    if: github.ref_name == 'master' || github.ref_name == 'development' || startsWith(github.ref_name, 'beta/') || startsWith(github.ref_name, 'release/')
+    # Only run this job for push on master, development OR branches starting with beta/, release/, beta-ng/, release-ng/
+    if: github.ref_name == 'master' || github.ref_name == 'beta-rc'|| github.ref_name == 'development' || startsWith(github.ref_name, 'beta/') || startsWith(github.ref_name, 'release/') || startsWith(github.ref_name, 'beta-ng/') || startsWith(github.ref_name, 'release-ng/')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source code
@@ -96,6 +96,7 @@ jobs:
 
   deploy_firebase:
     name: Deploy Test App to Firebase
+    if: github.ref_name == 'master' || github.ref_name == 'beta-rc'|| github.ref_name == 'development' || startsWith(github.ref_name, 'beta/') || startsWith(github.ref_name, 'release/') || startsWith(github.ref_name, 'beta-ng/') || startsWith(github.ref_name, 'release-ng/')
     runs-on: ubuntu-latest
     needs: build_store_artifact
     steps:
@@ -151,9 +152,11 @@ jobs:
           commit_sha: ${{ github.sha }}
           run_id: ${{ github.run_id }}
 
-  publish_to_jfrog_dev:
-    name: Publish build to JFROG Development
+  publish_hybid_dev:
+    name: Publish HyBid SDK to JFROG Development
     runs-on: ubuntu-latest
+    # Only run this job for push on master, development OR branches starting with beta/, release/
+    if: github.ref_name == 'master' || github.ref_name == 'beta-rc' || startsWith(github.ref_name, 'beta/') || startsWith(github.ref_name, 'release/')
     needs: build_store_artifact
 
     environment:
@@ -206,62 +209,12 @@ jobs:
           commit_sha: ${{ github.sha }}
           run_id: ${{ github.run_id }}
 
-  create_verve_namespaced_build_and_publish_s3_test_bucket:
-    name: Create Verve NG SDK Namespaced build and publish to S3 Test Bucket
+  publish_hybid_prod:
+    name: Publish HyBid SDK to JFROG Production
     runs-on: ubuntu-latest
-    needs: publish_to_jfrog_dev
-    permissions:
-      id-token: write
-      contents: read
-
-    environment:
-      name: development
-      url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
-
-      - name: Setup Gradle
-        uses: ./.github/actions/gradle-setup
-
-      - name: Clean Project
-        run: ./gradlew clean
-
-      - name: Build Project
-        run: ./gradlew build
-
-      - name: Repackage SDK Modules into Nextgen directory
-        run: ./gradlew repackageNG
-
-      - name: Move Nextgen directory and files to root level NG SDK Project
-        run: ./gradlew moveNextgenDirectoriesFilesToNgSdkProject
-
-      - name: Correct import statements in to NG SDK Project
-        run: ./gradlew :ng.sdk:correctNgSdkImportStatements
-
-      - name: Clean NG SDK Project
-        run: ./gradlew :ng.sdk:clean
-
-      - name: Assemble NG SDK Project
-        run: ./gradlew :ng.sdk:assemble
-
-      - name: Configure AWS Credentials (Development)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN_TEST_BUCKET }}
-          aws-region: us-east-1
-
-      # Publish NG SDK Namespaced libraries to Artifactory using the Gradle task directly.
-      - name: Upload to Development S3
-        run: ./gradlew :ng.sdk:publishReleasePublicationToDevelopmentRepository
-
-  publish_to_jfrog_prod:
-    name: Publish build to JFROG Production
-    runs-on: ubuntu-latest
-    # Only run this job for push on master OR start with release
+    # Only run this job for push on master OR branches starting with 'release/'
     if: github.ref_name == 'master' || startsWith(github.ref_name, 'release/')
-    needs: build_store_artifact
+    needs: publish_hybid_dev
 
     environment:
       name: production
@@ -313,10 +266,59 @@ jobs:
           commit_sha: ${{ github.sha }}
           run_id: ${{ github.run_id }}
 
-  create_verve_namespaced_build_and_publish_s3_production_bucket:
+  publish_ngsdk_dev:
+    name: Create Verve NG SDK Namespaced build and publish to S3 Test Bucket
+    runs-on: ubuntu-latest
+    # Only run this job for push on master, development OR branches starting with beta/, release/, beta-ng/, release-ng/
+    if: github.ref_name == 'master' || startsWith(github.ref_name, 'beta/') || startsWith(github.ref_name, 'release/') || startsWith(github.ref_name, 'beta-ng/') || startsWith(github.ref_name, 'release-ng/')
+    needs: build_store_artifact
+
+    permissions:
+      id-token: write
+      contents: read
+
+    environment:
+      name: development
+      url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Gradle
+        uses: ./.github/actions/gradle-setup
+
+      - name: Repackage SDK Modules into Nextgen directory
+        run: ./gradlew repackageNG
+
+      - name: Move Nextgen directory and files to root level NG SDK Project
+        run: ./gradlew moveNextgenDirectoriesFilesToNgSdkProject
+
+      - name: Correct import statements in to NG SDK Project
+        run: ./gradlew :ng.sdk:correctNgSdkImportStatements
+
+      - name: Clean NG SDK Project
+        run: ./gradlew :ng.sdk:clean
+
+      - name: Assemble NG SDK Project
+        run: ./gradlew :ng.sdk:assemble
+
+      - name: Configure AWS Credentials (Development)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_TEST_BUCKET }}
+          aws-region: us-east-1
+
+      # Publish NG SDK Namespaced libraries to Artifactory using the Gradle task directly.
+      - name: Upload to Development S3
+        run: ./gradlew :ng.sdk:publishReleasePublicationToDevelopmentRepository
+
+  publish_ngsdk_prod:
     name: Create Verve NG SDK Namespaced build and publish to S3 Production Bucket
     runs-on: ubuntu-latest
-    needs: publish_to_jfrog_prod
+    # Only run this job for push on master OR branches starting with 'release/', 'release-ng/'
+    if: github.ref_name == 'master' || startsWith(github.ref_name, 'release/') || startsWith(github.ref_name, 'release-ng/')
+    needs: publish_ngsdk_dev
     permissions:
       id-token: write
       contents: read
@@ -330,12 +332,6 @@ jobs:
 
       - name: Setup Gradle
         uses: ./.github/actions/gradle-setup
-
-      - name: Clean Project
-        run: ./gradlew clean
-
-      - name: Build Project
-        run: ./gradlew build
 
       - name: Repackage SDK Modules into Nextgen directory
         run: ./gradlew repackageNG

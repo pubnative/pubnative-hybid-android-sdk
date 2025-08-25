@@ -16,6 +16,7 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 
+import net.pubnative.lite.sdk.receiver.VolumeChangedActionReceiver;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
 import net.pubnative.lite.sdk.rewarded.RewardedActivityInteractor;
 import net.pubnative.lite.sdk.rewarded.viewModel.MraidRewardedViewModel;
@@ -24,6 +25,7 @@ import net.pubnative.lite.sdk.rewarded.viewModel.VastRewardedViewModel;
 import net.pubnative.lite.sdk.views.CloseableContainer;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.vpaid.HyBidActivityInteractor;
+import net.pubnative.lite.sdk.vpaid.volume.VolumeObserver;
 
 public abstract class HyBidRewardedActivity extends Activity implements RewardedActivityInteractor {
 
@@ -69,6 +71,7 @@ public abstract class HyBidRewardedActivity extends Activity implements Rewarded
     protected void dismiss() {
         mViewModel.sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLOSE);
         mIsFinishing = true;
+        mViewModel.resetVolumeChangeTracker();
         finish();
     }
 
@@ -133,6 +136,8 @@ public abstract class HyBidRewardedActivity extends Activity implements Rewarded
     @Override
     public void finishActivity() {
         mIsFinishing = true;
+        if (mViewModel != null)
+            mViewModel.resetVolumeChangeTracker();
         finish();
     }
 
@@ -169,6 +174,7 @@ public abstract class HyBidRewardedActivity extends Activity implements Rewarded
         if (mCloseableContainer != null) {
             mCloseableContainer.removeAllViews();
         }
+        VolumeObserver.getInstance().reset();
         super.onDestroy();
     }
 
@@ -183,5 +189,17 @@ public abstract class HyBidRewardedActivity extends Activity implements Rewarded
             return super.onKeyDown(keyCode, event);
         }
         return false;
+    }
+
+    @Override
+    protected void onPause() {
+        VolumeChangedActionReceiver.getInstance().unregister(this);
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        VolumeChangedActionReceiver.getInstance().register(this);
     }
 }

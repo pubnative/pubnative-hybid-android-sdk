@@ -15,11 +15,11 @@ public class IdEmail extends JsonModel {
     public String email;
 
 
-    public IdEmail(){
+    public IdEmail() {
 
     }
 
-    public IdEmail(JSONObject jsonObject) throws Exception{
+    public IdEmail(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
     }
 }

@@ -9,6 +9,8 @@ import android.graphics.BitmapFactory;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
+import androidx.annotation.VisibleForTesting;
+
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.utils.Logger;
 
@@ -20,14 +22,23 @@ public class ImageUtils {
     private static final String TAG = ImageUtils.class.getSimpleName();
 
     public static void setScaledImage(ImageView imageView, final String filePath) {
+        setScaledImage(imageView, filePath, new AndroidBitmapDecoder());
+    }
+
+    public static void setScaledImage(ImageView imageView, final String filePath, final BitmapDecoder decoder) {
         final ImageView view = imageView;
         ViewTreeObserver viewTreeObserver = view.getViewTreeObserver();
+        if (!viewTreeObserver.isAlive()) {
+            return;
+        }
         viewTreeObserver.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             public boolean onPreDraw() {
                 view.getViewTreeObserver().removeOnPreDrawListener(this);
                 int imageViewHeight = view.getMeasuredHeight();
                 int imageViewWidth = view.getMeasuredWidth();
-                Bitmap decoded = decodeSampledBitmap(filePath, imageViewWidth, imageViewHeight);
+
+                Bitmap decoded = decoder.decodeFile(new File(filePath), imageViewWidth, imageViewHeight);
+
                 if (decoded != null) {
                     view.setImageBitmap(decoded);
                 }
@@ -36,24 +47,8 @@ public class ImageUtils {
         });
     }
 
-    public static void setScaledImage(ImageView imageView, final Bitmap image) {
-        final ImageView view = imageView;
-        ViewTreeObserver viewTreeObserver = view.getViewTreeObserver();
-        viewTreeObserver.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            public boolean onPreDraw() {
-                view.getViewTreeObserver().removeOnPreDrawListener(this);
-                int imageViewHeight = view.getMeasuredHeight();
-                int imageViewWidth = view.getMeasuredWidth();
-                Bitmap decoded = decodeSampledBitmap(image, imageViewWidth, imageViewHeight);
-                if (decoded != null) {
-                    view.setImageBitmap(decoded);
-                }
-                return true;
-            }
-        });
-    }
-
-    private static Bitmap decodeSampledBitmap(String filePath, int reqWidth, int reqHeight) {
+    @VisibleForTesting
+    static Bitmap decodeSampledBitmap(String filePath, int reqWidth, int reqHeight) {
         Bitmap bitmap;
         try {
             final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -63,35 +58,13 @@ public class ImageUtils {
             return bitmap;
         } catch (OutOfMemoryError | RuntimeException ex) {
             HyBid.reportException(ex);
-            bitmap = decodeFile(new File(filePath), reqWidth, reqHeight);
+            bitmap = new AndroidBitmapDecoder().decodeFile(new File(filePath), reqWidth, reqHeight);
             return bitmap;
         }
     }
 
-    public static Bitmap decodeFile(File f, int reqWidth, int reqHeight) {
-        try {
-            //Decode image size
-            BitmapFactory.Options o = new BitmapFactory.Options();
-            o.inJustDecodeBounds = true;
-            o.inDither = true;
-            BitmapFactory.decodeStream(new FileInputStream(f), null, o);
-            int scale = 1;
-            if (o.outWidth != 0 && o.outHeight != 0) {
-                while (o.outWidth / scale / 2 >= reqWidth && o.outHeight / scale / 2 >= reqHeight) {
-                    scale *= 2;
-                }
-            }
-            //Decode with inSampleSize
-            BitmapFactory.Options o2 = new BitmapFactory.Options();
-            o2.inSampleSize = scale;
-            return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
-        } catch (FileNotFoundException ignored) {
-            HyBid.reportException(ignored);
-        }
-        return null;
-    }
-
-    private static Bitmap decodeSampledBitmap(Bitmap image, int reqWidth, int reqHeight) {
+    @VisibleForTesting
+    static Bitmap decodeSampledBitmap(Bitmap image, int reqWidth, int reqHeight) {
         try {
             int inSampleSize = calculateInSampleSize(image.getWidth(), image.getHeight(), reqWidth, reqHeight);
             int dstWidth = (int) (image.getWidth() / inSampleSize);
@@ -104,13 +77,15 @@ public class ImageUtils {
         }
     }
 
-    private static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+    @VisibleForTesting
+    static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
         final int height = options.outHeight;
         final int width = options.outWidth;
         return calculateInSampleSize(width, height, reqWidth, reqHeight);
     }
 
-    private static int calculateInSampleSize(int width, int height, int reqWidth, int reqHeight) {
+    @VisibleForTesting
+    static int calculateInSampleSize(int width, int height, int reqWidth, int reqHeight) {
 
         int inSampleSize = 1;
 

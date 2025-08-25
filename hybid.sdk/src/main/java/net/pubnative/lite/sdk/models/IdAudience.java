@@ -21,11 +21,11 @@ public class IdAudience extends JsonModel {
     public String ts;
 
 
-    public IdAudience(){
+    public IdAudience() {
 
     }
 
-    public IdAudience(JSONObject jsonObject) throws Exception{
+    public IdAudience(JSONObject jsonObject) throws Exception {
         fromJson(jsonObject);
     }
 }

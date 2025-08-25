@@ -43,9 +43,6 @@ import java.util.Objects;
 
 public class HyBid {
     private static final String TAG = HyBid.class.getSimpleName();
-
-    public static final String OMSDK_VERSION = BuildConfig.OMIDPV;
-    public static final String OM_PARTNER_NAME = BuildConfig.OMIDPN;
     public static final String HYBID_VERSION = BuildConfig.SDK_VERSION;
 
     private static String sAppToken;
@@ -126,10 +123,6 @@ public class HyBid {
         preferences = new HyBidPreferences(application.getApplicationContext());
         preferences.setAppFirstInstalledTime(String.valueOf(installed));
         preferences.setSessionTimeStamp(System.currentTimeMillis(), () -> {
-//            DBManager dbManager = new DBManager(application.getApplicationContext());
-//            dbManager.open();
-//            dbManager.nukeTable();
-//            dbManager.close();
             SessionImpressionPrefs prefs = new SessionImpressionPrefs(application.getApplicationContext());
             prefs.nukePrefs();
         }, HyBidPreferences.TIMESTAMP.NORMAL);
@@ -156,8 +149,8 @@ public class HyBid {
             sSdkManager = SdkManager.builder()
                     .visibilityManager(new HybidViewabilityManager(application))
                     .displayManager(DisplayManager.builder()
-                            .setIsHybid(true)
-                            .setDisplayManagerName("HyBid")
+                            .setIsWrapped(BuildConfig.IS_WRAPPED)
+                            .setDisplayManagerName(BuildConfig.DISPLAY_MANAGER_NAME)
                             .build())
                     .build();
         }
@@ -251,14 +244,24 @@ public class HyBid {
         if (!isInitialized()) {
             Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before using getViewabilityManager()");
         }
-        return sSdkManager.getVisibilityManager();
+        return getSdkManager().getVisibilityManager();
     }
 
     public static SdkManager getSdkManager() {
         if (!isInitialized()) {
             Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before using getViewabilityManager()");
         }
-        return sSdkManager;
+
+        if (sSdkManager != null) {
+            return sSdkManager;
+        }
+
+        return SdkManager.builder()
+                .displayManager(DisplayManager.builder()
+                        .setIsWrapped(BuildConfig.IS_WRAPPED)
+                        .setDisplayManagerName(BuildConfig.DISPLAY_MANAGER_NAME)
+                        .build())
+                .build();
     }
 
     public static VgiIdManager getVgiIdManager() {
@@ -308,7 +311,7 @@ public class HyBid {
     }
 
     public static boolean isViewabilityMeasurementActivated() {
-        BaseViewabilityManager sViewabilityManager = sSdkManager.getVisibilityManager();
+        BaseViewabilityManager sViewabilityManager = getSdkManager().getVisibilityManager();
         return sViewabilityManager != null && sViewabilityManager.isViewabilityMeasurementActivated();
     }
 
@@ -435,15 +438,20 @@ public class HyBid {
         }
     }
 
+    /**
+     * Function to validate atom initialisation.
+     * If Atom is already running we keep it untouched
+     * If Atom is enabled in config we start Atom.
+     * If Atom is disabled or absent in configs we do nothing, means if Atom is running we keep it running
+     * @param isAtomEnabled
+     * @param application
+     */
     private static void validateAtomStart(Boolean isAtomEnabled, Application application) {
         if (isAtomStarted()) {
             return;
         }
         if (isAtomEnabled != null && application != null && isAtomEnabled) {
             AtomManager.initializeAtom(application.getApplicationContext());
-        } else {
-            AtomManager.stopAtom();
-            setAtomStarted(false);
         }
     }
 
@@ -552,12 +560,11 @@ public class HyBid {
     }
 
     public static String getSDKVersionInfo() {
-        return sSdkManager.getDisplayManager().getDisplayManagerVersion(IntegrationType.IN_APP_BIDDING);
+        return getSdkManager().getDisplayManager().getDisplayManagerVersion(IntegrationType.IN_APP_BIDDING);
     }
 
     public static String getSDKVersionInfo(IntegrationType integrationType) {
-        if (integrationType == null) integrationType = IntegrationType.IN_APP_BIDDING;
-        return sSdkManager.getDisplayManager().getDisplayManagerVersion(integrationType);
+        return getSdkManager().getDisplayManager().getDisplayManagerVersion(integrationType != null ? integrationType : IntegrationType.IN_APP_BIDDING);
     }
 
     public static void setSkipXmlResource(Integer skipResource) {

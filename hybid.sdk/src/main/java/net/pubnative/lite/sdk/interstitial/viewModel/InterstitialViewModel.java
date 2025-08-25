@@ -299,4 +299,6 @@ public abstract class InterstitialViewModel extends BaseViewModel implements PNA
     public abstract View getAdView();
 
     public abstract void destroyAd();
+
+    public abstract void resetVolumeChangeTracker();
 }

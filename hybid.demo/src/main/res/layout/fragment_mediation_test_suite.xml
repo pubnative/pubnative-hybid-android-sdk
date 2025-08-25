@@ -69,7 +69,8 @@
         </com.google.android.material.textfield.TextInputLayout>
 
 
-        <com.google.android.material.button.MaterialButton
+         <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
             android:id="@+id/button_open_mediation_test_suite"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

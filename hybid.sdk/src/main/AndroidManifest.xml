@@ -6,7 +6,8 @@
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
     <uses-permission android:name="android.permission.ACCESS_ADSERVICES_TOPICS" />
 
-    <application>
+    <application android:enableOnBackInvokedCallback="false"
+        tools:targetApi="33">
         <receiver 
             android:name="net.pubnative.lite.sdk.receiver.VolumeChangedActionReceiver"
             android:exported="true">
@@ -43,6 +44,7 @@
         <activity
             android:name="net.pubnative.lite.sdk.utils.browser.BrowserActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/BrowserActivityTheme"
             android:exported="false" />
     </application>
 

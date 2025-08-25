@@ -53,6 +53,7 @@ import net.pubnative.lite.sdk.views.endcard.HyBidEndCardView;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
+import net.pubnative.lite.sdk.vpaid.vast.VastUrlParameters;
 import net.pubnative.lite.sdk.vpaid.vast.VastUrlUtils;
 
 import org.json.JSONObject;
@@ -592,7 +593,13 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                         mTrackingMethod = ImpressionTrackingMethod.AD_VIEWABLE;
                         mAd = ad;
                         initializeAdTracker(ad);
-                        renderAd();
+                        Handler handler = new Handler(Looper.getMainLooper());
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                renderAd();
+                            }
+                        });
                     } else {
                         invokeOnLoadFailed(new HyBidError(HyBidErrorCode.NULL_AD));
 
@@ -678,7 +685,8 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     }
 
     public void renderVideoTag(final String adValue, final Listener listener) {
-        String url = VastUrlUtils.formatURL(adValue);
+        VastUrlParameters params = VastUrlUtils.buildParameters();
+        String url = VastUrlUtils.formatURL(adValue, params);
 
         Map<String, String> headers = new HashMap<>();
         String userAgent = HyBid.getDeviceInfo().getUserAgent();

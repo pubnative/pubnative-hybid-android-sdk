@@ -19,7 +19,8 @@
             android:layout_marginEnd="16dp"
             android:orientation="horizontal">
 
-            <com.google.android.material.button.MaterialButton
+             <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
                 android:id="@+id/button_request"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -27,7 +28,8 @@
                 android:layout_weight="1"
                 android:text="@string/action_request_consent_info" />
 
-            <com.google.android.material.button.MaterialButton
+             <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
                 android:id="@+id/button_load"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -36,7 +38,8 @@
                 android:text="@string/action_load_form" />
         </LinearLayout>
 
-        <com.google.android.material.button.MaterialButton
+         <com.google.android.material.button.MaterialButton
+            style="@style/CustomButton"
             android:id="@+id/button_show"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
