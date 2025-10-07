@@ -4,9 +4,6 @@
 //
 package net.pubnative.lite.sdk.vpaid.volume;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class VolumeObserver {
 
     public interface VolumeChangeListener {

@@ -44,6 +44,7 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
     private boolean mCustomEndCardClickTracked = false;
     private final IntegrationType mIntegrationType;
     private boolean mVideoAdSkipped = false;
+    private boolean mPlayableSkipTracked = false;
 
     public RewardedPresenterDecorator(RewardedPresenter rewardedPresenter, AdTracker adTrackingDelegate, AdTracker customEndCardTrackingDelegate, ReportingController reportingController, Listener listener, IntegrationType integrationType) {
         mRewardedPresenter = rewardedPresenter;
@@ -482,6 +483,29 @@ public class RewardedPresenterDecorator implements RewardedPresenter, RewardedPr
             }
             mReportingController.reportEvent(reportingEvent);
         }
+    }
+
+    @Override
+    public void onPlayableSkipButtonClicked() {
+        if (mIsDestroyed || mPlayableSkipTracked) {
+            return;
+        }
+        if (mReportingController != null && HyBid.isReportingEnabled()) {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.PLAYABLE_SKIP_CLICK);
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            reportingEvent.setAdFormat(Reporting.AdFormat.FULLSCREEN);
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
+            Ad ad = getAd();
+            if (ad != null) {
+                reportingEvent.setImpId(ad.getSessionId());
+                reportingEvent.setCampaignId(ad.getCampaignId());
+                reportingEvent.setConfigId(ad.getConfigId());
+            }
+            mReportingController.reportEvent(reportingEvent);
+        }
+        mPlayableSkipTracked = true;
     }
 
     private void reportCompanionView() {

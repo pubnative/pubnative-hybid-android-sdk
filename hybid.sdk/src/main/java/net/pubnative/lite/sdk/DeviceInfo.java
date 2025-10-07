@@ -96,6 +96,7 @@ public class DeviceInfo {
     private String mAdvertisingIdSha1;
     private boolean mLimitTracking = false;
     private boolean mIsCharging = false;
+    private final Object mReceiverLock = new Object();
     private boolean mIsChangingReceiverRegistered = false;
     private Listener mListener;
     private String deviceHeight;
@@ -120,18 +121,31 @@ public class DeviceInfo {
         public void onReceive(Context context, Intent intent) {
             int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
             mIsCharging = status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL;
-            if (mContext != null) {
-                mContext.unregisterReceiver(this);
-                mIsChangingReceiverRegistered = false;
+
+            synchronized (mReceiverLock) {
+                if (mContext != null && mIsChangingReceiverRegistered) {
+                    try {
+                        mContext.unregisterReceiver(this);
+                    } catch (IllegalArgumentException e) {
+                        // Receiver was already unregistered
+                    }
+                    mIsChangingReceiverRegistered = false;
+                }
             }
         }
     };
 
     public void updateChargingStatus() {
-        if (!mIsChangingReceiverRegistered) {
-            IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-            mContext.registerReceiver(mBatteryStatusReceiver, filter);
-            mIsChangingReceiverRegistered = true;
+        synchronized (mReceiverLock) {
+            if (!mIsChangingReceiverRegistered && mContext != null) {
+                try {
+                    IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+                    mContext.registerReceiver(mBatteryStatusReceiver, filter);
+                    mIsChangingReceiverRegistered = true;
+                } catch (SecurityException | IllegalArgumentException e) {
+                    Logger.e(TAG, "Failed to register battery receiver", e);
+                }
+            }
         }
     }
 

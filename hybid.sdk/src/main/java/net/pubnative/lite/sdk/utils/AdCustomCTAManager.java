@@ -8,6 +8,7 @@ import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.models.AdData;
 
 public class AdCustomCTAManager {
 
@@ -19,7 +20,7 @@ public class AdCustomCTAManager {
     }
 
     public static Integer getCustomCtaDelay(Ad ad){
-        Integer delay = ad.getCustomCTADelay() != null && ad.getCustomCTADelay() >= 0
+        Integer delay = ad != null && ad.getCustomCTADelay() != null && ad.getCustomCTADelay() >= 0
                 ? ad.getCustomCTADelay() : CUSTOM_CTA_DELAY_DEFAULT;
         return Math.min(delay, CUSTOM_CTA_DELAY_MAX);
     }
@@ -34,14 +35,15 @@ public class AdCustomCTAManager {
         }
     }
 
-    private static Boolean isEnabled(Ad ad){
-        return ad.isCustomCTAEnabled() != null && ad.isCustomCTAEnabled();
+    public static Boolean isEnabled(Ad ad){
+        return ad != null && ad.isCustomCTAEnabled() != null && ad.isCustomCTAEnabled();
     }
 
-    private static Boolean hasIcon(Ad ad){
-        return ad.hasCustomCTA() &&
-                !TextUtils.isEmpty(ad.getAsset(APIAsset.CUSTOM_CTA).getStringField("icon")) &&
-                URLValidator.isValidURL(ad.getAsset(APIAsset.CUSTOM_CTA).getStringField("icon"));
+    private static Boolean hasIcon(Ad ad) {
+        if (ad == null || !ad.hasCustomCTA()) return false;
+        AdData asset = ad.getAsset(APIAsset.CUSTOM_CTA);
+        String icon = (asset != null) ? asset.getStringField("icon") : null;
+        return !TextUtils.isEmpty(icon) && URLValidator.isValidURL(icon);
     }
 
     public enum CtaType {

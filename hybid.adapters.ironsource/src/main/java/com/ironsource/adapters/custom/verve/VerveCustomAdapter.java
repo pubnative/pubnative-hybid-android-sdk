@@ -12,15 +12,18 @@ import com.ironsource.mediationsdk.adunit.adapter.BaseAdapter;
 import com.ironsource.mediationsdk.adunit.adapter.listener.NetworkInitializationListener;
 import com.ironsource.mediationsdk.adunit.adapter.utility.AdData;
 import com.ironsource.mediationsdk.adunit.adapter.utility.AdapterErrors;
+import com.unity3d.mediation.LevelPlay;
 
 import net.pubnative.lite.sdk.HyBid;
+
+import org.jetbrains.annotations.NotNull;
 
 public class VerveCustomAdapter extends BaseAdapter {
     public static final String IRONSOURCE_MEDIATION_VENDOR = "lp";
     public static final String KEY_APP_TOKEN = "appToken";
     public static final String KEY_ZONE_ID = "zoneId";
 
-    private static final String NETWORK_SDK_VERSION = "3.6.2";
+    private static final String NETWORK_SDK_VERSION = "3.7.0";
     private static final String ADAPTER_VERSION = NETWORK_SDK_VERSION + ".0";
 
     @Override
@@ -47,6 +50,11 @@ public class VerveCustomAdapter extends BaseAdapter {
                 }
             }
         }
+    }
+
+    @Override
+    public boolean isUsingActivityBeforeImpression(@NotNull LevelPlay.AdFormat adFormat) {
+        return true;
     }
 
     @Override

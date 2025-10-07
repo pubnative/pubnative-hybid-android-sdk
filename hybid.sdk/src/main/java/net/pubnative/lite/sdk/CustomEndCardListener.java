@@ -16,4 +16,6 @@ public interface CustomEndCardListener {
     void onEndCardLoadSuccess(boolean isCustomEndCard);
 
     void onEndCardLoadFailure(boolean isCustomEndCard);
+
+    void onPlayableSkipButtonClicked();
 }

@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.viewability;
 
 import android.view.View;
@@ -23,33 +27,33 @@ public abstract class HyBidViewabilityAdSession {
     }
 
     public void fireLoaded() {
-        if (!viewabilityManager.isViewabilityMeasurementEnabled())
+        if (shouldSkipViewabilityMeasurement() || mAdEvents == null)
             return;
 
         if (mAdEvents != null) {
             try {
                 viewabilityManager.fireLoaded(mAdEvents);
             } catch (IllegalArgumentException | IllegalStateException e) {
-                e.printStackTrace();
+                Logger.e(TAG, e.getMessage());
             }
         }
     }
 
     public void fireImpression() {
-        if (!viewabilityManager.isViewabilityMeasurementEnabled())
+        if (shouldSkipViewabilityMeasurement() || mAdEvents == null)
             return;
 
         if (mAdEvents != null) {
             try {
                 viewabilityManager.fireImpression(mAdEvents);
             } catch (IllegalArgumentException | IllegalStateException e) {
-                e.printStackTrace();
+                Logger.e(TAG, e.getMessage());
             }
         }
     }
 
     public void stopAdSession() {
-        if (!viewabilityManager.isViewabilityMeasurementEnabled())
+        if (shouldSkipViewabilityMeasurement() || mAdSession == null)
             return;
 
         if (mAdSession != null) {
@@ -63,8 +67,15 @@ public abstract class HyBidViewabilityAdSession {
     }
 
     public void addFriendlyObstruction(View friendlyObstructionView, BaseFriendlyObstructionPurpose purpose, String reason) {
+        if (shouldSkipViewabilityMeasurement())
+            return;
+
         if (friendlyObstructionView != null && mAdSession != null) {
             viewabilityManager.addFriendlyObstruction(mAdSession, friendlyObstructionView, purpose, reason);
         }
+    }
+
+    private boolean shouldSkipViewabilityMeasurement() {
+        return viewabilityManager == null || !viewabilityManager.isViewabilityMeasurementEnabled();
     }
 }

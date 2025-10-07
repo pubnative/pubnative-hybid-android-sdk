@@ -81,7 +81,6 @@ data class LandingPageSettings(
 data class SkipOffsetSettings(
     var html: Pair<Boolean, String>?,
     var video: Pair<Boolean, String>?,
-    var playable: Pair<Boolean, String>?,
     var rewardedHtml: Pair<Boolean, String>?,
     var rewardedVideo: Pair<Boolean, String>?,
     var endCardCloseDelay: Pair<Boolean, String>?

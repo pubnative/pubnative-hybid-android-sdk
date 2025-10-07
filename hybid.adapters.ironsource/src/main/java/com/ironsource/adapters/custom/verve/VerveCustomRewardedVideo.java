@@ -17,10 +17,13 @@ import com.ironsource.mediationsdk.adunit.adapter.utility.AdapterErrors;
 import com.ironsource.mediationsdk.model.NetworkSettings;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedAd;
 import net.pubnative.lite.sdk.utils.Logger;
 
-public class VerveCustomRewardedVideo extends BaseRewardedVideo<VerveCustomAdapter> implements HyBidRewardedAd.Listener {
+import org.jetbrains.annotations.NotNull;
+
+public class VerveCustomRewardedVideo extends BaseRewardedVideo<VerveCustomAdapter> implements HyBidRewardedAd.Listener, VideoListener {
     private static final String TAG = VerveCustomRewardedVideo.class.getSimpleName();
 
     private RewardedVideoAdListener mRewardedVideoAdListener;
@@ -31,7 +34,7 @@ public class VerveCustomRewardedVideo extends BaseRewardedVideo<VerveCustomAdapt
     }
 
     @Override
-    public void loadAd(AdData adData, Activity activity, RewardedVideoAdListener rewardedVideoAdListener) {
+    public void loadAd(@NotNull AdData adData, @NotNull Context context, @NotNull RewardedVideoAdListener listener) {
         String appToken;
         String zoneID;
         if (!TextUtils.isEmpty(adData.getString(VerveCustomAdapter.KEY_APP_TOKEN))
@@ -43,22 +46,23 @@ public class VerveCustomRewardedVideo extends BaseRewardedVideo<VerveCustomAdapt
                     "Required params in VerveCustomRewardedVideo ad data must be provided as a valid JSON Object. " +
                     "Please consult HyBid documentation and update settings in your IronSource publisher dashboard.";
             Logger.e(TAG, errorMessage);
-            rewardedVideoAdListener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_INTERNAL,
+            listener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_INTERNAL,
                     AdapterErrors.ADAPTER_ERROR_MISSING_PARAMS, errorMessage);
             return;
         }
 
-        mRewardedVideoAdListener = rewardedVideoAdListener;
+        mRewardedVideoAdListener = listener;
 
         if (HyBid.getAppToken() != null && HyBid.getAppToken().equalsIgnoreCase(appToken) && HyBid.isInitialized()) {
-            requestRewardedAd(activity, zoneID);
+            requestRewardedAd(context, zoneID);
         } else {
-            HyBid.initialize(appToken, activity.getApplication(), b -> requestRewardedAd(activity, zoneID));
+            HyBid.initialize(appToken, (Application) context.getApplicationContext(), b -> requestRewardedAd(context, zoneID));
         }
     }
 
-    private void requestRewardedAd(Activity activity, String zoneId) {
-        mHyBidRewardedAd = new HyBidRewardedAd(activity, zoneId, this);
+    private void requestRewardedAd(Context context, String zoneId) {
+        mHyBidRewardedAd = new HyBidRewardedAd(context, zoneId, this);
+        mHyBidRewardedAd.setVideoListener(this);
         mHyBidRewardedAd.setMediation(true);
         mHyBidRewardedAd.setMediationVendor(VerveCustomAdapter.IRONSOURCE_MEDIATION_VENDOR);
         mHyBidRewardedAd.load();
@@ -74,10 +78,19 @@ public class VerveCustomRewardedVideo extends BaseRewardedVideo<VerveCustomAdapt
     }
 
     @Override
-    public void showAd(AdData adData, RewardedVideoAdListener listener) {
+    public void showAd(@NotNull AdData adData, @NotNull Activity activity, @NotNull RewardedVideoAdListener listener) {
         if (mHyBidRewardedAd != null) {
             mHyBidRewardedAd.show();
         }
+    }
+
+    @Override
+    public void destroyAd(@NotNull AdData adData) {
+        if (mHyBidRewardedAd != null) {
+            mHyBidRewardedAd.destroy();
+        }
+
+        mRewardedVideoAdListener = null;
     }
 
     //-------------------------------- HyBidRewardedAd Callbacks -----------------------------------
@@ -100,9 +113,7 @@ public class VerveCustomRewardedVideo extends BaseRewardedVideo<VerveCustomAdapt
     public void onRewardedOpened() {
         if (mRewardedVideoAdListener != null) {
             mRewardedVideoAdListener.onAdOpened();
-            mRewardedVideoAdListener.onAdShowSuccess();
             mRewardedVideoAdListener.onAdVisible();
-            mRewardedVideoAdListener.onAdStarted();
         }
     }
 
@@ -110,7 +121,6 @@ public class VerveCustomRewardedVideo extends BaseRewardedVideo<VerveCustomAdapt
     public void onRewardedClosed() {
         if (mRewardedVideoAdListener != null) {
             mRewardedVideoAdListener.onAdClosed();
-            mRewardedVideoAdListener.onAdEnded();
         }
     }
 
@@ -126,5 +136,35 @@ public class VerveCustomRewardedVideo extends BaseRewardedVideo<VerveCustomAdapt
         if (mRewardedVideoAdListener != null) {
             mRewardedVideoAdListener.onAdRewarded();
         }
+    }
+
+    @Override
+    public void onVideoStarted() {
+        if (mRewardedVideoAdListener != null) {
+            mRewardedVideoAdListener.onAdStarted();
+        }
+    }
+
+    @Override
+    public void onVideoError(int progressPercentage) {
+        if (mRewardedVideoAdListener != null) {
+            mRewardedVideoAdListener.onAdShowFailed(AdapterErrors.ADAPTER_ERROR_INTERNAL, "Error attempting to show HyBid Rewarded Ad");
+        }
+    }
+
+    @Override
+    public void onVideoFinished() {
+        if (mRewardedVideoAdListener != null) {
+            mRewardedVideoAdListener.onAdEnded();
+        }
+    }
+
+    @Override
+    public void onVideoSkipped() {
+    }
+
+    @Override
+    public void onVideoDismissed(int progressPercentage) {
+
     }
 }

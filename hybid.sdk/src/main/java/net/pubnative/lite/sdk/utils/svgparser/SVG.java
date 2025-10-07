@@ -17,7 +17,7 @@ public class SVG
    private SVGBase base;
 
    // Users should use one of the getFromX() methods to create an instance of SVG
-   private SVG(SVGBase base)
+   SVG(SVGBase base)
    {
       this.base = base;
    }

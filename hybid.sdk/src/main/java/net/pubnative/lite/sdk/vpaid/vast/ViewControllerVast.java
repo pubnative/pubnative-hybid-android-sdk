@@ -143,10 +143,10 @@ public class ViewControllerVast implements View.OnClickListener {
         bannerView.setVisibilityListener(mCreateVisibilityListener);
         bannerView.removeAllViews();
 
-            mControlsLayout = (FrameLayout) LayoutInflater.from(context).inflate(R.layout.controls, bannerView, false);
-            mOpenUrlLayout = LayoutInflater.from(context).inflate(R.layout.open_url, bannerView, false);
-            configLearnMore(context);
-            mUxLayout = mControlsLayout.findViewById(R.id.uxLayout);
+        mControlsLayout = (FrameLayout) LayoutInflater.from(context).inflate(R.layout.controls, bannerView, false);
+        mOpenUrlLayout = LayoutInflater.from(context).inflate(R.layout.open_url, bannerView, false);
+        configLearnMore(context);
+        mUxLayout = mControlsLayout.findViewById(R.id.uxLayout);
 
         initCustomCta(context);
 
@@ -194,13 +194,13 @@ public class ViewControllerVast implements View.OnClickListener {
             mVideoPlayerLayout.addView(mVideoPlayerLayoutTexture, 0, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
         }
 
-            mEndCardView = new HyBidEndCardView(context, mHasReducedCloseButton, mReplayListener);
-            mEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            mEndCardView.setVisibility(View.GONE);
+        mEndCardView = new HyBidEndCardView(context, mHasReducedCloseButton, mReplayListener);
+        mEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        mEndCardView.setVisibility(View.GONE);
 
-            mLastCustomEndCardView = new HyBidEndCardView(context, mHasReducedCloseButton, mReplayListener);
-            mLastCustomEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            mLastCustomEndCardView.setVisibility(View.GONE);
+        mLastCustomEndCardView = new HyBidEndCardView(context, mHasReducedCloseButton, mReplayListener);
+        mLastCustomEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        mLastCustomEndCardView.setVisibility(View.GONE);
 
         mOpenUrlLayout.findViewById(R.id.openURL).setOnClickListener(this);
         mOpenUrlLayout.findViewById(R.id.openURLIcon).setOnClickListener(this);

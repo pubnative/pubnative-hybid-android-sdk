@@ -27,6 +27,7 @@ public class HyBidInterstitialBroadcastReceiver extends BroadcastReceiver {
     public enum Action {
         SHOW("net.pubnative.hybid.interstitial.show"),
         CLICK("net.pubnative.hybid.interstitial.click"),
+        PLAYABLE_SKIP_CLICK("net.pubnative.hybid.interstitial.playable.click"),
         DISMISS("net.pubnative.hybid.interstitial.dismiss"),
         ERROR("net.pubnative.hybid.interstitial.error"),
         VIDEO_ERROR("net.pubnative.hybid.interstitial.video_error"),
@@ -73,6 +74,8 @@ public class HyBidInterstitialBroadcastReceiver extends BroadcastReceiver {
                 return END_CARD_LOAD_SUCCESS;
             } else if (END_CARD_LOAD_FAILURE.getId().equals(action)) {
                 return END_CARD_LOAD_FAILURE;
+            } else if (PLAYABLE_SKIP_CLICK.getId().equals(action)) {
+                return PLAYABLE_SKIP_CLICK;
             }
 
             return NONE;
@@ -126,6 +129,7 @@ public class HyBidInterstitialBroadcastReceiver extends BroadcastReceiver {
         mIntentFilter.addAction(Action.END_CARD_LOAD_SUCCESS.getId());
         mIntentFilter.addAction(Action.END_CARD_LOAD_FAILURE.getId());
         mIntentFilter.addAction(Action.ERROR.getId());
+        mIntentFilter.addAction(Action.PLAYABLE_SKIP_CLICK.getId());
     }
 
     public void setListener(Listener listener) {
@@ -248,12 +252,18 @@ public class HyBidInterstitialBroadcastReceiver extends BroadcastReceiver {
                 break;
             case END_CARD_LOAD_SUCCESS:
                 if (customEndCardListener != null) {
-                    customEndCardListener.onEndCardLoadSuccess(extras.getBoolean(Reporting.Key.IS_CUSTOM_END_CARD,false));
+                    customEndCardListener.onEndCardLoadSuccess(extras.getBoolean(Reporting.Key.IS_CUSTOM_END_CARD, false));
                 }
                 break;
             case END_CARD_LOAD_FAILURE:
                 if (customEndCardListener != null) {
-                    customEndCardListener.onEndCardLoadFailure(extras.getBoolean(Reporting.Key.IS_CUSTOM_END_CARD,false));
+                    customEndCardListener.onEndCardLoadFailure(extras.getBoolean(Reporting.Key.IS_CUSTOM_END_CARD, false));
+                }
+                break;
+
+            case PLAYABLE_SKIP_CLICK:
+                if (customEndCardListener != null) {
+                    customEndCardListener.onPlayableSkipButtonClicked();
                 }
                 break;
             case NONE:

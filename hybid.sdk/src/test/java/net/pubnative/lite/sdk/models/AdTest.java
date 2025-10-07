@@ -7,6 +7,7 @@ package net.pubnative.lite.sdk.models;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import net.pubnative.lite.sdk.testing.TestUtil;
@@ -47,30 +48,6 @@ public class AdTest {
 
         List<AdData> impressionBeacons = parsedAd.getBeacons(Ad.Beacon.IMPRESSION);
         assertEquals("https://mock-dsp.pubnative.net/tracker/nurl?app_id=1036637&p=0.01", impressionBeacons.get(0).getURL());
-    }
-
-    @Test
-    public void validateAdPlayableSkipOffsetRemoteConfigResponse() throws Exception {
-        mSubject = TestUtil.createTestInterstitialAd();
-        Ad parsedAd = new Ad(mSubject.toJson());
-        assertNotNull(parsedAd.getMeta("remoteconfigs"));
-        assertEquals(4, parsedAd.getPlayableSkipOffset().intValue());
-    }
-
-    @Test
-    public void validateAdIsPlayable() throws Exception {
-        mSubject = TestUtil.createMraidPlayableAd(true);
-        Ad parsedAd = new Ad(mSubject.toJson());
-        assertNotNull(parsedAd.getMeta("playable_ux"));
-        assertTrue(parsedAd.isAdPlayable());
-    }
-
-    @Test
-    public void validateAdIsNotPlayable() throws Exception {
-        mSubject = TestUtil.createMraidPlayableAd(false);
-        Ad parsedAd = new Ad(mSubject.toJson());
-        assertNotNull(parsedAd.getMeta("playable_ux"));
-        assertFalse(parsedAd.isAdPlayable());
     }
 
     @Test
@@ -153,4 +130,28 @@ public class AdTest {
         // After sorting, the ad with the higher ECPM should be first.
         assertEquals(adWithHighEcpm, adList.get(0));
     }
+
+    // --------------- NEW TESTS FOR DeepLink ---------------
+    @Test
+    public void getLink_whenLinkIsPresent_returnsLink() {
+        mSubject = TestUtil.createTestInterstitialAd();
+        mSubject.link = "https://example.com/linkURL";
+        assertEquals("https://example.com/linkURL", mSubject.getLink());
+    }
+
+    @Test
+    public void getLink_whenLinkIsEmpty_returnsNull() {
+        mSubject = TestUtil.createTestInterstitialAd();
+        mSubject.link = "";
+
+        assertNull(mSubject.getLink());
+    }
+
+    @Test
+    public void getLink_whenLinkIsNull_returnsNull() {
+        mSubject = TestUtil.createTestInterstitialAd();
+        mSubject.link = null;
+        assertNull(mSubject.getLink());
+    }
+    // --------------- NEW TESTS FOR DeepLink ---------------
 }

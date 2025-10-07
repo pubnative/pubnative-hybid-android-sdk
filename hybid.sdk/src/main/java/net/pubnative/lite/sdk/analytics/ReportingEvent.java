@@ -104,6 +104,15 @@ public class ReportingEvent {
         setCustomString(Reporting.Key.AD_FORMAT, adFormat);
     }
 
+    /**
+     * Sets the ad session data for this reporting event.
+     *
+     * @param adSessionData the session data associated with the ad
+     */
+    public synchronized void setAdSessionData(String adSessionData) {
+        setCustomString(Reporting.Key.AD_SESSION_DATA, adSessionData);
+    }
+
     public String getAdFormat() {
         return getCustomString(Reporting.Key.AD_FORMAT);
     }

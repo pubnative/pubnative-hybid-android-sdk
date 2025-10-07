@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.utils.sdkmanager;
 
 import android.text.TextUtils;
@@ -6,6 +10,10 @@ import net.pubnative.lite.sdk.BuildConfig;
 import net.pubnative.lite.sdk.models.IntegrationType;
 
 import java.util.Locale;
+
+/**
+ * Created by shubhamkeshri on 16.07.25.
+ */
 
 public class DisplayManager {
 

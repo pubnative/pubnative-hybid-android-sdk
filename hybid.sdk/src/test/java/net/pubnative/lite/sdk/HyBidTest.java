@@ -542,4 +542,22 @@ public class HyBidTest {
             HyBid.setSdkManager(originalSdkManager);
         }
     }
+
+    @Test
+    public void testGetEncodedCustomRequestSignalData() {
+        String encodedSignal = HyBid.getEncodedCustomRequestSignalData();
+        Assert.assertNotNull(encodedSignal);
+
+        if (!encodedSignal.isEmpty()) {
+            Assert.assertFalse(encodedSignal.contains("+"));
+            Assert.assertFalse(encodedSignal.contains("/"));
+            byte[] decoded = android.util.Base64.decode(encodedSignal, android.util.Base64.URL_SAFE);
+            Assert.assertNotNull(new String(decoded));
+        } else {
+            // If signal data is empty, encoded string should be empty
+            Assert.assertEquals("", encodedSignal);
+        }
+    }
+
+
 }

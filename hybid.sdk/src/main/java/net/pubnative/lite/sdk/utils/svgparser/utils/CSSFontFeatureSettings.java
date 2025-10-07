@@ -277,7 +277,7 @@ public class CSSFontFeatureSettings
                val = 0;
             else
                scan.consume(FEATURE_ON);  // "on" == 1 == default, so consume quietly if it is present
-         } else if (val > 99) {
+         } else if (num > 99) {
             return null;
          } else {
             val = num;

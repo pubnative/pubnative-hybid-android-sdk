@@ -9,6 +9,8 @@ import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 
 import net.pubnative.lite.sdk.analytics.CrashController;
@@ -33,13 +35,11 @@ import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNApiUrlComposer;
 import net.pubnative.lite.sdk.utils.sdkmanager.DisplayManager;
 import net.pubnative.lite.sdk.utils.sdkmanager.SdkManager;
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityManager;
 import net.pubnative.lite.sdk.viewability.baseom.BaseViewabilityManager;
-import net.pubnative.lite.sdk.viewability.HybidViewabilityManager;
 import net.pubnative.lite.sdk.vpaid.VideoAdCache;
 import net.pubnative.lite.sdk.vpaid.enums.AudioState;
 import net.pubnative.lite.sdk.vpaid.utils.FileUtils;
-
-import java.util.Objects;
 
 public class HyBid {
     private static final String TAG = HyBid.class.getSimpleName();
@@ -75,7 +75,6 @@ public class HyBid {
     private static boolean sLocationTrackingEnabled = true;
     private static boolean isDiagnosticsEnabled = false;
     private static boolean sTopicsApiEnabled = false;
-    private static boolean sAtomEnabled = false;
     private static boolean sReportingEnabled = false;
     private static boolean sAtomInitialized;
     private static String sAge;
@@ -87,7 +86,6 @@ public class HyBid {
     private static String sAppVersion;
     private static String sDeveloperDomain;
     private static String sContentAgeRating;
-    private static String sSDKConfigURL = "";
 
     private static Integer skipXmlResource = R.mipmap.skip;
 
@@ -96,9 +94,7 @@ public class HyBid {
 
     private static AudioState sVideoAudioState = AudioState.ON;
 
-    private static final boolean sEventLoggingEndpointEnabled = false;
     private static HyBidPreferences preferences;
-    private static boolean sIsAtomEnabled = false;
 
     public static void initialize(String appToken, Application application) {
         initialize(appToken, application, null);
@@ -147,7 +143,7 @@ public class HyBid {
 
         if (hasPackageName("net.pubnative.lite.sdk")) {
             sSdkManager = SdkManager.builder()
-                    .visibilityManager(new HybidViewabilityManager(application))
+                    .visibilityManager(new HyBidViewabilityManager(application))
                     .displayManager(DisplayManager.builder()
                             .setIsWrapped(BuildConfig.IS_WRAPPED)
                             .setDisplayManagerName(BuildConfig.DISPLAY_MANAGER_NAME)
@@ -443,6 +439,7 @@ public class HyBid {
      * If Atom is already running we keep it untouched
      * If Atom is enabled in config we start Atom.
      * If Atom is disabled or absent in configs we do nothing, means if Atom is running we keep it running
+     *
      * @param isAtomEnabled
      * @param application
      */
@@ -557,6 +554,28 @@ public class HyBid {
         }
 
         return url;
+    }
+
+    private static String encodeSignalData(String signalData) {
+        if (TextUtils.isEmpty(signalData)) {
+            return "";
+        }
+        return Base64.encodeToString(signalData.getBytes(), Base64.URL_SAFE | Base64.NO_WRAP);
+    }
+
+    public static String getEncodedCustomRequestSignalData() {
+        String signalData = getCustomRequestSignalData();
+        return encodeSignalData(signalData);
+    }
+
+    public static String getEncodedCustomRequestSignalData(String mediationVendorName) {
+        String signalData = getCustomRequestSignalData(mediationVendorName);
+        return encodeSignalData(signalData);
+    }
+
+    public static String getEncodedCustomRequestSignalData(Context context, String mediationVendorName) {
+        String signalData = getCustomRequestSignalData(context, mediationVendorName);
+        return encodeSignalData(signalData);
     }
 
     public static String getSDKVersionInfo() {

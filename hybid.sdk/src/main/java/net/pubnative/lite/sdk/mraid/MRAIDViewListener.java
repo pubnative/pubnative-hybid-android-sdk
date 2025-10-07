@@ -25,7 +25,29 @@ public interface MRAIDViewListener {
 
     void mraidShowCloseButton();
 
+    void mraidShowSkipButton();
+
+    void mraidHideSkipButton();
+
     void onExpandedAdClosed();
 
     void onReplayClicked();
+
+    void onCustomEndCardLoadSuccess();
+
+    void onCustomEndCardShow(String endCardType);
+
+    void onCustomEndCardLoadFail();
+
+    void onCustomEndCardClosed();
+
+    void onCustomEndCardClicked();
+
+    void onCustomCTAShow();
+
+    void onCustomCTAClick();
+
+    void onCustomCTALoadFail();
+
+    void mraidHideCloseButton();
 }

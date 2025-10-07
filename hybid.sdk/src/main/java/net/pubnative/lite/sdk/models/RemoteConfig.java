@@ -50,7 +50,11 @@ public enum RemoteConfig {
     BC_HIDE_CONTROLS("bc_hide_controls", Boolean.class),
     BC_LEARN_MORE_SIZE("bc_learn_more_size", String.class),
     BC_LEARN_MORE_LOCATION("bc_learn_more_location", String.class),
-    PLAYABLE_SKIP_OFFSET("playable_skip_offset", Integer.class);
+    CLICK_THROUGH_TIMER("click_through_timer", Integer.class),
+    PC_CLICK_THROUGH_TIMER("pc_click_through_timer", Integer.class),
+    BC_CLICK_THROUGH_TIMER("bc_click_through_timer", Integer.class),
+    PLAYABLE_SKIP_OFFSET("playable_skip_offset", Integer.class),
+    PLAYABLE_EXPERIENCE("playable_experience", Boolean.class);
 
     public final String fieldName;
     public final Class<?> type;

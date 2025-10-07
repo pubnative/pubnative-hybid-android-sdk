@@ -5,6 +5,7 @@
 package com.ironsource.adapters.custom.verve;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.text.TextUtils;
 
@@ -20,6 +21,8 @@ import net.pubnative.lite.sdk.VideoListener;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialAd;
 import net.pubnative.lite.sdk.utils.Logger;
 
+import org.jetbrains.annotations.NotNull;
+
 public class VerveCustomInterstitial extends BaseInterstitial<VerveCustomAdapter> implements HyBidInterstitialAd.Listener, VideoListener {
     private static final String TAG = VerveCustomInterstitial.class.getSimpleName();
 
@@ -31,7 +34,7 @@ public class VerveCustomInterstitial extends BaseInterstitial<VerveCustomAdapter
     }
 
     @Override
-    public void loadAd(AdData adData, Activity activity, InterstitialAdListener interstitialAdListener) {
+    public void loadAd(@NotNull AdData adData, @NotNull Context context, @NotNull InterstitialAdListener listener) {
         String appToken;
         String zoneID;
         if (!TextUtils.isEmpty(adData.getString(VerveCustomAdapter.KEY_APP_TOKEN))
@@ -43,22 +46,22 @@ public class VerveCustomInterstitial extends BaseInterstitial<VerveCustomAdapter
                     "Required params in VerveCustomInterstitial ad data must be provided as a valid JSON Object. " +
                     "Please consult HyBid documentation and update settings in your IronSource publisher dashboard.";
             Logger.e(TAG, errorMessage);
-            interstitialAdListener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_INTERNAL,
+            listener.onAdLoadFailed(AdapterErrorType.ADAPTER_ERROR_TYPE_INTERNAL,
                     AdapterErrors.ADAPTER_ERROR_MISSING_PARAMS, errorMessage);
             return;
         }
 
-        mInterstitialAdListener = interstitialAdListener;
+        mInterstitialAdListener = listener;
 
         if (HyBid.getAppToken() != null && HyBid.getAppToken().equalsIgnoreCase(appToken) && HyBid.isInitialized()) {
-            loadInterstitial(activity, zoneID);
+            loadInterstitial(context, zoneID);
         } else {
-            HyBid.initialize(appToken, activity.getApplication(), b -> loadInterstitial(activity, zoneID));
+            HyBid.initialize(appToken, (Application) context.getApplicationContext(), b -> loadInterstitial(context, zoneID));
         }
     }
 
-    private void loadInterstitial(Activity activity, String zoneId) {
-        mInterstitialAd = new HyBidInterstitialAd(activity, zoneId, this);
+    private void loadInterstitial(Context context, String zoneId) {
+        mInterstitialAd = new HyBidInterstitialAd(context, zoneId, this);
         mInterstitialAd.setVideoListener(this);
         mInterstitialAd.setMediation(true);
         mInterstitialAd.setMediationVendor(VerveCustomAdapter.IRONSOURCE_MEDIATION_VENDOR);
@@ -75,10 +78,19 @@ public class VerveCustomInterstitial extends BaseInterstitial<VerveCustomAdapter
     }
 
     @Override
-    public void showAd(AdData adData, InterstitialAdListener listener) {
+    public void showAd(@NotNull AdData adData, @NotNull Activity activity, @NotNull InterstitialAdListener listener) {
         if (mInterstitialAd != null) {
             mInterstitialAd.show();
         }
+    }
+
+    @Override
+    public void destroyAd(@NotNull AdData adData) {
+        if (mInterstitialAd != null) {
+            mInterstitialAd.destroy();
+        }
+
+        mInterstitialAdListener = null;
     }
 
     //------------------------------- HyBidInterstitialAd Callbacks --------------------------------
@@ -101,7 +113,6 @@ public class VerveCustomInterstitial extends BaseInterstitial<VerveCustomAdapter
     public void onInterstitialImpression() {
         if (mInterstitialAdListener != null) {
             mInterstitialAdListener.onAdOpened();
-            mInterstitialAdListener.onAdShowSuccess();
             mInterstitialAdListener.onAdVisible();
         }
     }

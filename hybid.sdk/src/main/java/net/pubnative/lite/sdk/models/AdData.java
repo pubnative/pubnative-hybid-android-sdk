@@ -65,11 +65,13 @@ public class AdData extends JsonModel implements Serializable {
     }
 
     public int getWidth() {
-        return getIntField("w");
+        Integer width = getIntField("w");
+        return width == null ? 0 : width;
     }
 
     public int getHeight() {
-        return getIntField("h");
+        Integer height = getIntField("h");
+        return height == null ? 0 : height;
     }
 
     public String getStringField(String field) {
@@ -82,8 +84,11 @@ public class AdData extends JsonModel implements Serializable {
     }
 
     public JSONObject getJSONObjectField(String field) {
-
-        return (JSONObject) getDataField(field);
+        Object value = getDataField(field);
+        if (value instanceof JSONObject) {
+            return (JSONObject) value;
+        }
+        return null;
     }
 
     public Double getDoubleField(String field) {
@@ -96,17 +101,22 @@ public class AdData extends JsonModel implements Serializable {
     }
 
     public Integer getIntField(String field) {
-
-        return (Integer) getDataField(field);
+        Object value = getDataField(field);
+        if (value instanceof Integer) {
+            return (Integer) value;
+        }
+        return null;
     }
 
     public Boolean getBooleanField(String field) {
-
-        return (Boolean) getDataField(field);
+        if (getDataField(field) instanceof Boolean)
+            return (Boolean) getDataField(field);
+        else
+            return null;
     }
 
     public Boolean hasField(String field) {
-        return data.containsKey(field);
+        return data != null && data.containsKey(field);
     }
 
     protected Object getDataField(String dataField) {

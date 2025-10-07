@@ -140,6 +140,11 @@ public class PreserveAspectRatio
       }
 
       Alignment  align = aspectRatioKeywords.get(word);
+
+      if (align == null) {
+         throw new SVGParseException("Invalid preserveAspectRatio alignment value: " + val);
+      }
+
       Scale      scale = null;
 
       scan.skipWhitespace();

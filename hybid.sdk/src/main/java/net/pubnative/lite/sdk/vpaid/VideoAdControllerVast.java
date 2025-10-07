@@ -46,7 +46,6 @@ import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.utils.UrlClickSource;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
 import net.pubnative.lite.sdk.vpaid.vast.ViewControllerVast;
-import net.pubnative.lite.sdk.vpaid.volume.VolumeObserver;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -316,9 +315,17 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
             mSkipTimerWithPause.pause();
         }
 
-        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
-            mMediaPlayer.pause();
-            getViewabilityAdSession().firePause();
+        if (mMediaPlayer != null) {
+
+            try {
+                if (mMediaPlayer.isPlaying()){
+                    mMediaPlayer.pause();
+                    getViewabilityAdSession().firePause();
+                }
+            } catch (IllegalStateException exception) {
+                Logger.e(VideoAdControllerVast.class.getSimpleName(),"Media player is not prepared: "
+                        + exception.getMessage());
+            }
         }
 
         if (!isVideoCompleted && !isVideoSkipped) {
@@ -969,11 +976,13 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
             Context context = mBaseAdInternal.getContext();
             trackClickThroughEvent(url);
             String navigationMode = null;
+            String link = null;
             if (mBaseAdInternal.getAd() != null) {
                 navigationMode = mBaseAdInternal.getAd().getNavigationMode();
+                link = mBaseAdInternal.getAd().getLink();
             }
             UrlHandler urlHandler = new UrlHandler(context);
-            urlHandler.handleUrl(url, navigationMode);
+            urlHandler.handleUrl(url, link, navigationMode);
         } else {
             Logger.e(LOG_TAG, "No internet connection");
         }
@@ -1004,7 +1013,6 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
 
     @Override
     public void onDefaultEndCardShow(String endCardType) {
-
         if (mBaseAdInternal != null)
             mBaseAdInternal.onDefaultEndCardShow(endCardType);
 

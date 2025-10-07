@@ -190,6 +190,35 @@ public class HyBidCTAView extends FrameLayout {
         }
     }
 
+    public void showWithoutIcon(String buttonText, Integer delay) {
+        resetAll();
+
+        if (delay == null || delay == 0) {
+            showImmediately = true;
+        }
+
+        int horizontalPadding = 90;
+        icon.setVisibility(View.GONE);
+        int fontSize = (int) (getResources().getDimension(R.dimen.big_cta_font_size) / getResources().getDisplayMetrics().density);
+        this.button.setTextSize(fontSize);
+        this.button.setPadding(horizontalPadding, 0, horizontalPadding, 0);
+        setButton(buttonText);
+        isLoaded = true;
+
+        if (delay != null && delay > 0) {
+            showWithDelay(delay);
+        } else {
+            show();
+        }
+    }
+
+    public void killTimer() {
+        if (mShowTimer != null) {
+            mShowTimer.pause();
+            mShowTimer.cancel();
+        }
+    }
+
     public void pause() {
         if (mShowTimer != null) mShowTimer.pause();
     }

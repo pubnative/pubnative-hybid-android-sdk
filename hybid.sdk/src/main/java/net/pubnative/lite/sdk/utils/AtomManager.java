@@ -41,7 +41,7 @@ public class AtomManager {
 
     private static AtomManager instance;
 
-    private AtomManager() {
+    AtomManager() {
     }
 
     public static AtomManager getInstance() {
@@ -51,12 +51,26 @@ public class AtomManager {
         return instance;
     }
 
+    // Reflection helpers for testability
+    protected Class<?> findClass(String className) throws ClassNotFoundException {
+        return Class.forName(className);
+    }
+    protected Method getDeclaredMethod(Class<?> clazz, String name, Class<?>... params) throws NoSuchMethodException {
+        return clazz.getDeclaredMethod(name, params);
+    }
+    protected Object invokeMethod(Method method, Object obj, Object... args) throws Exception {
+        return method.invoke(obj, args);
+    }
+    protected Object createProxy(ClassLoader loader, Class<?> iface, ProxyUtils.ProxyMethodHandler handler) {
+        return ProxyUtils.createProxy(loader, iface, handler);
+    }
+
     @SuppressWarnings("unchecked")
-    public static List<Object> getAtomCohorts() {
+    public List<Object> getAtomCohortsInstance() {
         try {
-            Class<?> atomClass = Class.forName(ATOM_CLASS_NAME);
-            Method getCalculatedCohortsMethod = atomClass.getDeclaredMethod(ATOM_GET_CALCULATED_COHORTS_METHOD_NAME);
-            Object result = getCalculatedCohortsMethod.invoke(null);
+            Class<?> atomClass = findClass(ATOM_CLASS_NAME);
+            Method getCalculatedCohortsMethod = getDeclaredMethod(atomClass, ATOM_GET_CALCULATED_COHORTS_METHOD_NAME);
+            Object result = invokeMethod(getCalculatedCohortsMethod, null);
             if (result instanceof List) {
                 return (List<Object>) result;
             }
@@ -65,13 +79,16 @@ public class AtomManager {
         }
         return new ArrayList<>();
     }
+    public static List<Object> getAtomCohorts() {
+        return getInstance().getAtomCohortsInstance();
+    }
 
-    public static boolean isAtomSdkDisabled() {
+    public boolean isAtomSdkDisabledInstance() {
         boolean isDisabled = true;
         try {
-            Class<?> atomClass = Class.forName(ATOM_CLASS_NAME);
-            Method getIsDisabledMethod = atomClass.getDeclaredMethod(ATOM_IS_DISABLED_METHOD_NAME);
-            Object result = getIsDisabledMethod.invoke(null);
+            Class<?> atomClass = findClass(ATOM_CLASS_NAME);
+            Method getIsDisabledMethod = getDeclaredMethod(atomClass, ATOM_IS_DISABLED_METHOD_NAME);
+            Object result = invokeMethod(getIsDisabledMethod, null);
             if (result instanceof Boolean) {
                 isDisabled = (Boolean) result;
             }
@@ -80,23 +97,29 @@ public class AtomManager {
         }
         return isDisabled;
     }
+    public static boolean isAtomSdkDisabled() {
+        return getInstance().isAtomSdkDisabledInstance();
+    }
 
-    public static void setAdSessionData(HashMap<String, Object> adSessionData){
+    public void setAdSessionDataInstance(HashMap<String, Object> adSessionData){
         try {
-            Class<?> atomClass = Class.forName(ATOM_CLASS_NAME);
-            Method adSessionDataMethod = atomClass.getDeclaredMethod(ATOM_SET_AD_SESSION_DATA_METHOD_NAME, Map.class);
-            adSessionDataMethod.invoke(null ,adSessionData);
+            Class<?> atomClass = findClass(ATOM_CLASS_NAME);
+            Method adSessionDataMethod = getDeclaredMethod(atomClass, ATOM_SET_AD_SESSION_DATA_METHOD_NAME, Map.class);
+            invokeMethod(adSessionDataMethod, null, adSessionData);
         } catch (Exception e) {
             Logger.d(TAG, ATOM_NOT_FOUND_MESSAGE+" "+e);
         }
     }
+    public static void setAdSessionData(HashMap<String, Object> adSessionData){
+        getInstance().setAdSessionDataInstance(adSessionData);
+    }
 
-    public static boolean isAtomSdkConfigurationFetchSuccessful() {
+    public boolean isAtomSdkConfigurationFetchSuccessfulInstance() {
         boolean configFetched = false;
         try {
-            Class<?> atomClass = Class.forName(ATOM_CLASS_NAME);
-            Method getConfigFetchedMethod = atomClass.getDeclaredMethod(ATOM_IS_CONFIG_FETCHED_METHOD_NAME);
-            Object result = getConfigFetchedMethod.invoke(null);
+            Class<?> atomClass = findClass(ATOM_CLASS_NAME);
+            Method getConfigFetchedMethod = getDeclaredMethod(atomClass, ATOM_IS_CONFIG_FETCHED_METHOD_NAME);
+            Object result = invokeMethod(getConfigFetchedMethod, null);
             if (result instanceof Boolean) {
                 configFetched = (Boolean) result;
             }
@@ -105,43 +128,51 @@ public class AtomManager {
         }
         return configFetched;
     }
+    public static boolean isAtomSdkConfigurationFetchSuccessful() {
+        return getInstance().isAtomSdkConfigurationFetchSuccessfulInstance();
+    }
 
-    public static void initializeAtom(Context context) {
+    public void initializeAtomInstance(Context context) {
         String packageName = context.getPackageName();
         try {
-            Class<?> atomClass = Class.forName(ATOM_CLASS_NAME);
-            Method startMethod = atomClass.getDeclaredMethod(ATOM_START_METHOD_NAME, Context.class, String.class, boolean.class, Class.forName(ATOM_INIT_LISTENER_CLASS_NAME));
-
-            Object listener = ProxyUtils.createProxy(atomClass.getClassLoader(), Class.forName(ATOM_INIT_LISTENER_CLASS_NAME), (proxy, method, args) -> {
+            Class<?> atomClass = findClass(ATOM_CLASS_NAME);
+            Class<?> listenerClass = findClass(ATOM_INIT_LISTENER_CLASS_NAME);
+            Method startMethod = getDeclaredMethod(atomClass, ATOM_START_METHOD_NAME, Context.class, String.class, boolean.class, listenerClass);
+            Object listener = createProxy(atomClass.getClassLoader(), listenerClass, (proxy, method, args) -> {
                 String methodName = method.getName();
                 if (ATOM_ON_INITIALISED_METHOD_NAME.equals(methodName) && args.length == 1 && args[0] instanceof Boolean) {
                     HyBid.setAtomStarted((Boolean) args[0]);
                 }
                 return null;
             });
-            startMethod.invoke(null, context, packageName, HyBid.isTestMode(), listener);
+            invokeMethod(startMethod, null, context, packageName, HyBid.isTestMode(), listener);
         } catch (Exception e) {
             HyBid.setAtomStarted(false);
             Logger.d(TAG, ATOM_NOT_FOUND_MESSAGE);
         }
     }
+    public static void initializeAtom(Context context) {
+        getInstance().initializeAtomInstance(context);
+    }
 
-    public static void stopAtom() {
+    public void stopAtomInstance() {
         try {
-            Class<?> atomClass = Class.forName(ATOM_CLASS_NAME);
-
-            Method stopMethod = atomClass.getDeclaredMethod(ATOM_STOP_METHOD_NAME, Class.forName(ATOM_STOP_LISTENER_CLASS_NAME));
-
-            Object listener = ProxyUtils.createProxy(atomClass.getClassLoader(), Class.forName(ATOM_STOP_LISTENER_CLASS_NAME), (proxy, method, args) -> {
+            Class<?> atomClass = findClass(ATOM_CLASS_NAME);
+            Class<?> listenerClass = findClass(ATOM_STOP_LISTENER_CLASS_NAME);
+            Method stopMethod = getDeclaredMethod(atomClass, ATOM_STOP_METHOD_NAME, listenerClass);
+            Object listener = createProxy(atomClass.getClassLoader(), listenerClass, (proxy, method, args) -> {
                 String methodName = method.getName();
                 if (ATOM_ON_STOPPED_METHOD_NAME.equals(methodName) && args.length == 1 && args[0] instanceof Boolean) {
                     HyBid.setAtomStarted(!((Boolean) args[0]));
                 }
                 return null;
             });
-            stopMethod.invoke(null, listener);
+            invokeMethod(stopMethod, null, listener);
         } catch (Exception e) {
             Logger.d(TAG, ATOM_NOT_FOUND_MESSAGE);
         }
+    }
+    public static void stopAtom() {
+        getInstance().stopAtomInstance();
     }
 }

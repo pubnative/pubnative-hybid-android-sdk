@@ -181,7 +181,6 @@ class HyBidDemoApplication : MultiDexApplication() {
                 skipOffsetSettings = SkipOffsetSettings(
                     html = false to Constants.SKIP_OFFSET_DEFAULT.toString(),
                     video = false to Constants.VIDEO_SKIP_OFFSET_DEFAULT.toString(),
-                    playable = false to "5",
                     rewardedHtml = false to "5",
                     rewardedVideo = false to "15",
                     endCardCloseDelay = false to Constants.ENDCARD_CLOSE_BUTTON_DELAY_DEFAULT.toString()

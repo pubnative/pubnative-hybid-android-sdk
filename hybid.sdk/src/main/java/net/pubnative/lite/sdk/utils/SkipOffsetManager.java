@@ -4,6 +4,8 @@
 //
 package net.pubnative.lite.sdk.utils;
 
+import androidx.annotation.VisibleForTesting;
+
 import java.util.ArrayList;
 
 public class SkipOffsetManager {
@@ -11,7 +13,6 @@ public class SkipOffsetManager {
     //All the below skip offsets are represented in seconds
     //TODO : Check the default values for interstitial and rewarded ads
 
-    private static final int PLAYABLE_SKIP_OFFSET = 5;
     private static final int NATIVE_CLOSE_BUTTON_DELAY = 15;
 
     private static final int REWARDED_HTML_SKIP_OFFSET = 30;
@@ -22,6 +23,8 @@ public class SkipOffsetManager {
     private static final int INTERSTITIAL_VIDEO_WITH_END_CARD = 10;
 
     public static final int INTERSTITIAL_MRAID = 3;
+    private static final Integer PC_HTML_SKIP_OFFSET = 3;
+    private static final Integer PC_REWARDED_HTML_SKIP_OFFSET = 30;
 
     private static Boolean isCustomInterstitialVideoSkipOffset = false;
     private static Boolean isCustomInterstitialHTMLSkipOffset = false;
@@ -30,7 +33,10 @@ public class SkipOffsetManager {
 
     private static final int VIDEO_WITHOUT_ENDCARD_SKIP_OFFSET = 15;
 
+    private static final Integer ENDCARD_CLOSE_DELAY_DEFAULT = 3;
     private static final int ENDCARD_SKIP_OFFSET = 4;
+    private static final int PC_ENDCARD_SKIP_OFFSET = 5;
+    private static final int BC_ENDCARD_SKIP_OFFSET = 0;
     private static final int ENDCARD_CLOSE_DELAY_MAXIMUM = 30;
 
 //    private static final int globalMaximumSkipOffsetWithoutEndCard = 30;
@@ -38,14 +44,6 @@ public class SkipOffsetManager {
 //    private static final int globalMaximumSkipOffsetWithEndCard = 30;
 
     private static final int globalMaximumSkipOffset = 30;
-
-    public static Integer getPlayableSkipOffset(Integer remoteConfigSkipOffset) {
-        Integer skipOffset = remoteConfigSkipOffset;
-        if (remoteConfigSkipOffset == null || remoteConfigSkipOffset < 0 || remoteConfigSkipOffset > SkipOffsetManager.NATIVE_CLOSE_BUTTON_DELAY) {
-            skipOffset = SkipOffsetManager.PLAYABLE_SKIP_OFFSET;
-        }
-        return skipOffset;
-    }
 
     public static Integer getNativeCloseButtonDelay(Integer remoteConfigDelay) {
         Integer nativeCloseButtonDelay = remoteConfigDelay;
@@ -156,8 +154,28 @@ public class SkipOffsetManager {
         return ENDCARD_SKIP_OFFSET;
     }
 
+    public static Integer getDefaultPCEndcardSkipOffset() {
+        return PC_ENDCARD_SKIP_OFFSET;
+    }
+
+    public static Integer getDefaultBCEndcardSkipOffset() {
+        return BC_ENDCARD_SKIP_OFFSET;
+    }
+
     public static Integer getMaximumEndcardCloseDelay() {
         return ENDCARD_CLOSE_DELAY_MAXIMUM;
+    }
+
+    public static Integer getDefaultEndcardCloseDelay() {
+        return ENDCARD_CLOSE_DELAY_DEFAULT;
+    }
+
+    public static Integer getDefaultPCHTMLSkipOffset() {
+        return PC_HTML_SKIP_OFFSET;
+    }
+
+    public static Integer getDefaultPCRewardedHTMLSkipOffset() {
+        return PC_REWARDED_HTML_SKIP_OFFSET;
     }
 
     private static class SkipOffset {
@@ -196,5 +214,11 @@ public class SkipOffsetManager {
 
     public static int getMaximumRewardedSkipOffset() {
         return REWARDED_VIDEO_DEFAULT;
+    }
+
+    @VisibleForTesting
+    public static void reset() {
+        isCustomInterstitialVideoSkipOffset = false;
+        isCustomInterstitialHTMLSkipOffset = false;
     }
 }

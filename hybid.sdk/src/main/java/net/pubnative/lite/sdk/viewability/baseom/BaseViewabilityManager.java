@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.viewability.baseom;
 
 import android.app.Application;
@@ -9,6 +13,10 @@ import android.webkit.WebView;
 import net.pubnative.lite.sdk.utils.Logger;
 
 import java.util.List;
+
+/**
+ * Created by shubhamkeshri on 25.02.25.
+ */
 
 public abstract class BaseViewabilityManager {
 
@@ -61,21 +69,34 @@ public abstract class BaseViewabilityManager {
 
     public abstract void activateOmId(Application application);
 
+    public abstract <T> T createMediaEvents(T mAdSession);
+
+    public abstract void fireMediaEvents(Enum event, Object mMediaEvents);
+
+    public abstract void fireMediaEventStart(Object mMediaEvents, float duration, float mute);
+
+    public abstract void fireMediaEventVolumeChange(Object mMediaEvents, float mute);
+
+    public abstract <T> T createVastPropertiesForNonSkippableMedia();
+
+    public abstract <T> T createVastPropertiesForSkippableMedia(Integer skipOffset);
+
     public BaseViewabilityManager(final Application application) {
+        String TAG = getTag() != null ? getTag() : BaseViewabilityManager.class.getSimpleName();
         new Handler(Looper.getMainLooper()).post(() -> {
             try {
                 if (!isOmActive()) {
                     activateOmId(application);
                 }
             } catch (IllegalArgumentException e) {
-                Logger.e(getTag(), "Could not initialise Omid");
+                Logger.e(TAG, "Could not initialise Omid");
             }
 
             if (isOmActive() && mPartner == null) {
                 try {
                     mPartner = createPartner();
                 } catch (IllegalArgumentException e) {
-                    Logger.e(getTag(), "Could not initialise Omid");
+                    Logger.e(TAG, "Could not initialise Omid");
                 }
             }
         });
@@ -92,14 +113,4 @@ public abstract class BaseViewabilityManager {
     public boolean isViewabilityMeasurementEnabled() {
         return mShouldMeasureViewability;
     }
-
-    public abstract <T> T createMediaEvents(T mAdSession);
-
-    public abstract void fireMediaEvents(Enum event, Object mMediaEvents);
-
-    public abstract void fireMediaEventStart(Object mMediaEvents, float duration, float mute);
-
-    public abstract void fireMediaEventVolumeChange(Object mMediaEvents, float mute);
-
-    public abstract <T> T createVastPropertiesForNonSkippableMedia();
 }

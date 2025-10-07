@@ -27,12 +27,15 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityAdSess
 
     private boolean muted = true;
 
-    public HyBidViewabilityNativeVideoAdSession(BaseViewabilityManager viewabilityManager) {
+    private final Integer skipOffset;
+
+    public HyBidViewabilityNativeVideoAdSession(BaseViewabilityManager viewabilityManager, Integer skipOffset) {
         super(viewabilityManager);
+        this.skipOffset = skipOffset;
     }
 
     public void initAdSession(View view, List<BaseVerificationScriptResource> verificationScriptResources) {
-        if (viewabilityManager != null && !viewabilityManager.isViewabilityMeasurementEnabled())
+        if (shouldSkipViewabilityMeasurement())
             return;
 
         mVerificationScriptResources.addAll(verificationScriptResources);
@@ -52,16 +55,18 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityAdSess
     }
 
     protected void createAdEvents() {
-        if (mAdSession != null) {
-            mAdEvents = viewabilityManager.createAdEvents(mAdSession);
-        }
+        if (shouldSkipViewabilityMeasurement() || mAdSession == null)
+            return;
+
+        mAdEvents = viewabilityManager.createAdEvents(mAdSession);
     }
 
     protected void createMediaEvents() {
         try {
-            if (mAdSession != null) {
-                mMediaEvents = viewabilityManager.createMediaEvents(mAdSession);
-            }
+            if (shouldSkipViewabilityMeasurement() || mAdSession == null)
+                return;
+
+            mMediaEvents = viewabilityManager.createMediaEvents(mAdSession);
         } catch (Exception exception) {
             Logger.e(TAG, OM_EXCEPTION, exception);
         }
@@ -70,10 +75,14 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityAdSess
     @Override
     public void fireLoaded() {
         try {
-            if (!viewabilityManager.isViewabilityMeasurementEnabled())
+            if (shouldSkipViewabilityMeasurement())
                 return;
-
-            Object vastProperties = viewabilityManager.createVastPropertiesForNonSkippableMedia();
+            Object vastProperties;
+            if (skipOffset != null && skipOffset > -1) {
+                vastProperties = viewabilityManager.createVastPropertiesForSkippableMedia(skipOffset);
+            } else {
+                vastProperties = viewabilityManager.createVastPropertiesForNonSkippableMedia();
+            }
 
             if (mAdEvents != null) {
                 viewabilityManager.fireEventProperties(mAdEvents, vastProperties);
@@ -85,7 +94,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityAdSess
 
     public void fireStart(float duration, boolean mute) {
         try {
-            if (!viewabilityManager.isViewabilityMeasurementEnabled())
+            if (shouldSkipViewabilityMeasurement())
                 return;
 
             if (mMediaEvents != null && !startFired) {
@@ -99,7 +108,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityAdSess
 
     public void fireFirstQuartile() {
         try {
-            if (!viewabilityManager.isViewabilityMeasurementEnabled())
+            if (shouldSkipViewabilityMeasurement())
                 return;
 
             if (mMediaEvents != null && !firstQuartileFired) {
@@ -113,7 +122,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityAdSess
 
     public void fireMidpoint() {
         try {
-            if (!viewabilityManager.isViewabilityMeasurementEnabled())
+            if (shouldSkipViewabilityMeasurement())
                 return;
 
             if (mMediaEvents != null && !midpointFired) {
@@ -127,7 +136,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityAdSess
 
     public void fireThirdQuartile() {
         try {
-            if (!viewabilityManager.isViewabilityMeasurementEnabled())
+            if (shouldSkipViewabilityMeasurement())
                 return;
 
             if (mMediaEvents != null && !thirdQuartileFired) {
@@ -141,7 +150,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityAdSess
 
     public void fireComplete() {
         try {
-            if (!viewabilityManager.isViewabilityMeasurementEnabled())
+            if (shouldSkipViewabilityMeasurement())
                 return;
 
             if (mMediaEvents != null && !completeFired) {
@@ -155,7 +164,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityAdSess
 
     public void firePause() {
         try {
-            if (!viewabilityManager.isViewabilityMeasurementEnabled())
+            if (shouldSkipViewabilityMeasurement())
                 return;
 
             if (mMediaEvents != null) {
@@ -168,7 +177,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityAdSess
 
     public void fireResume() {
         try {
-            if (!viewabilityManager.isViewabilityMeasurementEnabled())
+            if (shouldSkipViewabilityMeasurement())
                 return;
 
             if (mMediaEvents != null) {
@@ -184,7 +193,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityAdSess
      */
     public void fireBufferStart() {
         try {
-            if (!viewabilityManager.isViewabilityMeasurementEnabled())
+            if (shouldSkipViewabilityMeasurement())
                 return;
 
             if (mMediaEvents != null) {
@@ -200,7 +209,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityAdSess
      */
     public void fireBufferFinish() {
         try {
-            if (!viewabilityManager.isViewabilityMeasurementEnabled())
+            if (shouldSkipViewabilityMeasurement())
                 return;
 
             if (mMediaEvents != null) {
@@ -213,7 +222,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityAdSess
 
     public void fireVolumeChange(boolean mute) {
         try {
-            if (!viewabilityManager.isViewabilityMeasurementEnabled() || mute == muted)
+            if (shouldSkipViewabilityMeasurement() || mute == muted)
                 return;
 
             muted = mute;
@@ -230,7 +239,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityAdSess
      */
     public void fireSkipped() {
         try {
-            if (!viewabilityManager.isViewabilityMeasurementEnabled())
+            if (shouldSkipViewabilityMeasurement())
                 return;
 
             if (mMediaEvents != null) {
@@ -243,7 +252,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityAdSess
 
     public void fireClick() {
         try {
-            if (!viewabilityManager.isViewabilityMeasurementEnabled())
+            if (shouldSkipViewabilityMeasurement())
                 return;
 
             if (mMediaEvents != null) {
@@ -252,5 +261,9 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityAdSess
         } catch (Exception exception) {
             Logger.e(TAG, OM_EXCEPTION, exception);
         }
+    }
+
+    private boolean shouldSkipViewabilityMeasurement() {
+        return viewabilityManager == null || !viewabilityManager.isViewabilityMeasurementEnabled();
     }
 }

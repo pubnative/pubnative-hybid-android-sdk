@@ -127,18 +127,13 @@
                 android:textColor="?colorPrimaryVariant"
                 android:textStyle="normal" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/check_landing_page"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/check_landing_page"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp" />
+                android:layout_marginEnd="10dp"
+                android:text="@string/check_landing_page"
+                android:textSize="14sp" />
 
         </LinearLayout>
 
@@ -157,18 +152,13 @@
                 android:textColor="?colorPrimaryVariant"
                 android:textStyle="normal" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/check_mraid_expand"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/check_mraid_expand"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp" />
+                android:layout_marginEnd="10dp"
+                android:text="@string/check_mraid_expand"
+                android:textSize="14sp" />
 
         </LinearLayout>
 
@@ -187,18 +177,13 @@
                 android:textColor="?colorPrimaryVariant"
                 android:textStyle="normal" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/check_enable_endcard"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/check_enable_endcard"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp" />
+                android:layout_marginEnd="10dp"
+                android:text="@string/check_enable_endcard"
+                android:textSize="14sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -243,6 +228,13 @@
             android:layout_marginEnd="8dp"
             android:background="@android:color/darker_gray" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:background="@android:color/darker_gray" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -274,18 +266,13 @@
                     android:textColor="?colorPrimaryVariant"
                     android:textStyle="normal" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/check_enable_custom_endcard"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/check_enable_custom_endcard"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="10dp" />
+                    android:layout_marginEnd="10dp"
+                    android:text="@string/check_enable_custom_endcard"
+                    android:textSize="14sp" />
             </LinearLayout>
 
             <LinearLayout
@@ -389,18 +376,13 @@
                 android:textColor="?colorPrimaryVariant"
                 android:textStyle="normal" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/check_auto_close"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/check_auto_close"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp" />
+                android:layout_marginEnd="10dp"
+                android:text="@string/check_auto_close"
+                android:textSize="14sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -469,41 +451,6 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:visibility="gone"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <CheckBox
-                android:id="@+id/cb_input_playable_skip_offset"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/roboto"
-                android:textColor="?colorPrimaryVariant"
-                android:textSize="14sp"
-                android:textStyle="normal" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/input_playable_skip_offset"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/hint_playable_skip_offset"
-                    android:imeOptions="actionNext"
-                    android:inputType="number"
-                    android:maxLines="1" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-        </LinearLayout>
-
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
@@ -538,19 +485,24 @@
                 android:textColor="?colorPrimaryVariant"
                 android:textStyle="normal" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/check_auto_close"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/check_auto_close_rewarded"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp" />
+                android:layout_marginEnd="10dp"
+                android:text="@string/check_auto_close"
+                android:textSize="14sp" />
         </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/fullscreen_video"
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -654,18 +606,13 @@
                 android:textSize="14sp"
                 android:textStyle="normal" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/check_reduced_close_skip_buttons"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/check_reduced_close_skip_buttons"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp" />
+                android:layout_marginEnd="10dp"
+                android:text="@string/check_reduced_close_skip_buttons"
+                android:textSize="14sp" />
         </LinearLayout>
 
         <View
@@ -690,9 +637,9 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
-            android:layout_marginStart="10dp">
+            android:layout_marginEnd="10dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_bundle_id"
@@ -710,16 +657,6 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
             android:background="@android:color/darker_gray" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:text="@string/fullscreen_video"
-            android:textSize="14sp"
-            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -804,18 +741,13 @@
                 android:textColor="?colorPrimaryVariant"
                 android:textStyle="normal" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/custom_cta_enabled"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/check_custom_cta_enabled"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp" />
+                android:layout_marginEnd="10dp"
+                android:text="@string/custom_cta_enabled"
+                android:textSize="14sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -880,9 +812,9 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
-            android:layout_marginStart="10dp">
+            android:layout_marginEnd="10dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_custom_cta_app_name"
@@ -897,9 +829,9 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
-            android:layout_marginStart="10dp">
+            android:layout_marginEnd="10dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_custom_cta_icon"
@@ -1167,132 +1099,132 @@
             android:layout_marginEnd="8dp"
             android:background="@android:color/darker_gray" />
 
-    <TextView
-        android:id="@+id/branding_configs_label"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="16dp"
-        android:text="@string/branding_configs_label"
-        android:textSize="14sp"
-        android:textStyle="bold" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        <TextView
+            android:id="@+id/branding_configs_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/branding_configs_label"
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_marginTop="10dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <CheckBox
-                android:id="@+id/cb_learn_more_size"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/roboto"
-                android:textColor="?colorPrimaryVariant"
-                android:textSize="14sp"
-                android:textStyle="normal" />
-
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:text="@string/learn_more_size_title"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <RadioGroup
-            android:id="@+id/group_learn_more_size"
-            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="10dp"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
-            <RadioButton
-                android:id="@+id/radio_learn_more_size_default"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:checked="true"
-                android:text="@string/learn_more_size_default" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <RadioButton
-                android:id="@+id/radio_learn_more_size_medium"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:text="@string/learn_more_size_medium" />
+                <CheckBox
+                    android:id="@+id/cb_learn_more_size"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/roboto"
+                    android:textColor="?colorPrimaryVariant"
+                    android:textSize="14sp"
+                    android:textStyle="normal" />
 
-            <RadioButton
-                android:id="@+id/radio_learn_more_size_large"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:text="@string/learn_more_size_large" />
-        </RadioGroup>
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:text="@string/learn_more_size_title"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_marginTop="10dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <CheckBox
-                android:id="@+id/cb_learn_more_location"
-                android:layout_width="wrap_content"
+            <RadioGroup
+                android:id="@+id/group_learn_more_size"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/roboto"
-                android:textColor="?colorPrimaryVariant"
-                android:textSize="14sp"
-                android:textStyle="normal" />
-
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="4dp"
                 android:layout_marginEnd="10dp"
-                android:text="@string/learn_more_location_title"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/radio_learn_more_size_default"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:checked="true"
+                    android:text="@string/learn_more_size_default" />
+
+                <RadioButton
+                    android:id="@+id/radio_learn_more_size_medium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="@string/learn_more_size_medium" />
+
+                <RadioButton
+                    android:id="@+id/radio_learn_more_size_large"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="@string/learn_more_size_large" />
+            </RadioGroup>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <CheckBox
+                    android:id="@+id/cb_learn_more_location"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/roboto"
+                    android:textColor="?colorPrimaryVariant"
+                    android:textSize="14sp"
+                    android:textStyle="normal" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:text="@string/learn_more_location_title"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <RadioGroup
+                android:id="@+id/group_learn_more_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="10dp"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/radio_learn_more_location_default"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:checked="true"
+                    android:text="@string/learn_more_location_default" />
+
+                <RadioButton
+                    android:id="@+id/radio_learn_more_location_bottom_down"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="@string/learn_more_location_bottom_down" />
+
+                <RadioButton
+                    android:id="@+id/radio_learn_more_location_bottom_up"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:text="@string/learn_more_location_bottom_up" />
+            </RadioGroup>
+
+
         </LinearLayout>
-
-        <RadioGroup
-            android:id="@+id/group_learn_more_location"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="10dp"
-            android:orientation="horizontal">
-
-            <RadioButton
-                android:id="@+id/radio_learn_more_location_default"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:checked="true"
-                android:text="@string/learn_more_location_default" />
-
-            <RadioButton
-                android:id="@+id/radio_learn_more_location_bottom_down"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:text="@string/learn_more_location_bottom_down" />
-
-            <RadioButton
-                android:id="@+id/radio_learn_more_location_bottom_up"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:text="@string/learn_more_location_bottom_up" />
-        </RadioGroup>
-
-
-    </LinearLayout>
 
         <View
             android:layout_width="match_parent"

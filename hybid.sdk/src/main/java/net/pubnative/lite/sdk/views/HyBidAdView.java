@@ -1197,12 +1197,66 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     }
 
     @Override
+    public void mraidShowSkipButton() {
+    }
+
+    @Override
+    public void mraidHideSkipButton() {
+
+    }
+
+    @Override
     public void onExpandedAdClosed() {
         if (mRaidListener != null) mRaidListener.onExpandedAdClosed();
     }
 
     @Override
     public void onReplayClicked() {
+
+    }
+
+    @Override
+    public void onCustomEndCardLoadSuccess() {
+
+    }
+
+    @Override
+    public void onCustomEndCardShow(String endCardType) {
+
+    }
+
+    @Override
+    public void onCustomEndCardLoadFail() {
+
+    }
+
+    @Override
+    public void onCustomEndCardClosed() {
+
+    }
+
+    @Override
+    public void onCustomEndCardClicked() {
+
+    }
+
+    @Override
+    public void onCustomCTAShow() {
+
+    }
+
+    @Override
+    public void onCustomCTAClick() {
+
+    }
+
+    @Override
+    public void onCustomCTALoadFail() {
+
+    }
+
+    @Override
+    public void mraidHideCloseButton() {
 
     }
 }

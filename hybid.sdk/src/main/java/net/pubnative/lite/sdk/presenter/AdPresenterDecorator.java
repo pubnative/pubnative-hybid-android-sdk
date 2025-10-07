@@ -46,6 +46,7 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
     private boolean mClickTracked = false;
 
     private IntegrationType mIntegrationType;
+    private boolean mPlayableSkipButtonClickTracked = false;
 
     public AdPresenterDecorator(AdPresenter adPresenter, AdTracker adTrackingDelegate, ReportingController reportingController, Listener listener, ImpressionListener impressionListener, IntegrationType integrationType) {
         mAdPresenter = adPresenter;
@@ -244,7 +245,7 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
     @Override
     public void onVideoError(int progressPercentage) {
         if (mVideoListener != null) {
-            mVideoListener.onVideoDismissed(progressPercentage);
+            mVideoListener.onVideoError(progressPercentage);
         }
     }
 
@@ -307,6 +308,16 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
     }
 
     @Override
+    public void mraidShowSkipButton() {
+
+    }
+
+    @Override
+    public void mraidHideSkipButton() {
+
+    }
+
+    @Override
     public void onExpandedAdClosed() {
         if (mMraidListener != null)
             mMraidListener.onExpandedAdClosed();
@@ -314,6 +325,51 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
 
     @Override
     public void onReplayClicked() {
+
+    }
+
+    @Override
+    public void onCustomEndCardLoadSuccess() {
+
+    }
+
+    @Override
+    public void onCustomEndCardShow(String endCardType) {
+
+    }
+
+    @Override
+    public void onCustomEndCardLoadFail() {
+
+    }
+
+    @Override
+    public void onCustomEndCardClosed() {
+
+    }
+
+    @Override
+    public void onCustomEndCardClicked() {
+
+    }
+
+    @Override
+    public void onCustomCTAShow() {
+
+    }
+
+    @Override
+    public void onCustomCTAClick() {
+
+    }
+
+    @Override
+    public void onCustomCTALoadFail() {
+
+    }
+
+    @Override
+    public void mraidHideCloseButton() {
 
     }
 }

@@ -5,6 +5,7 @@
     <dimen name="mute_view_size">40dp</dimen>
     <dimen name="skip_view_size">40dp</dimen>
     <dimen name="cta_font_size">18sp</dimen>
+    <dimen name="big_cta_font_size">20sp</dimen>
 
     <!-- Margins for location -->
     <dimen name="learn_more_margin_default">8dp</dimen>

@@ -13,6 +13,8 @@ import android.widget.FrameLayout;
 
 import net.pubnative.lite.sdk.R;
 import net.pubnative.lite.sdk.utils.AdExperienceManager;
+import net.pubnative.lite.sdk.utils.ClickThroughTimerManager;
+import net.pubnative.lite.sdk.utils.SkipOffsetManager;
 import net.pubnative.lite.sdk.utils.json.BindField;
 import net.pubnative.lite.sdk.utils.json.JsonModel;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
@@ -385,7 +387,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             return configUrl;
         } else {
             AdData data = getMeta(APIMeta.CONTENT_INFO);
-            return data.getStringField(DATA_CONTENTINFO_ICON_KEY);
+            return data != null ? data.getStringField(DATA_CONTENTINFO_ICON_KEY) : null;
         }
     }
 
@@ -400,7 +402,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             return configClickUrl;
         } else {
             AdData data = getMeta(APIMeta.CONTENT_INFO);
-            return data.getStringField(DATA_CONTENTINFO_LINK_KEY);
+            return data != null ? data.getStringField(DATA_CONTENTINFO_LINK_KEY) : null;
         }
     }
 
@@ -442,7 +444,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
 
                 if (!TextUtils.isEmpty(data.getURL())) {
                     Uri uri = Uri.parse(data.getURL());
-                    if (uri.getAuthority().equals(PN_IMPRESSION_URL)) {
+                    if (uri.getAuthority() != null && uri.getAuthority().equals(PN_IMPRESSION_URL)) {
                         String idParam = uri.getQueryParameter(PN_IMPRESSION_QUERY_PARAM);
                         if (!TextUtils.isEmpty(idParam)) {
                             impressionId = idParam;
@@ -480,14 +482,6 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         String creativeId = adData.getStringField(DATA_TEXT_KEY);
 
         return TextUtils.isEmpty(creativeId) ? "" : creativeId;
-    }
-
-    public Boolean isAdPlayable() {
-        AdData adData = getMeta(APIMeta.PLAYABLE);
-        if (adData == null) {
-            return false;
-        }
-        return adData.getBooleanField("boolean");
     }
 
     public String getBundleId() {
@@ -595,10 +589,15 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             return getBcEndCardCloseDelay();
         } else {
             Integer endCardCloseDelay = getRemoteConfig(RemoteConfig.END_CARD_CLOSE_DELAY);
-            if (endCardCloseDelay == null || endCardCloseDelay < 0) {
-                endCardCloseDelay = null;
+            if (endCardCloseDelay != null) {
+                if (endCardCloseDelay > SkipOffsetManager.getMaximumEndcardCloseDelay()) {
+                    return SkipOffsetManager.getMaximumEndcardCloseDelay();
+                } else {
+                    return endCardCloseDelay;
+                }
+            } else {
+                return SkipOffsetManager.getDefaultEndcardCloseDelay();
             }
-            return endCardCloseDelay;
         }
     }
 
@@ -628,7 +627,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             return content_info_text;
         } else {
             AdData data = getMeta(APIMeta.CONTENT_INFO);
-            if (!TextUtils.isEmpty(data.getText())) {
+            if (data != null && !TextUtils.isEmpty(data.getText())) {
                 return data.getText();
             } else {
                 return CONTENT_INFO_TEXT;
@@ -672,6 +671,13 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             return getSkipOffset(RemoteConfig.HTML_SKIP_OFFSET);
     }
 
+    public Integer getMraidRewardedSkipOffset() {
+        if (isPerformanceAd()) {
+            return getPcMraidRewardedSkipOffset();
+        } else
+            return getSkipOffset(RemoteConfig.REWARDED_HTML_SKIP_OFFSET);
+    }
+
     public Integer getVideoSkipOffset() {
         if (isPerformanceAd()) {
             return getPcVideoSkipOffset();
@@ -679,13 +685,6 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             return getBcVideoSkipOffset();
         } else
             return getSkipOffset(RemoteConfig.VIDEO_SKIP_OFFSET);
-    }
-
-    public Integer getMraidRewardedSkipOffset() {
-        if (isPerformanceAd()) {
-            return getPcMraidRewardedSkipOffset();
-        } else
-            return getSkipOffset(RemoteConfig.REWARDED_HTML_SKIP_OFFSET);
     }
 
     public Integer getVideoRewardedSkipOffset() {
@@ -758,6 +757,10 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         return zoneId;
     }
 
+    public void setLink(String link) {
+        this.link = link;
+    }
+
     public void setAdSourceName(String adSourceName) {
         this.adSourceName = adSourceName;
     }
@@ -787,11 +790,13 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         return getAsset(APIAsset.CUSTOM_END_CARD) != null;
     }
 
-    public CustomCTAData getCustomCta(Context context) {
+    public CustomCTAData getCustomCta(Context context, boolean requireIcon) {
         CustomCTAData result = null;
         AdData data = getAsset(APIAsset.CUSTOM_CTA);
         if (data != null && !TextUtils.isEmpty(data.getStringField("icon"))) {
             result = new CustomCTAData(data.getStringField("icon"), context.getResources().getString(R.string.custom_cta_button));
+        } else if (!requireIcon) {
+            result = new CustomCTAData(null, context.getResources().getString(R.string.custom_cta_button));
         }
         return result;
     }
@@ -826,7 +831,16 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     }
 
     private Integer getPcHtmlSkipOffset() {
-        return getSkipOffset(RemoteConfig.PC_HTML_SKIP_OFFSET);
+        Integer endCardCloseDelay = getRemoteConfig(RemoteConfig.PC_HTML_SKIP_OFFSET);
+        if (endCardCloseDelay != null) {
+            if (endCardCloseDelay > SkipOffsetManager.getMaximumEndcardCloseDelay()) {
+                return SkipOffsetManager.getMaximumEndcardCloseDelay();
+            } else {
+                return endCardCloseDelay;
+            }
+        } else {
+            return SkipOffsetManager.getDefaultPCHTMLSkipOffset();
+        }
     }
 
     private Integer getPcVideoSkipOffset() {
@@ -834,7 +848,16 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     }
 
     private Integer getPcMraidRewardedSkipOffset() {
-        return getSkipOffset(RemoteConfig.PC_REWARDED_HTML_SKIP_OFFSET);
+        Integer endCardCloseDelay = getRemoteConfig(RemoteConfig.PC_REWARDED_HTML_SKIP_OFFSET);
+        if (endCardCloseDelay != null) {
+            if (endCardCloseDelay > SkipOffsetManager.getMaximumEndcardCloseDelay()) {
+                return SkipOffsetManager.getMaximumEndcardCloseDelay();
+            } else {
+                return endCardCloseDelay;
+            }
+        } else {
+            return SkipOffsetManager.getDefaultPCRewardedHTMLSkipOffset();
+        }
     }
 
     private Integer getPcVideoRewardedSkipOffset() {
@@ -843,10 +866,42 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
 
     private Integer getPcEndCardCloseDelay() {
         Integer endCardCloseDelay = getRemoteConfig(RemoteConfig.PC_END_CARD_CLOSE_DELAY);
-        if (endCardCloseDelay == null || endCardCloseDelay < 0) {
-            endCardCloseDelay = null;
+        if (endCardCloseDelay != null) {
+            if (endCardCloseDelay > SkipOffsetManager.getMaximumEndcardCloseDelay()) {
+                return SkipOffsetManager.getMaximumEndcardCloseDelay();
+            } else {
+                return endCardCloseDelay;
+            }
+        } else {
+            return SkipOffsetManager.getDefaultPCEndcardSkipOffset();
         }
-        return endCardCloseDelay;
+    }
+
+    private Integer getBcEndCardCloseDelay() {
+        Integer endCardCloseDelay = getRemoteConfig(RemoteConfig.BC_END_CARD_CLOSE_DELAY);
+        if (endCardCloseDelay != null) {
+            if (endCardCloseDelay > SkipOffsetManager.getMaximumEndcardCloseDelay()) {
+                return SkipOffsetManager.getMaximumEndcardCloseDelay();
+            } else {
+                return endCardCloseDelay;
+            }
+        } else {
+            return SkipOffsetManager.getDefaultBCEndcardSkipOffset();
+        }
+    }
+
+    public int getClickThroughTimer() {
+        Integer clickThroughTimer;
+        if (isPerformanceAd()) {
+            clickThroughTimer = getRemoteConfig(RemoteConfig.PC_CLICK_THROUGH_TIMER);
+            return ClickThroughTimerManager.getClickThroughTimer(clickThroughTimer);
+        } else if (isBrandAd()) {
+            clickThroughTimer = getRemoteConfig(RemoteConfig.BC_CLICK_THROUGH_TIMER);
+            return ClickThroughTimerManager.getClickThroughTimer(clickThroughTimer);
+        } else {
+            clickThroughTimer = getRemoteConfig(RemoteConfig.CLICK_THROUGH_TIMER);
+            return ClickThroughTimerManager.getClickThroughTimer(clickThroughTimer);
+        }
     }
 
     public Boolean isIconSizeReduced() {
@@ -859,14 +914,6 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
 
     private Integer getBcVideoRewardedSkipOffset() {
         return getSkipOffset(RemoteConfig.BC_REWARDED_VIDEO_SKIP_OFFSET);
-    }
-
-    private Integer getBcEndCardCloseDelay() {
-        Integer endCardCloseDelay = getRemoteConfig(RemoteConfig.BC_END_CARD_CLOSE_DELAY);
-        if (endCardCloseDelay == null || endCardCloseDelay < 0) {
-            endCardCloseDelay = null;
-        }
-        return endCardCloseDelay;
     }
 
     public boolean hasHiddenUxControls() {
@@ -918,12 +965,19 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         return getRemoteConfig(RemoteConfig.LANDING_PAGE);
     }
 
-    public Integer getPlayableSkipOffset() {
-        return getRemoteConfig(RemoteConfig.PLAYABLE_SKIP_OFFSET);
-    }
-
     @Override
     public int compareTo(Ad otherAd) {
         return (otherAd.getECPM() != null ? otherAd.getECPM() : 0) - (this.getECPM() != null ? this.getECPM() : 0);
+    }
+
+    /**
+     * Gets the ad link URL
+     * @return the link URL or null if not present
+     */
+    public String getLink() {
+        if (TextUtils.isEmpty(link)) {
+            return null;
+        }
+        return link;
     }
 }

@@ -29,7 +29,6 @@ import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.HybidConsumer;
-import net.pubnative.lite.sdk.utils.URLValidator;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.views.ProgressDialogFragment;
@@ -212,12 +211,67 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
     }
 
     @Override
+    public void mraidShowSkipButton() {
+
+    }
+
+    @Override
+    public void mraidHideSkipButton() {
+
+    }
+
+    @Override
     public void onExpandedAdClosed() {
 
     }
 
     @Override
     public void onReplayClicked() {
+
+    }
+
+    @Override
+    public void onCustomEndCardLoadSuccess() {
+
+    }
+
+    @Override
+    public void onCustomEndCardShow(String endCardType) {
+
+    }
+
+    @Override
+    public void onCustomEndCardLoadFail() {
+
+    }
+
+    @Override
+    public void onCustomEndCardClosed() {
+
+    }
+
+    @Override
+    public void onCustomEndCardClicked() {
+
+    }
+
+    @Override
+    public void onCustomCTAShow() {
+
+    }
+
+    @Override
+    public void onCustomCTAClick() {
+
+    }
+
+    @Override
+    public void onCustomCTALoadFail() {
+
+    }
+
+    @Override
+    public void mraidHideCloseButton() {
 
     }
 
@@ -247,10 +301,12 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
             return;
         }
         String navigationMode = null;
+        String link = null;
         if (mAd != null) {
             navigationMode = mAd.getNavigationMode();
+            link = mAd.getLink();
         }
-        mUrlHandlerDelegate.handleUrl(url, navigationMode);
+        mUrlHandlerDelegate.handleUrl(url, link, navigationMode);
         if (mListener != null) {
             mListener.onAdClicked(this);
         }

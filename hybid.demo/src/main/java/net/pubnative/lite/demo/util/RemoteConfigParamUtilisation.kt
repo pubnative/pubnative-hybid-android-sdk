@@ -99,13 +99,6 @@ object RemoteConfigParamUtilisation {
                 param.value = adCustomizationsManager.skipOffsetSettings.rewardedVideo?.second
                 configs.add(param)
             }
-
-            if (playable?.first == true) {
-                param = RemoteConfigParam()
-                param.name = RemoteConfig.PLAYABLE_SKIP_OFFSET.fieldName
-                param.value = adCustomizationsManager.skipOffsetSettings.playable?.second
-                configs.add(param)
-            }
         }
 
         adCustomizationsManager.autoCloseSettings?.apply {

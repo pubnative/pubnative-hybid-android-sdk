@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.HyBid;
@@ -31,54 +32,38 @@ public class IntentHandler {
 
     public boolean canHandleIntent(Intent intent) {
         final PackageManager packageManager = context.getPackageManager();
-        final List<ResolveInfo> resolveInfos = packageManager.queryIntentActivities(intent, 0);
+        final List<ResolveInfo> resolveInfos;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            resolveInfos = packageManager.queryIntentActivities(
+                    intent,
+                    PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY)
+            );
+        } else {
+            resolveInfos = packageManager.queryIntentActivities(
+                    intent,
+                    PackageManager.MATCH_DEFAULT_ONLY);
+        }
         return !resolveInfos.isEmpty();
     }
 
-    public boolean handleDeepLink(Uri uri) {
-        final Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(uri);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        try {
-            context.startActivity(intent);
-            return true;
-        } catch (RuntimeException e) {
-            Logger.e(TAG, e.getMessage());
+    public boolean canHandleIntent(Uri uri) {
+        if (uri == null) {
             return false;
         }
+        return canHandleIntent(createViewIntent(uri));
+    }
+
+    public boolean handleDeepLink(Uri uri) {
+        return startActivitySafely(createViewIntent(uri));
     }
 
     public boolean handleBrowserLink(Uri uri) {
         if (HyBid.getBrowserManager().containsPriorities()) {
-            Intent intent = null;
-
-            List<String> priorities = HyBid.getBrowserManager().getPackagePriorities();
-            Iterator<String> iterator = priorities.listIterator();
-
-            do {
-                String packageName = iterator.next();
-
-                if (!TextUtils.isEmpty(packageName.trim())) {
-                    Intent newIntent = new Intent(Intent.ACTION_VIEW);
-                    newIntent.setData(uri);
-                    newIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    newIntent.setPackage(packageName);
-                    if (canHandleIntent(newIntent)) {
-                        intent = newIntent;
-                    }
-                }
-            } while (iterator.hasNext() && intent == null);
-
+            Intent intent = getPriorityBrowserIntent(uri);
             if (intent == null) {
                 return handleDeepLink(uri);
             } else {
-                try {
-                    context.startActivity(intent);
-                } catch (RuntimeException e) {
-                    Logger.e(TAG, e.getMessage());
-                    return false;
-                }
-                return true;
+                return startActivitySafely(intent);
             }
         } else {
             return handleDeepLink(uri);
@@ -96,4 +81,37 @@ public class IntentHandler {
         return true;
     }
 
+    Intent createViewIntent(Uri uri) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(uri);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        return intent;
+    }
+
+    Intent getPriorityBrowserIntent(Uri uri) {
+        Intent intent = null;
+        List<String> priorities = HyBid.getBrowserManager().getPackagePriorities();
+        Iterator<String> iterator = priorities.listIterator();
+        while (iterator.hasNext() && intent == null) {
+            String packageName = iterator.next();
+            if (!TextUtils.isEmpty(packageName.trim())) {
+                Intent newIntent = createViewIntent(uri);
+                newIntent.setPackage(packageName);
+                if (canHandleIntent(newIntent)) {
+                    intent = newIntent;
+                }
+            }
+        }
+        return intent;
+    }
+
+    boolean startActivitySafely(Intent intent) {
+        try {
+            context.startActivity(intent);
+            return true;
+        } catch (RuntimeException e) {
+            Logger.e(TAG, e.getMessage());
+            return false;
+        }
+    }
 }

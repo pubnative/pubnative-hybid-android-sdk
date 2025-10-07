@@ -63,9 +63,9 @@ public class VastInterstitialViewModel extends InterstitialViewModel implements 
     private VideoAdCacheItem mAdCacheItem;
     private VideoAd mVideoAd;
     /*
-    * This flag is used for some edge case :when user put app in background directly when VastInterstitialActivity is visible for the user ,It causes
-    * app to view black screen instead of ad because surface is lost when app is in background.
-    * */
+     * This flag is used for some edge case :when user put app in background directly when VastInterstitialActivity is visible for the user ,It causes
+     * app to view black screen instead of ad because surface is lost when app is in background.
+     * */
     private boolean mIsAdPausedBeforeRender = false;
 
     public VastInterstitialViewModel(Context context, String zoneId, String integrationType, int skipOffset, long broadcastId, InterstitialActivityInteractor listener) {
@@ -96,6 +96,11 @@ public class VastInterstitialViewModel extends InterstitialViewModel implements 
             sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
             mListener.finishActivity();
         }
+    }
+
+    @Override
+    public void skipButtonClicked() {
+        //No usage for that because it should only be tracked by playable html ads
     }
 
     @Override
@@ -152,6 +157,11 @@ public class VastInterstitialViewModel extends InterstitialViewModel implements 
     @Override
     public void resetVolumeChangeTracker() {
         VolumeObserver.getInstance().reset();
+    }
+
+    @Override
+    public Boolean hasReducedCloseSize() {
+        return false;
     }
 
     private void initiateCustomCTAAdTrackers() {

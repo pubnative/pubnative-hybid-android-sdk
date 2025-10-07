@@ -13,14 +13,4 @@ class IronSourceMediationRewardedActivity : TabActivity() {
     override fun getAdFragment() = IronSourceMediationRewardedFragment()
 
     override fun getActivityTitle() = getString(R.string.ironsource_rewarded)
-
-    override fun onResume() {
-        super.onResume()
-        IronSource.onResume(this)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        IronSource.onPause(this)
-    }
 }

@@ -10,17 +10,19 @@ class SDKConfigDialogManager {
 
     private var dialog: SDKConfigDialog? = null
 
+    @Synchronized
     fun showDialog(
         listener: SDKConfigDialog.OnDismissListener,
         fragmentManager: FragmentManager
     ) {
-        if (dialog == null || dialog?.isVisible == false) {
+        if (dialog == null || dialog?.isAdded == false) {
             dialog = SDKConfigDialog()
             dialog?.setDismissListener(listener)
             dialog?.show(fragmentManager, "SDKConfigDialog")
         }
     }
 
+    @Synchronized
     fun hideDialog() {
         if (dialog?.isVisible == true) {
             dialog?.dismiss()

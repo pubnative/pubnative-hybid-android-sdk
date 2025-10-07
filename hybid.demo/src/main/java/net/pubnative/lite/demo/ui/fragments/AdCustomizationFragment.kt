@@ -89,6 +89,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
     private lateinit var cbInputSkipOffset: CheckBox
     private lateinit var cbInputVideoSkipOffset: CheckBox
 
+    private lateinit var cbInputPlayableSkipOffset: CheckBox
     private lateinit var cbInputRewardedSkipOffset: CheckBox
     private lateinit var cbInputRewardedVideoSkipOffset: CheckBox
     private lateinit var cbInputEndcardCloseButtonDelay: CheckBox
@@ -826,7 +827,7 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
                     enabled = cbInitialAudio.isChecked, value = getAudioStateInt(initialAudioState)
                 ), mraidSettings = MraidSettings(
                     expandEnabled = cbMraidExpand.isChecked,
-                    expandValue = mraidExpandSwitch.isChecked
+                    expandValue = mraidExpandSwitch.isChecked,
                 ), autoCloseSettings = AutoCloseSettings(
                     interstitialEnabled = cbAutoClose.isChecked,
                     interstitialValue = enableAutoCloseSwitch.isChecked,
@@ -847,7 +848,6 @@ class AdCustomizationFragment : Fragment(R.layout.fragment_ad_customization) {
                 ), skipOffsetSettings = SkipOffsetSettings(
                     html = cbInputSkipOffset.isChecked to htmlSkipOffsetInput.text.toString(),
                     video = cbInputVideoSkipOffset.isChecked to videoSkipOffsetInput.text.toString(),
-                    playable = false to "3",
                     rewardedHtml = cbInputRewardedSkipOffset.isChecked to rewardedHtmlSkipOffsetInput.text.toString(),
                     rewardedVideo = cbInputRewardedVideoSkipOffset.isChecked to rewardedVideoSkipOffsetInput.text.toString(),
                     endCardCloseDelay = cbInputEndcardCloseButtonDelay.isChecked to endCardCloseButtonDelayInput.text.toString()

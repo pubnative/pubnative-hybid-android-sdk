@@ -29,7 +29,13 @@ public interface InterstitialActivityInteractor {
 
     void showInterstitialCloseButton(CloseableContainer.OnCloseListener mCloseListener);
 
+    void showInterstitialSkipButton(CloseableContainer.OnSkipListener mSkipListener);
+
     void hideInterstitialCloseButton();
 
+    void hideInterstitialSkipButton();
+
     void setContentLayout();
+
+    void setSkipSize(int reducedCloseButtonSize);
 }

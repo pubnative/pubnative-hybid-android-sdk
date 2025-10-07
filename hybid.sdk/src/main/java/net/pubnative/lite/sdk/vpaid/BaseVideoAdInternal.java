@@ -72,7 +72,11 @@ abstract class BaseVideoAdInternal {
         this.isInterstitial = isInterstitial;
         this.isFullscreen = isFullscreen;
 
-        mViewabilityAdSession = new HyBidViewabilityNativeVideoAdSession(HyBid.getViewabilityManager());
+        mViewabilityAdSession = new HyBidViewabilityNativeVideoAdSession(
+                HyBid.getViewabilityManager(),
+                isRewarded() ? mAd.getVideoRewardedSkipOffset() : mAd.getVideoSkipOffset()
+        );
+
         this.mImpressionListener = impressionListener;
         this.mAdCloseButtonListener = adCloseButtonListener;
     }
@@ -286,7 +290,7 @@ abstract class BaseVideoAdInternal {
             onAdLoadFail(new PlayerInfo("Unsupported ad format"));
             return;
         }
-        CustomCTAData customCTAData = getCustomCTAData();
+        CustomCTAData customCTAData = getCustomCTAData(true);
         if (customCTAData != null && customCTAData.getIconURL() != null) {
             new PNBitmapDownloader().download(customCTAData.getIconURL(), new PNBitmapDownloader.DownloadListener() {
                 @Override
@@ -309,7 +313,7 @@ abstract class BaseVideoAdInternal {
 
     private void prepareAdController(AdParams adParams, IntegrationType integrationType, CustomCTAData customCTAData) {
         if (customCTAData == null)
-            customCTAData = getCustomCTAData();
+            customCTAData = getCustomCTAData(true);
         mAdController = new VideoAdControllerVast(
                 this, adParams, getViewabilityAdSession(),
                 isFullscreen, this.mImpressionListener, mAdCloseButtonListener,
@@ -333,10 +337,10 @@ abstract class BaseVideoAdInternal {
         return delay;
     }
 
-    private CustomCTAData getCustomCTAData() {
+    private CustomCTAData getCustomCTAData(boolean requireIcon) {
         CustomCTAData data = null;
         if (getAd() != null && AdCustomCTAManager.isAbleShow(this.getAd())) {
-            data = getAd().getCustomCta(getContext());
+            data = getAd().getCustomCta(getContext(), requireIcon);
         }
         return data;
     }
@@ -565,7 +569,7 @@ abstract class BaseVideoAdInternal {
         }
     }
 
-    public void onAdFinishedReplaying(){
+    public void onAdFinishedReplaying() {
         Logger.d(LOG_TAG, "onAdFinishedReplaying");
         if (mVideoAdListener != null) {
             mVideoAdListener.onReplayFinish();

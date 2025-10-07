@@ -113,7 +113,7 @@ public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureList
 
     @Override
     public void mraidNativeFeatureOpenBrowser(String url) {
-        mUrlHandlerDelegate.handleUrl(url, null);
+        mUrlHandlerDelegate.handleUrl(url, null, null);
     }
 
     @Override
@@ -168,12 +168,67 @@ public class AdFeedbackView implements MRAIDViewListener, MRAIDNativeFeatureList
     }
 
     @Override
+    public void mraidShowSkipButton() {
+
+    }
+
+    @Override
+    public void mraidHideSkipButton() {
+
+    }
+
+    @Override
     public void onExpandedAdClosed() {
 
     }
 
     @Override
     public void onReplayClicked() {
+
+    }
+
+    @Override
+    public void onCustomEndCardLoadSuccess() {
+
+    }
+
+    @Override
+    public void onCustomEndCardShow(String endCardType) {
+
+    }
+
+    @Override
+    public void onCustomEndCardLoadFail() {
+
+    }
+
+    @Override
+    public void onCustomEndCardClosed() {
+
+    }
+
+    @Override
+    public void onCustomEndCardClicked() {
+
+    }
+
+    @Override
+    public void onCustomCTAShow() {
+
+    }
+
+    @Override
+    public void onCustomCTAClick() {
+
+    }
+
+    @Override
+    public void onCustomCTALoadFail() {
+
+    }
+
+    @Override
+    public void mraidHideCloseButton() {
 
     }
 

@@ -48,9 +48,10 @@ class IronSourceMediationBannerFragment : Fragment(R.layout.fragment_ironsource_
 
         initializeIronSource()
 
-        levelPlayBanner = LevelPlayBannerAdView(requireActivity(), adUnitId!!)
-        levelPlayBanner.setAdSize(LevelPlayAdSize.BANNER)
-        levelPlayBanner.setBannerListener(this)
+        val adSize = LevelPlayAdSize.BANNER
+        val adConfig = LevelPlayBannerAdView.Config.Builder().setAdSize(adSize).setPlacementName("Banner").build()
+        levelPlayBanner = LevelPlayBannerAdView(requireActivity(), adUnitId!!, adConfig)
+        levelPlayBanner.bannerListener = this
         levelPlayBannerContainer.addView(levelPlayBanner)
 
         loadButton.setOnClickListener {
@@ -126,13 +127,8 @@ class IronSourceMediationBannerFragment : Fragment(R.layout.fragment_ironsource_
         if (!appKey.isNullOrEmpty()) {
             val initRequest = LevelPlayInitRequest.Builder(appKey).build()
             LevelPlay.init(requireActivity(), initRequest, object : LevelPlayInitListener {
-                override fun onInitSuccess(configuration: LevelPlayConfiguration) {
-
-                }
-
-                override fun onInitFailed(error: LevelPlayInitError) {
-
-                }
+                override fun onInitSuccess(configuration: LevelPlayConfiguration) {}
+                override fun onInitFailed(error: LevelPlayInitError) {}
             })
         }
     }

@@ -43,7 +43,6 @@ android {
             buildConfigField "String", "BASE_RTB_URL", "\"https://dsp.pubnative.net/\""
         }
         debug {
-            testCoverageEnabled = true
             buildConfigField "String", "OMIDPV", "\"$omid_version\""
             buildConfigField "String", "OMIDPN", "\"Pubnativenet\""
             buildConfigField "String", "SDK_VERSION", "\"$version_name\""
@@ -52,6 +51,8 @@ android {
             buildConfigField "Boolean", "IS_WRAPPED", "false"
             buildConfigField "String", "BASE_URL", "\"https://api.pubnative.net/\""
             buildConfigField "String", "BASE_RTB_URL", "\"https://dsp.pubnative.net/\""
+            enableUnitTestCoverage true
+            enableAndroidTestCoverage true
         }
     }
 
@@ -100,6 +101,7 @@ dependencies {
     implementation "net.pubnative:hybid.omsdk:$omid_version"
     implementation "com.verve:atom.sdk:+"
 
+    testImplementation 'androidx.core:core:1.15.0'
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.robolectric:robolectric:4.14.1'
     testImplementation 'org.mockito:mockito-core:5.16.1'

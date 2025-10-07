@@ -4,9 +4,12 @@
 //
 package net.pubnative.lite.sdk.interstitial.activity;
 
+import static net.pubnative.lite.sdk.utils.ViewUtils.applyWindowInsets;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -15,6 +18,10 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
+
+import androidx.annotation.VisibleForTesting;
 
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.interstitial.InterstitialActivityInteractor;
@@ -35,18 +42,47 @@ public abstract class HyBidInterstitialActivity extends Activity implements Inte
 
     private CloseableContainer mCloseableContainer;
     private ProgressBar mProgressBar;
+    private OnBackInvokedCallback mOnBackInvokedCallback;
 
     protected boolean mIsFinishing = false;
 
     protected InterstitialViewModel mViewModel;
+    private boolean isSuperBackPressedCalled = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            getWindow().getAttributes().layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+        }
+
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         initializeViews();
         initializeViewModel();
+        setupBackHandler();
+        applyWindowInsets(mCloseableContainer);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mViewModel != null && mViewModel.isAdSkippable()) {
+            mViewModel.sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
+            mIsFinishing = true;
+            mViewModel.resetVolumeChangeTracker();
+            super.onBackPressed();
+            isSuperBackPressedCalled = true;
+        }
+    }
+
+    @VisibleForTesting
+    public boolean isSuperBackPressedCalled() {
+        return isSuperBackPressedCalled;
     }
 
     private void initializeViews() {
@@ -61,6 +97,25 @@ public abstract class HyBidInterstitialActivity extends Activity implements Inte
             mViewModel = new VastInterstitialViewModel(this, mIntent.getStringExtra(EXTRA_ZONE_ID), mIntent.getStringExtra(INTEGRATION_TYPE), mIntent.getIntExtra(EXTRA_SKIP_OFFSET, -1), mIntent.getLongExtra(EXTRA_BROADCAST_ID, -1), this);
         } else {
             mViewModel = new MraidInterstitialViewModel(this, mIntent.getStringExtra(EXTRA_ZONE_ID), mIntent.getStringExtra(INTEGRATION_TYPE), mIntent.getIntExtra(EXTRA_SKIP_OFFSET, -1), mIntent.getLongExtra(EXTRA_BROADCAST_ID, -1), this);
+        }
+    }
+
+    private void setupBackHandler() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            mOnBackInvokedCallback = new OnBackInvokedCallback() {
+                @Override
+                public void onBackInvoked() {
+                    handleBackAction();
+                }
+            };
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT, mOnBackInvokedCallback);
+        }
+    }
+
+    private void handleBackAction() {
+        if (mViewModel != null && mViewModel.isAdSkippable()) {
+            dismiss();
         }
     }
 
@@ -120,6 +175,11 @@ public abstract class HyBidInterstitialActivity extends Activity implements Inte
     }
 
     @Override
+    public void setSkipSize(int reducedCloseButtonSize) {
+        if (mCloseableContainer != null) mCloseableContainer.setSkipSize(reducedCloseButtonSize);
+    }
+
+    @Override
     public void hideProgressBar() {
         if (mProgressBar != null) mProgressBar.setVisibility(View.INVISIBLE);
     }
@@ -166,7 +226,26 @@ public abstract class HyBidInterstitialActivity extends Activity implements Inte
     }
 
     @Override
+    public void showInterstitialSkipButton(CloseableContainer.OnSkipListener skipListener) {
+        if (mCloseableContainer != null && !isFinishing()) {
+            mCloseableContainer.setSkipVisible(true);
+            mCloseableContainer.setOnSkipListener(skipListener);
+        }
+    }
+
+    @Override
+    public void hideInterstitialSkipButton() {
+        if (mCloseableContainer != null) {
+            mCloseableContainer.setSkipVisible(false);
+            mCloseableContainer.setOnSkipListener(null);
+        }
+    }
+
+    @Override
     protected void onDestroy() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && mOnBackInvokedCallback != null) {
+            getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mOnBackInvokedCallback);
+        }
         if (mCloseableContainer != null) {
             mCloseableContainer.removeAllViews();
         }
@@ -176,15 +255,12 @@ public abstract class HyBidInterstitialActivity extends Activity implements Inte
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            if (mViewModel.isAdSkippable()) {
-                dismiss();
-                return true;
-            }
-        } else {
-            return super.onKeyDown(keyCode, event);
+        // For Android versions below API 33, use the legacy onKeyDown method
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU && keyCode == KeyEvent.KEYCODE_BACK) {
+            handleBackAction();
+            return true;
         }
-        return false;
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override

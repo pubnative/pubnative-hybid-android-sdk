@@ -1367,7 +1367,7 @@ public class SVGBase
       return null;
    }
 
-   private List<SvgObject>  getElementsByTagName(String nodeName)
+   List<SvgObject>  getElementsByTagName(String nodeName)
    {
       List<SvgObject>  result = new ArrayList<>();
 

@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.viewability;
 
 import android.app.Application;
@@ -31,9 +35,13 @@ import net.pubnative.lite.sdk.viewability.baseom.MediaEventType;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HybidViewabilityManager extends BaseViewabilityManager {
+/**
+ * Created by shubhamkeshri on 25.02.25.
+ */
 
-    private static final String TAG = HybidViewabilityManager.class.getSimpleName();
+public class HyBidViewabilityManager extends BaseViewabilityManager {
+
+    private static final String TAG = HyBidViewabilityManager.class.getSimpleName();
     private static final String VIEWABILITY_PARTNER_NAME = "Pubnativenet";
     private static String VIEWABILITY_JS_SERVICE_CONTENT;
 
@@ -43,7 +51,7 @@ public class HybidViewabilityManager extends BaseViewabilityManager {
     private String customReferenceData = "";
     private String contentUrl = "";
 
-    public HybidViewabilityManager(final Application application) {
+    public HyBidViewabilityManager(final Application application) {
         super(application);
     }
 
@@ -281,5 +289,14 @@ public class HybidViewabilityManager extends BaseViewabilityManager {
     @Override
     public <T> T createVastPropertiesForNonSkippableMedia() {
         return (T) VastProperties.createVastPropertiesForNonSkippableMedia(false, Position.STANDALONE);
+    }
+
+    @Override
+    public <T> T createVastPropertiesForSkippableMedia(Integer skipOffset) {
+        float skipOffsetFloat = -1;
+        if (skipOffset != null) {
+            skipOffsetFloat = skipOffset;
+        }
+        return (T) VastProperties.createVastPropertiesForSkippableMedia(skipOffsetFloat, false, Position.STANDALONE);
     }
 }

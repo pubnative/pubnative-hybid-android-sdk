@@ -12,6 +12,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.location.Location;
 import android.net.Uri;
@@ -26,6 +27,7 @@ import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -58,17 +60,26 @@ import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.BuildConfig;
 import net.pubnative.lite.sdk.R;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
+import net.pubnative.lite.sdk.models.CustomCTAData;
+import net.pubnative.lite.sdk.models.SkipOffset;
 import net.pubnative.lite.sdk.mraid.internal.MRAIDHtmlProcessor;
 import net.pubnative.lite.sdk.mraid.internal.MRAIDLog;
 import net.pubnative.lite.sdk.mraid.internal.MRAIDNativeFeatureManager;
 import net.pubnative.lite.sdk.mraid.internal.MRAIDParser;
+import net.pubnative.lite.sdk.mraid.model.HTMLAd;
+import net.pubnative.lite.sdk.mraid.model.LandingPageHandler;
 import net.pubnative.lite.sdk.mraid.properties.MRAIDOrientationProperties;
 import net.pubnative.lite.sdk.mraid.properties.MRAIDResizeProperties;
+import net.pubnative.lite.sdk.utils.ClickThroughTimerManager;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.ScreenDimensionsUtils;
+import net.pubnative.lite.sdk.utils.ViewUtils;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityWebAdSession;
 import net.pubnative.lite.sdk.viewability.baseom.BaseFriendlyObstructionPurpose;
 import net.pubnative.lite.sdk.views.PNWebView;
+import net.pubnative.lite.sdk.views.cta.HyBidCTAView;
+import net.pubnative.lite.sdk.views.endcard.HyBidEndCardView;
 import net.pubnative.lite.sdk.vpaid.helpers.BitmapHelper;
 import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
 import net.pubnative.lite.sdk.vpaid.widget.CountDownView;
@@ -93,46 +104,36 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
  * Created by erosgarciaponte on 05.01.18.
  */
 @SuppressLint("ViewConstructor")
-public class MRAIDView extends FrameLayout {
+public class MRAIDView extends FrameLayout implements LandingPageHandler.LandingPageCallback {
+
     // used to differentiate logging
     private static final String MRAID_LOG_TAG = MRAIDView.class.getSimpleName();
     private static final CountdownStyle COUNTDOWN_STYLE_DEFAULT = CountdownStyle.PIE_CHART;
-    private static final int LANDING_PAGE_CLOSE_DELAY = 30000;
     private final boolean isExpandEnabled;
-    private boolean isLandingPageEnabled;
-
     private final Boolean showTimerBeforeEndCard;
-
     private Integer mSkipTimeMillis = -1;
-
     private Integer mNativeCloseButtonDelay = -1;
-    private Boolean mIsAdPlayable;
-    private int mPlayableSkipOffset = -1;
     private Boolean isBackClickable = false;
-    private boolean isTimerFinished = false;
     private SimpleTimer mExpirationTimer;
     private SimpleTimer mNativeCloseButtonTimer;
     private SimpleTimer mAntilockTimer;
-
-    private String setCustomisationString;
-    private String landingBehaviourString;
-    private Integer landingPageDelay = 30000;
-    private boolean isFinalPage = false;
+    private SimpleTimer mClickThroughTimer;
+    private HyBidCTAView ctaView;
+    private MraidDisplayMode mMraidDisplayMode = MraidDisplayMode.AD;
+    private HTMLAd htmlAd;
 
     public void handleNativeCloseButtonDelay() {
         mNativeCloseButtonTimer = new SimpleTimer(mNativeCloseButtonDelay, new SimpleTimer.Listener() {
 
             @Override
             public void onFinish() {
-                if (listener != null)
-                    listener.mraidShowCloseButton();
+                if (listener != null) listener.mraidShowCloseButton();
                 showDefaultCloseButton();
                 isBackClickable = true;
             }
@@ -145,8 +146,74 @@ public class MRAIDView extends FrameLayout {
         mNativeCloseButtonTimer.start();
     }
 
-    public void setIsAdPlayable(Boolean adPlayable) {
-        mIsAdPlayable = adPlayable;
+    public void setHtmlAd(HTMLAd htmlAd) {
+        this.htmlAd = htmlAd;
+        if (htmlAd == null) return;
+
+        LandingPageHandler landingPage = htmlAd.getLandingPage();
+        if (landingPage != null && landingPage.isLandingPageEnabled()) {
+            landingPage.setCallback(this);
+            return;
+        }
+
+        if (htmlAd.getClickThroughTimerListener() != null) {
+            clickThroughListener = htmlAd.getClickThroughTimerListener();
+        }
+
+        if (htmlAd.shouldInitEndCardView()) {
+            initEndCardView(htmlAd.hasReducedCloseSize());
+        }
+
+        if (htmlAd.isCustomCTAEnabled()) {
+            initCustomCta();
+        }
+    }
+
+    @Override
+    public void setLandingPageUseCustomClose(boolean b) {
+        useCustomClose = b;
+    }
+
+    @Override
+    public void setLandingPageSkipTimer() {
+        if (mNativeCloseButtonTimer != null) {
+            mNativeCloseButtonTimer.cancel();
+            mNativeCloseButtonTimer = null;
+            postDelayed(MRAIDView.this::startSkipTimer, 500);
+        }
+    }
+
+    @Override
+    public void cancelLandingPageBehaviour() {
+        if (mSkipCountdownView != null) {
+            mSkipCountdownView.setVisibility(View.GONE);
+            mSkipCountdownView = null;
+        }
+        postDelayed(MRAIDView.this::showClose, 600);
+    }
+
+    @Override
+    public void showCountDownTimer() {
+        if (mSkipCountdownView != null && htmlAd != null && htmlAd.getLandingPage() != null && !htmlAd.getLandingPage().isTimerFinished()) {
+            mSkipCountdownView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void hideCountDownTimer() {
+        if (mSkipCountdownView != null) {
+            mSkipCountdownView.setVisibility(View.GONE);
+        }
+    }
+
+    private void showClose() {
+        if (mNativeCloseButtonTimer != null) {
+            mNativeCloseButtonTimer.onFinish();
+            mNativeCloseButtonTimer = null;
+        }
+        if (listener != null) listener.mraidShowCloseButton();
+        showDefaultCloseButton();
+        isBackClickable = true;
     }
 
     // used to define state of the MRAID advertisement
@@ -219,6 +286,7 @@ public class MRAIDView extends FrameLayout {
     private final GestureDetector gestureDetector;
 
     private boolean wasTouched = false;
+    private boolean customCTAClicked = false;
 
     private boolean contentInfoAdded = false;
     private boolean webViewLoaded = false;
@@ -252,6 +320,7 @@ public class MRAIDView extends FrameLayout {
     protected final MRAIDViewListener listener;
     private final MRAIDNativeFeatureListener nativeFeatureListener;
     private MRAIDViewCloseLayoutListener closeLayoutListener;
+    private ClickThroughTimerManager.ClickThroughTimerListener clickThroughListener;
 
     // used for setting positions and sizes (all in pixels, not dpi)
     private final DisplayMetrics displayMetrics;
@@ -295,6 +364,8 @@ public class MRAIDView extends FrameLayout {
     private boolean mIsExpanding = false;
 
     protected final Handler handler;
+
+    private HyBidEndCardView mEndCardView;
 
     public MRAIDView(Context context, String baseUrl, String data, Boolean showTimerBeforeEndCard, String[] supportedNativeFeatures, MRAIDViewListener listener, MRAIDNativeFeatureListener nativeFeatureListener, ViewGroup contentInfo, boolean isInterstitial, boolean isExpandEnabled) {
         super(context);
@@ -379,6 +450,78 @@ public class MRAIDView extends FrameLayout {
                     MRAIDLog.d("hz-m loading mraid from url: " + baseUrl);
                     webView.loadUrl(baseUrl);
                 }
+            }
+        }
+    }
+
+    private void initEndCardView(boolean hasReducedCloseSize) {
+        mEndCardView = new HyBidEndCardView(context, hasReducedCloseSize, null);
+        mEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        mEndCardView.setVisibility(View.GONE);
+        addView(mEndCardView);
+    }
+
+    private void initCustomCta() {
+        ctaView = new HyBidCTAView(context);
+        FrameLayout.LayoutParams ctaLp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        int hMargin = ViewUtils.asIntPixels(6, context);
+        ScreenDimensionsUtils screenDimensionsUtils = new ScreenDimensionsUtils();
+        Point point = screenDimensionsUtils.getScreenDimensionsToPoint(context);
+        int vMargin = point.y * 10 / 100;
+        ctaLp.setMargins(hMargin, vMargin, hMargin, vMargin);
+        ctaLp.gravity = Gravity.BOTTOM | Gravity.END;
+        ctaView.setLayoutParams(ctaLp);
+        ctaView.setContentDescription("ctaView");
+        ctaView.setVisibility(View.GONE);
+        addView(ctaView);
+
+        ctaView.setListener(new HyBidCTAView.CTAViewListener() {
+            @Override
+            public void onClick() {
+                // Set wasTouched to true, as this button does not trigger the onTouchListener and there would be no redirection
+                wasTouched = true;
+                customCTAClicked = true;
+                if (htmlAd != null && !TextUtils.isEmpty(htmlAd.getLink())) {
+                    open(htmlAd.getLink());
+                }
+                if (listener != null) {
+                    listener.onCustomCTAClick();
+                }
+            }
+
+            @Override
+            public void onShow() {
+                if (listener != null) {
+                    listener.onCustomCTAShow();
+                }
+            }
+
+            @Override
+            public void onFail() {
+                if (listener != null) {
+                    listener.onCustomCTALoadFail();
+                }
+            }
+
+            @Override
+            public void onInvalidCTAIconUrl() {
+                // We do not care about the missing icon for MRAID
+            }
+        });
+    }
+
+    private void handleShowingCTA() {
+        if (ctaView != null && htmlAd.isCustomCTAEnabled() && htmlAd.getCustomCTAData() != null) {
+            CustomCTAData data = htmlAd.getCustomCTAData();
+            Integer customDelay = htmlAd.getCustomCTADelay();
+            int delay = (customDelay != null) ? customDelay : 0;
+
+            if (data.getBitmap() != null) {
+                ctaView.show(data.getBitmap(), data.getLabel(), delay);
+            } else if (data.getIconURL() != null) {
+                ctaView.show(data.getIconURL(), data.getLabel(), delay);
+            } else {
+                ctaView.showWithoutIcon(data.getLabel(), delay);
             }
         }
     }
@@ -468,7 +611,6 @@ public class MRAIDView extends FrameLayout {
                     return false;
                 }
             });
-
 
             wv.getSettings().setJavaScriptEnabled(true);
             wv.getSettings().setDomStorageEnabled(true);
@@ -615,47 +757,20 @@ public class MRAIDView extends FrameLayout {
         }
     }
 
-    private void parseAdExperienceUrl(String commandUrl) {
-        MRAIDLog.d(MRAID_LOG_TAG, "parseAdExperienceUrl " + commandUrl);
-
-        String setCustomisationPattern = "verveadexperience://setcustomisation\\?text=(.+)";
-        String landingBehaviourPattern = "verveadexperience://landingbehaviour\\?text=(.+)";
-        String closeDelayPattern = "verveadexperience://closedelay\\?text=(.+)";
-        String finalPagePattern = "verveadexperience://setfinalpage";
-
+    private synchronized void parseRedirectionUrl(String commandUrl) {
+        if (htmlAd != null && !TextUtils.isEmpty(htmlAd.getLink())) {
+            return;
+        }
         try {
-            if (commandUrl.matches(setCustomisationPattern)) {
-                String base64Text = commandUrl.replaceFirst(setCustomisationPattern, "$1");
+            String redirectionURLPattern = "verveadexperience://setRedirectionUrl\\?text=(.+)";
+            if (commandUrl.matches(redirectionURLPattern)) {
+                String base64Text = commandUrl.replaceFirst(redirectionURLPattern, "$1");
                 byte[] decodedBytes = Base64.decode(base64Text, Base64.DEFAULT);
-                this.setCustomisationString = new String(decodedBytes);
-                if (!setCustomisationString.isEmpty()) {
-                    useCustomClose = false;
-                    if (mNativeCloseButtonTimer != null) {
-                        mNativeCloseButtonTimer.cancel();
-                        mNativeCloseButtonTimer = null;
-                        postDelayed(MRAIDView.this::startSkipTimer, 1000);
-                    }
-                }
-            } else if (commandUrl.matches(landingBehaviourPattern)) {
-                String base64Text = commandUrl.replaceFirst(landingBehaviourPattern, "$1");
-                byte[] decodedBytes = Base64.decode(base64Text, Base64.DEFAULT);
-                this.landingBehaviourString = new String(decodedBytes);
-            } else if (commandUrl.matches(closeDelayPattern)) {
-                String base64Text = commandUrl.replaceFirst(closeDelayPattern, "$1");
-                byte[] decodedBytes = Base64.decode(base64Text, Base64.DEFAULT);
-                String delayString = new String(decodedBytes);
-                try {
-                    landingPageDelay = Integer.parseInt(delayString);
-                } catch (NumberFormatException e) {
-                    // do nothing
-                }
-                validateDelay();
-            } else if (commandUrl.matches(finalPagePattern)) {
-                isFinalPage = true;
-                handleLandingPageBehavior();
+                htmlAd.setLink(new String(decodedBytes));
             }
         } catch (RuntimeException e) {
-            Logger.d(MRAID_LOG_TAG, "Error parsing Ad Experience: " + e);
+            Logger.d(MRAID_LOG_TAG, "Error parsing redirection url: " + e);
+            htmlAd.setLink(null);
         }
     }
 
@@ -667,8 +782,7 @@ public class MRAIDView extends FrameLayout {
             return false;
         }
 
-        if (isBackClickable)
-            close();
+        if (isBackClickable) close();
         return true;
     }
 
@@ -1291,6 +1405,13 @@ public class MRAIDView extends FrameLayout {
         }
     }
 
+    private void hideContentInfo(View view) {
+        if (contentInfo != null && contentInfoAdded) {
+            ((ViewGroup) view).removeView(contentInfo);
+            contentInfoAdded = false;
+        }
+    }
+
     private void addCloseRegion(View view) {
         // The input parameter should be either expandedView or resizedView.
 
@@ -1716,8 +1837,8 @@ public class MRAIDView extends FrameLayout {
                     addView(mSkipCountdownView);
 
                     mSkipCountdownView.setVisibility(View.GONE);
-
                     postDelayed(MRAIDView.this::startSkipTimer, 500);
+                    handleShowingCTA();
                 }
             }
             if (isExpandingPart2) {
@@ -1802,28 +1923,26 @@ public class MRAIDView extends FrameLayout {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             MRAIDLog.d(MRAID_LOG_TAG, "shouldOverrideUrlLoading: " + url);
-            if (isFinalPage) {
+            if (htmlAd != null && htmlAd.getLandingPage() != null && htmlAd.getLandingPage().isFinalPage()) {
                 cancelLandingPageBehaviour();
             }
-
             final Uri uri = Uri.parse(url);
             // Handle replay URL
-            if ("https".equalsIgnoreCase(uri.getScheme())
-                    && "customendcard.verve.com".equalsIgnoreCase(uri.getHost())
-                    && "/replay".equals(uri.getPath())) {
+            if ("https".equalsIgnoreCase(uri.getScheme()) && "customendcard.verve.com".equalsIgnoreCase(uri.getHost()) && "/replay".equals(uri.getPath())) {
                 if (listener != null) {
                     listener.onReplayClicked();
                 }
                 return true;
             }
-
             if (url.startsWith("mraid://")) {
                 parseCommandUrl(url);
             } else if (url.startsWith("verveadexperience://")) {
-                if (isLandingPageEnabled) {
-                    parseAdExperienceUrl(url);
+                if (url.contains("setRedirectionUrl")) {
+                    parseRedirectionUrl(url);
+                } else if (htmlAd != null && htmlAd.getLandingPage() != null && htmlAd.getLandingPage().isLandingPageEnabled()) {
+                    htmlAd.getLandingPage().parseAdExperienceUrl(url);
                 }
-            } else if (hasLandingPage() && !isFinalPage) {
+            } else if (hasLandingPage() && !htmlAd.getLandingPage().isFinalPage()) {
                 return false;
             } else {
                 // Fix for Verve custom creatives
@@ -2198,62 +2317,78 @@ public class MRAIDView extends FrameLayout {
         this.mSkipTimeMillis = skipOffset * 1000;
     }
 
-    public void setNativeCloseButtonDelay(Integer nativeCloseButtonDelay) {
-        this.mNativeCloseButtonDelay = nativeCloseButtonDelay * 1000;
-    }
-
-    public void setPlayableSkipOffset(Integer playableSkipOffset) {
-        this.mPlayableSkipOffset = playableSkipOffset * 1000;
-    }
-
-    public void setIsLandingPageEnabled(boolean isLandingPageEnabled) {
-        this.isLandingPageEnabled = isLandingPageEnabled;
-    }
-
-    private void startSkipTimer() {
+    private synchronized void startSkipTimer() {
         Integer skipTimerDelay;
-        // todo make sure timer logic works, cause we receive setCustomisation after the page has finished.
-        if (hasLandingPage()) {
-            // Deduct the second that is taken from postDelayed function
-            if (landingPageDelay >= 1000) landingPageDelay = landingPageDelay - 1000;
-            mNativeCloseButtonDelay = landingPageDelay;
-            skipTimerDelay = mNativeCloseButtonDelay;
-            handleNativeCloseButtonDelay();
-            useCustomClose = false;
-            mSkipTimeMillis = landingPageDelay;
-            if (mSkipCountdownView != null) mSkipCountdownView.setVisibility(View.INVISIBLE);
-        } else if (useCustomClose) {
-            handleNativeCloseButtonDelay();
-            skipTimerDelay = mNativeCloseButtonDelay;
-            if (mSkipCountdownView != null) mSkipCountdownView.setVisibility(View.GONE);
-        } else {
-            skipTimerDelay = mSkipTimeMillis;
-            if (mSkipCountdownView != null) mSkipCountdownView.setVisibility(View.VISIBLE);
+        if (listener != null) {
+            listener.mraidHideSkipButton();
+            listener.mraidHideCloseButton();
         }
+        if (htmlAd != null) {
+            if (htmlAd.getLandingPage() != null && htmlAd.getLandingPage().isLandingPageEnabled()) {
+                useCustomClose = false;
+                mEndCardView = null;
+                int delay = htmlAd.getLandingPage().getUpdatedDelay();
+                mNativeCloseButtonDelay = delay;
+                skipTimerDelay = mNativeCloseButtonDelay;
+                handleNativeCloseButtonDelay();
+                mSkipTimeMillis = delay;
+                if (mSkipCountdownView != null) mSkipCountdownView.setVisibility(View.INVISIBLE);
+            } else if (mEndCardView != null) {
+                useCustomClose = false;
+                skipTimerDelay = htmlAd.getSkipDelay();
+                if (mSkipCountdownView != null) mSkipCountdownView.setVisibility(View.VISIBLE);
+                startClickThroughTimer();
+            } else if (useCustomClose) {
+                skipTimerDelay = htmlAd.getNativeButtonCloseDelay();
+                mNativeCloseButtonDelay = skipTimerDelay;
+                handleNativeCloseButtonDelay();
+                if (mSkipCountdownView != null) mSkipCountdownView.setVisibility(View.VISIBLE);
+            } else {
+                skipTimerDelay = htmlAd.getCloseDelay();
+                if (mSkipCountdownView != null) mSkipCountdownView.setVisibility(View.VISIBLE);
+            }
+            mSkipTimeMillis = skipTimerDelay;
+            if (skipTimerDelay > 0) {
+                if (showTimerBeforeEndCard) {
+                    mExpirationTimer = new SimpleTimer(skipTimerDelay, new SimpleTimer.Listener() {
 
-        if (skipTimerDelay > 0 && showTimerBeforeEndCard) {
+                        @Override
+                        public void onFinish() {
+                            if (mEndCardView != null
+                                    && htmlAd != null
+                                    && !TextUtils.isEmpty(htmlAd.getLink())) {
+                                if (listener != null) listener.mraidShowSkipButton();
+                                isBackClickable = false;
+                            } else {
+                                if (listener != null) listener.mraidShowCloseButton();
+                                isBackClickable = true;
+                            }
+                            if (htmlAd != null && htmlAd.getLandingPage() != null && htmlAd.getLandingPage().isLandingPageEnabled()) {
+                                htmlAd.getLandingPage().setIsTimerFinished(true);
+                            }
+                            if (mSkipCountdownView != null) {
+                                mSkipCountdownView.setVisibility(View.GONE);
+                            }
+                        }
 
-            mExpirationTimer = new SimpleTimer(skipTimerDelay, new SimpleTimer.Listener() {
-
-                @Override
-                public void onFinish() {
-                    listener.mraidShowCloseButton();
+                        @Override
+                        public void onTick(long millisUntilFinished) {
+                            if (mSkipCountdownView != null) {
+                                mSkipCountdownView.setProgress((int) (mSkipTimeMillis - millisUntilFinished), mSkipTimeMillis);
+                            }
+                        }
+                    }, 10);
+                    mExpirationTimer.start();
+                }
+            } else if (skipTimerDelay == 0) {
+                if (mEndCardView != null) {
+                    if (listener != null) listener.mraidShowSkipButton();
+                    isBackClickable = false;
+                } else {
+                    if (listener != null) listener.mraidShowCloseButton();
                     isBackClickable = true;
-                    isTimerFinished = true;
-                    if (mSkipCountdownView != null) mSkipCountdownView.setVisibility(View.GONE);
                 }
-
-                @Override
-                public void onTick(long millisUntilFinished) {
-                    if (mSkipCountdownView != null) {
-                        mSkipCountdownView.setProgress((int) (mSkipTimeMillis - millisUntilFinished), mSkipTimeMillis);
-                    }
-                }
-            }, 10);
-            mExpirationTimer.start();
-        } else if (skipTimerDelay == 0) {
-            listener.mraidShowCloseButton();
-            isBackClickable = true;
+            }
         }
     }
 
@@ -2261,12 +2396,23 @@ public class MRAIDView extends FrameLayout {
         if (mExpirationTimer != null) mExpirationTimer.pause();
         if (mNativeCloseButtonTimer != null) mNativeCloseButtonTimer.pause();
         if (mAntilockTimer != null) mAntilockTimer.pause();
+        if (mEndCardView != null) mEndCardView.pause();
+        if (mClickThroughTimer != null) mClickThroughTimer.pause();
+        if (ctaView != null) ctaView.pause();
     }
 
     public void resume() {
-        if (mExpirationTimer != null) mExpirationTimer.resume();
-        if (mNativeCloseButtonTimer != null) mNativeCloseButtonTimer.resume();
-        if (mAntilockTimer != null) mAntilockTimer.resume();
+        if (mMraidDisplayMode == MraidDisplayMode.END_CARD) {
+            showEndCard();
+        } else {
+            if (mExpirationTimer != null) mExpirationTimer.resume();
+            if (mNativeCloseButtonTimer != null) mNativeCloseButtonTimer.resume();
+            if (mAntilockTimer != null) mAntilockTimer.resume();
+            if (mEndCardView != null) mEndCardView.resume();
+            if (mClickThroughTimer != null) mClickThroughTimer.resume();
+            if (ctaView != null) ctaView.resume();
+            mMraidDisplayMode = MraidDisplayMode.AD;
+        }
     }
 
     private void closeOnMainThread() {
@@ -2274,61 +2420,14 @@ public class MRAIDView extends FrameLayout {
     }
 
     private void handleSetCustomisationInjection() {
-        webView.evaluateJavascript(setCustomisationString, null);
-    }
-
-    private void handleLandingPageBehavior() {
-        if (landingBehaviourString != null) {
-            switch (landingBehaviourString) {
-                case "ic":
-                    cancelLandingPageBehaviour();
-                    break;
-                case "c":
-                    if (mSkipCountdownView != null && !isTimerFinished) {
-                        mSkipCountdownView.setVisibility(View.VISIBLE);
-                    }
-                    break;
-                case "nc":
-                    if (mSkipCountdownView != null) {
-                        mSkipCountdownView.setVisibility(View.GONE);
-                    }
-                    break;
-            }
-        } else {
-            if (mSkipCountdownView != null) {
-                mSkipCountdownView.setVisibility(View.VISIBLE);
-            }
+        if (htmlAd != null && htmlAd.getLandingPage() != null && !TextUtils.isEmpty(htmlAd.getLandingPage().getCustomisationString())) {
+            webView.evaluateJavascript(htmlAd.getLandingPage().getCustomisationString(), null);
         }
-    }
 
-    private void cancelLandingPageBehaviour() {
-        if (mSkipCountdownView != null) {
-            mSkipCountdownView.setVisibility(View.GONE);
-            mSkipCountdownView = null;
-        }
-        postDelayed(MRAIDView.this::showClose, 600);
-    }
-
-    private void showClose() {
-        if (mNativeCloseButtonTimer != null) {
-            mNativeCloseButtonTimer.onFinish();
-            mNativeCloseButtonTimer = null;
-        }
-        if (listener != null)
-            listener.mraidShowCloseButton();
-        showDefaultCloseButton();
-        isBackClickable = true;
-    }
-
-    private void validateDelay() {
-        if (landingPageDelay < 0 || landingPageDelay > 30000) {
-            landingPageDelay = 30000;
-        }
     }
 
     private boolean hasLandingPage() {
-        return isLandingPageEnabled && setCustomisationString != null
-                && !setCustomisationString.isEmpty();
+        return htmlAd != null && htmlAd.hasLandingPage();
     }
 
     // Timer to prevent locked black screen when HTML ads are broken
@@ -2337,8 +2436,7 @@ public class MRAIDView extends FrameLayout {
         mAntilockTimer = new SimpleTimer(antilockDelay, new SimpleTimer.Listener() {
             @Override
             public void onFinish() {
-                if (listener != null)
-                    listener.mraidShowCloseButton();
+                if (listener != null) listener.mraidShowCloseButton();
                 showDefaultCloseButton();
                 isBackClickable = true;
             }
@@ -2358,5 +2456,108 @@ public class MRAIDView extends FrameLayout {
             mAntilockTimer.cancel();
             mAntilockTimer = null;
         }
+    }
+
+    public void skipButtonClicked() {
+        wasTouched = true;
+        if (listener != null) {
+            listener.mraidHideSkipButton();
+        }
+        if (mClickThroughTimer != null) {
+            mClickThroughTimer.pause();
+            mClickThroughTimer.cancel();
+            mClickThroughTimer = null;
+        }
+        showEndCard();
+    }
+
+    private void showEndCard() {
+        if (mEndCardView != null && mMraidDisplayMode != MraidDisplayMode.END_CARD) {
+            mMraidDisplayMode = MraidDisplayMode.END_CARD;
+            mEndCardView.setEndCardViewListener(new HyBidEndCardView.EndCardViewListener() {
+                @Override
+                public void onClick(String url, Boolean isCustomEndCard, String endCardType) {
+                    wasTouched = true;
+                    if (htmlAd != null && !TextUtils.isEmpty(htmlAd.getLink())) {
+                        open(htmlAd.getLink());
+                    }
+                    if (listener != null) listener.onCustomEndCardClicked();
+                }
+
+                @Override
+                public void onSkip() {
+                }
+
+                @Override
+                public void onClose(Boolean isCustomEndCard) {
+                    if (listener != null) listener.onCustomEndCardClosed();
+                    close();
+                }
+
+                @Override
+                public void onShow(Boolean isCustomEndCard, String endCardType) {
+                    if (ctaView != null) {
+                        ctaView.setVisibility(View.GONE);
+                        ctaView.killTimer();
+                    }
+                    if (mEndCardView != null) mEndCardView.bringToFront();
+                    if (listener != null) listener.onCustomEndCardShow(endCardType);
+                }
+
+                @Override
+                public void onLoadSuccess(Boolean isCustomEndCard) {
+                    if (listener != null) {
+                        hideContentInfo(MRAIDView.this);
+                        listener.onCustomEndCardLoadSuccess();
+                    }
+                }
+
+                @Override
+                public void onLoadFail(Boolean isCustomEndCard) {
+                    if (listener != null) listener.onCustomEndCardLoadFail();
+                }
+            });
+            mEndCardView.setSkipOffset(new SkipOffset(this.htmlAd.getEndCardCloseDelay(), true));
+            mEndCardView.show(this.htmlAd.getEndCardData(), null);
+            mEndCardView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                mEndCardView.post(() -> mEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)));
+            });
+            mEndCardView.showCloseButton(() -> isBackClickable = true);
+        } else if (mMraidDisplayMode == MraidDisplayMode.END_CARD && mEndCardView != null) {
+            mEndCardView.resume();
+        }
+    }
+
+    private void startClickThroughTimer() {
+        if (htmlAd != null) {
+            mClickThroughTimer = new SimpleTimer(htmlAd.getClickThroughTimer(), new SimpleTimer.Listener() {
+
+                @Override
+                public void onFinish() {
+                    if (shouldTriggerClickThrough()) {
+                        if (clickThroughListener != null)
+                            clickThroughListener.onClickThroughTriggered();
+                        open(htmlAd.getLink());
+                        mClickThroughTimer.pause();
+                        mClickThroughTimer.cancel();
+                        mClickThroughTimer = null;
+                    }
+                }
+
+                @Override
+                public void onTick(long millisUntilFinished) {
+
+                }
+            }, 10);
+            mClickThroughTimer.start();
+        }
+    }
+
+    private boolean shouldTriggerClickThrough() {
+        return wasTouched && !customCTAClicked;
+    }
+
+    enum MraidDisplayMode {
+        AD, END_CARD
     }
 }

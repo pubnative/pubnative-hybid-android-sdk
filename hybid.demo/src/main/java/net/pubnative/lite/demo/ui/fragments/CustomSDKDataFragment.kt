@@ -44,6 +44,12 @@ class CustomSDKDataFragment : Fragment(R.layout.fragment_custom_sdk_data) {
                 HyBid.getCustomRequestSignalData(requireContext(), "m")
             )
         )
+        list.add(
+            SDKDataItem(
+                "Custom request encoded signal data",
+                HyBid.getEncodedCustomRequestSignalData(requireContext(), "m")
+            )
+        )
         return list
     }
 }

@@ -164,8 +164,10 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
         adRequest.coppa = HyBid.isCoppaEnabled() ? "1" : "0";
 
         BaseViewabilityManager viewabilityManager = mSdkManager.getVisibilityManager();
-        adRequest.omidpn = viewabilityManager.getPartnerName();
-        adRequest.omidpv = viewabilityManager.getPartnerVersion();
+        if (viewabilityManager != null) {
+            adRequest.omidpn = viewabilityManager.getPartnerName();
+            adRequest.omidpv = viewabilityManager.getPartnerVersion();
+        }
         adRequest.isInterstitial = adSize == AdSize.SIZE_INTERSTITIAL;
         adRequest.ae = paAvailable ? "1" : "0";
 

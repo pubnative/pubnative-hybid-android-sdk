@@ -22,8 +22,13 @@ import net.pubnative.lite.sdk.vpaid.helpers.BitmapHelper;
 import java.util.Random;
 
 public class CloseableContainer extends FrameLayout {
+
     public interface OnCloseListener {
         void onClose();
+    }
+
+    public interface OnSkipListener {
+        void onSkip();
     }
 
     public enum ClosePosition {
@@ -56,9 +61,12 @@ public class CloseableContainer extends FrameLayout {
     static final float CLOSE_BUTTON_PADDING_DP = 0.0f;
     static final float CLOSE_BUTTON_PADDING_BORDER_DP = 0.0f;
     private Integer mCustomCloseSize = null;
+    private Integer mCustomSkipSize = null;
 
     private OnCloseListener mOnCloseListener;
+    private OnSkipListener mOnSkipListener;
     private final ImageButton mCloseButton;
+    private final ImageButton mSkipButton;
     private ClosePosition mClosePosition;
 
     public CloseableContainer(Context context) {
@@ -78,14 +86,26 @@ public class CloseableContainer extends FrameLayout {
         int paddingBorderPixels = (int) ViewUtils.convertDpToPixel(CLOSE_BUTTON_PADDING_BORDER_DP, context);
 
         mCloseButton = new ImageButton(context);
+        mSkipButton = new ImageButton(context);
         Bitmap closeBitmap = BitmapHelper.toBitmap(context, HyBid.getNormalCloseXmlResource(), R.mipmap.close);
+        Bitmap skipBitmap = BitmapHelper.toBitmap(context, HyBid.getNormalCloseXmlResource(), R.mipmap.skip);
         if (closeBitmap != null) mCloseButton.setImageBitmap(closeBitmap);
         else
             mCloseButton.setImageBitmap(BitmapHelper.decodeResource(mCloseButton.getContext(), R.mipmap.close));
+        if (skipBitmap != null) mSkipButton.setImageBitmap(skipBitmap);
+        else
+            mSkipButton.setImageBitmap(BitmapHelper.decodeResource(mSkipButton.getContext(), R.mipmap.skip));
+
         mCloseButton.setId(R.id.button_fullscreen_close);
         mCloseButton.setBackgroundColor(Color.TRANSPARENT);
         mCloseButton.setScaleType(ImageView.ScaleType.FIT_CENTER);
         mCloseButton.setPadding(paddingPixels, paddingBorderPixels, paddingBorderPixels, paddingPixels);
+
+        mSkipButton.setId(R.id.button_fullscreen_skip);
+        mSkipButton.setBackgroundColor(Color.TRANSPARENT);
+        mSkipButton.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        mSkipButton.setPadding(paddingPixels, paddingBorderPixels, paddingBorderPixels, paddingPixels);
+
         mCloseButton.setOnClickListener(v -> {
             playSoundEffect(SoundEffectConstants.CLICK);
             if (mOnCloseListener != null) {
@@ -93,27 +113,61 @@ public class CloseableContainer extends FrameLayout {
             }
         });
 
-        //positionButton();
+        mSkipButton.setOnClickListener(v -> {
+            playSoundEffect(SoundEffectConstants.CLICK);
+            if (mOnSkipListener != null) {
+                mOnSkipListener.onSkip();
+            }
+        });
     }
 
-    private void positionButton() {
-        LayoutParams layoutParams;
+    private void positionCloseButton() {
+        FrameLayout.LayoutParams layoutParams;
         if (mCustomCloseSize != null) {
-            layoutParams = new LayoutParams(mCustomCloseSize, mCustomCloseSize);
+            layoutParams = new FrameLayout.LayoutParams(mCustomCloseSize, mCustomCloseSize);
             mCloseButton.setId(R.id.button_fullscreen_close_small);
             int margins = (int) ViewUtils.convertDpToPixel(8f, getContext());
             layoutParams.setMargins(margins, margins, margins, margins);
         } else {
             int buttonSize = (int) ViewUtils.convertDpToPixel(CLOSE_REGION_SIZE_DP, getContext());
-            layoutParams = new LayoutParams(buttonSize, buttonSize);
+            layoutParams = new FrameLayout.LayoutParams(buttonSize, buttonSize);
         }
         layoutParams.gravity = mClosePosition.getGravity();
-        removeView(mCloseButton);
-        addView(mCloseButton, layoutParams);
+        if (mSkipButton != null) {
+            removeView(mSkipButton);
+        }
+        if (mCloseButton != null) {
+            removeView(mCloseButton);
+            addView(mCloseButton, layoutParams);
+        }
+    }
+
+    private void positionSkipButton() {
+        FrameLayout.LayoutParams layoutParams;
+        if (mCustomSkipSize != null) {
+            layoutParams = new FrameLayout.LayoutParams(mCustomSkipSize, mCustomSkipSize);
+            mSkipButton.setId(R.id.button_fullscreen_skip_small);
+            int margins = (int) ViewUtils.convertDpToPixel(8f, getContext());
+            layoutParams.setMargins(margins, margins, margins, margins);
+        } else {
+            int buttonSize = (int) ViewUtils.convertDpToPixel(CLOSE_REGION_SIZE_DP, getContext());
+            layoutParams = new FrameLayout.LayoutParams(buttonSize, buttonSize);
+        }
+        layoutParams.gravity = Gravity.TOP | Gravity.START;
+        if (mCloseButton != null)
+            removeView(mCloseButton);
+        if (mSkipButton != null) {
+            removeView(mSkipButton);
+            addView(mSkipButton, layoutParams);
+        }
     }
 
     public void setOnCloseListener(OnCloseListener onCloseListener) {
         mOnCloseListener = onCloseListener;
+    }
+
+    public void setOnSkipListener(OnSkipListener onSkipListener) {
+        mOnSkipListener = onSkipListener;
     }
 
     public void setClosePosition(ClosePosition closePosition) {
@@ -132,19 +186,42 @@ public class CloseableContainer extends FrameLayout {
     }
 
     public void setCloseVisible(boolean visible) {
+        if (mSkipButton != null) {
+            mSkipButton.setVisibility(GONE);
+        }
         if (mCloseButton != null) {
             mCloseButton.setVisibility(visible ? VISIBLE : GONE);
             if (visible) {
-                positionButton();
+                positionCloseButton();
+            }
+        }
+    }
+
+    public void setSkipVisible(boolean visible) {
+        if (mCloseButton != null) {
+            mCloseButton.setVisibility(GONE);
+        }
+        if (mSkipButton != null) {
+            mSkipButton.setVisibility(visible ? VISIBLE : GONE);
+            if (visible) {
+                positionSkipButton();
             }
         }
     }
 
     public void setCloseSize(Integer size) {
         mCustomCloseSize = (int) ViewUtils.convertDpToPixel(size.floatValue(), getContext());
-        LayoutParams layoutParams = new LayoutParams(mCustomCloseSize, mCustomCloseSize);
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(mCustomCloseSize, mCustomCloseSize);
         layoutParams.gravity = mClosePosition.getGravity();
         removeView(mCloseButton);
         addView(mCloseButton, layoutParams);
+    }
+
+    public void setSkipSize(Integer size) {
+        mCustomSkipSize = (int) ViewUtils.convertDpToPixel(size.floatValue(), getContext());
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(mCustomSkipSize, mCustomSkipSize);
+        layoutParams.gravity = Gravity.TOP | Gravity.START;
+        removeView(mSkipButton);
+        addView(mSkipButton, layoutParams);
     }
 }

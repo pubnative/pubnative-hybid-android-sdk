@@ -31,7 +31,7 @@ import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
 import net.pubnative.lite.sdk.utils.PNCrypto;
 import net.pubnative.lite.sdk.utils.sdkmanager.DisplayManager;
 import net.pubnative.lite.sdk.utils.sdkmanager.SdkManager;
-import net.pubnative.lite.sdk.viewability.HybidViewabilityManager;
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityManager;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -63,7 +63,7 @@ public class AdRequestFactoryTest {
     @Mock
     private TopicManager mTopicManager;
     @Mock
-    private HybidViewabilityManager mViewabilityManager;
+    private HyBidViewabilityManager mViewabilityManager;
     @Mock
     private DisplayManager mDisplayManager;
     @Mock

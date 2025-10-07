@@ -32,8 +32,8 @@
         <activity
             android:name=".ui.activities.NavigationActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
-            android:theme="@style/HyBidDemoAppTheme"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/HyBidDemoAppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -267,8 +267,8 @@
             android:name=".ui.activities.config.HyBidSettingsActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboardHidden"
             android:label="@string/pn_settings"
-            android:theme="@style/HyBidDemoAppTheme"
             android:resizeableActivity="true"
+            android:theme="@style/HyBidDemoAppTheme"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ui.activities.AdCustomizationActivity"
@@ -410,17 +410,23 @@
         <activity
             android:name="com.ironsource.sdk.controller.ControllerActivity"
             android:configChanges="orientation|screenSize"
-            android:hardwareAccelerated="true" />
+            android:hardwareAccelerated="true"
+            android:theme="@android:style/Theme.NoTitleBar" />
         <activity
             android:name="com.ironsource.sdk.controller.InterstitialActivity"
             android:configChanges="orientation|screenSize"
             android:hardwareAccelerated="true"
-            android:theme="@android:style/Theme.Translucent" />
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <activity
             android:name="com.ironsource.sdk.controller.OpenUrlActivity"
             android:configChanges="orientation|screenSize"
             android:hardwareAccelerated="true"
-            android:theme="@android:style/Theme.Translucent" />
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <activity
+            android:name="com.ironsource.mediationsdk.testSuite.TestSuiteActivity"
+            android:configChanges="orientation|screenSize"
+            android:hardwareAccelerated="true"
+            android:theme="@android:style/Theme.NoTitleBar" />
 
         <provider
             android:name="com.ironsource.lifecycle.IronsourceLifecycleProvider"

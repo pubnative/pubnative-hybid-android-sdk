@@ -29,7 +29,13 @@ public interface RewardedActivityInteractor {
 
     void showRewardedCloseButton(CloseableContainer.OnCloseListener mCloseListener);
 
+    void showRewardedSkipButton(CloseableContainer.OnSkipListener skipListener);
+
     void hideRewardedCloseButton();
 
+    void hideRewardedSkipButton();
+
     void setContentLayout();
+
+    void setSkipSize(int reducedCloseButtonSize);
 }

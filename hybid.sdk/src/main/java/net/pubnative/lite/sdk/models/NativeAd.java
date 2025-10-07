@@ -21,6 +21,7 @@ import net.pubnative.lite.sdk.contentinfo.listeners.AdFeedbackLoadListener;
 import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.URLValidator;
+import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.views.PNBeaconWebView;
 import net.pubnative.lite.sdk.visibility.ImpressionManager;
@@ -81,6 +82,9 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
      * @return String representation of the ad title, null if not present
      */
     public String getTitle() {
+        if (mAd == null) {
+            return null;
+        }
         String result = null;
         AdData data = mAd.getAsset(APIAsset.TITLE);
         if (data != null) {
@@ -95,6 +99,9 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
      * @return String representation of the ad Description, null if not present
      */
     public String getDescription() {
+        if (mAd == null) {
+            return null;
+        }
         String result = null;
         AdData data = mAd.getAsset(APIAsset.DESCRIPTION);
         if (data != null) {
@@ -109,6 +116,9 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
      * @return String representation of the call to action value, null if not present
      */
     public String getCallToActionText() {
+        if (mAd == null) {
+            return null;
+        }
         String result = null;
         AdData data = mAd.getAsset(APIAsset.CALL_TO_ACTION);
         if (data != null) {
@@ -123,6 +133,9 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
      * @return valid String with the url value, null if not present
      */
     public String getIconUrl() {
+        if (mAd == null) {
+            return null;
+        }
         String result = null;
         AdData data = mAd.getAsset(APIAsset.ICON);
         if (data != null) {
@@ -145,6 +158,9 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
      * @return valid String with the url value, null if not present
      */
     public String getBannerUrl() {
+        if (mAd == null) {
+            return null;
+        }
         String result = null;
         AdData data = mAd.getAsset(APIAsset.BANNER);
         if (data != null) {
@@ -176,6 +192,9 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
      * @return int value, 0 if not present
      */
     public int getRating() {
+        if (mAd == null) {
+            return 0;
+        }
         int result = 0;
         AdData data = mAd.getAsset(APIAsset.RATING);
         if (data != null) {
@@ -188,19 +207,19 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
     }
 
     public String getContentInfoIconUrl() {
-        return mAd.getContentInfoIconUrl();
+        return mAd != null ? mAd.getContentInfoIconUrl() : null;
     }
 
     public String getContentInfoClickUrl() {
-        return mAd.getContentInfoClickUrl();
+        return mAd != null ? mAd.getContentInfoClickUrl() : null;
     }
 
     public String getContentInfoText() {
-        return mAd.getContentInfoText();
+        return mAd != null ? mAd.getContentInfoText() : null;
     }
 
     public View getContentInfo(Context context) {
-        return mAd.getContentInfo(context, this);
+        return mAd != null ? mAd.getContentInfo(context, this) : null;
     }
 
     public String getImpressionId() {
@@ -305,23 +324,10 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
     }
 
     protected void openURL(String urlString, boolean mediationClick) {
-        if (TextUtils.isEmpty(urlString)) {
-            Log.w(TAG, "Error: ending URL cannot be opened - " + urlString);
-        } else if (!mediationClick && mClickableView == null) {
-            Log.w(TAG, "Error: clickable view not set");
-        } else {
-            try {
-                Uri uri = Uri.parse(urlString);
-                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                if (mediationClick && mAdView != null) {
-                    mAdView.getContext().startActivity(intent);
-                } else {
-                    mClickableView.getContext().startActivity(intent);
-                }
-            } catch (Exception ex) {
-                Log.w(TAG, "openURL: Error - " + ex.getMessage());
-            }
+        Context context = mediationClick && mAdView != null ? mAdView.getContext() : mClickableView != null ? mClickableView.getContext() : null;
+        if (context != null && mAd != null) {
+            UrlHandler urlHandler = new UrlHandler(context);
+            urlHandler.handleUrl(urlString, mAd.getLink(), mAd.getNavigationMode());
         }
     }
 

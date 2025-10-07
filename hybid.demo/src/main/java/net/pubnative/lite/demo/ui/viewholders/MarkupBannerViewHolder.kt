@@ -91,6 +91,37 @@ class MarkupBannerViewHolder(
 
     }
 
+    override fun onCustomEndCardLoadSuccess() {
+    }
+
+    override fun onCustomEndCardShow(endCardType: String?) {
+    }
+
+    override fun onCustomEndCardLoadFail() {
+    }
+
+    override fun onCustomEndCardClosed() {
+    }
+
+    override fun onCustomEndCardClicked() {
+    }
+
+    override fun onCustomCTAShow() {
+
+    }
+
+    override fun onCustomCTAClick() {
+
+    }
+
+    override fun onCustomCTALoadFail() {
+
+    }
+
+    override fun mraidHideCloseButton() {
+        TODO("Not yet implemented")
+    }
+
     override fun mraidViewLoaded(mraidView: MRAIDView?) {
     }
 
@@ -115,5 +146,11 @@ class MarkupBannerViewHolder(
     }
 
     override fun mraidShowCloseButton() {
+    }
+
+    override fun mraidShowSkipButton() {
+    }
+
+    override fun mraidHideSkipButton() {
     }
 }

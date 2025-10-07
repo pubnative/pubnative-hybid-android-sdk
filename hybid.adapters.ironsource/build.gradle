@@ -49,7 +49,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':hybid.sdk')
-    compileOnly 'com.ironsource.sdk:mediationsdk:8.7.0'
+    compileOnly 'com.ironsource.sdk:mediationsdk:9.0.0'
 }
 
 task sourcesJar(type: Jar) {

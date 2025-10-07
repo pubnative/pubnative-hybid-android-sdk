@@ -40,6 +40,7 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
 
     private boolean mImpressionTracked = false;
     private boolean mClickTracked = false;
+    private boolean mPlayableSkipTracked = false;
     private boolean mDismissTracked = false;
 
     private boolean mDefaultEndCardImpressionTracked = false;
@@ -475,6 +476,29 @@ public class InterstitialPresenterDecorator implements InterstitialPresenter, In
             }
             mReportingController.reportEvent(reportingEvent);
         }
+    }
+
+    @Override
+    public void onPlayableSkipButtonClicked() {
+        if (mIsDestroyed || mPlayableSkipTracked) {
+            return;
+        }
+        if (mReportingController != null && HyBid.isReportingEnabled()) {
+            ReportingEvent reportingEvent = new ReportingEvent();
+            reportingEvent.setEventType(Reporting.EventType.PLAYABLE_SKIP_CLICK);
+            reportingEvent.setTimestamp(System.currentTimeMillis());
+            reportingEvent.setAdFormat(Reporting.AdFormat.FULLSCREEN);
+            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
+            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
+            Ad ad = getAd();
+            if (ad != null) {
+                reportingEvent.setImpId(ad.getSessionId());
+                reportingEvent.setCampaignId(ad.getCampaignId());
+                reportingEvent.setConfigId(ad.getConfigId());
+            }
+            mReportingController.reportEvent(reportingEvent);
+        }
+        mPlayableSkipTracked = true;
     }
 
     private void reportCompanionView() {

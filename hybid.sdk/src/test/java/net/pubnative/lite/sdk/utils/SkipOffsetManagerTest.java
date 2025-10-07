@@ -5,42 +5,54 @@
 package net.pubnative.lite.sdk.utils;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotSame;
-import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getDefaultRewardedHtmlSkipOffset;
 import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getHTMLSkipOffset;
 import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getMaximumRewardedSkipOffset;
 import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getNativeCloseButtonDelay;
 import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getVideoSkipOffset;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.After;
 import org.junit.Test;
+
+import java.lang.reflect.Field;
 
 
 public class SkipOffsetManagerTest {
 
+    @After
+    public void tearDown() throws Exception {
+        // Reset private static boolean flags after each test to ensure test independence
+        SkipOffsetManager.reset();
+    }
+
+    private void setStaticField(Class<?> clazz, String fieldName, Object value) throws Exception {
+        Field field = clazz.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(null, value);
+    }
+
     @Test
     public void testGetNativeCloseButtonDelay_nullRemoteConfigDelay() {
-        // Test with null remoteConfigDelay
         Integer nativeCloseButtonDelay = getNativeCloseButtonDelay(null);
         assertEquals(SkipOffsetManager.getDefaultNativeCloseButtonDelay(), nativeCloseButtonDelay);
     }
 
     @Test
     public void testGetNativeCloseButtonDelay_negativeRemoteConfigDelay() {
-        // Test with negative remoteConfigDelay
         Integer nativeCloseButtonDelay = getNativeCloseButtonDelay(-1);
         assertEquals(SkipOffsetManager.getDefaultNativeCloseButtonDelay(), nativeCloseButtonDelay);
     }
 
     @Test
     public void testGetNativeCloseButtonDelay_remoteConfigDelayGreaterThanNATIVE_CLOSE_BUTTON_DELAY() {
-        // Test with remoteConfigDelay greater than NATIVE_CLOSE_BUTTON_DELAY
         Integer nativeCloseButtonDelay = getNativeCloseButtonDelay(SkipOffsetManager.getDefaultNativeCloseButtonDelay() + 1);
         assertEquals(SkipOffsetManager.getDefaultNativeCloseButtonDelay(), nativeCloseButtonDelay);
     }
 
     @Test
     public void testGetNativeCloseButtonDelay_validRemoteConfigDelay() {
-        // Test with valid remoteConfigDelay
         Integer nativeCloseButtonDelay = getNativeCloseButtonDelay(10);
         Integer desiredDelay = 10;
         assertEquals(desiredDelay, nativeCloseButtonDelay);
@@ -48,128 +60,134 @@ public class SkipOffsetManagerTest {
 
     @Test
     public void testGetInterstitialHTMLSkipOffset_nullRemoteConfigSkipOffset() {
-        // Test with null remoteConfigSkipOffset
         Integer remoteConfigSkipOffset = null;
         Integer resultSkipOffset = getHTMLSkipOffset(remoteConfigSkipOffset, true);
-        assertEquals((int) resultSkipOffset, SkipOffsetManager.INTERSTITIAL_MRAID);
+        assertEquals(SkipOffsetManager.INTERSTITIAL_MRAID, (int) resultSkipOffset);
     }
 
     @Test
     public void testGetInterstitialHTMLSkipOffset_negativeRemoteConfigSkipOffset() {
-        // Test with negative remoteConfigSkipOffset
         Integer remoteConfigSkipOffset = -1;
         Integer resultSkipOffset = getHTMLSkipOffset(remoteConfigSkipOffset, true);
-        assertEquals((int) resultSkipOffset, SkipOffsetManager.INTERSTITIAL_MRAID);
+        assertEquals(SkipOffsetManager.INTERSTITIAL_MRAID, (int) resultSkipOffset);
     }
 
     @Test
     public void testGetInterstitialHTMLSkipOffset_validRemoteConfigSkipOffset() {
-        // Test with valid remoteConfigSkipOffset
         Integer remoteConfigSkipOffset = 25;
         Integer resultSkipOffset = getHTMLSkipOffset(remoteConfigSkipOffset, true);
-        assertEquals(resultSkipOffset, remoteConfigSkipOffset);
+        assertEquals(remoteConfigSkipOffset, resultSkipOffset);
     }
 
     @Test
-    public void testGetRewardedSkipOffset_nullRemoteConfigSkipOffset() {
-        // Test with null remoteConfigSkipOffset
-        Integer remoteConfigSkipOffset = null;
-        Integer publisherSkipSeconds = 8;
-        Integer adParamsSkipSeconds = 8;
-        Boolean hasEndcard = false;
-
-        Integer resultSkipOffset = getVideoSkipOffset(remoteConfigSkipOffset, publisherSkipSeconds, adParamsSkipSeconds, hasEndcard, false);
-        assertEquals(resultSkipOffset, publisherSkipSeconds);
+    public void testGetRewardedSkipOffset_adParamsHasPrecedence() {
+        // This test is refactored for clarity to confirm adParams has the highest precedence.
+        Integer resultSkipOffset = getVideoSkipOffset(15, 12, 8, false, false);
+        assertEquals(Integer.valueOf(8), resultSkipOffset);
     }
 
     @Test
-    public void testGetRewardedSkipOffset_negativeRemoteConfigSkipOffset() {
-        // Test with negative remoteConfigSkipOffset
-        Integer remoteConfigSkipOffset = -1;
-        Integer publisherSkipSeconds = 12;
-        Integer adParamsSkipSeconds = 8;
-        Boolean hasEndcard = false;
-
-        Integer resultSkipOffset = getVideoSkipOffset(remoteConfigSkipOffset, publisherSkipSeconds, adParamsSkipSeconds, hasEndcard, false);
-        assertNotSame(resultSkipOffset, publisherSkipSeconds);
-    }
-
-    @Test
-    public void testGetRewardedSkipOffset_remoteConfigSkipOffsetGreaterThanREWARDED_HTML_SKIP_OFFSET() {
-        // Test with remoteConfigSkipOffset greater than REWARDED_HTML_SKIP_OFFSET
-        Integer remoteConfigSkipOffset = 40;
-        Integer publisherSkipSeconds = 12;
-        Integer adParamsSkipSeconds = 8;
-        Boolean hasEndcard = false;
-
-        Integer correctSkipOffset = 8;
-
-        Integer resultSkipOffset = getVideoSkipOffset(remoteConfigSkipOffset, publisherSkipSeconds, adParamsSkipSeconds, hasEndcard, false);
-        assertEquals(resultSkipOffset, correctSkipOffset);
-    }
-
-    @Test
-    public void testGetRewardedSkipOffset_validRemoteConfigSkipOffset() {
-        // Test with valid remoteConfigSkipOffset
-        Integer remoteConfigSkipOffset = 22;
-        Integer publisherSkipSeconds = 12;
-        Integer adParamsSkipSeconds = 8;
-        Boolean hasEndcard = false;
-
-        Integer resultSkipOffset = getVideoSkipOffset(remoteConfigSkipOffset, publisherSkipSeconds, adParamsSkipSeconds, hasEndcard, false);
-        assertNotSame(resultSkipOffset, remoteConfigSkipOffset);
+    public void testGetRewardedSkipOffset_remoteConfigHasPrecedenceOverPublisher() {
+        // This test confirms remoteConfig has precedence when adParams is null.
+        Integer resultSkipOffset = getVideoSkipOffset(15, 12, null, false, false);
+        assertEquals(Integer.valueOf(15), resultSkipOffset);
     }
 
     @Test
     public void testGetRewardedSkipOffset_allNullValues() {
-        // Test with all null values
         Integer remoteConfigSkipOffset = null;
         Integer publisherSkipSeconds = null;
         Integer adParamsSkipSeconds = null;
-        Boolean hasEndcard = false;
         Integer defaultRewardedSkipOffset = getMaximumRewardedSkipOffset();
-
-        Integer resultSkipOffset = getVideoSkipOffset(remoteConfigSkipOffset, publisherSkipSeconds, adParamsSkipSeconds, hasEndcard, false);
-        assertEquals(resultSkipOffset, defaultRewardedSkipOffset);
+        Integer resultSkipOffset = getVideoSkipOffset(remoteConfigSkipOffset, publisherSkipSeconds, adParamsSkipSeconds, false, false);
+        assertEquals(defaultRewardedSkipOffset, resultSkipOffset);
     }
 
     @Test
     public void testGetRewardedHTMLSkipOffset_nullRemoteConfigSkipOffset() {
-        // Test with null remoteConfigSkipOffset
         Integer remoteConfigSkipOffset = null;
-        Integer defaultRewardedSkipOffset = getDefaultRewardedHtmlSkipOffset();
-
+        Integer defaultRewardedSkipOffset = SkipOffsetManager.getDefaultRewardedHtmlSkipOffset();
         Integer resultSkipOffset = getHTMLSkipOffset(remoteConfigSkipOffset, false);
-        assertEquals(resultSkipOffset, defaultRewardedSkipOffset);
+        assertEquals(defaultRewardedSkipOffset, resultSkipOffset);
     }
 
     @Test
     public void testGetRewardedHTMLSkipOffset_negativeRemoteConfigSkipOffset() {
-        // Test with negative remoteConfigSkipOffset
         Integer remoteConfigSkipOffset = -1;
-        Integer defaultRewardedSkipOffset = getDefaultRewardedHtmlSkipOffset();
-
+        Integer defaultRewardedSkipOffset = SkipOffsetManager.getDefaultRewardedHtmlSkipOffset();
         Integer resultSkipOffset = getHTMLSkipOffset(remoteConfigSkipOffset, false);
-        assertEquals(resultSkipOffset, defaultRewardedSkipOffset);
+        assertEquals(defaultRewardedSkipOffset, resultSkipOffset);
     }
 
     @Test
     public void testGetRewardedHTMLSkipOffset_remoteConfigSkipOffsetGreaterThanREWARDED_HTML_SKIP_OFFSET() {
-        // Test with remoteConfigSkipOffset greater than REWARDED_HTML_SKIP_OFFSET
         Integer remoteConfigSkipOffset = 35;
         Integer expectedSkipOffset = 30;
-
         Integer resultSkipOffset = getHTMLSkipOffset(remoteConfigSkipOffset, false);
-        assertEquals(resultSkipOffset, expectedSkipOffset);
+        assertEquals(expectedSkipOffset, resultSkipOffset);
     }
 
     @Test
     public void testGetRewardedHTMLSkipOffset_validRemoteConfigSkipOffset() {
-        // Test with valid remoteConfigSkipOffset
         Integer remoteConfigSkipOffset = 22;
-
         Integer resultSkipOffset = getHTMLSkipOffset(remoteConfigSkipOffset, false);
-        assertEquals(resultSkipOffset, remoteConfigSkipOffset);
+        assertEquals(remoteConfigSkipOffset, resultSkipOffset);
     }
 
+    // --- NEW TESTS (ADDED FOR COVERAGE) ---
+
+    @Test
+    public void getVideoSkipOffset_forInterstitialWithEndCard_usesCorrectDefault() {
+        // Test interstitial video with an end card, expecting a default of 10.
+        Integer result = getVideoSkipOffset(null, null, null, true, true);
+        assertEquals(Integer.valueOf(10), result);
+    }
+
+    @Test
+    public void getVideoSkipOffset_forInterstitialWithoutEndCard_usesCorrectDefault() {
+        // Test interstitial video without an end card, expecting a default of 15.
+        Integer result = getVideoSkipOffset(null, null, null, false, true);
+        assertEquals(Integer.valueOf(15), result);
+    }
+
+    @Test
+    public void getHTMLSkipOffset_forInterstitialWithValueGreaterThanMax_returnsCappedValue() {
+        // Test the capping logic for values > 30.
+        Integer result = getHTMLSkipOffset(40, true);
+        assertEquals(Integer.valueOf(30), result);
+    }
+
+    @Test
+    public void isCustomInterstitialHTMLSkipOffset_isSetCorrectly() {
+        // Test that the static flag is correctly updated.
+        assertFalse(SkipOffsetManager.isCustomInterstitialHTMLSkipOffset());
+        getHTMLSkipOffset(5, true);
+        assertTrue(SkipOffsetManager.isCustomInterstitialHTMLSkipOffset());
+    }
+
+    @Test
+    public void isCustomInterstitialVideoSkipOffset_isSetCorrectly() {
+        // Test that the static flag is correctly updated for video.
+        assertFalse(SkipOffsetManager.isCustomInterstitialVideoSkipOffset());
+        getVideoSkipOffset(20, null, null, true, true);
+        assertTrue(SkipOffsetManager.isCustomInterstitialVideoSkipOffset());
+    }
+
+    @Test
+    public void defaultGetters_returnCorrectConstants() {
+        // Test all simple constant getters for 100% coverage.
+        assertEquals(Integer.valueOf(15), SkipOffsetManager.getDefaultNativeCloseButtonDelay());
+        assertEquals(Integer.valueOf(30), SkipOffsetManager.getDefaultRewardedHtmlSkipOffset());
+        assertEquals(Integer.valueOf(3), SkipOffsetManager.getDefaultHtmlInterstitialSkipOffset());
+        assertEquals(Integer.valueOf(10), SkipOffsetManager.getDefaultVideoWithEndCardSkipOffset());
+        assertEquals(Integer.valueOf(15), SkipOffsetManager.getDefaultVideoWithoutEndCardSkipOffset());
+        assertEquals(Integer.valueOf(4), SkipOffsetManager.getDefaultEndcardSkipOffset());
+        assertEquals(Integer.valueOf(5), SkipOffsetManager.getDefaultPCEndcardSkipOffset());
+        assertEquals(Integer.valueOf(0), SkipOffsetManager.getDefaultBCEndcardSkipOffset());
+        assertEquals(Integer.valueOf(30), SkipOffsetManager.getMaximumEndcardCloseDelay());
+        assertEquals(Integer.valueOf(3), SkipOffsetManager.getDefaultEndcardCloseDelay());
+        assertEquals(Integer.valueOf(3), SkipOffsetManager.getDefaultPCHTMLSkipOffset());
+        assertEquals(Integer.valueOf(30), SkipOffsetManager.getDefaultPCRewardedHTMLSkipOffset());
+        assertEquals(30, SkipOffsetManager.getMaximumRewardedSkipOffset());
+    }
 }

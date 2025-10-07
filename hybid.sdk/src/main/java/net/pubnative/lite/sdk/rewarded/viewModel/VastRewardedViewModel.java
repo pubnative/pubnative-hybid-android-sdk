@@ -398,6 +398,11 @@ public class VastRewardedViewModel extends RewardedViewModel implements AdPresen
     }
 
     @Override
+    public void skipButtonClicked() {
+        //No usage of it here because it is applied only for playable html ones
+    }
+
+    @Override
     public View getAdView() {
         if (mAd != null) {
             mVideoPlayer = new VideoAdView(mContext);
@@ -456,5 +461,10 @@ public class VastRewardedViewModel extends RewardedViewModel implements AdPresen
     @Override
     public void resetVolumeChangeTracker() {
         VolumeObserver.getInstance().reset();
+    }
+
+    @Override
+    public boolean hasReducedCloseSize() {
+        return false;
     }
 }

@@ -13,14 +13,4 @@ class IronSourceMediationInterstitialActivity : TabActivity() {
     override fun getAdFragment() = IronSourceMediationInterstitialFragment()
 
     override fun getActivityTitle() = getString(R.string.ironsource_interstitial)
-
-    override fun onResume() {
-        super.onResume()
-        IronSource.onResume(this)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        IronSource.onPause(this)
-    }
 }

@@ -24,6 +24,7 @@ import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
+import net.pubnative.lite.sdk.analytics.tracker.ReportingTracker;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdRequestFactory;
@@ -462,9 +463,19 @@ public class RequestManager {
                 jsonData.put(RENDERING_STATUS, RENDERING_SUCCESS);
                 jsonData.put(VIEWABILITY, percentage != null ? percentage : 0);
                 HashMap<String, Object> adSessionData = new HashMap<>();
-                adSessionData.put(AD_SESSION_DATA, jsonData.toString());
-
+                String jsonDataString = jsonData.toString();
+                adSessionData.put(AD_SESSION_DATA, jsonDataString);
                 AtomManager.setAdSessionData(adSessionData);
+                if (!jsonDataString.isEmpty()) {
+                    ReportingEvent reportingEvent = new ReportingEvent();
+                    reportingEvent.setEventType(Reporting.EventType.SEND_ADSESSION_DATA);
+                    reportingEvent.setTimestamp(System.currentTimeMillis());
+                    adSessionData.put(AD_SESSION_DATA, jsonDataString);
+                    reportingEvent.setAdSessionData(jsonDataString);
+                    if (mReportingController != null) {
+                        mReportingController.reportEvent(reportingEvent);
+                    }
+                }
             } catch (JSONException e) {
                 Logger.d(TAG, "Error while sending ad session data to Atom: " + e.getMessage());
             }

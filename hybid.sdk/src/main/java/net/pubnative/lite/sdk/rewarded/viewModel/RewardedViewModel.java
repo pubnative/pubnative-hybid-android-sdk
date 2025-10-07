@@ -18,16 +18,17 @@ import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.contentinfo.AdFeedbackFormHelper;
 import net.pubnative.lite.sdk.contentinfo.listeners.AdFeedbackLoadListener;
 import net.pubnative.lite.sdk.models.Ad;
-import net.pubnative.lite.sdk.models.AdExperience;
 import net.pubnative.lite.sdk.models.ContentInfo;
 import net.pubnative.lite.sdk.models.ContentInfoIconXPosition;
 import net.pubnative.lite.sdk.models.ContentInfoIconYPosition;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.PositionX;
 import net.pubnative.lite.sdk.models.PositionY;
+import net.pubnative.lite.sdk.mraid.model.HTMLAd;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastSender;
 import net.pubnative.lite.sdk.rewarded.RewardedActivityInteractor;
+import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.URLValidator;
 import net.pubnative.lite.sdk.utils.UrlHandler;
@@ -63,6 +64,13 @@ public abstract class RewardedViewModel extends BaseViewModel implements PNAPICo
 
     protected boolean mIsSkippable = false;
 
+    protected AdTracker mAdTracker;
+    protected AdTracker mCustomEndcardTracker;
+    protected AdTracker mAdEventTracker;
+    protected AdTracker mCustomCTATracker;
+
+    protected HTMLAd htmlAd;
+
     public RewardedViewModel(Context context, String zoneId, String integrationType, int skipOffset, long broadcastId, RewardedActivityInteractor listener) {
         this.mContext = context;
         this.mZoneId = zoneId;
@@ -94,10 +102,13 @@ public abstract class RewardedViewModel extends BaseViewModel implements PNAPICo
     public void processRewardedAd() {
         if (isValidAdToRender()) {
             View view = getAdView();
+            initTrackers();
             mListener.hideRewardedCloseButton();
+            mListener.hideRewardedSkipButton();
             if (view != null) {
                 if (hasReducedCloseSize()) {
                     mListener.setCloseSize(REDUCED_CLOSE_BUTTON_SIZE);
+                    mListener.setSkipSize(REDUCED_CLOSE_BUTTON_SIZE);
                 }
                 FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
                 params.gravity = Gravity.CENTER;
@@ -197,6 +208,7 @@ public abstract class RewardedViewModel extends BaseViewModel implements PNAPICo
     }
 
     protected final CloseableContainer.OnCloseListener mCloseListener = this::closeButtonClicked;
+    protected final CloseableContainer.OnSkipListener mSkipListener = this::skipButtonClicked;
 
     @Override
     public void onIconClicked(List<String> clickTrackers) {
@@ -256,18 +268,8 @@ public abstract class RewardedViewModel extends BaseViewModel implements PNAPICo
 
     public void handleURL(String url) {
         if (mAd != null) {
-            mUrlHandlerDelegate.handleUrl(url, mAd.getNavigationMode());
+            mUrlHandlerDelegate.handleUrl(url, mAd.getLink(), mAd.getNavigationMode());
         }
-    }
-
-    public boolean hasReducedCloseSize() {
-        if (mAd != null) {
-            Boolean hasReducedIconSize = mAd.isIconSizeReduced();
-            String adExperience = mAd.getAdExperience();
-            return adExperience.equalsIgnoreCase(AdExperience.PERFORMANCE) &&
-                    hasReducedIconSize != null && hasReducedIconSize;
-        }
-        return false;
     }
 
     public boolean isValidAdToRender() {
@@ -284,6 +286,15 @@ public abstract class RewardedViewModel extends BaseViewModel implements PNAPICo
             mBroadcastSender.sendBroadcast(action, extras);
     }
 
+    private void initTrackers() {
+        if (mAd != null) {
+            mAdTracker = new AdTracker(mAd.getBeacons(Ad.Beacon.IMPRESSION), mAd.getBeacons(Ad.Beacon.CLICK));
+            mCustomEndcardTracker = new AdTracker(mAd.getBeacons(Ad.Beacon.CUSTOM_END_CARD_IMPRESSION), mAd.getBeacons(Ad.Beacon.CUSTOM_END_CARD_CLICK));
+            mAdEventTracker = new AdTracker(null, null, null, mAd.getBeacons(Ad.Beacon.COMPANION_AD_EVENT), mAd.getBeacons(Ad.Beacon.CUSTOM_ENDCARD_EVENT));
+            mCustomCTATracker = new AdTracker(mAd.getBeacons(Ad.Beacon.CUSTOM_CTA_SHOW), mAd.getBeacons(Ad.Beacon.CUSTOM_CTA_CLICK), false);
+        }
+    }
+
     public boolean isFeedbackFormOpen() {
         return mIsFeedbackFormOpen;
     }
@@ -296,9 +307,13 @@ public abstract class RewardedViewModel extends BaseViewModel implements PNAPICo
 
     public abstract void closeButtonClicked();
 
+    public abstract void skipButtonClicked();
+
     public abstract View getAdView();
 
     public abstract void destroyAd();
 
     public abstract void resetVolumeChangeTracker();
+
+    public abstract boolean hasReducedCloseSize();
 }

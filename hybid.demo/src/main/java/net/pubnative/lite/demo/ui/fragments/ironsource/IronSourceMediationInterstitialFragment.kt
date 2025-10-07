@@ -17,6 +17,7 @@ import com.unity3d.mediation.LevelPlayConfiguration
 import com.unity3d.mediation.LevelPlayInitError
 import com.unity3d.mediation.LevelPlayInitListener
 import com.unity3d.mediation.LevelPlayInitRequest
+import com.unity3d.mediation.banner.LevelPlayBannerAdView
 import com.unity3d.mediation.interstitial.LevelPlayInterstitialAd
 import com.unity3d.mediation.interstitial.LevelPlayInterstitialAdListener
 import net.pubnative.lite.demo.R
@@ -126,13 +127,8 @@ class IronSourceMediationInterstitialFragment : Fragment(R.layout.fragment_irons
         if (!appKey.isNullOrEmpty()) {
             val initRequest = LevelPlayInitRequest.Builder(appKey).build()
             LevelPlay.init(requireActivity(), initRequest, object : LevelPlayInitListener {
-                override fun onInitSuccess(configuration: LevelPlayConfiguration) {
-
-                }
-
-                override fun onInitFailed(error: LevelPlayInitError) {
-
-                }
+                override fun onInitSuccess(configuration: LevelPlayConfiguration) {}
+                override fun onInitFailed(error: LevelPlayInitError) {}
             })
         }
     }

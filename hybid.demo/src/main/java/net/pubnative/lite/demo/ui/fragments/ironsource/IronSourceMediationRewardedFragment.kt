@@ -104,8 +104,8 @@ class IronSourceMediationRewardedFragment : Fragment(R.layout.fragment_ironsourc
     }
 
     override fun onAdClosed(adInfo: LevelPlayAdInfo) {
-            Log.d(TAG, "onAdClosed")
-            showButton.isEnabled = false
+        Log.d(TAG, "onAdClosed")
+        showButton.isEnabled = false
     }
 
     override fun onAdRewarded(reward: LevelPlayReward, adInfo: LevelPlayAdInfo) {
@@ -127,13 +127,8 @@ class IronSourceMediationRewardedFragment : Fragment(R.layout.fragment_ironsourc
         if (!appKey.isNullOrEmpty()) {
             val initRequest = LevelPlayInitRequest.Builder(appKey).build()
             LevelPlay.init(requireActivity(), initRequest, object : LevelPlayInitListener {
-                override fun onInitSuccess(configuration: LevelPlayConfiguration) {
-
-                }
-
-                override fun onInitFailed(error: LevelPlayInitError) {
-
-                }
+                override fun onInitSuccess(configuration: LevelPlayConfiguration) {}
+                override fun onInitFailed(error: LevelPlayInitError) {}
             })
         }
     }

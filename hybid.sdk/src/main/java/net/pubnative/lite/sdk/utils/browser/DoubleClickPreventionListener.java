@@ -4,6 +4,7 @@
 //
 package net.pubnative.lite.sdk.utils.browser;
 
+import android.os.SystemClock;
 import android.view.View;
 
 public abstract class DoubleClickPreventionListener implements View.OnClickListener {
@@ -12,9 +13,22 @@ public abstract class DoubleClickPreventionListener implements View.OnClickListe
 
     private long lastClickTimestamp;
 
+    // Package-private for testing
+    TimeProvider timeProvider;
+
+    // Default constructor - uses SystemClock (existing behavior)
+    public DoubleClickPreventionListener() {
+        this(SystemClock::elapsedRealtime);
+    }
+
+    // Constructor for testing - allows injection of custom TimeProvider
+    public DoubleClickPreventionListener(TimeProvider timeProvider) {
+        this.timeProvider = timeProvider;
+    }
+
     @Override
     public final void onClick(View v) {
-        long now = System.currentTimeMillis();
+        long now = timeProvider.getCurrentTime();
         if (now - lastClickTimestamp < MIN_CLICK_INTERVAL_MS) {
             return;
         }
@@ -22,7 +36,10 @@ public abstract class DoubleClickPreventionListener implements View.OnClickListe
         processClick();
     }
 
-    protected void processClick() {
+    protected abstract void processClick();
 
+    // Interface for dependency injection in tests
+    interface TimeProvider {
+        long getCurrentTime();
     }
 }

@@ -32,7 +32,7 @@ public class BrowserActivity extends Activity implements BrowserView {
     private View btnNavigationBackward;
     private View btnNavigationForward;
 
-    private BrowserPresenter browserPresenter;
+    protected BrowserPresenter browserPresenter;
 
     public static Intent createIntent(Context context, String url) {
         Intent intent = new Intent(context, BrowserActivity.class);
@@ -104,47 +104,65 @@ public class BrowserActivity extends Activity implements BrowserView {
         }
     }
 
-    private void initViews() {
-        webView = findViewById(R.id.webView);
-        progressBar = findViewById(R.id.progressBar);
-
-        View btnClose = findViewById(R.id.btnClose);
-        btnClose.setOnClickListener(new DoubleClickPreventionListener() {
+    // Factory methods for creating DoubleClickPreventionListener instances
+    // These can be overridden in tests to inject custom TimeProviders
+    protected DoubleClickPreventionListener createCloseButtonListener() {
+        return new DoubleClickPreventionListener() {
             @Override
             protected void processClick() {
                 finish();
             }
-        });
+        };
+    }
 
-        View btnRefresh = findViewById(R.id.btnRefresh);
-        btnRefresh.setOnClickListener(new DoubleClickPreventionListener() {
+    protected DoubleClickPreventionListener createRefreshButtonListener() {
+        return new DoubleClickPreventionListener() {
             @Override
             protected void processClick() {
                 if (browserPresenter != null) {
                     browserPresenter.onReloadClicked();
                 }
             }
-        });
+        };
+    }
 
-        btnNavigationBackward = findViewById(R.id.btnBackward);
-        btnNavigationBackward.setOnClickListener(new DoubleClickPreventionListener() {
+    protected DoubleClickPreventionListener createBackwardButtonListener() {
+        return new DoubleClickPreventionListener() {
             @Override
             protected void processClick() {
                 if (browserPresenter != null) {
                     browserPresenter.onPageNavigationBackClicked();
                 }
             }
-        });
+        };
+    }
 
-        btnNavigationForward = findViewById(R.id.btnForward);
-        btnNavigationForward.setOnClickListener(new DoubleClickPreventionListener() {
+    protected DoubleClickPreventionListener createForwardButtonListener() {
+        return new DoubleClickPreventionListener() {
             @Override
             protected void processClick() {
                 if (browserPresenter != null) {
                     browserPresenter.onPageNavigationForwardClicked();
                 }
             }
-        });
+        };
+    }
+
+    private void initViews() {
+        webView = findViewById(R.id.webView);
+        progressBar = findViewById(R.id.progressBar);
+
+        View btnClose = findViewById(R.id.btnClose);
+        btnClose.setOnClickListener(createCloseButtonListener());
+
+        View btnRefresh = findViewById(R.id.btnRefresh);
+        btnRefresh.setOnClickListener(createRefreshButtonListener());
+
+        btnNavigationBackward = findViewById(R.id.btnBackward);
+        btnNavigationBackward.setOnClickListener(createBackwardButtonListener());
+
+        btnNavigationForward = findViewById(R.id.btnForward);
+        btnNavigationForward.setOnClickListener(createForwardButtonListener());
 
         /*View btnOpenExternalBrowser = findViewById(R.id.btnOpenExternal);
         btnOpenExternalBrowser.setOnClickListener(new DoubleClickPreventionListener() {

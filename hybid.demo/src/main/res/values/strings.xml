@@ -325,7 +325,6 @@
     <string name="initial_audio" translatable="false">Initial Audio</string>
     <string name="hint_html_mraid_skip_offset" translatable="false">HTML/MRAID Skip Offset</string>
     <string name="hint_video_skip_offset" translatable="false">Video Skip Offset</string>
-    <string name="hint_playable_skip_offset" translatable="false">Playable Skip Offset</string>
     <string name="hint_rewarded_html_mraid_skip_offset" translatable="false">Rewarded HTML/MRAID Skip Offset</string>
     <string name="hint_rewarded_video_skip_offset" translatable="false">Rewarded Video Skip Offset</string>
     <string name="hint_endcard_close_button_delay" translatable="false">EndCard close button delay</string>
@@ -356,7 +355,7 @@
     <string name="reduced_close_skip_size" translatable="false">Reduced skip/close buttons size</string>
     <string name="check_reduced_close_skip_buttons" translatable="false">Reduced skip/close buttons</string>
 
-    <string name="mraid_custom_close" translatable="false">MRAID Custom Close</string>
+    <string name="mraid_custom_close" translatable="false">MRAID Configs</string>
     <string name="hint_close_button_delay" translatable="false">Close Button Delay</string>
 
     <string name="hint_navigation_mode" translatable="false">Navigation mode</string>
@@ -382,7 +381,6 @@
     <string name="value" translatable="false">Value</string>
     <string name="fallback" translatable="false">Fallback</string>
     <string name="extension" translatable="false">Extension</string>
-
     <string name="check_enable_custom_endcard" tools:ignore="ExtraTranslation" translatable="false">Enable Custom endcard</string>
     <string name="check_enable_custom_endcard_display" tools:ignore="ExtraTranslation" translatable="false">Enable Custom endcard Display</string>
     <string name="custom_end_card" translatable="false">Custom EndCard</string>

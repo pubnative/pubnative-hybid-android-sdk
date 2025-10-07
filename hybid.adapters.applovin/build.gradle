@@ -53,7 +53,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':hybid.sdk')
-    compileOnly 'com.applovin:applovin-sdk:13.2.0'
+    compileOnly 'com.applovin:applovin-sdk:13.4.0'
 
     implementation project(':hybid.sdk')
 }

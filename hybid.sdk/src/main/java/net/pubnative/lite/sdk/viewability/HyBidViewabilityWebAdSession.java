@@ -1,3 +1,7 @@
+// HyBid SDK License
+//
+// https://github.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE
+//
 package net.pubnative.lite.sdk.viewability;
 
 import android.webkit.WebView;
@@ -13,7 +17,7 @@ public class HyBidViewabilityWebAdSession extends HyBidViewabilityAdSession {
     }
 
     public void initAdSession(WebView webView, boolean isVideoAd) {
-        if (viewabilityManager != null && !viewabilityManager.isViewabilityMeasurementEnabled())
+        if (shouldSkipViewabilityMeasurement())
             return;
 
         try {
@@ -33,8 +37,13 @@ public class HyBidViewabilityWebAdSession extends HyBidViewabilityAdSession {
     }
 
     protected void createAdEvents() {
-        if (mAdSession != null) {
-            mAdEvents = viewabilityManager.createAdEvents(mAdSession);
-        }
+        if (shouldSkipViewabilityMeasurement() || mAdSession == null)
+            return;
+
+        mAdEvents = viewabilityManager.createAdEvents(mAdSession);
+    }
+
+    private boolean shouldSkipViewabilityMeasurement() {
+        return viewabilityManager == null || !viewabilityManager.isViewabilityMeasurementEnabled();
     }
 }

@@ -63,4 +63,16 @@ public class ViewUtils {
     public static float convertPixelsToDp(float px, Context context){
         return px / ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
     }
+
+    public static void applyWindowInsets(View closeableContainer) {
+        if (closeableContainer != null) {
+            closeableContainer.setOnApplyWindowInsetsListener((v, insets) -> {
+                int bottomInset = insets.getSystemWindowInsetBottom();
+                int topInsets = insets.getSystemWindowInsetTop();
+                closeableContainer.setPadding(0, topInsets, 0, bottomInset);
+                return insets;
+            });
+            closeableContainer.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+        }
+    }
 }

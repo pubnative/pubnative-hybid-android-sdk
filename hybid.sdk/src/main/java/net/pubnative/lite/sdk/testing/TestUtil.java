@@ -22,19 +22,6 @@ import java.util.List;
 
 public class TestUtil {
 
-    public static Ad createMraidPlayableAd(Boolean isPlayable) {
-        Ad ad = new Ad();
-        ad.assetgroupid = ApiAssetGroupType.MRAID_320x480;
-        ad.assets = createMockAssets();
-        try {
-            ad.meta = createPlayableMockMeta(isPlayable);
-        } catch (JSONException e) {
-            ad.meta = null;
-        }
-        ad.beacons = createMockBeacons();
-        return ad;
-    }
-
     public static Ad createTestInterstitialAd() {
         return createTestAd(ApiAssetGroupType.MRAID_320x480);
     }
@@ -92,6 +79,7 @@ public class TestUtil {
 
     public static Ad createTestAd(int assetGroupId) {
         Ad ad = new Ad();
+        ad.setLink("https://ads.com/click/112770_1386565997");
         ad.assetgroupid = assetGroupId;
         ad.assets = createMockAssets();
         try {
@@ -138,16 +126,6 @@ public class TestUtil {
         assets.add(bannerAsset);
 
         return assets;
-    }
-
-    private static List<AdData> createPlayableMockMeta(Boolean isPlayable) throws JSONException {
-        List<AdData> meta = new ArrayList<>(3);
-        AdData playableMeta = new AdData();
-        playableMeta.type = "playable_ux";
-        playableMeta.data = new HashMap<>(1);
-        playableMeta.data.put("boolean", isPlayable);
-        meta.add(playableMeta);
-        return meta;
     }
 
     private static List<AdData> createMockMeta() throws JSONException {

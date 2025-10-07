@@ -4,9 +4,12 @@
 //
 package net.pubnative.lite.sdk.rewarded.activity;
 
+import static net.pubnative.lite.sdk.utils.ViewUtils.applyWindowInsets;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -15,6 +18,10 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
+
+import androidx.annotation.VisibleForTesting;
 
 import net.pubnative.lite.sdk.receiver.VolumeChangedActionReceiver;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
@@ -22,6 +29,7 @@ import net.pubnative.lite.sdk.rewarded.RewardedActivityInteractor;
 import net.pubnative.lite.sdk.rewarded.viewModel.MraidRewardedViewModel;
 import net.pubnative.lite.sdk.rewarded.viewModel.RewardedViewModel;
 import net.pubnative.lite.sdk.rewarded.viewModel.VastRewardedViewModel;
+import net.pubnative.lite.sdk.utils.ViewUtils;
 import net.pubnative.lite.sdk.views.CloseableContainer;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.vpaid.HyBidActivityInteractor;
@@ -36,11 +44,13 @@ public abstract class HyBidRewardedActivity extends Activity implements Rewarded
 
     private CloseableContainer mCloseableContainer;
     private ProgressBar mProgressBar;
+    private OnBackInvokedCallback mOnBackInvokedCallback;
 
     protected boolean mIsFinishing = false;
 
     protected HyBidActivityInteractor mInteractor;
     protected RewardedViewModel mViewModel;
+    private boolean isSuperBackPressedCalled = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +59,24 @@ public abstract class HyBidRewardedActivity extends Activity implements Rewarded
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         initializeViews();
         initializeViewModel();
+        setupBackHandler();
+        applyWindowInsets(mCloseableContainer);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mViewModel != null && mViewModel.isAdSkippable()) {
+            mViewModel.sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLOSE);
+            mIsFinishing = true;
+            mViewModel.resetVolumeChangeTracker();
+            super.onBackPressed();
+            isSuperBackPressedCalled = true;
+        }
+    }
+
+    @VisibleForTesting
+    public boolean isSuperBackPressedCalled() {
+        return isSuperBackPressedCalled;
     }
 
     private void initializeViews() {
@@ -66,6 +94,25 @@ public abstract class HyBidRewardedActivity extends Activity implements Rewarded
             mViewModel = new MraidRewardedViewModel(this, mIntent.getStringExtra(EXTRA_ZONE_ID), mIntent.getStringExtra(INTEGRATION_TYPE), mIntent.getIntExtra(EXTRA_SKIP_OFFSET, -1), mIntent.getLongExtra(EXTRA_BROADCAST_ID, -1), this);
         }
         mInteractor.activityCreated();
+    }
+
+    private void setupBackHandler() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            mOnBackInvokedCallback = new OnBackInvokedCallback() {
+                @Override
+                public void onBackInvoked() {
+                    handleBackAction();
+                }
+            };
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT, mOnBackInvokedCallback);
+        }
+    }
+
+    private void handleBackAction() {
+        if (mViewModel != null && mViewModel.isAdSkippable()) {
+            dismiss();
+        }
     }
 
     protected void dismiss() {
@@ -124,6 +171,11 @@ public abstract class HyBidRewardedActivity extends Activity implements Rewarded
     }
 
     @Override
+    public void setSkipSize(int reducedCloseButtonSize) {
+        if (mCloseableContainer != null) mCloseableContainer.setSkipSize(reducedCloseButtonSize);
+    }
+
+    @Override
     public void hideProgressBar() {
         if (mProgressBar != null) mProgressBar.setVisibility(View.INVISIBLE);
     }
@@ -160,7 +212,6 @@ public abstract class HyBidRewardedActivity extends Activity implements Rewarded
             mCloseableContainer.setOnCloseListener(closeListener);
         }
     }
-
     @Override
     public void hideRewardedCloseButton() {
         if (mCloseableContainer != null) {
@@ -170,7 +221,26 @@ public abstract class HyBidRewardedActivity extends Activity implements Rewarded
     }
 
     @Override
+    public void showRewardedSkipButton(CloseableContainer.OnSkipListener skipListener) {
+        if (mCloseableContainer != null && !isFinishing()) {
+            mCloseableContainer.setSkipVisible(true);
+            mCloseableContainer.setOnSkipListener(skipListener);
+        }
+    }
+
+    @Override
+    public void hideRewardedSkipButton() {
+        if (mCloseableContainer != null) {
+            mCloseableContainer.setSkipVisible(false);
+            mCloseableContainer.setOnSkipListener(null);
+        }
+    }
+
+    @Override
     protected void onDestroy() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && mOnBackInvokedCallback != null) {
+            getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mOnBackInvokedCallback);
+        }
         if (mCloseableContainer != null) {
             mCloseableContainer.removeAllViews();
         }
@@ -180,15 +250,12 @@ public abstract class HyBidRewardedActivity extends Activity implements Rewarded
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            if (mViewModel.isAdSkippable()) {
-                dismiss();
-                return true;
-            }
-        } else {
-            return super.onKeyDown(keyCode, event);
+        // For Android versions below API 33, use the legacy onKeyDown method
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU && keyCode == KeyEvent.KEYCODE_BACK) {
+            handleBackAction();
+            return true;
         }
-        return false;
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override
@@ -201,5 +268,10 @@ public abstract class HyBidRewardedActivity extends Activity implements Rewarded
     protected void onResume() {
         super.onResume();
         VolumeChangedActionReceiver.getInstance().register(this);
+    }
+
+    //For testing purposes
+    protected CloseableContainer getCloseableContainer() {
+        return mCloseableContainer;
     }
 }

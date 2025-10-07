@@ -15,16 +15,16 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.android.tools.build:gradle:8.9.0"
+        classpath 'com.android.tools.build:gradle:8.13.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.21"
         classpath "org.jetbrains.kotlin:kotlin-serialization:2.1.21"
-        classpath "com.android.tools:r8:8.9.35"
+        classpath "com.android.tools:r8:8.11.18"
         classpath 'net.saliman:gradle-cobertura-plugin:4.0.0'
         classpath 'com.google.firebase:firebase-appdistribution-gradle:5.1.1'
-        classpath 'com.google.firebase:perf-plugin:1.4.2'
-        classpath 'com.google.gms:google-services:4.4.2'
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9'
-        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:5.2.5'
+        classpath 'com.google.firebase:perf-plugin:2.0.1'
+        classpath 'com.google.gms:google-services:4.4.3'
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:3.0.6'
+        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:6.0.1'
     }
 }
 
@@ -180,9 +180,9 @@ subprojects {
         android_build_tools = '36.0.0'
         omid_version = '1.5.1'
         wrapper_version = '23.0.0'
-        atom_version = '3.7.1'
+        atom_version = '3.7.2'
     }
-    version = "3.6.2"
+    version = "3.7.0"
     group = "net.pubnative"
 }
 

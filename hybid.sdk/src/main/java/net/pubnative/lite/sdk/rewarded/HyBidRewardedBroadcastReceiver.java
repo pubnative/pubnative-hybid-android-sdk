@@ -26,6 +26,7 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
     public enum Action {
         OPEN("net.pubnative.hybid.rewarded.open"),
         CLICK("net.pubnative.hybid.rewarded.click"),
+        PLAYABLE_SKIP_CLICK("net.pubnative.hybid.rewarded.playable.click"),
         CLOSE("net.pubnative.hybid.rewarded.close"),
         ERROR("net.pubnative.hybid.rewarded.error"),
         VIDEO_ERROR("net.pubnative.hybid.rewarded.video_error"),
@@ -72,6 +73,8 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
                 return END_CARD_LOAD_SUCCESS;
             } else if (END_CARD_LOAD_FAILURE.getId().equals(action)) {
                 return END_CARD_LOAD_FAILURE;
+            } else if (PLAYABLE_SKIP_CLICK.getId().equals(action)) {
+                return PLAYABLE_SKIP_CLICK;
             }
             return NONE;
         }
@@ -124,6 +127,7 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
         mIntentFilter.addAction(Action.END_CARD_LOAD_SUCCESS.getId());
         mIntentFilter.addAction(Action.END_CARD_LOAD_FAILURE.getId());
         mIntentFilter.addAction(Action.ERROR.getId());
+        mIntentFilter.addAction(Action.PLAYABLE_SKIP_CLICK.getId());
     }
 
     public void setListener(Listener listener) {
@@ -237,6 +241,11 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
             case END_CARD_LOAD_FAILURE:
                 if (customEndCardListener != null) {
                     customEndCardListener.onEndCardLoadFailure(extras.getBoolean(Reporting.Key.IS_CUSTOM_END_CARD, false));
+                }
+                break;
+            case PLAYABLE_SKIP_CLICK:
+                if (customEndCardListener != null) {
+                    customEndCardListener.onPlayableSkipButtonClicked();
                 }
                 break;
             case NONE:

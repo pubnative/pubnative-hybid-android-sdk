@@ -6,15 +6,7 @@
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
     <uses-permission android:name="android.permission.ACCESS_ADSERVICES_TOPICS" />
 
-    <application android:enableOnBackInvokedCallback="false"
-        tools:targetApi="33">
-        <receiver 
-            android:name="net.pubnative.lite.sdk.receiver.VolumeChangedActionReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.media.VOLUME_CHANGED_ACTION" />
-            </intent-filter>
-        </receiver>
+    <application>
         <activity android:name=".consent.UserConsentActivity" />
         <activity
             android:name=".interstitial.activity.MraidInterstitialActivity"

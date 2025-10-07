@@ -57,6 +57,7 @@ public class Reporting {
         public static final String CLICK_SOURCE_TYPE = "click_source_type";
         public static final String CLICK_SOURCE_TYPE_END_CARD = "end_card";
         public static final String CLICK_SOURCE_TYPE_AD = "ad";
+        public static final String AD_SESSION_DATA = "ad_session_data";
     }
 
     public static final class EventType {
@@ -71,9 +72,11 @@ public class Reporting {
         public static final String IMPRESSION = "impression";
         public static final String ERROR = "error";
         public static final String CLICK = "click";
+        public static final String PLAYABLE_SKIP_CLICK = "playable_skip_clicked";
         public static final String INTERSTITIAL_CLOSED = "interstitial_closed";
         public static final String REWARDED_CLOSED = "rewarded_closed";
         public static final String REWARD = "reward";
+        public static final String SEND_ADSESSION_DATA = "send_ad_session_data";
 
         public static final String VIDEO_STARTED = "video_started";
         public static final String VIDEO_DISMISSED = "video_dismissed";

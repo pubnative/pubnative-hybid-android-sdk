@@ -21,7 +21,7 @@ android {
     compileSdk android_api
 
     defaultConfig {
-        minSdkVersion min_android_api
+        minSdkVersion 23
         targetSdkVersion android_api
         versionCode System.getenv("GITHUB_RUN_NUMBER") ? System.getenv("GITHUB_RUN_NUMBER").toInteger() : 1
         versionName version_name
@@ -54,7 +54,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':hybid.sdk')
-    compileOnly 'com.google.android.gms:play-services-ads:23.6.0'
+    compileOnly 'com.google.android.gms:play-services-ads:24.6.0'
 }
 
 task sourcesJar(type: Jar) {

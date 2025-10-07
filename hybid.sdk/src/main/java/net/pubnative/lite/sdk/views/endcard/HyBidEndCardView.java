@@ -18,6 +18,7 @@ import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import net.pubnative.lite.sdk.CountdownStyle;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.R;
 import net.pubnative.lite.sdk.models.EndCardData;
@@ -34,12 +35,15 @@ import net.pubnative.lite.sdk.vpaid.CloseButtonListener;
 import net.pubnative.lite.sdk.vpaid.ReplayListener;
 import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
 import net.pubnative.lite.sdk.vpaid.utils.ImageUtils;
+import net.pubnative.lite.sdk.vpaid.widget.CountDownView;
+import net.pubnative.lite.sdk.vpaid.widget.CountDownViewFactory;
 
 import java.util.List;
 import java.util.Map;
 
 public class HyBidEndCardView extends FrameLayout {
 
+    //it should be only for Vast Ads
     private ImageView staticEndCardView;
     private FrameLayout htmlEndCardContainer;
     private MRAIDBanner mHtmlEndCardView;
@@ -65,6 +69,11 @@ public class HyBidEndCardView extends FrameLayout {
 
     private Boolean isCustomEndCard = false;
     private boolean hasReducedClose = false;
+
+    private CountDownView mCloseCountdownView;
+
+    private static final CountdownStyle COUNTDOWN_STYLE_DEFAULT = CountdownStyle.PIE_CHART;
+
 
     // Listeners
     private final MRAIDViewListener mraidViewListener = new MRAIDViewListener() {
@@ -116,6 +125,16 @@ public class HyBidEndCardView extends FrameLayout {
         }
 
         @Override
+        public void mraidShowSkipButton() {
+
+        }
+
+        @Override
+        public void mraidHideSkipButton() {
+
+        }
+
+        @Override
         public void onExpandedAdClosed() {
         }
 
@@ -124,6 +143,51 @@ public class HyBidEndCardView extends FrameLayout {
             if (replayListener != null) {
                 replayListener.replayVast();
             }
+        }
+
+        @Override
+        public void onCustomEndCardLoadSuccess() {
+
+        }
+
+        @Override
+        public void onCustomEndCardShow(String endCardType) {
+
+        }
+
+        @Override
+        public void onCustomEndCardLoadFail() {
+
+        }
+
+        @Override
+        public void onCustomEndCardClosed() {
+
+        }
+
+        @Override
+        public void onCustomEndCardClicked() {
+
+        }
+
+        @Override
+        public void onCustomCTAShow() {
+
+        }
+
+        @Override
+        public void onCustomCTAClick() {
+
+        }
+
+        @Override
+        public void onCustomCTALoadFail() {
+
+        }
+
+        @Override
+        public void mraidHideCloseButton() {
+
         }
     };
 
@@ -158,34 +222,34 @@ public class HyBidEndCardView extends FrameLayout {
 
     public HyBidEndCardView(Context context) {
         super(context);
+        init(context);
+    }
+
+    private void init(Context context) {
         initUi();
-        initControlViews();
+        initControlViews(context);
     }
 
     public HyBidEndCardView(Context context, boolean hasReducedClose, ReplayListener replayListener) {
         super(context);
         this.hasReducedClose = hasReducedClose;
         this.replayListener = replayListener;
-        initUi();
-        initControlViews();
+        init(context);
     }
 
     public HyBidEndCardView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        initUi();
-        initControlViews();
+        init(context);
     }
 
     public HyBidEndCardView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        initUi();
-        initControlViews();
+        init(context);
     }
 
-    private void initControlViews() {
+    private void initControlViews(Context context) {
         if (!isValidContext()) {
-            if (endcardViewListener != null)
-                endcardViewListener.onLoadFail(isCustomEndCard);
+            if (endcardViewListener != null) endcardViewListener.onLoadFail(isCustomEndCard);
             return;
         }
         int skipViewSize = (int) ViewUtils.convertDpToPixel(30f, getContext());
@@ -216,6 +280,17 @@ public class HyBidEndCardView extends FrameLayout {
         } else {
             mCloseView.setId(R.id.button_fullscreen_close);
         }
+
+        mCloseCountdownView = new CountDownViewFactory().createCountdownView(context, COUNTDOWN_STYLE_DEFAULT, HyBidEndCardView.this);
+        mCloseCountdownView.setId(R.id.endcard_close_countdown_view);
+
+        int size = (int) ViewUtils.convertDpToPixel(hasReducedClose ? 60f : 80f, context);
+        LayoutParams lpCloseCountdownView = new LayoutParams(size, size);
+        lpCloseCountdownView.gravity = Gravity.START | Gravity.TOP;
+        lpCloseCountdownView.setMargins(margin, margin, margin, margin);
+        mCloseCountdownView.setLayoutParams(lpCloseCountdownView);
+        mCloseCountdownView.setVisibility(View.GONE);
+
         mCloseView.setLayoutParams(lp);
         mCloseView.setImageResource(R.mipmap.close);
         mCloseView.setVisibility(View.GONE);
@@ -225,6 +300,7 @@ public class HyBidEndCardView extends FrameLayout {
 
         this.addView(mSkipView);
         this.addView(mCloseView);
+        this.addView(mCloseCountdownView);
     }
 
     public void setSkipOffset(SkipOffset skipOffset) {
@@ -237,8 +313,7 @@ public class HyBidEndCardView extends FrameLayout {
 
     private void initUi() {
         if (!isValidContext()) {
-            if (endcardViewListener != null)
-                endcardViewListener.onLoadFail(isCustomEndCard);
+            if (endcardViewListener != null) endcardViewListener.onLoadFail(isCustomEndCard);
             return;
         }
         this.setVisibility(GONE);
@@ -299,6 +374,7 @@ public class HyBidEndCardView extends FrameLayout {
                 this.addView(staticEndCardView);
                 staticEndCardView.setVisibility(View.VISIBLE);
                 ImageUtils.setScaledImage(staticEndCardView, imageUri);
+                ensureOverlayOrder();
                 if (endcardViewListener != null) {
                     endcardViewListener.onLoadSuccess(isCustomEndCard);
                     endcardViewListener.onShow(endCardData.isCustom(), endCardType);
@@ -313,6 +389,7 @@ public class HyBidEndCardView extends FrameLayout {
                 }
                 this.addView(htmlEndCardContainer);
                 htmlEndCardContainer.setVisibility(View.VISIBLE);
+                ensureOverlayOrder();
                 if (endCardData.getType() == EndCardData.Type.IFRAME_RESOURCE) {
                     endCardType = Reporting.Key.END_CARD_IFRAME;
                     if (!isValidContext()) {
@@ -356,6 +433,7 @@ public class HyBidEndCardView extends FrameLayout {
         mHtmlEndCardView.setLayoutParams(lp);
         if (htmlEndCardContainer != null) {
             htmlEndCardContainer.addView(mHtmlEndCardView);
+            ensureOverlayOrder();
             if (endcardViewListener != null) {
                 endcardViewListener.onLoadSuccess(isCustomEndCard);
                 endcardViewListener.onShow(isCustomEndCard, endCardType);
@@ -422,22 +500,27 @@ public class HyBidEndCardView extends FrameLayout {
 
     public synchronized void showCloseButton(CloseButtonListener closeButtonListener) {
         if (!isViewShowingCloseButton) {
-            mSkipView.setVisibility(INVISIBLE);
+            mSkipView.setVisibility(GONE);
             startCloseTimer(() -> {
                 mCloseView.setVisibility(VISIBLE);
                 mCloseView.bringToFront();
-                closeButtonListener.onCloseButtonVisible();
+                if (closeButtonListener != null) closeButtonListener.onCloseButtonVisible();
             });
             isViewShowingCloseButton = true;
         }
     }
 
     public synchronized void startSkipOffsetTimer(Runnable callback) {
-        int delay = skipOffset.getOffset();
+        int delay = skipOffset.getOffset() * 1000;
         if (delay >= 0) {
-            mSkipEndcardTimer = new SimpleTimer(delay * 1000L, new SimpleTimer.Listener() {
+            if (mCloseCountdownView != null) {
+                mCloseCountdownView.setVisibility(View.VISIBLE);
+                ensureOverlayOrder();
+            }
+            mSkipEndcardTimer = new SimpleTimer(delay, new SimpleTimer.Listener() {
                 @Override
                 public void onFinish() {
+                    if (mCloseCountdownView != null) mCloseCountdownView.setVisibility(View.GONE);
                     if (callback != null) {
                         callback.run();
                     }
@@ -450,8 +533,12 @@ public class HyBidEndCardView extends FrameLayout {
 
                 @Override
                 public void onTick(long millisUntilFinished) {
+                    if (mCloseCountdownView != null) {
+                        int elapsed = (int) (delay - millisUntilFinished);
+                        mCloseCountdownView.setProgress(elapsed, delay);
+                    }
                 }
-            });
+            }, 50);
             mSkipEndcardTimer.start();
         } else {
             callback.run();
@@ -459,11 +546,16 @@ public class HyBidEndCardView extends FrameLayout {
     }
 
     public synchronized void startCloseTimer(Runnable callback) {
-        int delay = skipOffset.getOffset();
+        int delay = skipOffset.getOffset() * 1000;
         if (delay >= 0) {
-            mCloseEndcardTimer = new SimpleTimer(delay * 1000L, new SimpleTimer.Listener() {
+            if (mCloseCountdownView != null) {
+                mCloseCountdownView.setVisibility(View.VISIBLE);
+                ensureOverlayOrder();
+            }
+            mCloseEndcardTimer = new SimpleTimer(delay, new SimpleTimer.Listener() {
                 @Override
                 public void onFinish() {
+                    if (mCloseCountdownView != null) mCloseCountdownView.setVisibility(View.GONE);
                     if (callback != null) {
                         callback.run();
                     }
@@ -476,8 +568,12 @@ public class HyBidEndCardView extends FrameLayout {
 
                 @Override
                 public void onTick(long millisUntilFinished) {
+                    if (mCloseCountdownView != null) {
+                        int elapsed = (int) (delay - millisUntilFinished);
+                        mCloseCountdownView.setProgress(elapsed, delay);
+                    }
                 }
-            });
+            }, 50);
             mCloseEndcardTimer.start();
         } else {
             callback.run();
@@ -545,6 +641,13 @@ public class HyBidEndCardView extends FrameLayout {
             }
         }
         return super.onTouchEvent(event);
+    }
+
+    private void ensureOverlayOrder() {
+        if (mSkipView != null) mSkipView.bringToFront();
+        if (mCloseView != null) mCloseView.bringToFront();
+        if (mCloseCountdownView != null) mCloseCountdownView.bringToFront();
+        postInvalidateOnAnimation();
     }
 
     private boolean isValidContext() {
