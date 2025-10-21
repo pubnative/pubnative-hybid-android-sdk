@@ -286,7 +286,7 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
     private final GestureDetector gestureDetector;
 
     private boolean wasTouched = false;
-    private boolean customCTAClicked = false;
+    private boolean wasOpened = false;
 
     private boolean contentInfoAdded = false;
     private boolean webViewLoaded = false;
@@ -480,7 +480,6 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
             public void onClick() {
                 // Set wasTouched to true, as this button does not trigger the onTouchListener and there would be no redirection
                 wasTouched = true;
-                customCTAClicked = true;
                 if (htmlAd != null && !TextUtils.isEmpty(htmlAd.getLink())) {
                     open(htmlAd.getLink());
                 }
@@ -962,6 +961,7 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
                     nativeFeatureListener.mraidNativeFeatureOpenBrowser(url);
                 }
             }
+            wasOpened = true;
         } catch (UnsupportedEncodingException e) {
             HyBid.reportException(e);
             Logger.e(MRAID_LOG_TAG, e.getMessage());
@@ -2463,12 +2463,16 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
         if (listener != null) {
             listener.mraidHideSkipButton();
         }
+        cancelClickThroughTimer();
+        showEndCard();
+    }
+
+    private void cancelClickThroughTimer() {
         if (mClickThroughTimer != null) {
             mClickThroughTimer.pause();
             mClickThroughTimer.cancel();
             mClickThroughTimer = null;
         }
-        showEndCard();
     }
 
     private void showEndCard() {
@@ -2537,7 +2541,8 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
                     if (shouldTriggerClickThrough()) {
                         if (clickThroughListener != null)
                             clickThroughListener.onClickThroughTriggered();
-                        open(htmlAd.getLink());
+                        if (htmlAd != null && !TextUtils.isEmpty(htmlAd.getLink()))
+                            open(htmlAd.getLink());
                         mClickThroughTimer.pause();
                         mClickThroughTimer.cancel();
                         mClickThroughTimer = null;
@@ -2554,7 +2559,7 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
     }
 
     private boolean shouldTriggerClickThrough() {
-        return wasTouched && !customCTAClicked;
+        return wasTouched && !wasOpened;
     }
 
     enum MraidDisplayMode {

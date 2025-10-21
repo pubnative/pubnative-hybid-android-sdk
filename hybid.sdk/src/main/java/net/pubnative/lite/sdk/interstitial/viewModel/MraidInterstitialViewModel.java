@@ -72,7 +72,6 @@ public class MraidInterstitialViewModel extends InterstitialViewModel implements
                 htmlAd = new HTMLAd(mContext, mAd, HTMLAd.AdType.INTERSTITIAL);
                 htmlAd.setLink(mAd.getLink());
                 htmlAd.setClickThroughTimerListener(this);
-                adView.setHtmlAd(htmlAd);
                 adView.setCloseLayoutListener(this);
                 Integer skipDelay = htmlAd.getSkipDelay();
                 mIsSkippable = skipDelay != null && skipDelay == 0;

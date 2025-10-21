@@ -182,7 +182,7 @@ subprojects {
         wrapper_version = '23.0.0'
         atom_version = '3.7.2'
     }
-    version = "3.7.0"
+    version = "3.7.1"
     group = "net.pubnative"
 }
 
