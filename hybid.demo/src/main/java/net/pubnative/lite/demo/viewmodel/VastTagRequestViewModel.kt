@@ -143,7 +143,7 @@ class VastTagRequestViewModel(application: Application) : AndroidViewModel(appli
                         if (isVideoAd(ad) || MarkupUtils.isVastXml(ad.vast)) {
                             runCacheProcessForVideoAd(ad, _loadAdInterstitial)
                         } else {
-                            HyBid.getAdCache().put(ad.zoneId, ad)
+                            HyBid.getAdCache().put(ad.sessionId, ad)
                             _loadAdInterstitial.value = ad
                         }
                     }
@@ -183,7 +183,7 @@ class VastTagRequestViewModel(application: Application) : AndroidViewModel(appli
                         if (isVideoAd(ad) || MarkupUtils.isVastXml(ad.vast)) {
                             runCacheProcessForVideoAd(ad, _loadAdRewarded)
                         } else {
-                            HyBid.getAdCache().put(ad.zoneId, ad)
+                            HyBid.getAdCache().put(ad.sessionId, ad)
                             _loadAdRewarded.value = ad
                         }
                     }
@@ -217,8 +217,9 @@ class VastTagRequestViewModel(application: Application) : AndroidViewModel(appli
                     val adCacheItem =
                         VideoAdCacheItem(adParams, videoFilePath, endCardData, endCardFilePath)
                     ad.setHasEndCard(hasEndCard)
-                    HyBid.getAdCache().put(ad.zoneId, ad)
-                    HyBid.getVideoAdCache().put(ad.zoneId, adCacheItem)
+                    // Use sessionId as cache key for video ads
+                    HyBid.getAdCache().put(ad.sessionId, ad)
+                    HyBid.getVideoAdCache().put(ad.sessionId, adCacheItem)
                     loadLiveData.postValue(ad)
                 }
 

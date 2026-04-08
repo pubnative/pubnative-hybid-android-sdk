@@ -299,6 +299,8 @@ public abstract class RewardedViewModel extends BaseViewModel implements PNAPICo
         return mIsFeedbackFormOpen;
     }
 
+    public abstract void addFriendlyObstruction(View view);
+
     public abstract boolean shouldShowContentInfo();
 
     public abstract void resumeAd();

@@ -15,16 +15,16 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.13.0'
+        classpath 'com.android.tools.build:gradle:8.13.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.21"
         classpath "org.jetbrains.kotlin:kotlin-serialization:2.1.21"
         classpath "com.android.tools:r8:8.11.18"
         classpath 'net.saliman:gradle-cobertura-plugin:4.0.0'
-        classpath 'com.google.firebase:firebase-appdistribution-gradle:5.1.1'
-        classpath 'com.google.firebase:perf-plugin:2.0.1'
-        classpath 'com.google.gms:google-services:4.4.3'
+        classpath 'com.google.firebase:firebase-appdistribution-gradle:5.2.1'
+        classpath 'com.google.firebase:perf-plugin:2.0.2'
+        classpath 'com.google.gms:google-services:4.4.4'
         classpath 'com.google.firebase:firebase-crashlytics-gradle:3.0.6'
-        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:6.0.1'
+        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:6.0.4'
     }
 }
 
@@ -178,11 +178,11 @@ subprojects {
         min_android_api = 21
         android_api = 36
         android_build_tools = '36.0.0'
-        omid_version = '1.5.1'
-        wrapper_version = '23.0.0'
-        atom_version = '3.7.2'
+        omid_version = '1.6.2'
+        wrapper_version = '23.0.1'
+        atom_version = '3.7.3'
     }
-    version = "3.7.1"
+    version = "3.8.0"
     group = "net.pubnative"
 }
 
@@ -207,43 +207,52 @@ tasks.register('clean', Delete) {
 }
 
 /**
- * Custom Gradle task to iterate through subprojects and check their package names.
- * It move packages from subprojects 'nextgen' directory to root ng.sdk project
+ * Custom Gradle task to move packages from 'nextgen' directory to root ng.sdk project
  */
 
 tasks.register('moveNextgenDirectoriesFilesToNgSdkProject') {
     doLast {
         println "--- Starting movePackagesToNgSdkProject ---"
-        def destinationDir = project(':ng.sdk').file('src/main/java')
+        def hybidProject = rootProject.project(':hybid.sdk')
+        def ngSdkProject = rootProject.project(':ng.sdk')
 
-        // Iterate through all subprojects defined in settings.gradle
-        subprojects.each { project ->
-            def packageName = ""
-            def isLibraryProject = false
+        def destinationDir = ngSdkProject.file('src/main/java')
+        def destinationResDir = ngSdkProject.file('src/main/res')
+        def destinationManifest = ngSdkProject.file('src/main/AndroidManifest.xml')
 
-            // Check if the project applies an Android library plugin
-            if (project.plugins.hasPlugin('com.android.library')) {
-                isLibraryProject = true
-                // For Android library modules, the package name is typically the namespace
-                packageName = project.android.namespace
+        // Copy Java files
+        def flavourSourceDir = hybidProject.file('src/nextgen/java')
+        if (flavourSourceDir.exists() && flavourSourceDir.isDirectory()) {
+            copy {
+                from flavourSourceDir
+                into destinationDir
             }
+            //delete flavourSourceDir after copying
+            flavourSourceDir.deleteDir()
+        }
 
-            // Process only if it's an Android project and a package name was found
-            if (isLibraryProject && packageName) {
-
-                // Check if the package name contains the specified text
-                if (packageName.contains('net.pubnative.lite.sdk')) {
-                    def flavourSourceDir = project.file('src/nextgen/java')
-                    if (flavourSourceDir.exists() && flavourSourceDir.isDirectory()) {
-                        copy {
-                            from flavourSourceDir
-                            into destinationDir
-                        }
-                        //delete flavourSourceDir after copying
-                        flavourSourceDir.deleteDir()
-                    }
-                }
+        // Copy resources
+        def flavourResDir = hybidProject.file('src/nextgen/res')
+        if (flavourResDir.exists() && flavourResDir.isDirectory()) {
+            println "Copying resources from hybid.sdk/src/nextgen/res"
+            copy {
+                from flavourResDir
+                into destinationResDir
             }
+            //delete Resources after copying
+            flavourResDir.deleteDir()
+        }
+
+        // Copy AndroidManifest
+        def flavourManifest = hybidProject.file('src/nextgen/AndroidManifest.xml')
+        if (flavourManifest.exists()) {
+            println "Copying AndroidManifest from hybid.sdk/src/nextgen/"
+            copy {
+                from flavourManifest
+                into destinationManifest.parentFile
+            }
+            //delete nextgen/AndroidManifest after copying
+            flavourManifest.delete()
         }
         println "--- movePackagesToNgSdkProject Complete ---"
     }

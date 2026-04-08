@@ -6,6 +6,8 @@ package net.pubnative.lite.sdk.vpaid.xml;
 
 import android.text.TextUtils;
 
+import net.pubnative.lite.sdk.utils.Logger;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
@@ -15,7 +17,10 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * Simple XML parser.
@@ -26,7 +31,8 @@ import java.util.List;
  * For example &lt;PIC width="7in"/&gt; and &lt;PIC WIDTH="6in"/&gt; are separate attributes.
  */
 public class XmlParser {
-
+    private static final Map<AnnotatedElement, Map<Class<? extends Annotation>,
+            Annotation>> ANNOTATION_CACHE = new WeakHashMap<>();
     public static <T> T parse(String xml, Class<T> classOfT) throws Exception {
         XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
         XmlPullParser parser = factory.newPullParser();
@@ -44,6 +50,7 @@ public class XmlParser {
         return tagInstance;
     }
 
+    @SuppressWarnings("java:S3011") // Reflection accessibility bypass is required for XML parsing framework
     private static <T> void parseAttributes(XmlPullParser parser, T tagInstance) throws IllegalAccessException {
         for (Field field : tagInstance.getClass().getDeclaredFields()) {
             Attribute attribute = getAnnotation(field, Attribute.class);
@@ -58,6 +65,7 @@ public class XmlParser {
             if (TextUtils.isEmpty(value)) {
                 continue;
             }
+            // Accessibility bypass needed to set private/protected fields from XML attributes
             field.setAccessible(true);
             Class fieldClass = field.getType();
             if (fieldClass.equals(String.class)) {
@@ -89,19 +97,21 @@ public class XmlParser {
         }
     }
 
+    @SuppressWarnings("java:S3011") // Reflection accessibility bypass is required for XML parsing framework
     private static <T> void parseText(XmlPullParser parser, T parent) throws Exception {
         if (parser.getEventType() != XmlPullParser.TEXT) {
             return;
         }
         Field textField = getFieldForText(parent);
         if (textField != null) {
+            // Accessibility bypass needed to set private/protected text fields from XML content
             textField.setAccessible(true);
             textField.set(parent, parser.getText());
         }
         parser.next();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "java:S3011"}) // Reflection accessibility bypass is required for XML parsing framework
     private static <T> void parseSubTag(XmlPullParser parser, T parent) throws Exception {
         String tagName = parser.getName();
         int tagDepth = parser.getDepth();
@@ -114,6 +124,7 @@ public class XmlParser {
                 ParameterizedType listGenericType = (ParameterizedType) tagField.getGenericType();
                 Class<?> listGenericClass = (Class<?>) listGenericType.getActualTypeArguments()[0];
                 Object tag = parseTag(parser, listGenericClass);
+                // Accessibility bypass needed to set private/protected list fields from XML tags
                 tagField.setAccessible(true);
                 List list = (List) tagField.get(parent);
                 if (list == null) {
@@ -123,6 +134,7 @@ public class XmlParser {
                 list.add(tag);
             } else {
                 Object tag = parseTag(parser, tagField.getType());
+                // Accessibility bypass needed to set private/protected fields from XML tags
                 tagField.setAccessible(true);
                 tagField.set(parent, tag);
             }
@@ -164,10 +176,33 @@ public class XmlParser {
 
     @SuppressWarnings("unchecked")
     private static <T extends Annotation> T getAnnotation(AnnotatedElement element, Class<? extends Annotation> annotationType) {
-        for (Annotation annotation : element.getDeclaredAnnotations()) {
-            if (annotationType.isInstance(annotation)) {
-                return (T) annotation;
+        try {
+            Map<Class<? extends Annotation>, Annotation> elementCache = ANNOTATION_CACHE.get(element);
+            if (elementCache != null) {
+                Annotation cachedAnnotation = elementCache.get(annotationType);
+                if (cachedAnnotation != null) {
+                    return (T) cachedAnnotation;
+                }
             }
+
+            for (Annotation annotation : element.getDeclaredAnnotations()) {
+                if (annotationType.isInstance(annotation)) {
+                    if (elementCache == null) {
+                        elementCache = new HashMap<>();
+                        ANNOTATION_CACHE.put(element, elementCache);
+                    }
+                    elementCache.put(annotationType, annotation);
+                    return (T) annotation;
+                }
+            }
+
+            if (elementCache == null) {
+                elementCache = new HashMap<>();
+                ANNOTATION_CACHE.put(element, elementCache);
+            }
+            elementCache.put(annotationType, null);
+        } catch (OutOfMemoryError e) {
+            Logger.e(XmlParser.class.getSimpleName(), "Error getting annotation: " + e.getMessage());
         }
         return null;
     }

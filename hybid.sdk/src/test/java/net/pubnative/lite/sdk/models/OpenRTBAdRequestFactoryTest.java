@@ -146,14 +146,14 @@ public class OpenRTBAdRequestFactoryTest {
     @Test
     public void getUser_withTopics_populatesUserData() {
         try (MockedStatic<HyBid> mockedHyBid = Mockito.mockStatic(HyBid.class)) {
-            mockedHyBid.when(HyBid::getAge).thenReturn("30");
+            mockedHyBid.when(HyBid::getAge).thenReturn("31");
 
             List<Topic> topics = List.of(new Topic(1, 1L, "v1"));
             when(mockTopicManager.getTopics()).thenReturn(topics);
 
             User user = subject.getUser();
 
-            // 2025 (current year from context) - 30 = 1995
+            // 2026 (current year from context) - 31 = 1995
             assertEquals(Integer.valueOf(1995), user.getYearOfBirth());
             assertNotNull(user.getData());
             assertEquals(1, user.getData().size());

@@ -53,6 +53,7 @@ public class RewardedViewModelTest {
         @Override public void destroyAd() {}
         @Override public void resetVolumeChangeTracker() {}
         @Override public boolean hasReducedCloseSize() {return false;}
+        @Override public void addFriendlyObstruction(View view) {}
     }
 
     @Before

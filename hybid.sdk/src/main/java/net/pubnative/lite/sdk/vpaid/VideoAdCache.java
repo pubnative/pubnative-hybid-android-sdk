@@ -18,21 +18,21 @@ public class VideoAdCache {
         mAdMap = new HashMap<>();
     }
 
-    public VideoAdCacheItem remove(String zoneId) {
-        return mAdMap.remove(zoneId);
+    public VideoAdCacheItem remove(String key) {
+        return mAdMap.remove(key);
     }
 
-    public VideoAdCacheItem inspect(String zoneId) {
-        return mAdMap.get(zoneId);
+    public VideoAdCacheItem inspect(String key) {
+        return mAdMap.get(key);
     }
 
     public VideoAdCacheItem inspectLatest() {
         return mAdMap.get(mLatestZoneId);
     }
 
-    public void put(String zoneId, VideoAdCacheItem adCacheItem) {
-        Logger.d(TAG, "VideoAdCache putting video for zone id: " + zoneId);
-        mAdMap.put(zoneId, adCacheItem);
+    public void put(String key, VideoAdCacheItem adCacheItem) {
+        Logger.d(TAG, "VideoAdCache putting video for key: " + key);
+        mAdMap.put(key, adCacheItem);
         mAdMap.put(mLatestZoneId, adCacheItem);
     }
 }

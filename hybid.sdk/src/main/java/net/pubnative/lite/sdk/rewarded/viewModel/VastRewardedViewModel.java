@@ -78,6 +78,13 @@ public class VastRewardedViewModel extends RewardedViewModel implements AdPresen
         initVolumeTracker();
     }
 
+    @Override
+    public void addFriendlyObstruction(View view) {
+        if (mVideoAd != null) {
+            mVideoAd.addFriendlyObstruction(view);
+        }
+    }
+
     private void initVolumeTracker() {
         VolumeObserver.getInstance().setListener(this);
     }
@@ -108,7 +115,9 @@ public class VastRewardedViewModel extends RewardedViewModel implements AdPresen
                 mVideoAd.setAdListener(mVideoAdListener);
                 mVideoAd.setAdCloseButtonListener(mCloseButtonListener);
                 mListener.showProgressBar();
-                mAdCacheItem = HyBid.getVideoAdCache().remove(mZoneId);
+                // sessionId used as cache key
+                String cacheKeyRewarded = mAd.getSessionId();
+                mAdCacheItem = HyBid.getVideoAdCache().inspect(cacheKeyRewarded);
                 if (mAdCacheItem != null) {
                     if (mAdCacheItem.getAdParams() != null) {
                         mAdCacheItem.getAdParams().setPublisherSkipSeconds(mSkipOffset);

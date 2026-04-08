@@ -6,6 +6,7 @@ package net.pubnative.lite.sdk.vpaid.utils;
 
 import android.content.Context;
 import net.pubnative.lite.sdk.vpaid.VpaidConstants;
+import net.pubnative.lite.sdk.vpaid.helpers.FileLockManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,8 +16,12 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
@@ -55,6 +60,13 @@ public class FileUtilsTest {
     @After
     public void tearDown() throws Exception {
         closeable.close();
+        clearAllLocks();
+    }
+
+    private void clearAllLocks() throws Exception {
+        Field field = FileLockManager.class.getDeclaredField("mFileReferences");
+        field.setAccessible(true);
+        ((Map<?, ?>) field.get(FileLockManager.getInstance())).clear();
     }
 
     @Test
@@ -198,5 +210,81 @@ public class FileUtilsTest {
         FileUtils.deleteExpiredFiles(mockContext);
 
         verify(mockFile1, never()).delete();
+    }
+
+    @Test
+    public void deleteExpiredFiles_lockedExpiredFile_forceReleasedAndDeleted() {
+        when(mockFileExpired.isDirectory()).thenReturn(false);
+        when(mockFileExpired.lastModified()).thenReturn(currentTime - VpaidConstants.CACHED_VIDEO_LIFE_TIME - 1000); // Expired
+        when(mockFileExpired.length()).thenReturn(1024L); // Non-empty
+        when(mockParentDir.listFiles()).thenReturn(new File[]{mockFileExpired});
+        when(mockFileExpired.getAbsolutePath()).thenReturn("/mock/expired_locked_file");
+
+        FileLockManager lockManager = FileLockManager.getInstance();
+        lockManager.acquire(mockFileExpired.getAbsolutePath());
+        FileUtils.deleteExpiredFiles(mockContext);
+        // Should force release and delete
+        verify(mockFileExpired, times(1)).delete();
+        assertFalse(lockManager.isLocked("/mock/expired_locked_file"));
+    }
+
+    @Test
+    public void deleteExpiredFiles_lockedNonExpiredFile_notDeleted() {
+        when(mockFile1.isDirectory()).thenReturn(false);
+        when(mockFile1.lastModified()).thenReturn(currentTime - 1000); // Not expired
+        when(mockFile1.length()).thenReturn(1024L); // Non-empty
+        when(mockParentDir.listFiles()).thenReturn(new File[]{mockFile1});
+
+        when(mockFile1.getAbsolutePath()).thenReturn("/mock/locked_valid_file");
+        FileLockManager lockManager = FileLockManager.getInstance();
+        lockManager.acquire(mockFile1.getAbsolutePath());
+        FileUtils.deleteExpiredFiles(mockContext);
+        // Should not delete
+        verify(mockFile1, never()).delete();
+        assertTrue(lockManager.isLocked("/mock/locked_valid_file"));
+        lockManager.release("/mock/locked_valid_file");
+    }
+
+    @Test
+    public void deleteExpiredFiles_emptyLockedFile_notDeleted() {
+        when(mockFileEmpty.isDirectory()).thenReturn(false);
+        when(mockFileEmpty.lastModified()).thenReturn(currentTime - 1000); // Not expired
+        when(mockFileEmpty.length()).thenReturn(0L); // Empty file
+        when(mockParentDir.listFiles()).thenReturn(new File[]{mockFileEmpty});
+
+        when(mockFileEmpty.getAbsolutePath()).thenReturn("/mock/empty_locked_file");
+        FileLockManager lockManager = FileLockManager.getInstance();
+        lockManager.acquire(mockFileEmpty.getAbsolutePath());
+        FileUtils.deleteExpiredFiles(mockContext);
+        // Should not delete
+        verify(mockFileEmpty, never()).delete();
+        assertTrue(lockManager.isLocked("/mock/empty_locked_file"));
+        lockManager.release("/mock/empty_locked_file");
+    }
+
+    @Test
+    public void deleteExpiredFiles_emptyUnlockedFile_deleted() {
+        when(mockFileEmpty.isDirectory()).thenReturn(false);
+        when(mockFileEmpty.lastModified()).thenReturn(currentTime - 1000); // Not expired
+        when(mockFileEmpty.length()).thenReturn(0L); // Empty file
+        when(mockParentDir.listFiles()).thenReturn(new File[]{mockFileEmpty});
+
+        when(mockFileEmpty.getAbsolutePath()).thenReturn("/mock/empty_unlocked_file");
+        FileUtils.deleteExpiredFiles(mockContext);
+        // Should delete
+        verify(mockFileEmpty, times(1)).delete();
+    }
+
+    @Test
+    public void deleteExpiredFiles_unlockedExpiredFile_deleted() {
+        when(mockFileExpired.isDirectory()).thenReturn(false);
+        when(mockFileExpired.lastModified()).thenReturn(currentTime - VpaidConstants.CACHED_VIDEO_LIFE_TIME - 1000); // Expired
+        when(mockFileExpired.length()).thenReturn(1024L); // Non-empty
+        when(mockParentDir.listFiles()).thenReturn(new File[]{mockFileExpired});
+
+        when(mockFileExpired.getAbsolutePath()).thenReturn("/mock/expired_unlocked_file");
+        FileUtils.deleteExpiredFiles(mockContext);
+        // Should delete
+        verify(mockFileExpired, times(1)).delete();
     }
 }

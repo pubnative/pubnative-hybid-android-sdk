@@ -61,6 +61,7 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
     private final Context mContext;
     private final Ad mAd;
     private final ImpressionTrackingMethod mTrackingMethod;
+    private final View mWatermark;
     private VideoVisibilityManager videoVisibilityManager;
 
     private Listener mListener;
@@ -99,10 +100,11 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
     private AdTracker mCustomCTAEndcardTracker;
     private ReportingController mReportingController;
 
-    public VastAdPresenter(Context context, Ad ad, AdSize adSize, ImpressionTrackingMethod trackingMethod, IntegrationType integrationType) {
+    public VastAdPresenter(Context context, Ad ad, AdSize adSize, ImpressionTrackingMethod trackingMethod, IntegrationType integrationType, View watermark) {
         mContext = context;
         mAdSize = adSize;
         mAd = ad;
+        mWatermark = watermark;
 
         mReportingController = HyBid.getReportingController();
 
@@ -171,8 +173,8 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
                 mCustomEndCardImpressionTracked = false;
                 mLoadDefaultEndCardTracked = false;
                 mLoadCustomEndCardTracked = false;
-                if (!TextUtils.isEmpty(getAd().getZoneId())) {
-                    VideoAdCacheItem adCacheItem = HyBid.getVideoAdCache().remove(getAd().getZoneId());
+                if (!TextUtils.isEmpty(getAd().getSessionId())) {
+                    VideoAdCacheItem adCacheItem = HyBid.getVideoAdCache().inspect(getAd().getSessionId());
                     if (adCacheItem != null) {
                         mVideoAd.setVideoCacheItem(adCacheItem);
                         if (adCacheItem.getAdParams() != null && adCacheItem.getAdParams().getAdIcon() != null) {
@@ -230,6 +232,13 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
     }
 
     @Override
+    public void addFriendlyObstruction(View view) {
+        if (mVideoAd != null) {
+            mVideoAd.addFriendlyObstruction(view);
+        }
+    }
+
+    @Override
     public void pauseAd() {
         if (mVideoAd != null && mVideoAd.isShowing()) {
             mVideoAd.pause();
@@ -258,6 +267,13 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
         container.addView(mVideoPlayer, layoutParams);
 
         setupContentInfo(container);
+
+        if (mWatermark != null) {
+            if (mWatermark.getParent() != null) {
+                ((ViewGroup) mWatermark.getParent()).removeView(mWatermark);
+            }
+            container.addView(mWatermark);
+        }
 
         return container;
     }

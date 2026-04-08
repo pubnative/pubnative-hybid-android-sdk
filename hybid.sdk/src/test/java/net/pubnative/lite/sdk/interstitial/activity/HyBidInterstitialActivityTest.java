@@ -4,8 +4,11 @@
 //
 package net.pubnative.lite.sdk.interstitial.activity;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 import android.app.Activity;
 import android.content.Context;
@@ -23,6 +26,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
@@ -40,6 +44,9 @@ public class HyBidInterstitialActivityTest {
     private HyBidInterstitialActivity subject;
     private long broadcastIdentifier;
     private ActivityController<TestInterstitialActivity> activityController;
+
+    @Mock
+    private InterstitialViewModel mockViewModel;
 
 
     private static class TestInterstitialActivity extends HyBidInterstitialActivity {
@@ -184,6 +191,51 @@ public class HyBidInterstitialActivityTest {
         } catch (Exception e) {
             throw new RuntimeException("Test failed due to reflection error", e);
         }
+    }
+
+    @Test
+    public void testAddWatermarkView() {
+        Context context = Robolectric.buildActivity(Activity.class).create().get();
+        Intent intent = new Intent(context, TestInterstitialActivity.class);
+        intent.putExtra(HyBidInterstitialActivity.EXTRA_BROADCAST_ID, broadcastIdentifier);
+        intent.putExtra(HyBidInterstitialActivity.EXTRA_ZONE_ID, "2");
+
+        HyBidInterstitialActivity subject = Robolectric.buildActivity(TestInterstitialActivity.class, intent)
+                .create().get();
+
+        ((TestInterstitialActivity) subject).setMockViewModel(mockViewModel);
+
+        View mockWatermarkView = new View(subject);
+
+        int childCountBefore = getContentView(subject).getChildCount();
+        subject.addWatermarkView(mockWatermarkView);
+        int childCountAfter = getContentView(subject).getChildCount();
+
+        assertEquals(childCountBefore + 1, childCountAfter);
+        verify(mockViewModel).addFriendlyObstruction(mockWatermarkView);
+    }
+
+    @Test
+    public void addWatermarkView_calledTwice_doesNotDuplicateRegistration() {
+        Intent intent = new Intent();
+        intent.putExtra(HyBidInterstitialActivity.EXTRA_ZONE_ID, "test_zone");
+        intent.putExtra(HyBidInterstitialActivity.EXTRA_BROADCAST_ID, 1L);
+        intent.putExtra(HyBidInterstitialActivity.EXTRA_SKIP_OFFSET, 5);
+
+        HyBidInterstitialActivity subject = Robolectric.buildActivity(TestInterstitialActivity.class, intent)
+                .create().get();
+
+        ((TestInterstitialActivity) subject).setMockViewModel(mockViewModel);
+
+        View mockWatermarkView = new View(subject);
+
+        // First call
+        subject.addWatermarkView(mockWatermarkView);
+        // Second call (should be ignored due to guard)
+        subject.addWatermarkView(mockWatermarkView);
+
+        // Verify addFriendlyObstruction called only once
+        verify(mockViewModel, times(1)).addFriendlyObstruction(mockWatermarkView);
     }
 
     protected FrameLayout getContentView(HyBidInterstitialActivity subject) {

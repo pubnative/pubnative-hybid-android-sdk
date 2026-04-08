@@ -42,7 +42,15 @@ public class AdParams {
     private final List<BaseVerificationScriptResource> verificationScriptResources = new ArrayList<>();
 
 
+    /**
+     * @deprecated Use {@link #getDurationInteger()} instead to handle null safely.
+     */
+    @Deprecated
     public int getDuration() {
+        return duration != null ? duration : 0;
+    }
+
+    public Integer getDurationInteger() {
         return duration;
     }
 

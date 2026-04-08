@@ -16,6 +16,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.URLUtil;
 
+import net.pubnative.lite.sdk.HyBidError;
+import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.utils.svgparser.SVG;
 
 import java.io.InputStream;
@@ -64,11 +66,11 @@ public class PNBitmapDownloader {
                 PNBitmapLruCache.addBitmapToMemoryCache(mURL, bitmap);
                 invokeLoad(bitmap);
             } catch (RuntimeException e) {
-                invokeFail(e);
-            } catch (Error error) {
-                invokeFail(new Exception(error.toString()));
+                invokeFail(new HyBidError(HyBidErrorCode.INTERNAL_ERROR, e));
+            } catch (OutOfMemoryError error) {
+                invokeFail(new HyBidError(HyBidErrorCode.RESOURCE_EXHAUSTION, error));
             } catch (Exception e) {
-                invokeFail(e);
+                invokeFail(new HyBidError(HyBidErrorCode.INTERNAL_ERROR, e));
             } finally {
                 if (connection != null) {
                     connection.disconnect();
@@ -86,11 +88,11 @@ public class PNBitmapDownloader {
                 PNBitmapLruCache.addBitmapToMemoryCache(mURL, bitmap);
                 invokeLoad(bitmap);
             } catch (RuntimeException e) {
-                invokeFail(e);
-            } catch (Error error) {
-                invokeFail(new Exception(error.toString()));
+                invokeFail(new HyBidError(HyBidErrorCode.INTERNAL_ERROR, e));
+            } catch (OutOfMemoryError error) {
+                invokeFail(new HyBidError(HyBidErrorCode.RESOURCE_EXHAUSTION, error));
             } catch (Exception e) {
-                invokeFail(e);
+                invokeFail(new HyBidError(HyBidErrorCode.INTERNAL_ERROR, e));
             }
         }
     };
@@ -130,13 +132,13 @@ public class PNBitmapDownloader {
             mWidth = width;
             mHeight = height;
             if (TextUtils.isEmpty(url)) {
-                invokeFail(new Exception("Image URL is empty"));
+                invokeFail(new HyBidError(HyBidErrorCode.INVALID_URL, "Image URL is empty"));
             } else if (URLUtil.isHttpUrl(url) || URLUtil.isHttpsUrl(url)) {
                 downloadImage();
             } else if (URLUtil.isFileUrl(url)) {
                 loadCachedImage();
             } else {
-                invokeFail(new Exception("Wrong file URL!"));
+                invokeFail(new HyBidError(HyBidErrorCode.INVALID_URL, "Wrong file URL!"));
             }
         }
     }
@@ -150,12 +152,23 @@ public class PNBitmapDownloader {
             BitmapDownloaderExecutor.getExecutor().submit(downloadTask);
         } catch (RejectedExecutionException e) {
             Logger.e(TAG, "Task submission rejected: " + e.getMessage());
-            invokeFail(e);
+            invokeFail(new HyBidError(HyBidErrorCode.RESOURCE_EXHAUSTION, e));
+        } catch (OutOfMemoryError error) {
+            Logger.e(TAG, "Error submitting download task: " + error.getMessage());
+            invokeFail(new HyBidError(HyBidErrorCode.RESOURCE_EXHAUSTION, error));
         }
     }
 
     private void loadCachedImage() {
-        BitmapDownloaderExecutor.getExecutor().submit(loadFromFileSystemTask);
+        try {
+            BitmapDownloaderExecutor.getExecutor().submit(loadFromFileSystemTask);
+        } catch (RejectedExecutionException e) {
+            Logger.e(TAG, "Task submission rejected: " + e.getMessage());
+            invokeFail(new HyBidError(HyBidErrorCode.RESOURCE_EXHAUSTION, e));
+        } catch (OutOfMemoryError error) {
+            Logger.e(TAG, "Error submitting file load task: " + error.getMessage());
+            invokeFail(new HyBidError(HyBidErrorCode.RESOURCE_EXHAUSTION, error));
+        }
     }
 
     private BitmapFactory.Options getBitmapOptionsDecodingBounds(boolean decodeBounds) {

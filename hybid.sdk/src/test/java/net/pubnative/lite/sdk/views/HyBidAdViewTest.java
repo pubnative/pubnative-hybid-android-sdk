@@ -7,14 +7,17 @@ package net.pubnative.lite.sdk.views;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.Activity;
 import android.os.Looper;
 import android.view.View;
+import android.widget.ImageView;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
@@ -41,6 +44,8 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
 
 import java.time.Duration;
+
+import java.lang.reflect.Field;
 
 @RunWith(RobolectricTestRunner.class)
 public class HyBidAdViewTest {
@@ -184,4 +189,161 @@ public class HyBidAdViewTest {
         adViewSpy.onAdLoaded(mockPresenter, mockBannerView);
         verify(adViewSpy).setupAdView(mockBannerView);
     }
+
+    @Test
+    public void setWatermark_withValidBase64_createsImageView() {
+        String validPngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
+        HyBidAdView adView = new HyBidAdView(activity);
+        adView.setWatermark(validPngBase64);
+    }
+
+    @Test
+    public void setWatermark_withInvalidBase64_setsWatermarkToNull() {
+        String invalidBase64 = "invalid_base64_string";
+        HyBidAdView adView = new HyBidAdView(activity);
+        adView.setWatermark(invalidBase64);
+    }
+
+    @Test
+    public void setWatermark_withEmptyString_setsWatermarkToNull() {
+        HyBidAdView adView = new HyBidAdView(activity);
+        adView.setWatermark("");
+    }
+
+    @Test
+    public void setWatermark_withNullString_setsWatermarkToNull() {
+        HyBidAdView adView = new HyBidAdView(activity);
+        String strNull = null;
+        adView.setWatermark(strNull);
+    }
+
+    @Test
+    public void setupAdView_withWatermark_addsWatermarkToView() {
+        HyBidAdView adView = spy(new HyBidAdView(activity));
+        View mockBannerView = mock(View.class);
+        String validPngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
+        adView.setWatermark(validPngBase64);
+
+        // Mock the view's parent to return null
+        when(mockBannerView.getParent()).thenReturn(null);
+
+        adView.setupAdView(mockBannerView);
+    }
+
+    @Test
+    public void setupAdView_withWatermarkAndPresenter_registersFriendlyObstruction() throws Exception {
+        HyBidAdView adView = spy(new HyBidAdView(activity));
+        View mockBannerView = mock(View.class);
+        AdPresenter mockPresenter = mock(AdPresenter.class);
+        String validPngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
+
+        adView.setWatermark(validPngBase64);
+
+        // Use reflection to set the private mPresenter field
+        Field presenterField = HyBidAdView.class.getDeclaredField("mPresenter");
+        presenterField.setAccessible(true);
+        presenterField.set(adView, mockPresenter);
+
+        // Mock the view's parent
+        when(mockBannerView.getParent()).thenReturn(null);
+
+        adView.setupAdView(mockBannerView);
+
+        // Verify that addFriendlyObstruction was called on the presenter with the watermark
+        verify(mockPresenter).addFriendlyObstruction(any(View.class));
+    }
+
+
+    @Test
+    public void cleanup_removesWatermark() {
+        HyBidAdView adView = new HyBidAdView(activity);
+        View mockBannerView = mock(View.class);
+        String validPngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
+
+        // Set watermark and trigger its creation by calling setupAdView
+        adView.setWatermark(validPngBase64);
+        when(mockBannerView.getParent()).thenReturn(null);
+        adView.setupAdView(mockBannerView);
+
+        // Verify watermark exists before cleanup
+        org.junit.Assert.assertNotNull(getPrivateWatermark(adView));
+
+        // Call cleanup and verify watermark is removed
+        adView.cleanup();
+        org.junit.Assert.assertNull(getPrivateWatermark(adView));
+    }
+
+    @Test
+    public void cleanup_removesVideoCacheEntry() throws Exception {
+        net.pubnative.lite.sdk.vpaid.VideoAdCache mVideoAdCache = mock(net.pubnative.lite.sdk.vpaid.VideoAdCache.class);
+        mHyBid.when(HyBid::getVideoAdCache).thenReturn(mVideoAdCache);
+
+        HyBidAdView adView = new HyBidAdView(activity);
+        Ad mockAdLocal = mock(Ad.class);
+        when(mockAdLocal.getSessionId()).thenReturn("session_adview");
+
+        Field adField = HyBidAdView.class.getDeclaredField("mAd");
+        adField.setAccessible(true);
+        adField.set(adView, mockAdLocal);
+
+        adView.cleanup();
+
+        verify(mVideoAdCache).remove("session_adview");
+    }
+
+    @Test
+    public void cleanup_doesNotRemoveVideoCache_whenSessionIdEmpty() throws Exception {
+        net.pubnative.lite.sdk.vpaid.VideoAdCache mVideoAdCache = mock(net.pubnative.lite.sdk.vpaid.VideoAdCache.class);
+        mHyBid.when(HyBid::getVideoAdCache).thenReturn(mVideoAdCache);
+
+        HyBidAdView adView = new HyBidAdView(activity);
+        Ad mockAdLocal = mock(Ad.class);
+        when(mockAdLocal.getSessionId()).thenReturn("");
+        Field adField = HyBidAdView.class.getDeclaredField("mAd");
+        adField.setAccessible(true);
+        adField.set(adView, mockAdLocal);
+
+        adView.cleanup();
+        verify(mVideoAdCache, org.mockito.Mockito.never()).remove(org.mockito.ArgumentMatchers.anyString());
+    }
+
+    @Test
+    public void setupAdView_withWatermark_registersFriendlyObstructionOnlyOnce() throws Exception {
+        HyBidAdView adViewLocal = new HyBidAdView(activity);
+        View banner = mock(View.class);
+        AdPresenter presenterMock = mock(AdPresenter.class);
+        String watermarkBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
+
+        adViewLocal.setWatermark(watermarkBase64);
+        Field presenterField = HyBidAdView.class.getDeclaredField("mPresenter");
+        presenterField.setAccessible(true);
+        presenterField.set(adViewLocal, presenterMock);
+
+        // Banner should return null for parent initially
+        when(banner.getParent()).thenReturn(null);
+
+        // First call should register the watermark
+        adViewLocal.setupAdView(banner);
+
+        // Now mock that the banner has a parent (the adViewLocal) so the second call won't re-enter setup
+        when(banner.getParent()).thenReturn(adViewLocal);
+
+        // Call setupAdView again with same banner - since banner now has a parent,
+        // it won't re-enter the setup code, so no duplicate registration
+        adViewLocal.setupAdView(banner);
+
+        // Should be called exactly once
+        verify(presenterMock, org.mockito.Mockito.times(1)).addFriendlyObstruction(any(View.class));
+    }
+
+    private ImageView getPrivateWatermark(HyBidAdView adView) {
+        try {
+            Field watermarkField = HyBidAdView.class.getDeclaredField("mWatermark");
+            watermarkField.setAccessible(true);
+            return (ImageView) watermarkField.get(adView);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 }

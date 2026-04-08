@@ -114,7 +114,7 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
                 MarkupType.ORTB_BODY -> {
                     if (apiAd.isNullOrEmpty() || body.isNullOrEmpty()) {
                         Log.v(TAG, "Please enter a valid URL and body for the request")
-                        _errorMessage.value = "Please enter a valid URL and body for the request"
+                        _errorMessage.postValue("Please enter a valid URL and body for the request")
                         return
                     } else {
                         loadOrtbAd(apiAd, body)
@@ -131,7 +131,7 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
 
     private fun loadAdFromResponse(response: String?) {
         if (!isValidResponse(response)) {
-            _errorMessage.value = "Please input valid response"
+            _errorMessage.postValue("Please input valid response")
             return
         }
 
@@ -140,7 +140,8 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     private fun loadAdFromUrl(adUrl: String) {
-        PNHttpClient.makeRequest(getApplication<Application>().applicationContext,
+        PNHttpClient.makeRequest(
+            getApplication<Application>().applicationContext,
             adUrl,
             null,
             null,
@@ -156,7 +157,7 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
 
                 override fun onFailure(error: Throwable) {
                     Log.d("onFailure", error.toString())
-                    _errorMessage.value = "Ad request failed"
+                    _errorMessage.postValue("Ad request failed")
                 }
             })
     }
@@ -169,7 +170,8 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
         headers["Accept-Charset"] = "utf-8"
         headers["User-Agent"] = userAgent
 
-        PNHttpClient.makeRequest(getApplication<Application>().applicationContext,
+        PNHttpClient.makeRequest(
+            getApplication<Application>().applicationContext,
             adUrl,
             headers,
             adBody,
@@ -185,7 +187,7 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
 
                 override fun onFailure(error: Throwable) {
                     Log.d("onFailure", error.toString())
-                    _errorMessage.value = "Ad request failed"
+                    _errorMessage.postValue("Ad request failed")
                 }
             })
     }
@@ -218,7 +220,7 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
                         }
 
                         override fun onFailure(exception: Throwable?) {
-                            _errorMessage.value = "Can't parse ad response"
+                            _errorMessage.postValue("Can't parse ad response")
                         }
                     })
             }
@@ -235,7 +237,8 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
             if (isVideoAd(ad)) {
                 runCacheProcessForVideoAd(ad, livedata)
             } else {
-                HyBid.getAdCache().put(ad.zoneId, ad)
+                // Use sessionId as cache key for HTML ads
+                HyBid.getAdCache().put(ad.sessionId, ad)
                 livedata.value = ad
             }
         } else {
@@ -304,13 +307,14 @@ class ApiTesterViewModel(application: Application) : AndroidViewModel(applicatio
                     val adCacheItem =
                         VideoAdCacheItem(adParams, videoFilePath, endCardData, endCardFilePath)
                     ad.setHasEndCard(hasEndCard)
-                    HyBid.getAdCache().put(ad.zoneId, ad)
-                    HyBid.getVideoAdCache().put(ad.zoneId, adCacheItem)
+                    // Use sessionId as cache key for video ads
+                    HyBid.getAdCache().put(ad.sessionId, ad)
+                    HyBid.getVideoAdCache().put(ad.sessionId, adCacheItem)
                     _loadLiveData.postValue(ad)
                 }
 
                 override fun onCacheError(error: Throwable) {
-                    _errorMessage.value = "Can't parse video ad response"
+                    _errorMessage.postValue("Can't parse video ad response")
                 }
             })
     }

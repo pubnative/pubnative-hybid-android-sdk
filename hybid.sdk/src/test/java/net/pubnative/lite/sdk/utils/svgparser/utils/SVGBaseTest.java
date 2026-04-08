@@ -16,7 +16,6 @@ import org.robolectric.annotation.Config;
 import java.util.List;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import net.pubnative.lite.sdk.utils.svgparser.PreserveAspectRatio;
@@ -308,12 +307,76 @@ public class SVGBaseTest {
 
         private SVGBase.PathDefinition pathDef;
 
-        @Mock
-        private SVGBase.PathInterface mockPather;
+        private static class TestPathInterface implements SVGBase.PathInterface {
+            int moveToCount = 0;
+            int lineToCount = 0;
+            int cubicToCount = 0;
+            int quadToCount = 0;
+            int arcToCount = 0;
+            int closeCount = 0;
+
+            float lastMoveToX, lastMoveToY;
+            float lastLineToX, lastLineToY;
+            float lastCubicX1, lastCubicY1, lastCubicX2, lastCubicY2, lastCubicX3, lastCubicY3;
+            float lastQuadX1, lastQuadY1, lastQuadX2, lastQuadY2;
+            float lastArcRx, lastArcRy, lastArcRotation;
+            boolean lastArcLargeFlag, lastArcSweepFlag;
+            float lastArcX, lastArcY;
+
+            @Override
+            public void moveTo(float x, float y) {
+                moveToCount++;
+                lastMoveToX = x;
+                lastMoveToY = y;
+            }
+
+            @Override
+            public void lineTo(float x, float y) {
+                lineToCount++;
+                lastLineToX = x;
+                lastLineToY = y;
+            }
+
+            @Override
+            public void cubicTo(float x1, float y1, float x2, float y2, float x3, float y3) {
+                cubicToCount++;
+                lastCubicX1 = x1;
+                lastCubicY1 = y1;
+                lastCubicX2 = x2;
+                lastCubicY2 = y2;
+                lastCubicX3 = x3;
+                lastCubicY3 = y3;
+            }
+
+            @Override
+            public void quadTo(float x1, float y1, float x2, float y2) {
+                quadToCount++;
+                lastQuadX1 = x1;
+                lastQuadY1 = y1;
+                lastQuadX2 = x2;
+                lastQuadY2 = y2;
+            }
+
+            @Override
+            public void arcTo(float rx, float ry, float xAxisRotation, boolean largeArcFlag, boolean sweepFlag, float x, float y) {
+                arcToCount++;
+                lastArcRx = rx;
+                lastArcRy = ry;
+                lastArcRotation = xAxisRotation;
+                lastArcLargeFlag = largeArcFlag;
+                lastArcSweepFlag = sweepFlag;
+                lastArcX = x;
+                lastArcY = y;
+            }
+
+            @Override
+            public void close() {
+                closeCount++;
+            }
+        }
 
         @Before
         public void setUp() {
-            MockitoAnnotations.openMocks(this);
             pathDef = new SVGBase.PathDefinition();
         }
 
@@ -327,13 +390,32 @@ public class SVGBaseTest {
             pathDef.close();
             assertFalse(pathDef.isEmpty());
 
-            pathDef.enumeratePath(mockPather);
+            TestPathInterface testPather = new TestPathInterface();
+            pathDef.enumeratePath(testPather);
 
-            verify(mockPather).moveTo(10, 10);
-            verify(mockPather).lineTo(50, 50);
-            verify(mockPather).cubicTo(60, 60, 70, 70, 80, 80);
-            verify(mockPather).quadTo(90, 90, 100, 100);
-            verify(mockPather).close();
+            assertEquals(1, testPather.moveToCount);
+            assertEquals(10f, testPather.lastMoveToX, 0f);
+            assertEquals(10f, testPather.lastMoveToY, 0f);
+
+            assertEquals(1, testPather.lineToCount);
+            assertEquals(50f, testPather.lastLineToX, 0f);
+            assertEquals(50f, testPather.lastLineToY, 0f);
+
+            assertEquals(1, testPather.cubicToCount);
+            assertEquals(60f, testPather.lastCubicX1, 0f);
+            assertEquals(60f, testPather.lastCubicY1, 0f);
+            assertEquals(70f, testPather.lastCubicX2, 0f);
+            assertEquals(70f, testPather.lastCubicY2, 0f);
+            assertEquals(80f, testPather.lastCubicX3, 0f);
+            assertEquals(80f, testPather.lastCubicY3, 0f);
+
+            assertEquals(1, testPather.quadToCount);
+            assertEquals(90f, testPather.lastQuadX1, 0f);
+            assertEquals(90f, testPather.lastQuadY1, 0f);
+            assertEquals(100f, testPather.lastQuadX2, 0f);
+            assertEquals(100f, testPather.lastQuadY2, 0f);
+
+            assertEquals(1, testPather.closeCount);
         }
 
         @Test
@@ -341,9 +423,17 @@ public class SVGBaseTest {
             pathDef.arcTo(10, 20, 45, true, false, 100, 200);
             assertFalse(pathDef.isEmpty());
 
-            pathDef.enumeratePath(mockPather);
+            TestPathInterface testPather = new TestPathInterface();
+            pathDef.enumeratePath(testPather);
 
-            verify(mockPather).arcTo(10, 20, 45, true, false, 100, 200);
+            assertEquals(1, testPather.arcToCount);
+            assertEquals(10f, testPather.lastArcRx, 0f);
+            assertEquals(20f, testPather.lastArcRy, 0f);
+            assertEquals(45f, testPather.lastArcRotation, 0f);
+            assertTrue(testPather.lastArcLargeFlag);
+            assertFalse(testPather.lastArcSweepFlag);
+            assertEquals(100f, testPather.lastArcX, 0f);
+            assertEquals(200f, testPather.lastArcY, 0f);
         }
 
         @Test

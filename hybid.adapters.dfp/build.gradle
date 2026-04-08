@@ -55,7 +55,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(':hybid.sdk')
 
-    compileOnly 'com.google.android.gms:play-services-ads:24.6.0'
+    compileOnly 'com.google.android.gms:play-services-ads:25.0.0'
 }
 
 task sourcesJar(type: Jar) {

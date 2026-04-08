@@ -278,7 +278,7 @@ jobs:
       contents: read
 
     environment:
-      name: development
+      name: development-ngsdk
       url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
     steps:
@@ -289,7 +289,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
 
       - name: Repackage SDK Modules into Nextgen directory
-        run: ./gradlew repackageNG
+        run: ./gradlew :hybid.sdk:repackageNG
 
       - name: Move Nextgen directory and files to root level NG SDK Project
         run: ./gradlew moveNextgenDirectoriesFilesToNgSdkProject
@@ -297,8 +297,17 @@ jobs:
       - name: Correct import statements in to NG SDK Project
         run: ./gradlew :ng.sdk:correctNgSdkImportStatements
 
+      - name: Namespace File Content
+        run: ./gradlew :ng.sdk:namespaceFileContent
+
+      - name: Remove NextGenViewabilityManager
+        run: ./gradlew :ng.sdk:removeNextGenViewabilityManager
+
       - name: Clean NG SDK Project
         run: ./gradlew :ng.sdk:clean
+
+      - name: Clean NG SDK Project
+        run: ./gradlew :ng.sdk:lint
 
       - name: Assemble NG SDK Project
         run: ./gradlew :ng.sdk:assemble
@@ -324,7 +333,7 @@ jobs:
       contents: read
 
     environment:
-      name: production
+      name: production-ngsdk
       url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
       - name: Checkout source code
@@ -334,7 +343,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
 
       - name: Repackage SDK Modules into Nextgen directory
-        run: ./gradlew repackageNG
+        run: ./gradlew :hybid.sdk:repackageNG
 
       - name: Move Nextgen directory and files to root level NG SDK Project
         run: ./gradlew moveNextgenDirectoriesFilesToNgSdkProject
@@ -342,8 +351,17 @@ jobs:
       - name: Correct import statements in to NG SDK Project
         run: ./gradlew :ng.sdk:correctNgSdkImportStatements
 
+      - name: Namespace File Content
+        run: ./gradlew :ng.sdk:namespaceFileContent
+
+      - name: Remove NextGenViewabilityManager
+        run: ./gradlew :ng.sdk:removeNextGenViewabilityManager
+
       - name: Clean NG SDK Project
         run: ./gradlew :ng.sdk:clean
+
+      - name: Clean NG SDK Project
+        run: ./gradlew :ng.sdk:lint
 
       - name: Assemble NG SDK Project
         run: ./gradlew :ng.sdk:assemble

@@ -7,6 +7,8 @@ package net.pubnative.lite.sdk.interstitial.presenter;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.View;
 
 import net.pubnative.lite.sdk.CustomEndCardListener;
 import net.pubnative.lite.sdk.VideoListener;
@@ -28,16 +30,18 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, HyBidI
     private final String mZoneId;
     private final Integer mSkipOffset;
     private final HyBidInterstitialBroadcastReceiver mBroadcastReceiver;
+    private final String mWatermarkData;
 
     private Listener mListener;
     private boolean mIsDestroyed;
     private boolean mReady = false;
 
-    public MraidInterstitialPresenter(Context context, Ad ad, String zoneId, Integer skipOffset) {
+    public MraidInterstitialPresenter(Context context, Ad ad, String zoneId, Integer skipOffset, String watermarkData) {
         mContext = context;
         mAd = ad;
         mZoneId = zoneId;
         mSkipOffset = skipOffset;
+        mWatermarkData = watermarkData;
         if (context != null && context.getApplicationContext() != null) {
             mBroadcastReceiver = new HyBidInterstitialBroadcastReceiver(mContext);
             mBroadcastReceiver.setListener(this);
@@ -94,6 +98,10 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, HyBidI
             intent.putExtra(HyBidInterstitialActivity.EXTRA_SKIP_OFFSET, mSkipOffset);
             intent.putExtra(HyBidInterstitialActivity.EXTRA_BROADCAST_ID, mBroadcastReceiver.getBroadcastId());
             intent.putExtra(HyBidInterstitialActivity.EXTRA_ZONE_ID, mZoneId);
+            if (!TextUtils.isEmpty(mWatermarkData)) {
+                intent.putExtra(HyBidInterstitialActivity.EXTRA_WATERMARK_DATA, mWatermarkData);
+            }
+            intent.putExtra(HyBidInterstitialActivity.EXTRA_SESSION_ID, mAd.getSessionId());
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mContext.startActivity(intent);
         }

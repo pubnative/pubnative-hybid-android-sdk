@@ -5,6 +5,7 @@
 package net.pubnative.lite.sdk.banner.presenter;
 
 import android.content.Context;
+import android.view.View;
 
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdSize;
@@ -33,6 +34,11 @@ public class BannerPresenterFactory extends PresenterFactory {
 
     @Override
     protected AdPresenter fromCreativeType(int assetGroupId, Ad ad, AdSize adSize, ImpressionTrackingMethod trackingMethod) {
+        return fromCreativeType(assetGroupId, ad, adSize, trackingMethod, null);
+    }
+
+    @Override
+    protected AdPresenter fromCreativeType(int assetGroupId, Ad ad, AdSize adSize, ImpressionTrackingMethod trackingMethod, View watermark) {
 
 
         ImpressionTrackingMethod trackingMethodFinal = trackingMethod;
@@ -54,10 +60,10 @@ public class BannerPresenterFactory extends PresenterFactory {
             case ApiAssetGroupType.MRAID_728x90:
             case ApiAssetGroupType.MRAID_768x1024:
             case ApiAssetGroupType.MRAID_1024x768: {
-                return new MraidAdPresenter(getContext(), ad, adSize, trackingMethodFinal);
+                return new MraidAdPresenter(getContext(), ad, adSize, trackingMethodFinal, watermark);
             }
             case ApiAssetGroupType.VAST_MRECT: {
-                return new VastAdPresenter(getContext(), ad, adSize, trackingMethodFinal, mIntegrationType);
+                return new VastAdPresenter(getContext(), ad, adSize, trackingMethodFinal, mIntegrationType, watermark);
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for banner ad format.");

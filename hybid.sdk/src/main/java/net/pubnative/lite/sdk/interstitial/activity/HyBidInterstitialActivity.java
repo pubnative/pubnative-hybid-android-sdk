@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +30,7 @@ import net.pubnative.lite.sdk.interstitial.viewModel.InterstitialViewModel;
 import net.pubnative.lite.sdk.interstitial.viewModel.MraidInterstitialViewModel;
 import net.pubnative.lite.sdk.interstitial.viewModel.VastInterstitialViewModel;
 import net.pubnative.lite.sdk.receiver.VolumeChangedActionReceiver;
+import net.pubnative.lite.sdk.utils.WatermarkHelper;
 import net.pubnative.lite.sdk.views.CloseableContainer;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.vpaid.volume.VolumeObserver;
@@ -36,13 +38,16 @@ import net.pubnative.lite.sdk.vpaid.volume.VolumeObserver;
 public abstract class HyBidInterstitialActivity extends Activity implements InterstitialActivityInteractor {
 
     public static final String EXTRA_ZONE_ID = "extra_pn_zone_id";
+    public static final String EXTRA_SESSION_ID = "extra_pn_session_id";
     public static final String EXTRA_BROADCAST_ID = "extra_pn_broadcast_id";
     public static final String EXTRA_SKIP_OFFSET = "extra_pn_skip_offset";
+    public static final String EXTRA_WATERMARK_DATA = "extra_pn_watermark_data";
     public static final String INTEGRATION_TYPE = "integration_type";
 
     private CloseableContainer mCloseableContainer;
     private ProgressBar mProgressBar;
     private OnBackInvokedCallback mOnBackInvokedCallback;
+    private WatermarkHelper mWatermarkHelper;
 
     protected boolean mIsFinishing = false;
 
@@ -89,16 +94,30 @@ public abstract class HyBidInterstitialActivity extends Activity implements Inte
         mCloseableContainer = new CloseableContainer(this);
         mProgressBar = new ProgressBar(this);
         mCloseableContainer.setBackgroundColor(Color.BLACK);
+        mWatermarkHelper = new WatermarkHelper();
     }
 
     private void initializeViewModel() {
         Intent mIntent = getIntent();
+
+        String sessionId = mIntent.getStringExtra(EXTRA_SESSION_ID);
+        String zoneId = mIntent.getStringExtra(EXTRA_ZONE_ID);
+        // Use sessionId if available, otherwise fall back to zoneId as earlier implementation
+        String cacheKey = !TextUtils.isEmpty(sessionId) ? sessionId : zoneId;
+
         if (this instanceof VastInterstitialActivity) {
-            mViewModel = new VastInterstitialViewModel(this, mIntent.getStringExtra(EXTRA_ZONE_ID), mIntent.getStringExtra(INTEGRATION_TYPE), mIntent.getIntExtra(EXTRA_SKIP_OFFSET, -1), mIntent.getLongExtra(EXTRA_BROADCAST_ID, -1), this);
+            mViewModel = new VastInterstitialViewModel(this, cacheKey, mIntent.getStringExtra(INTEGRATION_TYPE), mIntent.getIntExtra(EXTRA_SKIP_OFFSET, -1), mIntent.getLongExtra(EXTRA_BROADCAST_ID, -1), this);
         } else {
-            mViewModel = new MraidInterstitialViewModel(this, mIntent.getStringExtra(EXTRA_ZONE_ID), mIntent.getStringExtra(INTEGRATION_TYPE), mIntent.getIntExtra(EXTRA_SKIP_OFFSET, -1), mIntent.getLongExtra(EXTRA_BROADCAST_ID, -1), this);
+            mViewModel = new MraidInterstitialViewModel(this, cacheKey, mIntent.getStringExtra(INTEGRATION_TYPE), mIntent.getIntExtra(EXTRA_SKIP_OFFSET, -1), mIntent.getLongExtra(EXTRA_BROADCAST_ID, -1), this);
         }
+        String watermarkData = mIntent.getStringExtra(EXTRA_WATERMARK_DATA);
+        View watermarkView = WatermarkHelper.createWatermarkView(this, watermarkData);
+        if (watermarkView != null) {
+            addWatermarkView(watermarkView);
+        }
+
     }
+
 
     private void setupBackHandler() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -137,6 +156,15 @@ public abstract class HyBidInterstitialActivity extends Activity implements Inte
             mCloseableContainer.setClosePosition(CloseableContainer.ClosePosition.TOP_LEFT);
             if (layoutParams != null) mCloseableContainer.addView(contentInfoView, layoutParams);
             else mCloseableContainer.addView(contentInfoView);
+        }
+    }
+
+    @Override
+    public void addWatermarkView(View watermarkView) {
+        if (mCloseableContainer != null && watermarkView != null && !mWatermarkHelper.isWatermarkRegistered()) {
+            mCloseableContainer.addView(watermarkView);
+            mViewModel.addFriendlyObstruction(watermarkView);
+            mWatermarkHelper.setWatermarkRegistered();
         }
     }
 

@@ -4,12 +4,16 @@
 //
 package net.pubnative.lite.sdk.mrect;
 
+import android.content.Context;
+import androidx.test.core.app.ApplicationProvider;
+
 import com.google.common.truth.Truth;
 
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
 import net.pubnative.lite.sdk.banner.presenter.MraidAdPresenter;
 import net.pubnative.lite.sdk.banner.presenter.VastAdPresenter;
 import net.pubnative.lite.sdk.models.AdSize;
+import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.ApiAssetGroupType;
@@ -18,7 +22,6 @@ import net.pubnative.lite.sdk.testing.TestUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.robolectric.RobolectricTestRunner;
 
@@ -30,12 +33,13 @@ public class MRectPresenterFactoryTest {
     private AdPresenter.Listener mMockListener;
     private Ad mTestAd;
 
-    @InjectMocks
     private BannerPresenterFactory mSubject;
 
     @Before
     public void setup() {
         initMocks(this);
+        Context context = ApplicationProvider.getApplicationContext();
+        mSubject = new BannerPresenterFactory(context, IntegrationType.STANDALONE);
     }
 
     @Test

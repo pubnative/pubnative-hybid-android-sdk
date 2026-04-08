@@ -13,8 +13,11 @@ import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+
+import androidx.test.core.app.ApplicationProvider;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
@@ -36,6 +39,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.shadows.ShadowApplication;
 
 @RunWith(RobolectricTestRunner.class)
@@ -52,11 +56,15 @@ public class AdFeedbackFormHelperTest {
     private Context context;
     private AutoCloseable closeable;
 
+    private Application application;
+
     @Before
     public void setUp() {
         closeable = MockitoAnnotations.openMocks(this);
         subject = new AdFeedbackFormHelper();
         context = RuntimeEnvironment.getApplication();
+
+        application = ApplicationProvider.getApplicationContext();
     }
 
     @After
@@ -77,7 +85,7 @@ public class AdFeedbackFormHelperTest {
 
             subject.showFeedbackForm(context, testUrl, mockAd, "banner", IntegrationType.STANDALONE, mockListener);
 
-            Intent startedIntent = ShadowApplication.getInstance().getNextStartedActivity();
+            Intent startedIntent = Shadows.shadowOf(application).getNextStartedActivity();
             assertNotNull(startedIntent);
 
             assertEquals(AdFeedbackActivity.class.getName(), startedIntent.getComponent().getClassName());
@@ -92,8 +100,7 @@ public class AdFeedbackFormHelperTest {
 
         verify(mockListener).onLoadFailed(errorCaptor.capture());
         assertEquals(HyBidErrorCode.ERROR_LOADING_FEEDBACK, errorCaptor.getValue().getErrorCode());
-
-        Intent startedIntent = ShadowApplication.getInstance().getNextStartedActivity();
+        Intent startedIntent = Shadows.shadowOf(application).getNextStartedActivity();
         assertNull(startedIntent);
     }
 

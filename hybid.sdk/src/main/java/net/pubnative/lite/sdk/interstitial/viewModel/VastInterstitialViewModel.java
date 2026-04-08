@@ -23,6 +23,8 @@ import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.AdEndCardManager;
 import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
+import net.pubnative.lite.sdk.viewability.baseom.BaseFriendlyObstructionPurpose;
 import net.pubnative.lite.sdk.vpaid.AdCloseButtonListener;
 import net.pubnative.lite.sdk.vpaid.CloseButtonListener;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
@@ -75,6 +77,13 @@ public class VastInterstitialViewModel extends InterstitialViewModel implements 
         processInterstitialAd();
         listener.setContentLayout();
         initVolumeTracker();
+    }
+
+    @Override
+    public void addFriendlyObstruction(View view) {
+        if (mVideoAd != null) {
+            mVideoAd.addFriendlyObstruction(view);
+        }
     }
 
     private void initVolumeTracker() {
@@ -189,7 +198,9 @@ public class VastInterstitialViewModel extends InterstitialViewModel implements 
                 mVideoAd.setAdListener(mVideoAdListener);
                 mVideoAd.setAdCloseButtonListener(mCloseButtonListener);
                 mListener.showProgressBar();
-                mAdCacheItem = HyBid.getVideoAdCache().remove(mZoneId);
+                // Using sessionId as cache key
+                String cacheKey = mAd.getSessionId();
+                mAdCacheItem = HyBid.getVideoAdCache().inspect(cacheKey);
                 if (mAdCacheItem != null) {
                     if (mAdCacheItem.getAdParams() != null) {
                         mAdCacheItem.getAdParams().setPublisherSkipSeconds(mSkipOffset);

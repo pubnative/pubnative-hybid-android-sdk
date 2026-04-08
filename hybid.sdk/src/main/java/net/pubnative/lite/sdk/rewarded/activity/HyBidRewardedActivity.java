@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +30,7 @@ import net.pubnative.lite.sdk.rewarded.RewardedActivityInteractor;
 import net.pubnative.lite.sdk.rewarded.viewModel.MraidRewardedViewModel;
 import net.pubnative.lite.sdk.rewarded.viewModel.RewardedViewModel;
 import net.pubnative.lite.sdk.rewarded.viewModel.VastRewardedViewModel;
-import net.pubnative.lite.sdk.utils.ViewUtils;
+import net.pubnative.lite.sdk.utils.WatermarkHelper;
 import net.pubnative.lite.sdk.views.CloseableContainer;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.vpaid.HyBidActivityInteractor;
@@ -38,13 +39,16 @@ import net.pubnative.lite.sdk.vpaid.volume.VolumeObserver;
 public abstract class HyBidRewardedActivity extends Activity implements RewardedActivityInteractor {
 
     public static final String EXTRA_ZONE_ID = "extra_pn_zone_id";
+    public static final String EXTRA_SESSION_ID = "extra_pn_session_id";
     public static final String EXTRA_BROADCAST_ID = "extra_pn_broadcast_id";
     public static final String EXTRA_SKIP_OFFSET = "extra_pn_skip_offset";
+    public static final String EXTRA_WATERMARK_DATA = "extra_pn_watermark_data";
     public static final String INTEGRATION_TYPE = "integration_type";
 
     private CloseableContainer mCloseableContainer;
     private ProgressBar mProgressBar;
     private OnBackInvokedCallback mOnBackInvokedCallback;
+    private WatermarkHelper mWatermarkHelper;
 
     protected boolean mIsFinishing = false;
 
@@ -83,18 +87,34 @@ public abstract class HyBidRewardedActivity extends Activity implements Rewarded
         mCloseableContainer = new CloseableContainer(this);
         mProgressBar = new ProgressBar(this);
         mCloseableContainer.setBackgroundColor(Color.BLACK);
+        mWatermarkHelper = new WatermarkHelper();
     }
 
     private void initializeViewModel() {
         Intent mIntent = getIntent();
         mInteractor = HyBidActivityInteractor.getInstance();
+
+        // Extract all intent extras
+        String sessionId = mIntent.getStringExtra(EXTRA_SESSION_ID);
+        String zoneId = mIntent.getStringExtra(EXTRA_ZONE_ID);
+
+        // Use sessionId if available, otherwise fall back to zoneId as earlier implementation
+        String cacheKey = !TextUtils.isEmpty(sessionId) ? sessionId : zoneId;
+
+
         if (this instanceof VastRewardedActivity) {
-            mViewModel = new VastRewardedViewModel(this, mIntent.getStringExtra(EXTRA_ZONE_ID), mIntent.getStringExtra(INTEGRATION_TYPE), mIntent.getIntExtra(EXTRA_SKIP_OFFSET, -1), mIntent.getLongExtra(EXTRA_BROADCAST_ID, -1), this);
+            mViewModel = new VastRewardedViewModel(this, cacheKey, mIntent.getStringExtra(INTEGRATION_TYPE), mIntent.getIntExtra(EXTRA_SKIP_OFFSET, -1), mIntent.getLongExtra(EXTRA_BROADCAST_ID, -1), this);
         } else {
-            mViewModel = new MraidRewardedViewModel(this, mIntent.getStringExtra(EXTRA_ZONE_ID), mIntent.getStringExtra(INTEGRATION_TYPE), mIntent.getIntExtra(EXTRA_SKIP_OFFSET, -1), mIntent.getLongExtra(EXTRA_BROADCAST_ID, -1), this);
+            mViewModel = new MraidRewardedViewModel(this, cacheKey, mIntent.getStringExtra(INTEGRATION_TYPE), mIntent.getIntExtra(EXTRA_SKIP_OFFSET, -1), mIntent.getLongExtra(EXTRA_BROADCAST_ID, -1), this);
+        }
+        String watermarkData = mIntent.getStringExtra(EXTRA_WATERMARK_DATA);
+        View watermarkView = WatermarkHelper.createWatermarkView(this, watermarkData);
+        if (watermarkView != null) {
+            addWatermarkView(watermarkView);
         }
         mInteractor.activityCreated();
     }
+
 
     private void setupBackHandler() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -133,6 +153,15 @@ public abstract class HyBidRewardedActivity extends Activity implements Rewarded
             mCloseableContainer.setClosePosition(CloseableContainer.ClosePosition.TOP_LEFT);
             if (layoutParams != null) mCloseableContainer.addView(contentInfoView, layoutParams);
             else mCloseableContainer.addView(contentInfoView);
+        }
+    }
+
+    @Override
+    public void addWatermarkView(View mWatermarkView) {
+        if (mCloseableContainer != null && mWatermarkView != null && !mWatermarkHelper.isWatermarkRegistered()) {
+            mCloseableContainer.addView(mWatermarkView);
+            mViewModel.addFriendlyObstruction(mWatermarkView);
+            mWatermarkHelper.setWatermarkRegistered();
         }
     }
 

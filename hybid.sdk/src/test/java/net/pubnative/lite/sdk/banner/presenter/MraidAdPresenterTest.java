@@ -16,7 +16,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.view.View;
+import android.widget.FrameLayout;
 
+import androidx.test.core.app.ApplicationProvider;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.mraid.MRAIDBanner;
@@ -26,12 +29,15 @@ import net.pubnative.lite.sdk.models.AdSize;
 import net.pubnative.lite.sdk.models.ImpressionTrackingMethod;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.CheckUtils;
+import net.pubnative.lite.sdk.viewability.FriendlyObstructionReasonConstants;
+import net.pubnative.lite.sdk.viewability.baseom.BaseFriendlyObstructionPurpose;
 import net.pubnative.lite.sdk.visibility.ImpressionManager;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
@@ -58,6 +64,8 @@ public class MraidAdPresenterTest {
     private ReportingController mockReportingController;
     @Mock
     private MRAIDView mockMraidView;
+    @Mock
+    private View mockWatermark;
 
     private MockedStatic<CheckUtils.NoThrow> mockedCheckUtils;
     private MockedStatic<HyBid> mockedHyBid;
@@ -66,6 +74,8 @@ public class MraidAdPresenterTest {
     @Before
     public void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        mockContext = ApplicationProvider.getApplicationContext();
 
         mockedCheckUtils = mockStatic(CheckUtils.NoThrow.class);
         mockedHyBid = mockStatic(HyBid.class);
@@ -92,7 +102,7 @@ public class MraidAdPresenterTest {
         try (MockedConstruction<MRAIDBanner> mockedBanner = mockConstruction(MRAIDBanner.class, (mock, context) -> {
             allConstructorArgs.add(new ArrayList<>(context.arguments()));
         })) {
-            MraidAdPresenter presenter = new MraidAdPresenter(mockContext, mockAd, mockAdSize, ImpressionTrackingMethod.AD_VIEWABLE);
+            MraidAdPresenter presenter = new MraidAdPresenter(mockContext, mockAd, mockAdSize, ImpressionTrackingMethod.AD_VIEWABLE, null);
             presenter.load();
 
             assertEquals(1, mockedBanner.constructed().size());
@@ -111,7 +121,7 @@ public class MraidAdPresenterTest {
         try (MockedConstruction<MRAIDBanner> mockedBanner = mockConstruction(MRAIDBanner.class, (mock, context) -> {
             allConstructorArgs.add(new ArrayList<>(context.arguments()));
         })) {
-            MraidAdPresenter presenter = new MraidAdPresenter(mockContext, mockAd, mockAdSize, ImpressionTrackingMethod.AD_VIEWABLE);
+            MraidAdPresenter presenter = new MraidAdPresenter(mockContext, mockAd, mockAdSize, ImpressionTrackingMethod.AD_VIEWABLE, null);
             presenter.load();
 
             List<?> arguments = allConstructorArgs.get(0);
@@ -126,7 +136,7 @@ public class MraidAdPresenterTest {
 
         // Mock the MRAIDBanner that will be created during load()
         try (MockedConstruction<MRAIDBanner> mockedBanner = mockConstruction(MRAIDBanner.class)) {
-            MraidAdPresenter presenter = new MraidAdPresenter(mockContext, mockAd, mockAdSize, ImpressionTrackingMethod.AD_VIEWABLE);
+            MraidAdPresenter presenter = new MraidAdPresenter(mockContext, mockAd, mockAdSize, ImpressionTrackingMethod.AD_VIEWABLE, null);
             presenter.setListener(mockListener);
             presenter.setImpressionListener(mockImpressionListener);
 
@@ -136,7 +146,7 @@ public class MraidAdPresenterTest {
             // Simulate the callback
             presenter.mraidViewLoaded(mockMraidView);
 
-            verify(mockListener).onAdLoaded(eq(presenter), any(MRAIDBanner.class));
+            verify(mockListener).onAdLoaded(eq(presenter), any(FrameLayout.class));
             verify(mockImpressionListener).onImpression();
         }
     }
@@ -147,7 +157,7 @@ public class MraidAdPresenterTest {
 
         // Mock the MRAIDBanner that will be created during load()
         try (MockedConstruction<MRAIDBanner> mockedBanner = mockConstruction(MRAIDBanner.class)) {
-            MraidAdPresenter presenter = new MraidAdPresenter(mockContext, mockAd, mockAdSize, ImpressionTrackingMethod.AD_VIEWABLE);
+            MraidAdPresenter presenter = new MraidAdPresenter(mockContext, mockAd, mockAdSize, ImpressionTrackingMethod.AD_VIEWABLE, null);
             presenter.setListener(mockListener);
             presenter.setImpressionListener(mockImpressionListener);
 
@@ -157,8 +167,78 @@ public class MraidAdPresenterTest {
             // Simulate the callback
             presenter.mraidViewLoaded(mockMraidView);
 
-            verify(mockListener).onAdLoaded(eq(presenter), any(MRAIDBanner.class));
+            verify(mockListener).onAdLoaded(eq(presenter), any(FrameLayout.class));
             verify(mockImpressionListener, never()).onImpression();
+        }
+    }
+
+    @Test
+    public void addFriendlyObstruction_callsMraidBanner() {
+        // Arrange
+        View mockObstruction = new View(mockContext);
+        when(mockAd.getAssetUrl(anyString())).thenReturn("https://example.com");
+
+        try (MockedConstruction<MRAIDBanner> mockedBanner = mockConstruction(MRAIDBanner.class)) {
+            MraidAdPresenter presenter = new MraidAdPresenter(mockContext, mockAd, mockAdSize, ImpressionTrackingMethod.AD_VIEWABLE, null);
+            presenter.load();
+
+            MRAIDBanner bannerInstance = mockedBanner.constructed().get(0);
+
+            // Act
+            presenter.addFriendlyObstruction(mockObstruction);
+
+            // Assert
+            verify(bannerInstance).addViewabilityFriendlyObstruction(eq(mockObstruction), eq(BaseFriendlyObstructionPurpose.OTHER), eq(FriendlyObstructionReasonConstants.WATERMARK_OBSTRUCTION_REASON));
+        }
+    }
+
+    @Test
+    public void mraidViewLoaded_whenDestroyed_returnsEarly() {
+        when(mockAd.getAssetUrl(anyString())).thenReturn("https://example.com");
+
+        try (MockedConstruction<MRAIDBanner> ignored = mockConstruction(MRAIDBanner.class)) {
+            MraidAdPresenter presenter = new MraidAdPresenter(mockContext, mockAd, mockAdSize, ImpressionTrackingMethod.AD_VIEWABLE, null);
+            presenter.setListener(mockListener);
+            presenter.load();
+            presenter.destroy();
+
+            presenter.mraidViewLoaded(mockMraidView);
+
+            verify(mockListener, never()).onAdLoaded(any(), any());
+        }
+    }
+
+    @Test
+    public void mraidViewLoaded_withWatermark_addsWatermarkToContainer() {
+        when(mockAd.getAssetUrl(anyString())).thenReturn("https://example.com");
+
+        try (MockedConstruction<MRAIDBanner> mockedBanner = mockConstruction(MRAIDBanner.class);
+             MockedConstruction<FrameLayout> mockedFrameLayout = mockConstruction(FrameLayout.class)) {
+
+            MraidAdPresenter presenter = new MraidAdPresenter(mockContext, mockAd, mockAdSize, ImpressionTrackingMethod.AD_VIEWABLE, mockWatermark);
+            presenter.setListener(mockListener);
+            presenter.load();
+
+            presenter.mraidViewLoaded(mockMraidView);
+
+            FrameLayout containerInstance = mockedFrameLayout.constructed().get(0);
+            verify(containerInstance).addView(mockedBanner.constructed().get(0));
+            verify(containerInstance).addView(mockWatermark);
+        }
+    }
+
+    @Test
+    public void mraidViewLoaded_withRenderedTracking_triggersImpression() {
+        when(mockAd.getAssetUrl(anyString())).thenReturn("https://example.com");
+
+        try (MockedConstruction<MRAIDBanner> ignored = mockConstruction(MRAIDBanner.class)) {
+            MraidAdPresenter presenter = new MraidAdPresenter(mockContext, mockAd, mockAdSize, ImpressionTrackingMethod.AD_RENDERED, null);
+            presenter.setListener(mockListener);
+            presenter.setImpressionListener(mockImpressionListener);
+            presenter.load();
+
+            presenter.mraidViewLoaded(mockMraidView);
+            verify(mockImpressionListener).onImpression();
         }
     }
 }

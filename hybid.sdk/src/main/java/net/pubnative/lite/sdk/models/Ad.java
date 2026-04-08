@@ -4,6 +4,9 @@
 //
 package net.pubnative.lite.sdk.models;
 
+import static net.pubnative.lite.sdk.utils.AtomManager.SURVEY_DATA_KEY;
+import static net.pubnative.lite.sdk.utils.AtomManager.SURVEY_HTML_KEY;
+
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
@@ -13,7 +16,9 @@ import android.widget.FrameLayout;
 
 import net.pubnative.lite.sdk.R;
 import net.pubnative.lite.sdk.utils.AdExperienceManager;
+import net.pubnative.lite.sdk.utils.AtomManager;
 import net.pubnative.lite.sdk.utils.ClickThroughTimerManager;
+import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.SkipOffsetManager;
 import net.pubnative.lite.sdk.utils.json.BindField;
 import net.pubnative.lite.sdk.utils.json.JsonModel;
@@ -23,6 +28,7 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -558,7 +564,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
 
         if (remoteConfigsDebug != null) {
             List<Integer> configIds = remoteConfigsDebug.getConfigIds();
-            if (configIds != null && configIds.size() > 0) {
+            if (configIds != null && !configIds.isEmpty()) {
                 return configIds.get(0).toString();
             }
         }
@@ -778,16 +784,42 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     }
 
     public EndCardData getCustomEndCard() {
-        EndCardData result = null;
-        AdData data = getAsset(APIAsset.CUSTOM_END_CARD);
-        if (data != null) {
-            result = new EndCardData(EndCardData.Type.HTML_RESOURCE, data.getStringField("html"), true);
+        // check if ATOM provides a custom end card
+        HashMap<String, String> atomJsData = AtomManager.getInstance().getAtomJSData();
+        if (atomJsData != null && !atomJsData.isEmpty()) {
+            String htmlTemplate = atomJsData.get(SURVEY_HTML_KEY);
+            return new EndCardData(EndCardData.Type.HTML_RESOURCE, htmlTemplate, true);
         }
-        return result;
+
+        // check if adserver provides a custom end card
+        AdData data = getAsset(APIAsset.CUSTOM_END_CARD);
+        if(data != null && data.getStringField("html") != null){
+            String cmgHtml = data.getStringField("html");
+            return new EndCardData(EndCardData.Type.HTML_RESOURCE, cmgHtml, true);
+        }
+        return null;
     }
 
     public boolean hasCustomEndCard() {
-        return getAsset(APIAsset.CUSTOM_END_CARD) != null;
+        try {
+            if (getAsset(APIAsset.CUSTOM_END_CARD) != null) {
+                return true;
+            }
+
+            HashMap<String, String> atomJsData = AtomManager.getInstance().getAtomJSData();
+            if (atomJsData == null) {
+                return false;
+            }
+            String surveyJson = atomJsData.get(SURVEY_HTML_KEY);
+            if (surveyJson == null || surveyJson.isEmpty() || surveyJson.trim().length() < 5) {
+                Logger.d(TAG, "No survey data found in Atom");
+                return false;
+            }
+            return true;
+        } catch (Exception e) {
+            Logger.d(TAG, "Error checking survey data found in Atom");
+            return false;
+        }
     }
 
     public CustomCTAData getCustomCta(Context context, boolean requireIcon) {
@@ -980,4 +1012,5 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         }
         return link;
     }
+
 }

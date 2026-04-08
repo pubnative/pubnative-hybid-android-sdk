@@ -127,7 +127,7 @@ public class HyBidViewabilityManager extends BaseViewabilityManager {
     @Override
     public String getServiceJS() {
         if (TextUtils.isEmpty(VIEWABILITY_JS_SERVICE_CONTENT)) {
-            String omsdkStr = Assets.omsdkjs;
+            String omsdkStr = Assets.OMSDKJS;
             byte[] omsdkBytes = Base64.decode(omsdkStr, Base64.DEFAULT);
             VIEWABILITY_JS_SERVICE_CONTENT = new String(omsdkBytes);
         }

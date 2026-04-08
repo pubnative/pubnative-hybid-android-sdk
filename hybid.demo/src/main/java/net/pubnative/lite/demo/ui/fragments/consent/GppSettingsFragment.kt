@@ -15,11 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
-import com.onetrust.otpublishers.headless.Public.OTEventListener
-import com.onetrust.otpublishers.headless.Public.OTPublishersHeadlessSDK
-import com.onetrust.otpublishers.headless.Public.OTUIDisplayReason.OTUIDisplayReason
 import net.pubnative.lite.demo.databinding.FragmentGppSettingsBinding
-import net.pubnative.lite.demo.util.OneTrustManager
 import net.pubnative.lite.sdk.HyBid
 import net.pubnative.lite.sdk.UserDataManager
 
@@ -38,8 +34,6 @@ class GppSettingsFragment : Fragment() {
 
     private var appPreferences: SharedPreferences? = null
     private var internalPreferences: SharedPreferences? = null
-    private var otPublishersHeadlessSDK: OTPublishersHeadlessSDK? = null
-
 
     private val binding get() = _binding!!
 
@@ -54,7 +48,6 @@ class GppSettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setOneTrustEventListener()
         userDataManager = HyBid.getUserDataManager()
 
         internalPreferences =
@@ -65,7 +58,6 @@ class GppSettingsFragment : Fragment() {
             context?.let { PreferenceManager.getDefaultSharedPreferences(it.applicationContext) }
         appPreferences?.registerOnSharedPreferenceChangeListener(appPrefsListener)
 
-        _binding?.buttonTriggerOnetrustConsent?.setOnClickListener { triggerOneTrustConsent() }
         _binding?.buttonSetGppString?.setOnClickListener { setGppString() }
         _binding?.buttonSetGppsid?.setOnClickListener { setGppSid() }
         _binding?.buttonDeleteGppString?.setOnClickListener { deleteGppString() }
@@ -76,11 +68,6 @@ class GppSettingsFragment : Fragment() {
         _binding?.viewInternalGppsidString?.text = userDataManager?.gppSid
         _binding?.viewPublicGppString?.text = getPublicGppString(appPreferences)
         _binding?.viewPublicGppsidString?.text = getPublicGppId(appPreferences)
-    }
-
-
-    private fun triggerOneTrustConsent() {
-        activity?.let { OneTrustManager.getInstance(requireContext()).getOtPublishersHeadlessSDK()?.showBannerUI(it) }
     }
 
     private fun setGppString() {
@@ -120,84 +107,6 @@ class GppSettingsFragment : Fragment() {
     private fun setPublicGppId(text: String) {
         appPreferences?.edit()?.putString(KEY_PUBLIC_GPP_ID, text)?.apply()
     }
-
-
-    private fun setOneTrustEventListener() {
-        OneTrustManager.getInstance(requireContext()).getOtPublishersHeadlessSDK()?.addEventListener(object : OTEventListener() {
-            override fun onShowBanner(p0: OTUIDisplayReason?) {
-                Log.d("OTEventListener", "onShowBanner")
-            }
-
-            override fun onHideBanner() {
-                Log.d("OTEventListener", "onHideBanner")
-            }
-
-            override fun onBannerClickedAcceptAll() {
-                Log.d("OTEventListener", "onBannerClickedAcceptAll")
-                setPublicGppString("Dummy GPP String")
-                setPublicGppId("2_4_5_6_7_8_9_15")
-            }
-
-            override fun onBannerClickedRejectAll() {
-                Log.d("OTEventListener", "onBannerClickedRejectAll")
-                setPublicGppString("")
-                setPublicGppId("")
-            }
-
-            override fun onShowPreferenceCenter(p0: OTUIDisplayReason?) {
-                Log.d("OTEventListener", "onShowPreferenceCenter")
-            }
-
-            override fun onHidePreferenceCenter() {
-                Log.d("OTEventListener", "onHidePreferenceCenter")
-            }
-
-            override fun onPreferenceCenterAcceptAll() {
-                Log.d("OTEventListener", "onPreferenceCenterAcceptAll")
-            }
-
-            override fun onPreferenceCenterRejectAll() {
-                Log.d("OTEventListener", "onPreferenceCenterRejectAll")
-            }
-
-            override fun onPreferenceCenterConfirmChoices() {
-                Log.d("OTEventListener", "onPreferenceCenterConfirmChoices")
-            }
-
-            override fun onShowVendorList() {
-                Log.d("OTEventListener", "onShowVendorList")
-            }
-
-            override fun onHideVendorList() {
-                Log.d("OTEventListener", "onHideVendorList")
-            }
-
-            override fun onVendorConfirmChoices() {
-                Log.d("OTEventListener", "onVendorConfirmChoices")
-            }
-
-            override fun allSDKViewsDismissed(p0: String?) {
-                Log.d("OTEventListener", "allSDKViewsDismissed")
-            }
-
-            override fun onVendorListVendorConsentChanged(p0: String?, p1: Int) {
-                Log.d("OTEventListener", "onVendorListVendorConsentChanged")
-            }
-
-            override fun onVendorListVendorLegitimateInterestChanged(p0: String?, p1: Int) {
-                Log.d("OTEventListener", "onVendorListVendorLegitimateInterestChanged")
-            }
-
-            override fun onPreferenceCenterPurposeConsentChanged(p0: String?, p1: Int) {
-                Log.d("OTEventListener", "onPreferenceCenterPurposeConsentChanged")
-            }
-
-            override fun onPreferenceCenterPurposeLegitimateInterestChanged(p0: String?, p1: Int) {
-                Log.d("OTEventListener", "onPreferenceCenterPurposeLegitimateInterestChanged")
-            }
-        })
-    }
-
 
     private val appPrefsListener =
         OnSharedPreferenceChangeListener { sharedPreferences, key ->

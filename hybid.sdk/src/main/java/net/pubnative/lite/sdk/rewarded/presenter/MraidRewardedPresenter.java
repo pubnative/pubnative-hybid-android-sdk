@@ -7,6 +7,7 @@ package net.pubnative.lite.sdk.rewarded.presenter;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.CustomEndCardListener;
 import net.pubnative.lite.sdk.VideoListener;
@@ -23,15 +24,17 @@ public class MraidRewardedPresenter implements RewardedPresenter, HyBidRewardedB
     private final Ad mAd;
     private final String mZoneId;
     private final HyBidRewardedBroadcastReceiver mBroadcastReceiver;
+    private final String mWatermarkData;
 
     private Listener mListener;
     private boolean mIsDestroyed;
     private boolean mReady = false;
 
-    public MraidRewardedPresenter(Context context, Ad ad, String zoneId) {
+    public MraidRewardedPresenter(Context context, Ad ad, String zoneId, String watermarkData) {
         mContext = context;
         mAd = ad;
         mZoneId = zoneId;
+        mWatermarkData = watermarkData;
         if (context != null && context.getApplicationContext() != null) {
             mBroadcastReceiver = new HyBidRewardedBroadcastReceiver(context);
             mBroadcastReceiver.setListener(this);
@@ -79,6 +82,10 @@ public class MraidRewardedPresenter implements RewardedPresenter, HyBidRewardedB
             Intent intent = new Intent(mContext, MraidRewardedActivity.class);
             intent.putExtra(HyBidRewardedActivity.EXTRA_BROADCAST_ID, mBroadcastReceiver.getBroadcastId());
             intent.putExtra(HyBidRewardedActivity.EXTRA_ZONE_ID, mZoneId);
+            if (!TextUtils.isEmpty(mWatermarkData)) {
+                intent.putExtra(HyBidRewardedActivity.EXTRA_WATERMARK_DATA, mWatermarkData);
+            }
+            intent.putExtra(HyBidRewardedActivity.EXTRA_SESSION_ID, mAd.getSessionId());
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mContext.startActivity(intent);
         }

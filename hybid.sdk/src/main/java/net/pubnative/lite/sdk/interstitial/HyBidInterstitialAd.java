@@ -6,6 +6,7 @@ package net.pubnative.lite.sdk.interstitial;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -90,6 +91,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     private String mScreenKeywords;
     private String mUserIntent;
     private boolean mIsExchange;
+    private String mWatermarkData;
 
 
     public HyBidInterstitialAd(Activity activity, Listener listener) {
@@ -277,6 +279,12 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         return mAd != null ? mAd.getECPM() : 0;
     }
 
+
+
+    public void setWatermark(String watermarkString) {
+        mWatermarkData = watermarkString;
+    }
+
     public void setCustomUrl(String customUrl) {
         mCustomUrl = customUrl;
     }
@@ -303,7 +311,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
         IntegrationType integrationType = IntegrationType.IN_APP_BIDDING;
         if (mRequestManager != null)
             integrationType = mRequestManager.getIntegrationType();
-        mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, this, integrationType);
+        mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, this, integrationType, mWatermarkData);
         if (mPresenter != null) {
             mPresenter.setVideoListener(this);
             mPresenter.load();
@@ -357,7 +365,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
             IntegrationType integrationType = IntegrationType.IN_APP_BIDDING;
             if (mRequestManager != null)
                 integrationType = mRequestManager.getIntegrationType();
-            mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, this, integrationType);
+            mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, this, integrationType, mWatermarkData);
             if (mPresenter != null) {
                 mPresenter.setVideoListener(this);
                 mPresenter.load();
@@ -403,13 +411,15 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
                         mAd = new Ad(assetGroupId, adValue, type);
                         mAd.setHasEndCard(hasEndCard);
                         initializeAdTracker();
-                        HyBid.getAdCache().put(mZoneId, mAd);
-                        HyBid.getVideoAdCache().put(mZoneId, adCacheItem);
+                        // Using sessionId as cache key
+                        String cacheKey = mAd.getSessionId();
+                        HyBid.getAdCache().put(cacheKey, mAd);
+                        HyBid.getVideoAdCache().put(cacheKey, adCacheItem);
                         checkRemoteConfigs();
                         IntegrationType integrationType = IntegrationType.IN_APP_BIDDING;
                         if (mRequestManager != null)
                             integrationType = mRequestManager.getIntegrationType();
-                        mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, HyBidInterstitialAd.this, integrationType);
+                        mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, HyBidInterstitialAd.this, integrationType, mWatermarkData);
                         if (mPresenter != null) {
                             mPresenter.setVideoListener(HyBidInterstitialAd.this);
                             mPresenter.load();
@@ -438,12 +448,14 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
                 mAd.setZoneId(mZoneId);
                 mAd.setHasEndCard(hasEndCard());
                 initializeAdTracker();
-                HyBid.getAdCache().put(mZoneId, mAd);
+                // Using sessionId as cache key
+                String cacheKey = mAd.getSessionId();
+                HyBid.getAdCache().put(cacheKey, mAd);
                 checkRemoteConfigs();
                 IntegrationType integrationType = IntegrationType.IN_APP_BIDDING;
                 if (mRequestManager != null)
                     integrationType = mRequestManager.getIntegrationType();
-                mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, HyBidInterstitialAd.this, integrationType);
+                mPresenter = new InterstitialPresenterFactory(mContext, mZoneId).createInterstitialPresenter(mAd, mHtmlSkipOffset, mVideoSkipOffset, HyBidInterstitialAd.this, integrationType, mWatermarkData);
                 if (mPresenter != null) {
                     mPresenter.setVideoListener(this);
                     mPresenter.load();
@@ -600,6 +612,12 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     }
 
     protected void invokeOnDismissed() {
+        // Clean up VideoAdCache entry
+        if (mAd != null && !TextUtils.isEmpty(mAd.getSessionId())) {
+            HyBid.getVideoAdCache().remove(mAd.getSessionId());
+            Logger.d(TAG, "Cleaned up VideoAdCache entry for sessionId: " + mAd.getSessionId());
+        }
+
         if (mListener != null) {
             mListener.onInterstitialDismissed();
         }

@@ -75,20 +75,71 @@ android {
 
 tasks.register('repackageNG') {
     doLast {
-        def smaatoDir = file("src/nextgen/java/com/verve/ng/sdk")
-        smaatoDir.mkdirs()
+        def ngJavaDir = file("src/nextgen/java/com/verve/ng/sdk")
+        def ngResDir = file("src/nextgen/res")
+        def ngManifestDir = file("src/nextgen")
+
+        ngJavaDir.mkdirs()
+        ngResDir.mkdirs()
+        // 1. Copy and transform Java files
         def sourceDir = file("src/main/java/net/pubnative/lite/sdk")
         if (sourceDir.exists()) {
-            fileTree(dir: sourceDir).include("**/*.java").each { File file ->
-                def relativePath = file.path.substring(sourceDir.path.length())
-                def targetFile = new File(smaatoDir, relativePath)
-                targetFile.parentFile.mkdirs()
+            fileTree(dir: sourceDir).include("**/*.java").exclude("**/HyBidViewabilityManager.java").each { File file ->
                 def content = file.text
+                def newFileName = file.name
+                if (content =~ /(class|interface|enum)\s+Hy[Bb]id(\w*)/) {
+                    // Rename class/interface/enum declaration (handles both 'HyBid' and 'Hybid')
+                    content = content.replaceAll(/(class|interface|enum)\s+Hy[Bb]id(\w*)/, { m, type, suffix ->
+                        "${type} NextGen${suffix}"
+                    })
+                    // Rename filename
+                    newFileName = newFileName.replaceAll(/HyBid|Hybid/, "NextGen")
+                }
+                // Handle PN* class renaming
+                if (content.contains("PN")) {
+                    if (content =~ /(class|interface|enum)\s+PN([A-Z]\w*)/) {
+                        content = content.replaceAll(/(class|interface|enum)\s+PN([A-Z]\w*)/, { m, type, suffix ->
+                            "${type} NGSDK${suffix}"
+                        })
+                        newFileName = newFileName.replaceAll(/^PN/, "NGSDK")
+                    }
+                }
+
                 content = content.replaceAll("package net.pubnative.lite.sdk", "package com.verve.ng.sdk")
                 content = content.replaceAll("import net.pubnative.lite.sdk", "import com.verve.ng.sdk")
                 content = content.replaceAll("import static net.pubnative.lite.sdk", "import static com.verve.ng.sdk")
                 content = content.replaceAll("net.pubnative.lite.sdk.BuildConfig", "com.verve.ng.sdk.BuildConfig")
+                def relativePath = file.parentFile.path.substring(sourceDir.path.length())
+                def targetFile = new File(ngJavaDir, relativePath + "/" + newFileName)
+                targetFile.parentFile.mkdirs()
                 targetFile.text = content
+            }
+
+            // 2. Copy resources
+            def mainResDir = file("src/main/res")
+            if (mainResDir.exists()) {
+                copy {
+                    from mainResDir
+                    into ngResDir
+                }
+            }
+
+            // 3. Copy AndroidManifest.xml
+            def mainManifest = file("src/main/AndroidManifest.xml")
+            if (mainManifest.exists()) {
+                def manifestContent = mainManifest.text
+                def ngManifest = new File(ngManifestDir, "AndroidManifest.xml")
+                ngManifest.text = manifestContent
+            }
+
+            // 4. Copy assets
+            def mainAssetsDir = file("src/main/assets")
+            if (mainAssetsDir.exists()) {
+                def ngAssetsDir = file("src/nextgen/assets")
+                copy {
+                    from mainAssetsDir
+                    into ngAssetsDir
+                }
             }
         } else {
             println "Source directory not found: ${sourceDir.path}"
@@ -99,15 +150,17 @@ tasks.register('repackageNG') {
 dependencies {
 
     implementation "net.pubnative:hybid.omsdk:$omid_version"
-    implementation "com.verve:atom.sdk:+"
+    implementation "com.verve:atom.sdk:3.8.0_beta_js_3.4"
 
+    testImplementation "androidx.test:core:1.7.0"
     testImplementation 'androidx.core:core:1.15.0'
+    testImplementation 'androidx.test:core:1.7.0'
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.robolectric:robolectric:4.14.1'
-    testImplementation 'org.mockito:mockito-core:5.16.1'
-    testImplementation 'org.hamcrest:hamcrest:2.2'
-    testImplementation 'com.google.truth:truth:1.1.3'
-    testImplementation 'org.mockito:mockito-inline:4.5.1'
+    testImplementation 'org.robolectric:robolectric:4.15.1'
+    testImplementation 'org.mockito:mockito-core:5.21.0'
+    testImplementation 'org.hamcrest:hamcrest:3.0'
+    testImplementation 'com.google.truth:truth:1.4.5'
+    testImplementation 'org.mockito:mockito-inline:5.2.0'
 
 
     testImplementation 'com.squareup.assertj:assertj-android:1.2.0'
@@ -142,17 +195,20 @@ tasks.register("jacocoTestReport", JacocoReport) {
     }
 
     def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*']
-    def debugTree = fileTree(dir: "$buildDir/intermediates/javac/debug", excludes: fileFilter)
-    def kotlinDebugTree = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug", excludes: fileFilter)
+    def debugTree = layout.buildDirectory.dir("intermediates/javac/debug")
+    def kotlinDebugTree = layout.buildDirectory.dir("tmp/kotlin-classes/debug")
 
     sourceDirectories.setFrom(files([
             "$projectDir/src/main/java",
             "$projectDir/src/main/kotlin"
     ]))
 
-    classDirectories.setFrom(files([debugTree, kotlinDebugTree]))
+    classDirectories.setFrom(files([
+        fileTree(dir: debugTree.get().asFile, excludes: fileFilter),
+        fileTree(dir: kotlinDebugTree.get().asFile, excludes: fileFilter)
+    ]))
 
-    executionData.setFrom(fileTree(dir: buildDir, includes: [
+    executionData.setFrom(fileTree(dir: layout.buildDirectory.get().asFile, includes: [
             "jacoco/testDebugUnitTest.exec",
             "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec"
     ]))
@@ -175,12 +231,12 @@ tasks.withType(Test).configureEach {
 //--------------------------------------------------------------------------------------------------
 //cobertura.coverageFormats = ['html', 'xml']
 
-task sourcesJar(type: Jar) {
+task('sourcesJar', type: Jar) {
     from android.sourceSets.main.java.srcDirs
     archiveClassifier = 'sources'
 }
 
-task javadoc(type: Javadoc) {
+task('javadoc', type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
     def bootClasspathFiles = android.getBootClasspath().findAll { it != null && it.toString().trim() }
     classpath += project.rootProject.files(bootClasspathFiles)
@@ -188,7 +244,7 @@ task javadoc(type: Javadoc) {
     failOnError false
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
+task('javadocJar', type: Jar, dependsOn: 'javadoc') {
     archiveClassifier = 'javadoc'
     from javadoc.destinationDir
 }

@@ -5,6 +5,7 @@
 package net.pubnative.lite.demo.ui.adapters
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import net.pubnative.lite.demo.R

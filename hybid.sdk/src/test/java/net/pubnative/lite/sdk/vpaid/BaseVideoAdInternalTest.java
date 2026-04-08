@@ -16,6 +16,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -54,6 +55,7 @@ import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.shadows.ShadowLooper;
+import java.lang.reflect.Method;
 
 @RunWith(RobolectricTestRunner.class)
 public class BaseVideoAdInternalTest {
@@ -157,6 +159,25 @@ public class BaseVideoAdInternalTest {
         assertFalse("Should not be rewarded initially", videoAd.isRewarded());
     }
 
+    @Test
+    public void constructor_withRewardedAd_usesRewardedSkipOffset() throws Exception {
+        when(mockAd.getVideoRewardedSkipOffset()).thenReturn(10);
+        when(mockAd.getVideoSkipOffset()).thenReturn(5);
+
+        videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+        videoAd.setRewarded(true);
+
+        TestVideoAd rewardedAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener) {
+            @Override
+            boolean isRewarded() {
+                return true;
+            }
+        };
+
+        assertNotNull("Viewability session should be created", rewardedAd.getViewabilityAdSession());
+        verify(mockAd).getVideoRewardedSkipOffset();
+    }
+
     // Getter/Setter Tests
     @Test
     public void setAdListener_storesListener() throws Exception {
@@ -219,6 +240,20 @@ public class BaseVideoAdInternalTest {
     }
 
     @Test
+    public void getViewabilityAdSession_returnsSession() throws Exception {
+        videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+        Object session = videoAd.getViewabilityAdSession();
+        assertNotNull("Viewability session should not be null", session);
+    }
+
+    @Test
+    public void getCacheItem_returnsStoredCacheItem() throws Exception {
+        videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+        videoAd.setVideoCacheItem(mockCacheItem);
+        assertEquals("Cache item should be returned", mockCacheItem, videoAd.getCacheItem());
+    }
+
+    @Test
     public void startFetcherTimer_startsTimerAndHandlesTimeout() throws Exception {
         final SimpleTimer.Listener[] capturedListener = new SimpleTimer.Listener[1];
         try (MockedConstruction<AssetsLoader> mockedAssetsLoader = mockConstruction(AssetsLoader.class);
@@ -276,6 +311,21 @@ public class BaseVideoAdInternalTest {
             // The expiration timer is the first one created
             SimpleTimer timer = mockedTimer.constructed().get(0);
             verify(timer).cancel();
+        }
+    }
+
+    @Test
+    public void stopExpirationTimer_whenTimerExists_logsMessage() throws Exception {
+        try (MockedConstruction<VideoAdControllerVast> mockedController = mockConstruction(VideoAdControllerVast.class);
+             MockedConstruction<VastProcessor> mockedProcessor = mockConstruction(VastProcessor.class);
+             MockedConstruction<AssetsLoader> mockedAssetsLoader = mockConstruction(AssetsLoader.class)) {
+
+            videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+            videoAd.setAdListener(mockVideoAdListener);
+
+            triggerAdLoadSuccess_forTimerTest(mockedProcessor, mockedAssetsLoader, mockedController);
+            videoAd.stopExpirationTimer();
+            mockedLogger.verify(() -> Logger.d(eq("BaseVideoAdInternal"), eq("Stop schedule expiration")));
         }
     }
 
@@ -536,6 +586,295 @@ public class BaseVideoAdInternalTest {
         verify(controller, atLeastOnce()).prepare(preparedListenerCaptor.capture());
         preparedListenerCaptor.getValue().onPrepared();
 
+        ShadowLooper.runUiThreadTasks();
+    }
+
+    @Test
+    public void prepareAdController_withNullController_callsOnAdLoadFail() throws Exception {
+        videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+        videoAd.setAdListener(mockVideoAdListener);
+
+        videoAd.releaseAdController();
+
+        Method method = BaseVideoAdInternal.class.getDeclaredMethod(
+                "prepareAdController", String.class, EndCardData.class, String.class);
+        method.setAccessible(true);
+        method.invoke(videoAd, "video_path", mockEndCardData, "endcard_path");
+
+        ShadowLooper.runUiThreadTasks();
+
+        verify(mockVideoAdListener).onAdLoadFail(any(PlayerInfo.class));
+        mockedErrorLog.verify(() -> ErrorLog.postError(eq(mockContext), any(VastError.class)));
+    }
+
+    @Test
+    public void prepareAdController_withNullCustomEndCard_doesNotCrash() throws Exception {
+        try (MockedConstruction<VideoAdControllerVast> ignored = mockConstruction(VideoAdControllerVast.class);
+             MockedConstruction<VastProcessor> mockedProcessor = mockConstruction(VastProcessor.class);
+             MockedConstruction<AssetsLoader> mockedAssetsLoader = mockConstruction(AssetsLoader.class)) {
+
+            videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+            videoAd.setAdListener(mockVideoAdListener);
+            setupCustomEndCardTest(null);
+            triggerAssetLoadingWithCustomEndCard(mockedProcessor, mockedAssetsLoader);
+            mockedLogger.verify(() -> Logger.d(eq("BaseVideoAdInternal"), eq("Custom end card data is null or empty")));
+        }
+    }
+
+    @Test
+    public void prepareAdController_withNullCustomEndCardInExtensionMode_logsMessage() throws Exception {
+        try (MockedConstruction<VideoAdControllerVast> ignored = mockConstruction(VideoAdControllerVast.class);
+             MockedConstruction<VastProcessor> mockedProcessor = mockConstruction(VastProcessor.class);
+             MockedConstruction<AssetsLoader> mockedAssetsLoader = mockConstruction(AssetsLoader.class)) {
+
+            videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+            videoAd.setAdListener(mockVideoAdListener);
+
+            when(mockAdParams.isVpaid()).thenReturn(false);
+            when(AdEndCardManager.shouldShowEndcard(mockAd)).thenReturn(true);
+            when(AdEndCardManager.shouldShowCustomEndcard(mockAd)).thenReturn(true);
+            when(mockAd.getCustomEndCard()).thenReturn(null);
+            when(mockAd.getCustomEndCardDisplay()).thenReturn(net.pubnative.lite.sdk.models.CustomEndCardDisplay.EXTENSION);
+            triggerAssetLoadingWithCustomEndCard(mockedProcessor, mockedAssetsLoader);
+            mockedLogger.verify(() -> Logger.d(eq("BaseVideoAdInternal"), eq("Custom end card data is null or empty")));
+        }
+    }
+
+    @Test
+    public void prepareAdController_withNullCustomEndCardContent_doesNotCrash() throws Exception {
+        try (MockedConstruction<VideoAdControllerVast> ignored = mockConstruction(VideoAdControllerVast.class);
+             MockedConstruction<VastProcessor> mockedProcessor = mockConstruction(VastProcessor.class);
+             MockedConstruction<AssetsLoader> mockedAssetsLoader = mockConstruction(AssetsLoader.class)) {
+
+            videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+            videoAd.setAdListener(mockVideoAdListener);
+            when(mockCustomEndCardData.getContent()).thenReturn(null);
+            setupCustomEndCardTest(mockCustomEndCardData);
+
+            triggerAssetLoadingWithCustomEndCard(mockedProcessor, mockedAssetsLoader);
+
+            mockedLogger.verify(() -> Logger.d(eq("BaseVideoAdInternal"), eq("Custom end card data is null or empty")));
+        }
+    }
+
+    @Test
+    public void prepareAdController_withValidCustomEndCardExtension_addsEndCard() throws Exception {
+        try (MockedConstruction<VideoAdControllerVast> mockedController = mockConstruction(VideoAdControllerVast.class);
+             MockedConstruction<VastProcessor> mockedProcessor = mockConstruction(VastProcessor.class);
+             MockedConstruction<AssetsLoader> mockedAssetsLoader = mockConstruction(AssetsLoader.class)) {
+
+            videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+            videoAd.setAdListener(mockVideoAdListener);
+
+            when(mockCustomEndCardData.getContent()).thenReturn("custom_content");
+            when(mockAdParams.isVpaid()).thenReturn(false);
+            when(AdEndCardManager.shouldShowEndcard(mockAd)).thenReturn(true);
+            when(AdEndCardManager.shouldShowCustomEndcard(mockAd)).thenReturn(true);
+            when(mockAd.getCustomEndCard()).thenReturn(mockCustomEndCardData);
+            when(mockAd.getCustomEndCardDisplay()).thenReturn(net.pubnative.lite.sdk.models.CustomEndCardDisplay.EXTENSION);
+
+            triggerAssetLoadingWithCustomEndCard(mockedProcessor, mockedAssetsLoader);
+
+            VideoAdControllerVast controller = mockedController.constructed().get(0);
+            verify(controller, times(2)).addEndCardData(any(EndCardData.class));
+            verify(mockVideoAdListener).onAdCustomEndCardFound();
+        }
+    }
+
+    @Test
+    public void prepareAdController_withValidCustomEndCardOnly_addsEndCard() throws Exception {
+        try (MockedConstruction<VideoAdControllerVast> mockedController = mockConstruction(VideoAdControllerVast.class);
+             MockedConstruction<VastProcessor> mockedProcessor = mockConstruction(VastProcessor.class);
+             MockedConstruction<AssetsLoader> mockedAssetsLoader = mockConstruction(AssetsLoader.class)) {
+
+            videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+            videoAd.setAdListener(mockVideoAdListener);
+
+            when(mockCustomEndCardData.getContent()).thenReturn("custom_content");
+            when(mockAdParams.isVpaid()).thenReturn(false);
+            when(AdEndCardManager.shouldShowEndcard(mockAd)).thenReturn(false);
+            when(AdEndCardManager.shouldShowCustomEndcard(mockAd)).thenReturn(true);
+            when(mockAd.getCustomEndCard()).thenReturn(mockCustomEndCardData);
+
+            triggerAssetLoadingWithCustomEndCard(mockedProcessor, mockedAssetsLoader);
+
+            VideoAdControllerVast controller = mockedController.constructed().get(0);
+            verify(controller, times(1)).addEndCardData(mockCustomEndCardData);
+            verify(mockVideoAdListener).onAdCustomEndCardFound();
+        }
+    }
+
+    @Test
+    public void prepareAdController_withInvalidCustomEndCardOnly_logsMessage() throws Exception {
+        try (MockedConstruction<VideoAdControllerVast> ignored = mockConstruction(VideoAdControllerVast.class);
+             MockedConstruction<VastProcessor> mockedProcessor = mockConstruction(VastProcessor.class);
+             MockedConstruction<AssetsLoader> mockedAssetsLoader = mockConstruction(AssetsLoader.class)) {
+
+            videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+            videoAd.setAdListener(mockVideoAdListener);
+
+            when(mockCustomEndCardData.getContent()).thenReturn("");
+            when(mockAdParams.isVpaid()).thenReturn(false);
+            when(AdEndCardManager.shouldShowEndcard(mockAd)).thenReturn(false);
+            when(AdEndCardManager.shouldShowCustomEndcard(mockAd)).thenReturn(true);
+            when(mockAd.getCustomEndCard()).thenReturn(mockCustomEndCardData);
+
+            triggerAssetLoadingWithCustomEndCard(mockedProcessor, mockedAssetsLoader);
+            mockedLogger.verify(() -> Logger.d(eq("BaseVideoAdInternal"), eq("Custom end card data is null or empty")));
+        }
+    }
+
+    @Test
+    public void isEndCardValid_withValidEndCard_returnsTrue() throws Exception {
+        videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+        when(mockCustomEndCardData.getContent()).thenReturn("valid_content");
+        Method method = BaseVideoAdInternal.class.getDeclaredMethod("isEndCardValid", EndCardData.class);
+        method.setAccessible(true);
+        boolean result = (boolean) method.invoke(videoAd, mockCustomEndCardData);
+        assertTrue("Valid endcard should return true", result);
+    }
+
+
+    @Test
+    public void isEndCardValid_withEmptyContent_returnsFalse() throws Exception {
+        videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+        when(mockCustomEndCardData.getContent()).thenReturn("");
+        Method method = BaseVideoAdInternal.class.getDeclaredMethod("isEndCardValid", EndCardData.class);
+        method.setAccessible(true);
+        boolean result = (boolean) method.invoke(videoAd, mockCustomEndCardData);
+        assertFalse("Endcard with empty content should return false", result);
+    }
+
+
+    @Test
+    public void onDefaultEndCardShow_notifiesListener() throws Exception {
+        videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+        videoAd.setAdListener(mockVideoAdListener);
+        videoAd.onDefaultEndCardShow("standard");
+        verify(mockVideoAdListener).onDefaultEndCardShow("standard");
+    }
+
+    @Test
+    public void onDefaultEndCardShow_withNullListener_doesNotCrash() throws Exception {
+        videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+        videoAd.setAdListener(null);
+        videoAd.onDefaultEndCardShow("standard");
+    }
+
+    @Test
+    public void onCustomEndCardClick_notifiesListener() throws Exception {
+        videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+        videoAd.setAdListener(mockVideoAdListener);
+        videoAd.onCustomEndCardClick("custom");
+        verify(mockVideoAdListener).onCustomEndCardClick("custom");
+    }
+
+    @Test
+    public void onCustomEndCardClick_withNullListener_doesNotCrash() throws Exception {
+        videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+        videoAd.setAdListener(null);
+        videoAd.onCustomEndCardClick("custom");
+    }
+
+    @Test
+    public void onDefaultEndCardClick_notifiesListener() throws Exception {
+        videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+        videoAd.setAdListener(mockVideoAdListener);
+        videoAd.onDefaultEndCardClick("standard");
+        verify(mockVideoAdListener).onDefaultEndCardClick("standard");
+    }
+
+    @Test
+    public void onDefaultEndCardClick_withNullListener_doesNotCrash() throws Exception {
+        videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+        videoAd.setAdListener(null);
+        videoAd.onDefaultEndCardClick("standard");
+    }
+
+    @Test
+    public void onCustomCTAShow_notifiesListener() throws Exception {
+        videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+        videoAd.setAdListener(mockVideoAdListener);
+        videoAd.onCustomCTAShow();
+        verify(mockVideoAdListener).onCustomCTAShow();
+    }
+
+    @Test
+    public void onCustomCTAShow_withNullListener_doesNotCrash() throws Exception {
+        videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+        videoAd.setAdListener(null);
+        videoAd.onCustomCTAShow();
+    }
+
+    @Test
+    public void onCustomCTALoadFail_notifiesListener() throws Exception {
+        videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+        videoAd.setAdListener(mockVideoAdListener);
+        videoAd.onCustomCTALoadFail();
+        verify(mockVideoAdListener).onCustomCTALoadFail();
+    }
+
+    @Test
+    public void onCustomCTALoadFail_withNullListener_doesNotCrash() throws Exception {
+        videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+        videoAd.setAdListener(null);
+        videoAd.onCustomCTALoadFail();
+    }
+
+    @Test
+    public void onEndCardSkipped_notifiesListener() throws Exception {
+        videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+        videoAd.setAdListener(mockVideoAdListener);
+        videoAd.onEndCardSkipped(true);
+        verify(mockVideoAdListener).onEndCardSkipped(true);
+    }
+
+    @Test
+    public void onEndCardSkipped_withNullListener_doesNotCrash() throws Exception {
+        videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+        videoAd.setAdListener(null);
+        videoAd.onEndCardSkipped(false);
+    }
+
+    @Test
+    public void onEndCardClosed_notifiesListener() throws Exception {
+        videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+        videoAd.setAdListener(mockVideoAdListener);
+        videoAd.onEndCardClosed(true);
+        verify(mockVideoAdListener).onEndCardClosed(true);
+    }
+
+    @Test
+    public void onEndCardClosed_withNullListener_doesNotCrash() throws Exception {
+        videoAd = new TestVideoAd(mockContext, mockAd, false, false, mockImpressionListener, mockAdCloseButtonListener);
+        videoAd.setAdListener(null);
+        videoAd.onEndCardClosed(false);
+    }
+
+
+    private void setupCustomEndCardTest(EndCardData customEndCard) {
+        when(mockAdParams.isVpaid()).thenReturn(false);
+        when(AdEndCardManager.shouldShowCustomEndcard(mockAd)).thenReturn(true);
+        when(mockAd.getCustomEndCard()).thenReturn(customEndCard);
+        when(mockAd.getCustomEndCardDisplay()).thenReturn(net.pubnative.lite.sdk.models.CustomEndCardDisplay.EXTENSION);
+    }
+
+    private void triggerAssetLoadingWithCustomEndCard(
+            MockedConstruction<VastProcessor> mockedProcessor,
+            MockedConstruction<AssetsLoader> mockedAssetsLoader) {
+
+        ArgumentCaptor<VastProcessor.Listener> vastListenerCaptor = ArgumentCaptor.forClass(VastProcessor.Listener.class);
+        ArgumentCaptor<AssetsLoader.OnAssetsLoaded> assetsListenerCaptor = ArgumentCaptor.forClass(AssetsLoader.OnAssetsLoaded.class);
+
+        videoAd.proceedLoad(IntegrationType.HEADER_BIDDING);
+
+        VastProcessor processor = mockedProcessor.constructed().get(0);
+        verify(processor).parseResponse(anyString(), vastListenerCaptor.capture());
+        vastListenerCaptor.getValue().onParseSuccess(mockAdParams, "vast_content");
+
+        AssetsLoader assetsLoader = mockedAssetsLoader.constructed().get(0);
+        verify(assetsLoader).load(any(), any(), assetsListenerCaptor.capture());
+        assetsListenerCaptor.getValue().onAssetsLoaded("video_path", mockEndCardData, "endcard_path");
         ShadowLooper.runUiThreadTasks();
     }
 }

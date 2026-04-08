@@ -18,8 +18,6 @@ import java.util.regex.Pattern;
 public class MRAIDHtmlProcessor {
 
     public static String processRawHtml(String rawHtml) {
-        StringBuffer processedHtml = new StringBuffer(rawHtml);
-
         // Remove the mraid.js script tag.
         // We expect the tag to look like this:
         // <script src='mraid.js'></script>
@@ -30,7 +28,10 @@ public class MRAIDHtmlProcessor {
         // Remove the mraid.js script tag.
         String regex = "<script\\s+[^>]*\\bsrc\\s*=\\s*([\"'])mraid\\.js\\1[^>]*>\\s*</script>\\n*";
         Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(processedHtml);
+        Matcher matcher = pattern.matcher(rawHtml);
+        String cleanedHtml = matcher.replaceAll("");
+
+        StringBuilder processedHtml = new StringBuilder(cleanedHtml);
 
         // Add html, head, and/or body tags as needed.
         boolean hasHtmlTag = removeAllScripts(rawHtml).contains("<html");
@@ -69,7 +70,7 @@ public class MRAIDHtmlProcessor {
         String mraidJs = new String(mraidjsBytes);
         String mraidTag = "<script>" + ls + mraidJs + ls + "</script>";
 
-        String omsdkStr = net.pubnative.lite.sdk.viewability.Assets.omsdkjs;
+        String omsdkStr = net.pubnative.lite.sdk.viewability.Assets.OMSDKJS;
         byte[] omsdkBytes = Base64.decode(omsdkStr, Base64.DEFAULT);
         String omSdk = new String(omsdkBytes);
         String omsdkTag = "<script>" + ls + omSdk + ls + "</script>";

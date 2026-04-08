@@ -8,6 +8,7 @@ import android.content.Context;
 
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.vpaid.VpaidConstants;
+import net.pubnative.lite.sdk.vpaid.helpers.FileLockManager;
 
 import java.io.File;
 import java.util.concurrent.Executor;
@@ -30,11 +31,33 @@ public class FileUtils {
                 if (!file.isDirectory()) {
                     long creationTime = file.lastModified();
                     long currentTime = System.currentTimeMillis();
-                    if ((creationTime + VpaidConstants.CACHED_VIDEO_LIFE_TIME < currentTime) ||
-                            (file.length() == 0)) {
-                        //noinspection ResultOfMethodCallIgnored
-                        file.delete();
-                        Logger.d(LOG_TAG, "Deleted cached file: " + file.getAbsolutePath());
+
+                    boolean isExpired = (creationTime + VpaidConstants.CACHED_VIDEO_LIFE_TIME < currentTime);
+                    boolean isEmpty = (file.length() == 0);
+
+                    if (isExpired || isEmpty) {
+                        // Check with FileLockManager if file can be safely deleted
+                        boolean isLocked = FileLockManager.getInstance()
+                                .isLocked(file.getAbsolutePath());
+
+                        if (!isLocked) {
+                            // case 1 : unlocked expired/empty file
+                            //noinspection ResultOfMethodCallIgnored
+                            file.delete();
+                            Logger.d(LOG_TAG, "Deleted cached file: " + file.getAbsolutePath());
+                        } else if (isExpired) {
+                            // Force delete expired files even if locked After VpaidConstants.CACHED_VIDEO_LIFE_TIME, file is stale and locks are likely leaked
+                            FileLockManager.getInstance().forceRelease(file.getAbsolutePath());
+                            //noinspection
+                            boolean deleted = file.delete();
+                            if (deleted) {
+                                Logger.w(LOG_TAG, "Force deleted EXPIRED file (was locked): " + file.getAbsolutePath());
+                            }
+                        } else {
+                            // Keep empty files if locked (download might be in progress)
+                            Logger.d(LOG_TAG, "Skipped deletion (empty file in use): " + file.getAbsolutePath());
+                            amountOfCachedFiles++;
+                        }
                     } else {
                         amountOfCachedFiles++;
                     }

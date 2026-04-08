@@ -28,6 +28,8 @@ public class AtomManager {
     public static final String ATOM_IS_DISABLED_METHOD_NAME = "isAtomDisabled";
     public static final String ATOM_IS_CONFIG_FETCHED_METHOD_NAME = "isConfigurationFetchSuccessful";
     public static final String ATOM_SET_AD_SESSION_DATA_METHOD_NAME = "sendAdSessionData";
+    public static final String ATOM_GET_JS_DATA_METHOD_NAME = "getAtomJSData";
+    public static final String ATOM_SET_JS_DATA_METHOD_NAME = "setAtomJSData";
     public static final String ATOM_NOT_FOUND_MESSAGE = "Atom not found";
     public static final String CREATIVE_ID = "creative_id";
     public static final String CAMPAIGN_ID = "campaign_id";
@@ -37,6 +39,8 @@ public class AtomManager {
     public static final String VIEWABILITY = "Viewability";
     public static final String AD_SESSION_DATA = "Ad_Session_Data";
     public static final String RENDERING_SUCCESS = "rendering success";
+    public static final String SURVEY_DATA_KEY = "SurveyData";
+    public static final String SURVEY_HTML_KEY = "SurveyHtml";
     private static final String TAG = AtomManager.class.getSimpleName();
 
     private static AtomManager instance;
@@ -99,6 +103,28 @@ public class AtomManager {
     }
     public static boolean isAtomSdkDisabled() {
         return getInstance().isAtomSdkDisabledInstance();
+    }
+
+    public HashMap<String, String> getAtomJSData() {
+        HashMap<String, String> jsData = null;
+        try {
+            Class<?> atomClass = findClass(ATOM_CLASS_NAME);
+            Method getIsDisabledMethod = getDeclaredMethod(atomClass, ATOM_GET_JS_DATA_METHOD_NAME);
+            Object result = invokeMethod(getIsDisabledMethod, null);
+            if (result instanceof HashMap) {
+                jsData = (HashMap<String, String>) result;
+            }
+        } catch (Exception e) {
+            Logger.d(TAG, ATOM_NOT_FOUND_MESSAGE);
+        }
+        return jsData;
+    }
+
+    public void putAtomJSData(String key, String value) {
+        HashMap<String, String> jsData = getAtomJSData();
+        if (jsData != null) {
+            jsData.put(key, value);
+        }
     }
 
     public void setAdSessionDataInstance(HashMap<String, Object> adSessionData){

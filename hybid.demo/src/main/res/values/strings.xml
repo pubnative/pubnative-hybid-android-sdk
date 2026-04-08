@@ -223,7 +223,6 @@
     <string name="consent_form_load_success" translatable="false">Consent form load success</string>
     <string name="consent_info_not_available" translatable="false">Consent info not available</string>
     <string name="consent_form_not_available" translatable="false">Consent form not available</string>
-    <string name="action_trigger_onetrust_consent" translatable="false">Trigger OneTrust consent dialog</string>
     <string name="label_public_gpp_string" translatable="false">Public Gpps String</string>
     <string name="label_public_gppsid_string" translatable="false">Public Gppsid String</string>
     <string name="label_internal_gpp_string" translatable="false">Internal Gpps String</string>

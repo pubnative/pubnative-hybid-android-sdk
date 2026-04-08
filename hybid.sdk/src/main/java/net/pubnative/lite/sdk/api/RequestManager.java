@@ -288,7 +288,9 @@ public class RequestManager {
             mVideoCache = HyBid.getVideoAdCache();
         }
         ad.setZoneId(adRequest.zoneId);
-        mAdCache.put(adRequest.zoneId, ad);
+        // Use sessionId as cache key
+        final String sessionId = ad.getSessionId();
+        mAdCache.put(sessionId, ad);
         AdTopicsAPIManager.setTopicsAPIEnabled(mApiClient.getContext(), ad);
 //        AtomManager.setAtomEnabled(mApiClient.getContext(), ad);
 
@@ -356,7 +358,9 @@ public class RequestManager {
                     ad.setHasEndCard(hasEndCard);
 
                     VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardData, endCardFilePath);
-                    mVideoCache.put(ad.getZoneId(), adCacheItem);
+                    // Use sessionId as cache key
+                    String cacheKey = ad.getSessionId();
+                    mVideoCache.put(cacheKey, adCacheItem);
                     mCacheStarted = false;
                     mCacheFinished = true;
                     if (mAutoCacheOnLoad && mRequestListener != null) {

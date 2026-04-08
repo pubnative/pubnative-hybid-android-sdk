@@ -87,7 +87,9 @@ public class DiagnosticsManager implements ReportingEventCallback {
         logBuilder.append("\nHyBid Diagnostics Log:\n\n");
 
         if (HyBid.isInitialized()) {
-            logBuilder.append("Event: ").append(event.getEventType()).append("\n");
+            if (event != null) {
+                logBuilder.append("Event: ").append(event.getEventType()).append("\n");
+            }
             logBuilder.append("Version: ").append(HyBid.getHyBidVersion()).append("\n");
             logBuilder.append("Bundle Id: ").append(HyBid.getBundleId()).append("\n");
             logBuilder.append("App Token: ").append(HyBid.getAppToken()).append("\n");

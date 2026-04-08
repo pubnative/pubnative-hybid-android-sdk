@@ -15,6 +15,8 @@ public interface RewardedActivityInteractor {
 
     void removeContentInfoView(View mContentInfoView);
 
+    void addWatermarkView(View watermarkView);
+
     void setCloseSize(int reducedCloseButtonSize);
 
     void showProgressBar();

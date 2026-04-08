@@ -6,6 +6,7 @@ package net.pubnative.lite.sdk.utils;
 
 import android.content.Context;
 import android.media.AudioManager;
+import android.os.Build;
 
 import net.pubnative.lite.sdk.HyBid;
 
@@ -40,9 +41,7 @@ public class SoundUtils {
             try {
                 AudioManager audio = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
                 if (audio != null) {
-                    int volume = audio.getStreamVolume(AudioManager.STREAM_RING);
-                    lastMutedState = (volume == 0);
-                    lastCheckedTime = System.currentTimeMillis();
+                    lastMutedState = checkMuteState(audio);
                     Logger.d(TAG, "Update and return lastMutedState");
                 }
             } catch (SecurityException exception) {
@@ -51,9 +50,22 @@ public class SoundUtils {
             } catch (Exception exception) {
                 HyBid.reportException(exception);
                 Logger.e(TAG, "Error fetching sound state: ", exception);
+            } catch (OutOfMemoryError error) {
+                Logger.e(TAG, "OutOfMemoryError fetching sound state: ", error);
             } finally {
+                lastCheckedTime = System.currentTimeMillis();
                 isRefreshing = false;
             }
         });
+    }
+
+    private static boolean checkMuteState(AudioManager audio) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return audio.isStreamMute(AudioManager.STREAM_RING);
+        }
+
+        int ringerMode = audio.getRingerMode();
+        return ringerMode == AudioManager.RINGER_MODE_SILENT
+                || ringerMode == AudioManager.RINGER_MODE_VIBRATE;
     }
 }

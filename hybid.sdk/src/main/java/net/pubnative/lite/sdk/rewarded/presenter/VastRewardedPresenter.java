@@ -7,6 +7,8 @@ package net.pubnative.lite.sdk.rewarded.presenter;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.View;
 
 import net.pubnative.lite.sdk.CustomEndCardListener;
 import net.pubnative.lite.sdk.VideoListener;
@@ -24,6 +26,7 @@ public class VastRewardedPresenter implements RewardedPresenter, HyBidRewardedBr
     private final Ad mAd;
     private final String mZoneId;
     private final HyBidRewardedBroadcastReceiver mBroadcastReceiver;
+    private final String mWatermarkData;
 
     private Listener mListener;
     private VideoListener mVideoListener;
@@ -32,10 +35,11 @@ public class VastRewardedPresenter implements RewardedPresenter, HyBidRewardedBr
     private boolean mReady = false;
     IntegrationType mIntegrationType;
 
-    public VastRewardedPresenter(Context context, Ad ad, String zoneId, IntegrationType integrationType) {
+    public VastRewardedPresenter(Context context, Ad ad, String zoneId, IntegrationType integrationType, String watermarkData) {
         mContext = context;
         mAd = ad;
         mZoneId = zoneId;
+        mWatermarkData = watermarkData;
         if (context != null && context.getApplicationContext() != null) {
             mBroadcastReceiver = new HyBidRewardedBroadcastReceiver(context);
             mBroadcastReceiver.setListener(this);
@@ -84,6 +88,10 @@ public class VastRewardedPresenter implements RewardedPresenter, HyBidRewardedBr
             Intent intent = new Intent(mContext, VastRewardedActivity.class);
             intent.putExtra(HyBidRewardedActivity.EXTRA_BROADCAST_ID, mBroadcastReceiver.getBroadcastId());
             intent.putExtra(HyBidRewardedActivity.EXTRA_ZONE_ID, mZoneId);
+            if (!TextUtils.isEmpty(mWatermarkData)) {
+                intent.putExtra(HyBidRewardedActivity.EXTRA_WATERMARK_DATA, mWatermarkData);
+            }
+            intent.putExtra(HyBidRewardedActivity.EXTRA_SESSION_ID, mAd.getSessionId());
             intent.putExtra(HyBidRewardedActivity.INTEGRATION_TYPE, mIntegrationType.getCode());
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mContext.startActivity(intent);

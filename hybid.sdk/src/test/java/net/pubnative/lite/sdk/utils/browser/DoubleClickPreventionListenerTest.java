@@ -8,23 +8,29 @@ import android.view.View;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 26)
 public class DoubleClickPreventionListenerTest {
 
-    @Mock
     private View mockView;
 
-    @Mock
-    private DoubleClickPreventionListener.TimeProvider mockTimeProvider;
+    private static class TestTimeProvider implements DoubleClickPreventionListener.TimeProvider {
+        private long currentTime;
+
+        public void setCurrentTime(long time) {
+            this.currentTime = time;
+        }
+
+        @Override
+        public long getCurrentTime() {
+            return currentTime;
+        }
+    }
 
     /**
      * A concrete implementation of the abstract listener for testing purposes.
@@ -51,15 +57,16 @@ public class DoubleClickPreventionListenerTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
+        mockView = null;
     }
 
     @Test
     public void onClick_whenCalledFirstTime_shouldProcessClick() {
         // Test that the first click is processed immediately.
-        TestListener listener = new TestListener(mockTimeProvider);
+        TestTimeProvider timeProvider = new TestTimeProvider();
+        TestListener listener = new TestListener(timeProvider);
 
-        when(mockTimeProvider.getCurrentTime()).thenReturn(1000L);
+        timeProvider.setCurrentTime(1000L);
 
         listener.onClick(mockView);
 
@@ -69,14 +76,15 @@ public class DoubleClickPreventionListenerTest {
     @Test
     public void onClick_whenCalledTooSoon_shouldNotProcessClick() {
         // Test that a rapid second click is ignored.
-        TestListener listener = new TestListener(mockTimeProvider);
+        TestTimeProvider timeProvider = new TestTimeProvider();
+        TestListener listener = new TestListener(timeProvider);
 
         // First click happens at time 1000ms
-        when(mockTimeProvider.getCurrentTime()).thenReturn(1000L);
+        timeProvider.setCurrentTime(1000L);
         listener.onClick(mockView);
 
         // Second click at 1500ms (500ms later, less than 1000ms interval)
-        when(mockTimeProvider.getCurrentTime()).thenReturn(1500L);
+        timeProvider.setCurrentTime(1500L);
         listener.onClick(mockView);
 
         assertEquals(1, listener.processClickCount);
@@ -84,14 +92,15 @@ public class DoubleClickPreventionListenerTest {
 
     @Test
     public void onClick_whenCalledAfterSufficientDelay_shouldProcessClickAgain() {
-        TestListener listener = new TestListener(mockTimeProvider);
+        TestTimeProvider timeProvider = new TestTimeProvider();
+        TestListener listener = new TestListener(timeProvider);
 
         // First click at time 1000ms
-        when(mockTimeProvider.getCurrentTime()).thenReturn(1000L);
+        timeProvider.setCurrentTime(1000L);
         listener.onClick(mockView);
 
         // Second click at 2001ms (1001ms later, more than 1000ms interval)
-        when(mockTimeProvider.getCurrentTime()).thenReturn(2001L);
+        timeProvider.setCurrentTime(2001L);
         listener.onClick(mockView);
 
         assertEquals(2, listener.processClickCount);
@@ -100,14 +109,15 @@ public class DoubleClickPreventionListenerTest {
     @Test
     public void onClick_whenCalledExactlyAtInterval_shouldProcessClickAgain() {
         // Test the boundary condition at exactly 1000ms
-        TestListener listener = new TestListener(mockTimeProvider);
+        TestTimeProvider timeProvider = new TestTimeProvider();
+        TestListener listener = new TestListener(timeProvider);
 
         // First click at time 1000ms
-        when(mockTimeProvider.getCurrentTime()).thenReturn(1000L);
+        timeProvider.setCurrentTime(1000L);
         listener.onClick(mockView);
 
         // Second click at 2000ms (exactly 1000ms later)
-        when(mockTimeProvider.getCurrentTime()).thenReturn(2000L);
+        timeProvider.setCurrentTime(2000L);
         listener.onClick(mockView);
 
         assertEquals(2, listener.processClickCount);
@@ -116,20 +126,21 @@ public class DoubleClickPreventionListenerTest {
     @Test
     public void onClick_multipleRapidClicks_shouldOnlyProcessFirst() {
         // Test multiple rapid clicks within the interval
-        TestListener listener = new TestListener(mockTimeProvider);
+        TestTimeProvider timeProvider = new TestTimeProvider();
+        TestListener listener = new TestListener(timeProvider);
 
         // First click at time 1000ms
-        when(mockTimeProvider.getCurrentTime()).thenReturn(1000L);
+        timeProvider.setCurrentTime(1000L);
         listener.onClick(mockView);
 
         // Multiple rapid clicks within the interval
-        when(mockTimeProvider.getCurrentTime()).thenReturn(1100L);
+        timeProvider.setCurrentTime(1100L);
         listener.onClick(mockView);
 
-        when(mockTimeProvider.getCurrentTime()).thenReturn(1200L);
+        timeProvider.setCurrentTime(1200L);
         listener.onClick(mockView);
 
-        when(mockTimeProvider.getCurrentTime()).thenReturn(1300L);
+        timeProvider.setCurrentTime(1300L);
         listener.onClick(mockView);
 
         // Only the first click should be processed
@@ -139,26 +150,27 @@ public class DoubleClickPreventionListenerTest {
     @Test
     public void onClick_alternatingValidAndInvalidClicks_shouldProcessOnlyValid() {
         // Test alternating pattern of valid and invalid clicks
-        TestListener listener = new TestListener(mockTimeProvider);
+        TestTimeProvider timeProvider = new TestTimeProvider();
+        TestListener listener = new TestListener(timeProvider);
 
         // First click at time 1000ms
-        when(mockTimeProvider.getCurrentTime()).thenReturn(1000L);
+        timeProvider.setCurrentTime(1000L);
         listener.onClick(mockView);
 
         // Rapid click at 1500ms (should be ignored)
-        when(mockTimeProvider.getCurrentTime()).thenReturn(1500L);
+        timeProvider.setCurrentTime(1500L);
         listener.onClick(mockView);
 
         // Valid click at 2001ms (after sufficient delay)
-        when(mockTimeProvider.getCurrentTime()).thenReturn(2001L);
+        timeProvider.setCurrentTime(2001L);
         listener.onClick(mockView);
 
         // Another rapid click at 2200ms (should be ignored)
-        when(mockTimeProvider.getCurrentTime()).thenReturn(2200L);
+        timeProvider.setCurrentTime(2200L);
         listener.onClick(mockView);
 
         // Another valid click at 3002ms
-        when(mockTimeProvider.getCurrentTime()).thenReturn(3002L);
+        timeProvider.setCurrentTime(3002L);
         listener.onClick(mockView);
 
         // Should have processed 3 clicks total
@@ -168,9 +180,10 @@ public class DoubleClickPreventionListenerTest {
     @Test
     public void onClick_withNullView_shouldStillProcessClick() {
         // Test that null view parameter doesn't break the functionality
-        TestListener listener = new TestListener(mockTimeProvider);
+        TestTimeProvider timeProvider = new TestTimeProvider();
+        TestListener listener = new TestListener(timeProvider);
 
-        when(mockTimeProvider.getCurrentTime()).thenReturn(1000L);
+        timeProvider.setCurrentTime(1000L);
 
         listener.onClick(null);
 
@@ -180,14 +193,15 @@ public class DoubleClickPreventionListenerTest {
     @Test
     public void onClick_boundaryCondition_exactlyAtThreshold_shouldAllowClick() {
         // Test boundary condition where time difference equals MIN_CLICK_INTERVAL_MS
-        TestListener listener = new TestListener(mockTimeProvider);
+        TestTimeProvider timeProvider = new TestTimeProvider();
+        TestListener listener = new TestListener(timeProvider);
 
         // First click at time 5000ms
-        when(mockTimeProvider.getCurrentTime()).thenReturn(5000L);
+        timeProvider.setCurrentTime(5000L);
         listener.onClick(mockView);
 
         // Second click at exactly 6000ms (1000ms later - should be allowed)
-        when(mockTimeProvider.getCurrentTime()).thenReturn(6000L);
+        timeProvider.setCurrentTime(6000L);
         listener.onClick(mockView);
 
         assertEquals(2, listener.processClickCount);

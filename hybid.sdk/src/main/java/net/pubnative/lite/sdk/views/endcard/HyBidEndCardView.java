@@ -113,6 +113,7 @@ public class HyBidEndCardView extends FrameLayout {
 
         @Override
         public void mraidViewClose(MRAIDView mraidView) {
+            if (endcardViewListener != null) endcardViewListener.onClose(isCustomEndCard);
         }
 
         @Override

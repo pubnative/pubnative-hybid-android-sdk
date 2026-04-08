@@ -123,9 +123,10 @@ public class UserAgentProvider {
         return new Architecture(name, getBitness(abi));
     }
 
-    private String getBitness(String abi) {
+    // Package-private for testing
+    String getBitness(String abi) {
         if (TextUtils.isEmpty(abi)) {
-            return Architecture.BITNESS_64;
+            return Architecture.BITNESS_32;
         }
 
         return abi.contains(Architecture.BITNESS_64) ? Architecture.BITNESS_64 : Architecture.BITNESS_32;

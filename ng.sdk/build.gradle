@@ -106,14 +106,14 @@ android {
 
 dependencies {
 
-    implementation "net.pubnative:hybid.omsdk:$omid_version"
     implementation "androidx.annotation:annotation:1.9.1"
+    implementation "com.verve:atom.sdk:+"
     
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.robolectric:robolectric:4.10.3'
-    testImplementation 'org.mockito:mockito-core:5.16.1'
-    testImplementation 'org.hamcrest:hamcrest:2.2'
-    testImplementation 'com.google.truth:truth:1.1.3'
+    testImplementation 'org.robolectric:robolectric:4.15.1'
+    testImplementation 'org.mockito:mockito-core:5.21.0'
+    testImplementation 'org.hamcrest:hamcrest:3.0'
+    testImplementation 'com.google.truth:truth:1.4.5'
     testImplementation 'com.squareup.assertj:assertj-android:1.2.0'
     androidTestImplementation "androidx.test:runner:1.1.0-beta01", {
         exclude group: 'com.android.support', module: 'support-annotations'
@@ -223,13 +223,80 @@ tasks.register('correctNgSdkImportStatements') {
                 def content = file.text
                 content = content.replaceAll(/import com\.verve\.ng\.sdk\..*?\.BuildConfig;/, "import com.verve.ng.sdk.BuildConfig;")
                 content = content.replaceAll(/import com\.verve\.ng\.sdk\..*?\.R;/, "import com.verve.ng.sdk.R;")
-                content = content.replaceAll("net.pubnative.lite.sdk.viewability.Assets.omsdkjs", "com.verve.ng.sdk.viewability.Assets.omsdkjs")
-                content = content.replaceAll("net.pubnative.lite.sdk.source.pnapi.BuildConfig.BASE_URL", "com.verve.ng.sdk.BuildConfig.BASE_URL")
-
+                content = content.replaceAll("net\\.pubnative\\.lite\\.sdk", "com.verve.ng.sdk")
+                content = content.replaceAll("(?m)^\\s*// https://github\\.com/pubnative/pubnative-hybid-android-sdk/blob/main/LICENSE\\s*\\r?\\n", "")
                 file.text = content
             }
         } else {
             println "Source directory not found: ${sourceDir.path}"
         }
+
+        def resDir = file("src/main/res")
+        // Process XML resource files
+        if (resDir.exists()) {
+            fileTree(dir: resDir).include("**/*.xml").each { File file ->
+                def content = file.text
+                content = content.replaceAll("net\\.pubnative\\.lite\\.sdk", "com.verve.ng.sdk")
+                file.text = content
+            }
+        }
+
+        def manifestFile = file("src/main/AndroidManifest.xml")
+        // Process AndroidManifest.xml
+        if (manifestFile.exists()) {
+            def content = manifestFile.text
+            content = content.replaceAll("net\\.pubnative\\.lite\\.sdk", "com.verve.ng.sdk")
+            manifestFile.text = content
+        } else {
+            println "Manifest file not found: ${manifestFile.path}"
+        }
+
     }
 }
+
+tasks.register('namespaceFileContent') {
+    doLast {
+        def sourceDir = file('src/main/java')
+        fileTree(dir: sourceDir).include('**/*.java').each { File file ->
+            def content = file.text
+
+            //Replace all PN* references
+            if (content.contains("PN")) {
+                content = content.replaceAll(/\bPN([A-Z]\w*)/, 'NGSDK$1')
+            }
+
+            // Replace HYBID with NEXTGEN
+            content = content.replaceAll(~/HYBID/, 'NEXTGEN')
+
+            // Replace hybid with nextgen
+            content = content.replaceAll(~/hybid/, 'nextgen')
+
+            // Replace HyBid, Hybid, hyBid with NextGen
+            content = content.replaceAll(~/HyBid/, 'NextGen')
+            content = content.replaceAll(~/Hybid/, 'NextGen')
+            content = content.replaceAll(~/hyBid/, 'NextGen')
+            file.text = content
+        }
+    }
+}
+
+tasks.register('removeNextGenViewabilityManager') {
+    doLast {
+        def nextGenFile = file('src/main/java/com/verve/ng/sdk/NextGen.java')
+
+        if (nextGenFile.exists()) {
+            def content = nextGenFile.text
+
+            // Remove the import statement for NextGenViewabilityManager
+            content = content.replaceAll(/(?m)^import com\.verve\.ng\.sdk\.viewability\.NextGenViewabilityManager;\r?\n/, '')
+
+            // Remove NextGenViewabilityManager instance creation code block
+            content = content.replaceAll(/(?ms)\s*if \(hasPackageName\("com\.verve\.ng\.sdk"\)\) \{\s*sSdkManager = SdkManager\.builder\(\).*?\.visibilityManager\(new NextGenViewabilityManager\(application\)\).*?\.build\(\);\s*\}/, '')
+
+            nextGenFile.text = content
+        } else {
+            println "NextGen.java file not found at: ${nextGenFile.path}"
+        }
+    }
+}
+

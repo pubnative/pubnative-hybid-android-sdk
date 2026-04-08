@@ -19,7 +19,6 @@ import net.pubnative.lite.demo.R
 import net.pubnative.lite.demo.databinding.ActivityNavigationBinding
 import net.pubnative.lite.demo.ui.dialogs.SDKConfigDialog
 import net.pubnative.lite.demo.ui.dialogs.SDKConfigDialogManager
-import net.pubnative.lite.demo.util.OneTrustManager
 import net.pubnative.lite.sdk.api.ApiManager
 
 
@@ -41,7 +40,6 @@ class NavigationActivity : HybidDemoMainActivity(), SDKConfigDialog.OnDismissLis
         }
         setupToolbar()
         setupNavigationController()
-        initializeOpenTrustSDK()
         showSDKConfigDialog()
     }
 
@@ -54,10 +52,6 @@ class NavigationActivity : HybidDemoMainActivity(), SDKConfigDialog.OnDismissLis
     private fun showSDKConfigDialog() {
         val instance = SDKConfigDialogManager.getInstance()
         instance?.showDialog(this, supportFragmentManager)
-    }
-
-    private fun initializeOpenTrustSDK() {
-        OneTrustManager.getInstance(this).initializeOpenTrustSDK()
     }
 
     override fun onDismiss(url: String?) {

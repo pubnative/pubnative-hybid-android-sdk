@@ -9,6 +9,7 @@ import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.Surface;
@@ -107,9 +108,10 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
 
     private final Map<Action, List<Action>> mPendingActions = new LinkedHashMap<>();
     private final List<Action> mActions = new Vector<>();
-    private final Handler mActionsProcessingHandler = new Handler(Looper.getMainLooper());
-    private Boolean isActionsProcessingRun = false;
-    private Action currentAction = Action.INITIAL;
+    private HandlerThread mActionsHandlerThread;
+    private Handler mActionsProcessingHandler;
+    private volatile boolean isActionsProcessingRun = false;
+    private volatile Action currentAction = Action.INITIAL;
     private Boolean isLastEndCardCustom = false;
 
     VideoAdControllerVast(BaseVideoAdInternal baseAd,
@@ -168,6 +170,10 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
 
         hasEndcard = AdEndCardManager.getDefaultEndCard();
         mIntegrationType = integrationType;
+
+        mActionsHandlerThread = new HandlerThread("VastActionsProcessor");
+        mActionsHandlerThread.start();
+        mActionsProcessingHandler = new Handler(mActionsHandlerThread.getLooper());
     }
 
     private synchronized void addAction(Action action) {
@@ -208,9 +214,60 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
         }
     }
 
-    private void clearAllActions() {
+    private synchronized void clearAllActions() {
         mActions.clear();
         mPendingActions.clear();
+    }
+
+    private void runOnUiThread(Runnable r) {
+        mBaseAdInternal.runOnUiThread(r);
+    }
+
+    private void fireImpression() {
+        runOnUiThread(() -> mImpressionListener.onImpression());
+        isImpressionFired = true;
+    }
+
+    private void createSkipTimer(boolean autoClose, boolean showEndcard, boolean showCountdownTimer) {
+        if (mSkipTimeMillis > 0 && isFullscreen) {
+            mSkipTimerWithPause = new TimerWithPause(mSkipTimeMillis, 10) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    runOnUiThread(() -> mViewControllerVast.setSkipProgress((int) millisUntilFinished, mSkipTimeMillis));
+                }
+
+                @Override
+                public void onFinish() {
+                    runOnUiThread(() -> {
+                        if (mViewControllerVast != null) {
+                            mViewControllerVast.endSkip(autoClose, showEndcard);
+                        }
+                    });
+                }
+            }.create();
+            if (showCountdownTimer && mViewControllerVast != null && !hasHiddenUx()) {
+                runOnUiThread(() -> mViewControllerVast.showCountdownTimer());
+            }
+        } else if (mSkipTimeMillis == 0 && isFullscreen) {
+            if (mViewControllerVast != null) {
+                runOnUiThread(() -> mViewControllerVast.endSkip(autoClose, showEndcard));
+            }
+        }
+    }
+
+    private void processTrackingEvents() {
+        List<TrackingEvent> eventsToRemove = new ArrayList<>();
+        for (TrackingEvent event : mTrackingEventsList) {
+            if (mDoneMillis > event.timeMillis) {
+                if (event.name != null && event.name.equals(EventConstants.START) && !isImpressionFired && containsStartEvent) {
+                    fireImpression();
+                }
+                EventTracker.postEvent(mBaseAdInternal.getContext(), event.url, event.name, mMacroHelper, false);
+                fireViewabilityTrackingEvent(event.name);
+                eventsToRemove.add(event);
+            }
+        }
+        mTrackingEventsList.removeAll(eventsToRemove);
     }
 
     private synchronized void processActions() {
@@ -218,20 +275,26 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
         if (mActions.isEmpty() || isActionsProcessingRun) return;
         isActionsProcessingRun = true;
         mActionsProcessingHandler.post(() -> {
-            while (!mActions.isEmpty()) {
-                Action currentAction = mActions.get(0);
-                executeAction(currentAction);
-                this.currentAction = currentAction;
-                if (!mActions.isEmpty()) mActions.remove(0);
-                if (!mPendingActions.isEmpty() && mPendingActions.containsKey(currentAction)) {
-                    List<Action> pendingActions = mPendingActions.get(currentAction);
-                    if (pendingActions != null && !pendingActions.isEmpty()) {
-                        mActions.addAll(0, pendingActions);
+            Action actionToExecute;
+            while (true) {
+                synchronized (VideoAdControllerVast.this) {
+                    if (mActions.isEmpty()) {
+                        isActionsProcessingRun = false;
+                        break;
                     }
-                    mPendingActions.remove(currentAction);
+                    actionToExecute = mActions.remove(0);
+                    currentAction = actionToExecute;
+                }
+                executeAction(actionToExecute);
+                synchronized (VideoAdControllerVast.this) {
+                    if (mPendingActions.containsKey(actionToExecute)) {
+                        List<Action> pendingActions = mPendingActions.remove(actionToExecute);
+                        if (pendingActions != null && !pendingActions.isEmpty()) {
+                            mActions.addAll(0, pendingActions);
+                        }
+                    }
                 }
             }
-            isActionsProcessingRun = false;
         });
     }
 
@@ -263,7 +326,7 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
                 processPrepareAction();
             } catch (Exception e) {
                 Logger.e(LOG_TAG, "mediaPlayer re-init: " + e.getMessage());
-                closeSelf();
+                runOnUiThread(this::closeSelf);
             }
         });
     }
@@ -292,15 +355,17 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
 
     private void processPlayAction() {
         if (mMediaPlayer == null) return;
-        muteVideo(mViewControllerVast.isMute(), false);
-        mViewControllerVast.adjustLayoutParams(mMediaPlayer.getVideoWidth(), mMediaPlayer.getVideoHeight());
+        runOnUiThread(() -> {
+            muteVideo(mViewControllerVast.isMute(), false);
+            mViewControllerVast.adjustLayoutParams(mMediaPlayer.getVideoWidth(), mMediaPlayer.getVideoHeight());
+        });
         mMediaPlayer.setSurface(mViewControllerVast.getSurface());
         createTimer(mMediaPlayer.getDuration());
         if (!isReplay) {
-            getViewabilityAdSession().fireImpression();
+            runOnUiThread(() -> getViewabilityAdSession().fireImpression());
         }
         if (mBaseAdInternal != null && mBaseAdInternal.getAdListener() != null) {
-            mBaseAdInternal.getAdListener().onAdStarted();
+            runOnUiThread(() -> mBaseAdInternal.getAdListener().onAdStarted());
         }
         mMediaPlayer.start();
     }
@@ -320,7 +385,7 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
             try {
                 if (mMediaPlayer.isPlaying()){
                     mMediaPlayer.pause();
-                    getViewabilityAdSession().firePause();
+                    runOnUiThread(() -> getViewabilityAdSession().firePause());
                 }
             } catch (IllegalStateException exception) {
                 Logger.e(VideoAdControllerVast.class.getSimpleName(),"Media player is not prepared: "
@@ -355,7 +420,7 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
 
         if (!isVideoCompleted && !isVideoSkipped) {
             fireReportingEvent(Reporting.EventType.VIDEO_RESUME);
-            getViewabilityAdSession().fireResume();
+            runOnUiThread(() -> getViewabilityAdSession().fireResume());
             EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.RESUME, mMacroHelper, false);
         }
     }
@@ -461,58 +526,28 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
         mTimerWithPause = new TimerWithPause(duration, 10) {
             @Override
             public void onTick(long millisUntilFinished) {
-                mViewControllerVast.setProgress((int) millisUntilFinished, duration);
+                runOnUiThread(() -> mViewControllerVast.setProgress((int) millisUntilFinished, duration));
                 mDoneMillis = duration - (int) millisUntilFinished;
 
                 if (!isImpressionFired && !containsStartEvent) {
-                    mImpressionListener.onImpression();
-                    isImpressionFired = true;
+                    fireImpression();
                 }
 
-                List<TrackingEvent> eventsToRemove = new ArrayList<>();
-                for (TrackingEvent event : mTrackingEventsList) {
-                    if (mDoneMillis > event.timeMillis) {
-                        if (event.name != null && event.name.equals(EventConstants.START) && !isImpressionFired && containsStartEvent) {
-                            mImpressionListener.onImpression();
-                            isImpressionFired = true;
-                        }
-                        EventTracker.postEvent(mBaseAdInternal.getContext(), event.url, event.name, mMacroHelper, false);
-                        fireViewabilityTrackingEvent(event.name);
-                        eventsToRemove.add(event);
-                    }
-                }
-
-                mTrackingEventsList.removeAll(eventsToRemove);
+                processTrackingEvents();
             }
 
             @Override
             public void onFinish() {
-                if (mViewControllerVast != null) {
-                    mViewControllerVast.resetProgress();
+                runOnUiThread(() -> {
+                    if (mViewControllerVast != null) {
+                        mViewControllerVast.resetProgress();
+                    }
                     handleMediaPlayerComplete();
-                }
+                });
             }
         }.create();
 
-        if (mSkipTimeMillis > 0 && isFullscreen) {
-            mSkipTimerWithPause = new TimerWithPause(mSkipTimeMillis, 10) {
-                @Override
-                public void onTick(long millisUntilFinished) {
-                    mViewControllerVast.setSkipProgress((int) millisUntilFinished, mSkipTimeMillis);
-                }
-
-                @Override
-                public void onFinish() {
-                    if (mViewControllerVast != null) {
-                        mViewControllerVast.endSkip(isAutoClose, hasEndcard);
-                    }
-                }
-            }.create();
-        } else if (mSkipTimeMillis == 0 && isFullscreen) {
-            if (mViewControllerVast != null) {
-                mViewControllerVast.endSkip(isAutoClose, hasEndcard);
-            }
-        }
+        createSkipTimer(isAutoClose, hasEndcard, false);
     }
 
     private void createReplayTimer(final int duration) {
@@ -522,100 +557,68 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
         mTimerWithPause = new TimerWithPause(duration, 10) {
             @Override
             public void onTick(long millisUntilFinished) {
-                mViewControllerVast.setProgress((int) millisUntilFinished, duration);
+                runOnUiThread(() -> mViewControllerVast.setProgress((int) millisUntilFinished, duration));
                 mDoneMillis = duration - (int) millisUntilFinished;
 
-                List<TrackingEvent> eventsToRemove = new ArrayList<>();
-                for (TrackingEvent event : mTrackingEventsList) {
-                    if (mDoneMillis > event.timeMillis) {
-                        if (event.name != null && event.name.equals(EventConstants.START) && !isImpressionFired && containsStartEvent) {
-                            mImpressionListener.onImpression();
-                            isImpressionFired = true;
-                        }
-                        EventTracker.postEvent(mBaseAdInternal.getContext(), event.url, event.name, mMacroHelper, false);
-                        fireViewabilityTrackingEvent(event.name);
-                        eventsToRemove.add(event);
-                    }
-                }
-
-                mTrackingEventsList.removeAll(eventsToRemove);
+                processTrackingEvents();
             }
 
             @Override
             public void onFinish() {
-                if (mViewControllerVast != null) {
-                    mViewControllerVast.showEndcards();
-                }
+                runOnUiThread(() -> {
+                    if (mViewControllerVast != null) {
+                        mViewControllerVast.showEndcards();
+                    }
+                });
             }
         }.create();
 
-        if (mSkipTimeMillis > 0 && isFullscreen) {
-            mSkipTimerWithPause = new TimerWithPause(mSkipTimeMillis, 10) {
-                @Override
-                public void onTick(long millisUntilFinished) {
-                    mViewControllerVast.setSkipProgress((int) millisUntilFinished, mSkipTimeMillis);
-                }
-
-                @Override
-                public void onFinish() {
-                    if (mViewControllerVast != null) {
-                        // This is done so the skip button is shown in all cases for replay
-                        mViewControllerVast.endSkip(false, true);
-                    }
-                }
-            }.create();
-            if (mViewControllerVast != null && !hasHiddenUx()) {
-                mViewControllerVast.showCountdownTimer();
-            }
-        } else if (mSkipTimeMillis == 0 && isFullscreen) {
-            if (mViewControllerVast != null) {
-                mViewControllerVast.endSkip(isAutoClose, hasEndcard);
-            }
-        }
+        createSkipTimer(false, true, true);
     }
 
     private void fireViewabilityTrackingEvent(String name) {
-        if (getViewabilityAdSession() == null)
+        if (getViewabilityAdSession() == null || TextUtils.isEmpty(name)) {
             return;
-        if (!TextUtils.isEmpty(name)) {
-            switch (name) {
-                case EventConstants.START:
-                    try {
-                        getViewabilityAdSession().fireStart(getAdParams().getDuration(), true);
-                    } catch (Exception ex) {
-                        if (mDuration > 0)
-                            getViewabilityAdSession().fireStart((float) mDuration, true);
-                        else if (mSkipTimeMillis > 0)
-                            getViewabilityAdSession().fireStart((float) mSkipTimeMillis, true);
-                    }
-                    if (!startFired) {
-                        fireReportingEvent(Reporting.EventType.VIDEO_STARTED);
-                        startFired = true;
-                    }
-                    break;
-                case EventConstants.FIRST_QUARTILE:
-                    getViewabilityAdSession().fireFirstQuartile();
-                    if (!firstQuartileFired) {
-                        fireReportingEvent(Reporting.EventType.VIDEO_AD_FIRST_QUARTILE);
-                        firstQuartileFired = true;
-                    }
-                    break;
-                case EventConstants.MIDPOINT:
-                    getViewabilityAdSession().fireMidpoint();
-                    if (!midpointFired) {
-                        fireReportingEvent(Reporting.EventType.VIDEO_AD_MIDPOINT);
-                        midpointFired = true;
-                    }
-                    break;
-                case EventConstants.THIRD_QUARTILE:
-                    getViewabilityAdSession().fireThirdQuartile();
-                    if (!thirdQuartileFired) {
-                        fireReportingEvent(Reporting.EventType.VIDEO_AD_THIRD_QUARTILE);
-                        thirdQuartileFired = true;
-                    }
-                    break;
-            }
         }
+        switch (name) {
+            case EventConstants.START:
+                final float startDuration = resolveStartDuration();
+                runOnUiThread(() -> getViewabilityAdSession().fireStart(startDuration, true));
+                startFired = fireReportingEventOnce(startFired, Reporting.EventType.VIDEO_STARTED);
+                break;
+            case EventConstants.FIRST_QUARTILE:
+                runOnUiThread(() -> getViewabilityAdSession().fireFirstQuartile());
+                firstQuartileFired = fireReportingEventOnce(firstQuartileFired, Reporting.EventType.VIDEO_AD_FIRST_QUARTILE);
+                break;
+            case EventConstants.MIDPOINT:
+                runOnUiThread(() -> getViewabilityAdSession().fireMidpoint());
+                midpointFired = fireReportingEventOnce(midpointFired, Reporting.EventType.VIDEO_AD_MIDPOINT);
+                break;
+            case EventConstants.THIRD_QUARTILE:
+                runOnUiThread(() -> getViewabilityAdSession().fireThirdQuartile());
+                thirdQuartileFired = fireReportingEventOnce(thirdQuartileFired, Reporting.EventType.VIDEO_AD_THIRD_QUARTILE);
+                break;
+        }
+    }
+
+    private float resolveStartDuration() {
+        if (getAdParams() != null && getAdParams().getDurationInteger() != null
+                && getAdParams().getDurationInteger() > 0) {
+            return getAdParams().getDurationInteger();
+        } else if (mDuration > 0) {
+            return mDuration / 1000f;
+        } else if (mSkipTimeMillis > 0) {
+            return mSkipTimeMillis / 1000f;
+        }
+        return 0;
+    }
+
+    private boolean fireReportingEventOnce(boolean alreadyFired, String eventType) {
+        if (!alreadyFired) {
+            fireReportingEvent(eventType);
+            return true;
+        }
+        return alreadyFired;
     }
 
     private void initSkipTime(int duration) {
@@ -769,7 +772,12 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
         return event;
     }
 
-    private final MediaPlayer.OnCompletionListener mOnCompletionListener = mp -> handleMediaPlayerComplete();
+    private final MediaPlayer.OnCompletionListener mOnCompletionListener = new MediaPlayer.OnCompletionListener() {
+        @Override
+        public void onCompletion(MediaPlayer mp) {
+            runOnUiThread(() -> handleMediaPlayerComplete());
+        }
+    };
 
     private void postDelayed(Runnable action) {
         mViewControllerVast.postDelayed(action, VideoAdControllerVast.DELAY_UNTIL_EXECUTE);
@@ -821,10 +829,10 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
         clearAllActions();
 
         if (skipEvent) {
-            getViewabilityAdSession().fireSkipped();
+            runOnUiThread(() -> getViewabilityAdSession().fireSkipped());
             mBaseAdInternal.onAdSkipped();
         } else {
-            if (!isVideoSkipped) getViewabilityAdSession().fireComplete();
+            if (!isVideoSkipped) runOnUiThread(() -> getViewabilityAdSession().fireComplete());
         }
 
         if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
@@ -895,7 +903,7 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
         }
 
         try {
-            getViewabilityAdSession().fireVolumeChange(mute);
+            runOnUiThread(() -> getViewabilityAdSession().fireVolumeChange(mute));
 
             if (mute) {
                 mMediaPlayer.setVolume(0f, 0f);
@@ -1107,6 +1115,12 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
         mViewControllerVast.destroy();
 
         clearAllActions();
+
+        if (mActionsHandlerThread != null) {
+            mActionsHandlerThread.quitSafely();
+            mActionsHandlerThread = null;
+            mActionsProcessingHandler = null;
+        }
     }
 
 
@@ -1216,7 +1230,8 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
         if (baseAd != null && baseAd.getAd() != null) {
             Boolean hasReducedIconSize = baseAd.getAd().isIconSizeReduced();
             String adExperience = baseAd.getAd().getAdExperience();
-            return adExperience.equalsIgnoreCase(AdExperience.PERFORMANCE) &&
+            return adExperience != null &&
+                    adExperience.equalsIgnoreCase(AdExperience.PERFORMANCE) &&
                     hasReducedIconSize != null && hasReducedIconSize;
         }
         return false;

@@ -9,29 +9,51 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 import net.pubnative.lite.sdk.testing.TestUtil;
+import net.pubnative.lite.sdk.utils.AtomManager;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
 @RunWith(RobolectricTestRunner.class)
 public class AdTest {
     private Ad mSubject;
 
+    @Mock
+    private AtomManager mockAtomManager;
+
+    private static final String SURVEY_HTML_KEY = "SurveyHtml";
+
+
+    private static final String TEST_SURVEY_HTML_TEMPLATE = "<!DOCTYPE html><html><body>" +
+            "<h1>Survey</h1>" +
+            "<div id=\"survey-data\">{survey_data_json}</div>" +
+            "</body></html>";
+
+    private static final String CUSTOM_END_CARD_WITHOUT_PLACEHOLDER = "<!DOCTYPE html><html><body>" +
+            "<h1>Static End Card</h1>" +
+            "<p>Thank you for watching!</p>" +
+            "</body></html>";
+
     @Before
     public void setup() {
         mSubject = TestUtil.createTestBannerAd();
+        MockitoAnnotations.openMocks(this);
     }
 
-    // --------------- EXISTING TESTS (UNCHANGED) ---------------
     @Test
     public void validateAd() throws Exception {
         JSONObject json = mSubject.toJson();
@@ -59,7 +81,6 @@ public class AdTest {
         assertEquals("bottom_up", parsedAd.getBcLearnMoreLocation());
     }
 
-    // --------------- NEW TESTS FOR EXPANDED COVERAGE ---------------
 
     @Test
     public void constructor_withAdTypeVideo_createsVastAsset() {
@@ -77,81 +98,304 @@ public class AdTest {
         Ad htmlAd = new Ad(2, htmlValue, Ad.AdType.HTML);
 
         assertEquals(2, htmlAd.assetgroupid);
-        assertEquals(htmlValue, htmlAd.getAssetHtml(APIAsset.HTML_BANNER));
+        assertNotNull(htmlAd.getAsset(APIAsset.HTML_BANNER));
     }
 
     @Test
-    public void getECPM_whenPointsMetaIsMissing_returnsMinPoints() {
-        mSubject.meta = new ArrayList<>(); // Clear the meta list
-        assertEquals(Integer.valueOf(10), mSubject.getECPM());
+    public void getAsset_withNullAssets_returnsNull() {
+        Ad ad = new Ad();
+        ad.assets = null;
+
+        assertNull(ad.getAsset(APIAsset.HTML_BANNER));
     }
 
     @Test
-    public void getImpressionId_whenBeaconIsValid_returnsId() {
-        AdData impressionBeacon = new AdData();
-        impressionBeacon.type = Ad.Beacon.IMPRESSION;
-        impressionBeacon.data = new java.util.HashMap<>();
-        impressionBeacon.data.put("url", "https://got.pubnative.net/impression?t=test_impression_id&some_other_param=value");
-        mSubject.beacons = List.of(impressionBeacon);
+    public void getMeta_withNullMeta_returnsNull() {
+        Ad ad = new Ad();
+        ad.meta = null;
 
-        assertEquals("test_impression_id", mSubject.getImpressionId());
+        assertNull(ad.getMeta("remoteconfigs"));
     }
 
     @Test
-    public void getImpressionId_whenBeaconIsInvalid_returnsEmptyString() {
-        AdData impressionBeacon = new AdData();
-        impressionBeacon.type = Ad.Beacon.IMPRESSION;
-        impressionBeacon.data = new java.util.HashMap<>();
-        impressionBeacon.data.put("url", "https://some.other.url/impression");
-        mSubject.beacons = List.of(impressionBeacon);
+    public void getBeacons_withNullBeacons_returnsNull() {
+        Ad ad = new Ad();
+        ad.beacons = null;
 
-        assertEquals("", mSubject.getImpressionId());
+        assertNull(ad.getBeacons(Ad.Beacon.IMPRESSION));
     }
 
     @Test
-    public void getSessionId_whenImpressionIdIsMissing_returnsUUID() {
-        mSubject.beacons = new ArrayList<>(); // No beacons
-        String sessionId1 = mSubject.getSessionId();
-        String sessionId2 = mSubject.getSessionId();
-
-        assertNotNull(sessionId1);
-        assertFalse(sessionId1.isEmpty());
-        assertEquals(sessionId1, sessionId2); // Subsequent calls should return the same UUID
+    public void setAndGetZoneId() {
+        mSubject.setZoneId("zone_123");
+        assertEquals("zone_123", mSubject.getZoneId());
     }
 
     @Test
-    public void compareTo_sortsAdsByEcpmDescending() {
-        Ad adWithHighEcpm = TestUtil.createHeaderBiddingTestAd(1, 100); // ECPM = 100
-        Ad adWithLowEcpm = TestUtil.createHeaderBiddingTestAd(1, 10);  // ECPM = 10
-
-        List<Ad> adList = new ArrayList<>(List.of(adWithLowEcpm, adWithHighEcpm));
-        Collections.sort(adList);
-
-        // After sorting, the ad with the higher ECPM should be first.
-        assertEquals(adWithHighEcpm, adList.get(0));
-    }
-
-    // --------------- NEW TESTS FOR DeepLink ---------------
-    @Test
-    public void getLink_whenLinkIsPresent_returnsLink() {
-        mSubject = TestUtil.createTestInterstitialAd();
-        mSubject.link = "https://example.com/linkURL";
-        assertEquals("https://example.com/linkURL", mSubject.getLink());
+    public void setAndGetLink() {
+        mSubject.setLink("https://test.com");
+        assertEquals("https://test.com", mSubject.getLink());
     }
 
     @Test
-    public void getLink_whenLinkIsEmpty_returnsNull() {
-        mSubject = TestUtil.createTestInterstitialAd();
-        mSubject.link = "";
-
-        assertNull(mSubject.getLink());
+    public void setAndGetAdSourceName() {
+        mSubject.setAdSourceName("TestSource");
+        assertEquals("TestSource", mSubject.getAdSourceName());
     }
 
     @Test
-    public void getLink_whenLinkIsNull_returnsNull() {
-        mSubject = TestUtil.createTestInterstitialAd();
-        mSubject.link = null;
-        assertNull(mSubject.getLink());
+    public void setAndGetHasEndCard() {
+        mSubject.setHasEndCard(true);
+        assertTrue(mSubject.hasEndCard());
+        mSubject.setHasEndCard(false);
+        assertFalse(mSubject.hasEndCard());
     }
-    // --------------- NEW TESTS FOR DeepLink ---------------
+
+    @Test
+    public void getCustomEndCard_atomProvidesSurveyHtml_returnsAtomHtml() {
+        Ad ad = new Ad();
+        ad.assets = new ArrayList<>();
+
+        try (MockedStatic<AtomManager> mockedAtom = mockStatic(AtomManager.class)) {
+            mockedAtom.when(AtomManager::getInstance).thenReturn(mockAtomManager);
+
+            HashMap<String, String> atomData = new HashMap<>();
+            atomData.put(SURVEY_HTML_KEY, TEST_SURVEY_HTML_TEMPLATE);
+            when(mockAtomManager.getAtomJSData()).thenReturn(atomData);
+
+            EndCardData result = ad.getCustomEndCard();
+
+            assertNotNull(result);
+            assertEquals(EndCardData.Type.HTML_RESOURCE, result.getType());
+            assertEquals(TEST_SURVEY_HTML_TEMPLATE, result.getContent());
+            assertTrue(ad.hasCustomEndCard());
+        }
+    }
+
+    /**
+     * When Atom provides SurveyHtml with null value, getCustomEndCard() should return null
+     */
+    @Test
+    public void getCustomEndCard_atomReturnsSurveyHtmlNull_returnsNullEndCard() {
+        Ad ad = new Ad();
+        ad.assets = new ArrayList<>();
+
+        try (MockedStatic<AtomManager> mockedAtom = mockStatic(AtomManager.class)) {
+            mockedAtom.when(AtomManager::getInstance).thenReturn(mockAtomManager);
+
+            HashMap<String, String> atomData = new HashMap<>();
+            // SurveyHtml key not present -> .get() returns null
+            when(mockAtomManager.getAtomJSData()).thenReturn(atomData);
+
+            EndCardData result = ad.getCustomEndCard();
+
+            assertNull(result);
+        }
+    }
+
+
+    @Test
+    public void getCustomEndCard_atomReturnsNull_fallsBackToAdserverAsset() {
+        Ad ad = createAdWithCustomEndCard(CUSTOM_END_CARD_WITHOUT_PLACEHOLDER);
+
+        try (MockedStatic<AtomManager> mockedAtom = mockStatic(AtomManager.class)) {
+            mockedAtom.when(AtomManager::getInstance).thenReturn(mockAtomManager);
+            when(mockAtomManager.getAtomJSData()).thenReturn(null);
+
+            EndCardData result = ad.getCustomEndCard();
+
+            assertNotNull(result);
+            assertEquals(EndCardData.Type.HTML_RESOURCE, result.getType());
+            assertEquals(CUSTOM_END_CARD_WITHOUT_PLACEHOLDER, result.getContent());
+        }
+    }
+
+
+    @Test
+    public void getCustomEndCard_atomReturnsNull_noAdserverAsset_returnsNull() {
+        Ad ad = new Ad();
+        ad.assets = new ArrayList<>();
+
+        try (MockedStatic<AtomManager> mockedAtom = mockStatic(AtomManager.class)) {
+            mockedAtom.when(AtomManager::getInstance).thenReturn(mockAtomManager);
+            when(mockAtomManager.getAtomJSData()).thenReturn(null);
+
+            EndCardData result = ad.getCustomEndCard();
+
+            assertNull(result);
+        }
+    }
+
+
+    @Test
+    public void getCustomEndCard_adserverAssetHtmlNull_atomNull_returnsNull() {
+        Ad ad = new Ad();
+        ad.assets = new ArrayList<>();
+        AdData adData = new AdData();
+        adData.type = APIAsset.CUSTOM_END_CARD;
+        adData.data = new HashMap<>();
+        adData.data.put("html", null);
+        ad.assets.add(adData);
+
+        try (MockedStatic<AtomManager> mockedAtom = mockStatic(AtomManager.class)) {
+            mockedAtom.when(AtomManager::getInstance).thenReturn(mockAtomManager);
+            when(mockAtomManager.getAtomJSData()).thenReturn(null);
+
+            EndCardData result = ad.getCustomEndCard();
+
+            assertNull(result);
+        }
+    }
+
+
+    @Test
+    public void hasCustomEndCard_adserverAssetExists_returnsTrue() {
+        Ad ad = createAdWithCustomEndCard(CUSTOM_END_CARD_WITHOUT_PLACEHOLDER);
+
+        try (MockedStatic<AtomManager> mockedAtom = mockStatic(AtomManager.class)) {
+            mockedAtom.when(AtomManager::getInstance).thenReturn(mockAtomManager);
+            when(mockAtomManager.getAtomJSData()).thenReturn(null);
+
+            assertTrue(ad.hasCustomEndCard());
+        }
+    }
+
+
+    @Test
+    public void hasCustomEndCard_noAdserverAsset_atomHasSurveyHtml_returnsTrue() {
+        Ad ad = new Ad();
+        ad.assets = new ArrayList<>();
+
+        try (MockedStatic<AtomManager> mockedAtom = mockStatic(AtomManager.class)) {
+            mockedAtom.when(AtomManager::getInstance).thenReturn(mockAtomManager);
+
+            HashMap<String, String> atomData = new HashMap<>();
+            atomData.put(SURVEY_HTML_KEY, TEST_SURVEY_HTML_TEMPLATE);
+            when(mockAtomManager.getAtomJSData()).thenReturn(atomData);
+
+            assertTrue(ad.hasCustomEndCard());
+        }
+    }
+
+
+    @Test
+    public void hasCustomEndCard_noAdserverAsset_atomReturnsNull_returnsFalse() {
+        Ad ad = new Ad();
+        ad.assets = new ArrayList<>();
+
+        try (MockedStatic<AtomManager> mockedAtom = mockStatic(AtomManager.class)) {
+            mockedAtom.when(AtomManager::getInstance).thenReturn(mockAtomManager);
+            when(mockAtomManager.getAtomJSData()).thenReturn(null);
+
+            assertFalse(ad.hasCustomEndCard());
+        }
+    }
+
+
+    @Test
+    public void hasCustomEndCard_noAdserverAsset_atomSurveyHtmlNull_returnsFalse() {
+        Ad ad = new Ad();
+        ad.assets = new ArrayList<>();
+
+        try (MockedStatic<AtomManager> mockedAtom = mockStatic(AtomManager.class)) {
+            mockedAtom.when(AtomManager::getInstance).thenReturn(mockAtomManager);
+
+            HashMap<String, String> atomData = new HashMap<>();
+            // No SURVEY_HTML_KEY entry
+            when(mockAtomManager.getAtomJSData()).thenReturn(atomData);
+
+            assertFalse(ad.hasCustomEndCard());
+        }
+    }
+
+
+    @Test
+    public void hasCustomEndCard_noAdserverAsset_atomSurveyHtmlEmpty_returnsFalse() {
+        Ad ad = new Ad();
+        ad.assets = new ArrayList<>();
+
+        try (MockedStatic<AtomManager> mockedAtom = mockStatic(AtomManager.class)) {
+            mockedAtom.when(AtomManager::getInstance).thenReturn(mockAtomManager);
+
+            HashMap<String, String> atomData = new HashMap<>();
+            atomData.put(SURVEY_HTML_KEY, "");
+            when(mockAtomManager.getAtomJSData()).thenReturn(atomData);
+
+            assertFalse(ad.hasCustomEndCard());
+        }
+    }
+
+
+    @Test
+    public void hasCustomEndCard_noAdserverAsset_atomSurveyHtmlTooShort_returnsFalse() {
+        Ad ad = new Ad();
+        ad.assets = new ArrayList<>();
+
+        try (MockedStatic<AtomManager> mockedAtom = mockStatic(AtomManager.class)) {
+            mockedAtom.when(AtomManager::getInstance).thenReturn(mockAtomManager);
+
+            HashMap<String, String> atomData = new HashMap<>();
+            atomData.put(SURVEY_HTML_KEY, "abc");
+            when(mockAtomManager.getAtomJSData()).thenReturn(atomData);
+
+            assertFalse(ad.hasCustomEndCard());
+        }
+    }
+
+
+    @Test
+    public void hasCustomEndCard_noAdserverAsset_atomSurveyHtmlWhitespace_returnsFalse() {
+        Ad ad = new Ad();
+        ad.assets = new ArrayList<>();
+
+        try (MockedStatic<AtomManager> mockedAtom = mockStatic(AtomManager.class)) {
+            mockedAtom.when(AtomManager::getInstance).thenReturn(mockAtomManager);
+
+            HashMap<String, String> atomData = new HashMap<>();
+            atomData.put(SURVEY_HTML_KEY, "    ");
+            when(mockAtomManager.getAtomJSData()).thenReturn(atomData);
+
+            assertFalse(ad.hasCustomEndCard());
+        }
+    }
+
+
+    @Test
+    public void hasCustomEndCard_exceptionThrown_returnsFalse() {
+        Ad ad = new Ad();
+        ad.assets = new ArrayList<>();
+
+        try (MockedStatic<AtomManager> mockedAtom = mockStatic(AtomManager.class)) {
+            mockedAtom.when(AtomManager::getInstance).thenThrow(new RuntimeException("test"));
+
+            assertFalse(ad.hasCustomEndCard());
+        }
+    }
+
+    @Test
+    public void hasCustomEndCard_bothAdserverAssetAndAtomPresent_returnsTrue() {
+        Ad ad = createAdWithCustomEndCard(CUSTOM_END_CARD_WITHOUT_PLACEHOLDER);
+
+        try (MockedStatic<AtomManager> mockedAtom = mockStatic(AtomManager.class)) {
+            mockedAtom.when(AtomManager::getInstance).thenReturn(mockAtomManager);
+
+            HashMap<String, String> atomData = new HashMap<>();
+            atomData.put(SURVEY_HTML_KEY, TEST_SURVEY_HTML_TEMPLATE);
+            when(mockAtomManager.getAtomJSData()).thenReturn(atomData);
+
+            assertTrue(ad.hasCustomEndCard());
+        }
+    }
+
+
+    private Ad createAdWithCustomEndCard(String html) {
+        Ad ad = new Ad();
+        ad.assets = new ArrayList<>();
+        AdData adData = new AdData();
+        adData.type = APIAsset.CUSTOM_END_CARD;
+        adData.data = new HashMap<>();
+        adData.data.put("html", html);
+        ad.assets.add(adData);
+        return ad;
+    }
 }

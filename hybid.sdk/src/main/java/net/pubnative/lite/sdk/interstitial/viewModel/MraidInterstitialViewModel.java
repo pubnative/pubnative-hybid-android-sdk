@@ -22,6 +22,8 @@ import net.pubnative.lite.sdk.mraid.MRAIDViewCloseLayoutListener;
 import net.pubnative.lite.sdk.mraid.MRAIDViewListener;
 import net.pubnative.lite.sdk.mraid.model.HTMLAd;
 import net.pubnative.lite.sdk.utils.ClickThroughTimerManager;
+import net.pubnative.lite.sdk.viewability.FriendlyObstructionReasonConstants;
+import net.pubnative.lite.sdk.viewability.baseom.BaseFriendlyObstructionPurpose;
 
 public class MraidInterstitialViewModel extends InterstitialViewModel implements MRAIDViewListener, MRAIDNativeFeatureListener, MRAIDViewCloseLayoutListener, ClickThroughTimerManager.ClickThroughTimerListener {
 
@@ -40,6 +42,13 @@ public class MraidInterstitialViewModel extends InterstitialViewModel implements
         super(context, zoneId, integrationType, skipOffset, broadcastId, listener);
         processInterstitialAd();
         listener.setContentLayout();
+    }
+
+    @Override
+    public void addFriendlyObstruction(View view) {
+        if (mView != null) {
+            mView.addViewabilityFriendlyObstruction(view, BaseFriendlyObstructionPurpose.OTHER, FriendlyObstructionReasonConstants.WATERMARK_OBSTRUCTION_REASON);
+        }
     }
 
     @Override

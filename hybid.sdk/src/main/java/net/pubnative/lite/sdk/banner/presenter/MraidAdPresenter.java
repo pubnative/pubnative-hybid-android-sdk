@@ -9,6 +9,8 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.VideoListener;
@@ -30,6 +32,8 @@ import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.HybidConsumer;
 import net.pubnative.lite.sdk.utils.UrlHandler;
+import net.pubnative.lite.sdk.viewability.FriendlyObstructionReasonConstants;
+import net.pubnative.lite.sdk.viewability.baseom.BaseFriendlyObstructionPurpose;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.views.ProgressDialogFragment;
 import net.pubnative.lite.sdk.visibility.ImpressionManager;
@@ -52,6 +56,7 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
     private final ImpressionTrackingMethod mTrackingMethod;
     private final UrlHandler mUrlHandlerDelegate;
     private final String[] mSupportedNativeFeatures;
+    private final View mWatermark;
     private AdSize mAdSize;
 
     private AdPresenter.Listener mListener;
@@ -62,10 +67,11 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
     private MRAIDViewListener mRaidListener;
     private ReportingController mReportingController;
 
-    public MraidAdPresenter(Context context, Ad ad, AdSize adSize, ImpressionTrackingMethod trackingMethod) {
+    public MraidAdPresenter(Context context, Ad ad, AdSize adSize, ImpressionTrackingMethod trackingMethod, View watermark) {
         mContext = context;
         mAdSize = adSize;
         mAd = ad;
+        mWatermark = watermark;
 
         ImpressionTrackingMethod trackingMethodFinal = trackingMethod;
 
@@ -165,13 +171,31 @@ public class MraidAdPresenter implements AdPresenter, MRAIDViewListener, MRAIDNa
     }
 
     @Override
+    public void addFriendlyObstruction(View view) {
+        if (mMRAIDBanner != null) {
+            mMRAIDBanner.addViewabilityFriendlyObstruction(view, BaseFriendlyObstructionPurpose.OTHER, FriendlyObstructionReasonConstants.WATERMARK_OBSTRUCTION_REASON);
+        }
+    }
+
+    @Override
     public void mraidViewLoaded(MRAIDView mraidView) {
         if (mIsDestroyed) {
             return;
         }
 
         if (mListener != null) {
-            mListener.onAdLoaded(this, mMRAIDBanner);
+            FrameLayout container = new FrameLayout(mContext);
+            if (mMRAIDBanner != null && mMRAIDBanner.getParent() != null) {
+                ((ViewGroup) mMRAIDBanner.getParent()).removeView(mMRAIDBanner);
+            }
+            container.addView(mMRAIDBanner);
+            if (mWatermark != null) {
+                if (mWatermark.getParent() != null) {
+                    ((ViewGroup) mWatermark.getParent()).removeView(mWatermark);
+                }
+                container.addView(mWatermark);
+            }
+            mListener.onAdLoaded(this, container);
             if (mTrackingMethod == ImpressionTrackingMethod.AD_RENDERED && mImpressionListener != null) {
                 mImpressionListener.onImpression();
             }

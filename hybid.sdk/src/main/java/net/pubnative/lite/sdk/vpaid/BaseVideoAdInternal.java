@@ -28,6 +28,7 @@ import net.pubnative.lite.sdk.vpaid.enums.AdState;
 import net.pubnative.lite.sdk.vpaid.enums.VastError;
 import net.pubnative.lite.sdk.vpaid.helpers.AssetsLoader;
 import net.pubnative.lite.sdk.vpaid.helpers.ErrorLog;
+import net.pubnative.lite.sdk.vpaid.helpers.FileLockManager;
 import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.AdSpotDimensions;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
@@ -58,6 +59,7 @@ abstract class BaseVideoAdInternal {
     private SimpleTimer mPrepareTimer;
     private Ad mAd;
     private VideoAdCacheItem mCacheItem;
+    private String mVideoFilePath;
 
     BaseVideoAdInternal(Context context, Ad ad, boolean isInterstitial, boolean isFullscreen, AdPresenter.ImpressionListener impressionListener, AdCloseButtonListener adCloseButtonListener) throws Exception {
         String data = ad.getVast();
@@ -158,9 +160,21 @@ abstract class BaseVideoAdInternal {
     void releaseAdController() {
         Logger.d(LOG_TAG, "Release ViewControllerVast");
 
+        // Release file lock before destroying ViewControllerVast
+        releaseFileLock();
+
         if (mAdController != null) {
             mAdController.destroy();
             mAdController = null;
+        }
+    }
+
+    // Release file lock when ad is dismissed or destroyed
+    private void releaseFileLock() {
+        if (mVideoFilePath != null) {
+            FileLockManager.getInstance().release(mVideoFilePath);
+            Logger.d(LOG_TAG, "Released file lock for: " + mVideoFilePath);
+            mVideoFilePath = null;
         }
     }
 
@@ -366,6 +380,15 @@ abstract class BaseVideoAdInternal {
             Logger.d(LOG_TAG, "VideoAdController == null, after onAssetsLoaded success");
             return;
         }
+
+        mVideoFilePath = videoFilePath;
+
+        // Lock file to prevent deletion while video is playing
+        if (videoFilePath != null) {
+            FileLockManager.getInstance().acquire(videoFilePath);
+            Logger.d(LOG_TAG, "Acquired file lock for playback: " + videoFilePath);
+        }
+
         mAdController.setVideoFilePath(videoFilePath);
 
         if (getAd() != null) {
@@ -373,15 +396,19 @@ abstract class BaseVideoAdInternal {
             if (AdEndCardManager.shouldShowEndcard(getAd())) {
                 mAdController.addEndCardData(endCardData);
                 if (AdEndCardManager.shouldShowCustomEndcard(getAd()) && getAd().getCustomEndCardDisplay().equals(CustomEndCardDisplay.EXTENSION)) {
-                    if (!endCard.getContent().isEmpty()) {
+                    if (isEndCardValid(endCard)) {
                         mAdController.addEndCardData(endCard);
                         mVideoAdListener.onAdCustomEndCardFound();
+                    } else {
+                        Logger.d(LOG_TAG, "Custom end card data is null or empty");
                     }
                 }
             } else if (AdEndCardManager.shouldShowCustomEndcard(getAd())) {
-                if (!endCard.getContent().isEmpty()) {
+                if (isEndCardValid(endCard)) {
                     mAdController.addEndCardData(endCard);
                     mVideoAdListener.onAdCustomEndCardFound();
+                } else {
+                    Logger.d(LOG_TAG, "Custom end card data is null or empty");
                 }
             }
         }
@@ -391,6 +418,10 @@ abstract class BaseVideoAdInternal {
             startPrepareTimer();
             mAdController.prepare(createOnPrepareListener());
         });
+    }
+
+    private boolean isEndCardValid(EndCardData endCard) {
+        return endCard != null && endCard.getContent() != null && !endCard.getContent().isEmpty();
     }
 
     private VideoAdController.OnPreparedListener createOnPrepareListener() {

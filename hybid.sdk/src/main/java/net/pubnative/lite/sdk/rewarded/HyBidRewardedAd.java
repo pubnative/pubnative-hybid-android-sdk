@@ -6,6 +6,7 @@ package net.pubnative.lite.sdk.rewarded;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -84,6 +85,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     private long mInitialRenderTime = -1;
     private VideoListener mVideoListener;
     private boolean mIsExchange;
+    private String mWatermarkData;
 
     public HyBidRewardedAd(Activity activity, Listener listener) {
         this((Context) activity, "", listener);
@@ -276,8 +278,15 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
         mCustomUrl = customUrl;
     }
 
+
+
+    public void setWatermark(String watermarkString) {
+        mWatermarkData = watermarkString;
+        //mWatermarkDrawable = WatermarkDecoder.decodeWatermark(mContext, watermarkString);
+    }
+
     private void renderAd() {
-        mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, this, mRequestManager.getIntegrationType());
+        mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, this, mRequestManager.getIntegrationType(), mWatermarkData);
         if (mPresenter != null) {
             mPresenter.setVideoListener(HyBidRewardedAd.this);
             mPresenter.load();
@@ -325,7 +334,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
                 mZoneId = mAd.getZoneId();
                 JsonOperations.putJsonString(mPlacementParams, Reporting.Key.ZONE_ID, mZoneId);
             }
-            mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, this, mRequestManager.getIntegrationType());
+            mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, this, mRequestManager.getIntegrationType(), mWatermarkData);
             if (mPresenter != null) {
                 mPresenter.setVideoListener(HyBidRewardedAd.this);
                 mPresenter.load();
@@ -412,9 +421,11 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
                         mAd.setZoneId(mZoneId);
                         mAd.setHasEndCard(hasEndCard);
                         initializeAdTracker();
-                        HyBid.getAdCache().put(mZoneId, mAd);
-                        HyBid.getVideoAdCache().put(mZoneId, adCacheItem);
-                        mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, HyBidRewardedAd.this, mRequestManager.getIntegrationType());
+                        // Using sessionId as cache key
+                        String cacheKey = mAd.getSessionId();
+                        HyBid.getAdCache().put(cacheKey, mAd);
+                        HyBid.getVideoAdCache().put(cacheKey, adCacheItem);
+                        mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, HyBidRewardedAd.this, mRequestManager.getIntegrationType(), mWatermarkData);
                         if (mPresenter != null) {
                             mPresenter.setVideoListener(HyBidRewardedAd.this);
                             mPresenter.load();
@@ -441,8 +452,10 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
                 type = Ad.AdType.HTML;
                 mAd = new Ad(assetGroupId, adValue, type);
                 initializeAdTracker();
-                HyBid.getAdCache().put(mZoneId, mAd);
-                mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, HyBidRewardedAd.this, mRequestManager.getIntegrationType());
+                // Using sessionId as cache key
+                String cacheKey = mAd.getSessionId();
+                HyBid.getAdCache().put(cacheKey, mAd);
+                mPresenter = new RewardedPresenterFactory(mContext, mZoneId).createRewardedPresenter(mAd, HyBidRewardedAd.this, mRequestManager.getIntegrationType(), mWatermarkData);
                 if (mPresenter != null) {
                     mPresenter.setVideoListener(HyBidRewardedAd.this);
                     mPresenter.load();
@@ -540,6 +553,12 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     }
 
     protected void invokeOnClosed() {
+        // Clean up VideoAdCache entry
+        if (mAd != null && !TextUtils.isEmpty(mAd.getSessionId())) {
+            HyBid.getVideoAdCache().remove(mAd.getSessionId());
+            Logger.d(TAG, "Cleaned up VideoAdCache entry for sessionId: " + mAd.getSessionId());
+        }
+
         if (mListener != null) {
             mListener.onRewardedClosed();
         }

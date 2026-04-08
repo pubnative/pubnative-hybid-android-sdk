@@ -22,6 +22,8 @@ import net.pubnative.lite.sdk.mraid.model.HTMLAd;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
 import net.pubnative.lite.sdk.rewarded.RewardedActivityInteractor;
 import net.pubnative.lite.sdk.utils.ClickThroughTimerManager;
+import net.pubnative.lite.sdk.viewability.FriendlyObstructionReasonConstants;
+import net.pubnative.lite.sdk.viewability.baseom.BaseFriendlyObstructionPurpose;
 
 public class MraidRewardedViewModel extends RewardedViewModel implements MRAIDViewListener, MRAIDNativeFeatureListener, MRAIDViewCloseLayoutListener, ClickThroughTimerManager.ClickThroughTimerListener {
 
@@ -39,6 +41,13 @@ public class MraidRewardedViewModel extends RewardedViewModel implements MRAIDVi
         super(context, zoneId, integrationType, skipOffset, broadcastId, listener);
         processRewardedAd();
         listener.setContentLayout();
+    }
+
+    @Override
+    public void addFriendlyObstruction(View view) {
+        if (mView != null) {
+            mView.addViewabilityFriendlyObstruction(view, BaseFriendlyObstructionPurpose.OTHER, FriendlyObstructionReasonConstants.WATERMARK_OBSTRUCTION_REASON);
+        }
     }
 
     @Override

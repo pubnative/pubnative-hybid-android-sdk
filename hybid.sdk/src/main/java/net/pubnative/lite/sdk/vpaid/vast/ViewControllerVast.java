@@ -9,6 +9,8 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.SurfaceTexture;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
@@ -39,6 +41,7 @@ import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.ScreenDimensionsUtils;
 import net.pubnative.lite.sdk.utils.SkipOffsetManager;
 import net.pubnative.lite.sdk.utils.ViewUtils;
+import net.pubnative.lite.sdk.viewability.FriendlyObstructionReasonConstants;
 import net.pubnative.lite.sdk.viewability.baseom.BaseFriendlyObstructionPurpose;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.views.cta.HyBidCTAView;
@@ -99,6 +102,8 @@ public class ViewControllerVast implements View.OnClickListener {
     private boolean mHasReducedCloseButton = false;
     private CustomCTAData mCustomCTAData = null;
     private Integer mCustomCTADelay = 0;
+    private final Handler mUiHandler = new Handler(Looper.getMainLooper());
+    private boolean mIsDestroyed = false;
 
     public ViewControllerVast(VideoAdController adController,
                               boolean isFullscreen,
@@ -252,7 +257,7 @@ public class ViewControllerVast implements View.OnClickListener {
 
         mSkipView.setOnClickListener(this);
 
-        mAdController.addViewabilityFriendlyObstruction(mControlsLayout, BaseFriendlyObstructionPurpose.VIDEO_CONTROLS, "Video controls");
+        mAdController.addViewabilityFriendlyObstruction(mControlsLayout, BaseFriendlyObstructionPurpose.VIDEO_CONTROLS, FriendlyObstructionReasonConstants.VIDEO_CONTROLS_OBSTRUCTION_REASON);
 
         bannerView.addView(mControlsLayout);
         bannerView.addView(mEndCardView);
@@ -321,7 +326,19 @@ public class ViewControllerVast implements View.OnClickListener {
     private final TextureView.SurfaceTextureListener mCreateTextureListener = new TextureView.SurfaceTextureListener() {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+            if (mIsDestroyed) return;
+            if (mSurface != null) {
+                mSurface.release();
+            }
             mSurface = new Surface(surface);
+            // If the controller already marked the video as visible (set during buildVideoAdView via
+            // the visibility listener), the MediaPlayer may have been started before this SurfaceTexture
+            // became available, resulting in a null-surface / black-screen. Re-triggering
+            // setVideoVisible(true) causes VideoAdControllerVast.recoverMediaPlayerSurface() to push
+            // the now-valid Surface to the already-running MediaPlayer.
+            if (mAdController.isVideoVisible()) {
+                mAdController.setVideoVisible(true);
+            }
         }
 
         @Override
@@ -330,6 +347,11 @@ public class ViewControllerVast implements View.OnClickListener {
 
         @Override
         public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+            if (mIsDestroyed) return false;
+            if (mSurface != null) {
+                mSurface.release();
+                mSurface = null;
+            }
             return false;
         }
 
@@ -356,8 +378,8 @@ public class ViewControllerVast implements View.OnClickListener {
     }
 
     public void postDelayed(Runnable action, long delayMillis) {
-        if (mBannerView != null) {
-            mBannerView.postDelayed(action, delayMillis);
+        if (mBannerView != null && !mIsDestroyed) {
+            mUiHandler.postDelayed(action, delayMillis);
         }
     }
 
@@ -782,12 +804,23 @@ public class ViewControllerVast implements View.OnClickListener {
     }
 
     public void dismiss() {
+        mUiHandler.removeCallbacksAndMessages(null);
         if (mBannerView != null) {
             mBannerView.removeAllViews();
         }
     }
 
     public void destroy() {
+        mIsDestroyed = true;
+        mUiHandler.removeCallbacksAndMessages(null);
+        if (mVideoPlayerLayoutTexture != null) {
+            mVideoPlayerLayoutTexture.setSurfaceTextureListener(null);
+            mVideoPlayerLayoutTexture = null;
+        }
+        if (mSurface != null) {
+            mSurface.release();
+            mSurface = null;
+        }
         if (mEndCardView != null) {
             mEndCardView.destroy();
         }

@@ -54,6 +54,7 @@ public class InterstitialViewModelTest {
         @Override public void destroyAd() {}
         @Override public void resetVolumeChangeTracker() {}
         @Override public Boolean hasReducedCloseSize() {return null;}
+        @Override public void addFriendlyObstruction(View view) {}
     }
 
     @Before

@@ -51,4 +51,5 @@ public interface AdPresenter {
     void stopTracking();
 
     JSONObject getPlacementParams();
+    void addFriendlyObstruction(View view);
 }

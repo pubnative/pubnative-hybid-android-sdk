@@ -296,6 +296,8 @@ public abstract class InterstitialViewModel extends BaseViewModel implements PNA
         return mIsSkippable;
     }
 
+    public abstract void addFriendlyObstruction(View view);
+
     protected final CloseableContainer.OnCloseListener mCloseListener = this::closeButtonClicked;
     protected final CloseableContainer.OnSkipListener mSkipListener = this::skipButtonClicked;
 

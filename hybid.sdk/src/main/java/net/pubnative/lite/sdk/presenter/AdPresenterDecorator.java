@@ -138,6 +138,13 @@ public class AdPresenterDecorator implements AdPresenter, AdPresenter.Listener, 
     }
 
     @Override
+    public void addFriendlyObstruction(View view) {
+        if (mAdPresenter != null) {
+            mAdPresenter.addFriendlyObstruction(view);
+        }
+    }
+
+    @Override
     public void onAdLoaded(AdPresenter adPresenter, View banner) {
         if (mIsDestroyed) {
             return;

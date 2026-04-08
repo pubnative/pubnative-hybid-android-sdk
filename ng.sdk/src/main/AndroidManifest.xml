@@ -7,8 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_ADSERVICES_TOPICS" />
 
     <application>
-        <activity android:name=".consent.UserConsentActivity"
-            tools:ignore="MissingClass" />
+        <activity android:name=".consent.UserConsentActivity" tools:ignore="MissingClass" />
         <activity
             android:name=".interstitial.activity.MraidInterstitialActivity"
             android:configChanges="keyboardHidden|screenSize"
@@ -28,6 +27,17 @@
             android:name=".rewarded.activity.VastRewardedActivity"
             android:configChanges="keyboardHidden|screenSize"
             android:screenOrientation="behind"
+            tools:ignore="MissingClass" />
+        <activity
+            android:name=".contentinfo.AdFeedbackActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:exported="false"
+            tools:ignore="LockedOrientationActivity,MissingClass" />
+        <activity
+            android:name=".utils.browser.BrowserActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/BrowserActivityTheme"
+            android:exported="false"
             tools:ignore="MissingClass" />
     </application>
 

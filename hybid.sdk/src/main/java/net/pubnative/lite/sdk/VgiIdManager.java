@@ -182,7 +182,7 @@ public class VgiIdManager {
                 Integer chargeCounter = mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
                 Integer capacity = mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
 
-                if (chargeCounter == Integer.MIN_VALUE || capacity == Integer.MIN_VALUE)
+                if (chargeCounter == Integer.MIN_VALUE || capacity == Integer.MIN_VALUE || capacity == 0)
                     return -1;
 
                 return (chargeCounter / capacity) * 100L;

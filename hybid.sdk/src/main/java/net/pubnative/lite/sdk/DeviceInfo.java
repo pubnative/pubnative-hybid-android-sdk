@@ -25,6 +25,8 @@ import android.net.NetworkInfo;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.StatFs;
 import android.provider.Settings;
@@ -124,12 +126,18 @@ public class DeviceInfo {
 
             synchronized (mReceiverLock) {
                 if (mContext != null && mIsChangingReceiverRegistered) {
-                    try {
-                        mContext.unregisterReceiver(this);
-                    } catch (IllegalArgumentException e) {
-                        // Receiver was already unregistered
-                    }
-                    mIsChangingReceiverRegistered = false;
+                    final Context ctx = mContext;
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        synchronized (mReceiverLock) {
+                            try {
+                                ctx.unregisterReceiver(mBatteryStatusReceiver);
+                            } catch (IllegalArgumentException ignored) {
+                                // Receiver was already unregistered
+                            } finally {
+                                mIsChangingReceiverRegistered = false;
+                            }
+                        }
+                    });
                 }
             }
         }
@@ -741,18 +749,22 @@ public class DeviceInfo {
         if (readPhoneStatePermission) {
             AudioManager am = (AudioManager) this.mContext.getSystemService(Context.AUDIO_SERVICE);
             if (am == null) return null;
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-                return (am.isWiredHeadsetOn() || am.isBluetoothScoOn() || am.isBluetoothA2dpOn()) ? 1 : 0;
-            } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 AudioDeviceInfo[] devices = am.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
                 if (devices == null) return null;
                 for (AudioDeviceInfo device : devices) {
-                    if (device.getType() == AudioDeviceInfo.TYPE_WIRED_HEADSET || device.getType() == AudioDeviceInfo.TYPE_WIRED_HEADPHONES) {
+                    int type = device.getType();
+                    if (type == AudioDeviceInfo.TYPE_WIRED_HEADSET || type == AudioDeviceInfo.TYPE_WIRED_HEADPHONES) {
                         return 1;
                     }
                 }
+                return 0;
+            } else {
+                // For older versions, use deprecated methods with suppression
+                @SuppressWarnings("deprecation")
+                boolean isHeadsetConnected = am.isWiredHeadsetOn() || am.isBluetoothScoOn() || am.isBluetoothA2dpOn();
+                return isHeadsetConnected ? 1 : 0;
             }
-            return 0;
         } else {
             return null;
         }

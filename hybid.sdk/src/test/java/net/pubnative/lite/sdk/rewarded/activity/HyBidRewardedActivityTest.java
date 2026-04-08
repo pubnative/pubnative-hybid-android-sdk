@@ -1,13 +1,17 @@
 package net.pubnative.lite.sdk.rewarded.activity;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Insets;
+import android.view.View;
 import android.widget.FrameLayout;
 
 import androidx.core.view.WindowInsetsCompat;
@@ -158,6 +162,45 @@ public class HyBidRewardedActivityTest {
         } catch (Exception e) {
             throw new RuntimeException("Test failed due to reflection error", e);
         }
+    }
+
+    @Test
+    public void testAddWatermarkView() {
+        activityController.create();
+        activity.setMockViewModel(mockViewModel);
+        activityController.start().resume().visible();
+
+        View mockWatermarkView = new View(activity);
+
+        int childCountBefore = activity.getCloseableContainer().getChildCount();
+        activity.addWatermarkView(mockWatermarkView);
+        int childCountAfter = activity.getCloseableContainer().getChildCount();
+
+        assertEquals(childCountBefore + 1, childCountAfter);
+        verify(mockViewModel).addFriendlyObstruction(mockWatermarkView);
+    }
+
+    @Test
+    public void addWatermarkView_calledTwice_doesNotDuplicateRegistration() {
+        Intent intent = new Intent();
+        intent.putExtra(HyBidRewardedActivity.EXTRA_ZONE_ID, "test_zone");
+        intent.putExtra(HyBidRewardedActivity.EXTRA_BROADCAST_ID, 1L);
+        intent.putExtra(HyBidRewardedActivity.EXTRA_SKIP_OFFSET, 5);
+
+        HyBidRewardedActivity activity = Robolectric.buildActivity(TestHyBidRewardedActivity.class, intent)
+                .create().get();
+
+        ((TestHyBidRewardedActivity) activity).setMockViewModel(mockViewModel);
+
+        View mockWatermarkView = new View(activity);
+
+        // First call
+        activity.addWatermarkView(mockWatermarkView);
+        // Second call (should be ignored due to guard)
+        activity.addWatermarkView(mockWatermarkView);
+
+        // Verify addFriendlyObstruction called only once
+        verify(mockViewModel, times(1)).addFriendlyObstruction(mockWatermarkView);
     }
 
     protected FrameLayout getContentView(HyBidRewardedActivity subject) {

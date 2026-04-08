@@ -4,6 +4,9 @@
 //
 package net.pubnative.lite.sdk.banner;
 
+import android.content.Context;
+import androidx.test.core.app.ApplicationProvider;
+
 import com.google.common.truth.Truth;
 
 import net.pubnative.lite.sdk.banner.presenter.BannerPresenterFactory;
@@ -18,7 +21,6 @@ import net.pubnative.lite.sdk.testing.TestUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.robolectric.RobolectricTestRunner;
 
@@ -30,12 +32,13 @@ public class AdPresenterFactoryTest {
     private AdPresenter.Listener mMockListener;
     private Ad mTestAd;
 
-    @InjectMocks
     private BannerPresenterFactory mSubject;
 
     @Before
     public void setup() {
         initMocks(this);
+        Context context = ApplicationProvider.getApplicationContext();
+        mSubject = new BannerPresenterFactory(context, IntegrationType.STANDALONE);
     }
 
     @Test
@@ -47,6 +50,7 @@ public class AdPresenterFactoryTest {
 
     @Test
     public void fromCreativeType_withHTML() {
+        mTestAd = TestUtil.createTestBannerAd();
         Truth.assertThat(mSubject.fromCreativeType(ApiAssetGroupType.MRAID_320x50, mTestAd, AdSize.SIZE_320x50))
                 .isInstanceOf(MraidAdPresenter.class);
     }

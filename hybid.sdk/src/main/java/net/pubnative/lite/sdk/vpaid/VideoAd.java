@@ -16,6 +16,8 @@ import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.AdAudioStateManager;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
+import net.pubnative.lite.sdk.viewability.FriendlyObstructionReasonConstants;
+import net.pubnative.lite.sdk.viewability.baseom.BaseFriendlyObstructionPurpose;
 import net.pubnative.lite.sdk.vpaid.enums.AdFormat;
 import net.pubnative.lite.sdk.vpaid.enums.AdState;
 import net.pubnative.lite.sdk.vpaid.enums.AudioState;
@@ -232,5 +234,9 @@ public class VideoAd extends BaseVideoAd {
         if (getAdController() != null) {
             getAdController().onVolumeChanged();
         }
+    }
+
+    public void addFriendlyObstruction(View view) {
+        getViewabilityAdSession().addFriendlyObstruction(view, BaseFriendlyObstructionPurpose.OTHER, FriendlyObstructionReasonConstants.WATERMARK_OBSTRUCTION_REASON);
     }
 }

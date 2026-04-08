@@ -6,6 +6,7 @@ package net.pubnative.lite.sdk.views;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -16,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import net.pubnative.lite.sdk.CacheListener;
 import net.pubnative.lite.sdk.HyBid;
@@ -48,6 +50,7 @@ import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.MarkupUtils;
 import net.pubnative.lite.sdk.utils.SignalDataProcessor;
 import net.pubnative.lite.sdk.utils.ViewUtils;
+import net.pubnative.lite.sdk.utils.WatermarkHelper;
 import net.pubnative.lite.sdk.utils.json.JsonOperations;
 import net.pubnative.lite.sdk.views.endcard.HyBidEndCardView;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
@@ -73,6 +76,9 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     private String mScreenIabCategory;
     private String mScreenKeywords;
     private String mUserIntent;
+    private Drawable mWatermarkDrawable;
+    private ImageView mWatermark;
+    private WatermarkHelper mWatermarkHelper = new WatermarkHelper();
 
     public void setIsAdSticky(boolean isAdSticky) {
         MraidCloseAdRepo.getInstance().setIsAdSticky(isAdSticky);
@@ -159,6 +165,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         mPlacementParams = new JSONObject();
         initEndCardView();
     }
+
 
     private void initEndCardView() {
         mEndCardView = new HyBidEndCardView(getContext());
@@ -357,7 +364,14 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
 
         stopTracking();
 
+        removeWatermark();
         removeAllViews();
+
+        // Clean up VideoAdCache entry
+        if (mAd != null && !TextUtils.isEmpty(mAd.getSessionId())) {
+            HyBid.getVideoAdCache().remove(mAd.getSessionId());
+            Logger.d(TAG, "Cleaned up VideoAdCache entry for sessionId: " + mAd.getSessionId());
+        }
 
         mAd = null;
         mPlacementParams = new JSONObject();
@@ -469,7 +483,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         if (mRequestManager != null && mRequestManager.getAdSize() != null) {
             adSize = mRequestManager.getAdSize();
         }
-        return new BannerPresenterFactory(getContext(), mIntegrationType).createPresenter(mAd, mAdTracker, adSize, mTrackingMethod, this, this);
+        return new BannerPresenterFactory(getContext(), mIntegrationType).createPresenter(mAd, mAdTracker, adSize, mTrackingMethod, this, this, mWatermark);
     }
 
     public void renderAd() {
@@ -740,8 +754,10 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                                 mAd = new Ad(assetGroup, adValue, type);
                                 mAd.setZoneId(zoneId);
                                 mAd.setHasEndCard(hasEndCard);
-                                HyBid.getAdCache().put(zoneId, mAd);
-                                HyBid.getVideoAdCache().put(zoneId, adCacheItem);
+                                // Using sessionId as cache key
+                                String cacheKey = mAd.getSessionId();
+                                HyBid.getAdCache().put(cacheKey, mAd);
+                                HyBid.getVideoAdCache().put(cacheKey, adCacheItem);
                                 renderFromCustomAd();
                             }
 
@@ -927,6 +943,20 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                 adLayoutParams.gravity = Gravity.CENTER;
 
                 addView(view, adLayoutParams);
+
+                if (mWatermarkDrawable != null) {
+                    createWatermarkView();
+                }
+                if (mWatermark != null) {
+                    if (mWatermark.getParent() != null && mWatermark.getParent() instanceof ViewGroup) {
+                        ((ViewGroup) mWatermark.getParent()).removeView(mWatermark);
+                    }
+                    addView(mWatermark);
+                    if (mPresenter != null && !mWatermarkHelper.isWatermarkRegistered()) {
+                        mPresenter.addFriendlyObstruction(mWatermark);
+                        mWatermarkHelper.setWatermarkRegistered();
+                    }
+                }
             }
 
             if (mAutoShowOnLoad) {
@@ -994,6 +1024,23 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
 
     public void setUserIntent(String userIntent) {
         mUserIntent = userIntent;
+    }
+
+
+    public void setWatermark(String watermarkString) {
+        this.mWatermarkDrawable = WatermarkHelper.decodeWatermark(getContext(), watermarkString);
+    }
+
+    private void createWatermarkView() {
+        removeWatermark();
+        mWatermark = WatermarkHelper.createWatermarkView(getContext(), mWatermarkDrawable);
+    }
+
+    public void removeWatermark() {
+        if (WatermarkHelper.removeWatermarkView(mWatermark)) {
+            mWatermark = null;
+            mWatermarkHelper.reset();
+        }
     }
 
     public enum Position {

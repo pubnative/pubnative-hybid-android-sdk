@@ -157,7 +157,9 @@ public class SignalDataProcessor {
 
     private void processAd(final String zoneId, final Ad ad) {
         ad.setZoneId(zoneId);
-        mAdCache.put(zoneId, ad);
+        // Using sessionId as cache key
+        final String sessionId = ad.getSessionId();
+        mAdCache.put(sessionId, ad);
 
         AdTopicsAPIManager.setTopicsAPIEnabled(mApiClient.getContext(), ad);
 //        AtomManager.setAtomEnabled(mApiClient.getContext(), ad);
@@ -177,7 +179,8 @@ public class SignalDataProcessor {
                         ad.setHasEndCard(hasEndCard);
 
                         VideoAdCacheItem adCacheItem = new VideoAdCacheItem(adParams, videoFilePath, endCardData, endCardFilePath);
-                        mVideoCache.put(zoneId, adCacheItem);
+                        // Using sessionId as cache key
+                        mVideoCache.put(sessionId, adCacheItem);
                         if (mListener != null) {
                             mListener.onProcessed(ad);
                         }

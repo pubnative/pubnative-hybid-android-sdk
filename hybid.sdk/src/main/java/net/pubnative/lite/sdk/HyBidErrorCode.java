@@ -31,7 +31,8 @@ public enum HyBidErrorCode {
     DISABLED_FORMAT(22, "The requested ad format has been disabled"),
     DISABLED_RENDERING_ENGINE(23, "The requested rendering engine has been disabled"),
     EXPIRED_AD(24, "The ad has expired"),
-    ERROR_LOADING_FEEDBACK(25, "An error has ocurred loading the feedback form");
+    ERROR_LOADING_FEEDBACK(25, "An error has ocurred loading the feedback form"),
+    RESOURCE_EXHAUSTION(26, "The device has run out of resources to complete the operation");
 
     private final int code;
     private final String message;

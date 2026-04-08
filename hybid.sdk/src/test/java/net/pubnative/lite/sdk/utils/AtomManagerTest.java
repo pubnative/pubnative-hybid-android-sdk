@@ -419,4 +419,97 @@ public class AtomManagerTest {
             }
         }
     }
+
+    @Test
+    public void testPutAtomJSData_Success_PutsValueInMap() {
+        TestAtomManager mgr = new TestAtomManager();
+        HashMap<String, String> fakeMap = new HashMap<>();
+        mgr.findClassResult = Object.class;
+        mgr.getDeclaredMethodResult = mock(Method.class);
+        mgr.invokeMethodResult = fakeMap;
+
+        mgr.putAtomJSData("testKey", "testValue");
+
+        assertEquals("testValue", fakeMap.get("testKey"));
+    }
+
+    @Test
+    public void testPutAtomJSData_OverwritesExistingValue() {
+        TestAtomManager mgr = new TestAtomManager();
+        HashMap<String, String> fakeMap = new HashMap<>();
+        fakeMap.put("testKey", "oldValue");
+        mgr.findClassResult = Object.class;
+        mgr.getDeclaredMethodResult = mock(Method.class);
+        mgr.invokeMethodResult = fakeMap;
+
+        mgr.putAtomJSData("testKey", "newValue");
+
+        assertEquals("newValue", fakeMap.get("testKey"));
+    }
+
+    @Test
+    public void testPutAtomJSData_NotAHashMap_DoesNotThrow() {
+        TestAtomManager mgr = new TestAtomManager();
+        mgr.findClassResult = Object.class;
+        mgr.getDeclaredMethodResult = mock(Method.class);
+        mgr.invokeMethodResult = "not a hashmap";
+
+        // Should not throw
+        mgr.putAtomJSData("testKey", "testValue");
+    }
+
+    @Test
+    public void testPutAtomJSData_NullResult_DoesNotThrow() {
+        TestAtomManager mgr = new TestAtomManager();
+        mgr.findClassResult = Object.class;
+        mgr.getDeclaredMethodResult = mock(Method.class);
+        mgr.invokeMethodResult = null;
+
+        // Should not throw
+        mgr.putAtomJSData("testKey", "testValue");
+    }
+
+    @Test
+    public void testPutAtomJSData_Exception_LogsError() {
+        TestAtomManager mgr = new TestAtomManager();
+        mgr.toThrow = new ClassNotFoundException();
+
+        try (MockedStatic<Logger> loggerMock = Mockito.mockStatic(Logger.class)) {
+            mgr.putAtomJSData("testKey", "testValue");
+            loggerMock.verify(() -> Logger.d(anyString(), contains(AtomManager.ATOM_NOT_FOUND_MESSAGE)));
+        }
+    }
+
+    @Test
+    public void testPutAtomJSData_MultipleKeys() {
+        TestAtomManager mgr = new TestAtomManager();
+        HashMap<String, String> fakeMap = new HashMap<>();
+        mgr.findClassResult = Object.class;
+        mgr.getDeclaredMethodResult = mock(Method.class);
+        mgr.invokeMethodResult = fakeMap;
+
+        mgr.putAtomJSData("key1", "value1");
+        mgr.putAtomJSData("key2", "value2");
+        mgr.putAtomJSData("key3", "value3");
+
+        assertEquals(3, fakeMap.size());
+        assertEquals("value1", fakeMap.get("key1"));
+        assertEquals("value2", fakeMap.get("key2"));
+        assertEquals("value3", fakeMap.get("key3"));
+    }
+
+    @Test
+    public void testSurveyDataKeyConstant() {
+        assertEquals("SurveyData", AtomManager.SURVEY_DATA_KEY);
+    }
+
+    @Test
+    public void testSurveyHtmlKeyConstant() {
+        assertEquals("SurveyHtml", AtomManager.SURVEY_HTML_KEY);
+    }
+
+    @Test
+    public void testAtomGetJsDataMethodNameConstant() {
+        assertEquals("getAtomJSData", AtomManager.ATOM_GET_JS_DATA_METHOD_NAME);
+    }
 }

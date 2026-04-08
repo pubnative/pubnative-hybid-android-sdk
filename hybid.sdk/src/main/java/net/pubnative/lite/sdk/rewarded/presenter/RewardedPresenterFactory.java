@@ -6,6 +6,11 @@ package net.pubnative.lite.sdk.rewarded.presenter;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.graphics.drawable.Drawable;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
@@ -27,8 +32,16 @@ public class RewardedPresenterFactory {
     public RewardedPresenter createRewardedPresenter(
             Ad ad,
             RewardedPresenter.Listener rewardedPresenterListener, IntegrationType integrationType) {
+        return createRewardedPresenter(ad, rewardedPresenterListener, integrationType, null);
+    }
 
-        final RewardedPresenter rewardedPresenter = fromCreativeType(ad.assetgroupid, ad, integrationType);
+    public RewardedPresenter createRewardedPresenter(
+            Ad ad,
+            RewardedPresenter.Listener rewardedPresenterListener,
+            IntegrationType integrationType,
+            String watermarkData) {
+
+        final RewardedPresenter rewardedPresenter = fromCreativeType(ad.assetgroupid, ad, integrationType, watermarkData);
         if (rewardedPresenter == null) {
             return null;
         }
@@ -53,17 +66,17 @@ public class RewardedPresenterFactory {
         return rewardedPresenterDecorator;
     }
 
-    RewardedPresenter fromCreativeType(int assetGroupId, Ad ad, IntegrationType integrationType) {
+    RewardedPresenter fromCreativeType(int assetGroupId, Ad ad, IntegrationType integrationType, String watermarkData) {
         switch (assetGroupId) {
             case ApiAssetGroupType.MRAID_300x600:
             case ApiAssetGroupType.MRAID_320x480:
             case ApiAssetGroupType.MRAID_480x320:
             case ApiAssetGroupType.MRAID_1024x768:
             case ApiAssetGroupType.MRAID_768x1024: {
-                return new MraidRewardedPresenter(mContext, ad, mZoneId);
+                return new MraidRewardedPresenter(mContext, ad, mZoneId, watermarkData);
             }
             case ApiAssetGroupType.VAST_INTERSTITIAL: {
-                return new VastRewardedPresenter(mContext, ad, mZoneId, integrationType);
+                return new VastRewardedPresenter(mContext, ad, mZoneId, integrationType, watermarkData);
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for rewarded ad format.");

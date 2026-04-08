@@ -83,7 +83,7 @@ public class FileLoader {
         mContext = context;
         mRemoteFileUrl = fileUrl;
         mIsEndCard = isEndCard;
-        String shortFileName = FileUtils.obtainHashName(mRemoteFileUrl);
+        String shortFileName = TextUtils.isEmpty(mRemoteFileUrl) ? "default_file" : FileUtils.obtainHashName(mRemoteFileUrl);
         mLoadingFile = new File(FileUtils.getParentDir(mContext), shortFileName);
     }
 
@@ -175,7 +175,7 @@ public class FileLoader {
                 outputStream.write(buffer, 0, length);
                 downloadedBytes += length;
                 double progress = downloadedBytes / (double) headers.fileLength;
-                handelProgress(progress);
+                handleProgress(progress);
             }
         } catch (Exception e) {
             Logger.e(LOG_TAG, "appendFile interrupted: " + e.getMessage());
@@ -242,7 +242,7 @@ public class FileLoader {
         return connection;
     }
 
-    private void handelProgress(double progress) {
+    private void handleProgress(double progress) {
         if (mCallback != null) {
             if (!firstQuartile) {
                 if (progress > 1.0 / 4) {

@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 
 import net.pubnative.lite.sdk.utils.HybidConsumer;
+import net.pubnative.lite.sdk.utils.Logger;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ public class VisibilityTracker {
     private static final int VISIBILITY_CHECK_DELAY = 100;
 
     protected WeakReference<View> mDeviceView = null;
-    private WeakReference<HybidConsumer<Double>> mPercentageConsumer;
+    private volatile WeakReference<HybidConsumer<Double>> mPercentageConsumer;
     protected WeakReference<Listener> mListener = null;
     protected final List<PubnativeVisibilityTrackerItem> mTrackedViews = new ArrayList<>();
     protected Handler mHandler = new Handler();
@@ -67,28 +68,30 @@ public class VisibilityTracker {
      *                             from 0 to 1
      */
     public void addView(View view, double minVisibilityPercent, HybidConsumer<Double> percentageConsumer) {
-        if (mDeviceView == null) {
-            mDeviceView = new WeakReference<>(view);
-            ViewTreeObserver observer = view.getViewTreeObserver();
-            if (observer.isAlive()) {
-                observer.addOnPreDrawListener(mOnPreDrawListener);
-            } else {
-                Log.d(TAG, "Unable to start tracking, Window ViewTreeObserver is not alive");
+        synchronized (mTrackedViews) {
+            if (mDeviceView == null) {
+                mDeviceView = new WeakReference<>(view);
+                ViewTreeObserver observer = view.getViewTreeObserver();
+                if (observer.isAlive()) {
+                    observer.addOnPreDrawListener(mOnPreDrawListener);
+                } else {
+                    Log.d(TAG, "Unable to start tracking, Window ViewTreeObserver is not alive");
+                }
             }
+            mPercentageConsumer = new WeakReference<>(percentageConsumer);
+            if (containsTrackedView(view)) {
+                // Already tracking this view, drop the call
+                return;
+            }
+
+            PubnativeVisibilityTrackerItem item = new PubnativeVisibilityTrackerItem();
+            item.mTrackingView = view;
+            item.mMinVisibilityPercent = minVisibilityPercent;
+
+            mTrackedViews.add(item);
+
+            scheduleVisibilityCheck();
         }
-        mPercentageConsumer = new WeakReference<>(percentageConsumer);
-        if (containsTrackedView(view)) {
-            // Already tracking this view, drop the call
-            return;
-        }
-
-        PubnativeVisibilityTrackerItem item = new PubnativeVisibilityTrackerItem();
-        item.mTrackingView = view;
-        item.mMinVisibilityPercent = minVisibilityPercent;
-
-        mTrackedViews.add(item);
-
-        scheduleVisibilityCheck();
     }
 
     /**
@@ -97,28 +100,38 @@ public class VisibilityTracker {
      * @param view view that you want to stop tracking
      */
     public void removeView(View view) {
-        mTrackedViews.remove(view);
+        synchronized (mTrackedViews) {
+            if (view == null) return;
+            int index = indexOfTrackedView(view);
+            if (index >= 0) {
+                mTrackedViews.remove(index);
+            }
+        }
     }
 
     /**
      * Stops tracking of all views and removes all callbacks
      */
     public void clear() {
-        mHandler.removeMessages(0);
-        mPercentageConsumer.clear();
-        mTrackedViews.clear();
-        mIsVisibilityCheckScheduled = false;
-        if (mDeviceView != null) {
-            View decorView = mDeviceView.get();
-            if (decorView != null && mOnPreDrawListener != null) {
-                ViewTreeObserver observer = decorView.getViewTreeObserver();
-                if (observer.isAlive()) {
-                    observer.removeOnPreDrawListener(mOnPreDrawListener);
-                }
-                mOnPreDrawListener = null;
+        synchronized (mTrackedViews) {
+            mHandler.removeMessages(0);
+            if (mPercentageConsumer != null) {
+                mPercentageConsumer.clear();
             }
+            mTrackedViews.clear();
+            mIsVisibilityCheckScheduled = false;
+            if (mDeviceView != null) {
+                View decorView = mDeviceView.get();
+                if (decorView != null && mOnPreDrawListener != null) {
+                    ViewTreeObserver observer = decorView.getViewTreeObserver();
+                    if (observer.isAlive()) {
+                        observer.removeOnPreDrawListener(mOnPreDrawListener);
+                    }
+                    mOnPreDrawListener = null;
+                }
+            }
+            mListener = null;
         }
-        mListener = null;
     }
 
     //==============================================================================================
@@ -173,7 +186,7 @@ public class VisibilityTracker {
         private final ArrayList<View> mVisibleViews;
         private final ArrayList<View> mInvisibleViews;
         private final Rect mVisibleRect;
-        private boolean mHasReportedVisibility = false;
+        private volatile boolean mHasReportedVisibility = false;
 
         VisibilityRunnable() {
             mVisibleRect = new Rect();
@@ -183,10 +196,14 @@ public class VisibilityTracker {
 
         @Override
         public void run() {
-
             mIsVisibilityCheckScheduled = false;
 
-            for (PubnativeVisibilityTrackerItem item : mTrackedViews) {
+            final List<PubnativeVisibilityTrackerItem> snapshot;
+            synchronized (mTrackedViews) {
+                snapshot = new ArrayList<>(mTrackedViews);
+            }
+
+            for (PubnativeVisibilityTrackerItem item : snapshot) {
 
                 if (isVisible(item)) {
 
@@ -206,24 +223,35 @@ public class VisibilityTracker {
         }
 
         protected boolean isVisible(PubnativeVisibilityTrackerItem item) {
-
             boolean result = false;
+            if (item == null) {
+                return result;
+            }
 
             View view = item.mTrackingView;
 
-            if (view != null
-                    && view.isShown() // This is specially useful to ensure visibility in lists
-                    && view.getParent() != null
-                    && view.getLocalVisibleRect(mVisibleRect)) {
-                float visibleArea = mVisibleRect.height() * mVisibleRect.width();
-                float viewArea = view.getHeight() * view.getWidth();
-                double percentVisible = (double) visibleArea / (double) viewArea;
+            try {
+                if (view != null
+                        && view.isShown() // This is specially useful to ensure visibility in lists
+                        && view.getParent() != null
+                        && view.getLocalVisibleRect(mVisibleRect)) {
+                    float visibleArea = mVisibleRect.height() * mVisibleRect.width();
+                    float viewArea = view.getHeight() * view.getWidth();
+                    if (viewArea <= 0) return false;
 
-                result = percentVisible >= item.mMinVisibilityPercent;
-                if (result && mPercentageConsumer.get() != null && !mHasReportedVisibility) {
-                    mPercentageConsumer.get().accept(percentVisible);
-                    mHasReportedVisibility = true;
+                    double percentVisible = (double) visibleArea / (double) viewArea;
+
+                    result = percentVisible >= item.mMinVisibilityPercent;
+                    if (result && !mHasReportedVisibility && mPercentageConsumer != null) {
+                        HybidConsumer<Double> consumer = mPercentageConsumer.get();
+                        if (consumer != null) {
+                            consumer.accept(percentVisible);
+                            mHasReportedVisibility = true;
+                        }
+                    }
                 }
+            } catch (Exception e) {
+                Logger.e(VisibilityTracker.TAG, "Error calculating visibility: " + e.getMessage());
             }
             return result;
         }

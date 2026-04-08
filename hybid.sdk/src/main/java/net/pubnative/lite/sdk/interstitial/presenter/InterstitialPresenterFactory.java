@@ -5,7 +5,11 @@
 package net.pubnative.lite.sdk.interstitial.presenter;
 
 import android.content.Context;
-import android.text.TextUtils;
+import android.graphics.drawable.Drawable;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.models.Ad;
@@ -34,10 +38,18 @@ public class InterstitialPresenterFactory {
     public InterstitialPresenter createInterstitialPresenter(
             Ad ad,
             InterstitialPresenter.Listener interstitialPresenterListener, IntegrationType integrationType) {
+        return createInterstitialPresenter(ad, interstitialPresenterListener, integrationType, null);
+    }
+
+    public InterstitialPresenter createInterstitialPresenter(
+            Ad ad,
+            InterstitialPresenter.Listener interstitialPresenterListener,
+            IntegrationType integrationType,
+            String watermarkData) {
         return createInterstitialPresenter(ad, new SkipOffset(SkipOffsetManager.getDefaultHtmlInterstitialSkipOffset(), false),
                 new SkipOffset(ad.hasEndCard() ? SkipOffsetManager.getDefaultVideoWithEndCardSkipOffset() :
                         SkipOffsetManager.getDefaultVideoWithoutEndCardSkipOffset(), false),
-                interstitialPresenterListener, integrationType);
+                interstitialPresenterListener, integrationType, watermarkData);
     }
 
     public InterstitialPresenter createInterstitialPresenter(
@@ -45,8 +57,18 @@ public class InterstitialPresenterFactory {
             SkipOffset htmlSkipOffset,
             SkipOffset videoSkipOffset,
             InterstitialPresenter.Listener interstitialPresenterListener, IntegrationType integrationType) {
+        return createInterstitialPresenter(ad, htmlSkipOffset, videoSkipOffset, interstitialPresenterListener, integrationType, null);
+    }
 
-        final InterstitialPresenter interstitialPresenter = fromCreativeType(ad.assetgroupid, ad, htmlSkipOffset, videoSkipOffset, integrationType);
+    public InterstitialPresenter createInterstitialPresenter(
+            Ad ad,
+            SkipOffset htmlSkipOffset,
+            SkipOffset videoSkipOffset,
+            InterstitialPresenter.Listener interstitialPresenterListener,
+            IntegrationType integrationType,
+            String watermarkData) {
+
+        final InterstitialPresenter interstitialPresenter = fromCreativeType(ad.assetgroupid, ad, htmlSkipOffset, videoSkipOffset, integrationType, watermarkData);
         if (interstitialPresenter == null) {
             return null;
         }
@@ -72,14 +94,14 @@ public class InterstitialPresenterFactory {
         return interstitialPresenterDecorator;
     }
 
-    InterstitialPresenter fromCreativeType(int assetGroupId, Ad ad, SkipOffset htmlSkipOffset, SkipOffset videoSkipOffset, IntegrationType integrationType) {
+    InterstitialPresenter fromCreativeType(int assetGroupId, Ad ad, SkipOffset htmlSkipOffset, SkipOffset videoSkipOffset, IntegrationType integrationType, String watermarkData) {
         switch (assetGroupId) {
             case ApiAssetGroupType.MRAID_300x600:
             case ApiAssetGroupType.MRAID_320x480:
             case ApiAssetGroupType.MRAID_480x320:
             case ApiAssetGroupType.MRAID_1024x768:
             case ApiAssetGroupType.MRAID_768x1024: {
-                return new MraidInterstitialPresenter(mContext, ad, mZoneId, htmlSkipOffset.getOffset());
+                return new MraidInterstitialPresenter(mContext, ad, mZoneId, htmlSkipOffset.getOffset(), watermarkData);
             }
             case ApiAssetGroupType.VAST_INTERSTITIAL: {
                 int videoOffset = videoSkipOffset.getOffset();
@@ -91,7 +113,7 @@ public class InterstitialPresenterFactory {
                         videoOffset = SkipOffsetManager.getDefaultVideoWithoutEndCardSkipOffset();
                     }
                 }
-                return new VastInterstitialPresenter(mContext, ad, mZoneId, videoOffset, integrationType);
+                return new VastInterstitialPresenter(mContext, ad, mZoneId, videoOffset, integrationType, watermarkData);
             }
             default: {
                 Logger.e(TAG, "Incompatible asset group type: " + assetGroupId + ", for interstitial ad format.");

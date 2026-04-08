@@ -5,23 +5,16 @@
 package net.pubnative.lite.sdk.utils;
 
 public class AdRequestRegistry {
-    private RequestItem mLastAdRequest;
+    private static final AdRequestRegistry INSTANCE = new AdRequestRegistry();
 
-    private static AdRequestRegistry sInstance;
+    private RequestItem mLastAdRequest;
 
     private AdRequestRegistry() {
 
     }
 
     public static AdRequestRegistry getInstance() {
-        if (sInstance == null) {
-            synchronized (AdRequestRegistry.class) {
-                if (sInstance == null) {
-                    sInstance = new AdRequestRegistry();
-                }
-            }
-        }
-        return sInstance;
+        return INSTANCE;
     }
 
     public void setLastAdRequest(String url, String response, long latency) {

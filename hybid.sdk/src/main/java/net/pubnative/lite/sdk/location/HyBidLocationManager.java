@@ -12,6 +12,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 
 import net.pubnative.lite.sdk.HyBid;
@@ -33,6 +34,7 @@ public class HyBidLocationManager implements LocationListener {
     private final LocationManager mManager;
 
     private Location mCurrentBestLocation;
+    private HandlerThread mLocationThread;
 
     public HyBidLocationManager(Context context) {
         mManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
@@ -59,24 +61,33 @@ public class HyBidLocationManager implements LocationListener {
      * Triggers a location update request and sets a timeout of 10 seconds to obtain the location
      */
     public void startLocationUpdates() {
-        Handler mainHandler = new Handler(Looper.getMainLooper());
+        if (mLocationThread != null && mLocationThread.isAlive()) {
+            return;
+        }
+        mLocationThread = new HandlerThread("HyBidLocationUpdates");
+        mLocationThread.start();
+        Handler locationHandler = new Handler(mLocationThread.getLooper());
 
         try {
-            if (hasCoarsePermission()) {
-                if (hasNetworkProvider()) {
-                    mainHandler.post(() -> mManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, HyBidLocationManager.this));
-                }
+            if (hasCoarsePermission() && hasNetworkProvider()) {
+                mManager.requestLocationUpdates(
+                        LocationManager.NETWORK_PROVIDER, 0, 0,
+                        HyBidLocationManager.this, mLocationThread.getLooper());
             }
         } catch (Exception exception) {
             Logger.e(TAG, "Can't request location updates: ".concat(String.valueOf(exception.getMessage())));
         }
 
-        mainHandler.postDelayed(mStopUpdatesRunnable, LOCATION_UPDATE_TIMEOUT);
+        locationHandler.postDelayed(mStopUpdatesRunnable, LOCATION_UPDATE_TIMEOUT);
     }
 
     public void stopLocationUpdates() {
         if (mManager != null) {
             mManager.removeUpdates(this);
+        }
+        if (mLocationThread != null) {
+            mLocationThread.quitSafely();
+            mLocationThread = null;
         }
     }
 

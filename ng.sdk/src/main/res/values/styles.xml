@@ -9,4 +9,10 @@
         <item name="android:maxHeight">2dip</item>
     </style>
 
+    <style name="BrowserActivityTheme">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
 </resources>
