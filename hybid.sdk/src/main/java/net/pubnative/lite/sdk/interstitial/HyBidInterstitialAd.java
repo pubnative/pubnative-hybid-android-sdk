@@ -354,6 +354,10 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     public void prepareAd(Ad ad) {
         if (ad != null) {
             mAd = ad;
+            // Ensure the ad is in the cache so the fullscreen activity can retrieve it
+            if (!TextUtils.isEmpty(mAd.getSessionId()) && HyBid.getAdCache() != null) {
+                HyBid.getAdCache().put(mAd.getSessionId(), mAd);
+            }
             initializeAdTracker();
             checkRemoteConfigs();
             if (mAd != null && mAd.getZoneId() != null && !mAd.getZoneId().equalsIgnoreCase(mZoneId)) {

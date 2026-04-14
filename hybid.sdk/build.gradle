@@ -150,7 +150,7 @@ tasks.register('repackageNG') {
 dependencies {
 
     implementation "net.pubnative:hybid.omsdk:$omid_version"
-    implementation "com.verve:atom.sdk:3.8.0_beta_js_3.4"
+    implementation "com.verve:atom.sdk:+"
 
     testImplementation "androidx.test:core:1.7.0"
     testImplementation 'androidx.core:core:1.15.0'
