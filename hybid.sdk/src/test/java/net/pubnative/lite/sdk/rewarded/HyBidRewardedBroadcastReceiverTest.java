@@ -104,9 +104,9 @@ public class HyBidRewardedBroadcastReceiverTest {
         assertEquals(HyBidRewardedBroadcastReceiver.Action.DEFAULT_END_CARD_CLICK,
                 HyBidRewardedBroadcastReceiver.Action.from("net.pubnative.hybid.rewarded.default_end_card_click"));
         assertEquals(HyBidRewardedBroadcastReceiver.Action.END_CARD_LOAD_SUCCESS,
-                HyBidRewardedBroadcastReceiver.Action.from("net.pubnative.hybid.interstitial.end_card_load_success"));
+                HyBidRewardedBroadcastReceiver.Action.from("net.pubnative.hybid.rewarded.end_card_load_success"));
         assertEquals(HyBidRewardedBroadcastReceiver.Action.END_CARD_LOAD_FAILURE,
-                HyBidRewardedBroadcastReceiver.Action.from("net.pubnative.hybid.interstitial.end_card_load_failure"));
+                HyBidRewardedBroadcastReceiver.Action.from("net.pubnative.hybid.rewarded.end_card_load_failure"));
         assertEquals(HyBidRewardedBroadcastReceiver.Action.NONE,
                 HyBidRewardedBroadcastReceiver.Action.from("unknown"));
     }

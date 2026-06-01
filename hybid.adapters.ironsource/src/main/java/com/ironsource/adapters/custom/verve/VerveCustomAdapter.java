@@ -15,6 +15,7 @@ import com.ironsource.mediationsdk.adunit.adapter.utility.AdapterErrors;
 import com.unity3d.mediation.LevelPlay;
 
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.BuildConfig;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -23,7 +24,7 @@ public class VerveCustomAdapter extends BaseAdapter {
     public static final String KEY_APP_TOKEN = "appToken";
     public static final String KEY_ZONE_ID = "zoneId";
 
-    private static final String NETWORK_SDK_VERSION = "3.8.1";
+    private static final String NETWORK_SDK_VERSION = BuildConfig.SDK_VERSION;
     private static final String ADAPTER_VERSION = NETWORK_SDK_VERSION + ".0";
 
     @Override

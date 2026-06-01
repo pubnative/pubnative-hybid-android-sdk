@@ -17,12 +17,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by erosgarciaponte on 22.01.18.
  */
 
 public final class PNApiUrlComposer {
+    private static final String TAG = PNApiUrlComposer.class.getSimpleName();
+    private static final Map<Class<?>, Map<Field, BidParam>> SIGNAL_FIELD_CACHE = new ConcurrentHashMap<>();
 
     public static String getUrlQuery(String baseUrl, PNAdRequest adRequest) {
         Uri uri = buildUri(baseUrl, adRequest);
@@ -258,11 +261,12 @@ public final class PNApiUrlComposer {
 
         if (!adRequest.getSignals().isEmpty()) {
             for (Signal signal : adRequest.getSignals()) {
-                for (Field field : signal.getClass().getDeclaredFields()) {
-                    final BidParam bidParam = field.getAnnotation(BidParam.class);
-                    if (bidParam == null) {
-                        continue;
-                    }
+                Map<Field, BidParam> fieldCache = getSignalFieldCache(signal.getClass());
+
+                for (Map.Entry<Field, BidParam> entry : fieldCache.entrySet()) {
+                    Field field = entry.getKey();
+                    BidParam bidParam = entry.getValue();
+
                     try {
                         Class typeClass = field.getType();
                         String value;
@@ -315,5 +319,33 @@ public final class PNApiUrlComposer {
         }
 
         return uriBuilder.build();
+    }
+
+    private static Map<Field, BidParam> getSignalFieldCache(Class<?> signalClass) {
+        Map<Field, BidParam> fieldMap = SIGNAL_FIELD_CACHE.get(signalClass);
+        if (fieldMap == null) {
+            synchronized (SIGNAL_FIELD_CACHE) {
+                fieldMap = SIGNAL_FIELD_CACHE.get(signalClass);
+                if (fieldMap == null) {
+                    fieldMap = new HashMap<>();
+                    try {
+                        for (Field field : signalClass.getDeclaredFields()) {
+                            BidParam bidParam = field.getAnnotation(BidParam.class);
+                            if (bidParam != null) {
+                                field.setAccessible(true);
+                                fieldMap.put(field, bidParam);
+                            }
+                        }
+                        // Cache on successful reflection
+                        SIGNAL_FIELD_CACHE.put(signalClass, fieldMap);
+                    } catch (SecurityException e) {
+                        Logger.e(TAG, "Cannot reflect signal fields for " + signalClass.getSimpleName() + " - security exception: " + e.getMessage());
+                    } catch (Exception e) {
+                        Logger.e(TAG, "Unexpected error reflecting signal fields for " + signalClass.getSimpleName(), e);
+                    }
+                }
+            }
+        }
+        return fieldMap;
     }
 }

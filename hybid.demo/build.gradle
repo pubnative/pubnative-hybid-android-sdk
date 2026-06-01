@@ -30,7 +30,7 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'lite.sdk.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'lite.sdk.pro'
             buildConfigField "String", "BASE_URL", "\"https://api.pubnative.net/\""
         }
         debug {

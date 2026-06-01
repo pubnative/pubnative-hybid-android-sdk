@@ -38,8 +38,8 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
         CUSTOM_END_CARD_CLICK("net.pubnative.hybid.rewarded.custom_end_card_click"),
         DEFAULT_END_CARD_SHOW("net.pubnative.hybid.rewarded.default_end_card_show"),
         DEFAULT_END_CARD_CLICK("net.pubnative.hybid.rewarded.default_end_card_click"),
-        END_CARD_LOAD_SUCCESS("net.pubnative.hybid.interstitial.end_card_load_success"),
-        END_CARD_LOAD_FAILURE("net.pubnative.hybid.interstitial.end_card_load_failure"),
+        END_CARD_LOAD_SUCCESS("net.pubnative.hybid.rewarded.end_card_load_success"),
+        END_CARD_LOAD_FAILURE("net.pubnative.hybid.rewarded.end_card_load_failure"),
         NONE("none");
 
         public static Action from(String action) {

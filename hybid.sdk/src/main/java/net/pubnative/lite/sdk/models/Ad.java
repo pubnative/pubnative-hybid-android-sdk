@@ -4,7 +4,6 @@
 //
 package net.pubnative.lite.sdk.models;
 
-import static net.pubnative.lite.sdk.utils.AtomManager.SURVEY_DATA_KEY;
 import static net.pubnative.lite.sdk.utils.AtomManager.SURVEY_HTML_KEY;
 
 import android.content.Context;
@@ -40,8 +39,8 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     private static final String DATA_POINTS_NUMBER_KEY = "number";
     private static final String DATA_TEXT_KEY = "text";
 
-    private static final String PN_IMPRESSION_URL = "got.pubnative.net";
-    private static final String PN_IMPRESSION_QUERY_PARAM = "t";
+    private static final String SDK_IMPRESSION_URL = "got.pubnative.net";
+    private static final String SDK_IMPRESSION_QUERY_PARAM = "t";
     private static final int MIN_POINTS = 10;
 
     public static final String CONTENT_INFO_LINK_URL = "https://pubnative.net/content-info";
@@ -450,8 +449,8 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
 
                 if (!TextUtils.isEmpty(data.getURL())) {
                     Uri uri = Uri.parse(data.getURL());
-                    if (uri.getAuthority() != null && uri.getAuthority().equals(PN_IMPRESSION_URL)) {
-                        String idParam = uri.getQueryParameter(PN_IMPRESSION_QUERY_PARAM);
+                    if (uri.getAuthority() != null && uri.getAuthority().equals(SDK_IMPRESSION_URL)) {
+                        String idParam = uri.getQueryParameter(SDK_IMPRESSION_QUERY_PARAM);
                         if (!TextUtils.isEmpty(idParam)) {
                             impressionId = idParam;
                             found = true;

@@ -8,20 +8,15 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 import android.app.Application;
-import android.os.Handler;
 import android.view.View;
 
 import androidx.test.core.app.ApplicationProvider;
-
-import com.verve.atom.sdk.utils.Threads;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.ReportingController;
@@ -40,7 +35,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 
 import java.lang.reflect.Field;
@@ -61,23 +55,11 @@ public class MraidRewardedViewModelTest {
     private ReportingController mockReportingController;
     @Mock
     private AdTracker mockAdTracker;
-    @Mock
-    private Handler mockedHandler;
-
-    private MockedStatic<Threads> mockedThreads;
 
     @Before
     public void setUp() {
         openMocks(this);
         application = ApplicationProvider.getApplicationContext();
-        mockedThreads = mockStatic(Threads.class);
-
-        mockedThreads.when(Threads::newUiHandler)
-                .thenReturn(mockedHandler);
-        when(mockedHandler.postDelayed(any(Runnable.class), anyLong())).thenAnswer((Answer) invocation -> {
-            invocation.getArgument(0, Runnable.class).run();
-            return null;
-        });
 
 
         viewModel = new MraidRewardedViewModel(
@@ -92,7 +74,7 @@ public class MraidRewardedViewModelTest {
 
     @After
     public void tearDown() {
-        mockedThreads.close();
+
     }
 
     @Test
@@ -133,7 +115,6 @@ public class MraidRewardedViewModelTest {
         replacePrivateVariableWithMock(RewardedViewModel.class, "mCustomCTATracker", mockAdTracker);
         replacePrivateVariableWithMock(RewardedViewModel.class, "mAdEventTracker", mockAdTracker);
         replacePrivateVariableWithMock(RewardedViewModel.class, "mCustomEndcardTracker", mockAdTracker);
-
 
         try (MockedStatic<HyBid> mockedStatic = mockStatic(HyBid.class)) {
             mockedStatic.when(HyBid::getReportingController).thenReturn(mockReportingController);

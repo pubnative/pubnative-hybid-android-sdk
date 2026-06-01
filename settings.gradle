@@ -12,5 +12,4 @@ include ':hybid.demo',
         ':hybid.adapters.admob',
         ':hybid.adapters.ironsource',
         ':hybid.adapters.applovin',
-        ':hybid.sdk',
-        ':ng.sdk'
+        ':hybid.sdk'

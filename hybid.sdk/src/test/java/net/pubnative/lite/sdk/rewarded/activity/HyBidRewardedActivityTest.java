@@ -3,7 +3,6 @@ package net.pubnative.lite.sdk.rewarded.activity;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 
@@ -16,9 +15,6 @@ import android.widget.FrameLayout;
 
 import androidx.core.view.WindowInsetsCompat;
 
-import com.verve.atom.sdk.database.DatabaseManager;
-
-import net.pubnative.lite.sdk.rewarded.viewModel.MraidRewardedViewModel;
 import net.pubnative.lite.sdk.rewarded.viewModel.RewardedViewModel;
 import net.pubnative.lite.sdk.vpaid.HyBidActivityInteractor;
 
@@ -27,7 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockedConstruction;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;

@@ -870,7 +870,7 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
     @JavascriptMRAIDCallback
     protected void close() {
         MRAIDLog.d(MRAID_LOG_TAG + "-JS callback", "close");
-        MRAIDLog.d("hz-m closing wv: " + webView);
+        MRAIDLog.d("hz-m closing wv: webView");
         handler.post(() -> {
             if (state == STATE_DEFAULT || state == STATE_EXPANDED) {
                 if (closeLayoutListener != null) {
@@ -895,7 +895,7 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
     @JavascriptMRAIDCallback
     protected void unload() {
         MRAIDLog.d(MRAID_LOG_TAG + "-JS callback", "unload");
-        MRAIDLog.d("hz-m unload wv: " + webView);
+        MRAIDLog.d("hz-m unload wv: webView");
         if (listener != null) {
             listener.mraidViewError(this);
         }
@@ -987,7 +987,7 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
                         webView.setWebViewClient(null);
                         webViewPart2 = createWebView();
                         webViewPart2.loadUrl(finalUrl);
-                        MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for " + webViewPart2);
+                        MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for webViewPart2");
                         currentWebView = webViewPart2;
                         isExpandingPart2 = true;
                         expandHelper(currentWebView);
@@ -1008,7 +1008,7 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
                         webViewPart2 = createWebView();
                         mIsExpanding = true;
                         webViewPart2.loadUrl(finalUrl);
-                        MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for " + webViewPart2);
+                        MRAIDLog.d("hz-m MRAIDView - expand - switching out currentwebview for webViewPart2");
                         currentWebView = webViewPart2;
                         isExpandingPart2 = true;
                         expandHelper(currentWebView);
@@ -1351,7 +1351,7 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
                     webViewPart2.destroy();
                     webView.setWebChromeClient(mraidWebChromeClient);
                     webView.setWebViewClient(mraidWebViewClient);
-                    MRAIDLog.d("hz-m MRAIDView - closeFromExpanded - setting currentwebview to " + webView);
+                    MRAIDLog.d("hz-m MRAIDView - closeFromExpanded - setting currentwebview to webView");
                     currentWebView = webView;
                     currentWebView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                 }
@@ -1811,7 +1811,7 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
         }
 
         public void onProgressChanged(WebView view, int newProgress) {
-            MRAIDLog.d("hz-m MRAIDView ChromeClient - onProgressChanged " + newProgress + " wv: " + webView + " view: " + MRAIDView.this);
+            MRAIDLog.d("hz-m MRAIDView ChromeClient - onProgressChanged " + newProgress);
         }
 
         public void onShowCustomView(View view, CustomViewCallback callback) {

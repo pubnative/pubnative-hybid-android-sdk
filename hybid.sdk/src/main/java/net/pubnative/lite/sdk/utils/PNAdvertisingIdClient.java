@@ -26,7 +26,7 @@ public class PNAdvertisingIdClient {
     private static final String TAG = PNAdvertisingIdClient.class.getSimpleName();
 
     public interface Listener {
-        void onPNAdvertisingIdFinish(String advertisingId, Boolean limitTracking);
+        void onAdvertisingIdFinish(String advertisingId, Boolean limitTracking);
     }
 
     protected Listener mListener;
@@ -86,7 +86,7 @@ public class PNAdvertisingIdClient {
             @Override
             public void run() {
                 if (mListener != null) {
-                    mListener.onPNAdvertisingIdFinish(advertisingId, limitTracking);
+                    mListener.onAdvertisingIdFinish(advertisingId, limitTracking);
                 }
             }
         });

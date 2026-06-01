@@ -10,6 +10,7 @@ import net.pubnative.lite.sdk.HyBid;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.robolectric.RobolectricTestRunner;
 
@@ -46,7 +47,7 @@ public class AdAudioStateManagerTest {
     public void testFullscreen_AdWithInvalidAudioState_FallbackToHyBid() {
         Ad ad = mock(Ad.class);
         when(ad.getAudioState()).thenReturn("invalid");
-        try (var mockedHyBid = Mockito.mockStatic(HyBid.class)) {
+        try (MockedStatic<HyBid> mockedHyBid = Mockito.mockStatic(HyBid.class)) {
             mockedHyBid.when(HyBid::getVideoAudioStatus).thenReturn(AudioState.ON);
             AudioState result = AdAudioStateManager.getAudioState(ad, true);
             assertEquals(AudioState.ON, result);
@@ -57,7 +58,7 @@ public class AdAudioStateManagerTest {
     public void testFullscreen_AdWithNullAudioState_FallbackToHyBid() {
         Ad ad = mock(Ad.class);
         when(ad.getAudioState()).thenReturn(null);
-        try (var mockedHyBid = Mockito.mockStatic(HyBid.class)) {
+        try (MockedStatic<HyBid> mockedHyBid = Mockito.mockStatic(HyBid.class)) {
             mockedHyBid.when(HyBid::getVideoAudioStatus).thenReturn(AudioState.DEFAULT);
             AudioState result = AdAudioStateManager.getAudioState(ad, true);
             assertEquals(AudioState.DEFAULT, result);
@@ -66,7 +67,7 @@ public class AdAudioStateManagerTest {
 
     @Test
     public void testFullscreen_AdIsNull_FallbackToHyBid() {
-        try (var mockedHyBid = Mockito.mockStatic(HyBid.class)) {
+        try (MockedStatic<HyBid> mockedHyBid = Mockito.mockStatic(HyBid.class)) {
             mockedHyBid.when(HyBid::getVideoAudioStatus).thenReturn(AudioState.MUTED);
             AudioState result = AdAudioStateManager.getAudioState(null, true);
             assertEquals(AudioState.MUTED, result);

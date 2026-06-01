@@ -192,7 +192,7 @@ public class VideoAdTest {
         videoAd.show();
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
         mockedLogger.verify(() -> Logger.e(anyString(), eq("Banner is not ready")));
-        assertTrue(videoAd.isAdStarted());
+        assertFalse(videoAd.isAdStarted());
     }
 
     @Test

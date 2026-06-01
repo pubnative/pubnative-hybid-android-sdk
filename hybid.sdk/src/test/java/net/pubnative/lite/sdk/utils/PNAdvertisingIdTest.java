@@ -35,6 +35,6 @@ public class PNAdvertisingIdTest {
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
 
-        verify(listener).onPNAdvertisingIdFinish((String) isNull(), (Boolean) isNotNull());
+        verify(listener).onAdvertisingIdFinish((String) isNull(), (Boolean) isNotNull());
     }
 }

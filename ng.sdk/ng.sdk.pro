@@ -1,2 +1,0 @@
--keep class com.verve.** { *; }
--keep class com.iab.omid.library.pubnativenet.** { *; }

@@ -545,12 +545,8 @@ public class HyBid {
             AdRequest adRequest = adRequestFactory.buildRequest("", "", AdSize.SIZE_INTERSTITIAL, "", true, IntegrationType.IN_APP_BIDDING, mediationVendorName, 0, false);
             url = PNApiUrlComposer.getUrlQuery(HyBid.getApiClient().getApiUrl(), (PNAdRequest) adRequest);
         } else {
-            if (context == null) {
-                url = "";
-            } else {
-                AdRequest adRequest = adRequestFactory.buildRequest(context, "", "", AdSize.SIZE_INTERSTITIAL, "", true, IntegrationType.IN_APP_BIDDING, mediationVendorName, 0, false);
-                url = PNApiUrlComposer.getUrlQuery(net.pubnative.lite.sdk.BuildConfig.BASE_URL, (PNAdRequest) adRequest);
-            }
+            AdRequest adRequest = adRequestFactory.buildRequest(context, "", "", AdSize.SIZE_INTERSTITIAL, "", true, IntegrationType.IN_APP_BIDDING, mediationVendorName, 0, false);
+            url = PNApiUrlComposer.getUrlQuery(net.pubnative.lite.sdk.BuildConfig.BASE_URL, (PNAdRequest) adRequest);
         }
 
         return url;
@@ -608,7 +604,7 @@ public class HyBid {
     }
 
     public static void setSdkManager(SdkManager sdkManager) {
-        if (sdkManager != null && hasPackageName("com.verve.ng.sdk")) {
+        if (sdkManager != null && hasPackageName(BuildConfig.SDK_WRAPPER_PACKAGE)) {
             sSdkManager = sdkManager;
         }
     }

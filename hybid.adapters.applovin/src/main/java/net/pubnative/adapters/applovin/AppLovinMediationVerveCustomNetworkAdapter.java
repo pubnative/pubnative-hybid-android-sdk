@@ -45,6 +45,7 @@ import net.pubnative.lite.sdk.request.HyBidNativeAdRequest;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedAd;
 import net.pubnative.lite.sdk.views.HyBidAdView;
 import net.pubnative.lite.sdk.vpaid.enums.AudioState;
+import net.pubnative.lite.sdk.BuildConfig;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -52,7 +53,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AppLovinMediationVerveCustomNetworkAdapter extends MediationAdapterBase implements MaxAdViewAdapter,
         MaxInterstitialAdapter, MaxRewardedAdapter, MaxNativeAdAdapter {
     public static final String MAX_MEDIATION_VENDOR = "m";
-    public static final String MAX_ADAPTER_VERSION = "3.8.1.0";
+    public static final String MAX_ADAPTER_VERSION = BuildConfig.SDK_VERSION + ".0";
     public static final String PARAM_APP_TOKEN = "pn_app_token";
     public static final String DUMMY_TOKEN = "dummytoken";
 

@@ -105,6 +105,15 @@ public class VideoAd extends BaseVideoAd {
                                         getAdController().playAd();
 
                                         validateAudioState();
+                                        mIsAdStarted = true;
+                                    } else {
+                                        Logger.e(LOG_TAG, "Ad params are null. Cannot start ad playback.");
+                                        if (getAdListener() != null) {
+                                            PlayerInfo info = new PlayerInfo("Ad params are null. Cannot start ad playback.");
+                                            getAdListener().onAdLoadFail(info);
+                                        }
+                                        mIsAdStarted = false;
+                                        setAdState(AdState.NONE);
                                     }
                                 }
                             } else {
@@ -113,12 +122,13 @@ public class VideoAd extends BaseVideoAd {
                                     PlayerInfo info = new PlayerInfo("getAdController() is null and can not set attributes to banner view ");
                                     getAdListener().onAdLoadFail(info);
                                 }
+                                mIsAdStarted = false;
+                                setAdState(AdState.NONE);
                             }
                         } else {
                             Logger.e(LOG_TAG, "Banner is not ready");
+                            mIsAdStarted = false;
                         }
-
-                        mIsAdStarted = true;
                     }
                 });
             }
@@ -176,7 +186,11 @@ public class VideoAd extends BaseVideoAd {
             if (getAdState() == AdState.SHOWING) {
                 if (mBannerView != null) {
                     mBannerView.setVisibility(View.GONE);
-                    mBannerView.removeAllViews();
+                    try {
+                        mBannerView.removeAllViews();
+                    } catch (Exception e) {
+                        Logger.e(LOG_TAG, "Error removing views from banner: " + e);
+                    }
                 }
                 if (getAdController() != null) {
                     getAdController().dismiss();

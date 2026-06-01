@@ -25,7 +25,7 @@ public class VisibilityTracker {
     protected WeakReference<View> mDeviceView = null;
     private volatile WeakReference<HybidConsumer<Double>> mPercentageConsumer;
     protected WeakReference<Listener> mListener = null;
-    protected final List<PubnativeVisibilityTrackerItem> mTrackedViews = new ArrayList<>();
+    protected final List<SdkVisibilityTrackerItem> mTrackedViews = new ArrayList<>();
     protected Handler mHandler = new Handler();
     protected boolean mIsVisibilityCheckScheduled = false;
     protected final VisibilityRunnable mVisibilityRunnable = new VisibilityRunnable();
@@ -84,7 +84,7 @@ public class VisibilityTracker {
                 return;
             }
 
-            PubnativeVisibilityTrackerItem item = new PubnativeVisibilityTrackerItem();
+            SdkVisibilityTrackerItem item = new SdkVisibilityTrackerItem();
             item.mTrackingView = view;
             item.mMinVisibilityPercent = minVisibilityPercent;
 
@@ -154,7 +154,7 @@ public class VisibilityTracker {
     protected int indexOfTrackedView(View view) {
         int result = -1;
         for (int i = 0; i < mTrackedViews.size(); i++) {
-            PubnativeVisibilityTrackerItem item = mTrackedViews.get(i);
+            SdkVisibilityTrackerItem item = mTrackedViews.get(i);
             if (item.equals(view)) {
                 result = i;
                 break;
@@ -166,9 +166,9 @@ public class VisibilityTracker {
     //==============================================================================================
     // INNER CLASSES
     //==============================================================================================
-    protected static class PubnativeVisibilityTrackerItem {
+    protected static class SdkVisibilityTrackerItem {
 
-        private final String TAG = PubnativeVisibilityTrackerItem.class.getSimpleName();
+        private final String TAG = SdkVisibilityTrackerItem.class.getSimpleName();
         public View mTrackingView;
         public double mMinVisibilityPercent; // Expressed from 0 to 1
 
@@ -198,12 +198,12 @@ public class VisibilityTracker {
         public void run() {
             mIsVisibilityCheckScheduled = false;
 
-            final List<PubnativeVisibilityTrackerItem> snapshot;
+            final List<SdkVisibilityTrackerItem> snapshot;
             synchronized (mTrackedViews) {
                 snapshot = new ArrayList<>(mTrackedViews);
             }
 
-            for (PubnativeVisibilityTrackerItem item : snapshot) {
+            for (SdkVisibilityTrackerItem item : snapshot) {
 
                 if (isVisible(item)) {
 
@@ -222,7 +222,7 @@ public class VisibilityTracker {
             mVisibleViews.clear();
         }
 
-        protected boolean isVisible(PubnativeVisibilityTrackerItem item) {
+        protected boolean isVisible(SdkVisibilityTrackerItem item) {
             boolean result = false;
             if (item == null) {
                 return result;

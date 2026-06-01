@@ -10,7 +10,6 @@ import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Looper;
 import android.text.TextUtils;
 import android.view.Surface;
 import android.view.TextureView;
@@ -50,6 +49,7 @@ import net.pubnative.lite.sdk.vpaid.vast.ViewControllerVast;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -726,7 +726,7 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
 
     private void addMissingDefaultEvents(int duration) {
 
-        List<String> defaultEvents = List.of(
+        List<String> defaultEvents = Arrays.asList(
                 EventConstants.START,
                 EventConstants.FIRST_QUARTILE,
                 EventConstants.MIDPOINT,

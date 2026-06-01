@@ -8,3 +8,4 @@
 .externalNativeBuild
 */build
 /.kotlin/
+/.github/

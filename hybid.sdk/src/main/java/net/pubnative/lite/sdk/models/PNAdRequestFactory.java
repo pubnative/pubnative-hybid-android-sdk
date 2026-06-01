@@ -9,6 +9,7 @@ import android.location.Location;
 import android.text.TextUtils;
 import android.util.Base64;
 
+import net.pubnative.lite.sdk.BuildConfig;
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.TopicManager;
@@ -160,18 +161,24 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
         adRequest.zoneId = zoneid;
         adRequest.appToken = TextUtils.isEmpty(appToken) ? HyBid.getAppToken() : appToken;
         adRequest.os = "android";
-        adRequest.osver = mDeviceInfo.getOSVersion();
+        if (mDeviceInfo != null) {
+            adRequest.osver = mDeviceInfo.getOSVersion();
+        }
         adRequest.coppa = HyBid.isCoppaEnabled() ? "1" : "0";
 
         BaseViewabilityManager viewabilityManager = mSdkManager.getVisibilityManager();
         if (viewabilityManager != null) {
             adRequest.omidpn = viewabilityManager.getPartnerName();
             adRequest.omidpv = viewabilityManager.getPartnerVersion();
+        } else {
+            adRequest.omidpn = BuildConfig.OMIDPN;
+            adRequest.omidpv = BuildConfig.OMIDPV;
         }
+
         adRequest.isInterstitial = adSize == AdSize.SIZE_INTERSTITIAL;
         adRequest.ae = paAvailable ? "1" : "0";
 
-        adRequest.hver = HyBid.getHyBidVersion();
+        adRequest.hver = BuildConfig.HVER;
 
         String atomCohorts = getAtomCohorts();
         if (!TextUtils.isEmpty(atomCohorts)) {
@@ -346,14 +353,19 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
     }
 
     private String getAgeOfApp() {
-        if (prefs == null) prefs = new HyBidPreferences(mDeviceInfo.getContext());
-        return prefs.getAppFirstInstalledTime();
+        if (prefs == null && mDeviceInfo != null && mDeviceInfo.getContext() != null) {
+            prefs = new HyBidPreferences(mDeviceInfo.getContext());
+        }
+
+        return prefs != null ? prefs.getAppFirstInstalledTime() : "";
     }
 
     private long calculateSessionDuration() {
-        if (prefs == null) prefs = new HyBidPreferences(mDeviceInfo.getContext());
+        if (prefs == null && mDeviceInfo != null && mDeviceInfo.getContext() != null) {
+            prefs = new HyBidPreferences(mDeviceInfo.getContext());
+        }
 
-        return System.currentTimeMillis() - prefs.getSessionTimeStamp();
+        return prefs != null ? System.currentTimeMillis() - prefs.getSessionTimeStamp() : 0L;
     }
 
     @Override

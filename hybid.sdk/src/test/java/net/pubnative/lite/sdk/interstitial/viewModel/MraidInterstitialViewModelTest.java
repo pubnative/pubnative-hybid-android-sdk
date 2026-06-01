@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
@@ -20,8 +21,6 @@ import android.os.Handler;
 import android.view.View;
 
 import androidx.test.core.app.ApplicationProvider;
-
-import com.verve.atom.sdk.utils.Threads;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.ReportingController;
@@ -68,21 +67,15 @@ public class MraidInterstitialViewModelTest {
     @Mock
     private Handler mockedHandler;
 
-    private MockedStatic<Threads> mockedThreads;
-
     @Before
     public void setUp() {
         openMocks(this);
         application = ApplicationProvider.getApplicationContext();
-        mockedThreads = mockStatic(Threads.class);
 
-        mockedThreads.when(Threads::newUiHandler)
-                .thenReturn(mockedHandler);
         when(mockedHandler.postDelayed(any(Runnable.class), anyLong())).thenAnswer((Answer) invocation -> {
             invocation.getArgument(0, Runnable.class).run();
             return null;
         });
-
 
         viewModel = new MraidInterstitialViewModel(
                 application,
@@ -96,7 +89,6 @@ public class MraidInterstitialViewModelTest {
 
     @After
     public void tearDown() {
-        mockedThreads.close();
     }
 
     @Test
@@ -137,7 +129,6 @@ public class MraidInterstitialViewModelTest {
         replacePrivateVariableWithMock(InterstitialViewModel.class, "mCustomCTATracker", mockAdTracker);
         replacePrivateVariableWithMock(InterstitialViewModel.class, "mAdEventTracker", mockAdTracker);
         replacePrivateVariableWithMock(InterstitialViewModel.class, "mCustomEndcardTracker", mockAdTracker);
-
 
         try (MockedStatic<HyBid> mockedStatic = mockStatic(HyBid.class)) {
             mockedStatic.when(HyBid::getReportingController).thenReturn(mockReportingController);

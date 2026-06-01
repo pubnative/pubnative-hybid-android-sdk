@@ -9,6 +9,7 @@ import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.AdData;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.robolectric.RobolectricTestRunner;
 
@@ -24,7 +25,7 @@ public class AdCustomCTAManagerTest {
         when(ad.isCustomCTAEnabled()).thenReturn(true);
         when(ad.hasCustomCTA()).thenReturn(true);
         when(ad.getAsset(APIAsset.CUSTOM_CTA)).thenReturn(adData);
-        try (var mockedUrlValidator = Mockito.mockStatic(URLValidator.class)) {
+        try (MockedStatic<URLValidator> mockedUrlValidator = Mockito.mockStatic(URLValidator.class)) {
             mockedUrlValidator.when(() -> URLValidator.isValidURL(anyString())).thenReturn(true);
             assertTrue(AdCustomCTAManager.isAbleShow(ad));
         }
@@ -68,7 +69,7 @@ public class AdCustomCTAManagerTest {
         when(ad.isCustomCTAEnabled()).thenReturn(true);
         when(ad.hasCustomCTA()).thenReturn(true);
         when(ad.getAsset(APIAsset.CUSTOM_CTA)).thenReturn(adData);
-        try (var mockedUrlValidator = Mockito.mockStatic(URLValidator.class)) {
+        try (MockedStatic<URLValidator> mockedUrlValidator = Mockito.mockStatic(URLValidator.class)) {
             mockedUrlValidator.when(() -> URLValidator.isValidURL(anyString())).thenReturn(true);
             assertFalse(AdCustomCTAManager.isAbleShow(ad));
         }
@@ -81,7 +82,7 @@ public class AdCustomCTAManagerTest {
         when(ad.isCustomCTAEnabled()).thenReturn(true);
         when(ad.hasCustomCTA()).thenReturn(true);
         when(ad.getAsset(APIAsset.CUSTOM_CTA)).thenReturn(adData);
-        try (var mockedUrlValidator = Mockito.mockStatic(URLValidator.class)) {
+        try (MockedStatic<URLValidator> mockedUrlValidator = Mockito.mockStatic(URLValidator.class)) {
             mockedUrlValidator.when(() -> URLValidator.isValidURL(anyString())).thenReturn(true);
             assertFalse(AdCustomCTAManager.isAbleShow(ad));
         }
@@ -94,7 +95,7 @@ public class AdCustomCTAManagerTest {
         when(ad.isCustomCTAEnabled()).thenReturn(true);
         when(ad.hasCustomCTA()).thenReturn(true);
         when(ad.getAsset(APIAsset.CUSTOM_CTA)).thenReturn(adData);
-        try (var mockedUrlValidator = Mockito.mockStatic(URLValidator.class)) {
+        try (MockedStatic<URLValidator> mockedUrlValidator = Mockito.mockStatic(URLValidator.class)) {
             mockedUrlValidator.when(() -> URLValidator.isValidURL(anyString())).thenReturn(false);
             assertFalse(AdCustomCTAManager.isAbleShow(ad));
         }
