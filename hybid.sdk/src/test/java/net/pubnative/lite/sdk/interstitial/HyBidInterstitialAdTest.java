@@ -27,6 +27,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -205,7 +206,7 @@ public class HyBidInterstitialAdTest {
     public void testOnInterstitialError_callsListener() {
         interstitialAd.onInterstitialError(mockPresenter);
 
-        verify(mockListener).onInterstitialLoadFailed(hyBidErrorArgumentCaptor.capture());
+        verify(mockListener).onInterstitialShowFailed(hyBidErrorArgumentCaptor.capture());
         HyBidError error = hyBidErrorArgumentCaptor.getValue();
         assertEquals(HyBidErrorCode.ERROR_RENDERING_INTERSTITIAL, error.getErrorCode());
     }
@@ -384,6 +385,22 @@ public class HyBidInterstitialAdTest {
         boolean result = interstitialAd.show();
 
         assertFalse(result);
+    }
+
+    @Test
+    public void testShow_whenAdExpired_doesNotShowAndTriggersError() {
+        replacePrivateVariableWithMock("mReady", true);
+        replacePrivateVariableWithMock("mPresenter", mockPresenter);
+        // Set initial load time to more than 30 minutes ago (TIME_TO_EXPIRE = 1800000 ms = 30 minutes)
+        long expiredTime = System.currentTimeMillis() - 1800001;
+        replacePrivateVariableWithMock("mInitialLoadTime", expiredTime);
+
+        interstitialAd.show();
+
+        verify(mockPresenter, never()).show();
+        verify(mockListener).onInterstitialShowFailed(hyBidErrorArgumentCaptor.capture());
+        HyBidError error = hyBidErrorArgumentCaptor.getValue();
+        assertEquals(HyBidErrorCode.EXPIRED_AD, error.getErrorCode());
     }
 
     @Test

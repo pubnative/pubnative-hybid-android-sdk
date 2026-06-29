@@ -58,6 +58,8 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
 
         void onRewardedLoadFailed(Throwable error);
 
+        default void onRewardedShowFailed(Throwable error) {}
+
         void onRewardedOpened();
 
         void onRewardedClosed();
@@ -204,7 +206,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
             } else {
                 Logger.e(TAG, "Ad has expired.");
                 cleanup();
-                invokeOnLoadFailed(new HyBidError(HyBidErrorCode.EXPIRED_AD));
+                invokeOnShowFailed(new HyBidError(HyBidErrorCode.EXPIRED_AD));
             }
         } else {
             Logger.e(TAG, "Can't display ad. Rewarded ad not ready.");
@@ -277,7 +279,6 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     public void setCustomUrl(String customUrl) {
         mCustomUrl = customUrl;
     }
-
 
 
     public void setWatermark(String watermarkString) {
@@ -501,6 +502,14 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
     }
 
     protected void invokeOnLoadFailed(Throwable exception) {
+        handleErrorReporting(exception);
+
+        if (mListener != null) {
+            mListener.onRewardedLoadFailed(exception);
+        }
+    }
+
+    private void handleErrorReporting(Throwable exception) {
         long loadTime = -1;
         if (mInitialLoadTime != -1) {
             loadTime = System.currentTimeMillis() - mInitialLoadTime;
@@ -533,9 +542,6 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
             sendLoadTracker(hyBidError.getErrorCode().getCode());
         } else {
             sendLoadTracker(HyBidErrorCode.UNKNOWN_ERROR.getCode());
-        }
-        if (mListener != null) {
-            mListener.onRewardedLoadFailed(exception);
         }
     }
 
@@ -692,7 +698,15 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
 
     @Override
     public void onRewardedError(RewardedPresenter rewardedPresenter) {
-        invokeOnLoadFailed(new HyBidError(HyBidErrorCode.ERROR_RENDERING_REWARDED));
+        invokeOnShowFailed(new HyBidError(HyBidErrorCode.ERROR_RENDERING_REWARDED));
+    }
+
+    protected void invokeOnShowFailed(Throwable exception) {
+        handleErrorReporting(exception);
+        Logger.e(TAG, exception.getMessage());
+        if (mListener != null) {
+            mListener.onRewardedShowFailed(exception);
+        }
     }
 
     @Override

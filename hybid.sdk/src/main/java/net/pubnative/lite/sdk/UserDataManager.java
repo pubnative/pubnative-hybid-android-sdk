@@ -142,9 +142,11 @@ public class UserDataManager {
             } catch (RejectedExecutionException exception) {
                 Logger.e(TAG, "processConsent", exception);
                 HyBid.reportException(exception);
+                notifyConsentGiven(null, given);
             } catch (Exception exception) {
                 Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
                 HyBid.reportException(exception);
+                notifyConsentGiven(null, given);
             }
         }
     }

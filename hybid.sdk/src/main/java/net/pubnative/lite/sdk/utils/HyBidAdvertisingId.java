@@ -41,12 +41,12 @@ public class HyBidAdvertisingId {
                     adInfo = methodBuilder.execute();
                     advertisingId = reflectedGetAdvertisingId(adInfo, advertisingId);
                     isLimitAdTrackingEnabled = reflectedIsLimitAdTrackingEnabled(adInfo, isLimitAdTrackingEnabled);
-                    post(listener, advertisingId, isLimitAdTrackingEnabled);
                 } catch (Exception e) {
                     HyBid.reportException(e);
                     Logger.e(TAG, "Unable to obtain Advertising ID.");
                 }
             }
+            post(listener, advertisingId, isLimitAdTrackingEnabled);
         });
     }
 

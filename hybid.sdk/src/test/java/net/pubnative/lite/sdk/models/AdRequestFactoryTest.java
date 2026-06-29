@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
@@ -49,6 +50,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
 
 import java.util.Locale;
+import java.util.concurrent.RejectedExecutionException;
 
 @RunWith(RobolectricTestRunner.class)
 public class AdRequestFactoryTest {
@@ -253,6 +255,44 @@ public class AdRequestFactoryTest {
 
             assertNotNull(capturedRequest);
             assertEquals("new-ad-id", capturedRequest.gid);
+        }
+    }
+
+    @Test
+    public void createAdRequest_whenAdIdFetchIsRejected_invokesCallbackWithNullAdId() {
+        when(mMockDeviceInfo.getAdvertisingId()).thenReturn(null);
+
+        try (MockedConstruction<HyBidAdvertisingId> mockedTask = Mockito.mockConstruction(HyBidAdvertisingId.class,
+                (mock, context) -> {
+                    doThrow(new RejectedExecutionException()).when(mock).execute(any());
+                })) {
+
+            mSubject.createAdRequest("token", "zone", AdSize.SIZE_320x50, false, false, mockCallback);
+
+            verify(mockCallback).onRequestCreated(adRequestCaptor.capture());
+            PNAdRequest capturedRequest = (PNAdRequest) adRequestCaptor.getValue();
+
+            assertNotNull(capturedRequest);
+            assertNull(capturedRequest.gid);
+        }
+    }
+
+    @Test
+    public void createAdRequest_whenAdIdFetchFails_invokesCallbackWithNullAdId() {
+        when(mMockDeviceInfo.getAdvertisingId()).thenReturn(null);
+
+        try (MockedConstruction<HyBidAdvertisingId> mockedTask = Mockito.mockConstruction(HyBidAdvertisingId.class,
+                (mock, context) -> {
+                    doThrow(new RuntimeException()).when(mock).execute(any());
+                })) {
+
+            mSubject.createAdRequest("token", "zone", AdSize.SIZE_320x50, false, false, mockCallback);
+
+            verify(mockCallback).onRequestCreated(adRequestCaptor.capture());
+            PNAdRequest capturedRequest = (PNAdRequest) adRequestCaptor.getValue();
+
+            assertNotNull(capturedRequest);
+            assertNull(capturedRequest.gid);
         }
     }
 }

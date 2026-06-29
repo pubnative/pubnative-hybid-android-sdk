@@ -4,8 +4,6 @@
 //
 package net.pubnative.lite.sdk;
 
-import static android.content.Context.BATTERY_SERVICE;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
@@ -36,7 +34,6 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 
-import net.pubnative.lite.sdk.R;
 import net.pubnative.lite.sdk.models.request.UserAgent;
 import net.pubnative.lite.sdk.utils.BatteryUtils;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
@@ -46,9 +43,13 @@ import net.pubnative.lite.sdk.utils.ScreenDimensionsUtils;
 import net.pubnative.lite.sdk.utils.SoundUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Created by erosgarciaponte on 08.01.18.
@@ -91,6 +92,12 @@ public class DeviceInfo {
     }
 
     private static final String TAG = DeviceInfo.class.getSimpleName();
+    private static final ExecutorService BACKGROUND_EXECUTOR = Executors.newSingleThreadExecutor(r -> {
+        Thread thread = new Thread(r, "HyBid-DeviceInfo");
+        thread.setDaemon(true);
+        return thread;
+    });
+
     private final Context mContext;
     private final UserAgentProvider mUserAgentProvider;
     private String mAdvertisingId;
@@ -104,11 +111,13 @@ public class DeviceInfo {
     private String deviceHeight;
     private String deviceWidth;
     private float pxratio;
+    private final AtomicReference<List<String>> mCachedInputLanguages = new AtomicReference<>(Collections.emptyList());
 
     public DeviceInfo(Context context) {
         mContext = context.getApplicationContext();
         mUserAgentProvider = new UserAgentProvider();
         getDeviceScreenDimensions();
+        fetchInputLanguages();
     }
 
     public void initialize(Listener listener) {
@@ -116,6 +125,9 @@ public class DeviceInfo {
         fetchUserAgent();
         fetchAdvertisingId();
         updateChargingStatus();
+        if (mCachedInputLanguages.get().isEmpty()) {
+            fetchInputLanguages();
+        }
     }
 
     private final BroadcastReceiver mBatteryStatusReceiver = new BroadcastReceiver() {
@@ -220,6 +232,53 @@ public class DeviceInfo {
 
     public void fetchUserAgent() {
         mUserAgentProvider.initialise(mContext);
+    }
+
+    private void fetchInputLanguages() {
+        try {
+            BACKGROUND_EXECUTOR.execute(() -> {
+                ArrayList<String> inputLanguages = new ArrayList<>();
+                if (mContext != null) {
+                    try {
+                        InputMethodManager inputMethodManager = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+
+                        if (inputMethodManager != null) {
+                            List<InputMethodInfo> inputMethodInfoList = inputMethodManager.getEnabledInputMethodList();
+
+                            if (inputMethodInfoList != null && !inputMethodInfoList.isEmpty()) {
+                                for (InputMethodInfo inputMethodInfo : inputMethodInfoList) {
+                                    if (inputMethodInfo == null) {
+                                        continue;
+                                    }
+
+                                    List<InputMethodSubtype> subtypeList = inputMethodManager.getEnabledInputMethodSubtypeList(inputMethodInfo, true);
+                                    if (subtypeList != null) {
+                                        for (InputMethodSubtype subtype : subtypeList) {
+                                            if (subtype == null) {
+                                                continue;
+                                            }
+                                            String mode = subtype.getMode();
+                                            if (mode != null && mode.equals("keyboard")) {
+                                                String currentLocale = subtype.getLocale();
+                                                if (currentLocale != null && !currentLocale.isEmpty()) {
+                                                    inputLanguages.add(currentLocale);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } catch (Exception exception) {
+                        Logger.e(TAG, "Error fetching input languages", exception);
+                    }
+                }
+                mCachedInputLanguages.set(Collections.unmodifiableList(inputLanguages));
+            });
+        } catch (RejectedExecutionException exception) {
+            Logger.e(TAG, "Failed to execute fetchInputLanguages", exception);
+            HyBid.reportException(exception);
+        }
     }
 
     public void getDeviceScreenDimensions() {
@@ -571,43 +630,11 @@ public class DeviceInfo {
     }
 
     public List<String> getInputLanguages() {
-        ArrayList<String> inputLanguages = new ArrayList<>();
-        if (mContext != null) {
-            try {
-                InputMethodManager inputMethodManager = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-
-                if (inputMethodManager != null) {
-                    List<InputMethodInfo> inputMethodInfoList = inputMethodManager.getEnabledInputMethodList();
-
-                    if (inputMethodInfoList != null && !inputMethodInfoList.isEmpty()) {
-                        for (InputMethodInfo inputMethodInfo : inputMethodInfoList) {
-                            if (inputMethodInfo == null) {
-                                continue;
-                            }
-
-                            List<InputMethodSubtype> subtypeList = inputMethodManager.getEnabledInputMethodSubtypeList(inputMethodInfo, true);
-                            if (subtypeList != null) {
-                                for (InputMethodSubtype subtype : subtypeList) {
-                                    if (subtype == null) {
-                                        continue;
-                                    }
-                                    String mode = subtype.getMode();
-                                    if (mode != null && mode.equals("keyboard")) {
-                                        String currentLocale = subtype.getLocale();
-                                        if (currentLocale != null && !currentLocale.isEmpty()) {
-                                            inputLanguages.add(currentLocale);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (Exception exception) {
-                Logger.e(TAG, "Error getting input languages", exception);
-            }
+        List<String> cached = mCachedInputLanguages.get();
+        if (cached.isEmpty()) {
+            fetchInputLanguages();
         }
-        return inputLanguages;
+        return new ArrayList<>(cached);
     }
 
     public Integer isBatteryCharging() {

@@ -98,7 +98,6 @@ def updateFileWithReplacements(String filePath, Map<String, String> replacements
 dependencies {
 
     implementation "net.pubnative:hybid.omsdk:$omid_version"
-    implementation "com.verve:atom.sdk:+"
 
     testImplementation "androidx.test:core:1.7.0"
     testImplementation 'androidx.core:core:1.15.0'

@@ -801,5 +801,160 @@ public class UserDataManagerTest {
             // Intent creation may fail in test environment, but method should not crash
         }
     }
-}
 
+    // =============================================================================================
+    // Additional GDPR Applies Tests for getGdprAppliesFlag edge cases
+    // =============================================================================================
+
+    @Test
+    public void testGdprApplies_whenValueIsEmptyString_returnsFalse() {
+        appPrefsStorage.put("IABTCF_gdprApplies", "");
+        assertFalse(userDataManager.gdprApplies());
+    }
+
+    @Test
+    public void testGdprApplies_whenValueIsOtherString_returnsFalse() {
+        appPrefsStorage.put("IABTCF_gdprApplies", "maybe");
+        assertFalse(userDataManager.gdprApplies());
+    }
+
+    @Test
+    public void testGdprApplies_whenValueIsNegativeInteger_returnsFalse() {
+        appPrefsStorage.put("IABTCF_gdprApplies", -1);
+        assertFalse(userDataManager.gdprApplies());
+    }
+
+    // =============================================================================================
+    // Additional CCPA Tests
+    // =============================================================================================
+
+    @Test
+    public void testIsCCPAOptOut_withLowercaseY_returnsTrue() {
+        privatePrefsStorage.put("ccpa_consent", "1-y-");
+        assertTrue(userDataManager.isCCPAOptOut());
+    }
+
+    // =============================================================================================
+    // Edge Cases for Null Preferences
+    // =============================================================================================
+
+    @Test
+    public void testGetIABUSPrivacyString_withNullPreferences_returnsNull() {
+        try (MockedStatic<PreferenceManager> preferenceManagerMock = mockStatic(PreferenceManager.class)) {
+            preferenceManagerMock.when(() -> PreferenceManager.getDefaultSharedPreferences(mockContext))
+                    .thenReturn(null);
+
+            UserDataManager nullPrefManager = new UserDataManager(mockContext);
+            assertNull(nullPrefManager.getIABUSPrivacyString());
+        }
+    }
+
+    @Test
+    public void testGetGppString_withNullPreferences_returnsNull() {
+        try (MockedStatic<PreferenceManager> preferenceManagerMock = mockStatic(PreferenceManager.class)) {
+            preferenceManagerMock.when(() -> PreferenceManager.getDefaultSharedPreferences(mockContext))
+                    .thenReturn(null);
+
+            UserDataManager nullPrefManager = new UserDataManager(mockContext);
+            assertNull(nullPrefManager.getGppString());
+        }
+    }
+
+    @Test
+    public void testGetGppSid_withNullPreferences_returnsNull() {
+        try (MockedStatic<PreferenceManager> preferenceManagerMock = mockStatic(PreferenceManager.class)) {
+            preferenceManagerMock.when(() -> PreferenceManager.getDefaultSharedPreferences(mockContext))
+                    .thenReturn(null);
+
+            UserDataManager nullPrefManager = new UserDataManager(mockContext);
+            assertNull(nullPrefManager.getGppSid());
+        }
+    }
+
+    @Test
+    public void testRemoveGppString_withNullPreferences_doesNotCrash() {
+        try (MockedStatic<PreferenceManager> preferenceManagerMock = mockStatic(PreferenceManager.class)) {
+            preferenceManagerMock.when(() -> PreferenceManager.getDefaultSharedPreferences(mockContext))
+                    .thenReturn(null);
+
+            UserDataManager nullPrefManager = new UserDataManager(mockContext);
+            nullPrefManager.removeGppString();
+        }
+    }
+
+    @Test
+    public void testRemoveGppSid_withNullPreferences_doesNotCrash() {
+        try (MockedStatic<PreferenceManager> preferenceManagerMock = mockStatic(PreferenceManager.class)) {
+            preferenceManagerMock.when(() -> PreferenceManager.getDefaultSharedPreferences(mockContext))
+                    .thenReturn(null);
+
+            UserDataManager nullPrefManager = new UserDataManager(mockContext);
+            nullPrefManager.removeGppSid();
+        }
+    }
+
+    @Test
+    public void testRemoveGppData_withNullPreferences_doesNotCrash() {
+        try (MockedStatic<PreferenceManager> preferenceManagerMock = mockStatic(PreferenceManager.class)) {
+            preferenceManagerMock.when(() -> PreferenceManager.getDefaultSharedPreferences(mockContext))
+                    .thenReturn(null);
+
+            UserDataManager nullPrefManager = new UserDataManager(mockContext);
+            nullPrefManager.removeGppData();
+        }
+    }
+
+    // =============================================================================================
+    // Consent Processing Edge Cases
+    // =============================================================================================
+
+    @Test
+    public void testProcessConsent_withEmptyAdvertisingId_handlesGracefully() {
+        try (MockedStatic<HyBid> hyBidMock = mockStatic(HyBid.class)) {
+            DeviceInfo mockDeviceInfo = mock(DeviceInfo.class);
+            when(mockDeviceInfo.getAdvertisingId()).thenReturn("");
+            hyBidMock.when(HyBid::getDeviceInfo).thenReturn(mockDeviceInfo);
+
+            userDataManager.grantConsent();
+        }
+    }
+
+    // =============================================================================================
+    // Additional getIABGDPRConsentString edge cases
+    // =============================================================================================
+
+    @Test
+    public void testGetIABGDPRConsentString_prefersTCF2OverTCF1() {
+        appPrefsStorage.put("IABTCF_TCString", "tcf2-consent");
+        appPrefsStorage.put("IABConsent_ConsentString", "tcf1-consent");
+        String result = userDataManager.getIABGDPRConsentString();
+        assertEquals("tcf2-consent", result);
+    }
+
+    @Test
+    public void testGetIABGDPRConsentString_prefersPrivateOverPublic() {
+        privatePrefsStorage.put("gdpr_consent", "private-consent");
+        appPrefsStorage.put("IABTCF_TCString", "tcf2-consent");
+        String result = userDataManager.getIABGDPRConsentString();
+        assertEquals("private-consent", result);
+    }
+
+    // =============================================================================================
+    // Additional canCollectData edge cases
+    // =============================================================================================
+
+    @Test
+    public void testCanCollectData_whenGdprAppliesAndDifferentAdId_returnsFalse() {
+        appPrefsStorage.put("IABTCF_gdprApplies", 1);
+        privatePrefsStorage.put("gdpr_consent_state", 1);
+        privatePrefsStorage.put("gdpr_advertising_id", "old-ad-id");
+
+        try (MockedStatic<HyBid> hyBidMock = mockStatic(HyBid.class)) {
+            DeviceInfo mockDeviceInfo = mock(DeviceInfo.class);
+            when(mockDeviceInfo.getAdvertisingId()).thenReturn("new-ad-id");
+            hyBidMock.when(HyBid::getDeviceInfo).thenReturn(mockDeviceInfo);
+
+            assertFalse(userDataManager.canCollectData());
+        }
+    }
+}

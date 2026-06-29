@@ -33,7 +33,7 @@ public class TimerCountDownView extends CountDownView {
     }
 
     private void init(Context ctx) {
-        View rootView = inflate(ctx, R.layout.timer_count_down, this);
+        View rootView = inflate(ctx, R.layout.vrvsdk_timer_count_down, this);
         progressTextView = rootView.findViewById(R.id.view_progress_text);
         timerContainer = rootView.findViewById(R.id.timer_container);
     }

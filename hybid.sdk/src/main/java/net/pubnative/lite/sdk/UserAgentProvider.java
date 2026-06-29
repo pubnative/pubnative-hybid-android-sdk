@@ -111,12 +111,12 @@ public class UserAgentProvider {
             abi = Build.CPU_ABI;
         }
 
-        String name = abi;
-        if (abi.contains(Architecture.X86)) {
+        String name = abi != null ? abi : "";
+        if (abi != null && abi.contains(Architecture.X86)) {
             name = Architecture.X86;
-        } else if (abi.contains(Architecture.ARM)) {
+        } else if (abi != null && abi.contains(Architecture.ARM)) {
             name = Architecture.ARM;
-        } else if (abi.contains(Architecture.MIPS)) {
+        } else if (abi != null && abi.contains(Architecture.MIPS)) {
             name = Architecture.MIPS;
         }
 

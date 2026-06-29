@@ -4,8 +4,6 @@
 //
 package net.pubnative.lite.sdk.utils;
 
-import androidx.annotation.VisibleForTesting;
-
 import java.util.ArrayList;
 
 public class SkipOffsetManager {
@@ -216,7 +214,6 @@ public class SkipOffsetManager {
         return REWARDED_VIDEO_DEFAULT;
     }
 
-    @VisibleForTesting
     public static void reset() {
         isCustomInterstitialVideoSkipOffset = false;
         isCustomInterstitialHTMLSkipOffset = false;

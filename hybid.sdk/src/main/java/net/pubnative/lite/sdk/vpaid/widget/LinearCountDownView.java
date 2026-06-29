@@ -35,7 +35,7 @@ public class LinearCountDownView extends FrameLayout {
     }
 
     private void init(Context ctx) {
-        View rootView = inflate(ctx, R.layout.linear_player_count_down, this);
+        View rootView = inflate(ctx, R.layout.vrvsdk_linear_player_count_down, this);
         progressBarView = rootView.findViewById(R.id.view_progress_bar);
         progressTextView = rootView.findViewById(R.id.view_progress_text);
     }

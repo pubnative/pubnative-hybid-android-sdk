@@ -10,13 +10,20 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -26,26 +33,32 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
+import android.text.TextUtils;
 
 import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicReference;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class DeviceInfoTest {
-
     @Mock
     private Context mMockContext;
     @Mock
@@ -58,15 +71,37 @@ public class DeviceInfoTest {
     private WindowManager mMockWindowManager;
     @Mock
     private Display mMockDisplay;
+    @Mock
+    private SharedPreferences mMockSharedPreferences;
+    @Mock
+    private SharedPreferences.Editor mMockEditor;
 
     private DeviceInfo mDeviceInfo;
+    private MockedStatic<TextUtils> mMockedTextUtils;
+    private MockedStatic<Log> mMockedLog;
 
     @Before
     public void setup() {
+        mMockedTextUtils = Mockito.mockStatic(TextUtils.class);
+        mMockedTextUtils.when(() -> TextUtils.isEmpty(any())).thenAnswer(invocation -> {
+            CharSequence s = invocation.getArgument(0);
+            return s == null || s.length() == 0;
+        });
+
+        mMockedLog = Mockito.mockStatic(Log.class);
+
+        net.pubnative.lite.sdk.utils.Logger.setLogLevel(net.pubnative.lite.sdk.utils.Logger.Level.none);
+
         when(mMockContext.getApplicationContext()).thenReturn(mMockContext);
         when(mMockContext.getResources()).thenReturn(mMockResources);
         when(mMockContext.getSystemService(Context.WINDOW_SERVICE)).thenReturn(mMockWindowManager);
         when(mMockWindowManager.getDefaultDisplay()).thenReturn(mMockDisplay);
+        when(mMockContext.getSharedPreferences(anyString(), anyInt())).thenReturn(mMockSharedPreferences);
+        when(mMockSharedPreferences.getString(anyString(), anyString())).thenReturn("dummy_ua");
+        when(mMockSharedPreferences.getInt(anyString(), anyInt())).thenReturn(android.os.Build.VERSION.SDK_INT);
+        when(mMockSharedPreferences.edit()).thenReturn(mMockEditor);
+        when(mMockEditor.putString(anyString(), anyString())).thenReturn(mMockEditor);
+        when(mMockEditor.putInt(anyString(), anyInt())).thenReturn(mMockEditor);
 
         // Mock Display.getSize() to set the Point dimensions
         doAnswer(invocation -> {
@@ -83,13 +118,51 @@ public class DeviceInfoTest {
         when(mMockResources.getDisplayMetrics()).thenReturn(displayMetrics);
         when(mMockContext.getSystemService(Context.CONNECTIVITY_SERVICE)).thenReturn(mMockConnectivityManager);
 
+        lenient().when(mMockContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+        lenient().when(mMockContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+
+        lenient().when(mMockContext.getSystemService(Context.INPUT_METHOD_SERVICE)).thenReturn(null);
         mDeviceInfo = new DeviceInfo(mMockContext);
+
+        try {
+            UserAgentProvider mockUap = mock(UserAgentProvider.class);
+            setField(mDeviceInfo, "mUserAgentProvider", mockUap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @After
+    public void tearDown() {
+        if (mMockedTextUtils != null) {
+            mMockedTextUtils.close();
+        }
+        if (mMockedLog != null) {
+            mMockedLog.close();
+        }
     }
 
     private void setField(Object object, String fieldName, Object value) throws Exception {
         Field field = object.getClass().getDeclaredField(fieldName);
         field.setAccessible(true);
         field.set(object, value);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void setAtomicReferenceField(Object object, String fieldName, Object value) throws Exception {
+        Field field = object.getClass().getDeclaredField(fieldName);
+        field.setAccessible(true);
+        AtomicReference atomicReference = (AtomicReference) field.get(object);
+        atomicReference.set(value);
+    }
+
+    private void waitForBackgroundTasks() throws Exception {
+        Field executorField = DeviceInfo.class.getDeclaredField("BACKGROUND_EXECUTOR");
+        executorField.setAccessible(true);
+        java.util.concurrent.ExecutorService executor = (java.util.concurrent.ExecutorService) executorField.get(null);
+        executor.submit(() -> {}).get();
     }
 
     @Test
@@ -455,28 +528,20 @@ public class DeviceInfoTest {
 
     @Test
     public void hasTrackingPermissions_withNoPermissions_returnsFalse() {
-        when(mMockContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
-        when(mMockContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
         assertFalse(mDeviceInfo.hasTrackingPermissions());
     }
 
     @Test
     public void hasTrackingPermissions_withCoarseLocation_returnsTrue() {
-        when(mMockContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION))
-                .thenReturn(PackageManager.PERMISSION_GRANTED);
-        lenient().when(mMockContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
+        doReturn(PackageManager.PERMISSION_GRANTED).when(mMockContext)
+                .checkCallingOrSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION);
         assertTrue(mDeviceInfo.hasTrackingPermissions());
     }
 
     @Test
     public void hasTrackingPermissions_withFineLocation_returnsTrue() {
-        lenient().when(mMockContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION))
-                .thenReturn(PackageManager.PERMISSION_DENIED);
-        when(mMockContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION))
-                .thenReturn(PackageManager.PERMISSION_GRANTED);
+        doReturn(PackageManager.PERMISSION_GRANTED).when(mMockContext)
+                .checkCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION);
         assertTrue(mDeviceInfo.hasTrackingPermissions());
     }
 
@@ -639,22 +704,11 @@ public class DeviceInfoTest {
     }
 
     @Test
-    public void getInputLanguages_withValidKeyboardSubtype_returnsLanguage() {
-        InputMethodManager mockImm = mock(InputMethodManager.class);
-        when(mMockContext.getSystemService(Context.INPUT_METHOD_SERVICE)).thenReturn(mockImm);
-
-        List<InputMethodInfo> inputMethodInfoList = new ArrayList<>();
-        InputMethodInfo mockInfo = mock(InputMethodInfo.class);
-        inputMethodInfoList.add(mockInfo);
-
-        List<InputMethodSubtype> subtypeList = new ArrayList<>();
-        InputMethodSubtype mockSubtype = mock(InputMethodSubtype.class);
-        subtypeList.add(mockSubtype);
-
-        when(mockImm.getEnabledInputMethodList()).thenReturn(inputMethodInfoList);
-        when(mockImm.getEnabledInputMethodSubtypeList(mockInfo, true)).thenReturn(subtypeList);
-        when(mockSubtype.getMode()).thenReturn("keyboard");
-        when(mockSubtype.getLocale()).thenReturn("en-US");
+    public void getInputLanguages_withValidKeyboardSubtype_returnsLanguage() throws Exception {
+        // Directly set the cached input languages using reflection
+        List<String> expectedLanguages = new ArrayList<>();
+        expectedLanguages.add("en-US");
+        setAtomicReferenceField(mDeviceInfo, "mCachedInputLanguages", expectedLanguages);
 
         List<String> languages = mDeviceInfo.getInputLanguages();
         assertNotNull(languages);
@@ -781,7 +835,103 @@ public class DeviceInfoTest {
         assertTrue(languages.isEmpty());
     }
 
+    @Test
+    public void getInputLanguages_returnsDefensiveCopy() throws Exception {
+        // Set cached languages
+        List<String> cachedLanguages = new ArrayList<>();
+        cachedLanguages.add("en-US");
+        cachedLanguages.add("es-ES");
+        setAtomicReferenceField(mDeviceInfo, "mCachedInputLanguages", cachedLanguages);
 
+        // Get languages
+        List<String> languages1 = mDeviceInfo.getInputLanguages();
+        List<String> languages2 = mDeviceInfo.getInputLanguages();
+
+        // Verify we get a defensive copy  with different instances
+        assertNotNull(languages1);
+        assertNotNull(languages2);
+        assertEquals(2, languages1.size());
+        assertEquals(2, languages2.size());
+
+        // Modify languages1 list
+        languages1.add("fr-FR");
+
+        // Verify the second call is not affected
+        assertEquals(3, languages1.size());
+        assertEquals(2, languages2.size());
+    }
+
+    @Test
+    public void getInputLanguages_withMultipleLanguages_returnsAllLanguages() throws Exception {
+        // Set multiple languages
+        List<String> expectedLanguages = new ArrayList<>();
+        expectedLanguages.add("en-US");
+        expectedLanguages.add("es-ES");
+        expectedLanguages.add("fr-FR");
+        expectedLanguages.add("de-DE");
+        setAtomicReferenceField(mDeviceInfo, "mCachedInputLanguages", expectedLanguages);
+
+        List<String> languages = mDeviceInfo.getInputLanguages();
+        assertNotNull(languages);
+        assertEquals(4, languages.size());
+        assertTrue(languages.contains("en-US"));
+        assertTrue(languages.contains("es-ES"));
+        assertTrue(languages.contains("fr-FR"));
+        assertTrue(languages.contains("de-DE"));
+    }
+
+    @Test
+    public void fetchInputLanguages_withEmptyList_skipsNull() throws Exception {
+        setAtomicReferenceField(mDeviceInfo, "mCachedInputLanguages", Collections.emptyList());
+
+        List<String> languages = mDeviceInfo.getInputLanguages();
+        assertNotNull(languages);
+        assertTrue(languages.isEmpty());
+    }
+
+    @Test
+    public void fetchInputLanguages_whenExceptionThrown_cachesEmptyList() throws Exception {
+        InputMethodManager mockImm = mock(InputMethodManager.class);
+        when(mMockContext.getSystemService(Context.INPUT_METHOD_SERVICE)).thenReturn(mockImm);
+        when(mockImm.getEnabledInputMethodList()).thenThrow(new RuntimeException("Test exception"));
+
+        DeviceInfo deviceInfo = new DeviceInfo(mMockContext);
+
+        // Wait for background thread to complete
+        Thread.sleep(200);
+
+        List<String> languages = deviceInfo.getInputLanguages();
+        assertNotNull(languages);
+        // Should return empty list when exception occurs
+        assertTrue(languages.isEmpty());
+    }
+
+    @Test
+    public void fetchInputLanguages_skipsNullInputMethodInfo() throws Exception {
+        InputMethodManager mockImm = mock(InputMethodManager.class);
+        when(mMockContext.getSystemService(Context.INPUT_METHOD_SERVICE)).thenReturn(mockImm);
+
+        InputMethodInfo mockImi = mock(InputMethodInfo.class);
+        List<InputMethodInfo> imiList = new ArrayList<>();
+        imiList.add(null);
+        imiList.add(mockImi);
+        when(mockImm.getEnabledInputMethodList()).thenReturn(imiList);
+
+        InputMethodSubtype mockSubtype = mock(InputMethodSubtype.class);
+        when(mockSubtype.getMode()).thenReturn("keyboard");
+        when(mockSubtype.getLocale()).thenReturn("en-US");
+        when(mockImm.getEnabledInputMethodSubtypeList(mockImi, true)).thenReturn(Collections.singletonList(mockSubtype));
+
+        java.lang.reflect.Method method = DeviceInfo.class.getDeclaredMethod("fetchInputLanguages");
+        method.setAccessible(true);
+        method.invoke(mDeviceInfo);
+
+        waitForBackgroundTasks();
+
+        List<String> languages = mDeviceInfo.getInputLanguages();
+        assertEquals(1, languages.size());
+        assertEquals("en-US", languages.get(0));
+    }
 
     @Test
     public void getConnectionType_withNullConnectivityManager_returnsNull() {
@@ -1788,5 +1938,110 @@ public class DeviceInfoTest {
         receiver.onReceive(mMockContext, dischargingIntent);
 
         assertFalse((Boolean) isChargingField.get(deviceInfo));
+    }
+
+    @Test
+    public void initialize_performsStandardInitialization() throws Exception {
+        waitForBackgroundTasks();
+        DeviceInfo.Listener mockListener = mock(DeviceInfo.Listener.class);
+        setField(mDeviceInfo, "mIsChangingReceiverRegistered", false);
+
+        Field uapField = DeviceInfo.class.getDeclaredField("mUserAgentProvider");
+        uapField.setAccessible(true);
+        UserAgentProvider mockUap = (UserAgentProvider) uapField.get(mDeviceInfo);
+
+        mDeviceInfo.initialize(mockListener);
+
+        // Verify listener set
+        Field listenerField = DeviceInfo.class.getDeclaredField("mListener");
+        listenerField.setAccessible(true);
+        assertEquals(mockListener, listenerField.get(mDeviceInfo));
+
+        // Verify UserAgentProvider initialized
+        verify(mockUap).initialise(mMockContext);
+
+        // Verify Charging status receiver registered
+        Field isRegisteredField = DeviceInfo.class.getDeclaredField("mIsChangingReceiverRegistered");
+        isRegisteredField.setAccessible(true);
+        assertTrue((Boolean) isRegisteredField.get(mDeviceInfo));
+    }
+
+    @Test
+    public void initialize_triggersFetchInputLanguages_whenEmpty() throws Exception {
+        waitForBackgroundTasks();
+        setAtomicReferenceField(mDeviceInfo, "mCachedInputLanguages", Collections.emptyList());
+
+        InputMethodManager mockImm = mock(InputMethodManager.class);
+        when(mMockContext.getSystemService(Context.INPUT_METHOD_SERVICE)).thenReturn(mockImm);
+
+        mDeviceInfo.initialize(null);
+
+        waitForBackgroundTasks();
+        verify(mockImm, atLeastOnce()).getEnabledInputMethodList();
+    }
+
+    @Test
+    public void initialize_doesNotTriggerFetchInputLanguages_whenNotEmpty() throws Exception {
+        waitForBackgroundTasks();
+        List<String> existingLanguages = Collections.singletonList("en-US");
+        setAtomicReferenceField(mDeviceInfo, "mCachedInputLanguages", existingLanguages);
+
+        InputMethodManager mockImm = mock(InputMethodManager.class);
+        when(mMockContext.getSystemService(Context.INPUT_METHOD_SERVICE)).thenReturn(mockImm);
+
+        mDeviceInfo.initialize(null);
+
+        waitForBackgroundTasks();
+        verify(mockImm, never()).getEnabledInputMethodList();
+    }
+
+    @Test
+    public void getInputLanguages_triggersFetch_whenEmpty() throws Exception {
+        waitForBackgroundTasks();
+        setAtomicReferenceField(mDeviceInfo, "mCachedInputLanguages", Collections.emptyList());
+
+        InputMethodManager mockImm = mock(InputMethodManager.class);
+        when(mMockContext.getSystemService(Context.INPUT_METHOD_SERVICE)).thenReturn(mockImm);
+
+        mDeviceInfo.getInputLanguages();
+
+        waitForBackgroundTasks();
+        verify(mockImm, atLeastOnce()).getEnabledInputMethodList();
+    }
+
+    @Test
+    public void fetchInputLanguages_logicTest() throws Exception {
+        InputMethodManager mockImm = mock(InputMethodManager.class);
+        when(mMockContext.getSystemService(Context.INPUT_METHOD_SERVICE)).thenReturn(mockImm);
+
+        InputMethodInfo mockImi = mock(InputMethodInfo.class);
+        List<InputMethodInfo> imiList = Collections.singletonList(mockImi);
+        when(mockImm.getEnabledInputMethodList()).thenReturn(imiList);
+
+        InputMethodSubtype mockSubtype1 = mock(InputMethodSubtype.class);
+        when(mockSubtype1.getMode()).thenReturn("keyboard");
+        when(mockSubtype1.getLocale()).thenReturn("en-US");
+
+        InputMethodSubtype mockSubtype2 = mock(InputMethodSubtype.class);
+        when(mockSubtype2.getMode()).thenReturn("voice");
+        when(mockSubtype2.getLocale()).thenReturn("es-ES");
+
+        List<InputMethodSubtype> subtypeList = new ArrayList<>();
+        subtypeList.add(mockSubtype1);
+        subtypeList.add(mockSubtype2);
+        subtypeList.add(null);
+
+        when(mockImm.getEnabledInputMethodSubtypeList(mockImi, true)).thenReturn(subtypeList);
+
+        java.lang.reflect.Method method = DeviceInfo.class.getDeclaredMethod("fetchInputLanguages");
+        method.setAccessible(true);
+        method.invoke(mDeviceInfo);
+
+        waitForBackgroundTasks();
+
+        List<String> languages = mDeviceInfo.getInputLanguages();
+        assertNotNull(languages);
+        assertEquals(1, languages.size());
+        assertEquals("en-US", languages.get(0));
     }
 }

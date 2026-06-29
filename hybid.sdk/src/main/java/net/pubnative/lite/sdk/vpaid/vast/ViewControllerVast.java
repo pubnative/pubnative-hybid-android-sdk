@@ -148,8 +148,8 @@ public class ViewControllerVast implements View.OnClickListener {
         bannerView.setVisibilityListener(mCreateVisibilityListener);
         bannerView.removeAllViews();
 
-        mControlsLayout = (FrameLayout) LayoutInflater.from(context).inflate(R.layout.controls, bannerView, false);
-        mOpenUrlLayout = LayoutInflater.from(context).inflate(R.layout.open_url, bannerView, false);
+        mControlsLayout = (FrameLayout) LayoutInflater.from(context).inflate(R.layout.vrvsdk_vast_controls, bannerView, false);
+        mOpenUrlLayout = LayoutInflater.from(context).inflate(R.layout.vrvsdk_vast_open_url, bannerView, false);
         configLearnMore(context);
         mUxLayout = mControlsLayout.findViewById(R.id.uxLayout);
 

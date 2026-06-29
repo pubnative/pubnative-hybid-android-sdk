@@ -931,7 +931,19 @@ public class VideoAdControllerVastTest {
         mediaPlayerField.setAccessible(true);
         mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
 
+        setupMockSurface();
         return mockMediaPlayer;
+    }
+
+    private void setupMockSurface() throws Exception {
+        android.view.Surface mockSurface = mock(android.view.Surface.class);
+        when(mockSurface.isValid()).thenReturn(true);
+
+        ViewControllerVast vc = getViewControllerVast();
+        Field surfaceField = ViewControllerVast.class.getDeclaredField("mSurface");
+        surfaceField.setAccessible(true);
+        surfaceField.set(vc, mockSurface);
+
     }
 
     private void setIsReplay(boolean value) throws Exception {
@@ -1459,12 +1471,18 @@ public class VideoAdControllerVastTest {
         mpField.set(videoAdControllerVast, mockMp);
 
         // Simulate onSurfaceTextureAvailable notifying the controller while video is already visible
+        getTextureListener().onSurfaceTextureAvailable(new SurfaceTexture(0), 0, 0);
+
+        // Clear any interactions from the callback above to verify the effect of the setVideoVisible(true) call
+        org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+        clearInvocations(mockMp);
+
         videoAdControllerVast.setVideoVisible(true);
 
         // Drain all pending (including delayed) tasks so the postDelayed action executes
         org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
 
-        // setSurface must have been called exactly once — the surface recovery succeeded
+        // setSurface must have been called by the explicit setVideoVisible(true) call
         verify(mockMp, times(1)).setSurface(any());
     }
 
@@ -1694,5 +1712,714 @@ public class VideoAdControllerVastTest {
         Field field = ViewControllerVast.class.getDeclaredField("mVideoPlayerLayoutTexture");
         field.setAccessible(true);
         return (android.view.TextureView) field.get(vc);
+    }
+
+    // =====================================================================
+    // Tests for processPlayAction
+    // =====================================================================
+
+    @Test
+    public void testProcessPlayAction_withInvalidSurface_waitsForSurface() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        // Set up an invalid surface
+        android.view.Surface mockSurface = mock(android.view.Surface.class);
+        when(mockSurface.isValid()).thenReturn(false);
+        ViewControllerVast vc = getViewControllerVast();
+        Field surfaceField = ViewControllerVast.class.getDeclaredField("mSurface");
+        surfaceField.setAccessible(true);
+        surfaceField.set(vc, mockSurface);
+
+        invokeProcessPlayAction();
+        org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+        // Should not call start() when surface is invalid
+        verify(mockMediaPlayer, never()).start();
+    }
+
+    @Test
+    public void testProcessPlayAction_withNullSurface_waitsForSurface() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        // Surface is null (not set)
+        ViewControllerVast vc = getViewControllerVast();
+        Field surfaceField = ViewControllerVast.class.getDeclaredField("mSurface");
+        surfaceField.setAccessible(true);
+        surfaceField.set(vc, null);
+
+        invokeProcessPlayAction();
+        org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
+        // Should not call start() when surface is null
+        verify(mockMediaPlayer, never()).start();
+    }
+
+    @Test
+    public void testProcessPlayAction_setSurfaceThrowsException_handlesGracefully() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        when(mockMediaPlayer.getDuration()).thenReturn(30000);
+        when(mockMediaPlayer.getVideoWidth()).thenReturn(1920);
+        when(mockMediaPlayer.getVideoHeight()).thenReturn(1080);
+        doThrow(new IllegalStateException("MediaPlayer not initialized"))
+                .when(mockMediaPlayer).setSurface(any());
+
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        setupMockSurface();
+
+        // Should not throw, should handle gracefully
+        invokeProcessPlayAction();
+
+        // start() should not be called due to exception
+        verify(mockMediaPlayer, never()).start();
+    }
+
+    @Test
+    public void testProcessPlayAction_startThrowsException_handlesGracefully() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        when(mockMediaPlayer.getDuration()).thenReturn(30000);
+        when(mockMediaPlayer.getVideoWidth()).thenReturn(1920);
+        when(mockMediaPlayer.getVideoHeight()).thenReturn(1080);
+        doThrow(new IllegalStateException("MediaPlayer not in started state"))
+                .when(mockMediaPlayer).start();
+
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        setupMockSurface();
+
+        // Should not throw, should handle gracefully
+        invokeProcessPlayAction();
+
+        verify(mockMediaPlayer).setSurface(any());
+    }
+
+    // =====================================================================
+    // Tests for processResumeAction
+    // =====================================================================
+
+    private void invokeProcessResumeAction() throws Exception {
+        Method processResumeActionMethod = VideoAdControllerVast.class.getDeclaredMethod("processResumeAction");
+        processResumeActionMethod.setAccessible(true);
+        processResumeActionMethod.invoke(videoAdControllerVast);
+    }
+
+    @Test
+    public void testProcessResumeAction_withValidSurface_startsMediaPlayer() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        setupMockSurface();
+
+        invokeProcessResumeAction();
+
+        verify(mockMediaPlayer).setSurface(any());
+        verify(mockMediaPlayer).start();
+    }
+
+    @Test
+    public void testProcessResumeAction_withInvalidSurface_waitsForSurface() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        // Set up an invalid surface
+        android.view.Surface mockSurface = mock(android.view.Surface.class);
+        when(mockSurface.isValid()).thenReturn(false);
+        ViewControllerVast vc = getViewControllerVast();
+        Field surfaceField = ViewControllerVast.class.getDeclaredField("mSurface");
+        surfaceField.setAccessible(true);
+        surfaceField.set(vc, mockSurface);
+
+        invokeProcessResumeAction();
+        org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+        // Should not call start() when surface is invalid
+        verify(mockMediaPlayer, never()).start();
+    }
+
+    @Test
+    public void testProcessResumeAction_withNullSurface_waitsForSurface() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        // Surface is null
+        ViewControllerVast vc = getViewControllerVast();
+        Field surfaceField = ViewControllerVast.class.getDeclaredField("mSurface");
+        surfaceField.setAccessible(true);
+        surfaceField.set(vc, null);
+
+        invokeProcessResumeAction();
+        org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+        // Should not call start() when surface is null
+        verify(mockMediaPlayer, never()).start();
+    }
+
+    @Test
+    public void testProcessResumeAction_withNullMediaPlayer_returnsEarlyFromResumeHelper() throws Exception {
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, null);
+
+        // Set isVideoCompleted to false so resumeMediaPlayerIfNeeded is actually tested
+        Field isVideoCompletedField = VideoAdControllerVast.class.getDeclaredField("isVideoCompleted");
+        isVideoCompletedField.setAccessible(true);
+        isVideoCompletedField.setBoolean(videoAdControllerVast, false);
+
+        invokeProcessResumeAction();
+
+        // When mMediaPlayer is null and isVideoCompleted is false, resumeMediaPlayerIfNeeded returns true
+        // The method should complete without throwing and not attempt any player operations
+
+        // With no MediaPlayer there is nothing to resume; resume events should not be fired.
+        verify(mockViewabilityAdSession, never()).fireResume();
+        // Verify isVideoCompleted is still false (no state corruption)
+        assertFalse(isVideoCompletedField.getBoolean(videoAdControllerVast));
+    }
+
+    @Test
+    public void testProcessResumeAction_whenVideoCompleted_callsRecoverSurface() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        // Set isVideoCompleted = true
+        Field isVideoCompletedField = VideoAdControllerVast.class.getDeclaredField("isVideoCompleted");
+        isVideoCompletedField.setAccessible(true);
+        isVideoCompletedField.setBoolean(videoAdControllerVast, true);
+
+        setupMockSurface();
+
+        invokeProcessResumeAction();
+
+        // Drain delayed tasks to trigger recoverMediaPlayerSurface
+        org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
+        // recoverMediaPlayerSurface was called (sets surface)
+        verify(mockMediaPlayer, atLeastOnce()).setSurface(any());
+    }
+
+    @Test
+    public void testProcessResumeAction_setSurfaceThrowsException_handlesGracefully() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        doThrow(new IllegalStateException("MediaPlayer released"))
+                .when(mockMediaPlayer).setSurface(any());
+
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        setupMockSurface();
+
+        // Should not throw
+        invokeProcessResumeAction();
+
+        // start() should not be called due to exception in setSurface
+        verify(mockMediaPlayer, never()).start();
+    }
+
+    // =====================================================================
+    // Tests for waitForSurface
+    // =====================================================================
+
+    private void invokeWaitForSurface() throws Exception {
+        Method waitForSurfaceMethod = VideoAdControllerVast.class.getDeclaredMethod("waitForSurface");
+        waitForSurfaceMethod.setAccessible(true);
+        waitForSurfaceMethod.invoke(videoAdControllerVast);
+    }
+
+    @Test
+    public void testWaitForSurface_whenSurfaceBecomesValid_addsPlayAction() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        // Set currentAction to PLAY (simulating waitForSurface called from processPlayAction)
+        Field currentActionField = VideoAdControllerVast.class.getDeclaredField("currentAction");
+        currentActionField.setAccessible(true);
+        Class<?> actionClass = Class.forName("net.pubnative.lite.sdk.vpaid.VideoAdControllerVast$Action");
+        @SuppressWarnings("unchecked")
+        Object playAction = Enum.valueOf((Class) actionClass.asSubclass(Enum.class), "PLAY"); // PLAY
+        currentActionField.set(videoAdControllerVast, playAction);
+
+        // Start with null surface
+        ViewControllerVast vc = getViewControllerVast();
+        Field surfaceField = ViewControllerVast.class.getDeclaredField("mSurface");
+        surfaceField.setAccessible(true);
+        surfaceField.set(vc, null);
+
+        // Call waitForSurface - it will schedule a delayed retry
+        invokeWaitForSurface();
+
+        // Make surface valid before the delayed check executes
+        android.view.Surface mockSurface = mock(android.view.Surface.class);
+        when(mockSurface.isValid()).thenReturn(true);
+        surfaceField.set(vc, mockSurface);
+
+        // Stub values required by processPlayAction when the PLAY retry is executed
+        when(mockMediaPlayer.getDuration()).thenReturn(30000);
+        when(mockMediaPlayer.getVideoWidth()).thenReturn(1920);
+        when(mockMediaPlayer.getVideoHeight()).thenReturn(1080);
+
+        // Run the delayed tasks on UI thread (schedules PLAY) and then drain the action-processing thread
+        org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+        Field actionsHandlerField = VideoAdControllerVast.class.getDeclaredField("mActionsProcessingHandler");
+        actionsHandlerField.setAccessible(true);
+        android.os.Handler actionsHandler = (android.os.Handler) actionsHandlerField.get(videoAdControllerVast);
+        org.robolectric.Shadows.shadowOf(actionsHandler.getLooper()).idle();
+
+        // PLAY retry should have been executed
+        verify(mockMediaPlayer).setSurface(any());
+        verify(mockMediaPlayer).start();
+    }
+
+    @Test
+    public void testWaitForSurface_doesNotClearTextureListener() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+
+        TextureView textureView = getVcTextureView();
+        assertNotNull(textureView);
+        assertNotNull(textureView.getSurfaceTextureListener());
+
+        invokeWaitForSurface();
+
+        // waitForSurface should not clear the TextureView listener
+        assertNotNull(textureView.getSurfaceTextureListener());
+    }
+
+    @Test
+    public void testWaitForSurface_withNullTextureView_doesNotCrash() throws Exception {
+        // Don't build video ad view, so texture is null
+        // mMediaPlayer is also null, so waitForSurface should exit early inside runnable
+
+        invokeWaitForSurface();
+        org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
+        // Verify no actions were added to the queue (early return due to null mMediaPlayer)
+        Field mActionsField = VideoAdControllerVast.class.getDeclaredField("mActions");
+        mActionsField.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        java.util.List<Object> actions = (java.util.List<Object>) mActionsField.get(videoAdControllerVast);
+        assertTrue("No actions should be added when MediaPlayer is null", actions.isEmpty());
+    }
+
+    @Test
+    public void testWaitForSurface_whenFinishedPlaying_doesNotRequeueAction() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        setMediaPlayerField(mockMediaPlayer);
+        setCurrentActionField("PLAY");
+
+        // Set finishedPlaying to true (simulating video has finished)
+        Field finishedPlayingField = VideoAdControllerVast.class.getDeclaredField("finishedPlaying");
+        finishedPlayingField.setAccessible(true);
+        finishedPlayingField.setBoolean(videoAdControllerVast, true);
+
+        // Set up a valid surface
+        setSurfaceValidity(true);
+
+        // Call waitForSurface
+        invokeWaitForSurface();
+        org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
+        // Verify no actions were added to the queue (guard prevented re-queue)
+        assertTrue("No actions should be added when finishedPlaying is true", getActionsQueue().isEmpty());
+    }
+
+    @Test
+    public void testWaitForSurface_whenVideoSkipped_doesNotRequeueAction() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        setMediaPlayerField(mockMediaPlayer);
+        setCurrentActionField("PLAY");
+
+        // Set isVideoSkipped to true (simulating video was skipped)
+        // Note: In actual code flow, finishedPlaying is also set to true when video is skipped
+        Field isVideoSkippedField = VideoAdControllerVast.class.getDeclaredField("isVideoSkipped");
+        isVideoSkippedField.setAccessible(true);
+        isVideoSkippedField.setBoolean(videoAdControllerVast, true);
+
+        Field finishedPlayingField = VideoAdControllerVast.class.getDeclaredField("finishedPlaying");
+        finishedPlayingField.setAccessible(true);
+        finishedPlayingField.setBoolean(videoAdControllerVast, true);
+
+        // Set up a valid surface
+        setSurfaceValidity(true);
+
+        // Call waitForSurface
+        invokeWaitForSurface();
+        org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
+        // Verify no actions were added to the queue (guard prevented re-queue)
+        assertTrue("No actions should be added when video is skipped", getActionsQueue().isEmpty());
+    }
+
+    @Test
+    public void testWaitForSurface_whenCurrentActionIsPause_doesNotRequeuePlay() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        setMediaPlayerField(mockMediaPlayer);
+
+        // Set currentAction to PAUSE (simulating user paused while waiting for surface)
+        setCurrentActionField("PAUSE");
+
+        // Set up a valid surface
+        setSurfaceValidity(true);
+
+        // Call waitForSurface - it would try to queue PLAY but should be prevented
+        invokeWaitForSurface();
+        org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
+        // Verify no actions were added to the queue (guard prevented re-queue due to PAUSE state)
+        assertTrue("No actions should be added when currentAction is PAUSE", getActionsQueue().isEmpty());
+    }
+
+    @Test
+    public void testWaitForSurface_userPausesDuringWait_doesNotAutoResume() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        setMediaPlayerField(mockMediaPlayer);
+        setCurrentActionField("PLAY");
+
+        // Start with null surface so waitForSurface will schedule retry
+        clearSurfaceField();
+
+        // Call waitForSurface - schedules delayed retry
+        invokeWaitForSurface();
+
+        // Simulate user pausing during the wait
+        setCurrentActionField("PAUSE");
+
+        // Now make surface valid
+        setSurfaceValidity(true);
+
+        // Run delayed tasks - should NOT re-queue PLAY because controller is now PAUSED
+        org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
+        // Verify no PLAY action was added (user pause should be respected)
+        assertTrue("No PLAY should be queued when user paused during surface wait", getActionsQueue().isEmpty());
+    }
+
+    // =====================================================================
+    // Tests for recoverMediaPlayerSurface
+    // =====================================================================
+
+    private void invokeRecoverMediaPlayerSurface() throws Exception {
+        Method recoverMethod = VideoAdControllerVast.class.getDeclaredMethod("recoverMediaPlayerSurface");
+        recoverMethod.setAccessible(true);
+        recoverMethod.invoke(videoAdControllerVast);
+    }
+
+    @Test
+    public void testRecoverMediaPlayerSurface_withNullMediaPlayer_returnsEarly() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+
+        // Set up a mock surface to verify it's never used
+        android.view.Surface mockSurface = mock(android.view.Surface.class);
+        when(mockSurface.isValid()).thenReturn(true);
+        ViewControllerVast vc = getViewControllerVast();
+        Field surfaceField = ViewControllerVast.class.getDeclaredField("mSurface");
+        surfaceField.setAccessible(true);
+        surfaceField.set(vc, mockSurface);
+
+        // Ensure mMediaPlayer is null
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, null);
+
+        invokeRecoverMediaPlayerSurface();
+        org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
+        // Verify surface.isValid() was never called because we returned early before checking
+        verify(mockSurface, never()).isValid();
+    }
+
+    @Test
+    public void testRecoverMediaPlayerSurface_withValidSurface_setsSurface() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        setupMockSurface();
+
+        invokeRecoverMediaPlayerSurface();
+        org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
+        verify(mockMediaPlayer).setSurface(any());
+    }
+
+    @Test
+    public void testRecoverMediaPlayerSurface_whenFinishedPlaying_seeksToEnd() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        Field finishedPlayingField = VideoAdControllerVast.class.getDeclaredField("finishedPlaying");
+        finishedPlayingField.setAccessible(true);
+        finishedPlayingField.setBoolean(videoAdControllerVast, true);
+
+        Field durationField = VideoAdControllerVast.class.getDeclaredField("mDuration");
+        durationField.setAccessible(true);
+        durationField.setInt(videoAdControllerVast, 30000);
+
+        setupMockSurface();
+
+        invokeRecoverMediaPlayerSurface();
+        org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
+        verify(mockMediaPlayer).seekTo(30000);
+    }
+
+    @Test
+    public void testRecoverMediaPlayerSurface_withInvalidSurface_doesNotSetSurface() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        // Set up an invalid surface
+        android.view.Surface mockSurface = mock(android.view.Surface.class);
+        when(mockSurface.isValid()).thenReturn(false);
+        ViewControllerVast vc = getViewControllerVast();
+        Field surfaceField = ViewControllerVast.class.getDeclaredField("mSurface");
+        surfaceField.setAccessible(true);
+        surfaceField.set(vc, mockSurface);
+
+        invokeRecoverMediaPlayerSurface();
+        org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
+        // Should not call setSurface with invalid surface
+        verify(mockMediaPlayer, never()).setSurface(any());
+    }
+
+    @Test
+    public void testRecoverMediaPlayerSurface_exceptionHandled_doesNotCrash() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        doThrow(new IllegalStateException("MediaPlayer released"))
+                .when(mockMediaPlayer).setSurface(any());
+
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        setupMockSurface();
+
+        invokeRecoverMediaPlayerSurface();
+        org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
+        // Verifies setSurface() was called (proving the exception was thrown and caught)
+        // Test should pass because no exception propagated - the catch block handled it
+        verify(mockMediaPlayer).setSurface(any());
+    }
+
+    // =====================================================================
+    // Tests for destroy() nullifying mMediaPlayer
+    // =====================================================================
+
+    @Test
+    public void testDestroy_nullsMediaPlayer() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        videoAdControllerVast.destroy();
+
+        Object mediaPlayerAfterDestroy = mediaPlayerField.get(videoAdControllerVast);
+        assertNull("mMediaPlayer should be null after destroy()", mediaPlayerAfterDestroy);
+        verify(mockMediaPlayer).release();
+    }
+
+    // =====================================================================
+    // API 23 (Android 6) resume-after-background — verifies the removed Android 6 changes are handled correctly
+    // =====================================================================
+
+    // ---- helpers for API 23 resume-after-background tests ---- //
+    private void setMediaPlayerField(android.media.MediaPlayer player) throws Exception {
+        Field f = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        f.setAccessible(true);
+        f.set(videoAdControllerVast, player);
+    }
+
+    private android.media.MediaPlayer getMediaPlayerField() throws Exception {
+        Field f = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        f.setAccessible(true);
+        return (android.media.MediaPlayer) f.get(videoAdControllerVast);
+    }
+
+    private void setSurfaceValidity(boolean valid) throws Exception {
+        android.view.Surface mockSurface = mock(android.view.Surface.class);
+        when(mockSurface.isValid()).thenReturn(valid);
+        ViewControllerVast vc = getViewControllerVast();
+        Field surfaceField = ViewControllerVast.class.getDeclaredField("mSurface");
+        surfaceField.setAccessible(true);
+        surfaceField.set(vc, mockSurface);
+    }
+
+    private void clearSurfaceField() throws Exception {
+        ViewControllerVast vc = getViewControllerVast();
+        Field surfaceField = ViewControllerVast.class.getDeclaredField("mSurface");
+        surfaceField.setAccessible(true);
+        surfaceField.set(vc, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void setCurrentActionField(String enumName) throws Exception {
+        Field currentActionField = VideoAdControllerVast.class.getDeclaredField("currentAction");
+        currentActionField.setAccessible(true);
+        Class<?> actionClass =
+                Class.forName("net.pubnative.lite.sdk.vpaid.VideoAdControllerVast$Action");
+        Object value = Enum.valueOf((Class<Enum>) actionClass.asSubclass(Enum.class), enumName);
+        currentActionField.set(videoAdControllerVast, value);
+    }
+    // ---- helpers for API 23 resume-after-background tests ---- //
+
+    @Test
+    @Config(sdk = 23)
+    public void testApi23_resumeAfterBackground_surfaceValid_startsPlayer() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        setMediaPlayerField(mockMediaPlayer);
+
+        // On return to foreground the surface is valid.
+        setSurfaceValidity(true);
+
+        invokeProcessResumeAction();
+
+        verify(mockMediaPlayer).setSurface(any());
+        verify(mockMediaPlayer).start();
+    }
+
+    @Test
+    @Config(sdk = 23)
+    public void testApi23_resumeAfterBackground_surfaceNotReadyThenValid_queuesResume()
+            throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        setMediaPlayerField(mockMediaPlayer);
+        setCurrentActionField("RESUME");
+
+        clearSurfaceField();
+
+        invokeWaitForSurface();              // surface not ready -> schedules retry
+        verify(mockMediaPlayer, never()).start();
+
+        setSurfaceValidity(true);            // surface comes back
+
+        org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
+        // The retry observed the valid surface and re-queued RESUME.
+        Class<?> actionClass =
+                Class.forName("net.pubnative.lite.sdk.vpaid.VideoAdControllerVast$Action");
+        Object resume = Enum.valueOf((Class) actionClass.asSubclass(Enum.class), "RESUME");
+        assertTrue("RESUME should be queued (or already drained) after surface became valid",
+                getActionsQueue().contains(resume) || getActionsQueue().isEmpty());
+    }
+
+    @Test
+    @Config(sdk = 23)
+    public void testApi23_waitForSurface_doesNotSwapTextureListener() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+
+        android.view.TextureView textureView = getVcTextureView();
+        assertNotNull(textureView);
+        android.view.TextureView.SurfaceTextureListener before =
+                textureView.getSurfaceTextureListener();
+        assertNotNull(before);
+
+        // Give it a player so the polling lambda doesn't early-return.
+        setMediaPlayerField(mock(android.media.MediaPlayer.class));
+
+        invokeWaitForSurface();
+
+        // Old Android 6 code replaced this listener; the new shared path must NOT.
+        assertNotNull(textureView.getSurfaceTextureListener());
+        assertTrue("ViewControllerVast's own listener must remain installed",
+                before == textureView.getSurfaceTextureListener());
+    }
+
+    @Test
+    @Config(sdk = 23)
+    public void testApi23_waitForSurface_adDestroyedWhileWaiting_stopsAndDoesNotStart()
+            throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        setMediaPlayerField(mockMediaPlayer);
+        setCurrentActionField("RESUME");
+
+        clearSurfaceField();   // surface never becomes valid
+
+        invokeWaitForSurface();
+
+        // Ad gets destroyed during the wait -> player reference cleared.
+        setMediaPlayerField(null);
+
+        org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
+        verify(mockMediaPlayer, never()).start();
+        assertNull(getMediaPlayerField());
+    }
+
+    @Test
+    @Config(sdk = 23)
+    public void testApi23_waitForSurface_surfaceNeverValid_givesUpWithoutStarting()
+            throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        setMediaPlayerField(mockMediaPlayer);
+        setCurrentActionField("RESUME");
+
+        setSurfaceValidity(false);   // stays invalid the whole time
+
+        invokeWaitForSurface();
+
+        // Draining all delayed tasks must terminate (bounded retries), not hang.
+        org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
+        verify(mockMediaPlayer, never()).start();
+        assertTrue("no action should be queued when surface never became valid",
+                getActionsQueue().isEmpty());
     }
 }

@@ -14,9 +14,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-import androidx.annotation.VisibleForTesting;
-
-
 public class AndroidBitmapDecoder implements BitmapDecoder {
 
     @Override
@@ -29,7 +26,6 @@ public class AndroidBitmapDecoder implements BitmapDecoder {
         return null;
     }
 
-    @VisibleForTesting
     Bitmap decode(InputStream boundsStream, InputStream fullStream, int reqWidth, int reqHeight) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;

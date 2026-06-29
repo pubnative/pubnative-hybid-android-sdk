@@ -9,8 +9,6 @@ import android.graphics.BitmapFactory;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
-import androidx.annotation.VisibleForTesting;
-
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.utils.Logger;
 
@@ -47,7 +45,6 @@ public class ImageUtils {
         });
     }
 
-    @VisibleForTesting
     static Bitmap decodeSampledBitmap(String filePath, int reqWidth, int reqHeight) {
         Bitmap bitmap;
         try {
@@ -63,7 +60,6 @@ public class ImageUtils {
         }
     }
 
-    @VisibleForTesting
     static Bitmap decodeSampledBitmap(Bitmap image, int reqWidth, int reqHeight) {
         try {
             int inSampleSize = calculateInSampleSize(image.getWidth(), image.getHeight(), reqWidth, reqHeight);
@@ -77,14 +73,12 @@ public class ImageUtils {
         }
     }
 
-    @VisibleForTesting
     static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
         final int height = options.outHeight;
         final int width = options.outWidth;
         return calculateInSampleSize(width, height, reqWidth, reqHeight);
     }
 
-    @VisibleForTesting
     static int calculateInSampleSize(int width, int height, int reqWidth, int reqHeight) {
 
         int inSampleSize = 1;

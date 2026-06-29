@@ -180,10 +180,10 @@ subprojects {
         android_build_tools = '36.0.0'
         omid_version = '1.6.2'
         wrapper_omid_version = '1.5.5'
-        wrapper_version = '23.1.0'
-        atom_version = '3.8.0'
+        wrapper_version = '23.2.0'
     }
-    version = "3.8.2"
+
+    version = "3.9.0"
     group = "net.pubnative"
 }
 

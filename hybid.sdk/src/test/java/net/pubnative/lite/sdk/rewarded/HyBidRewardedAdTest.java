@@ -202,7 +202,7 @@ public class HyBidRewardedAdTest {
     public void testOnRewardedError_callsListener() {
         rewardedAd.onRewardedError(mockPresenter);
 
-        verify(mockListener).onRewardedLoadFailed(hyBidErrorArgumentCaptor.capture());
+        verify(mockListener).onRewardedShowFailed(hyBidErrorArgumentCaptor.capture());
         HyBidError error = hyBidErrorArgumentCaptor.getValue();
         assertEquals(HyBidErrorCode.ERROR_RENDERING_REWARDED, error.getErrorCode());
     }
@@ -418,7 +418,7 @@ public class HyBidRewardedAdTest {
         rewardedAd.show();
 
         verify(mockPresenter, never()).show();
-        verify(mockListener).onRewardedLoadFailed(hyBidErrorArgumentCaptor.capture());
+        verify(mockListener).onRewardedShowFailed(hyBidErrorArgumentCaptor.capture());
         HyBidError error = hyBidErrorArgumentCaptor.getValue();
         assertEquals(HyBidErrorCode.EXPIRED_AD, error.getErrorCode());
     }

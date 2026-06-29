@@ -496,6 +496,13 @@ public class AppLovinMediationVerveCustomNetworkAdapter extends MediationAdapter
         }
 
         @Override
+        public void onInterstitialShowFailed(final Throwable error) {
+            log("Interstitial ad failed to display with error: " + error);
+            MaxAdapterError adapterError = toMaxError(error);
+            listener.onInterstitialAdDisplayFailed(adapterError);
+        }
+
+        @Override
         public void onInterstitialImpression() {
             log("Interstitial did track impression");
             listener.onInterstitialAdDisplayed();
@@ -535,6 +542,13 @@ public class AppLovinMediationVerveCustomNetworkAdapter extends MediationAdapter
             log("Rewarded ad failed to load with error: " + error);
             MaxAdapterError adapterError = toMaxError(error);
             listener.onRewardedAdLoadFailed(adapterError);
+        }
+
+        @Override
+        public void onRewardedShowFailed(final Throwable error) {
+            log("Rewarded ad failed to display with error: " + error);
+            MaxAdapterError adapterError = toMaxError(error);
+            listener.onRewardedAdDisplayFailed(adapterError);
         }
 
         @Override

@@ -37,7 +37,7 @@ public class PieChartCountdownView extends CountDownView {
     }
 
     private void init(Context ctx) {
-        View rootView = inflate(ctx, R.layout.player_count_down, this);
+        View rootView = inflate(ctx, R.layout.vrvsdk_player_count_down, this);
         progressBarView = rootView.findViewById(R.id.view_progress_bar);
         progressTextView = rootView.findViewById(R.id.view_progress_text);
         RotateAnimation makeVertical = new RotateAnimation(0, -90, RELATIVE_TO_SELF, 0.5f, RELATIVE_TO_SELF, 0.5f);

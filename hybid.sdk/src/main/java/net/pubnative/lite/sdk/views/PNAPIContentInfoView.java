@@ -78,11 +78,11 @@ public class PNAPIContentInfoView extends FrameLayout {
         LayoutInflater inflater = LayoutInflater.from(context);
         mHandler = new Handler(Looper.getMainLooper());
         /*if (contentInfoIconXPosition == ContentInfoIconXPosition.RIGHT) {
-            mContainerView = (LinearLayout) inflater.inflate(R.layout.content_info_right_aligned_layout, this, false);
+            mContainerView = (LinearLayout) inflater.inflate(R.layout.vrvsdk_content_info_right_aligned_layout, this, false);
         } else {
-            mContainerView = (LinearLayout) inflater.inflate(R.layout.content_info_left_aligned_layout, this, false);
+            mContainerView = (LinearLayout) inflater.inflate(R.layout.vrvsdk_content_info_left_aligned_layout, this, false);
         }*/
-        mContainerView = (LinearLayout) inflater.inflate(R.layout.content_info_left_aligned_layout, this, false);
+        mContainerView = (LinearLayout) inflater.inflate(R.layout.vrvsdk_content_info_left_aligned_layout, this, false);
 
         mContentInfoIcon = mContainerView.findViewById(R.id.ic_context_icon);
         mContentInfoText = mContainerView.findViewById(R.id.tv_context_text);

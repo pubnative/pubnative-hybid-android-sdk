@@ -43,7 +43,7 @@ public class VideoAdProcessor {
             public void onParseError(PlayerInfo message) {
                 if (listener != null) {
                     Logger.e(TAG, message.getMessage());
-                    listener.onCacheError(new HyBidError(HyBidErrorCode.VAST_PLAYER_ERROR, message.getMessage()));
+                    listener.onCacheError(new HyBidError(HyBidErrorCode.PARSER_ERROR, message.getMessage()));
                 }
             }
         });
@@ -63,7 +63,7 @@ public class VideoAdProcessor {
             public void onError(PlayerInfo info) {
                 if (listener != null) {
                     Logger.e(TAG, info.getMessage());
-                    listener.onCacheError(new HyBidError(HyBidErrorCode.VAST_PLAYER_ERROR, info.getMessage()));
+                    listener.onCacheError(new HyBidError(HyBidErrorCode.INVALID_ASSET, info.getMessage()));
                 }
             }
         });

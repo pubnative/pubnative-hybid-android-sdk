@@ -5,14 +5,11 @@
 package net.pubnative.lite.sdk.vpaid;
 
 import android.content.Context;
-import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
-import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.text.TextUtils;
 import android.view.Surface;
-import android.view.TextureView;
 import android.view.View;
 
 import net.pubnative.lite.sdk.HyBid;
@@ -74,7 +71,7 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
     private final AdTracker mCreativeViewEventsTracker;
     private final IntegrationType mIntegrationType;
     private Boolean isCreativeViewEventsTracked = false;
-    private MediaPlayer mMediaPlayer;
+    private volatile MediaPlayer mMediaPlayer;
     private TimerWithPause mTimerWithPause;
     private TimerWithPause mSkipTimerWithPause;
     private String mVideoUri;
@@ -104,7 +101,6 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
 
     private final HyBidViewabilityNativeVideoAdSession mViewabilityAdSession;
     private final List<HyBidViewabilityFriendlyObstruction> mViewabilityFriendlyObstructions;
-    private Boolean isAndroid6VersionDevice = false;
 
     private final Map<Action, List<Action>> mPendingActions = new LinkedHashMap<>();
     private final List<Action> mActions = new Vector<>();
@@ -143,9 +139,7 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
         );
         mMacroHelper = new MacroHelper();
         mCreativeViewEventsTracker = new AdTracker(getAdParams().getCompanionCreativeViewEvents(), null);
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
-            isAndroid6VersionDevice = true;
-        }
+
         if (isFullscreen) {
             this.videoVisible = true;
         }
@@ -354,22 +348,35 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
     }
 
     private void processPlayAction() {
-        if (mMediaPlayer == null) return;
+        MediaPlayer player = mMediaPlayer;
+        if (player == null) return;
+
+        Surface surface = mViewControllerVast.getSurface();
+        if (surface == null || !surface.isValid()) {
+            Logger.e(LOG_TAG, "play: surface not ready, waiting for it");
+            waitForSurface();
+            return;
+        }
+
         runOnUiThread(() -> {
             muteVideo(mViewControllerVast.isMute(), false);
-            mViewControllerVast.adjustLayoutParams(mMediaPlayer.getVideoWidth(), mMediaPlayer.getVideoHeight());
+            mViewControllerVast.adjustLayoutParams(player.getVideoWidth(), player.getVideoHeight());
         });
-        mMediaPlayer.setSurface(mViewControllerVast.getSurface());
-        createTimer(mMediaPlayer.getDuration());
+
+        try {
+            player.setSurface(surface);
+            createTimer(player.getDuration());
         if (!isReplay) {
             runOnUiThread(() -> getViewabilityAdSession().fireImpression());
         }
         if (mBaseAdInternal != null && mBaseAdInternal.getAdListener() != null) {
             runOnUiThread(() -> mBaseAdInternal.getAdListener().onAdStarted());
         }
-        mMediaPlayer.start();
+            player.start();
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            Logger.e(LOG_TAG, "play: failed to start: " + e.getMessage());
+        }
     }
-
     private void processPauseAction() {
 
         if (mTimerWithPause != null) {
@@ -400,16 +407,50 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
     }
 
     private void processResumeAction() {
-
-        if (!isVideoCompleted && mMediaPlayer != null) {
-            mMediaPlayer.setSurface(mViewControllerVast.getSurface());
-            mMediaPlayer.start();
+        if (!resumeMediaPlayerIfNeeded()) {
+            return;
         }
 
         if (isVideoCompleted) {
             recoverMediaPlayerSurface();
         }
 
+        resumeTimersIfPaused();
+
+        if (!isVideoCompleted && !isVideoSkipped) {
+            fireReportingEvent(Reporting.EventType.VIDEO_RESUME);
+            runOnUiThread(() -> getViewabilityAdSession().fireResume());
+            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.RESUME, mMacroHelper, false);
+        }
+    }
+
+    private boolean resumeMediaPlayerIfNeeded() {
+        MediaPlayer player = mMediaPlayer;
+        if (isVideoCompleted) {
+            return true;
+        }
+        if (player == null) {
+            return false;
+        }
+
+        Surface surface = mViewControllerVast.getSurface();
+        if (surface == null || !surface.isValid()) {
+            Logger.e(LOG_TAG, "resume: surface not ready, waiting for it");
+            waitForSurface();
+            return false;
+        }
+
+        try {
+            player.setSurface(surface);
+            player.start();
+            return true;
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            Logger.e(LOG_TAG, "resume: failed to start: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private void resumeTimersIfPaused() {
         if (mTimerWithPause != null && mTimerWithPause.isPaused()) {
             mTimerWithPause.resume();
         }
@@ -418,11 +459,37 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
             mSkipTimerWithPause.resume();
         }
 
-        if (!isVideoCompleted && !isVideoSkipped) {
-            fireReportingEvent(Reporting.EventType.VIDEO_RESUME);
-            runOnUiThread(() -> getViewabilityAdSession().fireResume());
-            EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.RESUME, mMacroHelper, false);
-        }
+    }
+
+    private static final int SURFACE_WAIT_MAX_ATTEMPTS = 40; // ~4 seconds (40 × 100ms)
+
+    private void waitForSurface() {
+        // Retry the action that originally requested the surface.
+        // Using currentAction ensures correct behavior even during replay
+        // when a new MediaPlayer is created.
+        Action actionToRetry = (currentAction == Action.RESUME) ? Action.RESUME : Action.PLAY;
+        waitForSurface(actionToRetry, 0);
+    }
+
+    private void waitForSurface(Action action, int attempt) {
+        postDelayed(() -> {
+            if (mMediaPlayer == null || finishedPlaying || currentAction != action) {
+                return;
+            }
+
+            Surface surface = mViewControllerVast.getSurface();
+            if (surface == null || !surface.isValid()) {
+                if (attempt < SURFACE_WAIT_MAX_ATTEMPTS) {
+                    waitForSurface(action, attempt + 1);
+                } else {
+                    Logger.e(LOG_TAG, "surface never became ready, giving up");
+                }
+                return;
+            }
+
+            addAction(action);
+            processActions();
+        });
     }
 
     @Override
@@ -1094,6 +1161,7 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
             } catch (RuntimeException exception) {
                 Logger.e(LOG_TAG, "Error releasing HyBid video player");
             }
+            mMediaPlayer = null;
         }
 
         if (currentAction == Action.INITIAL) {
@@ -1126,39 +1194,8 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
 
     @Override
     public void resume() {
-        if (isAndroid6VersionDevice && mMediaPlayer != null) {
-            if (mViewControllerVast != null && mViewControllerVast.getTexture() != null) {
-                mViewControllerVast.getTexture().setSurfaceTextureListener(mCreateTextureListener);
-            } else {
-                resumeAd();
-            }
-        } else {
-            resumeAd();
-        }
+        resumeAd();
     }
-
-    private final TextureView.SurfaceTextureListener mCreateTextureListener = new TextureView.SurfaceTextureListener() {
-        @Override
-        public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
-            Surface surface = new Surface(surfaceTexture);
-            mMediaPlayer.setSurface(surface);
-            if (!adFinishedPlaying() || isReplay) resumeAd();
-        }
-
-        @Override
-        public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-        }
-
-        @Override
-        public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-            return false;
-        }
-
-        @Override
-
-        public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-        }
-    };
 
     private void handleMediaPlayerComplete() {
         if (isVideoCompleted) return;
@@ -1178,14 +1215,17 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
     }
 
     private void recoverMediaPlayerSurface() {
-
-        if (mMediaPlayer == null) return;
-
         postDelayed(() -> {
+            MediaPlayer player = mMediaPlayer;
+            if (player == null) return;
+
             try {
-                mMediaPlayer.setSurface(mViewControllerVast.getSurface());
-                if (finishedPlaying) mMediaPlayer.seekTo(mDuration);
-            } catch (IllegalStateException e) {
+                Surface surface = mViewControllerVast.getSurface();
+                if (surface != null && surface.isValid()) {
+                    player.setSurface(surface);
+                    if (finishedPlaying) player.seekTo(mDuration);
+                }
+            } catch (IllegalStateException | IllegalArgumentException e) {
                 Logger.e(LOG_TAG, "mediaPlayer cant recover surface: " + e.getMessage());
             }
         });

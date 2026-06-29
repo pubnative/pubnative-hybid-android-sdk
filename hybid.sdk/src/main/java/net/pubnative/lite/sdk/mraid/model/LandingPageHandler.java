@@ -3,8 +3,6 @@ package net.pubnative.lite.sdk.mraid.model;
 import android.text.TextUtils;
 import android.util.Base64;
 
-import androidx.annotation.NonNull;
-
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.mraid.internal.MRAIDLog;
 import net.pubnative.lite.sdk.utils.Logger;
@@ -25,7 +23,7 @@ public class LandingPageHandler {
 
     private LandingPageCallback callback;
 
-    public LandingPageHandler(@NonNull Ad ad) {
+    public LandingPageHandler(Ad ad) {
         isLandingPageEnabled = ad.isLandingPage();
     }
 

@@ -22,8 +22,6 @@ import android.widget.ProgressBar;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 
-import androidx.annotation.VisibleForTesting;
-
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.interstitial.InterstitialActivityInteractor;
 import net.pubnative.lite.sdk.interstitial.viewModel.InterstitialViewModel;
@@ -85,7 +83,6 @@ public abstract class HyBidInterstitialActivity extends Activity implements Inte
         }
     }
 
-    @VisibleForTesting
     public boolean isSuperBackPressedCalled() {
         return isSuperBackPressedCalled;
     }

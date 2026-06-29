@@ -61,6 +61,8 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
 
         void onInterstitialLoadFailed(Throwable error);
 
+        default void onInterstitialShowFailed(Throwable error) {}
+
         void onInterstitialImpression();
 
         void onInterstitialDismissed();
@@ -221,7 +223,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
             } else {
                 Logger.e(TAG, "Ad has expired.");
                 cleanup();
-                invokeOnLoadFailed(new HyBidError(HyBidErrorCode.EXPIRED_AD));
+                invokeOnShowFailed(new HyBidError(HyBidErrorCode.EXPIRED_AD));
                 return false;
             }
         } else {
@@ -278,7 +280,6 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     public Integer getBidPoints() {
         return mAd != null ? mAd.getECPM() : 0;
     }
-
 
 
     public void setWatermark(String watermarkString) {
@@ -439,7 +440,17 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
                         }
 
                         Logger.w(TAG, "onCacheError", error);
-                        invokeOnLoadFailed(error);
+
+                        if (error instanceof HyBidError) {
+                            HyBidError hyBidError = (HyBidError) error;
+                            if (hyBidError.getErrorCode() == HyBidErrorCode.MRAID_PLAYER_ERROR || hyBidError.getErrorCode() == HyBidErrorCode.VAST_PLAYER_ERROR) {
+                                invokeOnShowFailed(hyBidError);
+                            } else {
+                                invokeOnLoadFailed(hyBidError);
+                            }
+                        } else {
+                            invokeOnLoadFailed(error);
+                        }
                     }
                 });
             } else {
@@ -563,6 +574,13 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
     }
 
     protected void invokeOnLoadFailed(Throwable exception) {
+        handleErrorReporting(exception);
+        if (mListener != null) {
+            mListener.onInterstitialLoadFailed(exception);
+        }
+    }
+
+    private void handleErrorReporting(Throwable exception) {
         long loadTime = -1;
         if (mInitialLoadTime != -1) {
             loadTime = System.currentTimeMillis() - mInitialLoadTime;
@@ -597,9 +615,6 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
             sendLoadTracker(hyBidError.getErrorCode().getCode());
         } else {
             sendLoadTracker(HyBidErrorCode.UNKNOWN_ERROR.getCode());
-        }
-        if (mListener != null) {
-            mListener.onInterstitialLoadFailed(exception);
         }
     }
 
@@ -694,7 +709,15 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
 
     @Override
     public void onInterstitialError(InterstitialPresenter interstitialPresenter) {
-        invokeOnLoadFailed(new HyBidError(HyBidErrorCode.ERROR_RENDERING_INTERSTITIAL));
+        invokeOnShowFailed(new HyBidError(HyBidErrorCode.ERROR_RENDERING_INTERSTITIAL));
+    }
+
+    protected void invokeOnShowFailed(Throwable exception) {
+        handleErrorReporting(exception);
+        Logger.e(TAG, exception.getMessage());
+        if (mListener != null) {
+            mListener.onInterstitialShowFailed(exception);
+        }
     }
 
     @Override
@@ -807,7 +830,8 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
                     null,
                     mAd.getBeacons(Ad.Beacon.SDK_EVENT),
                     null,
-                    null);
+                    null
+            );
         }
     }
 

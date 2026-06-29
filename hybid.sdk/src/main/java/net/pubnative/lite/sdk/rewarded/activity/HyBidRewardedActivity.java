@@ -22,8 +22,6 @@ import android.widget.ProgressBar;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 
-import androidx.annotation.VisibleForTesting;
-
 import net.pubnative.lite.sdk.receiver.VolumeChangedActionReceiver;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
 import net.pubnative.lite.sdk.rewarded.RewardedActivityInteractor;
@@ -78,7 +76,6 @@ public abstract class HyBidRewardedActivity extends Activity implements Rewarded
         }
     }
 
-    @VisibleForTesting
     public boolean isSuperBackPressedCalled() {
         return isSuperBackPressedCalled;
     }

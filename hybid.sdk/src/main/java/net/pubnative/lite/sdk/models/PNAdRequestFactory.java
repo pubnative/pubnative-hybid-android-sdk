@@ -84,26 +84,29 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
             context = mDeviceInfo.getContext();
         }
         mIsRewarded = isRewarded;
+        
+        int impDepth = 0;
+        if (mDeviceInfo != null && mDeviceInfo.getContext() != null) {
+            SessionImpressionPrefs prefs = new SessionImpressionPrefs(mDeviceInfo.getContext());
+            impDepth = prefs.getImpressionDepth(zoneid);
+        }
+        final int finalImpDepth = impDepth;
+
         if (TextUtils.isEmpty(deviceInfoAdvertisingId) && context != null) {
             try {
-                SessionImpressionPrefs prefs = new SessionImpressionPrefs(mDeviceInfo.getContext());
-                int impDepth = prefs.getImpressionDepth(zoneid);
                 HyBidAdvertisingId hyBidAdvertisingIdTask = new HyBidAdvertisingId(context);
                 hyBidAdvertisingIdTask.execute((advertisingId, limitTracking1) ->
                         processAdvertisingId(appToken, zoneid, adSize, advertisingId,
-                                limitTracking1, impDepth, protectedAudiencesAvailable, callback));
+                                limitTracking1, finalImpDepth, protectedAudiencesAvailable, callback));
             } catch (RejectedExecutionException exception) {
                 Logger.e(TAG, "createAdRequest", exception);
+                processAdvertisingId(appToken, zoneid, adSize, deviceInfoAdvertisingId, limitTracking, finalImpDepth, protectedAudiencesAvailable, callback);
             } catch (Exception exception) {
                 Logger.e(TAG, "Error executing HyBidAdvertisingId AsyncTask");
+                processAdvertisingId(appToken, zoneid, adSize, deviceInfoAdvertisingId, limitTracking, finalImpDepth, protectedAudiencesAvailable, callback);
             }
         } else {
-            if (mDeviceInfo != null && mDeviceInfo.getContext() != null) {
-                SessionImpressionPrefs prefs = new SessionImpressionPrefs(mDeviceInfo.getContext());
-                int impDepth = prefs.getImpressionDepth(zoneid);
-
-                processAdvertisingId(appToken, zoneid, adSize, deviceInfoAdvertisingId, limitTracking, impDepth, protectedAudiencesAvailable, callback);
-            }
+            processAdvertisingId(appToken, zoneid, adSize, deviceInfoAdvertisingId, limitTracking, finalImpDepth, protectedAudiencesAvailable, callback);
         }
     }
 

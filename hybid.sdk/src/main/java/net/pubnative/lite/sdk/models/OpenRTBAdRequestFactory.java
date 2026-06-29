@@ -84,8 +84,10 @@ public class OpenRTBAdRequestFactory extends BaseRequestFactory implements AdReq
                                 protectedAudiencesAvailable, callback));
             } catch (RejectedExecutionException exception) {
                 Logger.e(TAG, "createAdRequest", exception);
+                processAdvertisingId(appToken, zoneid, adSize, mAdvertisingId, mLimitTracking, protectedAudiencesAvailable, callback);
             } catch (Exception exception) {
                 Logger.e(TAG, "Error executing HyBidAdvertisingId Executor");
+                processAdvertisingId(appToken, zoneid, adSize, mAdvertisingId, mLimitTracking, protectedAudiencesAvailable, callback);
             }
         } else {
             processAdvertisingId(appToken, zoneid, adSize, mAdvertisingId, mLimitTracking, protectedAudiencesAvailable, callback);

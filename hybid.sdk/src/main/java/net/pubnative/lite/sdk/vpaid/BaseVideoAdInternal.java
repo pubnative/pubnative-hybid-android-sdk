@@ -63,8 +63,11 @@ abstract class BaseVideoAdInternal {
 
     BaseVideoAdInternal(Context context, Ad ad, boolean isInterstitial, boolean isFullscreen, AdPresenter.ImpressionListener impressionListener, AdCloseButtonListener adCloseButtonListener) throws Exception {
         String data = ad.getVast();
-        if (context == null || TextUtils.isEmpty(data)) {
-            throw new HyBidError(HyBidErrorCode.VAST_PLAYER_ERROR);
+        if (context == null ) {
+            throw new HyBidError(HyBidErrorCode.INTERNAL_ERROR);
+        }
+        if (TextUtils.isEmpty(data)){
+            throw new HyBidError(HyBidErrorCode.INVALID_ASSET);
         }
         mAd = ad;
         mAdState = AdState.NONE;

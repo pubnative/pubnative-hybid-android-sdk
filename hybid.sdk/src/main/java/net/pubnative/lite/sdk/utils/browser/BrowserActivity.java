@@ -59,7 +59,7 @@ public class BrowserActivity extends Activity implements BrowserView {
             return;
         }
 
-        setContentView(R.layout.activity_internal_browser);
+        setContentView(R.layout.vrvsdk_activity_internal_browser);
 
         initViews();
         initWebView();

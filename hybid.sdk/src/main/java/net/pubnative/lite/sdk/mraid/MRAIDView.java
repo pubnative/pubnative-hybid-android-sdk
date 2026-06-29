@@ -55,8 +55,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-import androidx.annotation.VisibleForTesting;
-
 import net.pubnative.lite.sdk.CountdownStyle;
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
