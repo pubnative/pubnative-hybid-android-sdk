@@ -82,7 +82,7 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
     private int mDoneMillis = -1;
 
     private boolean videoVisible = false;
-    private boolean finishedPlaying = false;
+    private volatile boolean finishedPlaying = false;
     private boolean isImpressionFired = false;
     private boolean isVideoSkipped = false;
     private boolean isVideoCompleted = false;
@@ -107,6 +107,7 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
     private HandlerThread mActionsHandlerThread;
     private Handler mActionsProcessingHandler;
     private volatile boolean isActionsProcessingRun = false;
+    private volatile boolean awaitingPrepare = false;
     private volatile Action currentAction = Action.INITIAL;
     private Boolean isLastEndCardCustom = false;
 
@@ -213,6 +214,12 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
         mPendingActions.clear();
     }
 
+    // Clears the async-prepare pause flags. Doesn't resume the queue - callers do that if needed.
+    private synchronized void clearPrepareState() {
+        awaitingPrepare = false;
+        isActionsProcessingRun = false;
+    }
+
     private void runOnUiThread(Runnable r) {
         mBaseAdInternal.runOnUiThread(r);
     }
@@ -287,6 +294,13 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
                             mActions.addAll(0, pendingActions);
                         }
                     }
+                    if (awaitingPrepare) {
+                        // PREPARE just kicked off an async prepare; remaining actions (e.g. PLAY)
+                        // stay queued until onPrepared()/onError() resumes processing. Leave
+                        // isActionsProcessingRun true so a processActions() call from elsewhere
+                        // (e.g. pause()/resume()) can't sneak in and pop an action early.
+                        break;
+                    }
                 }
             }
         });
@@ -327,23 +341,43 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
 
     private void processPrepareAction() throws IOException, IllegalStateException {
 
+        if (finishedPlaying) return;
+
         if (mMediaPlayer != null) {
-            mMediaPlayer.release();
+            try {
+                mMediaPlayer.release();
+            } catch (RuntimeException exception) {
+                Logger.e(LOG_TAG, "Error releasing HyBid video player");
+            }
+            mMediaPlayer = null;
+            // Clear async-prepare flag so queue doesn't wait for abandoned player's callback.
+            awaitingPrepare = false;
         }
+
+        if (mVideoUri == null || mVideoUri.isEmpty()) {
+            mBaseAdInternal.onAdLoadFailInternal(new PlayerInfo("Invalid media file uri"));
+            return;
+        }
+
         mMediaPlayer = new MediaPlayer();
         try {
-            if (mVideoUri == null || mVideoUri.isEmpty()) {
-                mBaseAdInternal.onAdLoadFailInternal(new PlayerInfo("Invalid media file uri"));
-            }
-
             mMediaPlayer.setDataSource(mVideoUri);
             mMediaPlayer.setOnCompletionListener(mOnCompletionListener);
             mMediaPlayer.setOnErrorListener(mOnErrorListener);
+            mMediaPlayer.setOnPreparedListener(mOnPreparedListener);
             mMediaPlayer.setLooping(false);
-            mMediaPlayer.prepare();
+            awaitingPrepare = true;
+            mMediaPlayer.prepareAsync();
         } catch (IOException | RuntimeException e) {
+            awaitingPrepare = false;
             Logger.e(LOG_TAG, "startMediaPlayer: " + e.getMessage());
             mBaseAdInternal.onAdLoadFailInternal(new PlayerInfo("Error loading media file"));
+            try {
+                mMediaPlayer.release();
+            } catch (RuntimeException exception) {
+                Logger.e(LOG_TAG, "Error releasing HyBid video player");
+            }
+            mMediaPlayer = null;
         }
     }
 
@@ -359,8 +393,15 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
         }
 
         runOnUiThread(() -> {
-            muteVideo(mViewControllerVast.isMute(), false);
-            mViewControllerVast.adjustLayoutParams(player.getVideoWidth(), player.getVideoHeight());
+            // Only adjust layout if this is still the player we started; a re-prepare/destroy
+            // may have replaced or released it between posting this Runnable and it running.
+            if (mMediaPlayer != player) return;
+            try {
+                muteVideo(mViewControllerVast.isMute(), false);
+                mViewControllerVast.adjustLayoutParams(player.getVideoWidth(), player.getVideoHeight());
+            } catch (IllegalStateException e) {
+                Logger.e(LOG_TAG, "play: player released before layout adjust", e);
+            }
         });
 
         try {
@@ -379,19 +420,21 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
     }
     private void processPauseAction() {
 
-        if (mTimerWithPause != null) {
-            mTimerWithPause.pause();
+        TimerWithPause timer = mTimerWithPause;
+        if (timer != null) {
+            timer.pause();
         }
 
-        if (mSkipTimerWithPause != null) {
-            mSkipTimerWithPause.pause();
+        TimerWithPause skipTimer = mSkipTimerWithPause;
+        if (skipTimer != null) {
+            skipTimer.pause();
         }
 
-        if (mMediaPlayer != null) {
-
+        MediaPlayer player = mMediaPlayer;
+        if (player != null) {
             try {
-                if (mMediaPlayer.isPlaying()){
-                    mMediaPlayer.pause();
+                if (player.isPlaying()) {
+                    player.pause();
                     runOnUiThread(() -> getViewabilityAdSession().firePause());
                 }
             } catch (IllegalStateException exception) {
@@ -451,12 +494,14 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
     }
 
     private void resumeTimersIfPaused() {
-        if (mTimerWithPause != null && mTimerWithPause.isPaused()) {
-            mTimerWithPause.resume();
+        TimerWithPause timer = mTimerWithPause;
+        if (timer != null && timer.isPaused()) {
+            timer.resume();
         }
 
-        if (mSkipTimerWithPause != null && mSkipTimerWithPause.isPaused()) {
-            mSkipTimerWithPause.resume();
+        TimerWithPause skipTimer = mSkipTimerWithPause;
+        if (skipTimer != null && skipTimer.isPaused()) {
+            skipTimer.resume();
         }
 
     }
@@ -566,7 +611,22 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
     private final MediaPlayer.OnErrorListener mOnErrorListener = new MediaPlayer.OnErrorListener() {
         @Override
         public boolean onError(MediaPlayer mp, int what, int extra) {
-            if (extra == MediaPlayerErrors.MEDIA_ERROR_SYSTEM || extra == MediaPlayerErrors.MEDIA_ERROR_SYSTEM_CALLBACK) {
+            if (finishedPlaying) return true;
+            if (mp != mMediaPlayer) return true;
+            boolean wasAwaitingPrepare = awaitingPrepare;
+            if (wasAwaitingPrepare) {
+                // prepareAsync() failures land here instead of throwing - unblock the action queue.
+                clearPrepareState();
+                processActions();
+                try {
+                    mp.release();
+                } catch (RuntimeException exception) {
+                    Logger.e(LOG_TAG, "Error releasing HyBid video player");
+                }
+                mMediaPlayer = null;
+            }
+            // Only defer to system handler for non-prepare errors; prepare failures are always load failures.
+            if (!wasAwaitingPrepare && (extra == MediaPlayerErrors.MEDIA_ERROR_SYSTEM || extra == MediaPlayerErrors.MEDIA_ERROR_SYSTEM_CALLBACK)) {
                 return false;
             }
             //1 : MediaPlayer.MEDIA_ERROR_UNKNOWN
@@ -574,6 +634,16 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
             ErrorLog.postError(mBaseAdInternal.getContext(), VastError.MEDIA_FILE_UNSUPPORTED);
             mBaseAdInternal.onAdLoadFailInternal(new PlayerInfo("Error loading media file"));
             return true;
+        }
+    };
+
+    private final MediaPlayer.OnPreparedListener mOnPreparedListener = new MediaPlayer.OnPreparedListener() {
+        @Override
+        public void onPrepared(MediaPlayer mp) {
+            if (finishedPlaying) return;
+            if (mp != mMediaPlayer || !awaitingPrepare) return;
+            clearPrepareState();
+            processActions();
         }
     };
 
@@ -842,6 +912,9 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
     private final MediaPlayer.OnCompletionListener mOnCompletionListener = new MediaPlayer.OnCompletionListener() {
         @Override
         public void onCompletion(MediaPlayer mp) {
+            if (finishedPlaying) return;
+            // Ignore a stale completion from a superseded player (e.g. after skip + replay).
+            if (mp != mMediaPlayer) return;
             runOnUiThread(() -> handleMediaPlayerComplete());
         }
     };
@@ -885,14 +958,24 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
     private void skipVideo(boolean skipEvent) {
 
         if (isReplay) {
-            mBaseAdInternal.onAdFinishedReplaying();
+            // Return to the already-shown end card; must return, else we fall through to
+            // the video-skip path where the consumed end-card list closes the ad.
+            if (skipEvent) {
+                // Completion fires onAdFinishedReplaying() itself; set isVideoSkipped before pause() so the queued PAUSE isn't tracked as a real pause.
+                isVideoSkipped = true;
+                mBaseAdInternal.onAdFinishedReplaying();
+            }
+            // The replay playthrough has ended - keep this flag consistent with the non-replay path.
+            finishedPlaying = true;
             mViewControllerVast.showEndcards();
             pause();
+            return;
         }
 
         if (finishedPlaying) return;
 
         finishedPlaying = true;
+        clearPrepareState();
         clearAllActions();
 
         if (skipEvent) {
@@ -902,18 +985,27 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
             if (!isVideoSkipped) runOnUiThread(() -> getViewabilityAdSession().fireComplete());
         }
 
-        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
-            mMediaPlayer.pause();
+        MediaPlayer player = mMediaPlayer;
+        if (player != null) {
+            try {
+                if (player.isPlaying()) {
+                    player.pause();
+                }
+            } catch (IllegalStateException e) {
+                Logger.e(LOG_TAG, "skipVideo: failed to pause player: " + e.getMessage());
+            }
         }
 
-        if (mTimerWithPause != null) {
-            mTimerWithPause.pause();
-            mTimerWithPause = null;
+        TimerWithPause timer = mTimerWithPause;
+        mTimerWithPause = null;
+        if (timer != null) {
+            timer.pause();
         }
 
-        if (mSkipTimerWithPause != null) {
-            mSkipTimerWithPause.pause();
-            mSkipTimerWithPause = null;
+        TimerWithPause skipTimer = mSkipTimerWithPause;
+        mSkipTimerWithPause = null;
+        if (skipTimer != null) {
+            skipTimer.pause();
         }
 
         if (skipEvent) {
@@ -965,7 +1057,8 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
     }
 
     private synchronized void muteVideo(boolean mute, boolean postEvent) {
-        if (mMediaPlayer == null) {
+        MediaPlayer player = mMediaPlayer;
+        if (player == null) {
             return;
         }
 
@@ -973,14 +1066,14 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
             runOnUiThread(() -> getViewabilityAdSession().fireVolumeChange(mute));
 
             if (mute) {
-                mMediaPlayer.setVolume(0f, 0f);
+                player.setVolume(0f, 0f);
                 if (postEvent) {
                     fireReportingEvent(Reporting.EventType.VIDEO_MUTE);
                     EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.MUTE, mMacroHelper, false);
                 }
             } else {
                 float systemVolume = Utils.getSystemVolume(mBaseAdInternal.getContext());
-                mMediaPlayer.setVolume(systemVolume, systemVolume);
+                player.setVolume(systemVolume, systemVolume);
                 if (postEvent) {
                     fireReportingEvent(Reporting.EventType.VIDEO_UNMUTE);
                     EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.UNMUTE, mMacroHelper, false);
@@ -1155,6 +1248,33 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
 
     @Override
     public void destroy() {
+        finishedPlaying = true;
+        clearPrepareState();
+        clearAllActions();
+
+        TimerWithPause timer = mTimerWithPause;
+        mTimerWithPause = null;
+        if (timer != null) {
+            timer.pause();
+        }
+
+        TimerWithPause skipTimer = mSkipTimerWithPause;
+        mSkipTimerWithPause = null;
+        if (skipTimer != null) {
+            skipTimer.pause();
+        }
+
+        synchronized (this) {
+            if (mActionsHandlerThread != null) {
+                if (mActionsProcessingHandler != null) {
+                    mActionsProcessingHandler.removeCallbacksAndMessages(null);
+                }
+                mActionsHandlerThread.quitSafely();
+                mActionsHandlerThread = null;
+                mActionsProcessingHandler = null;
+            }
+        }
+
         if (mMediaPlayer != null) {
             try {
                 mMediaPlayer.release();
@@ -1168,27 +1288,7 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
             EventTracker.postEventByType(mBaseAdInternal.getContext(), mAdParams.getEvents(), EventConstants.NOT_USED, mMacroHelper, true);
         }
 
-        finishedPlaying = true;
-
-        if (mTimerWithPause != null) {
-            mTimerWithPause.pause();
-            mTimerWithPause = null;
-        }
-
-        if (mSkipTimerWithPause != null) {
-            mSkipTimerWithPause.pause();
-            mSkipTimerWithPause = null;
-        }
-
         mViewControllerVast.destroy();
-
-        clearAllActions();
-
-        if (mActionsHandlerThread != null) {
-            mActionsHandlerThread.quitSafely();
-            mActionsHandlerThread = null;
-            mActionsProcessingHandler = null;
-        }
     }
 
 
@@ -1352,7 +1452,7 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
 
     @Override
     public int getProgress() {
-        if (mDoneMillis == -1 || mDuration == -1) {
+        if (mDoneMillis == -1 || mDuration <= 0) {
             return -1;
         }
         return (mDoneMillis * 100) / mDuration;
@@ -1375,6 +1475,8 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
     public void replayVast() {
         // Can only have hidden controls if it is brand and has hiddenUxControls true
         isVideoCompleted = false;
+        // Reset so playAd() below can actually prepare again (a prior skip/completion set this true).
+        finishedPlaying = false;
         mBaseAdInternal.onAdReplaying();
         if (mViewControllerVast != null) {
             mViewControllerVast.recoverGoneCountdownView();

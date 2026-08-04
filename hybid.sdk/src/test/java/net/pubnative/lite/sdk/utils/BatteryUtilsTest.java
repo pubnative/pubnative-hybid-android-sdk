@@ -114,4 +114,103 @@ public class BatteryUtilsTest {
         assertEquals(50, result);
         assertTrue(BatteryUtils.isBatteryPercentageValueFetched());
     }
+
+    @Test
+    public void getBatteryPercentageSync_securityException_returnsZeroAndNotFetched() {
+        when(mContext.registerReceiver(isNull(), any())).thenThrow(new SecurityException("no permission"));
+
+        int result = BatteryUtils.getBatteryPercentageSync(mContext);
+
+        assertEquals(0, result);
+        assertFalse(BatteryUtils.isBatteryPercentageValueFetched());
+    }
+
+    @Test
+    public void getBatteryPercentageSync_illegalArgumentException_returnsZeroAndNotFetched() {
+        when(mContext.registerReceiver(isNull(), any())).thenThrow(new IllegalArgumentException("bad filter"));
+
+        int result = BatteryUtils.getBatteryPercentageSync(mContext);
+
+        assertEquals(0, result);
+        assertFalse(BatteryUtils.isBatteryPercentageValueFetched());
+    }
+
+    @Test
+    public void isChargingSync_nullContext_returnsFalse() {
+        assertFalse(BatteryUtils.isChargingSync(null));
+    }
+
+    @Test
+    public void isChargingSync_nullIntent_returnsFalse() {
+        when(mContext.registerReceiver(isNull(), any())).thenReturn(null);
+
+        assertFalse(BatteryUtils.isChargingSync(mContext));
+    }
+
+    @Test
+    public void isChargingSync_statusCharging_returnsTrue() {
+        Intent batteryIntent = new Intent();
+        batteryIntent.putExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_CHARGING);
+        when(mContext.registerReceiver(isNull(), any())).thenReturn(batteryIntent);
+
+        assertTrue(BatteryUtils.isChargingSync(mContext));
+    }
+
+    @Test
+    public void isChargingSync_statusFull_returnsTrue() {
+        Intent batteryIntent = new Intent();
+        batteryIntent.putExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_FULL);
+        when(mContext.registerReceiver(isNull(), any())).thenReturn(batteryIntent);
+
+        assertTrue(BatteryUtils.isChargingSync(mContext));
+    }
+
+    @Test
+    public void isChargingSync_statusDischarging_returnsFalse() {
+        Intent batteryIntent = new Intent();
+        batteryIntent.putExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_DISCHARGING);
+        when(mContext.registerReceiver(isNull(), any())).thenReturn(batteryIntent);
+
+        assertFalse(BatteryUtils.isChargingSync(mContext));
+    }
+
+    @Test
+    public void isChargingSync_statusNotCharging_returnsFalse() {
+        Intent batteryIntent = new Intent();
+        batteryIntent.putExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_NOT_CHARGING);
+        when(mContext.registerReceiver(isNull(), any())).thenReturn(batteryIntent);
+
+        assertFalse(BatteryUtils.isChargingSync(mContext));
+    }
+
+    @Test
+    public void isChargingSync_statusUnknown_returnsFalse() {
+        Intent batteryIntent = new Intent();
+        batteryIntent.putExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_UNKNOWN);
+        when(mContext.registerReceiver(isNull(), any())).thenReturn(batteryIntent);
+
+        assertFalse(BatteryUtils.isChargingSync(mContext));
+    }
+
+    @Test
+    public void isChargingSync_missingStatusExtra_returnsFalse() {
+        Intent batteryIntent = new Intent();
+        when(mContext.registerReceiver(isNull(), any())).thenReturn(batteryIntent);
+
+        assertFalse(BatteryUtils.isChargingSync(mContext));
+    }
+
+    @Test
+    public void isChargingSync_securityException_returnsFalse() {
+        when(mContext.registerReceiver(isNull(), any())).thenThrow(new SecurityException("no permission"));
+
+        assertFalse(BatteryUtils.isChargingSync(mContext));
+    }
+
+    @Test
+    public void isChargingSync_illegalArgumentException_returnsFalse() {
+        when(mContext.registerReceiver(isNull(), any())).thenThrow(new IllegalArgumentException("bad filter"));
+
+        assertFalse(BatteryUtils.isChargingSync(mContext));
+    }
 }

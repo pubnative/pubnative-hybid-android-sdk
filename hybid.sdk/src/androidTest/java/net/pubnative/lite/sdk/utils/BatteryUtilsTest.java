@@ -42,4 +42,16 @@ public class BatteryUtilsTest {
         assertTrue("Battery Value is valid", percentage >= 0 && percentage <= 100);
         assertTrue("isBatteryPercentageValueFetched should be true", BatteryUtils.isBatteryPercentageValueFetched());
     }
+
+    @Test
+    public void testIsChargingSync_withValidContext() {
+        Context context = ApplicationProvider.getApplicationContext();
+        BatteryUtils.isChargingSync(context);
+    }
+
+    @Test
+    public void testIsChargingSync_withNullContext() {
+        boolean isCharging = BatteryUtils.isChargingSync(null);
+        assertFalse("Result should be false when context is null", isCharging);
+    }
 }

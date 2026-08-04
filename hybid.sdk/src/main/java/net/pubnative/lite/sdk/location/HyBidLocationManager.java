@@ -33,6 +33,8 @@ public class HyBidLocationManager implements LocationListener {
     private final Context mContext;
     private final LocationManager mManager;
 
+    private final Object mLocationThreadLock = new Object();
+
     private Location mCurrentBestLocation;
     private HandlerThread mLocationThread;
 
@@ -61,33 +63,54 @@ public class HyBidLocationManager implements LocationListener {
      * Triggers a location update request and sets a timeout of 10 seconds to obtain the location
      */
     public void startLocationUpdates() {
-        if (mLocationThread != null && mLocationThread.isAlive()) {
-            return;
-        }
-        mLocationThread = new HandlerThread("HyBidLocationUpdates");
-        mLocationThread.start();
-        Handler locationHandler = new Handler(mLocationThread.getLooper());
-
-        try {
-            if (hasCoarsePermission() && hasNetworkProvider()) {
-                mManager.requestLocationUpdates(
-                        LocationManager.NETWORK_PROVIDER, 0, 0,
-                        HyBidLocationManager.this, mLocationThread.getLooper());
+        synchronized (mLocationThreadLock) {
+            if (mLocationThread != null && mLocationThread.isAlive()) {
+                return;
             }
-        } catch (Exception exception) {
-            Logger.e(TAG, "Can't request location updates: ".concat(String.valueOf(exception.getMessage())));
-        }
+            mLocationThread = new HandlerThread("HyBidLocationUpdates");
+            mLocationThread.start();
 
-        locationHandler.postDelayed(mStopUpdatesRunnable, LOCATION_UPDATE_TIMEOUT);
+            // getLooper() can return null if the thread died before preparing its Looper;
+            // avoid passing null into Handler's constructor.
+            Looper looper = mLocationThread.getLooper();
+            if (looper == null) {
+                Logger.e(TAG, "Can't start location updates: HandlerThread Looper is null.");
+                mLocationThread = null;
+                return;
+            }
+
+            Handler locationHandler = new Handler(looper);
+
+            try {
+                if (hasCoarsePermission() && hasNetworkProvider()) {
+                    mManager.requestLocationUpdates(
+                            LocationManager.NETWORK_PROVIDER, 0, 0,
+                            HyBidLocationManager.this, looper);
+                }
+            } catch (Exception exception) {
+                Logger.e(TAG, "Can't request location updates.", exception);
+            }
+
+            locationHandler.postDelayed(mStopUpdatesRunnable, LOCATION_UPDATE_TIMEOUT);
+        }
     }
 
     public void stopLocationUpdates() {
-        if (mManager != null) {
-            mManager.removeUpdates(this);
-        }
-        if (mLocationThread != null) {
-            mLocationThread.quitSafely();
-            mLocationThread = null;
+        synchronized (mLocationThreadLock) {
+            if (mManager != null) {
+                try {
+                    mManager.removeUpdates(this);
+                } catch (Exception exception) {
+                    // removeUpdates() can be reached (e.g. via the timeout runnable) even
+                    // when location permission was never granted, and some OEM builds
+                    // throw (typically SecurityException) instead of no-op'ing there.
+                    Logger.e(TAG, "Can't remove location updates.", exception);
+                }
+            }
+            if (mLocationThread != null) {
+                mLocationThread.quitSafely();
+                mLocationThread = null;
+            }
         }
     }
 

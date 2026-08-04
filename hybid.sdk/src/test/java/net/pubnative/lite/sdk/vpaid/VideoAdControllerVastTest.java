@@ -142,6 +142,7 @@ public class VideoAdControllerVastTest {
         if (mockedEventTracker != null) {
             mockedEventTracker.close();
         }
+        ShadowMediaPlayer.resetStaticState();
     }
 
     @Test
@@ -319,6 +320,65 @@ public class VideoAdControllerVastTest {
     }
 
     @Test
+    public void testHideEndcards_withCustomCTA_hidesLearnMore() throws Exception {
+        // on replay, hideEndcards() must hide "Learn More" when a Custom CTA is active,
+        // even if it was already visible (otherwise Learn More and the Custom CTA both show).
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+
+        ViewControllerVast viewController = getViewControllerVast();
+        setViewControllerBoolean(viewController, "mIsCustomCTA", true);
+        View learnMore = getViewControllerView(viewController, "mOpenUrlLayout");
+        learnMore.setVisibility(View.VISIBLE); // set Learn More already showing
+
+        viewController.hideEndcards();
+
+        assertEquals(View.GONE, learnMore.getVisibility());
+    }
+
+    @Test
+    public void testHideEndcards_withoutCustomCTA_showsLearnMore() throws Exception {
+        // Without a Custom CTA, hideEndcards() restores "Learn More" (the non-Custom-CTA path).
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+
+        ViewControllerVast viewController = getViewControllerVast();
+        setViewControllerBoolean(viewController, "mIsCustomCTA", false);
+        setViewControllerBoolean(viewController, "mIsBrandAd", true);
+        View learnMore = getViewControllerView(viewController, "mOpenUrlLayout");
+        learnMore.setVisibility(View.GONE);
+
+        viewController.hideEndcards();
+
+        assertEquals(View.VISIBLE, learnMore.getVisibility());
+    }
+
+    @Test
+    public void testSkipVideo_duringReplay_firesFinishedReplaying_andDoesNotCloseAd() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+        setIsReplay(true);
+
+        videoAdControllerVast.skipVideo();
+
+        verify(mockBaseAdInternal).onAdFinishedReplaying();
+        verify(mockBaseAdInternal, never()).dismiss();
+        assertTrue(videoAdControllerVast.adFinishedPlaying());
+    }
+
+    @Test
+    public void testHandleMediaPlayerComplete_duringReplay_firesOnAdFinishedReplayingOnce() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+        setIsReplay(true);
+
+        invokeHandleMediaPlayerComplete();
+
+        verify(mockBaseAdInternal, times(1)).onAdFinishedReplaying();
+        assertTrue(videoAdControllerVast.adFinishedPlaying());
+    }
+
+    @Test
     public void testCloseEndCard_callsCloseSelf() {
         videoAdControllerVast.closeEndCard();
 
@@ -345,7 +405,11 @@ public class VideoAdControllerVastTest {
                 IntegrationType.IN_APP_BIDDING
         );
 
-        assertTrue(rewardedController.isRewarded());
+        try {
+            assertTrue(rewardedController.isRewarded());
+        } finally {
+            rewardedController.destroy();
+        }
     }
 
     @Test
@@ -434,7 +498,11 @@ public class VideoAdControllerVastTest {
                 IntegrationType.IN_APP_BIDDING
         );
 
-        assertTrue(fullscreenController.isVideoVisible());
+        try {
+            assertTrue(fullscreenController.isVideoVisible());
+        } finally {
+            fullscreenController.destroy();
+        }
     }
 
     @Test
@@ -469,8 +537,12 @@ public class VideoAdControllerVastTest {
                 IntegrationType.IN_APP_BIDDING
         );
 
-        assertNotNull(rewardedController);
-        assertTrue(rewardedController.isRewarded());
+        try {
+            assertNotNull(rewardedController);
+            assertTrue(rewardedController.isRewarded());
+        } finally {
+            rewardedController.destroy();
+        }
     }
 
     @Test
@@ -487,8 +559,12 @@ public class VideoAdControllerVastTest {
                 IntegrationType.IN_APP_BIDDING
         );
 
-        assertNotNull(fullscreenController);
-        assertTrue(fullscreenController.isVideoVisible());
+        try {
+            assertNotNull(fullscreenController);
+            assertTrue(fullscreenController.isVideoVisible());
+        } finally {
+            fullscreenController.destroy();
+        }
     }
 
     @Test
@@ -546,36 +622,52 @@ public class VideoAdControllerVastTest {
     @Test
     public void testCreateSkipTimer_withZeroSkipTime_callsEndSkipImmediately() throws Exception {
         VideoAdControllerVast fullscreenController = createFullscreenController();
-        invokeCreateSkipTimer(fullscreenController, 0, true, true, false);
-        assertNotNull(fullscreenController);
+        try {
+            invokeCreateSkipTimer(fullscreenController, 0, true, true, false);
+            assertNotNull(fullscreenController);
+        } finally {
+            fullscreenController.destroy();
+        }
     }
 
     @Test
     public void testCreateSkipTimer_withPositiveSkipTime_createsTimer() throws Exception {
         VideoAdControllerVast fullscreenController = createFullscreenController();
-        invokeCreateSkipTimer(fullscreenController, 5000, false, true, true);
-        Field skipTimerField = VideoAdControllerVast.class.getDeclaredField("mSkipTimerWithPause");
-        skipTimerField.setAccessible(true);
-        Object skipTimer = skipTimerField.get(fullscreenController);
-        assertNotNull(skipTimer);
+        try {
+            invokeCreateSkipTimer(fullscreenController, 5000, false, true, true);
+            Field skipTimerField = VideoAdControllerVast.class.getDeclaredField("mSkipTimerWithPause");
+            skipTimerField.setAccessible(true);
+            Object skipTimer = skipTimerField.get(fullscreenController);
+            assertNotNull(skipTimer);
+        } finally {
+            fullscreenController.destroy();
+        }
     }
 
     @Test
     public void testCreateSkipTimer_withAllParametersFalse() throws Exception {
         VideoAdControllerVast fullscreenController = createFullscreenController();
-        invokeCreateSkipTimer(fullscreenController, 5000, false, false, false);
-        Field skipTimerField = VideoAdControllerVast.class.getDeclaredField("mSkipTimerWithPause");
-        skipTimerField.setAccessible(true);
-        assertNotNull(skipTimerField.get(fullscreenController));
+        try {
+            invokeCreateSkipTimer(fullscreenController, 5000, false, false, false);
+            Field skipTimerField = VideoAdControllerVast.class.getDeclaredField("mSkipTimerWithPause");
+            skipTimerField.setAccessible(true);
+            assertNotNull(skipTimerField.get(fullscreenController));
+        } finally {
+            fullscreenController.destroy();
+        }
     }
 
     @Test
     public void testCreateSkipTimer_withAllParametersTrue() throws Exception {
         VideoAdControllerVast fullscreenController = createFullscreenController();
-        invokeCreateSkipTimer(fullscreenController, 5000, true, true, true);
-        Field skipTimerField = VideoAdControllerVast.class.getDeclaredField("mSkipTimerWithPause");
-        skipTimerField.setAccessible(true);
-        assertNotNull(skipTimerField.get(fullscreenController));
+        try {
+            invokeCreateSkipTimer(fullscreenController, 5000, true, true, true);
+            Field skipTimerField = VideoAdControllerVast.class.getDeclaredField("mSkipTimerWithPause");
+            skipTimerField.setAccessible(true);
+            assertNotNull(skipTimerField.get(fullscreenController));
+        } finally {
+            fullscreenController.destroy();
+        }
     }
 
     @Test
@@ -592,77 +684,93 @@ public class VideoAdControllerVastTest {
                 IntegrationType.IN_APP_BIDDING
         );
 
-        invokeCreateSkipTimer(nonFullscreenController, 5000, true, true, true);
+        try {
+            invokeCreateSkipTimer(nonFullscreenController, 5000, true, true, true);
 
-        Field skipTimerField = VideoAdControllerVast.class.getDeclaredField("mSkipTimerWithPause");
-        skipTimerField.setAccessible(true);
-        Object skipTimer = skipTimerField.get(nonFullscreenController);
-        
-        // Timer should not be created
-        assertNull(skipTimer);
+            Field skipTimerField = VideoAdControllerVast.class.getDeclaredField("mSkipTimerWithPause");
+            skipTimerField.setAccessible(true);
+            Object skipTimer = skipTimerField.get(nonFullscreenController);
+
+            // Timer should not be created
+            assertNull(skipTimer);
+        } finally {
+            nonFullscreenController.destroy();
+        }
     }
 
     @Test
     public void testCreateSkipTimer_onTick_callsSetSkipProgress() throws Exception {
         VideoAdControllerVast fullscreenController = createFullscreenController();
-        invokeCreateSkipTimer(fullscreenController, 5000, false, true, false);
+        try {
+            invokeCreateSkipTimer(fullscreenController, 5000, false, true, false);
 
-        Field skipTimerField = VideoAdControllerVast.class.getDeclaredField("mSkipTimerWithPause");
-        skipTimerField.setAccessible(true);
-        Object skipTimer = skipTimerField.get(fullscreenController);
+            Field skipTimerField = VideoAdControllerVast.class.getDeclaredField("mSkipTimerWithPause");
+            skipTimerField.setAccessible(true);
+            Object skipTimer = skipTimerField.get(fullscreenController);
 
-        assertNotNull("Timer should be created", skipTimer);
-        
-        Class<?> timerClass = skipTimer.getClass();
-        java.lang.reflect.Method onTickMethod = timerClass.getDeclaredMethod("onTick", long.class);
-        onTickMethod.setAccessible(true);
-        
-        // Call onTick should execute setSkipProgress
-        onTickMethod.invoke(skipTimer, 3000L);
-        
-        assertNotNull(fullscreenController);
+            assertNotNull("Timer should be created", skipTimer);
+
+            Class<?> timerClass = skipTimer.getClass();
+            java.lang.reflect.Method onTickMethod = timerClass.getDeclaredMethod("onTick", long.class);
+            onTickMethod.setAccessible(true);
+
+            // Call onTick should execute setSkipProgress
+            onTickMethod.invoke(skipTimer, 3000L);
+
+            assertNotNull(fullscreenController);
+        } finally {
+            fullscreenController.destroy();
+        }
     }
 
     @Test
     public void testCreateSkipTimer_onFinish_callsEndSkip() throws Exception {
         VideoAdControllerVast fullscreenController = createFullscreenController();
-        invokeCreateSkipTimer(fullscreenController, 5000, true, false, false);
+        try {
+            invokeCreateSkipTimer(fullscreenController, 5000, true, false, false);
 
-        Field skipTimerField = VideoAdControllerVast.class.getDeclaredField("mSkipTimerWithPause");
-        skipTimerField.setAccessible(true);
-        Object skipTimer = skipTimerField.get(fullscreenController);
+            Field skipTimerField = VideoAdControllerVast.class.getDeclaredField("mSkipTimerWithPause");
+            skipTimerField.setAccessible(true);
+            Object skipTimer = skipTimerField.get(fullscreenController);
 
-        assertNotNull("Timer should be created", skipTimer);
-        
-        Class<?> timerClass = skipTimer.getClass();
-        java.lang.reflect.Method onFinishMethod = timerClass.getDeclaredMethod("onFinish");
-        onFinishMethod.setAccessible(true);
-        
-        // Call onFinish should execute endSkip
-        onFinishMethod.invoke(skipTimer);
-        
-        assertNotNull(fullscreenController);
+            assertNotNull("Timer should be created", skipTimer);
+
+            Class<?> timerClass = skipTimer.getClass();
+            java.lang.reflect.Method onFinishMethod = timerClass.getDeclaredMethod("onFinish");
+            onFinishMethod.setAccessible(true);
+
+            // Call onFinish should execute endSkip
+            onFinishMethod.invoke(skipTimer);
+
+            assertNotNull(fullscreenController);
+        } finally {
+            fullscreenController.destroy();
+        }
     }
 
     @Test
     public void testCreateSkipTimer_onFinish_withAutoCloseAndEndcard() throws Exception {
         VideoAdControllerVast fullscreenController = createFullscreenController();
-        invokeCreateSkipTimer(fullscreenController, 5000, true, true, false);
+        try {
+            invokeCreateSkipTimer(fullscreenController, 5000, true, true, false);
 
-        Field skipTimerField = VideoAdControllerVast.class.getDeclaredField("mSkipTimerWithPause");
-        skipTimerField.setAccessible(true);
-        Object skipTimer = skipTimerField.get(fullscreenController);
+            Field skipTimerField = VideoAdControllerVast.class.getDeclaredField("mSkipTimerWithPause");
+            skipTimerField.setAccessible(true);
+            Object skipTimer = skipTimerField.get(fullscreenController);
 
-        assertNotNull("Timer should be created", skipTimer);
-        
-        Class<?> timerClass = skipTimer.getClass();
-        java.lang.reflect.Method onFinishMethod = timerClass.getDeclaredMethod("onFinish");
-        onFinishMethod.setAccessible(true);
-        
-        // Call onFinish should call endSkip
-        onFinishMethod.invoke(skipTimer);
-        
-        assertNotNull(fullscreenController);
+            assertNotNull("Timer should be created", skipTimer);
+
+            Class<?> timerClass = skipTimer.getClass();
+            java.lang.reflect.Method onFinishMethod = timerClass.getDeclaredMethod("onFinish");
+            onFinishMethod.setAccessible(true);
+
+            // Call onFinish should call endSkip
+            onFinishMethod.invoke(skipTimer);
+
+            assertNotNull(fullscreenController);
+        } finally {
+            fullscreenController.destroy();
+        }
     }
 
     @Test
@@ -950,6 +1058,12 @@ public class VideoAdControllerVastTest {
         Field isReplayField = VideoAdControllerVast.class.getDeclaredField("isReplay");
         isReplayField.setAccessible(true);
         isReplayField.setBoolean(videoAdControllerVast, value);
+    }
+
+    private void invokeHandleMediaPlayerComplete() throws Exception {
+        Method method = VideoAdControllerVast.class.getDeclaredMethod("handleMediaPlayerComplete");
+        method.setAccessible(true);
+        method.invoke(videoAdControllerVast);
     }
 
     private void invokeProcessPlayAction() throws Exception {
@@ -1690,6 +1804,20 @@ public class VideoAdControllerVastTest {
         return (ViewControllerVast) field.get(videoAdControllerVast);
     }
 
+    /** Sets a boolean field on the ViewControllerVast. */
+    private void setViewControllerBoolean(ViewControllerVast target, String fieldName, boolean value) throws Exception {
+        Field field = ViewControllerVast.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.setBoolean(target, value);
+    }
+
+    /** Returns a View field from the ViewControllerVast. */
+    private View getViewControllerView(ViewControllerVast target, String fieldName) throws Exception {
+        Field field = ViewControllerVast.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return (View) field.get(target);
+    }
+
     /** Returns the mCreateTextureListener from the ViewControllerVast. */
     private TextureView.SurfaceTextureListener getTextureListener() throws Exception {
         ViewControllerVast vc = getViewControllerVast();
@@ -1800,6 +1928,37 @@ public class VideoAdControllerVastTest {
         invokeProcessPlayAction();
 
         verify(mockMediaPlayer).setSurface(any());
+    }
+
+    @Test
+    public void testProcessPlayAction_getVideoWidthThrowsInUiCallback_handlesGracefully() throws Exception {
+        // the layout lambda runs later on the UI thread; if the player is released by then
+        // getVideoWidth() throws IllegalStateException and must be caught, not crash.
+        android.media.MediaPlayer mockMediaPlayer = setupMockMediaPlayer();
+        when(mockMediaPlayer.getVideoWidth()).thenThrow(new IllegalStateException("released"));
+
+        invokeProcessPlayAction();
+
+        verify(mockMediaPlayer).getVideoWidth();
+        verify(mockMediaPlayer).start();
+    }
+
+    @Test
+    public void testProcessPlayAction_playerNulledBeforeUiCallbackRuns_skipsLayoutRead() throws Exception {
+        // Player nulled (destroy()/re-prepare) between posting the lambda and it running:
+        // re-reading the field inside the Runnable must short-circuit before touching it.
+        android.media.MediaPlayer mockMediaPlayer = setupMockMediaPlayer();
+        doAnswer(invocation -> {
+            Field field = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+            field.setAccessible(true);
+            field.set(videoAdControllerVast, null);
+            ((Runnable) invocation.getArgument(0)).run();
+            return null;
+        }).when(mockBaseAdInternal).runOnUiThread(any(Runnable.class));
+
+        invokeProcessPlayAction();
+
+        verify(mockMediaPlayer, never()).getVideoWidth();
     }
 
     // =====================================================================
@@ -2421,5 +2580,975 @@ public class VideoAdControllerVastTest {
         verify(mockMediaPlayer, never()).start();
         assertTrue("no action should be queued when surface never became valid",
                 getActionsQueue().isEmpty());
+    }
+
+    @Test
+    public void testGetProgress_withZeroDuration_returnsMinusOne() throws Exception {
+        setFieldInt(videoAdControllerVast, "mDoneMillis", 5000);
+        setFieldInt(videoAdControllerVast, "mDuration", 0);
+
+        int progress = videoAdControllerVast.getProgress();
+
+        assertEquals(-1, progress);
+    }
+
+    @Test
+    public void testGetProgress_withNegativeDuration_returnsMinusOne() throws Exception {
+        setFieldInt(videoAdControllerVast, "mDoneMillis", 5000);
+        setFieldInt(videoAdControllerVast, "mDuration", -5);
+
+        int progress = videoAdControllerVast.getProgress();
+
+        assertEquals(-1, progress);
+    }
+
+    @Test
+    public void testGetProgress_withPositiveDuration_returnsCorrectPercentage() throws Exception {
+        setFieldInt(videoAdControllerVast, "mDoneMillis", 15000);
+        setFieldInt(videoAdControllerVast, "mDuration", 30000);
+
+        int progress = videoAdControllerVast.getProgress();
+
+        assertEquals(50, progress);
+    }
+
+    @Test
+    public void testGetProgress_withDoneMillisMinusOne_returnsMinusOne() throws Exception {
+        setFieldInt(videoAdControllerVast, "mDoneMillis", -1);
+        setFieldInt(videoAdControllerVast, "mDuration", 30000);
+
+        int progress = videoAdControllerVast.getProgress();
+
+        assertEquals(-1, progress);
+    }
+
+    private void invokeProcessPauseAction() throws Exception {
+        Method processPauseActionMethod = VideoAdControllerVast.class.getDeclaredMethod("processPauseAction");
+        processPauseActionMethod.setAccessible(true);
+        processPauseActionMethod.invoke(videoAdControllerVast);
+    }
+
+    @Test
+    public void testProcessPauseAction_withNullMediaPlayer_doesNotCrash() throws Exception {
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, null);
+
+        invokeProcessPauseAction();
+
+        // Verify no exception was thrown and method completed
+        assertNotNull(videoAdControllerVast);
+    }
+
+    @Test
+    public void testProcessPauseAction_whenIsPlayingThrowsException_handlesGracefully() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        when(mockMediaPlayer.isPlaying()).thenThrow(new IllegalStateException("MediaPlayer released"));
+
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        invokeProcessPauseAction();
+
+        // Verify pause was never called due to exception in isPlaying
+        verify(mockMediaPlayer, never()).pause();
+    }
+
+    @Test
+    public void testProcessPauseAction_whenPauseThrowsException_handlesGracefully() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        when(mockMediaPlayer.isPlaying()).thenReturn(true);
+        doThrow(new IllegalStateException("MediaPlayer not initialized")).when(mockMediaPlayer).pause();
+
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        invokeProcessPauseAction();
+
+        // Verify pause was attempted
+        verify(mockMediaPlayer).pause();
+    }
+
+    @Test
+    public void testProcessPauseAction_whenNotPlaying_doesNotCallPause() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        when(mockMediaPlayer.isPlaying()).thenReturn(false);
+
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        invokeProcessPauseAction();
+
+        // Verify pause was not called because isPlaying returned false
+        verify(mockMediaPlayer, never()).pause();
+    }
+
+    @Test
+    public void testProcessPauseAction_pausesTimersAndMediaPlayer() throws Exception {
+        VideoAdControllerVast controller = createFullscreenController();
+        try {
+            android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+            when(mockMediaPlayer.isPlaying()).thenReturn(true);
+
+            Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+            mediaPlayerField.setAccessible(true);
+            mediaPlayerField.set(controller, mockMediaPlayer);
+
+            // Create mock timers to verify both get paused
+            net.pubnative.lite.sdk.vpaid.helpers.TimerWithPause mockMainTimer =
+                    mock(net.pubnative.lite.sdk.vpaid.helpers.TimerWithPause.class);
+            net.pubnative.lite.sdk.vpaid.helpers.TimerWithPause mockSkipTimer =
+                    mock(net.pubnative.lite.sdk.vpaid.helpers.TimerWithPause.class);
+
+            Field mainTimerField = VideoAdControllerVast.class.getDeclaredField("mTimerWithPause");
+            mainTimerField.setAccessible(true);
+            mainTimerField.set(controller, mockMainTimer);
+
+            Field skipTimerField = VideoAdControllerVast.class.getDeclaredField("mSkipTimerWithPause");
+            skipTimerField.setAccessible(true);
+            skipTimerField.set(controller, mockSkipTimer);
+
+            Method processPauseActionMethod = VideoAdControllerVast.class.getDeclaredMethod("processPauseAction");
+            processPauseActionMethod.setAccessible(true);
+            processPauseActionMethod.invoke(controller);
+
+            verify(mockMainTimer).pause();
+            verify(mockSkipTimer).pause();
+            verify(mockMediaPlayer).pause();
+        } finally {
+            controller.destroy();
+        }
+    }
+
+    private void invokeSkipVideoInternal(boolean skipEvent) throws Exception {
+        Method skipVideoMethod = VideoAdControllerVast.class.getDeclaredMethod("skipVideo", boolean.class);
+        skipVideoMethod.setAccessible(true);
+        skipVideoMethod.invoke(videoAdControllerVast, skipEvent);
+    }
+
+    @Test
+    public void testSkipVideoInternal_whenIsPlayingThrowsException_handlesGracefully() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        when(mockMediaPlayer.isPlaying()).thenThrow(new IllegalStateException("MediaPlayer released"));
+
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        invokeSkipVideoInternal(true);
+
+        // Verify the method completed and set finishedPlaying
+        assertTrue(videoAdControllerVast.adFinishedPlaying());
+    }
+
+    @Test
+    public void testSkipVideoInternal_whenPauseThrowsException_handlesGracefully() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        when(mockMediaPlayer.isPlaying()).thenReturn(true);
+        doThrow(new IllegalStateException("MediaPlayer not initialized")).when(mockMediaPlayer).pause();
+
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        invokeSkipVideoInternal(true);
+
+        // Verify the method completed and set finishedPlaying
+        assertTrue(videoAdControllerVast.adFinishedPlaying());
+    }
+
+    @Test
+    public void testSkipVideoInternal_withNullMediaPlayer_doesNotCrash() throws Exception {
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, null);
+
+        invokeSkipVideoInternal(true);
+
+        // Verify the method completed
+        assertTrue(videoAdControllerVast.adFinishedPlaying());
+    }
+
+    @Test
+    public void testSkipVideoInternal_whenAlreadyFinished_returnsEarly() throws Exception {
+        // Set finishedPlaying to true
+        Field finishedPlayingField = VideoAdControllerVast.class.getDeclaredField("finishedPlaying");
+        finishedPlayingField.setAccessible(true);
+        finishedPlayingField.setBoolean(videoAdControllerVast, true);
+
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        invokeSkipVideoInternal(true);
+
+        // Verify isPlaying was never called because of early return
+        verify(mockMediaPlayer, never()).isPlaying();
+    }
+
+    private void invokeMuteVideo(boolean mute, boolean postEvent) throws Exception {
+        Method muteVideoMethod = VideoAdControllerVast.class.getDeclaredMethod("muteVideo", boolean.class, boolean.class);
+        muteVideoMethod.setAccessible(true);
+        muteVideoMethod.invoke(videoAdControllerVast, mute, postEvent);
+    }
+
+    @Test
+    public void testMuteVideo_withNullMediaPlayer_returnsEarly() throws Exception {
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, null);
+
+        invokeMuteVideo(true, false);
+
+        // Verify fireVolumeChange was never called because of null player
+        verify(mockViewabilityAdSession, never()).fireVolumeChange(anyBoolean());
+    }
+
+    @Test
+    public void testMuteVideo_mute_setsVolumeToZero() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        invokeMuteVideo(true, false);
+
+        verify(mockMediaPlayer).setVolume(0f, 0f);
+        verify(mockViewabilityAdSession).fireVolumeChange(true);
+    }
+
+    @Test
+    public void testMuteVideo_unmute_setsVolumeToSystemVolume() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        invokeMuteVideo(false, false);
+
+        // Verify setVolume was called (with system volume, which may be 0 in test environment)
+        verify(mockMediaPlayer).setVolume(anyFloat(), anyFloat());
+        verify(mockViewabilityAdSession).fireVolumeChange(false);
+    }
+
+    @Test
+    public void testMuteVideo_whenSetVolumeThrowsRuntimeException_handlesGracefully() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        doThrow(new RuntimeException("MediaPlayer error")).when(mockMediaPlayer).setVolume(anyFloat(), anyFloat());
+
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        invokeMuteVideo(true, false);
+
+        // Verify setVolume was attempted
+        verify(mockMediaPlayer).setVolume(0f, 0f);
+    }
+
+    @Test
+    public void testDestroy_stopsHandlerThreadAndReleasesMediaPlayer() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        Field handlerThreadField = VideoAdControllerVast.class.getDeclaredField("mActionsHandlerThread");
+        handlerThreadField.setAccessible(true);
+        Object handlerThreadBefore = handlerThreadField.get(videoAdControllerVast);
+        assertNotNull("HandlerThread should exist before destroy", handlerThreadBefore);
+
+        videoAdControllerVast.destroy();
+
+        // Verify handler thread is null after destroy
+        Object handlerThreadAfter = handlerThreadField.get(videoAdControllerVast);
+        assertNull("HandlerThread should be null after destroy", handlerThreadAfter);
+
+        // Verify media player release was called
+        verify(mockMediaPlayer).release();
+    }
+
+    @Test
+    public void testDestroy_setsFinishedPlayingToTrue() throws Exception {
+        assertFalse(videoAdControllerVast.adFinishedPlaying());
+
+        videoAdControllerVast.destroy();
+
+        assertTrue("finishedPlaying should be true after destroy", videoAdControllerVast.adFinishedPlaying());
+    }
+
+    @Test
+    public void testDestroy_clearsActionsQueue() throws Exception {
+        java.util.List mActions = getActionsQueue();
+        Object playAction = getAction(1);
+        mActions.add(playAction);
+        assertFalse("Actions queue should not be empty before destroy", mActions.isEmpty());
+
+        videoAdControllerVast.destroy();
+        assertTrue("Actions queue should be empty after destroy", getActionsQueue().isEmpty());
+    }
+
+    @Test
+    public void testDestroy_whenMediaPlayerReleaseThrows_stillNullsReference() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        doThrow(new RuntimeException("Release failed")).when(mockMediaPlayer).release();
+
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        videoAdControllerVast.destroy();
+
+        // Verify media player reference is null despite exception
+        Object mediaPlayerAfter = mediaPlayerField.get(videoAdControllerVast);
+        assertNull("mMediaPlayer should be null after destroy even if release throws", mediaPlayerAfter);
+    }
+
+    @Test
+    public void testDestroy_pausesAndNullsTimers() throws Exception {
+        VideoAdControllerVast controller = createFullscreenController();
+
+        // Create mock timers
+        net.pubnative.lite.sdk.vpaid.helpers.TimerWithPause mockTimer =
+                mock(net.pubnative.lite.sdk.vpaid.helpers.TimerWithPause.class);
+        net.pubnative.lite.sdk.vpaid.helpers.TimerWithPause mockSkipTimer =
+                mock(net.pubnative.lite.sdk.vpaid.helpers.TimerWithPause.class);
+
+        // Set timers
+        Field timerField = VideoAdControllerVast.class.getDeclaredField("mTimerWithPause");
+        timerField.setAccessible(true);
+        timerField.set(controller, mockTimer);
+
+        Field skipTimerField = VideoAdControllerVast.class.getDeclaredField("mSkipTimerWithPause");
+        skipTimerField.setAccessible(true);
+        skipTimerField.set(controller, mockSkipTimer);
+
+        assertNotNull("mTimerWithPause should exist before destroy", timerField.get(controller));
+        assertNotNull("mSkipTimerWithPause should exist before destroy", skipTimerField.get(controller));
+
+        controller.destroy();
+
+        // Verify both timers pause before they were null
+        verify(mockTimer).pause();
+        verify(mockSkipTimer).pause();
+
+        // Verify both timers are null after destroy
+        assertNull("mTimerWithPause should be null after destroy", timerField.get(controller));
+        assertNull("mSkipTimerWithPause should be null after destroy", skipTimerField.get(controller));
+    }
+
+    private boolean invokeResumeMediaPlayerIfNeeded() throws Exception {
+        Method method = VideoAdControllerVast.class.getDeclaredMethod("resumeMediaPlayerIfNeeded");
+        method.setAccessible(true);
+        return (boolean) method.invoke(videoAdControllerVast);
+    }
+
+    @Test
+    public void testResumeMediaPlayerIfNeeded_withVideoCompleted_returnsTrue() throws Exception {
+        Field isVideoCompletedField = VideoAdControllerVast.class.getDeclaredField("isVideoCompleted");
+        isVideoCompletedField.setAccessible(true);
+        isVideoCompletedField.setBoolean(videoAdControllerVast, true);
+
+        boolean result = invokeResumeMediaPlayerIfNeeded();
+
+        assertTrue("Should return true when video is completed", result);
+    }
+
+    @Test
+    public void testResumeMediaPlayerIfNeeded_withNullMediaPlayer_returnsFalse() throws Exception {
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, null);
+
+        Field isVideoCompletedField = VideoAdControllerVast.class.getDeclaredField("isVideoCompleted");
+        isVideoCompletedField.setAccessible(true);
+        isVideoCompletedField.setBoolean(videoAdControllerVast, false);
+
+        boolean result = invokeResumeMediaPlayerIfNeeded();
+
+        assertFalse("Should return false when media player is null", result);
+    }
+
+    @Test
+    public void testResumeMediaPlayerIfNeeded_setSurfaceThrowsIllegalArgument_returnsFalse() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        doThrow(new IllegalArgumentException("Surface released")).when(mockMediaPlayer).setSurface(any());
+
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        Field isVideoCompletedField = VideoAdControllerVast.class.getDeclaredField("isVideoCompleted");
+        isVideoCompletedField.setAccessible(true);
+        isVideoCompletedField.setBoolean(videoAdControllerVast, false);
+
+        setupMockSurface();
+
+        boolean result = invokeResumeMediaPlayerIfNeeded();
+
+        assertFalse("Should return false when setSurface throws exception", result);
+        verify(mockMediaPlayer, never()).start();
+    }
+
+    @Test
+    public void testResumeMediaPlayerIfNeeded_withValidSurface_returnsTrue() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        Field isVideoCompletedField = VideoAdControllerVast.class.getDeclaredField("isVideoCompleted");
+        isVideoCompletedField.setAccessible(true);
+        isVideoCompletedField.setBoolean(videoAdControllerVast, false);
+
+        setupMockSurface();
+
+        boolean result = invokeResumeMediaPlayerIfNeeded();
+
+        assertTrue("Should return true when resume succeeds", result);
+        verify(mockMediaPlayer).setSurface(any());
+        verify(mockMediaPlayer).start();
+    }
+
+    @Test
+    public void testResumeMediaPlayerIfNeeded_withInvalidSurface_returnsFalse() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+
+        Field isVideoCompletedField = VideoAdControllerVast.class.getDeclaredField("isVideoCompleted");
+        isVideoCompletedField.setAccessible(true);
+        isVideoCompletedField.setBoolean(videoAdControllerVast, false);
+
+        setSurfaceValidity(false);
+
+        boolean result = invokeResumeMediaPlayerIfNeeded();
+
+        assertFalse("Should return false when surface is invalid", result);
+        verify(mockMediaPlayer, never()).start();
+    }
+
+    @Test
+    public void testResumeTimersIfPaused_withPausedTimers_resumesBothTimers() throws Exception {
+        net.pubnative.lite.sdk.vpaid.helpers.TimerWithPause mockTimer =
+                mock(net.pubnative.lite.sdk.vpaid.helpers.TimerWithPause.class);
+        when(mockTimer.isPaused()).thenReturn(true);
+
+        net.pubnative.lite.sdk.vpaid.helpers.TimerWithPause mockSkipTimer =
+                mock(net.pubnative.lite.sdk.vpaid.helpers.TimerWithPause.class);
+        when(mockSkipTimer.isPaused()).thenReturn(true);
+
+        Field timerField = VideoAdControllerVast.class.getDeclaredField("mTimerWithPause");
+        timerField.setAccessible(true);
+        timerField.set(videoAdControllerVast, mockTimer);
+
+        Field skipTimerField = VideoAdControllerVast.class.getDeclaredField("mSkipTimerWithPause");
+        skipTimerField.setAccessible(true);
+        skipTimerField.set(videoAdControllerVast, mockSkipTimer);
+
+        Method method = VideoAdControllerVast.class.getDeclaredMethod("resumeTimersIfPaused");
+        method.setAccessible(true);
+        method.invoke(videoAdControllerVast);
+
+        verify(mockTimer).resume();
+        verify(mockSkipTimer).resume();
+    }
+
+    @Test
+    public void testSkipVideoInternal_withTimers_pausesAndClearsTimers() throws Exception {
+        net.pubnative.lite.sdk.vpaid.helpers.TimerWithPause mockTimer =
+                mock(net.pubnative.lite.sdk.vpaid.helpers.TimerWithPause.class);
+        net.pubnative.lite.sdk.vpaid.helpers.TimerWithPause mockSkipTimer =
+                mock(net.pubnative.lite.sdk.vpaid.helpers.TimerWithPause.class);
+
+        Field timerField = VideoAdControllerVast.class.getDeclaredField("mTimerWithPause");
+        timerField.setAccessible(true);
+        timerField.set(videoAdControllerVast, mockTimer);
+
+        Field skipTimerField = VideoAdControllerVast.class.getDeclaredField("mSkipTimerWithPause");
+        skipTimerField.setAccessible(true);
+        skipTimerField.set(videoAdControllerVast, mockSkipTimer);
+
+        invokeSkipVideoInternal(true);
+
+        verify(mockTimer).pause();
+        verify(mockSkipTimer).pause();
+        assertNull("mTimerWithPause should be null after skip", timerField.get(videoAdControllerVast));
+        assertNull("mSkipTimerWithPause should be null after skip", skipTimerField.get(videoAdControllerVast));
+    }
+
+    // Helper methods for async-prepare tests
+    private boolean getAwaitingPrepare() throws Exception {
+        Field field = VideoAdControllerVast.class.getDeclaredField("awaitingPrepare");
+        field.setAccessible(true);
+        return (Boolean) field.get(videoAdControllerVast);
+    }
+
+    private void setAwaitingPrepare(boolean value) throws Exception {
+        Field field = VideoAdControllerVast.class.getDeclaredField("awaitingPrepare");
+        field.setAccessible(true);
+        field.setBoolean(videoAdControllerVast, value);
+    }
+
+    private android.os.Handler getActionsHandler() throws Exception {
+        Field field = VideoAdControllerVast.class.getDeclaredField("mActionsProcessingHandler");
+        field.setAccessible(true);
+        return (android.os.Handler) field.get(videoAdControllerVast);
+    }
+
+    private void invokeProcessPrepareAction() throws Exception {
+        Method method = VideoAdControllerVast.class.getDeclaredMethod("processPrepareAction");
+        method.setAccessible(true);
+        try {
+            method.invoke(videoAdControllerVast);
+        } catch (java.lang.reflect.InvocationTargetException e) {
+            throw (Exception) e.getCause();
+        }
+    }
+
+    @Test
+    public void testProcessPrepareAction_startsAsyncPrepare_doesNotCompleteSynchronously() throws Exception {
+        String videoUri = "http://test.example/video.mp4";
+        org.robolectric.shadows.util.DataSource dataSource = org.robolectric.shadows.util.DataSource.toDataSource(videoUri);
+        ShadowMediaPlayer.addMediaInfo(dataSource, new ShadowMediaPlayer.MediaInfo(30000, 5000));
+
+        videoAdControllerVast.setVideoFilePath(videoUri);
+        invokeProcessPrepareAction();
+
+        // prepareAsync() must return immediately, before the video is actually ready.
+        assertTrue("awaitingPrepare should be set while the async prepare is in flight", getAwaitingPrepare());
+        android.media.MediaPlayer mediaPlayer = getMediaPlayerField();
+        assertEquals("player must still be PREPARING right after prepareAsync() returns",
+                ShadowMediaPlayer.State.PREPARING, org.robolectric.Shadows.shadowOf(mediaPlayer).getState());
+
+        org.robolectric.Shadows.shadowOf(mediaPlayer).invokePreparedListener();
+        assertFalse("awaitingPrepare should clear once onPrepared() fires", getAwaitingPrepare());
+    }
+
+    @Test
+    public void testOnError_duringAwaitingPrepare_clearsFlagAndResumesQueue() throws Exception {
+        String videoUri = "http://test.example/broken-video.mp4";
+        org.robolectric.shadows.util.DataSource dataSource = org.robolectric.shadows.util.DataSource.toDataSource(videoUri);
+        ShadowMediaPlayer.addMediaInfo(dataSource, new ShadowMediaPlayer.MediaInfo(30000, 5000));
+
+        videoAdControllerVast.setVideoFilePath(videoUri);
+        invokeProcessPrepareAction();
+        assertTrue(getAwaitingPrepare());
+
+        // Queue a follow-up action to prove the queue resumes, not just that the flag clears.
+        getActionsQueue().add(getAction(2)); // PAUSE
+
+        // prepareAsync() failures are reported via onError(), not by throwing.
+        android.media.MediaPlayer mediaPlayer = getMediaPlayerField();
+        org.robolectric.Shadows.shadowOf(mediaPlayer).invokeErrorListener(1 /* MEDIA_ERROR_UNKNOWN */, 0);
+        org.robolectric.Shadows.shadowOf(getActionsHandler().getLooper()).idle();
+
+        assertFalse("awaitingPrepare must clear on error so the queue doesn't stall forever",
+                getAwaitingPrepare());
+        assertTrue("the queued action should have run once the error unblocked the queue",
+                getActionsQueue().isEmpty());
+        assertNull("the failed player should be released and cleared, not left for a later "
+                + "action to run against", getMediaPlayerField());
+        verify(mockBaseAdInternal).onAdLoadFailInternal(any(PlayerInfo.class));
+    }
+
+    @Test
+    public void testOnError_systemErrorDuringAwaitingPrepare_stillReportsLoadFailure() throws Exception {
+        String videoUri = "http://test.example/broken-video.mp4";
+        org.robolectric.shadows.util.DataSource dataSource = org.robolectric.shadows.util.DataSource.toDataSource(videoUri);
+        ShadowMediaPlayer.addMediaInfo(dataSource, new ShadowMediaPlayer.MediaInfo(30000, 5000));
+
+        videoAdControllerVast.setVideoFilePath(videoUri);
+        invokeProcessPrepareAction();
+        assertTrue(getAwaitingPrepare());
+
+        // A MEDIA_ERROR_SYSTEM* error during prepare must still be reported as a load failure -
+        // returning false here (the post-prepare behavior) would rely on onCompletion() as a
+        // fallback, but the player is already released/cleared by this point so that never fires.
+        android.media.MediaPlayer mediaPlayer = getMediaPlayerField();
+        org.robolectric.Shadows.shadowOf(mediaPlayer)
+                .invokeErrorListener(1 /* what */, net.pubnative.lite.sdk.utils.MediaPlayerErrors.MEDIA_ERROR_SYSTEM /* extra */);
+
+        assertFalse(getAwaitingPrepare());
+        verify(mockBaseAdInternal).onAdLoadFailInternal(any(PlayerInfo.class));
+    }
+
+    @Test
+    public void testProcessActions_queuedActionWaitsForRealOnPrepared_thenRuns() throws Exception {
+        String videoUri = "http://test.example/video.mp4";
+        org.robolectric.shadows.util.DataSource dataSource = org.robolectric.shadows.util.DataSource.toDataSource(videoUri);
+        ShadowMediaPlayer.addMediaInfo(dataSource, new ShadowMediaPlayer.MediaInfo(30000, 5000));
+        videoAdControllerVast.setVideoFilePath(videoUri);
+
+        // PAUSE stands in for PLAY: ShadowMediaPlayer can't simulate setSurface(), but PAUSE
+        // exercises the same "does the next action wait for PREPARE" mechanism safely.
+        java.util.List mActions = getActionsQueue();
+        mActions.add(getAction(0)); // PREPARE
+        mActions.add(getAction(2)); // PAUSE
+
+        invokeProcessActions();
+        org.robolectric.Shadows.shadowOf(getActionsHandler().getLooper()).idle();
+
+        assertTrue("prepare should still be in flight", getAwaitingPrepare());
+        assertEquals("PAUSE must stay queued until the player is actually ready",
+                1, getActionsQueue().size());
+        assertEquals(ShadowMediaPlayer.State.PREPARING,
+                org.robolectric.Shadows.shadowOf(getMediaPlayerField()).getState());
+
+        org.robolectric.Shadows.shadowOf(getMediaPlayerField()).invokePreparedListener();
+        org.robolectric.Shadows.shadowOf(getActionsHandler().getLooper()).idle();
+
+        assertFalse(getAwaitingPrepare());
+        assertTrue("the queued action should have run once onPrepared() fired",
+                getActionsQueue().isEmpty());
+    }
+
+    @Test
+    public void testProcessActions_reentrantCallWhileAwaitingPrepare_doesNotRunQueuedPlay() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = setupMockMediaPlayer();
+
+        java.util.List mActions = getActionsQueue();
+        mActions.add(getAction(1)); // PLAY
+
+        // Simulate the state right after PREPARE ran and kicked off an async prepare.
+        setAwaitingPrepare(true);
+        setIsActionsProcessingRun(true);
+
+        // Some other call site (e.g. pause()/resume()) triggers processActions() again.
+        invokeProcessActions();
+        org.robolectric.Shadows.shadowOf(getActionsHandler().getLooper()).idle();
+
+        verify(mockMediaPlayer, never()).start();
+        assertEquals("PLAY must remain queued while awaitingPrepare is true",
+                1, getActionsQueue().size());
+    }
+
+    private void setFinishedPlaying(boolean value) throws Exception {
+        Field field = VideoAdControllerVast.class.getDeclaredField("finishedPlaying");
+        field.setAccessible(true);
+        field.setBoolean(videoAdControllerVast, value);
+    }
+
+    @Test
+    public void testProcessPrepareAction_whenFinishedPlaying_doesNotStartPrepare() throws Exception {
+        setFinishedPlaying(true);
+        videoAdControllerVast.setVideoFilePath("http://test.example/video.mp4");
+
+        invokeProcessPrepareAction();
+
+        assertNull("no MediaPlayer should be created once the controller is destroyed",
+                getMediaPlayerField());
+        assertFalse(getAwaitingPrepare());
+    }
+
+    @Test
+    public void testProcessPrepareAction_withInvalidVideoUri_reportsFailureOnceAndReleasesPlayer() throws Exception {
+        videoAdControllerVast.setVideoFilePath(null);
+
+        invokeProcessPrepareAction();
+
+        // Without the early return, this would fall through and report a second failure.
+        verify(mockBaseAdInternal, times(1)).onAdLoadFailInternal(any(PlayerInfo.class));
+        assertNull("no MediaPlayer should be created for an invalid URI", getMediaPlayerField());
+        assertFalse(getAwaitingPrepare());
+    }
+
+    @Test
+    public void testProcessPrepareAction_whenSetDataSourceThrows_releasesPlayerAndReportsFailureOnce() throws Exception {
+        // No MediaInfo registered, so setDataSource() throws and hits the catch block.
+        videoAdControllerVast.setVideoFilePath("http://test.example/unregistered-video.mp4");
+
+        invokeProcessPrepareAction();
+
+        verify(mockBaseAdInternal, times(1)).onAdLoadFailInternal(any(PlayerInfo.class));
+        assertNull("the MediaPlayer from a failed prepare should be released and cleared",
+                getMediaPlayerField());
+        assertFalse(getAwaitingPrepare());
+    }
+
+    @Test
+    public void testProcessPrepareAction_reprepareWithInvalidUri_resetsAwaitingPrepare() throws Exception {
+        String videoUri = "http://test.example/video.mp4";
+        org.robolectric.shadows.util.DataSource dataSource = org.robolectric.shadows.util.DataSource.toDataSource(videoUri);
+        ShadowMediaPlayer.addMediaInfo(dataSource, new ShadowMediaPlayer.MediaInfo(30000, 5000));
+        videoAdControllerVast.setVideoFilePath(videoUri);
+
+        // First prepare starts and is still in flight.
+        invokeProcessPrepareAction();
+        assertTrue(getAwaitingPrepare());
+
+        // Re-preparing with an invalid URI abandons the old (still in-flight) player without
+        // starting a new one - nothing will ever fire onPrepared()/onError() to clear the flag.
+        videoAdControllerVast.setVideoFilePath(null);
+        invokeProcessPrepareAction();
+
+        assertFalse("awaitingPrepare must not stay stuck true when re-preparing with an invalid URI",
+                getAwaitingPrepare());
+        assertNull("no MediaPlayer should be left over from the invalid re-prepare",
+                getMediaPlayerField());
+    }
+
+    @Test
+    public void testOnPrepared_afterDestroy_doesNotTouchNulledHandler() throws Exception {
+        String videoUri = "http://test.example/video.mp4";
+        org.robolectric.shadows.util.DataSource dataSource = org.robolectric.shadows.util.DataSource.toDataSource(videoUri);
+        ShadowMediaPlayer.addMediaInfo(dataSource, new ShadowMediaPlayer.MediaInfo(30000, 5000));
+        videoAdControllerVast.setVideoFilePath(videoUri);
+
+        invokeProcessPrepareAction();
+        assertTrue(getAwaitingPrepare());
+        android.media.MediaPlayer mediaPlayer = getMediaPlayerField();
+
+        // destroy() while the prepare is still in flight - it resets awaitingPrepare itself.
+        videoAdControllerVast.destroy();
+        assertFalse("destroy() should reset awaitingPrepare itself", getAwaitingPrepare());
+
+        // The callback can still arrive after destroy(). Without the finishedPlaying guard,
+        // it would NPE posting to the now-null handler.
+        org.robolectric.Shadows.shadowOf(mediaPlayer).invokePreparedListener();
+
+        assertFalse("onPrepared() must bail out without touching the queue",
+                getAwaitingPrepare());
+    }
+
+    @Test
+    public void testOnError_afterDestroy_doesNotTouchNulledHandler() throws Exception {
+        String videoUri = "http://test.example/broken-video.mp4";
+        org.robolectric.shadows.util.DataSource dataSource = org.robolectric.shadows.util.DataSource.toDataSource(videoUri);
+        ShadowMediaPlayer.addMediaInfo(dataSource, new ShadowMediaPlayer.MediaInfo(30000, 5000));
+        videoAdControllerVast.setVideoFilePath(videoUri);
+
+        invokeProcessPrepareAction();
+        assertTrue(getAwaitingPrepare());
+        android.media.MediaPlayer mediaPlayer = getMediaPlayerField();
+
+        videoAdControllerVast.destroy();
+        assertFalse("destroy() should reset awaitingPrepare itself", getAwaitingPrepare());
+        clearInvocations(mockBaseAdInternal);
+
+        // Without the finishedPlaying guard, this would NPE and wrongly report a failure.
+        org.robolectric.Shadows.shadowOf(mediaPlayer).invokeErrorListener(1, 0);
+
+        assertFalse("onError() must bail out without touching the queue", getAwaitingPrepare());
+        verify(mockBaseAdInternal, never()).onAdLoadFailInternal(any(PlayerInfo.class));
+    }
+
+    @Test
+    public void testReplayVast_afterSkip_actuallyRestartsPrepare() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+
+        String videoUri = "http://test.example/video.mp4";
+        org.robolectric.shadows.util.DataSource dataSource = org.robolectric.shadows.util.DataSource.toDataSource(videoUri);
+        ShadowMediaPlayer.addMediaInfo(dataSource, new ShadowMediaPlayer.MediaInfo(30000, 0));
+        videoAdControllerVast.setVideoFilePath(videoUri);
+
+        // Simulate a completed/skipped first playthrough.
+        videoAdControllerVast.skipVideo();
+        assertTrue(videoAdControllerVast.adFinishedPlaying());
+
+        // Replay must genuinely start a new prepare, not silently no-op.
+        videoAdControllerVast.replayVast();
+        org.robolectric.Shadows.shadowOf(getActionsHandler().getLooper()).idle();
+
+        assertFalse("finishedPlaying must be reset so a fresh prepare can start",
+                videoAdControllerVast.adFinishedPlaying());
+        assertNotNull("replay should have created a new MediaPlayer for the fresh prepare",
+                getMediaPlayerField());
+    }
+
+    @Test
+    public void testReplayVast_afterSkipDuringInFlightPrepare_queueIsNotStuck() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+
+        String videoUri = "http://test.example/video.mp4";
+        org.robolectric.shadows.util.DataSource dataSource = org.robolectric.shadows.util.DataSource.toDataSource(videoUri);
+        ShadowMediaPlayer.addMediaInfo(dataSource, new ShadowMediaPlayer.MediaInfo(30000, 5000));
+        videoAdControllerVast.setVideoFilePath(videoUri);
+
+        // Simulate the state right after PREPARE ran and the loop paused to wait for it.
+        invokeProcessPrepareAction();
+        assertTrue(getAwaitingPrepare());
+        setIsActionsProcessingRun(true);
+        android.media.MediaPlayer stalePlayer = getMediaPlayerField();
+
+        // Skip is a public API and can be called any time, including mid-prepare.
+        videoAdControllerVast.skipVideo();
+
+        assertFalse("skipVideo() must not leave the queue paused forever", getAwaitingPrepare());
+        assertFalse("skipVideo() must not leave the queue marked busy forever",
+                getIsActionsProcessingRun());
+
+        // A later replay must actually run, not silently no-op on a stuck queue.
+        videoAdControllerVast.replayVast();
+        org.robolectric.Shadows.shadowOf(getActionsHandler().getLooper()).idle();
+
+        android.media.MediaPlayer newPlayer = getMediaPlayerField();
+        assertNotNull("replay should have started a fresh prepare", newPlayer);
+        assertNotSame("replay must not resume the stale in-flight player from before the skip",
+                stalePlayer, newPlayer);
+    }
+
+    private void invokeExecuteAction(Object action) throws Exception {
+        Class<?> actionClass = Class.forName("net.pubnative.lite.sdk.vpaid.VideoAdControllerVast$Action");
+        Method method = VideoAdControllerVast.class.getDeclaredMethod("executeAction", actionClass);
+        method.setAccessible(true);
+        try {
+            method.invoke(videoAdControllerVast, action);
+        } catch (java.lang.reflect.InvocationTargetException e) {
+            throw (Exception) e.getCause();
+        }
+    }
+
+    @Test
+    public void testExecuteActionPrepare_returnsLongBeforeMediaPlayerFinishesPreparing() throws Exception {
+        String videoUri = "http://test.example/video.mp4";
+        org.robolectric.shadows.util.DataSource dataSource = org.robolectric.shadows.util.DataSource.toDataSource(videoUri);
+        long simulatedPrepareDelayMillis = 3000;
+        ShadowMediaPlayer.addMediaInfo(dataSource,
+                new ShadowMediaPlayer.MediaInfo(30000, (int) simulatedPrepareDelayMillis));
+        videoAdControllerVast.setVideoFilePath(videoUri);
+
+        long start = System.nanoTime();
+        invokeExecuteAction(getAction(0)); // PREPARE
+        long elapsedMillis = java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+
+        // The old synchronous prepare() wouldn't return until the video was ready. This must
+        // return almost immediately, proving the monitor is held only for an instant.
+        assertTrue("executeAction(PREPARE) took " + elapsedMillis + "ms but should return in well "
+                        + "under the simulated " + simulatedPrepareDelayMillis + "ms prepare time",
+                elapsedMillis < simulatedPrepareDelayMillis / 2);
+        assertTrue(getAwaitingPrepare());
+        assertEquals("the player must still be mid-prepare when executeAction() already returned",
+                ShadowMediaPlayer.State.PREPARING,
+                org.robolectric.Shadows.shadowOf(getMediaPlayerField()).getState());
+    }
+
+    @Test
+    public void testDestroy_completesPromptly_onceConcurrentMonitorHolderReleasesIt() throws Exception {
+        final java.util.concurrent.CountDownLatch monitorAcquired = new java.util.concurrent.CountDownLatch(1);
+        final long holdMillis = 300;
+
+        Thread monitorHolder = new Thread(() -> {
+            synchronized (videoAdControllerVast) {
+                monitorAcquired.countDown();
+                try {
+                    Thread.sleep(holdMillis);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        });
+        monitorHolder.start();
+
+        assertTrue("background thread should have acquired the monitor",
+                monitorAcquired.await(1, java.util.concurrent.TimeUnit.SECONDS));
+
+        long start = System.nanoTime();
+        videoAdControllerVast.destroy();
+        long elapsedMillis = java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+
+        monitorHolder.join(java.util.concurrent.TimeUnit.SECONDS.toMillis(2));
+        assertFalse("monitorHolder thread should have finished", monitorHolder.isAlive());
+
+        // destroy() waiting for the monitor is fine - it just must not hang well beyond
+        // the brief hold above.
+        assertTrue("destroy() took " + elapsedMillis + "ms - should complete shortly after the "
+                        + "monitor is released (held for " + holdMillis + "ms), not hang",
+                elapsedMillis < 2000);
+    }
+
+    @Test
+    public void testOnError_fromSupersededPlayer_isIgnored() throws Exception {
+        String videoUri = "http://test.example/video.mp4";
+        org.robolectric.shadows.util.DataSource dataSource = org.robolectric.shadows.util.DataSource.toDataSource(videoUri);
+        ShadowMediaPlayer.addMediaInfo(dataSource, new ShadowMediaPlayer.MediaInfo(30000, 5000));
+        videoAdControllerVast.setVideoFilePath(videoUri);
+
+        // Player A starts preparing, then gets superseded by a new prepare (as happens on a
+        // skip + replay) before its callback arrives.
+        invokeProcessPrepareAction();
+        android.media.MediaPlayer playerA = getMediaPlayerField();
+        invokeProcessPrepareAction();
+        android.media.MediaPlayer playerB = getMediaPlayerField();
+        assertNotSame(playerA, playerB);
+        assertTrue(getAwaitingPrepare());
+
+        // A's stale error callback finally arrives.
+        org.robolectric.Shadows.shadowOf(playerA).invokeErrorListener(1, 0);
+
+        assertTrue("a stale callback from A must not touch B's in-flight prepare",
+                getAwaitingPrepare());
+        assertSame("a stale callback from A must not null out the current player",
+                playerB, getMediaPlayerField());
+    }
+
+    @Test
+    public void testOnPrepared_fromSupersededPlayer_isIgnored() throws Exception {
+        String videoUri = "http://test.example/video.mp4";
+        org.robolectric.shadows.util.DataSource dataSource = org.robolectric.shadows.util.DataSource.toDataSource(videoUri);
+        ShadowMediaPlayer.addMediaInfo(dataSource, new ShadowMediaPlayer.MediaInfo(30000, 5000));
+        videoAdControllerVast.setVideoFilePath(videoUri);
+
+        invokeProcessPrepareAction();
+        android.media.MediaPlayer playerA = getMediaPlayerField();
+        invokeProcessPrepareAction();
+        android.media.MediaPlayer playerB = getMediaPlayerField();
+        assertNotSame(playerA, playerB);
+        assertTrue(getAwaitingPrepare());
+
+        // A's stale prepared callback finally arrives.
+        org.robolectric.Shadows.shadowOf(playerA).invokePreparedListener();
+
+        assertTrue("a stale callback from A must not clear B's in-flight prepare",
+                getAwaitingPrepare());
+    }
+
+    @Test
+    public void testOnCompletion_fromSupersededPlayer_isIgnored() throws Exception {
+        String videoUri = "http://test.example/video.mp4";
+        org.robolectric.shadows.util.DataSource dataSource = org.robolectric.shadows.util.DataSource.toDataSource(videoUri);
+        ShadowMediaPlayer.addMediaInfo(dataSource, new ShadowMediaPlayer.MediaInfo(30000, 5000));
+        videoAdControllerVast.setVideoFilePath(videoUri);
+
+        invokeProcessPrepareAction();
+        android.media.MediaPlayer playerA = getMediaPlayerField();
+        invokeProcessPrepareAction();
+        android.media.MediaPlayer playerB = getMediaPlayerField();
+        assertNotSame(playerA, playerB);
+
+        // A's stale completion callback finally arrives - it must not end B's fresh playthrough.
+        org.robolectric.Shadows.shadowOf(playerA).invokeCompletionListener();
+
+        assertFalse("a stale completion from A must not mark the fresh playthrough as finished",
+                videoAdControllerVast.adFinishedPlaying());
+    }
+
+    @Test
+    public void testOnCompletion_whileFinishedPlaying_isIgnored() throws Exception {
+        String videoUri = "http://test.example/video.mp4";
+        org.robolectric.shadows.util.DataSource dataSource = org.robolectric.shadows.util.DataSource.toDataSource(videoUri);
+        ShadowMediaPlayer.addMediaInfo(dataSource, new ShadowMediaPlayer.MediaInfo(30000, 0));
+        videoAdControllerVast.setVideoFilePath(videoUri);
+
+        invokeProcessPrepareAction();
+        android.media.MediaPlayer mediaPlayer = getMediaPlayerField();
+
+        // Simulate the window inside destroy() where finishedPlaying is already set but the
+        // player hasn't been released/nulled yet (destroy() runs on the main thread while this
+        // callback fires on the actions thread, so the two can genuinely interleave).
+        setFinishedPlaying(true);
+
+        org.robolectric.Shadows.shadowOf(mediaPlayer).invokeCompletionListener();
+
+        verify(mockBaseAdInternal, never()).onAdDidReachEnd();
     }
 }

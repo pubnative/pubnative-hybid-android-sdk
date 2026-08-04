@@ -388,6 +388,17 @@ public class HyBidRewardedAdTest {
     }
 
     @Test
+    public void testShow_calledTwiceInARow_secondCallDoesNotShowPresenter() {
+        replacePrivateVariableWithMock("mReady", true);
+        replacePrivateVariableWithMock("mPresenter", mockPresenter);
+
+        rewardedAd.show();
+        rewardedAd.show();
+
+        verify(mockPresenter, times(1)).show();
+    }
+
+    @Test
     public void testShow_whenNotReady_doesNotShowPresenter() {
         replacePrivateVariableWithMock("mReady", false);
         replacePrivateVariableWithMock("mPresenter", mockPresenter);

@@ -3,6 +3,7 @@ package net.pubnative.lite.sdk.rewarded.activity;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 
@@ -82,13 +83,29 @@ public class HyBidRewardedActivityTest {
 
     }
 
-    @Test
-    public void applyWindowInsets_shouldSetBottomPadding() {
-        activityController.create().start().resume().visible();
+    private Intent createTestIntent() {
         Context context = Robolectric.buildActivity(Activity.class).create().get();
         Intent intent = new Intent(context, TestHyBidRewardedActivity.class);
         intent.putExtra(HyBidRewardedActivity.EXTRA_BROADCAST_ID, broadcastIdentifier);
         intent.putExtra(HyBidRewardedActivity.EXTRA_ZONE_ID, "2");
+        return intent;
+    }
+
+    @Test
+    public void onCreate_shouldCreateView() {
+        Intent intent = createTestIntent();
+
+        subject = Robolectric.buildActivity(TestHyBidRewardedActivity.class, intent)
+                .create().get();
+        View adView = getContentView(subject);
+
+        Assert.assertNotNull(adView);
+    }
+
+    @Test
+    public void applyWindowInsets_shouldSetBottomPadding() {
+        activityController.create().start().resume().visible();
+        Intent intent = createTestIntent();
 
         subject = Robolectric.buildActivity(TestHyBidRewardedActivity.class, intent)
                 .create().get();
@@ -196,6 +213,52 @@ public class HyBidRewardedActivityTest {
 
         // Verify addFriendlyObstruction called only once
         verify(mockViewModel, times(1)).addFriendlyObstruction(mockWatermarkView);
+    }
+
+    @Test
+    public void onDestroy_shouldCleanUpContentView() {
+        Intent intent = createTestIntent();
+
+        subject = Robolectric.buildActivity(TestHyBidRewardedActivity.class, intent)
+                .create().destroy().get();
+
+        Assert.assertEquals(0, getContentView(subject).getChildCount());
+    }
+
+    @Test
+    public void onDestroy_withViewModel_callsOnActivityDestroyed() {
+        Intent intent = createTestIntent();
+
+        ActivityController<TestHyBidRewardedActivity> controller =
+                Robolectric.buildActivity(TestHyBidRewardedActivity.class, intent);
+        TestHyBidRewardedActivity activity = controller.create().get();
+
+        // Inject mock ViewModel after creation
+        activity.setMockViewModel(mockViewModel);
+
+        // Destroy the activity - this should call onActivityDestroyed on the ViewModel
+        controller.destroy();
+
+        // Verify onActivityDestroyed was called with isFinishing parameter
+        verify(mockViewModel).onActivityDestroyed(anyBoolean());
+    }
+
+    @Test
+    public void onDestroy_withNullViewModel_doesNotCrash() {
+        Intent intent = createTestIntent();
+
+        ActivityController<TestHyBidRewardedActivity> controller =
+                Robolectric.buildActivity(TestHyBidRewardedActivity.class, intent);
+        TestHyBidRewardedActivity activity = controller.create().get();
+
+        // Set ViewModel to null
+        activity.setMockViewModel(null);
+
+        // Destroy should not crash even with null ViewModel
+        controller.destroy();
+
+        // Should not throw exception
+        Assert.assertEquals(0, getContentView(activity).getChildCount());
     }
 
     protected FrameLayout getContentView(HyBidRewardedActivity subject) {

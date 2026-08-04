@@ -40,4 +40,23 @@ public class BatteryUtils {
     public static synchronized Boolean isBatteryPercentageValueFetched() {
         return isBatteryPercentageValueFetched;
     }
+
+    public static boolean isChargingSync(Context context) {
+        if (context == null) {
+            return false;
+        }
+
+        try {
+            Intent batteryIntent = context.registerReceiver(null,
+                    new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+            if (batteryIntent != null) {
+                int status = batteryIntent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+                return status == BatteryManager.BATTERY_STATUS_CHARGING ||
+                        status == BatteryManager.BATTERY_STATUS_FULL;
+            }
+        } catch (RuntimeException e) {
+            Logger.e(TAG, "Could not retrieve battery charging status.", e);
+        }
+        return false;
+    }
 }

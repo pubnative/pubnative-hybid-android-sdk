@@ -36,7 +36,7 @@ public class ApiExecutor {
                     Runtime.getRuntime().availableProcessors() * 2,
                     60L,
                     TimeUnit.SECONDS,
-                    new LinkedBlockingQueue<>(50),
+                    new LinkedBlockingQueue<>(100),
                     new ThreadPoolExecutor.CallerRunsPolicy()
             );
         }

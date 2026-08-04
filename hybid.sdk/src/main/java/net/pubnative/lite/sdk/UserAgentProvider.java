@@ -10,7 +10,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
-import android.webkit.WebView;
+import android.webkit.WebSettings;
 
 import net.pubnative.lite.sdk.models.request.BrandVersion;
 import net.pubnative.lite.sdk.models.request.UserAgent;
@@ -53,10 +53,12 @@ public class UserAgentProvider {
             mUserAgent = userAgent;
             fetchStructuredUserAgent(mUserAgent);
         } else {
+            Context appContext = context.getApplicationContext();
+            Context safeContext = appContext != null ? appContext : context;
             Handler mainHandler = new Handler(Looper.getMainLooper());
             mainHandler.post(() -> {
                 try {
-                    mUserAgent = new WebView(context).getSettings().getUserAgentString();
+                    mUserAgent = WebSettings.getDefaultUserAgent(safeContext);
                     fetchStructuredUserAgent(mUserAgent);
                     if (!TextUtils.isEmpty(mUserAgent)) {
                         SharedPreferences.Editor editor = preferences.edit();

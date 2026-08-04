@@ -194,6 +194,7 @@ public class HyBidRewardedAd implements RequestManager.RequestListener, Rewarded
 
     public void show() {
         if (mPresenter != null && mReady) {
+            mReady = false;
             mInitialRenderTime = System.currentTimeMillis();
             long adExpireTime = mInitialLoadTime + TIME_TO_EXPIRE;
             if (mInitialRenderTime < adExpireTime || mInitialLoadTime == -1) {

@@ -10,6 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import net.pubnative.lite.sdk.AdCache;
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.interstitial.viewModel.InterstitialViewModelTest;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
 import net.pubnative.lite.sdk.models.Ad;
@@ -21,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
@@ -68,6 +71,58 @@ public class RewardedViewModelTest {
     @Test
     public void testIsValidAdToRender_true() {
         assertTrue(viewModel.isValidAdToRender());
+    }
+
+    @Test
+    public void testFetchAd_peeksCacheWithoutConsuming() {
+        try (MockedStatic<HyBid> hyBidMock = mockStatic(HyBid.class)) {
+            AdCache adCache = mock(AdCache.class);
+            Ad cachedAd = mock(Ad.class);
+            when(adCache.inspect("sessKey")).thenReturn(cachedAd);
+            hyBidMock.when(HyBid::getAdCache).thenReturn(adCache);
+
+            // Constructor calls fetchAd() for the given cache key.
+            TestRewardedViewModel vm = new TestRewardedViewModel(
+                    RuntimeEnvironment.getApplication(), "sessKey", "standalone", 5, 123L, mockListener);
+
+            // Ad must be fetched via inspect() (peek) and NOT removed, so the entry
+            // survives activity re-creation / a re-entrant fetch of the same key.
+            assertSame(cachedAd, vm.mAd);
+            verify(adCache).inspect("sessKey");
+            verify(adCache, never()).remove(anyString());
+        }
+    }
+
+    @Test
+    public void testOnActivityDestroyed_finishing_evictsCacheEntry() {
+        try (MockedStatic<HyBid> hyBidMock = mockStatic(HyBid.class)) {
+            AdCache adCache = mock(AdCache.class);
+            hyBidMock.when(HyBid::getAdCache).thenReturn(adCache);
+
+            TestRewardedViewModel vm = new TestRewardedViewModel(
+                    RuntimeEnvironment.getApplication(), "sessKey", "standalone", 5, 123L, mockListener);
+
+            // Genuine finish -> evict.
+            vm.onActivityDestroyed(true);
+
+            verify(adCache).remove("sessKey");
+        }
+    }
+
+    @Test
+    public void testOnActivityDestroyed_notFinishing_keepsCacheEntry() {
+        try (MockedStatic<HyBid> hyBidMock = mockStatic(HyBid.class)) {
+            AdCache adCache = mock(AdCache.class);
+            hyBidMock.when(HyBid::getAdCache).thenReturn(adCache);
+
+            TestRewardedViewModel vm = new TestRewardedViewModel(
+                    RuntimeEnvironment.getApplication(), "sessKey", "standalone", 5, 123L, mockListener);
+
+            // Activity re-creation (config change) must NOT evict.
+            vm.onActivityDestroyed(false);
+
+            verify(adCache, never()).remove(anyString());
+        }
     }
 
     @Test

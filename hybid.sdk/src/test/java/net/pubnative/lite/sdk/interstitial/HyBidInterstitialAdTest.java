@@ -379,6 +379,18 @@ public class HyBidInterstitialAdTest {
     }
 
     @Test
+    public void testShow_calledTwiceInARow_secondCallDoesNotShowPresenter() {
+        replacePrivateVariableWithMock("mReady", true);
+        replacePrivateVariableWithMock("mPresenter", mockPresenter);
+
+        interstitialAd.show();
+        boolean secondResult = interstitialAd.show();
+
+        assertFalse(secondResult);
+        verify(mockPresenter, times(1)).show();
+    }
+
+    @Test
     public void testShow_whenNotReady_returnsFalse() {
         replacePrivateVariableWithMock("mReady", false);
 

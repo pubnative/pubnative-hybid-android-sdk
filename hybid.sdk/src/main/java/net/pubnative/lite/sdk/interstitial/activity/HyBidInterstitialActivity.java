@@ -268,6 +268,10 @@ public abstract class HyBidInterstitialActivity extends Activity implements Inte
 
     @Override
     protected void onDestroy() {
+        // Only evict on finish — re-creation needs the cache entry intact.
+        if (mViewModel != null) {
+            mViewModel.onActivityDestroyed(isFinishing());
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && mOnBackInvokedCallback != null) {
             getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mOnBackInvokedCallback);
         }

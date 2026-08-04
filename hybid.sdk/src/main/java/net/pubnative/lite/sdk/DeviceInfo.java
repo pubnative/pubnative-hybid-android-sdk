@@ -6,11 +6,8 @@ package net.pubnative.lite.sdk;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Point;
@@ -20,11 +17,8 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
-import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.PowerManager;
 import android.os.StatFs;
 import android.provider.Settings;
@@ -104,9 +98,6 @@ public class DeviceInfo {
     private String mAdvertisingIdMd5;
     private String mAdvertisingIdSha1;
     private boolean mLimitTracking = false;
-    private boolean mIsCharging = false;
-    private final Object mReceiverLock = new Object();
-    private boolean mIsChangingReceiverRegistered = false;
     private Listener mListener;
     private String deviceHeight;
     private String deviceWidth;
@@ -124,49 +115,19 @@ public class DeviceInfo {
         mListener = listener;
         fetchUserAgent();
         fetchAdvertisingId();
-        updateChargingStatus();
         if (mCachedInputLanguages.get().isEmpty()) {
             fetchInputLanguages();
         }
     }
 
-    private final BroadcastReceiver mBatteryStatusReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-            mIsCharging = status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL;
-
-            synchronized (mReceiverLock) {
-                if (mContext != null && mIsChangingReceiverRegistered) {
-                    final Context ctx = mContext;
-                    new Handler(Looper.getMainLooper()).post(() -> {
-                        synchronized (mReceiverLock) {
-                            try {
-                                ctx.unregisterReceiver(mBatteryStatusReceiver);
-                            } catch (IllegalArgumentException ignored) {
-                                // Receiver was already unregistered
-                            } finally {
-                                mIsChangingReceiverRegistered = false;
-                            }
-                        }
-                    });
-                }
-            }
-        }
-    };
-
+    /**
+     * @deprecated Charging status is now read synchronously from the sticky
+     * {@code ACTION_BATTERY_CHANGED} broadcast on demand (see {@link #isBatteryCharging()}).
+     * This method is a no-op kept for binary compatibility.
+     */
+    @Deprecated
     public void updateChargingStatus() {
-        synchronized (mReceiverLock) {
-            if (!mIsChangingReceiverRegistered && mContext != null) {
-                try {
-                    IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-                    mContext.registerReceiver(mBatteryStatusReceiver, filter);
-                    mIsChangingReceiverRegistered = true;
-                } catch (SecurityException | IllegalArgumentException e) {
-                    Logger.e(TAG, "Failed to register battery receiver", e);
-                }
-            }
-        }
+        // no-op
     }
 
     private void fetchAdvertisingId() {
@@ -638,8 +599,7 @@ public class DeviceInfo {
     }
 
     public Integer isBatteryCharging() {
-        updateChargingStatus();
-        return mIsCharging ? 1 : 0;
+        return BatteryUtils.isChargingSync(mContext) ? 1 : 0;
     }
 
     public Integer getBatteryLevel() {

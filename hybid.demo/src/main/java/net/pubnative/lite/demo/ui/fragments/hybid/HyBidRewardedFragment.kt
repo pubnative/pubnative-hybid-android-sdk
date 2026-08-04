@@ -106,6 +106,12 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        rewardedAd?.destroy()
+        rewardedAd = null
+    }
+
 
     private fun loadPNRewardedAd() {
         rewardedAd = HyBidRewardedAd(activity, zoneId, this)
@@ -152,9 +158,10 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
 
     override fun onRewardedOpened() {
         Log.d(TAG, "onRewardedOpened")
+        val ctx = context ?: return // Fragment not attached, skip safely
         if (HyBid.getDiagnosticsManager() != null) {
             HyBid.getDiagnosticsManager().printPlacementDiagnosticsLog(
-                requireContext(),
+                ctx,
                 rewardedAd?.placementParams
             )
         }
@@ -163,6 +170,7 @@ class HyBidRewardedFragment : Fragment(R.layout.fragment_hybid_rewarded), HyBidR
     override fun onRewardedClosed() {
         Log.d(TAG, "onRewardedClosed")
         rewardedAd = null
+        if (!isAdded || view == null) return // Fragment not attached or view destroyed, skip view updates
         prepareButton.isEnabled = false
         showButton.isEnabled = false
     }

@@ -580,8 +580,14 @@ public class ViewControllerVast implements View.OnClickListener {
         if (mLastCustomEndCardView != null) {
             mLastCustomEndCardView.setVisibility(View.GONE);
         }
-        if (mOpenUrlLayout != null && (remoteConfigInterstitialClickBehaviour != InterstitialActionBehaviour.HB_CREATIVE || mIsBrandAd)) {
-            mOpenUrlLayout.setVisibility(View.VISIBLE);
+        // Custom CTA mode hides "Learn More" on first play (buildVideoAdView); keep it hidden on
+        // replay too, otherwise both "Learn More" and the Custom CTA show (VMA-1537).
+        if (mOpenUrlLayout != null) {
+            if (!mIsCustomCTA && (remoteConfigInterstitialClickBehaviour != InterstitialActionBehaviour.HB_CREATIVE || mIsBrandAd)) {
+                mOpenUrlLayout.setVisibility(View.VISIBLE);
+            } else if (mIsCustomCTA) {
+                mOpenUrlLayout.setVisibility(View.GONE);
+            }
         }
         if (ctaView != null && mIsCustomCTA) {
             ctaView.setVisibility(View.VISIBLE);

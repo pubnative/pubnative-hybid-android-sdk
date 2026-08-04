@@ -102,12 +102,9 @@ public class UserAgentProviderTest {
         when(mockSharedPreferences.getString(anyString(), anyString())).thenReturn("");
         when(mockSharedPreferences.getInt(anyString(), anyInt())).thenReturn(-1);
 
-        try (MockedConstruction<WebView> webViewMock = mockConstruction(WebView.class,
-                (mock, context) -> {
-                    WebSettings webSettings = mock(WebSettings.class);
-                    when(mock.getSettings()).thenReturn(webSettings);
-                    when(webSettings.getUserAgentString()).thenReturn("Mozilla/5.0 (Linux; Android 10) Chrome/91.0.4472.120");
-                })) {
+        try (MockedStatic<WebSettings> webSettingsMock = mockStatic(WebSettings.class)) {
+            webSettingsMock.when(() -> WebSettings.getDefaultUserAgent(any()))
+                    .thenReturn("Mozilla/5.0 (Linux; Android 10) Chrome/91.0.4472.120");
 
             // When
             userAgentProvider.initialise(mockContext);
@@ -142,12 +139,9 @@ public class UserAgentProviderTest {
         when(mockSharedPreferences.getString(eq("hybid_user_agent"), anyString())).thenReturn(cachedUserAgent);
         when(mockSharedPreferences.getInt(eq("hybid_user_agent_last_version"), anyInt())).thenReturn(Build.VERSION.SDK_INT - 1);
 
-        try (MockedConstruction<WebView> webViewMock = mockConstruction(WebView.class,
-                (mock, context) -> {
-                    WebSettings webSettings = mock(WebSettings.class);
-                    when(mock.getSettings()).thenReturn(webSettings);
-                    when(webSettings.getUserAgentString()).thenReturn("Mozilla/5.0 (Linux; Android 10) Chrome/91.0.4472.120");
-                })) {
+        try (MockedStatic<WebSettings> webSettingsMock = mockStatic(WebSettings.class)) {
+            webSettingsMock.when(() -> WebSettings.getDefaultUserAgent(any()))
+                    .thenReturn("Mozilla/5.0 (Linux; Android 10) Chrome/91.0.4472.120");
 
             // When
             userAgentProvider.fetchUserAgent(mockContext);
@@ -166,12 +160,9 @@ public class UserAgentProviderTest {
         when(mockSharedPreferences.getString(eq("hybid_user_agent"), anyString())).thenReturn("");
         when(mockSharedPreferences.getInt(eq("hybid_user_agent_last_version"), anyInt())).thenReturn(-1);
 
-        try (MockedConstruction<WebView> webViewMock = mockConstruction(WebView.class,
-                (mock, context) -> {
-                    WebSettings webSettings = mock(WebSettings.class);
-                    when(mock.getSettings()).thenReturn(webSettings);
-                    when(webSettings.getUserAgentString()).thenReturn("Mozilla/5.0 (Linux; Android 10) Chrome/91.0.4472.120");
-                })) {
+        try (MockedStatic<WebSettings> webSettingsMock = mockStatic(WebSettings.class)) {
+            webSettingsMock.when(() -> WebSettings.getDefaultUserAgent(any()))
+                    .thenReturn("Mozilla/5.0 (Linux; Android 10) Chrome/91.0.4472.120");
 
             // When
             userAgentProvider.fetchUserAgent(mockContext);
@@ -185,16 +176,15 @@ public class UserAgentProviderTest {
     }
 
     @Test
-    public void fetchUserAgent_whenWebViewThrowsException_handlesGracefully() {
+    public void fetchUserAgent_whenWebSettingsThrowsException_handlesGracefully() {
         // Given
         when(mockSharedPreferences.getString(eq("hybid_user_agent"), anyString())).thenReturn("");
         when(mockSharedPreferences.getInt(eq("hybid_user_agent_last_version"), anyInt())).thenReturn(-1);
 
-        try (MockedConstruction<WebView> webViewMock = mockConstruction(WebView.class,
-                (mock, context) -> {
-                    when(mock.getSettings()).thenThrow(new RuntimeException("WebView initialization failed"));
-                });
+        try (MockedStatic<WebSettings> webSettingsMock = mockStatic(WebSettings.class);
              MockedStatic<HyBid> hybidMock = mockStatic(HyBid.class)) {
+            webSettingsMock.when(() -> WebSettings.getDefaultUserAgent(any()))
+                    .thenThrow(new RuntimeException("WebSettings initialization failed"));
 
             // When
             userAgentProvider.fetchUserAgent(mockContext);
@@ -213,17 +203,13 @@ public class UserAgentProviderTest {
     }
 
     @Test
-    public void fetchUserAgent_whenWebViewReturnsEmptyUserAgent_doesNotSave() {
+    public void fetchUserAgent_whenWebSettingsReturnsEmptyUserAgent_doesNotSave() {
         // Given
         when(mockSharedPreferences.getString(eq("hybid_user_agent"), anyString())).thenReturn("");
         when(mockSharedPreferences.getInt(eq("hybid_user_agent_last_version"), anyInt())).thenReturn(-1);
 
-        try (MockedConstruction<WebView> webViewMock = mockConstruction(WebView.class,
-                (mock, context) -> {
-                    WebSettings webSettings = mock(WebSettings.class);
-                    when(mock.getSettings()).thenReturn(webSettings);
-                    when(webSettings.getUserAgentString()).thenReturn("");
-                })) {
+        try (MockedStatic<WebSettings> webSettingsMock = mockStatic(WebSettings.class)) {
+            webSettingsMock.when(() -> WebSettings.getDefaultUserAgent(any())).thenReturn("");
 
             // When
             userAgentProvider.fetchUserAgent(mockContext);
@@ -231,6 +217,71 @@ public class UserAgentProviderTest {
 
             // Then
             verify(mockEditor, never()).apply();
+        }
+    }
+
+    @Test
+    public void fetchUserAgent_neverInstantiatesWebView() {
+        // VMA-1334 regression guard: the fix must NEVER construct a WebView —
+        // constructing one on the main thread is exactly what caused the ANR.
+        // Fails loudly if anyone reintroduces `new WebView(context)`.
+        when(mockSharedPreferences.getString(eq("hybid_user_agent"), anyString())).thenReturn("");
+        when(mockSharedPreferences.getInt(eq("hybid_user_agent_last_version"), anyInt())).thenReturn(-1);
+
+        try (MockedStatic<WebSettings> webSettingsMock = mockStatic(WebSettings.class);
+             MockedConstruction<WebView> webViewConstruction = mockConstruction(WebView.class)) {
+            webSettingsMock.when(() -> WebSettings.getDefaultUserAgent(any()))
+                    .thenReturn("Mozilla/5.0 (Linux; Android 10) Chrome/91.0.4472.120");
+
+            // When
+            userAgentProvider.fetchUserAgent(mockContext);
+            Shadows.shadowOf(Looper.getMainLooper()).idle();
+
+            // Then
+            assertTrue("UserAgentProvider must not instantiate a WebView (VMA-1334 ANR)",
+                    webViewConstruction.constructed().isEmpty());
+            webSettingsMock.verify(() -> WebSettings.getDefaultUserAgent(any()));
+        }
+    }
+
+    @Test
+    public void fetchUserAgent_usesApplicationContext() {
+        // The fix switched to getApplicationContext(); verify the app context —
+        // not the raw context — reaches WebSettings.getDefaultUserAgent.
+        Context appContext = mock(Context.class);
+        when(mockContext.getApplicationContext()).thenReturn(appContext);
+        when(mockSharedPreferences.getString(eq("hybid_user_agent"), anyString())).thenReturn("");
+        when(mockSharedPreferences.getInt(eq("hybid_user_agent_last_version"), anyInt())).thenReturn(-1);
+
+        try (MockedStatic<WebSettings> webSettingsMock = mockStatic(WebSettings.class)) {
+            webSettingsMock.when(() -> WebSettings.getDefaultUserAgent(any())).thenReturn("Mozilla/5.0 Chrome/91.0");
+
+            // When
+            userAgentProvider.fetchUserAgent(mockContext);
+            Shadows.shadowOf(Looper.getMainLooper()).idle();
+
+            // Then
+            webSettingsMock.verify(() -> WebSettings.getDefaultUserAgent(eq(appContext)));
+        }
+    }
+
+    @Test
+    public void fetchUserAgent_whenApplicationContextNull_fallsBackToContext() {
+        // getApplicationContext() can be null very early in process init; the fix
+        // falls back to the original context instead of passing null.
+        when(mockContext.getApplicationContext()).thenReturn(null);
+        when(mockSharedPreferences.getString(eq("hybid_user_agent"), anyString())).thenReturn("");
+        when(mockSharedPreferences.getInt(eq("hybid_user_agent_last_version"), anyInt())).thenReturn(-1);
+
+        try (MockedStatic<WebSettings> webSettingsMock = mockStatic(WebSettings.class)) {
+            webSettingsMock.when(() -> WebSettings.getDefaultUserAgent(any())).thenReturn("Mozilla/5.0 Chrome/91.0");
+
+            // When
+            userAgentProvider.fetchUserAgent(mockContext);
+            Shadows.shadowOf(Looper.getMainLooper()).idle();
+
+            // Then
+            webSettingsMock.verify(() -> WebSettings.getDefaultUserAgent(eq(mockContext)));
         }
     }
 
@@ -737,12 +788,8 @@ public class UserAgentProviderTest {
         when(mockSharedPreferences.getString(eq("hybid_user_agent"), anyString())).thenReturn("Mozilla/5.0 Chrome/90.0");
         when(mockSharedPreferences.getInt(eq("hybid_user_agent_last_version"), anyInt())).thenReturn(-1);
 
-        try (MockedConstruction<WebView> webViewMock = mockConstruction(WebView.class,
-                (mock, context) -> {
-                    WebSettings webSettings = mock(WebSettings.class);
-                    when(mock.getSettings()).thenReturn(webSettings);
-                    when(webSettings.getUserAgentString()).thenReturn("Mozilla/5.0 Chrome/91.0");
-                })) {
+        try (MockedStatic<WebSettings> webSettingsMock = mockStatic(WebSettings.class)) {
+            webSettingsMock.when(() -> WebSettings.getDefaultUserAgent(any())).thenReturn("Mozilla/5.0 Chrome/91.0");
 
             // When
             userAgentProvider.fetchUserAgent(mockContext);
@@ -797,12 +844,8 @@ public class UserAgentProviderTest {
         when(mockSharedPreferences.getString(eq("hybid_user_agent"), anyString())).thenReturn("");
         when(mockSharedPreferences.getInt(eq("hybid_user_agent_last_version"), anyInt())).thenReturn(-1);
 
-        try (MockedConstruction<WebView> webViewMock = mockConstruction(WebView.class,
-                (mock, context) -> {
-                    WebSettings webSettings = mock(WebSettings.class);
-                    when(mock.getSettings()).thenReturn(webSettings);
-                    when(webSettings.getUserAgentString()).thenReturn("Mozilla/5.0 Chrome/91.0");
-                })) {
+        try (MockedStatic<WebSettings> webSettingsMock = mockStatic(WebSettings.class)) {
+            webSettingsMock.when(() -> WebSettings.getDefaultUserAgent(any())).thenReturn("Mozilla/5.0 Chrome/91.0");
 
             // When
             userAgentProvider.fetchUserAgent(mockContext);

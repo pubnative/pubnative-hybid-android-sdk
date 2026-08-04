@@ -210,6 +210,7 @@ public class HyBidInterstitialAd implements RequestManager.RequestListener, Inte
 
     public boolean show() {
         if (mPresenter != null && mReady) {
+            mReady = false;
             mInitialRenderTime = System.currentTimeMillis();
             long adExpireTime = mInitialLoadTime + TIME_TO_EXPIRE;
             if (mInitialRenderTime < adExpireTime || mInitialLoadTime == -1) {

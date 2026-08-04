@@ -7,9 +7,11 @@ package net.pubnative.lite.sdk.location;
 import android.Manifest;
 import android.content.Context;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
+import android.os.HandlerThread;
 
 import net.pubnative.lite.sdk.HyBid;
 
@@ -17,6 +19,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
@@ -26,6 +29,15 @@ import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.shadows.ShadowLocationManager;
 import org.robolectric.shadows.ShadowLooper;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -222,6 +234,44 @@ public class HyBidLocationManagerTest {
         locationManager.stopLocationUpdates();
 
         assertNotNull(locationManager);
+    }
+
+    @Test
+    public void testStopLocationUpdates_removeUpdatesThrowsSecurityException_doesNotCrash() throws Exception {
+        LocationManager throwingManager = mock(LocationManager.class);
+        doThrow(new SecurityException("no permission")).when(throwingManager).removeUpdates(any(LocationListener.class));
+
+        java.lang.reflect.Field managerField = HyBidLocationManager.class.getDeclaredField("mManager");
+        managerField.setAccessible(true);
+        managerField.set(locationManager, throwingManager);
+
+        locationManager.stopLocationUpdates();
+
+        verify(throwingManager).removeUpdates(any(LocationListener.class));
+        assertNotNull(locationManager);
+    }
+
+    @Test
+    public void testStopLocationUpdates_removeUpdatesThrowsSecurityException_stillClearsLocationThread() throws Exception {
+        shadowApplication.grantPermissions(Manifest.permission.ACCESS_COARSE_LOCATION);
+        shadowLocationManager.setProviderEnabled(LocationManager.NETWORK_PROVIDER, true);
+
+        locationManager.startLocationUpdates();
+        ShadowLooper.idleMainLooper();
+
+        java.lang.reflect.Field threadField = HyBidLocationManager.class.getDeclaredField("mLocationThread");
+        threadField.setAccessible(true);
+        assertNotNull(threadField.get(locationManager));
+
+        LocationManager throwingManager = mock(LocationManager.class);
+        doThrow(new SecurityException("no permission")).when(throwingManager).removeUpdates(any(LocationListener.class));
+        java.lang.reflect.Field managerField = HyBidLocationManager.class.getDeclaredField("mManager");
+        managerField.setAccessible(true);
+        managerField.set(locationManager, throwingManager);
+
+        locationManager.stopLocationUpdates();
+
+        assertNull(threadField.get(locationManager));
     }
 
     // isBetterLocation Tests
@@ -637,6 +687,124 @@ public class HyBidLocationManagerTest {
         ShadowLooper.idleMainLooper();
 
         assertNotNull(locationManager);
+    }
+
+    // Regression tests for VMA-1510: NPE in HyBidLocationManager.startLocationUpdates
+    // when HandlerThread#getLooper() returns null (e.g. the thread died/never prepared
+    // its Looper before we tried to build a Handler out of it).
+
+    @Test
+    public void testStartLocationUpdates_withNullLooper_doesNotThrowNPE() {
+        shadowApplication.grantPermissions(Manifest.permission.ACCESS_COARSE_LOCATION);
+        shadowLocationManager.setProviderEnabled(LocationManager.NETWORK_PROVIDER, true);
+
+        try (MockedConstruction<HandlerThread> mockedThread = mockConstruction(
+                HandlerThread.class,
+                (mock, context) -> {
+                    // Simulate a HandlerThread that never got to prepare (or already lost)
+                    // its Looper - this is exactly what triggered the NPE in Handler's
+                    // constructor before the fix.
+                    when(mock.getLooper()).thenReturn(null);
+                    when(mock.isAlive()).thenReturn(false);
+                })) {
+
+            // Should not throw - startLocationUpdates() must bail out gracefully instead
+            // of handing a null Looper to `new Handler(...)`.
+            locationManager.startLocationUpdates();
+
+            assertEquals(1, mockedThread.constructed().size());
+            verify(mockedThread.constructed().get(0)).start();
+        }
+
+        assertNotNull(locationManager);
+    }
+
+    @Test
+    public void testStartLocationUpdates_withNullLooper_resetsLocationThread() throws Exception {
+        shadowApplication.grantPermissions(Manifest.permission.ACCESS_COARSE_LOCATION);
+        shadowLocationManager.setProviderEnabled(LocationManager.NETWORK_PROVIDER, true);
+
+        try (MockedConstruction<HandlerThread> mockedThread = mockConstruction(
+                HandlerThread.class,
+                (mock, context) -> {
+                    when(mock.getLooper()).thenReturn(null);
+                    when(mock.isAlive()).thenReturn(false);
+                })) {
+
+            locationManager.startLocationUpdates();
+
+            java.lang.reflect.Field field = HyBidLocationManager.class.getDeclaredField("mLocationThread");
+            field.setAccessible(true);
+            Object value = field.get(locationManager);
+
+            // The dead/never-prepared thread reference must not linger - otherwise a
+            // later startLocationUpdates() call would wrongly think updates are already
+            // running (mLocationThread != null && mLocationThread.isAlive()).
+            assertNull(value);
+        }
+    }
+
+    @Test
+    public void testConcurrentStartAndStopLocationUpdates_doesNotCrash() throws Exception {
+        shadowApplication.grantPermissions(Manifest.permission.ACCESS_COARSE_LOCATION);
+        shadowLocationManager.setProviderEnabled(LocationManager.NETWORK_PROVIDER, true);
+
+        final int threadCount = 10;
+        final int iterationsPerThread = 10;
+        final AtomicReference<Throwable> failure = new AtomicReference<>();
+        final CountDownLatch startLatch = new CountDownLatch(1);
+
+        // Catches uncaught exceptions from the location HandlerThread itself (e.g. via
+        // mStopUpdatesRunnable), not just the executor threads below; restored in the
+        // finally so it never leaks into other tests.
+        Thread.UncaughtExceptionHandler originalHandler = Thread.getDefaultUncaughtExceptionHandler();
+        ExecutorService executor = null;
+        try {
+            Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+                failure.compareAndSet(null, throwable);
+                if (originalHandler != null) {
+                    originalHandler.uncaughtException(thread, throwable);
+                }
+            });
+
+            executor = Executors.newFixedThreadPool(threadCount);
+            List<Future<?>> futures = new ArrayList<>();
+
+            for (int i = 0; i < threadCount; i++) {
+                final boolean startFirst = i % 2 == 0;
+                futures.add(executor.submit(() -> {
+                    try {
+                        startLatch.await();
+                        for (int j = 0; j < iterationsPerThread; j++) {
+                            if (startFirst) {
+                                locationManager.startLocationUpdates();
+                                locationManager.stopLocationUpdates();
+                            } else {
+                                locationManager.stopLocationUpdates();
+                                locationManager.startLocationUpdates();
+                            }
+                        }
+                    } catch (Throwable t) {
+                        failure.compareAndSet(null, t);
+                    }
+                }));
+            }
+
+            startLatch.countDown();
+            for (Future<?> future : futures) {
+                future.get(20, TimeUnit.SECONDS);
+            }
+        } finally {
+            if (executor != null) {
+                executor.shutdownNow();
+            }
+            Thread.setDefaultUncaughtExceptionHandler(originalHandler);
+            locationManager.stopLocationUpdates();
+        }
+        // Before the VMA-1510 fix, racing start/stop calls on the shared mLocationThread
+        // field could hand a not-yet-ready (or already-quit) HandlerThread's Looper to a
+        // new Handler, throwing an NPE on a background thread.
+        assertNull("Concurrent start/stop should not throw", failure.get());
     }
 
     @Test

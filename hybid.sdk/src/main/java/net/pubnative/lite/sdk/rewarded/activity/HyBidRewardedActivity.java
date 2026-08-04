@@ -264,6 +264,10 @@ public abstract class HyBidRewardedActivity extends Activity implements Rewarded
 
     @Override
     protected void onDestroy() {
+        // Evict the cached ad only on a genuine finish, not on re-creation.
+        if (mViewModel != null) {
+            mViewModel.onActivityDestroyed(isFinishing());
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && mOnBackInvokedCallback != null) {
             getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mOnBackInvokedCallback);
         }

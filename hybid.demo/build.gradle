@@ -42,6 +42,35 @@ android {
             }
             buildConfigField "String", "BASE_URL", "\"https://api.pubnative.net/\""
         }
+        // CI-only: a minified (R8/Proguard-ON) build that is DEBUG-SIGNED — so it
+        // installs on the lab device without a release keystore, yet applies the
+        // same rules as `release` (lite.sdk.pro + the SDK modules' consumer
+        // keep-rules). Purpose: give a regression suite a target that exercises
+        // the minified app so missing/incorrect keep-rules (which break real
+        // integrators who minify) surface — something the debug build never can.
+        // NOTE: this repo only DEFINES the variant; nothing here assembles it.
+        // Building/running `assembleMinified` is wired externally (the
+        // automation-tests regression campaign), not in this repo's CI yet.
+        // Same applicationId as debug, so the Appium suite targets it unchanged.
+        // `initWith debug` inherits debug signing/debuggable; `matchingFallbacks`
+        // lets library modules (hybid.sdk, adapters) resolve a variant for it.
+        // shrinkResources stays OFF to keep the signal on CODE keep-rules (the
+        // SDK concern) and avoid resource-stripping false positives; flip to true
+        // for full production parity.
+        minified {
+            initWith debug
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'lite.sdk.pro'
+            matchingFallbacks = ['release', 'debug']
+            buildConfigField "String", "BASE_URL", "\"https://api.pubnative.net/\""
+            // minifyEnabled makes the Crashlytics plugin register a mapping-file
+            // upload task in `assembleMinified`; disable it so the nightly build
+            // needs no Firebase credentials/network and can't fail on upload.
+            firebaseCrashlytics {
+                mappingFileUploadEnabled false
+            }
+        }
     }
 
     compileOptions {

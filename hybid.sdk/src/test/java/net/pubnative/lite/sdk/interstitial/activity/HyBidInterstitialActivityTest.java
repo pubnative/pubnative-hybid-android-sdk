@@ -7,6 +7,7 @@ package net.pubnative.lite.sdk.interstitial.activity;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 
@@ -78,12 +79,17 @@ public class HyBidInterstitialActivityTest {
         activity = activityController.get();
     }
 
-    @Test
-    public void onCreate_shouldCreateView() {
+    private Intent createTestIntent() {
         Context context = Robolectric.buildActivity(Activity.class).create().get();
         Intent intent = new Intent(context, TestInterstitialActivity.class);
         intent.putExtra(HyBidInterstitialActivity.EXTRA_BROADCAST_ID, broadcastIdentifier);
         intent.putExtra(HyBidInterstitialActivity.EXTRA_ZONE_ID, "2");
+        return intent;
+    }
+
+    @Test
+    public void onCreate_shouldCreateView() {
+        Intent intent = createTestIntent();
 
         subject = Robolectric.buildActivity(TestInterstitialActivity.class, intent)
                 .create().get();
@@ -94,10 +100,7 @@ public class HyBidInterstitialActivityTest {
 
     @Test
     public void onDestroy_shouldCleanUpContentView() {
-        Context context = Robolectric.buildActivity(Activity.class).create().get();
-        Intent intent = new Intent(context, TestInterstitialActivity.class);
-        intent.putExtra(HyBidInterstitialActivity.EXTRA_BROADCAST_ID, broadcastIdentifier);
-        intent.putExtra(HyBidInterstitialActivity.EXTRA_ZONE_ID, "2");
+        Intent intent = createTestIntent();
 
         subject = Robolectric.buildActivity(TestInterstitialActivity.class, intent)
                 .create().destroy().get();
@@ -106,11 +109,44 @@ public class HyBidInterstitialActivityTest {
     }
 
     @Test
+    public void onDestroy_withViewModel_callsOnActivityDestroyed() {
+        Intent intent = createTestIntent();
+
+        ActivityController<TestInterstitialActivity> controller =
+                Robolectric.buildActivity(TestInterstitialActivity.class, intent);
+        TestInterstitialActivity activity = controller.create().get();
+
+        // Inject mock ViewModel after creation
+        activity.setMockViewModel(mockViewModel);
+
+        // Destroy the activity - this should call onActivityDestroyed on the ViewModel
+        controller.destroy();
+
+        // Verify onActivityDestroyed was called with isFinishing parameter
+        verify(mockViewModel).onActivityDestroyed(anyBoolean());
+    }
+
+    @Test
+    public void onDestroy_withNullViewModel_doesNotCrash() {
+        Intent intent = createTestIntent();
+
+        ActivityController<TestInterstitialActivity> controller =
+                Robolectric.buildActivity(TestInterstitialActivity.class, intent);
+        TestInterstitialActivity activity = controller.create().get();
+
+        // Set ViewModel to null
+        activity.setMockViewModel(null);
+
+        // Destroy should not crash even with null ViewModel
+        controller.destroy();
+
+        // Should not throw exception
+        Assert.assertEquals(0, getContentView(activity).getChildCount());
+    }
+
+    @Test
     public void getBroadcastIdentifier_shouldReturnBroadcastIdFromIntent() {
-        Context context = Robolectric.buildActivity(Activity.class).create().get();
-        Intent intent = new Intent(context, TestInterstitialActivity.class);
-        intent.putExtra(HyBidInterstitialActivity.EXTRA_BROADCAST_ID, broadcastIdentifier);
-        intent.putExtra(HyBidInterstitialActivity.EXTRA_ZONE_ID, "2");
+        Intent intent = createTestIntent();
 
         subject = Robolectric.buildActivity(TestInterstitialActivity.class, intent)
                 .create().get();
@@ -119,10 +155,7 @@ public class HyBidInterstitialActivityTest {
 
     @Test
     public void applyWindowInsets_shouldSetBottomPadding() {
-        Context context = Robolectric.buildActivity(Activity.class).create().get();
-        Intent intent = new Intent(context, TestInterstitialActivity.class);
-        intent.putExtra(HyBidInterstitialActivity.EXTRA_BROADCAST_ID, broadcastIdentifier);
-        intent.putExtra(HyBidInterstitialActivity.EXTRA_ZONE_ID, "2");
+        Intent intent = createTestIntent();
 
         subject = Robolectric.buildActivity(TestInterstitialActivity.class, intent)
                 .create().get();
@@ -195,10 +228,7 @@ public class HyBidInterstitialActivityTest {
 
     @Test
     public void testAddWatermarkView() {
-        Context context = Robolectric.buildActivity(Activity.class).create().get();
-        Intent intent = new Intent(context, TestInterstitialActivity.class);
-        intent.putExtra(HyBidInterstitialActivity.EXTRA_BROADCAST_ID, broadcastIdentifier);
-        intent.putExtra(HyBidInterstitialActivity.EXTRA_ZONE_ID, "2");
+        Intent intent = createTestIntent();
 
         HyBidInterstitialActivity subject = Robolectric.buildActivity(TestInterstitialActivity.class, intent)
                 .create().get();

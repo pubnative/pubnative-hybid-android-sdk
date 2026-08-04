@@ -12,6 +12,7 @@ import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 
+import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.utils.Logger;
 
 import java.io.ByteArrayOutputStream;
@@ -99,15 +100,20 @@ public class PNHttpClient {
                                    final boolean shouldReturnOnMainThread,
                                    final boolean shouldRetryIfFail,
                                    final Listener listener) {
-        NetworkInfo networkInfo = getActiveNetworkInfo(context);
-        if (networkInfo == null || !networkInfo.isConnected()
-                || (networkInfo.getType() != ConnectivityManager.TYPE_WIFI && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE)) {
-            if (listener != null) {
-                listener.onFailure(new Exception("{\"status\": \"error\", \"error_message\": \"Unable to connect to URL. No network connection.\"}"));
-            }
-        } else {
-            try {
-                ApiExecutor.getInstance().execute(() -> {
+        try {
+            ApiExecutor.getInstance().execute(() -> {
+                NetworkInfo networkInfo = getActiveNetworkInfo(context);
+                if (networkInfo == null || !networkInfo.isConnected()
+                        || (networkInfo.getType() != ConnectivityManager.TYPE_WIFI && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE)) {
+                    if (listener != null) {
+                        Exception noConnectionException = new Exception("{\"status\": \"error\", \"error_message\": \"Unable to connect to URL. No network connection.\"}");
+                        if (shouldReturnOnMainThread) {
+                            sUiHandler.post(() -> listener.onFailure(noConnectionException));
+                        } else {
+                            listener.onFailure(noConnectionException);
+                        }
+                    }
+                } else {
                     final Response response = sendRequest(url, headers, postBody);
                     if (response.exception != null) {
                         if (shouldRetryIfFail && !TextUtils.isEmpty(url)) {
@@ -139,13 +145,24 @@ public class PNHttpClient {
                         }
                     }
                     if (listener != null) {
-                        listener.onFinally(url, response.responseCode);
+                        if (shouldReturnOnMainThread) {
+                            sUiHandler.post(() -> listener.onFinally(url, response.responseCode));
+                        } else {
+                            listener.onFinally(url, response.responseCode);
+                        }
                     }
                     performPendingRequests(context);
-                });
-            } catch (RejectedExecutionException exception) {
-                Logger.e(TAG, url, exception);
-                listener.onFailure(new Exception("{\"status\": \"error\", \"error_message\": \"Unable to connect to URL. Too many requests.\"}"));
+                }
+            });
+        } catch (RejectedExecutionException exception) {
+            Logger.e(TAG, url, exception);
+            if (listener != null) {
+                Exception tooManyRequestsException = new Exception("{\"status\": \"error\", \"error_message\": \"Unable to connect to URL. Too many requests.\"}");
+                if (shouldReturnOnMainThread) {
+                    sUiHandler.post(() -> listener.onFailure(tooManyRequestsException));
+                } else {
+                    listener.onFailure(tooManyRequestsException);
+                }
             }
         }
     }
@@ -224,8 +241,20 @@ public class PNHttpClient {
             return null;
         }
 
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        return connectivityManager.getActiveNetworkInfo();
+        try {
+            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (connectivityManager == null) {
+                return null;
+            }
+            return connectivityManager.getActiveNetworkInfo();
+        } catch (SecurityException e) {
+            // Don't spam exception reporting for missing permission.
+            Logger.e(TAG, "Missing ACCESS_NETWORK_STATE permission", e);
+            return null;
+        } catch (Exception e) {
+            HyBid.reportException(e);
+            return null;
+        }
     }
 
     private static void performPendingRequests(Context context) {
@@ -246,11 +275,11 @@ public class PNHttpClient {
                                                        final PendingRequest pendingRequest) {
         if (pendingRequest != null) {
             if (pendingRequest.shouldRetry()) {
-                NetworkInfo networkInfo = getActiveNetworkInfo(context);
-                if (networkInfo != null && networkInfo.isConnected()
-                        && (networkInfo.getType() == ConnectivityManager.TYPE_WIFI || networkInfo.getType() == ConnectivityManager.TYPE_MOBILE)) {
-                    try {
-                        ApiExecutor.getInstance().execute(() -> {
+                try {
+                    ApiExecutor.getInstance().execute(() -> {
+                        NetworkInfo networkInfo = getActiveNetworkInfo(context);
+                        if (networkInfo != null && networkInfo.isConnected()
+                                && (networkInfo.getType() == ConnectivityManager.TYPE_WIFI || networkInfo.getType() == ConnectivityManager.TYPE_MOBILE)) {
                             pendingRequest.countRetry();
                             final Response response = sendRequest(pendingRequest.getUrl(), pendingRequest.getHeaders(), pendingRequest.getPostBody());
                             if (response.exception != null
@@ -258,10 +287,13 @@ public class PNHttpClient {
                                     && !TextUtils.isEmpty(pendingRequest.getUrl())) {
                                 sPendingRequests.add(pendingRequest);
                             }
-                        });
-                    } catch (RejectedExecutionException exception) {
-                        Logger.e(TAG, pendingRequest.getUrl(), exception);
-                    }
+                        } else {
+                            sPendingRequests.add(pendingRequest);
+                        }
+                    });
+                } catch (RejectedExecutionException exception) {
+                    Logger.e(TAG, pendingRequest.getUrl(), exception);
+                    sPendingRequests.add(pendingRequest);
                 }
             } else {
                 pendingRequest.countAttempt();

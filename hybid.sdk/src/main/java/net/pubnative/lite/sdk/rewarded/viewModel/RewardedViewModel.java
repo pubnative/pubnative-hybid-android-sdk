@@ -135,9 +135,17 @@ public abstract class RewardedViewModel extends BaseViewModel implements PNAPICo
         if (mAd == null) {
             synchronized (this) {
                 if (HyBid.getAdCache() != null) {
-                    mAd = HyBid.getAdCache().remove(mZoneId);
+                    // Peek, don't consume — the entry survives activity re-creation.
+                    mAd = HyBid.getAdCache().inspect(mZoneId);
                 }
             }
+        }
+    }
+
+    // Evict only on a genuine finish; a config-change re-creation keeps the entry.
+    public void onActivityDestroyed(boolean isFinishing) {
+        if (isFinishing && !TextUtils.isEmpty(mZoneId) && HyBid.getAdCache() != null) {
+            HyBid.getAdCache().remove(mZoneId);
         }
     }
 

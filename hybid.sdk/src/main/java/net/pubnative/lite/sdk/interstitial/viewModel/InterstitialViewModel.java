@@ -87,9 +87,17 @@ public abstract class InterstitialViewModel extends BaseViewModel implements PNA
         if (mAd == null) {
             synchronized (this) {
                 if (HyBid.getAdCache() != null) {
-                    mAd = HyBid.getAdCache().remove(mZoneId);
+                    // Non-consuming read so re-creation / re-entrant fetches still find the ad.
+                    mAd = HyBid.getAdCache().inspect(mZoneId);
                 }
             }
+        }
+    }
+
+    // Only evict when truly finishing — recreation must still find this via fetchAd().
+    public void onActivityDestroyed(boolean isFinishing) {
+        if (isFinishing && !TextUtils.isEmpty(mZoneId) && HyBid.getAdCache() != null) {
+            HyBid.getAdCache().remove(mZoneId);
         }
     }
 

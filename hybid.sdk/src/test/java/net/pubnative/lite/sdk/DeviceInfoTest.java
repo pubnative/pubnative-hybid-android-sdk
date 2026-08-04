@@ -6,12 +6,14 @@ package net.pubnative.lite.sdk;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -23,6 +25,8 @@ import static org.mockito.Mockito.when;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -30,6 +34,7 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.BatteryManager;
 import android.os.Build;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
@@ -55,6 +60,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -647,6 +657,56 @@ public class DeviceInfoTest {
     }
 
     @Test
+    public void isBatteryCharging_whenCharging_returnsOne() {
+        Intent chargingIntent = mock(Intent.class);
+        when(chargingIntent.getIntExtra(BatteryManager.EXTRA_STATUS, -1))
+                .thenReturn(BatteryManager.BATTERY_STATUS_CHARGING);
+        when(mMockContext.registerReceiver(isNull(), any(IntentFilter.class))).thenReturn(chargingIntent);
+
+        assertEquals(Integer.valueOf(1), mDeviceInfo.isBatteryCharging());
+    }
+
+    @Test
+    public void isBatteryCharging_whenNotCharging_returnsZero() {
+        Intent dischargingIntent = mock(Intent.class);
+        when(dischargingIntent.getIntExtra(BatteryManager.EXTRA_STATUS, -1))
+                .thenReturn(BatteryManager.BATTERY_STATUS_DISCHARGING);
+        when(mMockContext.registerReceiver(isNull(), any(IntentFilter.class))).thenReturn(dischargingIntent);
+
+        assertEquals(Integer.valueOf(0), mDeviceInfo.isBatteryCharging());
+    }
+
+    @Test
+    public void isBatteryCharging_withNullStickyIntent_returnsZero() {
+        when(mMockContext.registerReceiver(isNull(), any(IntentFilter.class))).thenReturn(null);
+
+        assertEquals(Integer.valueOf(0), mDeviceInfo.isBatteryCharging());
+    }
+
+    @Test
+    public void isBatteryCharging_withNullContext_returnsZero() throws Exception {
+        setField(mDeviceInfo, "mContext", null);
+
+        assertEquals(Integer.valueOf(0), mDeviceInfo.isBatteryCharging());
+    }
+
+    @Test
+    public void isBatteryCharging_reflectsCurrentStateEachCall() {
+        Intent chargingIntent = mock(Intent.class);
+        when(chargingIntent.getIntExtra(BatteryManager.EXTRA_STATUS, -1))
+                .thenReturn(BatteryManager.BATTERY_STATUS_CHARGING);
+        Intent dischargingIntent = mock(Intent.class);
+        when(dischargingIntent.getIntExtra(BatteryManager.EXTRA_STATUS, -1))
+                .thenReturn(BatteryManager.BATTERY_STATUS_DISCHARGING);
+
+        when(mMockContext.registerReceiver(isNull(), any(IntentFilter.class))).thenReturn(chargingIntent);
+        assertEquals(Integer.valueOf(1), mDeviceInfo.isBatteryCharging());
+
+        when(mMockContext.registerReceiver(isNull(), any(IntentFilter.class))).thenReturn(dischargingIntent);
+        assertEquals(Integer.valueOf(0), mDeviceInfo.isBatteryCharging());
+    }
+
+    @Test
     public void getBatteryLevel_withNullContext_returnsNull() throws Exception {
         setField(mDeviceInfo, "mContext", null);
         assertNull(mDeviceInfo.getBatteryLevel());
@@ -714,6 +774,97 @@ public class DeviceInfoTest {
         assertNotNull(languages);
         assertEquals(1, languages.size());
         assertEquals("en-US", languages.get(0));
+    }
+
+    @Test
+    public void getInputLanguages_whenBackgroundFetchIsSlow_runsOffCallerThreadAndDoesNotBlock() throws Exception {
+        // Drain any work left over from previous tests before touching the shared static
+        // executor, so it can't interfere with (or be interfered with by) this test.
+        waitForBackgroundTasks();
+
+        // Force a cache miss so getInputLanguages() triggers fetchInputLanguages().
+        setAtomicReferenceField(mDeviceInfo, "mCachedInputLanguages", Collections.emptyList());
+
+        AtomicReference<String> callerThreadName = new AtomicReference<>();
+        AtomicReference<String> workerThreadName = new AtomicReference<>();
+        // Fires the instant the background call is entered, so we can tell it actually started.
+        CountDownLatch backgroundCallStarted = new CountDownLatch(1);
+        // Held deliberately by the test - only released once we've independently confirmed
+        // the caller thread already returned, so the background call can't finish "by
+        // accident" beforehand.
+        CountDownLatch releaseSlowCall = new CountDownLatch(1);
+
+        InputMethodInfo mockImi = mock(InputMethodInfo.class);
+        InputMethodSubtype mockSubtype = mock(InputMethodSubtype.class);
+        when(mockSubtype.getMode()).thenReturn("keyboard");
+        when(mockSubtype.getLocale()).thenReturn("en-US");
+
+        InputMethodManager mockImm = mock(InputMethodManager.class);
+        when(mMockContext.getSystemService(Context.INPUT_METHOD_SERVICE)).thenReturn(mockImm);
+        when(mockImm.getEnabledInputMethodSubtypeList(mockImi, true))
+                .thenReturn(Collections.singletonList(mockSubtype));
+        when(mockImm.getEnabledInputMethodList()).thenAnswer(invocation -> {
+            // Record which thread actually performs the slow binder call, signal that it has
+            // started, then park it here until the test explicitly releases it below -
+            // simulating the slow IME lookup that caused the ANR. This resolves to a
+            // NON-EMPTY result, so returning the pre-existing empty snapshot below can't
+            // pass by coincidence the way it would if the mock just returned an empty list.
+            workerThreadName.set(Thread.currentThread().getName());
+            backgroundCallStarted.countDown();
+            releaseSlowCall.await(5, TimeUnit.SECONDS);
+            return Collections.singletonList(mockImi);
+        });
+
+        // Invoke getInputLanguages() on its own dedicated, interruptible executor thread,
+        // distinct from both this test's thread and the DeviceInfo background executor.
+        // Running it on a third thread is what lets us tell "the caller returned" apart
+        // from "the mock was released" - if getInputLanguages() itself blocked waiting on
+        // the background task (e.g. via a stray Future#get()), this thread would still be
+        // stuck when we check below, regardless of what this test's own thread is doing. A
+        // same-thread check can't tell that case apart from a genuinely non-blocking call.
+        ExecutorService callerExecutor = Executors.newSingleThreadExecutor();
+        try {
+            Future<List<String>> callerFuture = callerExecutor.submit(() -> {
+                callerThreadName.set(Thread.currentThread().getName());
+                return mDeviceInfo.getInputLanguages();
+            });
+
+            // Wait for the background call to actually begin. This is a generous bound just
+            // to confirm the executor picked up the task - it is not asserting speed.
+            assertTrue("background fetch should have started",
+                    backgroundCallStarted.await(5, TimeUnit.SECONDS));
+
+            // The caller thread must already have returned from getInputLanguages(), even
+            // though the background call is still deliberately parked because the test
+            // hasn't released it yet. The 2s bound only needs to comfortably exceed how long
+            // a non-blocking call actually takes (microseconds). If the caller blocked
+            // instead, this throws TimeoutException and fails the test.
+            List<String> result = callerFuture.get(2, TimeUnit.SECONDS);
+            assertTrue("must return the stale snapshot instead of waiting on the slow fetch",
+                    result.isEmpty());
+        } finally {
+            // Release the mock first so the shared background executor can't be left
+            // hanging, then shut the caller executor down - shutdownNow() also attempts to
+            // interrupt it if it were ever still stuck for some other reason.
+            releaseSlowCall.countDown();
+            callerExecutor.shutdownNow();
+            assertTrue("caller executor should terminate", callerExecutor.awaitTermination(5, TimeUnit.SECONDS));
+            // Drain the shared background executor even if the test fails to avoid cross-test interference.
+            try {
+                waitForBackgroundTasks();
+            } catch (Exception ignored) {
+            }
+        }
+
+        // Verify the slow binder call never ran on the caller thread.
+        assertNotEquals("slow binder call must not run on the caller thread", callerThreadName.get(), workerThreadName.get());
+        assertTrue("slow binder call should run on the dedicated HyBid-DeviceInfo executor",
+                workerThreadName.get().startsWith("HyBid-DeviceInfo"));
+
+        // And once the (now-unblocked) fetch has actually completed, the cache reflects its real result.
+        List<String> updated = mDeviceInfo.getInputLanguages();
+        assertEquals(1, updated.size());
+        assertEquals("en-US", updated.get(0));
     }
 
     @Test
@@ -943,19 +1094,22 @@ public class DeviceInfoTest {
     }
 
     @Test
-    public void isBatteryCharging_afterUpdate_returnsUpdatedValue() {
-        // Test that updateChargingStatus is called
-        mDeviceInfo.updateChargingStatus();
-        Integer charging = mDeviceInfo.isBatteryCharging();
-        assertNotNull(charging);
-        assertTrue(charging == 0 || charging == 1);
-    }
-
-    @Test
     public void updateChargingStatus_withNullContext_doesNotThrow() throws Exception {
         setField(mDeviceInfo, "mContext", null);
         // Should not throw
         mDeviceInfo.updateChargingStatus();
+    }
+
+    @Test
+    public void updateChargingStatus_isNoOp_doesNotAffectIsBatteryCharging() throws Exception {
+        Intent chargingIntent = mock(Intent.class);
+        when(chargingIntent.getIntExtra(BatteryManager.EXTRA_STATUS, -1))
+                .thenReturn(BatteryManager.BATTERY_STATUS_CHARGING);
+        when(mMockContext.registerReceiver(isNull(), any(IntentFilter.class))).thenReturn(chargingIntent);
+
+        mDeviceInfo.updateChargingStatus();
+
+        assertEquals(Integer.valueOf(1), mDeviceInfo.isBatteryCharging());
     }
 
     @Test
@@ -1828,123 +1982,9 @@ public class DeviceInfoTest {
     }
 
     @Test
-    public void updateChargingStatus_registersReceiver() {
-        DeviceInfo deviceInfo = new DeviceInfo(mMockContext);
-        deviceInfo.updateChargingStatus();
-
-        // Verify that the method completes without exception
-        assertNotNull(deviceInfo);
-    }
-
-    @Test
-    public void updateChargingStatus_canBeCalledMultipleTimes() {
-        DeviceInfo deviceInfo = new DeviceInfo(mMockContext);
-        deviceInfo.updateChargingStatus();
-        deviceInfo.updateChargingStatus();
-        deviceInfo.updateChargingStatus();
-
-        assertNotNull(deviceInfo);
-    }
-
-    @Test
-    public void batteryStatusReceiver_doesNotUnregisterWhenNotRegistered() throws Exception {
-        DeviceInfo deviceInfo = new DeviceInfo(mMockContext);
-        
-        // Set mIsChangingReceiverRegistered to false
-        setField(deviceInfo, "mIsChangingReceiverRegistered", false);
-
-        Field receiverField = DeviceInfo.class.getDeclaredField("mBatteryStatusReceiver");
-        receiverField.setAccessible(true);
-        android.content.BroadcastReceiver receiver = (android.content.BroadcastReceiver) receiverField.get(deviceInfo);
-
-        android.content.Intent mockIntent = mock(android.content.Intent.class);
-        when(mockIntent.getIntExtra(android.os.BatteryManager.EXTRA_STATUS, -1))
-                .thenReturn(android.os.BatteryManager.BATTERY_STATUS_CHARGING);
-
-        receiver.onReceive(mMockContext, mockIntent);
-
-        // Verify charging status was updated
-        Field isChargingField = DeviceInfo.class.getDeclaredField("mIsCharging");
-        isChargingField.setAccessible(true);
-        assertTrue((Boolean) isChargingField.get(deviceInfo));
-
-        // Verify mIsChangingReceiverRegistered remains false (no unregistration attempted)
-        Field isRegisteredField = DeviceInfo.class.getDeclaredField("mIsChangingReceiverRegistered");
-        isRegisteredField.setAccessible(true);
-        assertFalse((Boolean) isRegisteredField.get(deviceInfo));
-    }
-
-
-    @Test
-    public void batteryStatusReceiver_setsFullStatusAsCharging() throws Exception {
-        DeviceInfo deviceInfo = new DeviceInfo(mMockContext);
-
-        Field receiverField = DeviceInfo.class.getDeclaredField("mBatteryStatusReceiver");
-        receiverField.setAccessible(true);
-        android.content.BroadcastReceiver receiver = (android.content.BroadcastReceiver) receiverField.get(deviceInfo);
-
-        android.content.Intent fullIntent = mock(android.content.Intent.class);
-        when(fullIntent.getIntExtra(android.os.BatteryManager.EXTRA_STATUS, -1))
-                .thenReturn(android.os.BatteryManager.BATTERY_STATUS_FULL);
-
-        receiver.onReceive(mMockContext, fullIntent);
-
-        Field isChargingField = DeviceInfo.class.getDeclaredField("mIsCharging");
-        isChargingField.setAccessible(true);
-        assertTrue((Boolean) isChargingField.get(deviceInfo));
-    }
-
-
-    @Test
-    public void updateChargingStatus_doesNotRegisterWhenAlreadyRegistered() throws Exception {
-        DeviceInfo deviceInfo = new DeviceInfo(mMockContext);
-        
-        deviceInfo.updateChargingStatus();
-        setField(deviceInfo, "mIsChangingReceiverRegistered", true);
-        
-        deviceInfo.updateChargingStatus();
-        
-        Field isRegisteredField = DeviceInfo.class.getDeclaredField("mIsChangingReceiverRegistered");
-        isRegisteredField.setAccessible(true);
-        assertTrue((Boolean) isRegisteredField.get(deviceInfo));
-    }
-
-    @Test
-    public void batteryStatusReceiver_updatesChargingStatusCorrectly() throws Exception {
-        DeviceInfo deviceInfo = new DeviceInfo(mMockContext);
-
-        Field receiverField = DeviceInfo.class.getDeclaredField("mBatteryStatusReceiver");
-        receiverField.setAccessible(true);
-        android.content.BroadcastReceiver receiver = (android.content.BroadcastReceiver) receiverField.get(deviceInfo);
-
-        setField(deviceInfo, "mIsChangingReceiverRegistered", false);
-
-        // Test CHARGING status
-        android.content.Intent chargingIntent = mock(android.content.Intent.class);
-        when(chargingIntent.getIntExtra(android.os.BatteryManager.EXTRA_STATUS, -1))
-                .thenReturn(android.os.BatteryManager.BATTERY_STATUS_CHARGING);
-
-        receiver.onReceive(mMockContext, chargingIntent);
-
-        Field isChargingField = DeviceInfo.class.getDeclaredField("mIsCharging");
-        isChargingField.setAccessible(true);
-        assertTrue((Boolean) isChargingField.get(deviceInfo));
-
-        // Test DISCHARGING status
-        android.content.Intent dischargingIntent = mock(android.content.Intent.class);
-        when(dischargingIntent.getIntExtra(android.os.BatteryManager.EXTRA_STATUS, -1))
-                .thenReturn(android.os.BatteryManager.BATTERY_STATUS_DISCHARGING);
-
-        receiver.onReceive(mMockContext, dischargingIntent);
-
-        assertFalse((Boolean) isChargingField.get(deviceInfo));
-    }
-
-    @Test
     public void initialize_performsStandardInitialization() throws Exception {
         waitForBackgroundTasks();
         DeviceInfo.Listener mockListener = mock(DeviceInfo.Listener.class);
-        setField(mDeviceInfo, "mIsChangingReceiverRegistered", false);
 
         Field uapField = DeviceInfo.class.getDeclaredField("mUserAgentProvider");
         uapField.setAccessible(true);
@@ -1959,11 +1999,6 @@ public class DeviceInfoTest {
 
         // Verify UserAgentProvider initialized
         verify(mockUap).initialise(mMockContext);
-
-        // Verify Charging status receiver registered
-        Field isRegisteredField = DeviceInfo.class.getDeclaredField("mIsChangingReceiverRegistered");
-        isRegisteredField.setAccessible(true);
-        assertTrue((Boolean) isRegisteredField.get(mDeviceInfo));
     }
 
     @Test
