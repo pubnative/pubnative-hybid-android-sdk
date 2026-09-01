@@ -4,7 +4,6 @@
 //
 package net.pubnative.lite.sdk.views;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.util.AttributeSet;
 
@@ -27,7 +26,6 @@ public class HyBidBannerAdView extends HyBidAdView {
         super(context, attrs, defStyleAttr);
     }
 
-    @TargetApi(21)
     public HyBidBannerAdView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }

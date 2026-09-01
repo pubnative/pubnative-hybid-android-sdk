@@ -93,6 +93,58 @@ public class HyBidViewabilityNativeVideoAdSessionTest {
     }
 
     @Test
+    public void testFireLoaded_nonRewardedWithSkipOffset_shouldFireSkippableMedia() {
+        // A non-rewarded video with a valid skip offset (> -1) is genuinely skippable.
+        HyBidViewabilityNativeVideoAdSession skippableSession =
+                new HyBidViewabilityNativeVideoAdSession(mockViewabilityManager, 5);
+        skippableSession.initAdSession(mock(View.class), Collections.emptyList());
+
+        Object skippableProps = new Object();
+        when(mockViewabilityManager.createVastPropertiesForSkippableMedia(5)).thenReturn(skippableProps);
+
+        skippableSession.fireLoaded();
+
+        verify(mockViewabilityManager).createVastPropertiesForSkippableMedia(5);
+        verify(mockViewabilityManager, never()).createVastPropertiesForNonSkippableMedia();
+        verify(mockViewabilityManager).fireEventProperties(eq(mockAdEvents), eq(skippableProps));
+    }
+
+    @Test
+    public void testFireLoaded_rewardedWithSkipOffset_shouldStillFireNonSkippableMedia() {
+        // Rewarded ads must always be reported as non-skippable, even when a valid skip
+        // offset (> -1) is present. This is the fix for the IAB rewarded skippable finding.
+        HyBidViewabilityNativeVideoAdSession rewardedSession =
+                new HyBidViewabilityNativeVideoAdSession(mockViewabilityManager, 5);
+        rewardedSession.setRewarded(true);
+        rewardedSession.initAdSession(mock(View.class), Collections.emptyList());
+
+        Object nonSkippableProps = new Object();
+        when(mockViewabilityManager.createVastPropertiesForNonSkippableMedia()).thenReturn(nonSkippableProps);
+
+        rewardedSession.fireLoaded();
+
+        verify(mockViewabilityManager).createVastPropertiesForNonSkippableMedia();
+        verify(mockViewabilityManager, never()).createVastPropertiesForSkippableMedia(any());
+        verify(mockViewabilityManager).fireEventProperties(eq(mockAdEvents), eq(nonSkippableProps));
+    }
+
+    @Test
+    public void testFireLoaded_rewardedWithoutSkipOffset_shouldFireNonSkippableMedia() {
+        HyBidViewabilityNativeVideoAdSession rewardedSession =
+                new HyBidViewabilityNativeVideoAdSession(mockViewabilityManager, -1);
+        rewardedSession.setRewarded(true);
+        rewardedSession.initAdSession(mock(View.class), Collections.emptyList());
+
+        Object nonSkippableProps = new Object();
+        when(mockViewabilityManager.createVastPropertiesForNonSkippableMedia()).thenReturn(nonSkippableProps);
+
+        rewardedSession.fireLoaded();
+
+        verify(mockViewabilityManager).createVastPropertiesForNonSkippableMedia();
+        verify(mockViewabilityManager, never()).createVastPropertiesForSkippableMedia(any());
+    }
+
+    @Test
     public void testFireStart_shouldFireMediaEvents_onlyOnce() {
         adSession.initAdSession(mock(View.class), Collections.emptyList());
 

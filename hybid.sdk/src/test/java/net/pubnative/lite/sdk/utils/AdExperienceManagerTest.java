@@ -13,8 +13,33 @@ import static org.junit.Assert.*;
 public class AdExperienceManagerTest {
     // isBrandAd tests
     @Test
-    public void testIsBrandAd_True() {
+    public void testIsBrandAd_True_VAST_INTERSTITIAL() {
         assertTrue(AdExperienceManager.isBrandAd(ApiAssetGroupType.VAST_INTERSTITIAL, AdExperience.BRAND));
+    }
+
+    @Test
+    public void testIsBrandAd_True_MRAID_320x480() {
+        assertTrue(AdExperienceManager.isBrandAd(ApiAssetGroupType.MRAID_320x480, AdExperience.BRAND));
+    }
+
+    @Test
+    public void testIsBrandAd_True_MRAID_480x320() {
+        assertTrue(AdExperienceManager.isBrandAd(ApiAssetGroupType.MRAID_480x320, AdExperience.BRAND));
+    }
+
+    @Test
+    public void testIsBrandAd_True_MRAID_768x1024() {
+        assertTrue(AdExperienceManager.isBrandAd(ApiAssetGroupType.MRAID_768x1024, AdExperience.BRAND));
+    }
+
+    @Test
+    public void testIsBrandAd_True_MRAID_1024x768() {
+        assertTrue(AdExperienceManager.isBrandAd(ApiAssetGroupType.MRAID_1024x768, AdExperience.BRAND));
+    }
+
+    @Test
+    public void testIsBrandAd_True_MRAID_300x600() {
+        assertTrue(AdExperienceManager.isBrandAd(ApiAssetGroupType.MRAID_300x600, AdExperience.BRAND));
     }
 
     @Test
@@ -29,7 +54,7 @@ public class AdExperienceManagerTest {
 
     @Test
     public void testIsBrandAd_False_WrongAssetGroup() {
-        assertFalse(AdExperienceManager.isBrandAd(ApiAssetGroupType.MRAID_320x480, AdExperience.BRAND));
+        assertFalse(AdExperienceManager.isBrandAd(4, AdExperience.BRAND)); // 4 is not compatible
     }
 
     @Test(expected = NullPointerException.class)

@@ -5,7 +5,6 @@
 package net.pubnative.lite.sdk.models;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.text.TextUtils;
@@ -22,6 +21,11 @@ import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.URLValidator;
 import net.pubnative.lite.sdk.utils.UrlHandler;
+import net.pubnative.lite.sdk.viewability.FriendlyObstructionReasonConstants;
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeDisplayAdSession;
+import net.pubnative.lite.sdk.viewability.baseom.BaseFriendlyObstructionPurpose;
+import net.pubnative.lite.sdk.viewability.baseom.BaseVerificationScriptResource;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.views.PNBeaconWebView;
 import net.pubnative.lite.sdk.visibility.ImpressionManager;
@@ -29,12 +33,19 @@ import net.pubnative.lite.sdk.visibility.ImpressionTracker;
 import net.pubnative.lite.sdk.visibility.TrackingManager;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoView.ContentInfoListener {
     private static final String TAG = NativeAd.class.getSimpleName();
     private ReportingController mReportingController;
+
+    // Viewability tracking
+    private HyBidViewabilityNativeDisplayAdSession mViewabilityAdSession;
+    private final List<HyBidViewabilityFriendlyObstruction> mViewabilityFriendlyObstructions = new ArrayList<>();
+    private View mContentInfoView;
+    private boolean mViewabilitySessionInitialized;
 
     /**
      * Interface definition for callbacks to be invoked when impression confirmed/failed, ad clicked/clickfailed
@@ -69,11 +80,19 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
     public NativeAd() {
         this.mAd = null;
         mReportingController = HyBid.getReportingController();
+        initViewabilitySession();
     }
 
     public NativeAd(Ad ad) {
         this.mAd = ad;
         mReportingController = HyBid.getReportingController();
+        initViewabilitySession();
+    }
+
+    private void initViewabilitySession() {
+        if (mViewabilityAdSession == null && HyBid.getViewabilityManager() != null) {
+            mViewabilityAdSession = new HyBidViewabilityNativeDisplayAdSession(HyBid.getViewabilityManager());
+        }
     }
 
     /**
@@ -219,7 +238,10 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
     }
 
     public View getContentInfo(Context context) {
-        return mAd != null ? mAd.getContentInfo(context, this) : null;
+        if (mContentInfoView == null && mAd != null) {
+            mContentInfoView = mAd.getContentInfo(context, this);
+        }
+        return mContentInfoView;
     }
 
     public String getImpressionId() {
@@ -290,8 +312,51 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
             Log.i(TAG, "impression is already confirmed, dropping impression tracking");
         } else {
             mAdView = view;
+            initViewabilityAdSession(view);
             ImpressionManager.startTrackingView(view, mAd.getImpressionMinVisibleTime(), mAd.getImpressionVisiblePercent(), this);
         }
+    }
+
+    private void initViewabilityAdSession(View adView) {
+        initViewabilitySession();
+
+        if (mViewabilityAdSession == null || adView == null || mViewabilitySessionInitialized) {
+            return;
+        }
+
+        try {
+            List<BaseVerificationScriptResource> verificationScriptResources = new ArrayList<>();
+            mViewabilityAdSession.initAdSession(adView, verificationScriptResources);
+
+            if (mContentInfoView != null) {
+                addViewabilityFriendlyObstruction(
+                        mContentInfoView,
+                        BaseFriendlyObstructionPurpose.OTHER,
+                        FriendlyObstructionReasonConstants.CONTENT_INFO_OBSTRUCTION_REASON
+                );
+            }
+
+            // Apply all registered friendly obstructions
+            for (HyBidViewabilityFriendlyObstruction obstruction : mViewabilityFriendlyObstructions) {
+                mViewabilityAdSession.addFriendlyObstruction(
+                        obstruction.getView(),
+                        obstruction.getPurpose(),
+                        obstruction.getReason()
+                );
+            }
+
+            mViewabilityAdSession.fireLoaded();
+            mViewabilitySessionInitialized = true;
+        } catch (Exception e) {
+            Logger.e(TAG, "Error initializing viewability ad session", e);
+        }
+    }
+
+    private void addViewabilityFriendlyObstruction(View view, BaseFriendlyObstructionPurpose purpose, String reason) {
+        if (view == null) {
+            return;
+        }
+        mViewabilityFriendlyObstructions.add(new HyBidViewabilityFriendlyObstruction(view, purpose, reason));
     }
 
     public void startTrackingClicks(View clickableView) {
@@ -311,10 +376,20 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
     public void stopTracking() {
         stopTrackingImpression();
         stopTrackingClicks();
+        stopViewabilitySession();
     }
 
     private void stopTrackingImpression() {
         ImpressionManager.stopTrackingAll(this);
+    }
+
+    private void stopViewabilitySession() {
+        if (mViewabilityAdSession != null) {
+            mViewabilityAdSession.stopAdSession();
+        }
+        mContentInfoView = null;
+        mViewabilityFriendlyObstructions.clear();
+        mViewabilitySessionInitialized = false;
     }
 
     private void stopTrackingClicks() {
@@ -404,6 +479,11 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
 
     @Override
     public void onImpression(View visibleView) {
+        // Fire OM impression event
+        if (mViewabilityAdSession != null) {
+            mViewabilityAdSession.fireImpression();
+        }
+
         confirmImpressionBeacons(visibleView.getContext());
         invokeOnImpression(visibleView);
     }

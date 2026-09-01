@@ -3,9 +3,12 @@ package net.pubnative.lite.sdk.rewarded.activity;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 
 import android.app.Activity;
 import android.content.Context;
@@ -16,6 +19,7 @@ import android.widget.FrameLayout;
 
 import androidx.core.view.WindowInsetsCompat;
 
+import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
 import net.pubnative.lite.sdk.rewarded.viewModel.RewardedViewModel;
 import net.pubnative.lite.sdk.vpaid.HyBidActivityInteractor;
 
@@ -47,6 +51,7 @@ public class HyBidRewardedActivityTest {
     private ActivityController<TestHyBidRewardedActivity> activityController;
 
     public static class TestHyBidRewardedActivity extends HyBidRewardedActivity {
+        private boolean isChangingConfigurationsOverride = false;
 
         public void setMockViewModel(RewardedViewModel viewModel) {
             this.mViewModel = viewModel;
@@ -54,6 +59,19 @@ public class HyBidRewardedActivityTest {
 
         public void setMockInteractor(HyBidActivityInteractor interactor) {
             this.mInteractor = interactor;
+        }
+
+        public void setIsFinishingFlag(boolean value) {
+            this.mIsFinishing = value;
+        }
+
+        public void setIsChangingConfigurationsOverride(boolean value) {
+            this.isChangingConfigurationsOverride = value;
+        }
+
+        @Override
+        public boolean isChangingConfigurations() {
+            return isChangingConfigurationsOverride;
         }
 
         @Override
@@ -241,6 +259,72 @@ public class HyBidRewardedActivityTest {
 
         // Verify onActivityDestroyed was called with isFinishing parameter
         verify(mockViewModel).onActivityDestroyed(anyBoolean());
+    }
+
+    @Test
+    public void onDestroy_taskClear_rewardEligible_sendsClose() {
+        Intent intent = createTestIntent();
+
+        ActivityController<TestHyBidRewardedActivity> controller =
+                Robolectric.buildActivity(TestHyBidRewardedActivity.class, intent);
+        TestHyBidRewardedActivity activity = controller.create().get();
+        activity.setMockViewModel(mockViewModel);
+        when(mockViewModel.isRewardEligible()).thenReturn(true);
+        // Reset: onCreate() already ran finishActivity() (test intent has no cached ad).
+        activity.setIsFinishingFlag(false);
+
+        controller.destroy();
+
+        verify(mockViewModel).sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLOSE);
+        verify(mockViewModel, never()).sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLOSE_WITHOUT_REWARD);
+    }
+
+    @Test
+    public void onDestroy_taskClear_notRewardEligible_sendsCloseWithoutReward() {
+        Intent intent = createTestIntent();
+
+        ActivityController<TestHyBidRewardedActivity> controller =
+                Robolectric.buildActivity(TestHyBidRewardedActivity.class, intent);
+        TestHyBidRewardedActivity activity = controller.create().get();
+        activity.setMockViewModel(mockViewModel);
+        when(mockViewModel.isRewardEligible()).thenReturn(false);
+        activity.setIsFinishingFlag(false); // reset onCreate()'s finishActivity() side effect
+
+        controller.destroy();
+
+        verify(mockViewModel).sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLOSE_WITHOUT_REWARD);
+        verify(mockViewModel, never()).sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLOSE);
+    }
+
+    @Test
+    public void onDestroy_explicitClose_doesNotSendBroadcast() {
+        Intent intent = createTestIntent();
+
+        ActivityController<TestHyBidRewardedActivity> controller =
+                Robolectric.buildActivity(TestHyBidRewardedActivity.class, intent);
+        TestHyBidRewardedActivity activity = controller.create().get();
+        activity.setMockViewModel(mockViewModel);
+        activity.setIsFinishingFlag(true);
+
+        controller.destroy();
+
+        verify(mockViewModel, never()).sendBroadcast(any(HyBidRewardedBroadcastReceiver.Action.class));
+    }
+
+    @Test
+    public void onDestroy_configChange_doesNotSendBroadcast() {
+        Intent intent = createTestIntent();
+
+        ActivityController<TestHyBidRewardedActivity> controller =
+                Robolectric.buildActivity(TestHyBidRewardedActivity.class, intent);
+        TestHyBidRewardedActivity activity = controller.create().get();
+        activity.setMockViewModel(mockViewModel);
+        activity.setIsFinishingFlag(false); // isolate isChangingConfigurations() from onCreate()'s finishActivity()
+        activity.setIsChangingConfigurationsOverride(true);
+
+        controller.destroy();
+
+        verify(mockViewModel, never()).sendBroadcast(any(HyBidRewardedBroadcastReceiver.Action.class));
     }
 
     @Test

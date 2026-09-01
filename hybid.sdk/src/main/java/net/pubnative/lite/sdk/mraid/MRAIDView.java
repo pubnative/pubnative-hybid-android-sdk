@@ -687,8 +687,6 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
             wv.getSettings().setDomStorageEnabled(true);
             wv.getSettings().setAllowContentAccess(false);
 
-            wv.enablePlugins(true);
-
             // no zooming!
             wv.getSettings().setSupportZoom(false);
 
@@ -752,12 +750,12 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
         contentInfoAdded = false;
 
         if (mExpirationTimer != null) {
-            mExpirationTimer.onFinish();
+            mExpirationTimer.cancel();
             mExpirationTimer = null;
         }
 
         if (mNativeCloseButtonTimer != null) {
-            mNativeCloseButtonTimer.onFinish();
+            mNativeCloseButtonTimer.cancel();
             mNativeCloseButtonTimer = null;
         }
     }
@@ -2044,9 +2042,13 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
         public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
             if (request != null && request.getUrl() != null) {
                 String url = request.getUrl().toString();
-                MRAIDLog.d("hz-m shouldInterceptRequest - " + url);
+                if (MRAIDLog.isLoggable(MRAIDLog.LOG_LEVEL.debug)) {
+                    MRAIDLog.d("hz-m shouldInterceptRequest - " + url);
+                }
                 if (url.contains("mraid.js")) {
-                    MRAIDLog.d("hz-m shouldInterceptRequest - intercepting mraid - " + url);
+                    if (MRAIDLog.isLoggable(MRAIDLog.LOG_LEVEL.debug)) {
+                        MRAIDLog.d("hz-m shouldInterceptRequest - intercepting mraid - " + url);
+                    }
                     handler.post(() -> injectJavaScript(webView, "mraid.logLevel = mraid.LogLevelEnum.DEBUG;"));
                     return new WebResourceResponse("application/javascript", "UTF-8", getMraidJsStream());
                 }
@@ -2567,58 +2569,70 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
     private void showEndCard() {
         if (mEndCardView != null && mMraidDisplayMode != MraidDisplayMode.END_CARD) {
             mMraidDisplayMode = MraidDisplayMode.END_CARD;
-            mEndCardView.setEndCardViewListener(new HyBidEndCardView.EndCardViewListener() {
-                @Override
-                public void onClick(String url, Boolean isCustomEndCard, String endCardType) {
-                    wasTouched = true;
-                    if (htmlAd != null && !TextUtils.isEmpty(htmlAd.getLink())) {
-                        open(htmlAd.getLink());
-                    }
-                    if (listener != null) listener.onCustomEndCardClicked();
-                }
-
-                @Override
-                public void onSkip() {
-                }
-
-                @Override
-                public void onClose(Boolean isCustomEndCard) {
-                    if (listener != null) listener.onCustomEndCardClosed();
-                    close();
-                }
-
-                @Override
-                public void onShow(Boolean isCustomEndCard, String endCardType) {
-                    if (ctaView != null) {
-                        ctaView.setVisibility(View.GONE);
-                        ctaView.killTimer();
-                    }
-                    if (mEndCardView != null) mEndCardView.bringToFront();
-                    if (listener != null) listener.onCustomEndCardShow(endCardType);
-                }
-
-                @Override
-                public void onLoadSuccess(Boolean isCustomEndCard) {
-                    if (listener != null) {
-                        hideContentInfo(MRAIDView.this);
-                        listener.onCustomEndCardLoadSuccess();
-                    }
-                }
-
-                @Override
-                public void onLoadFail(Boolean isCustomEndCard) {
-                    if (listener != null) listener.onCustomEndCardLoadFail();
-                }
-            });
+            mEndCardView.setEndCardViewListener(createEndCardViewListener());
             mEndCardView.setSkipOffset(new SkipOffset(this.htmlAd.getEndCardCloseDelay(), true));
             mEndCardView.show(this.htmlAd.getEndCardData(), null);
-            mEndCardView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-                mEndCardView.post(() -> mEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)));
-            });
+            mEndCardView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
+                    mEndCardView.post(this::ensureEndCardMatchParent));
             mEndCardView.showCloseButton(() -> isBackClickable = true);
         } else if (mMraidDisplayMode == MraidDisplayMode.END_CARD && mEndCardView != null) {
             mEndCardView.resume();
         }
+    }
+
+    //re-apply MATCH_PARENT only when not already set; an unconditional re-apply loops requestLayout.
+    private void ensureEndCardMatchParent() {
+        ViewGroup.LayoutParams lp = mEndCardView.getLayoutParams();
+        if (lp == null || lp.width != ViewGroup.LayoutParams.MATCH_PARENT || lp.height != ViewGroup.LayoutParams.MATCH_PARENT) {
+            mEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        }
+    }
+
+    // Extracted to keep showEndCard()'s cognitive complexity low.
+    private HyBidEndCardView.EndCardViewListener createEndCardViewListener() {
+        return new HyBidEndCardView.EndCardViewListener() {
+            @Override
+            public void onClick(String url, Boolean isCustomEndCard, String endCardType) {
+                wasTouched = true;
+                if (htmlAd != null && !TextUtils.isEmpty(htmlAd.getLink())) {
+                    open(htmlAd.getLink());
+                }
+                if (listener != null) listener.onCustomEndCardClicked();
+            }
+
+            @Override
+            public void onSkip() {
+            }
+
+            @Override
+            public void onClose(Boolean isCustomEndCard) {
+                if (listener != null) listener.onCustomEndCardClosed();
+                close();
+            }
+
+            @Override
+            public void onShow(Boolean isCustomEndCard, String endCardType) {
+                if (ctaView != null) {
+                    ctaView.setVisibility(View.GONE);
+                    ctaView.killTimer();
+                }
+                if (mEndCardView != null) mEndCardView.bringToFront();
+                if (listener != null) listener.onCustomEndCardShow(endCardType);
+            }
+
+            @Override
+            public void onLoadSuccess(Boolean isCustomEndCard) {
+                if (listener != null) {
+                    hideContentInfo(MRAIDView.this);
+                    listener.onCustomEndCardLoadSuccess();
+                }
+            }
+
+            @Override
+            public void onLoadFail(Boolean isCustomEndCard) {
+                if (listener != null) listener.onCustomEndCardLoadFail();
+            }
+        };
     }
 
     private void startClickThroughTimer() {

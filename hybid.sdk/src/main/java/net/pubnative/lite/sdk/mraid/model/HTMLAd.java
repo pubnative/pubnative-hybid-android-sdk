@@ -109,7 +109,7 @@ public class HTMLAd {
 
     public boolean shouldInitEndCardView() {
         return endCardData != null && !TextUtils.isEmpty(endCardData.getContent())
-                && shouldShowCustomEndCard && ad != null && ad.isPerformanceAd();
+                && shouldShowCustomEndCard && ad != null;
     }
 
     public boolean hasLandingPage() {

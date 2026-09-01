@@ -174,10 +174,35 @@ public class HTMLAdTest {
             when(mockAd.getLink()).thenReturn("some link");
             when(mockAd.getCustomEndCard()).thenReturn(mockEndCardData);
             when(mockEndCardData.getContent()).thenReturn("some_content");
-            when(mockAd.isPerformanceAd()).thenReturn(true);
 
             HTMLAd htmlAd = new HTMLAd(mockContext, mockAd, HTMLAd.AdType.INTERSTITIAL);
 
+            assertTrue(htmlAd.shouldInitEndCardView());
+        }
+    }
+
+    @Test
+    public void shouldInitEndCardView_whenAdIsPerformance_returnsTrue() {
+        try (MockedStatic<AdEndCardManager> mockedManager = mockStatic(AdEndCardManager.class)) {
+            mockedManager.when(() -> AdEndCardManager.shouldShowCustomEndcard(mockAd)).thenReturn(true);
+            when(mockAd.getCustomEndCard()).thenReturn(mockEndCardData);
+            when(mockEndCardData.getContent()).thenReturn("some_content");
+            when(mockAd.isPerformanceAd()).thenReturn(true);
+
+            HTMLAd htmlAd = new HTMLAd(mockContext, mockAd, HTMLAd.AdType.INTERSTITIAL);
+            assertTrue(htmlAd.shouldInitEndCardView());
+        }
+    }
+
+    @Test
+    public void shouldInitEndCardView_whenAdIsBrand_returnsTrue() {
+        try (MockedStatic<AdEndCardManager> mockedManager = mockStatic(AdEndCardManager.class)) {
+            mockedManager.when(() -> AdEndCardManager.shouldShowCustomEndcard(mockAd)).thenReturn(true);
+            when(mockAd.getCustomEndCard()).thenReturn(mockEndCardData);
+            when(mockEndCardData.getContent()).thenReturn("some_content");
+            when(mockAd.isBrandAd()).thenReturn(true);
+
+            HTMLAd htmlAd = new HTMLAd(mockContext, mockAd, HTMLAd.AdType.INTERSTITIAL);
             assertTrue(htmlAd.shouldInitEndCardView());
         }
     }
@@ -188,20 +213,6 @@ public class HTMLAdTest {
             mockedManager.when(() -> AdEndCardManager.shouldShowCustomEndcard(mockAd)).thenReturn(true);
             when(mockAd.getCustomEndCard()).thenReturn(mockEndCardData);
             when(mockEndCardData.getContent()).thenReturn(""); // Empty content
-            when(mockAd.isPerformanceAd()).thenReturn(true);
-
-            HTMLAd htmlAd = new HTMLAd(mockContext, mockAd, HTMLAd.AdType.INTERSTITIAL);
-            assertFalse(htmlAd.shouldInitEndCardView());
-        }
-    }
-
-    @Test
-    public void shouldInitEndCardView_whenAdIsNotPerformance_returnsFalse() {
-        try (MockedStatic<AdEndCardManager> mockedManager = mockStatic(AdEndCardManager.class)) {
-            mockedManager.when(() -> AdEndCardManager.shouldShowCustomEndcard(mockAd)).thenReturn(true);
-            when(mockAd.getCustomEndCard()).thenReturn(mockEndCardData);
-            when(mockEndCardData.getContent()).thenReturn("some_content");
-            when(mockAd.isPerformanceAd()).thenReturn(false); // Condition to test
 
             HTMLAd htmlAd = new HTMLAd(mockContext, mockAd, HTMLAd.AdType.INTERSTITIAL);
             assertFalse(htmlAd.shouldInitEndCardView());
@@ -215,7 +226,6 @@ public class HTMLAdTest {
             when(mockAd.getLink()).thenReturn("https://example.com");
             when(mockAd.getCustomEndCard()).thenReturn(mockEndCardData);
             when(mockEndCardData.getContent()).thenReturn("some_content");
-            when(mockAd.isPerformanceAd()).thenReturn(true);
 
             HTMLAd htmlAd = new HTMLAd(mockContext, mockAd, HTMLAd.AdType.INTERSTITIAL);
 
@@ -234,7 +244,6 @@ public class HTMLAdTest {
             mockedManager.when(() -> AdEndCardManager.shouldShowCustomEndcard(mockAd)).thenReturn(true);
             when(mockAd.getLink()).thenReturn("https://example.com");
             when(mockAd.getCustomEndCard()).thenReturn(null); // Condition to test
-            when(mockAd.isPerformanceAd()).thenReturn(true);
 
             HTMLAd htmlAd = new HTMLAd(mockContext, mockAd, HTMLAd.AdType.INTERSTITIAL);
 
@@ -249,7 +258,6 @@ public class HTMLAdTest {
             when(mockAd.getLink()).thenReturn("https://example.com");
             when(mockAd.getCustomEndCard()).thenReturn(mockEndCardData);
             when(mockEndCardData.getContent()).thenReturn(""); // Condition to test
-            when(mockAd.isPerformanceAd()).thenReturn(true);
 
             HTMLAd htmlAd = new HTMLAd(mockContext, mockAd, HTMLAd.AdType.INTERSTITIAL);
 
@@ -264,7 +272,6 @@ public class HTMLAdTest {
             when(mockAd.getLink()).thenReturn("https://example.com");
             when(mockAd.getCustomEndCard()).thenReturn(mockEndCardData);
             when(mockEndCardData.getContent()).thenReturn("some_content");
-            when(mockAd.isPerformanceAd()).thenReturn(true);
 
             HTMLAd htmlAd = new HTMLAd(mockContext, mockAd, HTMLAd.AdType.INTERSTITIAL);
 
@@ -286,7 +293,6 @@ public class HTMLAdTest {
             when(mockAd.getLink()).thenReturn("https://example.com");
             when(mockAd.getCustomEndCard()).thenReturn(mockEndCardData);
             when(mockEndCardData.getContent()).thenReturn(null); // Condition to test
-            when(mockAd.isPerformanceAd()).thenReturn(true);
 
             HTMLAd htmlAd = new HTMLAd(mockContext, mockAd, HTMLAd.AdType.INTERSTITIAL);
             assertFalse(htmlAd.shouldInitEndCardView());

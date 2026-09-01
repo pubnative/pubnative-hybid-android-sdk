@@ -37,6 +37,8 @@ public abstract class BaseViewabilityManager {
 
     public abstract <T> T getNativeAdSessionConfiguration();
 
+    public abstract <T> T getNativeDisplayAdSessionConfiguration();
+
     public abstract <T> T createNativeAdSessionContext(List<BaseVerificationScriptResource> mVerificationScriptResources);
 
     public abstract <T> T getWebAdSessionConfiguration(boolean isVideoAd, T owner);

@@ -699,6 +699,10 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     }
 
     public void renderVideoTag(final String adValue, final Listener listener) {
+        cleanup();
+        mInitialLoadTime = System.currentTimeMillis();
+        mListener = listener;
+
         VastUrlParameters params = VastUrlUtils.buildParameters();
         String url = VastUrlUtils.formatURL(adValue, params);
 
@@ -713,6 +717,8 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
             public void onSuccess(String response, Map<String, List<String>> headers) {
                 if (!TextUtils.isEmpty(response)) {
                     renderCustomMarkup(response, listener);
+                } else {
+                    invokeOnLoadFailed(new HyBidError(HyBidErrorCode.INVALID_ASSET));
                 }
             }
 

@@ -5,8 +5,8 @@
 package net.pubnative.lite.sdk.utils;
 
 import static junit.framework.Assert.assertEquals;
+import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getDefaultRewardedVideoSkipOffset;
 import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getHTMLSkipOffset;
-import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getMaximumRewardedSkipOffset;
 import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getNativeCloseButtonDelay;
 import static net.pubnative.lite.sdk.utils.SkipOffsetManager.getVideoSkipOffset;
 
@@ -80,17 +80,44 @@ public class SkipOffsetManagerTest {
     }
 
     @Test
-    public void testGetRewardedSkipOffset_adParamsHasPrecedence() {
-        // This test is refactored for clarity to confirm adParams has the highest precedence.
-        Integer resultSkipOffset = getVideoSkipOffset(15, 12, 8, false, false);
-        assertEquals(Integer.valueOf(8), resultSkipOffset);
+    public void getVideoSkipOffset_whenAllValid_remoteConfigIsSmallest_returnsRemoteConfig() {
+        // Resolution is a true minimum, not first-valid-wins: adParams (20) is largest despite being checked first.
+        Integer resultSkipOffset = getVideoSkipOffset(5, 12, 20, false, false);
+        assertEquals(Integer.valueOf(5), resultSkipOffset);
     }
 
     @Test
-    public void testGetRewardedSkipOffset_remoteConfigHasPrecedenceOverPublisher() {
-        // This test confirms remoteConfig has precedence when adParams is null.
+    public void getVideoSkipOffset_whenAllValid_adParamsIsSmallest_returnsAdParams() {
+        Integer resultSkipOffset = getVideoSkipOffset(20, 12, 5, false, false);
+        assertEquals(Integer.valueOf(5), resultSkipOffset);
+    }
+
+    @Test
+    public void getVideoSkipOffset_whenAdParamsAbsent_returnsMinOfRemoteConfigAndPublisher() {
         Integer resultSkipOffset = getVideoSkipOffset(15, 12, null, false, false);
-        assertEquals(Integer.valueOf(15), resultSkipOffset);
+        assertEquals(Integer.valueOf(12), resultSkipOffset);
+    }
+
+    @Test
+    public void getVideoSkipOffset_whenAdParamsInvalid_excludedFromMinimum() {
+        // A negative adParams value must not participate in the minimum, same as if it were absent.
+        Integer resultSkipOffset = getVideoSkipOffset(20, null, -1, false, false);
+        assertEquals(Integer.valueOf(20), resultSkipOffset);
+    }
+
+    @Test
+    public void getVideoSkipOffset_whenZeroIsSmallest_returnsZero() {
+        // Guards the -1 sentinel used internally to mean "no valid value yet": a genuine 0 must not be mistaken for it.
+        Integer resultSkipOffset = getVideoSkipOffset(20, null, 0, false, false);
+        assertEquals(Integer.valueOf(0), resultSkipOffset);
+    }
+
+    @Test
+    public void getVideoSkipOffset_whenOnlyPublisherValid_returnsPublisherValue() {
+        // publisherSkipSeconds is unreachable from any current production call site, but the resolution
+        // function itself must still honour it as a valid candidate.
+        Integer resultSkipOffset = getVideoSkipOffset(null, 18, null, false, false);
+        assertEquals(Integer.valueOf(18), resultSkipOffset);
     }
 
     @Test
@@ -98,9 +125,22 @@ public class SkipOffsetManagerTest {
         Integer remoteConfigSkipOffset = null;
         Integer publisherSkipSeconds = null;
         Integer adParamsSkipSeconds = null;
-        Integer defaultRewardedSkipOffset = getMaximumRewardedSkipOffset();
+        Integer defaultRewardedSkipOffset = getDefaultRewardedVideoSkipOffset();
         Integer resultSkipOffset = getVideoSkipOffset(remoteConfigSkipOffset, publisherSkipSeconds, adParamsSkipSeconds, false, false);
         assertEquals(defaultRewardedSkipOffset, resultSkipOffset);
+    }
+
+    @Test
+    public void getVideoSkipOffset_forRewarded_negativeRemoteConfig_fallsBackToDefault() {
+        Integer resultSkipOffset = getVideoSkipOffset(-1, null, null, false, false);
+        assertEquals(Integer.valueOf(getDefaultRewardedVideoSkipOffset()), resultSkipOffset);
+    }
+
+    @Test
+    public void getVideoSkipOffset_forRewarded_remoteConfigAboveOldCap_isHonoured() {
+        Integer remoteConfigSkipOffset = 75;
+        Integer resultSkipOffset = getVideoSkipOffset(remoteConfigSkipOffset, null, null, false, false);
+        assertEquals(remoteConfigSkipOffset, resultSkipOffset);
     }
 
     @Test
@@ -120,11 +160,10 @@ public class SkipOffsetManagerTest {
     }
 
     @Test
-    public void testGetRewardedHTMLSkipOffset_remoteConfigSkipOffsetGreaterThanREWARDED_HTML_SKIP_OFFSET() {
+    public void testGetRewardedHTMLSkipOffset_remoteConfigSkipOffsetAboveOldCap_isHonoured() {
         Integer remoteConfigSkipOffset = 35;
-        Integer expectedSkipOffset = 30;
         Integer resultSkipOffset = getHTMLSkipOffset(remoteConfigSkipOffset, false);
-        assertEquals(expectedSkipOffset, resultSkipOffset);
+        assertEquals(remoteConfigSkipOffset, resultSkipOffset);
     }
 
     @Test
@@ -151,10 +190,28 @@ public class SkipOffsetManagerTest {
     }
 
     @Test
-    public void getHTMLSkipOffset_forInterstitialWithValueGreaterThanMax_returnsCappedValue() {
-        // Test the capping logic for values > 30.
+    public void getVideoSkipOffset_forInterstitial_negativeRemoteConfig_fallsBackToDefault() {
+        Integer result = getVideoSkipOffset(-1, null, null, false, true);
+        assertEquals(Integer.valueOf(15), result);
+    }
+
+    @Test
+    public void getVideoSkipOffset_forInterstitial_remoteConfigAboveOldCap_isHonoured() {
+        Integer remoteConfigSkipOffset = 90;
+        Integer result = getVideoSkipOffset(remoteConfigSkipOffset, null, null, false, true);
+        assertEquals(remoteConfigSkipOffset, result);
+    }
+
+    @Test
+    public void getVideoSkipOffset_forInterstitial_whenAdParamsAndRemoteConfigValid_returnsMinimum() {
+        Integer result = getVideoSkipOffset(25, null, 10, false, true);
+        assertEquals(Integer.valueOf(10), result);
+    }
+
+    @Test
+    public void getHTMLSkipOffset_forInterstitialWithValueAboveOldCap_isHonoured() {
         Integer result = getHTMLSkipOffset(40, true);
-        assertEquals(Integer.valueOf(30), result);
+        assertEquals(Integer.valueOf(40), result);
     }
 
     @Test
@@ -184,10 +241,9 @@ public class SkipOffsetManagerTest {
         assertEquals(Integer.valueOf(4), SkipOffsetManager.getDefaultEndcardSkipOffset());
         assertEquals(Integer.valueOf(5), SkipOffsetManager.getDefaultPCEndcardSkipOffset());
         assertEquals(Integer.valueOf(0), SkipOffsetManager.getDefaultBCEndcardSkipOffset());
-        assertEquals(Integer.valueOf(30), SkipOffsetManager.getMaximumEndcardCloseDelay());
         assertEquals(Integer.valueOf(3), SkipOffsetManager.getDefaultEndcardCloseDelay());
         assertEquals(Integer.valueOf(3), SkipOffsetManager.getDefaultPCHTMLSkipOffset());
         assertEquals(Integer.valueOf(30), SkipOffsetManager.getDefaultPCRewardedHTMLSkipOffset());
-        assertEquals(30, SkipOffsetManager.getMaximumRewardedSkipOffset());
+        assertEquals(30, SkipOffsetManager.getDefaultRewardedVideoSkipOffset());
     }
 }

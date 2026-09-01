@@ -77,6 +77,7 @@ public class PNApiClient implements ApiClient {
                 headers.put("User-Agent", userAgent);
             }
 
+            // Deliberately not retry-eligible: a delayed retry could return an ad for a placement/Activity that's since moved on.
             PNHttpClient.makeRequest(mContext, url, headers, null, new PNHttpClient.Listener() {
                 @Override
                 public void onSuccess(String response, Map<String, List<String>> headers) {

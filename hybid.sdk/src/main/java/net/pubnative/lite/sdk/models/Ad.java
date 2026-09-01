@@ -595,11 +595,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         } else {
             Integer endCardCloseDelay = getRemoteConfig(RemoteConfig.END_CARD_CLOSE_DELAY);
             if (endCardCloseDelay != null) {
-                if (endCardCloseDelay > SkipOffsetManager.getMaximumEndcardCloseDelay()) {
-                    return SkipOffsetManager.getMaximumEndcardCloseDelay();
-                } else {
-                    return endCardCloseDelay;
-                }
+                return endCardCloseDelay;
             } else {
                 return SkipOffsetManager.getDefaultEndcardCloseDelay();
             }
@@ -702,12 +698,6 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     }
 
     private Integer getSkipOffset(RemoteConfig remoteConfigSkipOffset) {
-//        Integer skipOffset = ;
-//        if (skipOffset == null || skipOffset < 0) return skipOffset;
-//
-//        if (skipOffset > 30) {
-//            return 30;
-//        }
         return getRemoteConfig(remoteConfigSkipOffset);
     }
 
@@ -864,11 +854,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     private Integer getPcHtmlSkipOffset() {
         Integer endCardCloseDelay = getRemoteConfig(RemoteConfig.PC_HTML_SKIP_OFFSET);
         if (endCardCloseDelay != null) {
-            if (endCardCloseDelay > SkipOffsetManager.getMaximumEndcardCloseDelay()) {
-                return SkipOffsetManager.getMaximumEndcardCloseDelay();
-            } else {
-                return endCardCloseDelay;
-            }
+            return endCardCloseDelay;
         } else {
             return SkipOffsetManager.getDefaultPCHTMLSkipOffset();
         }
@@ -881,11 +867,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     private Integer getPcMraidRewardedSkipOffset() {
         Integer endCardCloseDelay = getRemoteConfig(RemoteConfig.PC_REWARDED_HTML_SKIP_OFFSET);
         if (endCardCloseDelay != null) {
-            if (endCardCloseDelay > SkipOffsetManager.getMaximumEndcardCloseDelay()) {
-                return SkipOffsetManager.getMaximumEndcardCloseDelay();
-            } else {
-                return endCardCloseDelay;
-            }
+            return endCardCloseDelay;
         } else {
             return SkipOffsetManager.getDefaultPCRewardedHTMLSkipOffset();
         }
@@ -898,11 +880,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     private Integer getPcEndCardCloseDelay() {
         Integer endCardCloseDelay = getRemoteConfig(RemoteConfig.PC_END_CARD_CLOSE_DELAY);
         if (endCardCloseDelay != null) {
-            if (endCardCloseDelay > SkipOffsetManager.getMaximumEndcardCloseDelay()) {
-                return SkipOffsetManager.getMaximumEndcardCloseDelay();
-            } else {
-                return endCardCloseDelay;
-            }
+            return endCardCloseDelay;
         } else {
             return SkipOffsetManager.getDefaultPCEndcardSkipOffset();
         }
@@ -911,11 +889,7 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     private Integer getBcEndCardCloseDelay() {
         Integer endCardCloseDelay = getRemoteConfig(RemoteConfig.BC_END_CARD_CLOSE_DELAY);
         if (endCardCloseDelay != null) {
-            if (endCardCloseDelay > SkipOffsetManager.getMaximumEndcardCloseDelay()) {
-                return SkipOffsetManager.getMaximumEndcardCloseDelay();
-            } else {
-                return endCardCloseDelay;
-            }
+            return endCardCloseDelay;
         } else {
             return SkipOffsetManager.getDefaultBCEndcardSkipOffset();
         }

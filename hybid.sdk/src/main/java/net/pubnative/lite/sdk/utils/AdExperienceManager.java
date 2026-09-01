@@ -10,7 +10,9 @@ import net.pubnative.lite.sdk.models.ApiAssetGroupType;
 public class AdExperienceManager {
 
     private static boolean isBrandCompatible(Integer assetgroupid) {
-        return assetgroupid == ApiAssetGroupType.VAST_INTERSTITIAL;
+        return assetgroupid == ApiAssetGroupType.VAST_INTERSTITIAL || assetgroupid == ApiAssetGroupType.MRAID_320x480
+                || assetgroupid == ApiAssetGroupType.MRAID_480x320 || assetgroupid == ApiAssetGroupType.MRAID_768x1024
+                || assetgroupid == ApiAssetGroupType.MRAID_1024x768 || assetgroupid == ApiAssetGroupType.MRAID_300x600;
     }
 
     private static boolean isPerformanceCompatible(Integer assetgroupid) {

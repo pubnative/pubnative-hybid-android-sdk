@@ -178,12 +178,12 @@ subprojects {
         min_android_api = 21
         android_api = 36
         android_build_tools = '36.0.0'
-        omid_version = '1.6.2'
-        wrapper_omid_version = '1.5.5'
-        wrapper_version = '23.2.1'
+        omid_version = '1.6.7'
+        wrapper_omid_version = '1.6.7'
+        wrapper_version = '23.2.2'
     }
 
-    version = "3.9.1"
+    version = "3.9.2"
     group = "net.pubnative"
 }
 

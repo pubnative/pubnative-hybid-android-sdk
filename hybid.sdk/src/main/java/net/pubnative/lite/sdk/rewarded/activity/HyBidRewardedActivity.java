@@ -264,6 +264,12 @@ public abstract class HyBidRewardedActivity extends Activity implements Rewarded
 
     @Override
     protected void onDestroy() {
+        // System destroy (task clear) with no explicit close — grant reward only if already eligible.
+        if (mViewModel != null && !mIsFinishing && !isChangingConfigurations()) {
+            mViewModel.sendBroadcast(mViewModel.isRewardEligible()
+                    ? HyBidRewardedBroadcastReceiver.Action.CLOSE
+                    : HyBidRewardedBroadcastReceiver.Action.CLOSE_WITHOUT_REWARD);
+        }
         // Evict the cached ad only on a genuine finish, not on re-creation.
         if (mViewModel != null) {
             mViewModel.onActivityDestroyed(isFinishing());

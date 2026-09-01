@@ -186,6 +186,14 @@ public class HyBidViewabilityManager extends BaseViewabilityManager {
     }
 
     @Override
+    public <T> T getNativeDisplayAdSessionConfiguration() {
+        return (T) AdSessionConfiguration.createAdSessionConfiguration(
+                CreativeType.NATIVE_DISPLAY,
+                ImpressionType.BEGIN_TO_RENDER,
+                Owner.NATIVE, Owner.NONE, false);
+    }
+
+    @Override
     public <T> T createPartner() {
         mPubNativePartner = Partner.createPartner(getPartnerName(), getSdkVersion());
         return (T) mPubNativePartner;

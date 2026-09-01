@@ -134,6 +134,9 @@ abstract class BaseVideoAdInternal {
 
     void setRewarded(boolean isRewarded) {
         this.mIsRewarded = isRewarded;
+        if (mViewabilityAdSession != null) {
+            mViewabilityAdSession.setRewarded(isRewarded);
+        }
     }
 
     void setAdCloseButtonListener(CloseButtonListener closeButtonListener) {

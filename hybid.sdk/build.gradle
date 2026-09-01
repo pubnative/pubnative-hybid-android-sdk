@@ -111,6 +111,7 @@ dependencies {
 
 
     testImplementation 'com.squareup.assertj:assertj-android:1.2.0'
+    testImplementation "com.squareup.okhttp3:mockwebserver:4.12.0"
     androidTestImplementation "androidx.test:core:1.7.0"
     androidTestImplementation "androidx.test:runner:1.1.0-beta01", {
         exclude group: 'com.android.support', module: 'support-annotations'
@@ -121,6 +122,8 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:3.1.0-beta01", {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
+    // HTTP server for FileLoader network-behaviour tests (request count, retries, odd responses)
+    androidTestImplementation "com.squareup.okhttp3:mockwebserver:4.12.0"
 }
 //--------------------------------------------------------------------------------------------------
 // sonar

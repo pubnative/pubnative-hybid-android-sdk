@@ -8,15 +8,21 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import android.content.Context;
+import android.net.Uri;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
+import android.webkit.WebViewClient;
 
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdData;
 import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.utils.AtomManager;
+import net.pubnative.lite.sdk.mraid.internal.MRAIDLog;
 import net.pubnative.lite.sdk.mraid.model.HTMLAd;
 import net.pubnative.lite.sdk.views.endcard.HyBidEndCardView;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,11 +31,14 @@ import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.shadows.ShadowLog;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Test class for VRVAdJI JavaScript interface and survey end-card integration.
@@ -84,6 +93,11 @@ public class MRAIDViewTest {
                 false,
                 true
         );
+    }
+
+    @After
+    public void tearDown() {
+        MRAIDLog.setLoggingLevel(MRAIDLog.LOG_LEVEL.warning);
     }
 
     @Test
@@ -962,5 +976,160 @@ public class MRAIDViewTest {
         method.invoke(mraid);
 
         verify(mockListener).mraidShowCloseButton();
+    }
+
+    @Test
+    public void testDestroy_withPendingTimers_cancelsInsteadOfFiringCallbacks() throws Exception {
+        MRAIDViewListener mockListener = mock(MRAIDViewListener.class);
+        MRAIDView mraid = new MRAIDView(
+                context,
+                "https://example.com",
+                null,
+                false,
+                new String[]{},
+                mockListener,
+                null,
+                null,
+                false,
+                true
+        );
+
+        net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer mockExpirationTimer =
+                mock(net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer.class);
+        net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer mockNativeCloseButtonTimer =
+                mock(net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer.class);
+
+        java.lang.reflect.Field expirationField = MRAIDView.class.getDeclaredField("mExpirationTimer");
+        expirationField.setAccessible(true);
+        expirationField.set(mraid, mockExpirationTimer);
+
+        java.lang.reflect.Field nativeCloseField = MRAIDView.class.getDeclaredField("mNativeCloseButtonTimer");
+        nativeCloseField.setAccessible(true);
+        nativeCloseField.set(mraid, mockNativeCloseButtonTimer);
+
+        mraid.destroy();
+
+        verify(mockExpirationTimer).cancel();
+        verify(mockExpirationTimer, never()).onFinish();
+        verify(mockNativeCloseButtonTimer).cancel();
+        verify(mockNativeCloseButtonTimer, never()).onFinish();
+    }
+
+    @Test
+    public void shouldInterceptRequest_mraidJsResource_returnsResponseRegardlessOfLogLevel() {
+        WebViewClient client = mraidView.webView.getWebViewClient();
+        WebResourceRequest mockRequest = mock(WebResourceRequest.class);
+        Uri mockUri = mock(Uri.class);
+        when(mockRequest.getUrl()).thenReturn(mockUri);
+        when(mockUri.toString()).thenReturn("https://cdn.example.com/mraid.js");
+
+        MRAIDLog.setLoggingLevel(MRAIDLog.LOG_LEVEL.warning);
+        WebResourceResponse loggingOff = client.shouldInterceptRequest(mraidView.webView, mockRequest);
+
+        MRAIDLog.setLoggingLevel(MRAIDLog.LOG_LEVEL.debug);
+        WebResourceResponse loggingOn = client.shouldInterceptRequest(mraidView.webView, mockRequest);
+
+        assertNotNull(loggingOff);
+        assertNotNull(loggingOn);
+        assertEquals("application/javascript", loggingOff.getMimeType());
+        assertEquals("application/javascript", loggingOn.getMimeType());
+    }
+
+    @Test
+    public void shouldInterceptRequest_whenDebugEnabled_writesBothLogLines() {
+        WebViewClient client = mraidView.webView.getWebViewClient();
+        WebResourceRequest mockRequest = mock(WebResourceRequest.class);
+        Uri mockUri = mock(Uri.class);
+        String url = "https://cdn.example.com/mraid.js";
+        when(mockRequest.getUrl()).thenReturn(mockUri);
+        when(mockUri.toString()).thenReturn(url);
+
+        MRAIDLog.setLoggingLevel(MRAIDLog.LOG_LEVEL.debug);
+        client.shouldInterceptRequest(mraidView.webView, mockRequest);
+
+        List<ShadowLog.LogItem> logs = ShadowLog.getLogsForTag("HyBid-MRAID");
+        assertTrue(logs.stream().anyMatch(item -> item.msg.equals("hz-m shouldInterceptRequest - " + url)));
+        assertTrue(logs.stream().anyMatch(item -> item.msg.contains("intercepting mraid")));
+    }
+
+    @Test
+    public void shouldInterceptRequest_whenLoggingOff_writesNoDebugMessages() {
+        WebViewClient client = mraidView.webView.getWebViewClient();
+        WebResourceRequest mockRequest = mock(WebResourceRequest.class);
+        Uri mockUri = mock(Uri.class);
+        when(mockRequest.getUrl()).thenReturn(mockUri);
+        when(mockUri.toString()).thenReturn("https://cdn.example.com/mraid.js");
+
+        MRAIDLog.setLoggingLevel(MRAIDLog.LOG_LEVEL.warning);
+        client.shouldInterceptRequest(mraidView.webView, mockRequest);
+
+        List<ShadowLog.LogItem> logs = ShadowLog.getLogsForTag("HyBid-MRAID");
+        assertFalse(logs.stream().anyMatch(item -> item.msg.contains("shouldInterceptRequest -")));
+    }
+
+    @Test
+    public void testShowEndCard_layoutGuardReappliesMatchParent() throws Exception {
+        HyBidEndCardView endCard = new HyBidEndCardView(context, false, null);
+
+        HTMLAd htmlAd = mock(HTMLAd.class);
+        when(htmlAd.getEndCardCloseDelay()).thenReturn(0);
+        when(htmlAd.getEndCardData()).thenReturn(null); // null -> HyBidEndCardView.show() returns early (safe)
+
+        setMraidField("mEndCardView", endCard);
+        setMraidField("htmlAd", htmlAd);
+
+        // Attach the view so View.post() runnable actually execute.
+        org.robolectric.android.controller.ActivityController<android.app.Activity> controller =
+                org.robolectric.Robolectric.buildActivity(android.app.Activity.class).create();
+        controller.get().setContentView(endCard);
+        controller.start().resume().visible();
+
+        Method showEndCard = MRAIDView.class.getDeclaredMethod("showEndCard");
+        showEndCard.setAccessible(true);
+        showEndCard.invoke(mraidView);
+
+        // Move params off MATCH_PARENT so the guard takes the "re-apply" branch, then fire layout.
+        endCard.setLayoutParams(new android.widget.FrameLayout.LayoutParams(100, 100));
+        endCard.measure(android.view.View.MeasureSpec.makeMeasureSpec(300, android.view.View.MeasureSpec.EXACTLY),
+                android.view.View.MeasureSpec.makeMeasureSpec(200, android.view.View.MeasureSpec.EXACTLY));
+        endCard.layout(0, 0, 300, 200);
+        org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+
+        assertEquals(android.view.ViewGroup.LayoutParams.MATCH_PARENT, endCard.getLayoutParams().width);
+    }
+
+    private void setMraidField(String name, Object value) throws Exception {
+        Field field = MRAIDView.class.getDeclaredField(name);
+        field.setAccessible(true);
+        field.set(mraidView, value);
+    }
+
+    // Covers the extracted createEndCardViewListener() bodies: each callback delegates to the listener.
+    @Test
+    public void testEndCardViewListener_delegatesToListener() throws Exception {
+        MRAIDViewListener mockListener = mock(MRAIDViewListener.class);
+        MRAIDView view = new MRAIDView(context, "https://example.com", null, false,
+                new String[]{}, mockListener, null, null, false, true);
+        Field endCardField = MRAIDView.class.getDeclaredField("mEndCardView");
+        endCardField.setAccessible(true);
+        endCardField.set(view, new HyBidEndCardView(context, false, null));
+
+        Method create = MRAIDView.class.getDeclaredMethod("createEndCardViewListener");
+        create.setAccessible(true);
+        HyBidEndCardView.EndCardViewListener l =
+                (HyBidEndCardView.EndCardViewListener) create.invoke(view);
+
+        l.onShow(true, "type");
+        l.onLoadSuccess(true);
+        l.onLoadFail(false);
+        l.onClick("http://example.com", true, "type");
+        l.onClose(true);
+        l.onSkip();
+
+        verify(mockListener).onCustomEndCardShow("type");
+        verify(mockListener).onCustomEndCardLoadSuccess();
+        verify(mockListener).onCustomEndCardLoadFail();
+        verify(mockListener).onCustomEndCardClicked();
+        verify(mockListener).onCustomEndCardClosed();
     }
 }

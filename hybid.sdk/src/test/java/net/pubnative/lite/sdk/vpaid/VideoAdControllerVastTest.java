@@ -36,6 +36,8 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowMediaPlayer;
 
 import android.view.View;
+import android.view.ViewGroup;
+import net.pubnative.lite.sdk.views.endcard.HyBidEndCardView;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -379,6 +381,20 @@ public class VideoAdControllerVastTest {
     }
 
     @Test
+    public void handleMediaPlayerComplete_whenSkipControlDisabled_stillReachesEnd() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+
+        Field skipTimeMillisField = VideoAdControllerVast.class.getDeclaredField("mSkipTimeMillis");
+        skipTimeMillisField.setAccessible(true);
+        skipTimeMillisField.setInt(videoAdControllerVast, -1);
+
+        invokeHandleMediaPlayerComplete();
+
+        verify(mockBaseAdInternal).onAdDidReachEnd();
+    }
+
+    @Test
     public void testCloseEndCard_callsCloseSelf() {
         videoAdControllerVast.closeEndCard();
 
@@ -696,6 +712,60 @@ public class VideoAdControllerVastTest {
         } finally {
             nonFullscreenController.destroy();
         }
+    }
+
+    private void invokeInitSkipTime(VideoAdControllerVast controller, int duration) throws Exception {
+        Method initSkipTimeMethod = VideoAdControllerVast.class.getDeclaredMethod("initSkipTime", int.class);
+        initSkipTimeMethod.setAccessible(true);
+        initSkipTimeMethod.invoke(controller, duration);
+    }
+
+    private int getSkipTimeMillis(VideoAdControllerVast controller) throws Exception {
+        Field skipTimeMillisField = VideoAdControllerVast.class.getDeclaredField("mSkipTimeMillis");
+        skipTimeMillisField.setAccessible(true);
+        return skipTimeMillisField.getInt(controller);
+    }
+
+    @Test
+    public void initSkipTime_forRewarded_skipOffsetAboveDuration_disablesSkipControl() throws Exception {
+        when(mockBaseAdInternal.isRewarded()).thenReturn(true);
+        when(mockAd.getVideoRewardedSkipOffset()).thenReturn(75);
+        when(mockAdParams.getPublisherSkipSeconds()).thenReturn(-1);
+
+        invokeInitSkipTime(videoAdControllerVast, 60000);
+
+        assertEquals(-1, getSkipTimeMillis(videoAdControllerVast));
+    }
+
+    @Test
+    public void initSkipTime_forRewarded_skipOffsetBelowDuration_isHonoured() throws Exception {
+        when(mockBaseAdInternal.isRewarded()).thenReturn(true);
+        when(mockAd.getVideoRewardedSkipOffset()).thenReturn(10);
+        when(mockAdParams.getPublisherSkipSeconds()).thenReturn(-1);
+
+        invokeInitSkipTime(videoAdControllerVast, 60000);
+
+        assertEquals(10000, getSkipTimeMillis(videoAdControllerVast));
+    }
+
+    @Test
+    public void initSkipTime_forInterstitial_skipOffsetAboveDuration_disablesSkipControl() throws Exception {
+        when(mockBaseAdInternal.isRewarded()).thenReturn(false);
+        when(mockAd.getVideoSkipOffset()).thenReturn(75);
+
+        invokeInitSkipTime(videoAdControllerVast, 60000);
+
+        assertEquals(-1, getSkipTimeMillis(videoAdControllerVast));
+    }
+
+    @Test
+    public void initSkipTime_forInterstitial_skipOffsetBelowDuration_isHonoured() throws Exception {
+        when(mockBaseAdInternal.isRewarded()).thenReturn(false);
+        when(mockAd.getVideoSkipOffset()).thenReturn(10);
+
+        invokeInitSkipTime(videoAdControllerVast, 60000);
+
+        assertEquals(10000, getSkipTimeMillis(videoAdControllerVast));
     }
 
     @Test
@@ -1030,8 +1100,12 @@ public class VideoAdControllerVastTest {
 
     // Helper methods for processPlayAction tests
     private android.media.MediaPlayer setupMockMediaPlayer() throws Exception {
+        return setupMockMediaPlayer(30000);
+    }
+
+    private android.media.MediaPlayer setupMockMediaPlayer(int duration) throws Exception {
         android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
-        when(mockMediaPlayer.getDuration()).thenReturn(30000);
+        when(mockMediaPlayer.getDuration()).thenReturn(duration);
         when(mockMediaPlayer.getVideoWidth()).thenReturn(1920);
         when(mockMediaPlayer.getVideoHeight()).thenReturn(1080);
 
@@ -1113,6 +1187,99 @@ public class VideoAdControllerVastTest {
         mediaPlayerField.set(videoAdControllerVast, null);
         invokeProcessPlayAction();
         assertNotNull(videoAdControllerVast);
+    }
+
+    @Test
+    public void testIsDurationInvalid_boundaryValues() throws Exception {
+        Method method = VideoAdControllerVast.class.getDeclaredMethod("isDurationInvalid", int.class);
+        method.setAccessible(true);
+
+        assertTrue((Boolean) method.invoke(videoAdControllerVast, 0));
+        assertTrue((Boolean) method.invoke(videoAdControllerVast, -1));
+        assertTrue((Boolean) method.invoke(videoAdControllerVast, Integer.MIN_VALUE));
+        assertFalse((Boolean) method.invoke(videoAdControllerVast, 1));
+        assertFalse((Boolean) method.invoke(videoAdControllerVast, 15000));
+    }
+
+    @Test
+    public void testProcessPlayAction_withZeroDuration_doesNotStartMediaPlayer() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = setupMockMediaPlayer(0);
+
+        invokeProcessPlayAction();
+
+        verify(mockMediaPlayer, never()).start();
+    }
+
+    @Test
+    public void testProcessPlayAction_withNegativeDuration_doesNotStartMediaPlayer() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = setupMockMediaPlayer(-1);
+
+        invokeProcessPlayAction();
+
+        verify(mockMediaPlayer, never()).start();
+    }
+
+    @Test
+    public void testProcessPlayAction_withZeroDuration_reportsLoadFailure() throws Exception {
+        setupMockMediaPlayer(0);
+
+        invokeProcessPlayAction();
+
+        verify(mockBaseAdInternal).onAdLoadFailInternal(any(PlayerInfo.class));
+    }
+
+    @Test
+    public void testProcessPlayAction_withNegativeDuration_reportsLoadFailure() throws Exception {
+        setupMockMediaPlayer(-1);
+
+        invokeProcessPlayAction();
+
+        verify(mockBaseAdInternal).onAdLoadFailInternal(any(PlayerInfo.class));
+    }
+
+    @Test
+    public void testProcessPlayAction_withZeroDuration_doesNotFireImpressionOrOnAdStarted() throws Exception {
+        setupMockMediaPlayer(0);
+        setIsReplay(false);
+
+        VideoAdListener mockAdListener = mock(VideoAdListener.class);
+        when(mockBaseAdInternal.getAdListener()).thenReturn(mockAdListener);
+
+        invokeProcessPlayAction();
+
+        verify(mockViewabilityAdSession, never()).fireImpression();
+        verify(mockAdListener, never()).onAdStarted();
+    }
+
+    @Test
+    public void testProcessPlayAction_withZeroDuration_doesNotCreateTimer() throws Exception {
+        setupMockMediaPlayer(0);
+
+        invokeProcessPlayAction();
+
+        Field timerField = VideoAdControllerVast.class.getDeclaredField("mTimerWithPause");
+        timerField.setAccessible(true);
+        assertNull(timerField.get(videoAdControllerVast));
+    }
+
+    @Test
+    public void testProcessPlayAction_withPositiveDuration_doesNotReportLoadFailure() throws Exception {
+        setupMockMediaPlayer(30000);
+
+        invokeProcessPlayAction();
+
+        verify(mockBaseAdInternal, never()).onAdLoadFailInternal(any());
+    }
+
+    @Test
+    public void testProcessPlayAction_withPositiveDuration_createsTimer() throws Exception {
+        setupMockMediaPlayer(30000);
+
+        invokeProcessPlayAction();
+
+        Field timerField = VideoAdControllerVast.class.getDeclaredField("mTimerWithPause");
+        timerField.setAccessible(true);
+        assertNotNull(timerField.get(videoAdControllerVast));
     }
 
 
@@ -1791,6 +1958,192 @@ public class VideoAdControllerVastTest {
 
         // The recovery task was removed by dismiss(), so setSurface must never be called
         verify(mockMp, never()).setSurface(any());
+    }
+
+    /** Attaches the view tree to a visible Activity so View.post() runnable actually run. */
+    private void attachToWindow(View root) {
+        org.robolectric.android.controller.ActivityController<android.app.Activity> controller =
+                org.robolectric.Robolectric.buildActivity(android.app.Activity.class).create();
+        controller.get().setContentView(root);
+        controller.start().resume().visible();
+    }
+
+    /** Forces a layout pass on the given view so its OnLayoutChangeListener fires, then flushes. */
+    private void forceLayout(View view, int w, int h) {
+        view.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY));
+        view.layout(0, 0, w, h);
+        org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+    }
+
+    @Test
+    public void testAdjustLayoutParams_layoutGuardSkipsWhenSizeUnchanged() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+        attachToWindow(videoAdView);
+        ViewControllerVast vc = getViewControllerVast();
+
+        vc.adjustLayoutParams(640, 480);
+
+        android.widget.FrameLayout videoPlayer =
+                (android.widget.FrameLayout) getViewControllerView(vc, "mVideoPlayerLayout");
+        int widthAfterAdjust = videoPlayer.getLayoutParams().width;
+        int heightAfterAdjust = videoPlayer.getLayoutParams().height;
+
+        // Fire the OnLayoutChangeListener with an unchanged banner size: the guard must NOT re-apply params.
+        forceLayout(videoPlayer, 300, 200);
+
+        assertEquals(widthAfterAdjust, videoPlayer.getLayoutParams().width);
+        assertEquals(heightAfterAdjust, videoPlayer.getLayoutParams().height);
+    }
+
+    @Test
+    public void testAdjustLayoutParams_layoutGuardReappliesWhenSizeChanged() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+        attachToWindow(videoAdView);
+        ViewControllerVast vc = getViewControllerVast();
+
+        vc.adjustLayoutParams(640, 480);
+
+        android.widget.FrameLayout videoPlayer =
+                (android.widget.FrameLayout) getViewControllerView(vc, "mVideoPlayerLayout");
+        // Force current params to differ from the computed size so the guard takes the re-apply branch.
+        videoPlayer.setLayoutParams(new android.widget.FrameLayout.LayoutParams(1, 1));
+        forceLayout(videoPlayer, 300, 200);
+
+        // Guard recomputed from the banner size and re-applied, overriding the bogus 1x1.
+        assertNotEquals(1, videoPlayer.getLayoutParams().width);
+    }
+
+    @Test
+    public void testShowEndCard_inline_blocksDescendantFocus_andReappliesMatchParent() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+        attachToWindow(videoAdView);
+        ViewControllerVast vc = getViewControllerVast();
+
+        vc.showEndCard(null, null, false, mock(CloseButtonListener.class));
+
+        HyBidEndCardView endCard = (HyBidEndCardView) getViewControllerView(vc, "mEndCardView");
+        // Inline placement (not fullscreen) must block descendant focus
+        assertEquals(ViewGroup.FOCUS_BLOCK_DESCENDANTS, endCard.getDescendantFocusability());
+
+        // Move params off MATCH_PARENT so the guard takes the "re-apply" branch on next layout.
+        endCard.setLayoutParams(new android.widget.FrameLayout.LayoutParams(100, 100));
+        forceLayout(endCard, 300, 200);
+        assertEquals(ViewGroup.LayoutParams.MATCH_PARENT, endCard.getLayoutParams().width);
+    }
+
+    @Test
+    public void testShowLastCustomEndCard_inline_blocksDescendantFocus_andReappliesMatchParent() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+        attachToWindow(videoAdView);
+        ViewControllerVast vc = getViewControllerVast();
+
+        vc.showLastCustomEndCard(null, null, mock(CloseButtonListener.class));
+
+        HyBidEndCardView lastCustom =
+                (HyBidEndCardView) getViewControllerView(vc, "mLastCustomEndCardView");
+        assertEquals(ViewGroup.FOCUS_BLOCK_DESCENDANTS, lastCustom.getDescendantFocusability());
+
+        lastCustom.setLayoutParams(new android.widget.FrameLayout.LayoutParams(100, 100));
+        forceLayout(lastCustom, 300, 200);
+        assertEquals(ViewGroup.LayoutParams.MATCH_PARENT, lastCustom.getLayoutParams().width);
+    }
+
+    private int layoutChangeListenerCount(View view) throws Exception {
+        java.lang.reflect.Field liField = View.class.getDeclaredField("mListenerInfo");
+        liField.setAccessible(true);
+        Object listenerInfo = liField.get(view);
+        if (listenerInfo == null) return 0;
+        java.lang.reflect.Field lclField = listenerInfo.getClass().getDeclaredField("mOnLayoutChangeListeners");
+        lclField.setAccessible(true);
+        java.util.ArrayList<?> listeners = (java.util.ArrayList<?>) lclField.get(listenerInfo);
+        return listeners == null ? 0 : listeners.size();
+    }
+
+    @Test
+    public void testAdjustLayoutParams_doesNotStackLayoutListeners() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+        attachToWindow(videoAdView);
+        ViewControllerVast vc = getViewControllerVast();
+        android.widget.FrameLayout videoPlayer =
+                (android.widget.FrameLayout) getViewControllerView(vc, "mVideoPlayerLayout");
+
+        int before = layoutChangeListenerCount(videoPlayer);
+        vc.adjustLayoutParams(640, 480);
+        vc.adjustLayoutParams(640, 480);
+        vc.adjustLayoutParams(640, 480);
+
+        // remove-before-add: repeated play/resume must not accumulate listeners (VMA-1539).
+        assertEquals(before + 1, layoutChangeListenerCount(videoPlayer));
+    }
+
+    @Test
+    public void testShowEndCard_doesNotStackLayoutListeners() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+        attachToWindow(videoAdView);
+        ViewControllerVast vc = getViewControllerVast();
+        HyBidEndCardView endCard = (HyBidEndCardView) getViewControllerView(vc, "mEndCardView");
+
+        int before = layoutChangeListenerCount(endCard);
+        vc.showEndCard(null, null, false, mock(CloseButtonListener.class));
+        vc.showEndCard(null, null, false, mock(CloseButtonListener.class));
+        vc.showEndCard(null, null, false, mock(CloseButtonListener.class));
+
+        assertEquals(before + 1, layoutChangeListenerCount(endCard));
+    }
+
+    @Test
+    public void testShowLastCustomEndCard_doesNotStackLayoutListeners() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+        attachToWindow(videoAdView);
+        ViewControllerVast vc = getViewControllerVast();
+        HyBidEndCardView lastCustom =
+                (HyBidEndCardView) getViewControllerView(vc, "mLastCustomEndCardView");
+
+        int before = layoutChangeListenerCount(lastCustom);
+        vc.showLastCustomEndCard(null, null, mock(CloseButtonListener.class));
+        vc.showLastCustomEndCard(null, null, mock(CloseButtonListener.class));
+        vc.showLastCustomEndCard(null, null, mock(CloseButtonListener.class));
+
+        assertEquals(before + 1, layoutChangeListenerCount(lastCustom));
+    }
+
+    @Test
+    public void testEndCardViewListener_delegatesToAdController() throws Exception {
+        VideoAdView videoAdView = new VideoAdView(context);
+        videoAdControllerVast.buildVideoAdView(videoAdView);
+        ViewControllerVast vc = getViewControllerVast();
+        HyBidEndCardView endCard = (HyBidEndCardView) getViewControllerView(vc, "mEndCardView");
+
+        java.lang.reflect.Method create = ViewControllerVast.class.getDeclaredMethod(
+                "createEndCardViewListener", HyBidEndCardView.class);
+        create.setAccessible(true);
+        HyBidEndCardView.EndCardViewListener l =
+                (HyBidEndCardView.EndCardViewListener) create.invoke(vc, endCard);
+
+        l.onShow(true, "type");
+        l.onShow(false, "type");
+        l.onLoadSuccess(true);
+        l.onLoadFail(false);
+        l.onClose(true);
+        l.onSkip();
+        l.onClick("http://example.com", true, "type");
+        l.onClick("http://example.com", false, "type");
+
+        verify(mockBaseAdInternal).onCustomEndCardShow("type");
+        verify(mockBaseAdInternal).onDefaultEndCardShow("type");
+        verify(mockBaseAdInternal).onEndCardLoadSuccess(true);
+        verify(mockBaseAdInternal).onEndCardLoadFail(false);
+        verify(mockBaseAdInternal).onEndCardClosed(true);
+        verify(mockBaseAdInternal).onCustomEndCardClick("type");
+        verify(mockBaseAdInternal).onDefaultEndCardClick("type");
     }
 
     // -------------------------------------------------------------------------

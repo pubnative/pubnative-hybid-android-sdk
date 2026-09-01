@@ -344,11 +344,7 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
         if (finishedPlaying) return;
 
         if (mMediaPlayer != null) {
-            try {
-                mMediaPlayer.release();
-            } catch (RuntimeException exception) {
-                Logger.e(LOG_TAG, "Error releasing HyBid video player");
-            }
+            releasePlayer(mMediaPlayer);
             mMediaPlayer = null;
             // Clear async-prepare flag so queue doesn't wait for abandoned player's callback.
             awaitingPrepare = false;
@@ -372,11 +368,7 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
             awaitingPrepare = false;
             Logger.e(LOG_TAG, "startMediaPlayer: " + e.getMessage());
             mBaseAdInternal.onAdLoadFailInternal(new PlayerInfo("Error loading media file"));
-            try {
-                mMediaPlayer.release();
-            } catch (RuntimeException exception) {
-                Logger.e(LOG_TAG, "Error releasing HyBid video player");
-            }
+            releasePlayer(mMediaPlayer);
             mMediaPlayer = null;
         }
     }
@@ -406,7 +398,12 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
 
         try {
             player.setSurface(surface);
-            createTimer(player.getDuration());
+            int duration = player.getDuration();
+            if (isDurationInvalid(duration)) {
+                handleInvalidDuration(player, duration);
+                return;
+            }
+            createTimer(duration);
         if (!isReplay) {
             runOnUiThread(() -> getViewabilityAdSession().fireImpression());
         }
@@ -618,11 +615,7 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
                 // prepareAsync() failures land here instead of throwing - unblock the action queue.
                 clearPrepareState();
                 processActions();
-                try {
-                    mp.release();
-                } catch (RuntimeException exception) {
-                    Logger.e(LOG_TAG, "Error releasing HyBid video player");
-                }
+                releasePlayer(mp);
                 mMediaPlayer = null;
             }
             // Only defer to system handler for non-prepare errors; prepare failures are always load failures.
@@ -646,6 +639,31 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
             processActions();
         }
     };
+
+    private boolean isDurationInvalid(int duration) {
+        return duration <= 0;
+    }
+
+    private void releasePlayer(MediaPlayer player) {
+        if (player == null) {
+            return;
+        }
+        try {
+            player.release();
+        } catch (RuntimeException exception) {
+            Logger.e(LOG_TAG, "Error releasing HyBid video player", exception);
+        }
+    }
+
+    private void handleInvalidDuration(MediaPlayer player, int duration) {
+        Logger.e(LOG_TAG, "play: player reported invalid duration (" + duration + "), treating as a load error");
+        ErrorLog.postError(mBaseAdInternal.getContext(), VastError.MEDIA_FILE_UNSUPPORTED);
+        mBaseAdInternal.onAdLoadFailInternal(new PlayerInfo("Invalid media duration: " + duration));
+        releasePlayer(player);
+        if (mMediaPlayer == player) {
+            mMediaPlayer = null;
+        }
+    }
 
     private void createTimer(final int duration) {
         if (isReplay) {
@@ -1276,11 +1294,7 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
         }
 
         if (mMediaPlayer != null) {
-            try {
-                mMediaPlayer.release();
-            } catch (RuntimeException exception) {
-                Logger.e(LOG_TAG, "Error releasing HyBid video player");
-            }
+            releasePlayer(mMediaPlayer);
             mMediaPlayer = null;
         }
 

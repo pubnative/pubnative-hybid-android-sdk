@@ -35,13 +35,6 @@ public class SkipOffsetManager {
     private static final int ENDCARD_SKIP_OFFSET = 4;
     private static final int PC_ENDCARD_SKIP_OFFSET = 5;
     private static final int BC_ENDCARD_SKIP_OFFSET = 0;
-    private static final int ENDCARD_CLOSE_DELAY_MAXIMUM = 30;
-
-//    private static final int globalMaximumSkipOffsetWithoutEndCard = 30;
-//
-//    private static final int globalMaximumSkipOffsetWithEndCard = 30;
-
-    private static final int globalMaximumSkipOffset = 30;
 
     public static Integer getNativeCloseButtonDelay(Integer remoteConfigDelay) {
         Integer nativeCloseButtonDelay = remoteConfigDelay;
@@ -95,17 +88,16 @@ public class SkipOffsetManager {
         int skipOffset = -1;
 
         for (Integer value1 : values) {
-            if (value1 == null) continue;
             SkipOffset skipOffsetObj = isValidSkipOffset(value1);
-            if (skipOffsetObj.isValid()) {
+            if (!skipOffsetObj.isValid()) {
+                continue;
+            }
+            if (skipOffset == -1 || skipOffsetObj.getSkipOffset() < skipOffset) {
                 skipOffset = skipOffsetObj.getSkipOffset();
-                break;
             }
         }
 
         if (skipOffset == -1) skipOffset = defaultSkipOffset;
-        // Handle maximum possible skip offset
-        if (skipOffset > 30) skipOffset = globalMaximumSkipOffset;
 
         return skipOffset;
     }
@@ -119,12 +111,7 @@ public class SkipOffsetManager {
     }
 
     public static SkipOffset isValidSkipOffset(Integer skipOffset) {
-        int maximumSkipOffset = globalMaximumSkipOffset;
-        boolean isValid = false;
-        if (skipOffset != null && skipOffset >= 0) {
-            isValid = true;
-            if (skipOffset > maximumSkipOffset) skipOffset = maximumSkipOffset;
-        }
+        boolean isValid = skipOffset != null && skipOffset >= 0;
         return new SkipOffset(isValid, skipOffset);
     }
 
@@ -160,10 +147,6 @@ public class SkipOffsetManager {
         return BC_ENDCARD_SKIP_OFFSET;
     }
 
-    public static Integer getMaximumEndcardCloseDelay() {
-        return ENDCARD_CLOSE_DELAY_MAXIMUM;
-    }
-
     public static Integer getDefaultEndcardCloseDelay() {
         return ENDCARD_CLOSE_DELAY_DEFAULT;
     }
@@ -178,7 +161,7 @@ public class SkipOffsetManager {
 
     private static class SkipOffset {
         private Integer skipOffset;
-        private Boolean isValid;
+        private boolean isValid;
 
         public SkipOffset(boolean isValid, Integer skipOffset) {
             this.skipOffset = skipOffset;
@@ -193,24 +176,16 @@ public class SkipOffsetManager {
             this.skipOffset = skipOffset;
         }
 
-        public Boolean isValid() {
+        public boolean isValid() {
             return isValid;
         }
 
-        public void setValid(Boolean valid) {
+        public void setValid(boolean valid) {
             isValid = valid;
         }
     }
 
-//    public static int getMaximumRewardedSkipOffsetWithEndCard(){
-//        return Rewarded_VIDEO_WITH_END_CARD;
-//    }
-//
-//    public static int getMaximumRewardedSkipOffsetWithoutEndCard(){
-//        return Rewarded_VIDEO_WITHOUT_END_CARD;
-//    }
-
-    public static int getMaximumRewardedSkipOffset() {
+    public static int getDefaultRewardedVideoSkipOffset() {
         return REWARDED_VIDEO_DEFAULT;
     }
 

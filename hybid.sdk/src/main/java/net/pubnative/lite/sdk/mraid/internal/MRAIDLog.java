@@ -110,4 +110,8 @@ public class MRAIDLog {
     public static LOG_LEVEL getLoggingLevel() {
         return LEVEL;
     }
+
+    public static boolean isLoggable(LOG_LEVEL level) {
+        return LEVEL.getValue() <= level.getValue();
+    }
 }

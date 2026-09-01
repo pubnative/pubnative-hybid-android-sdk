@@ -28,6 +28,7 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
         CLICK("net.pubnative.hybid.rewarded.click"),
         PLAYABLE_SKIP_CLICK("net.pubnative.hybid.rewarded.playable.click"),
         CLOSE("net.pubnative.hybid.rewarded.close"),
+        CLOSE_WITHOUT_REWARD("net.pubnative.hybid.rewarded.close_without_reward"),
         ERROR("net.pubnative.hybid.rewarded.error"),
         VIDEO_ERROR("net.pubnative.hybid.rewarded.video_error"),
         VIDEO_START("net.pubnative.hybid.rewarded.video_start"),
@@ -49,6 +50,8 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
                 return CLICK;
             } else if (CLOSE.getId().equals(action)) {
                 return CLOSE;
+            } else if (CLOSE_WITHOUT_REWARD.getId().equals(action)) {
+                return CLOSE_WITHOUT_REWARD;
             } else if (VIDEO_START.getId().equals(action)) {
                 return VIDEO_START;
             } else if (VIDEO_SKIP.getId().equals(action)) {
@@ -114,6 +117,7 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
         mIntentFilter.addAction(Action.OPEN.getId());
         mIntentFilter.addAction(Action.CLICK.getId());
         mIntentFilter.addAction(Action.CLOSE.getId());
+        mIntentFilter.addAction(Action.CLOSE_WITHOUT_REWARD.getId());
         mIntentFilter.addAction(Action.VIDEO_START.getId());
         mIntentFilter.addAction(Action.VIDEO_SKIP.getId());
         mIntentFilter.addAction(Action.VIDEO_FINISH.getId());
@@ -184,6 +188,9 @@ public class HyBidRewardedBroadcastReceiver extends BroadcastReceiver {
                 break;
             case CLOSE:
                 listener.onRewardedFinished(presenter);
+                listener.onRewardedClosed(presenter);
+                break;
+            case CLOSE_WITHOUT_REWARD:
                 listener.onRewardedClosed(presenter);
                 break;
             case ERROR:

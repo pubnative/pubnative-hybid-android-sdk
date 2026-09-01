@@ -7,10 +7,13 @@ package net.pubnative.lite.sdk.models;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
@@ -38,6 +41,10 @@ import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.contentinfo.AdFeedbackFormHelper;
 import net.pubnative.lite.sdk.utils.URLValidator;
+import net.pubnative.lite.sdk.viewability.FriendlyObstructionReasonConstants;
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityManager;
+import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeDisplayAdSession;
+import net.pubnative.lite.sdk.viewability.baseom.BaseFriendlyObstructionPurpose;
 import net.pubnative.lite.sdk.views.PNBeaconWebView;
 import net.pubnative.lite.sdk.visibility.ImpressionManager;
 import net.pubnative.lite.sdk.visibility.ImpressionTracker;
@@ -56,10 +63,8 @@ import org.mockito.MockedStatic;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
-import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 29)
 public class NativeAdTest {
 
     private Context applicationContext;
@@ -585,6 +590,282 @@ public class NativeAdTest {
             // isLinkClickRunning should be true during the call, but will be reset by callback
             // (simulate callback to reset)
             assertTrue(subject.isLinkClickRunning || !subject.isLinkClickRunning);
+        }
+    }
+
+    // --------------- OM Viewability Tracking Tests ---------------
+
+    @Test
+    public void startTrackingImpression_initializesViewabilitySession() {
+        try (
+                MockedStatic<HyBid> mockedHyBid = mockStatic(HyBid.class);
+                MockedConstruction<HyBidViewabilityNativeDisplayAdSession> mockedAdSession =
+                        mockConstruction(HyBidViewabilityNativeDisplayAdSession.class)
+        ) {
+            HyBidViewabilityManager mockViewabilityManager = mock(HyBidViewabilityManager.class);
+            mockedHyBid.when(HyBid::getViewabilityManager).thenReturn(mockViewabilityManager);
+            mockedHyBid.when(HyBid::getReportingController).thenReturn(mockReportingController);
+
+            NativeAd nativeAd = new NativeAd(spiedAd);
+            nativeAd.startTrackingImpression(mockView);
+
+            // Verify a viewability session was created
+            assertEquals(1, mockedAdSession.constructed().size());
+            HyBidViewabilityNativeDisplayAdSession mockSession = mockedAdSession.constructed().get(0);
+
+            // Verify initAdSession was called
+            verify(mockSession).initAdSession(eq(mockView), anyList());
+            // Verify fireLoaded was called
+            verify(mockSession).fireLoaded();
+        }
+    }
+
+    @Test
+    public void onImpression_firesViewabilityImpression() {
+        try (
+                MockedStatic<HyBid> mockedHyBid = mockStatic(HyBid.class);
+                MockedStatic<TrackingManager> mockedTrackingManager = mockStatic(TrackingManager.class);
+                MockedConstruction<HyBidViewabilityNativeDisplayAdSession> mockedAdSession =
+                        mockConstruction(HyBidViewabilityNativeDisplayAdSession.class)
+        ) {
+            HyBidViewabilityManager mockViewabilityManager = mock(HyBidViewabilityManager.class);
+            mockedHyBid.when(HyBid::getViewabilityManager).thenReturn(mockViewabilityManager);
+            mockedHyBid.when(HyBid::getReportingController).thenReturn(mockReportingController);
+
+            NativeAd nativeAd = new NativeAd(spiedAd);
+            nativeAd.startTrackingImpression(mockView);
+
+            // Trigger impression
+            nativeAd.onImpression(mockView);
+
+            // Verify fireImpression was called
+            HyBidViewabilityNativeDisplayAdSession mockSession = mockedAdSession.constructed().get(0);
+            verify(mockSession).fireImpression();
+        }
+    }
+
+    @Test
+    public void stopTracking_stopsViewabilitySession() {
+        try (
+                MockedStatic<HyBid> mockedHyBid = mockStatic(HyBid.class);
+                MockedStatic<ImpressionManager> mockedImpressionManager = mockStatic(ImpressionManager.class);
+                MockedConstruction<HyBidViewabilityNativeDisplayAdSession> mockedAdSession =
+                        mockConstruction(HyBidViewabilityNativeDisplayAdSession.class)
+        ) {
+            HyBidViewabilityManager mockViewabilityManager = mock(HyBidViewabilityManager.class);
+            mockedHyBid.when(HyBid::getViewabilityManager).thenReturn(mockViewabilityManager);
+            mockedHyBid.when(HyBid::getReportingController).thenReturn(mockReportingController);
+
+            NativeAd nativeAd = new NativeAd(spiedAd);
+            nativeAd.startTrackingImpression(mockView);
+
+            // Stop tracking
+            nativeAd.stopTracking();
+
+            // Verify stopAdSession was called
+            HyBidViewabilityNativeDisplayAdSession mockSession = mockedAdSession.constructed().get(0);
+            verify(mockSession).stopAdSession();
+        }
+    }
+
+    @Test
+    public void viewabilitySession_notInitialized_whenViewabilityManagerIsNull() {
+        try (
+                MockedStatic<HyBid> mockedHyBid = mockStatic(HyBid.class);
+                MockedConstruction<HyBidViewabilityNativeDisplayAdSession> mockedAdSession =
+                        mockConstruction(HyBidViewabilityNativeDisplayAdSession.class)
+        ) {
+            // Return null for viewability manager
+            mockedHyBid.when(HyBid::getViewabilityManager).thenReturn(null);
+            mockedHyBid.when(HyBid::getReportingController).thenReturn(mockReportingController);
+
+            NativeAd nativeAd = new NativeAd(spiedAd);
+            nativeAd.startTrackingImpression(mockView);
+
+            // Verify no viewability session was created
+            assertEquals(0, mockedAdSession.constructed().size());
+        }
+    }
+
+    @Test
+    public void onImpression_firesViewabilityImpression_beforeBeacons() {
+        final List<String> seq = new java.util.ArrayList<>();
+        try (
+                MockedStatic<HyBid> mockedHyBid = mockStatic(HyBid.class);
+                MockedStatic<TrackingManager> mockedTrackingManager = mockStatic(TrackingManager.class);
+                MockedConstruction<HyBidViewabilityNativeDisplayAdSession> mockedAdSession =
+                        mockConstruction(HyBidViewabilityNativeDisplayAdSession.class,
+                                (m, ctx) -> doAnswer(i -> {
+                                    seq.add("om-impression");
+                                    return null;
+                                }).when(m).fireImpression())
+        ) {
+            HyBidViewabilityManager mockViewabilityManager = mock(HyBidViewabilityManager.class);
+            mockedHyBid.when(HyBid::getViewabilityManager).thenReturn(mockViewabilityManager);
+            mockedHyBid.when(HyBid::getReportingController).thenReturn(mockReportingController);
+
+            mockedTrackingManager.when(() -> TrackingManager.track(any(Context.class), anyString()))
+                    .thenAnswer(i -> {
+                        seq.add("beacon:" + i.getArgument(1));
+                        return null;
+                    });
+
+            // Ensure at least one impression beacon exists so TrackingManager.track is invoked
+            AdData beacon = new AdData();
+            beacon.data = new HashMap<>();
+            beacon.data.put("url", "https://example.com/imp");
+            doReturn(java.util.Collections.singletonList(beacon))
+                    .when(spiedAd).getBeacons(Ad.Beacon.IMPRESSION);
+
+            NativeAd nativeAd = new NativeAd(spiedAd);
+            nativeAd.startTrackingImpression(mockView);
+            nativeAd.onImpression(mockView);
+
+            // OM impression must fire before the impression beacon (OM ordering requirement)
+            assertEquals(
+                    java.util.Arrays.asList("om-impression", "beacon:https://example.com/imp"),
+                    seq);
+        }
+    }
+
+    @Test
+    public void startTrackingImpression_registersContentInfoAsFriendlyObstruction() {
+        try (
+                MockedStatic<HyBid> mockedHyBid = mockStatic(HyBid.class);
+                MockedConstruction<HyBidViewabilityNativeDisplayAdSession> mockedAdSession =
+                        mockConstruction(HyBidViewabilityNativeDisplayAdSession.class)
+        ) {
+            HyBidViewabilityManager mockViewabilityManager = mock(HyBidViewabilityManager.class);
+            mockedHyBid.when(HyBid::getViewabilityManager).thenReturn(mockViewabilityManager);
+            mockedHyBid.when(HyBid::getReportingController).thenReturn(mockReportingController);
+
+            View mockContentInfoView = mock(View.class);
+            doReturn(mockContentInfoView).when(spiedAd).getContentInfo(any(Context.class), any());
+
+            NativeAd nativeAd = new NativeAd(spiedAd);
+            // Content info must be resolved before tracking starts for it to be registered
+            nativeAd.getContentInfo(applicationContext);
+            nativeAd.startTrackingImpression(mockView);
+
+            HyBidViewabilityNativeDisplayAdSession mockSession = mockedAdSession.constructed().get(0);
+            verify(mockSession).addFriendlyObstruction(
+                    eq(mockContentInfoView),
+                    eq(BaseFriendlyObstructionPurpose.OTHER),
+                    eq(FriendlyObstructionReasonConstants.CONTENT_INFO_OBSTRUCTION_REASON));
+        }
+    }
+
+    @Test
+    public void getContentInfo_returnsCachedInstance_soOmRegistersRenderedView() {
+        try (MockedStatic<HyBid> mockedHyBid = mockStatic(HyBid.class)) {
+            mockedHyBid.when(HyBid::getViewabilityManager)
+                    .thenReturn(mock(HyBidViewabilityManager.class));
+            mockedHyBid.when(HyBid::getReportingController).thenReturn(mockReportingController);
+
+            View first = mock(View.class);
+            View second = mock(View.class);
+            doReturn(first, second).when(spiedAd).getContentInfo(any(Context.class), any());
+
+            NativeAd nativeAd = new NativeAd(spiedAd);
+            View rendered = nativeAd.getContentInfo(applicationContext);
+            View again = nativeAd.getContentInfo(applicationContext);
+
+            assertSame(first, rendered);
+            assertSame(rendered, again);
+            verify(spiedAd, times(1)).getContentInfo(any(Context.class), any());
+        }
+    }
+
+    @Test
+    public void startTrackingImpression_doesNotInitSession_whenImpressionAlreadyConfirmed() {
+        try (
+                MockedStatic<HyBid> mockedHyBid = mockStatic(HyBid.class);
+                MockedStatic<TrackingManager> mockedTrackingManager = mockStatic(TrackingManager.class);
+                MockedConstruction<HyBidViewabilityNativeDisplayAdSession> mockedAdSession =
+                        mockConstruction(HyBidViewabilityNativeDisplayAdSession.class)
+        ) {
+            HyBidViewabilityManager mockViewabilityManager = mock(HyBidViewabilityManager.class);
+            mockedHyBid.when(HyBid::getViewabilityManager).thenReturn(mockViewabilityManager);
+            mockedHyBid.when(HyBid::getReportingController).thenReturn(mockReportingController);
+
+            NativeAd nativeAd = new NativeAd(spiedAd);
+            nativeAd.startTrackingImpression(mockView);
+            // Confirm the impression
+            nativeAd.onImpression(mockView);
+
+            HyBidViewabilityNativeDisplayAdSession mockSession = mockedAdSession.constructed().get(0);
+
+            // A second tracking attempt after confirmation must be a no-op for OM init
+            nativeAd.startTrackingImpression(mockView);
+            verify(mockSession, times(1)).initAdSession(eq(mockView), anyList());
+        }
+    }
+
+    @Test
+    public void startTrackingImpression_calledTwice_initializesSessionOnce() {
+        try (
+                MockedStatic<HyBid> mockedHyBid = mockStatic(HyBid.class);
+                MockedConstruction<HyBidViewabilityNativeDisplayAdSession> mockedAdSession =
+                        mockConstruction(HyBidViewabilityNativeDisplayAdSession.class)
+        ) {
+            HyBidViewabilityManager mockViewabilityManager = mock(HyBidViewabilityManager.class);
+            mockedHyBid.when(HyBid::getViewabilityManager).thenReturn(mockViewabilityManager);
+            mockedHyBid.when(HyBid::getReportingController).thenReturn(mockReportingController);
+
+            NativeAd nativeAd = new NativeAd(spiedAd);
+            // Two consecutive starts without an intervening stop (e.g. a re-bind/re-layout)
+            nativeAd.startTrackingImpression(mockView);
+            nativeAd.startTrackingImpression(mockView);
+
+            HyBidViewabilityNativeDisplayAdSession mockSession = mockedAdSession.constructed().get(0);
+            // The duplicate-init guard must keep OM init to a single session start
+            verify(mockSession, times(1)).initAdSession(eq(mockView), anyList());
+            verify(mockSession, times(1)).fireLoaded();
+        }
+    }
+
+    @Test
+    public void stopTracking_withoutPriorStart_doesNotCrash() {
+        try (
+                MockedStatic<HyBid> mockedHyBid = mockStatic(HyBid.class);
+                MockedStatic<ImpressionManager> mockedImpressionManager = mockStatic(ImpressionManager.class);
+                MockedConstruction<HyBidViewabilityNativeDisplayAdSession> mockedAdSession =
+                        mockConstruction(HyBidViewabilityNativeDisplayAdSession.class)
+        ) {
+            HyBidViewabilityManager mockViewabilityManager = mock(HyBidViewabilityManager.class);
+            mockedHyBid.when(HyBid::getViewabilityManager).thenReturn(mockViewabilityManager);
+            mockedHyBid.when(HyBid::getReportingController).thenReturn(mockReportingController);
+
+            NativeAd nativeAd = new NativeAd(spiedAd);
+            // Stop before any start must be safe: no OM init and no impression fired
+            nativeAd.stopTracking();
+
+            HyBidViewabilityNativeDisplayAdSession mockSession = mockedAdSession.constructed().get(0);
+            verify(mockSession, never()).initAdSession(any(View.class), anyList());
+            verify(mockSession, never()).fireImpression();
+        }
+    }
+
+    @Test
+    public void startTracking_afterStop_reinitializesSession() {
+        try (
+                MockedStatic<HyBid> mockedHyBid = mockStatic(HyBid.class);
+                MockedStatic<ImpressionManager> mockedImpressionManager = mockStatic(ImpressionManager.class);
+                MockedConstruction<HyBidViewabilityNativeDisplayAdSession> mockedAdSession =
+                        mockConstruction(HyBidViewabilityNativeDisplayAdSession.class)
+        ) {
+            HyBidViewabilityManager mockViewabilityManager = mock(HyBidViewabilityManager.class);
+            mockedHyBid.when(HyBid::getViewabilityManager).thenReturn(mockViewabilityManager);
+            mockedHyBid.when(HyBid::getReportingController).thenReturn(mockReportingController);
+
+            NativeAd nativeAd = new NativeAd(spiedAd);
+            nativeAd.startTrackingImpression(mockView);
+            nativeAd.stopTracking();
+            // A fresh tracking cycle must be allowed to init OM again once the guard is reset
+            nativeAd.startTrackingImpression(mockView);
+
+            HyBidViewabilityNativeDisplayAdSession mockSession = mockedAdSession.constructed().get(0);
+            verify(mockSession, times(2)).initAdSession(eq(mockView), anyList());
         }
     }
 

@@ -215,6 +215,10 @@ public abstract class RewardedViewModel extends BaseViewModel implements PNAPICo
         return mIsSkippable;
     }
 
+    public boolean isRewardEligible() {
+        return isAdSkippable();
+    }
+
     protected final CloseableContainer.OnCloseListener mCloseListener = this::closeButtonClicked;
     protected final CloseableContainer.OnSkipListener mSkipListener = this::skipButtonClicked;
 

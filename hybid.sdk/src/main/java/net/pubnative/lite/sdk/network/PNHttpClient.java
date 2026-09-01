@@ -22,11 +22,13 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 
 public class PNHttpClient {
@@ -35,8 +37,8 @@ public class PNHttpClient {
 
     private static final Handler sUiHandler = new Handler(Looper.getMainLooper());
 
+    private static final Object sQueueLock = new Object();
     private static final Queue<PendingRequest> sPendingRequests = new ArrayDeque<>();
-    private static final Queue<PendingRequest> sCurrentRequests = new ArrayDeque<>();
 
     private static final int READ_TIMEOUT = 10000;
     private static final int CONNECT_TIMEOUT = 10000;
@@ -100,71 +102,88 @@ public class PNHttpClient {
                                    final boolean shouldReturnOnMainThread,
                                    final boolean shouldRetryIfFail,
                                    final Listener listener) {
-        try {
-            ApiExecutor.getInstance().execute(() -> {
-                NetworkInfo networkInfo = getActiveNetworkInfo(context);
-                if (networkInfo == null || !networkInfo.isConnected()
-                        || (networkInfo.getType() != ConnectivityManager.TYPE_WIFI && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE)) {
-                    if (listener != null) {
-                        Exception noConnectionException = new Exception("{\"status\": \"error\", \"error_message\": \"Unable to connect to URL. No network connection.\"}");
-                        if (shouldReturnOnMainThread) {
-                            sUiHandler.post(() -> listener.onFailure(noConnectionException));
-                        } else {
-                            listener.onFailure(noConnectionException);
-                        }
-                    }
-                } else {
-                    final Response response = sendRequest(url, headers, postBody);
-                    if (response.exception != null) {
-                        if (shouldRetryIfFail && !TextUtils.isEmpty(url)) {
-                            sPendingRequests.add(new PendingRequest(url, postBody, headers, MAX_RETRIES, RETRY_MULTIPLIER));
-                        }
+        makeRequest(context, url, headers, postBody, shouldReturnOnMainThread, shouldRetryIfFail, ApiExecutor.getInstance(), listener);
+    }
 
-                        if (shouldReturnOnMainThread) {
-                            sUiHandler.post(() -> {
-                                if (listener != null) {
-                                    listener.onFailure(response.exception);
-                                }
-                            });
-                        } else {
-                            if (listener != null) {
-                                listener.onFailure(response.exception);
-                            }
-                        }
-                    } else {
-                        if (shouldReturnOnMainThread) {
-                            sUiHandler.post(() -> {
-                                if (listener != null) {
-                                    listener.onSuccess(response.response, response.headers);
-                                }
-                            });
-                        } else {
-                            if (listener != null) {
-                                listener.onSuccess(response.response, response.headers);
-                            }
-                        }
-                    }
-                    if (listener != null) {
-                        if (shouldReturnOnMainThread) {
-                            sUiHandler.post(() -> listener.onFinally(url, response.responseCode));
-                        } else {
-                            listener.onFinally(url, response.responseCode);
-                        }
-                    }
-                    performPendingRequests(context);
+    public static void makeRequest(final Context context,
+                                   final String url,
+                                   final Map<String, String> headers,
+                                   final String postBody,
+                                   final boolean shouldReturnOnMainThread,
+                                   final boolean shouldRetryIfFail,
+                                   final Executor executor,
+                                   final Listener listener) {
+        try {
+            executor.execute(() -> {
+                if (!isConnected(getActiveNetworkInfo(context))) {
+                    notifyNoConnection(listener, shouldReturnOnMainThread);
+                    return;
                 }
+
+                final Response response = sendRequest(url, headers, postBody);
+                deliverResponse(response, url, postBody, headers, shouldReturnOnMainThread, shouldRetryIfFail, executor, listener);
+                performPendingRequests(context);
             });
         } catch (RejectedExecutionException exception) {
             Logger.e(TAG, url, exception);
-            if (listener != null) {
-                Exception tooManyRequestsException = new Exception("{\"status\": \"error\", \"error_message\": \"Unable to connect to URL. Too many requests.\"}");
-                if (shouldReturnOnMainThread) {
-                    sUiHandler.post(() -> listener.onFailure(tooManyRequestsException));
-                } else {
-                    listener.onFailure(tooManyRequestsException);
-                }
+            if (shouldRetryIfFail && !TextUtils.isEmpty(url)) {
+                enqueueForRetry(new PendingRequest(url, postBody, headers, MAX_RETRIES, RETRY_MULTIPLIER, executor));
             }
+            notifyRejected(listener, shouldReturnOnMainThread);
         }
+    }
+
+    private static void deliverResponse(Response response,
+                                        String url,
+                                        String postBody,
+                                        Map<String, String> headers,
+                                        boolean shouldReturnOnMainThread,
+                                        boolean shouldRetryIfFail,
+                                        Executor executor,
+                                        Listener listener) {
+        if (response.exception != null) {
+            if (shouldRetryIfFail && !TextUtils.isEmpty(url)) {
+                enqueueForRetry(new PendingRequest(url, postBody, headers, MAX_RETRIES, RETRY_MULTIPLIER, executor));
+            }
+            if (listener != null) {
+                deliver(shouldReturnOnMainThread, () -> listener.onFailure(response.exception));
+            }
+        } else if (listener != null) {
+            deliver(shouldReturnOnMainThread, () -> listener.onSuccess(response.response, response.headers));
+        }
+
+        if (listener != null) {
+            deliver(shouldReturnOnMainThread, () -> listener.onFinally(url, response.responseCode));
+        }
+    }
+
+    private static void notifyNoConnection(Listener listener, boolean shouldReturnOnMainThread) {
+        if (listener == null) {
+            return;
+        }
+        Exception noConnectionException = new Exception("{\"status\": \"error\", \"error_message\": \"Unable to connect to URL. No network connection.\"}");
+        deliver(shouldReturnOnMainThread, () -> listener.onFailure(noConnectionException));
+    }
+
+    private static void notifyRejected(Listener listener, boolean shouldReturnOnMainThread) {
+        if (listener == null) {
+            return;
+        }
+        Exception tooManyRequestsException = new Exception("{\"status\": \"error\", \"error_message\": \"Unable to connect to URL. Too many requests.\"}");
+        deliver(shouldReturnOnMainThread, () -> listener.onFailure(tooManyRequestsException));
+    }
+
+    private static void deliver(boolean shouldReturnOnMainThread, Runnable action) {
+        if (shouldReturnOnMainThread) {
+            sUiHandler.post(action);
+        } else {
+            action.run();
+        }
+    }
+
+    private static boolean isConnected(NetworkInfo networkInfo) {
+        return networkInfo != null && networkInfo.isConnected()
+                && (networkInfo.getType() == ConnectivityManager.TYPE_WIFI || networkInfo.getType() == ConnectivityManager.TYPE_MOBILE);
     }
 
     private static Response sendRequest(String url,
@@ -257,48 +276,64 @@ public class PNHttpClient {
         }
     }
 
+    // Snapshots and drains the pending queue under sQueueLock, then processes it outside the lock.
     private static void performPendingRequests(Context context) {
-        if (sCurrentRequests.isEmpty() && !sPendingRequests.isEmpty()) {
-            sCurrentRequests.addAll(sPendingRequests);
+        List<PendingRequest> requestsToProcess;
+        synchronized (sQueueLock) {
+            requestsToProcess = new ArrayList<>(sPendingRequests);
             sPendingRequests.clear();
         }
 
-        if (!sCurrentRequests.isEmpty()) {
-            for (PendingRequest pendingRequest : sCurrentRequests) {
-                makePendingRequest(context, pendingRequest);
-            }
-            sCurrentRequests.clear();
+        for (PendingRequest pendingRequest : requestsToProcess) {
+            makePendingRequest(context, pendingRequest);
         }
     }
 
-    public static synchronized void makePendingRequest(final Context context,
-                                                       final PendingRequest pendingRequest) {
-        if (pendingRequest != null) {
-            if (pendingRequest.shouldRetry()) {
-                try {
-                    ApiExecutor.getInstance().execute(() -> {
-                        NetworkInfo networkInfo = getActiveNetworkInfo(context);
-                        if (networkInfo != null && networkInfo.isConnected()
-                                && (networkInfo.getType() == ConnectivityManager.TYPE_WIFI || networkInfo.getType() == ConnectivityManager.TYPE_MOBILE)) {
-                            pendingRequest.countRetry();
-                            final Response response = sendRequest(pendingRequest.getUrl(), pendingRequest.getHeaders(), pendingRequest.getPostBody());
-                            if (response.exception != null
-                                    && !pendingRequest.isLimitReached()
-                                    && !TextUtils.isEmpty(pendingRequest.getUrl())) {
-                                sPendingRequests.add(pendingRequest);
-                            }
-                        } else {
-                            sPendingRequests.add(pendingRequest);
-                        }
-                    });
-                } catch (RejectedExecutionException exception) {
-                    Logger.e(TAG, pendingRequest.getUrl(), exception);
-                    sPendingRequests.add(pendingRequest);
-                }
-            } else {
-                pendingRequest.countAttempt();
-                sPendingRequests.add(pendingRequest);
+    // Not synchronized: sQueueLock already guards the shared queue and PendingRequest guards its own state.
+    public static void makePendingRequest(final Context context,
+                                          final PendingRequest pendingRequest) {
+        if (pendingRequest == null) {
+            return;
+        }
+
+        // Every re-enqueue path below checks isLimitReached() to bound retries.
+        if (!pendingRequest.shouldRetry()) {
+            pendingRequest.countAttempt();
+            if (!pendingRequest.isLimitReached()) {
+                enqueueForRetry(pendingRequest);
             }
+            return;
+        }
+
+        pendingRequest.countRetry();
+        try {
+            pendingRequest.getExecutor().execute(() -> {
+                if (isConnected(getActiveNetworkInfo(context))) {
+                    final Response response = sendRequest(pendingRequest.getUrl(), pendingRequest.getHeaders(), pendingRequest.getPostBody());
+                    if (response.exception != null
+                            && !pendingRequest.isLimitReached()
+                            && !TextUtils.isEmpty(pendingRequest.getUrl())) {
+                        enqueueForRetry(pendingRequest);
+                    }
+                } else {
+                    requeueIfWithinLimit(pendingRequest);
+                }
+            });
+        } catch (RejectedExecutionException exception) {
+            Logger.e(TAG, pendingRequest.getUrl(), exception);
+            requeueIfWithinLimit(pendingRequest);
+        }
+    }
+
+    private static void requeueIfWithinLimit(PendingRequest pendingRequest) {
+        if (!pendingRequest.isLimitReached()) {
+            enqueueForRetry(pendingRequest);
+        }
+    }
+
+    private static void enqueueForRetry(PendingRequest pendingRequest) {
+        synchronized (sQueueLock) {
+            sPendingRequests.add(pendingRequest);
         }
     }
 }

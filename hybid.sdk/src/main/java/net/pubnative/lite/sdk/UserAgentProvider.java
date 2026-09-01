@@ -102,13 +102,9 @@ public class UserAgentProvider {
 
     private Architecture getArchitecture() {
         String abi;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            String[] abis = Build.SUPPORTED_ABIS;
-            if (abis != null && abis.length > 0) {
-                abi = abis[0];
-            } else {
-                abi = Build.CPU_ABI;
-            }
+        String[] abis = Build.SUPPORTED_ABIS;
+        if (abis != null && abis.length > 0) {
+            abi = abis[0];
         } else {
             abi = Build.CPU_ABI;
         }

@@ -361,5 +361,22 @@ public class HyBidViewabilityManagerTest {
         assertNotNull(props);
     }
 
+    @Test
+    public void testGetNativeDisplayAdSessionConfiguration() {
+        AdSessionConfiguration mockAdSessionConfiguration = mock(AdSessionConfiguration.class);
+
+        try (MockedStatic<AdSessionConfiguration> mockedStatic = mockStatic(AdSessionConfiguration.class)) {
+            mockedStatic.when(() -> AdSessionConfiguration.createAdSessionConfiguration(
+                            eq(CreativeType.NATIVE_DISPLAY),
+                            eq(ImpressionType.BEGIN_TO_RENDER),
+                            eq(Owner.NATIVE),
+                            eq(Owner.NONE),
+                            eq(false)))
+                    .thenReturn(mockAdSessionConfiguration);
+
+            assertEquals(mockAdSessionConfiguration, viewabilityManager.getNativeDisplayAdSessionConfiguration());
+        }
+    }
+
 
 }

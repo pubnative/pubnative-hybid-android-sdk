@@ -105,6 +105,10 @@ public class ViewControllerVast implements View.OnClickListener {
     private final Handler mUiHandler = new Handler(Looper.getMainLooper());
     private boolean mIsDestroyed = false;
 
+    private View.OnLayoutChangeListener mVideoPlayerLayoutChangeListener;
+    private View.OnLayoutChangeListener mEndCardLayoutChangeListener;
+    private View.OnLayoutChangeListener mLastCustomEndCardLayoutChangeListener;
+
     public ViewControllerVast(VideoAdController adController,
                               boolean isFullscreen,
                               Integer endCardCloseDelay,
@@ -368,13 +372,34 @@ public class ViewControllerVast implements View.OnClickListener {
         FrameLayout.LayoutParams oldParams = (FrameLayout.LayoutParams) mVideoPlayerLayout.getLayoutParams();
         ViewGroup.LayoutParams newParams = Utils.calculateNewLayoutParams(oldParams, width, height, mBannerView.getWidth(), mBannerView.getHeight(), Utils.StretchOption.NO_STRETCH);
         mVideoPlayerLayout.setLayoutParams(newParams);
-        mVideoPlayerLayout.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-            mVideoPlayerLayout.post(() -> {
-                FrameLayout.LayoutParams oldParams1 = (FrameLayout.LayoutParams) mVideoPlayerLayout.getLayoutParams();
-                ViewGroup.LayoutParams newParams1 = Utils.calculateNewLayoutParams(oldParams1, width, height, mBannerView.getWidth(), mBannerView.getHeight(), Utils.StretchOption.NO_STRETCH);
-                mVideoPlayerLayout.setLayoutParams(newParams1);
-            });
-        });
+        // Remove-before-add so repeated play/resume calls don't stack listeners
+        if (mVideoPlayerLayoutChangeListener != null) {
+            mVideoPlayerLayout.removeOnLayoutChangeListener(mVideoPlayerLayoutChangeListener);
+        }
+        mVideoPlayerLayoutChangeListener = (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
+                mVideoPlayerLayout.post(() -> reapplyVideoPlayerSize(width, height));
+        mVideoPlayerLayout.addOnLayoutChangeListener(mVideoPlayerLayoutChangeListener);
+    }
+
+    // re-apply only on real size change. calculateNewLayoutParams mutates its arg in place,
+    // so snapshot the old size and pass a copy; an unconditional re-apply loops requestLayout every frame.
+    private void reapplyVideoPlayerSize(int width, int height) {
+        FrameLayout.LayoutParams current = (FrameLayout.LayoutParams) mVideoPlayerLayout.getLayoutParams();
+        if (current == null) return;
+        int oldWidth = current.width;
+        int oldHeight = current.height;
+        ViewGroup.LayoutParams newParams = Utils.calculateNewLayoutParams(new FrameLayout.LayoutParams(current), width, height, mBannerView.getWidth(), mBannerView.getHeight(), Utils.StretchOption.NO_STRETCH);
+        if (oldWidth != newParams.width || oldHeight != newParams.height) {
+            mVideoPlayerLayout.setLayoutParams(newParams);
+        }
+    }
+
+    //re-apply MATCH_PARENT only when not already set; an unconditional re-apply loops requestLayout.
+    private void ensureEndCardMatchParent(View endCardView) {
+        ViewGroup.LayoutParams lp = endCardView.getLayoutParams();
+        if (lp == null || lp.width != ViewGroup.LayoutParams.MATCH_PARENT || lp.height != ViewGroup.LayoutParams.MATCH_PARENT) {
+            endCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        }
     }
 
     public void postDelayed(Runnable action, long delayMillis) {
@@ -422,73 +447,82 @@ public class ViewControllerVast implements View.OnClickListener {
         return mMuteState;
     }
 
+    // Used in showEndCard/showLastCustomEndCard; extracted to keep those methods' cognitive complexity low.
+    private HyBidEndCardView.EndCardViewListener createEndCardViewListener(HyBidEndCardView endCardView) {
+        return new HyBidEndCardView.EndCardViewListener() {
+            @Override
+            public void onClick(String url, Boolean isCustomEndCard, String endCardType) {
+                if (isCustomEndCard) {
+                    validateOpenURLClicked(null, UrlClickSource.CUSTOM_END_CARD);
+                    mAdController.onCustomEndCardClick(endCardType);
+                } else {
+                    validateOpenURLClicked(url, UrlClickSource.DEFAULT_END_CARD);
+                    mAdController.onDefaultEndCardClick(endCardType);
+                }
+            }
+
+            @Override
+            public void onSkip() {
+                skipEndCard();
+            }
+
+            @Override
+            public void onClose(Boolean isCustomEndCard) {
+                if (mAdController != null) {
+                    mAdController.onEndCardClosed(isCustomEndCard);
+                }
+                closeSelf();
+            }
+
+            @Override
+            public void onShow(Boolean isCustomEndCard, String endCardType) {
+                if (mOpenUrlLayout != null) {
+                    mOpenUrlLayout.setVisibility(View.GONE);
+                }
+                if (isCustomEndCard) {
+                    mAdController.onCustomEndCardShow(endCardType);
+                    endCardView.bringToFront();
+                    if (ctaView != null) {
+                        ctaView.hide();
+                    }
+                } else {
+                    mAdController.onDefaultEndCardShow(endCardType);
+                    if (ctaView != null) {
+                        ctaView.show();
+                    }
+                }
+            }
+
+            @Override
+            public void onLoadSuccess(Boolean isCustomEndCard) {
+                if (mAdController != null) {
+                    mAdController.onEndCardLoadSuccess(isCustomEndCard);
+                }
+            }
+
+            @Override
+            public void onLoadFail(Boolean isCustomEndCard) {
+                if (mAdController != null) {
+                    mAdController.onEndCardLoadFail(isCustomEndCard);
+                }
+            }
+        };
+    }
+
     public void showEndCard(EndCardData endCardData, String imageUri, Boolean isLastEndCard, CloseButtonListener closeButtonListener) {
         if (mEndCardView != null) {
-            mEndCardView.setEndCardViewListener(new HyBidEndCardView.EndCardViewListener() {
-                @Override
-                public void onClick(String url, Boolean isCustomEndCard, String endCardType) {
-                    if (isCustomEndCard) {
-                        validateOpenURLClicked(null, UrlClickSource.CUSTOM_END_CARD);
-                        mAdController.onCustomEndCardClick(endCardType);
-                    } else {
-                        validateOpenURLClicked(url, UrlClickSource.DEFAULT_END_CARD);
-                        mAdController.onDefaultEndCardClick(endCardType);
-                    }
-                }
-
-                @Override
-                public void onSkip() {
-                    skipEndCard();
-                }
-
-                @Override
-                public void onClose(Boolean isCustomEndCard) {
-                    if (mAdController != null) {
-                        mAdController.onEndCardClosed(isCustomEndCard);
-                    }
-                    closeSelf();
-                }
-
-                @Override
-                public void onShow(Boolean isCustomEndCard, String endCardType) {
-                    if (mOpenUrlLayout != null) {
-                        mOpenUrlLayout.setVisibility(View.GONE);
-                    }
-                    if (isCustomEndCard) {
-                        mAdController.onCustomEndCardShow(endCardType);
-                        mEndCardView.bringToFront();
-                        if (ctaView != null) {
-                            ctaView.hide();
-                        }
-                    } else {
-                        mAdController.onDefaultEndCardShow(endCardType);
-                        if (ctaView != null) {
-                            ctaView.show();
-                        }
-                    }
-                }
-
-                @Override
-                public void onLoadSuccess(Boolean isCustomEndCard) {
-                    if (mAdController != null) {
-                        mAdController.onEndCardLoadSuccess(isCustomEndCard);
-                    }
-                }
-
-                @Override
-                public void onLoadFail(Boolean isCustomEndCard) {
-                    if (mAdController != null) {
-                        mAdController.onEndCardLoadFail(isCustomEndCard);
-                    }
-                }
-            });
+            mEndCardView.setEndCardViewListener(createEndCardViewListener(mEndCardView));
             SkipOffset endCardCloseDelay = getEndCardCloseDelay();
             mEndCardView.setSkipOffset(endCardCloseDelay);
             mEndCardView.show(endCardData, imageUri);
 
-            mEndCardView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-                mEndCardView.post(() -> mEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)));
-            });
+            // Remove-before-add so repeated shows/replays don't stack listeners
+            if (mEndCardLayoutChangeListener != null) {
+                mEndCardView.removeOnLayoutChangeListener(mEndCardLayoutChangeListener);
+            }
+            mEndCardLayoutChangeListener = (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
+                    mEndCardView.post(() -> ensureEndCardMatchParent(mEndCardView));
+            mEndCardView.addOnLayoutChangeListener(mEndCardLayoutChangeListener);
 
             if (mIsFullscreen) {
                 if (isLastEndCard) {
@@ -496,79 +530,34 @@ public class ViewControllerVast implements View.OnClickListener {
                 } else {
                     mEndCardView.showSkipButton();
                 }
+            } else {
+                // block WebView from holding focus so it can't pin the host feed's
+                // scroll after a click-through. Blocks focus only; CTA clicks still work.
+                mEndCardView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
             }
         }
     }
 
     public void showLastCustomEndCard(EndCardData endCardData, String imageUri, CloseButtonListener closeButtonListener) {
         if (mLastCustomEndCardView != null) {
-            mLastCustomEndCardView.setEndCardViewListener(new HyBidEndCardView.EndCardViewListener() {
-                @Override
-                public void onClick(String url, Boolean isCustomEndCard, String endCardType) {
-                    if (isCustomEndCard) {
-                        validateOpenURLClicked(null, UrlClickSource.CUSTOM_END_CARD);
-                        mAdController.onCustomEndCardClick(endCardType);
-                    } else {
-                        validateOpenURLClicked(url, UrlClickSource.DEFAULT_END_CARD);
-                        mAdController.onDefaultEndCardClick(endCardType);
-                    }
-                }
-
-                @Override
-                public void onSkip() {
-                    skipEndCard();
-                }
-
-                @Override
-                public void onClose(Boolean isCustomEndCard) {
-                    if (mAdController != null) {
-                        mAdController.onEndCardClosed(isCustomEndCard);
-                    }
-                    closeSelf();
-                }
-
-                @Override
-                public void onShow(Boolean isCustomEndCard, String endCardType) {
-                    if (mOpenUrlLayout != null) {
-                        mOpenUrlLayout.setVisibility(View.GONE);
-                    }
-                    if (isCustomEndCard) {
-                        mAdController.onCustomEndCardShow(endCardType);
-                        mLastCustomEndCardView.bringToFront();
-                        if (ctaView != null) {
-                            ctaView.hide();
-                        }
-                    } else {
-                        mAdController.onDefaultEndCardShow(endCardType);
-                        if (ctaView != null) {
-                            ctaView.show();
-                        }
-                    }
-                }
-
-                @Override
-                public void onLoadSuccess(Boolean isCustomEndCard) {
-                    if (mAdController != null) {
-                        mAdController.onEndCardLoadSuccess(isCustomEndCard);
-                    }
-                }
-
-                @Override
-                public void onLoadFail(Boolean isCustomEndCard) {
-                    if (mAdController != null) {
-                        mAdController.onEndCardLoadFail(isCustomEndCard);
-                    }
-                }
-            });
+            mLastCustomEndCardView.setEndCardViewListener(createEndCardViewListener(mLastCustomEndCardView));
             SkipOffset endCardCloseDelay = getEndCardCloseDelay();
             mLastCustomEndCardView.setSkipOffset(endCardCloseDelay);
             mEndCardView.hideSkipButton();
             mLastCustomEndCardView.show(endCardData, imageUri);
-            mLastCustomEndCardView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-                mLastCustomEndCardView.post(() -> mLastCustomEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)));
-            });
+            // Remove-before-add so repeated shows/replays don't stack listeners
+            if (mLastCustomEndCardLayoutChangeListener != null) {
+                mLastCustomEndCardView.removeOnLayoutChangeListener(mLastCustomEndCardLayoutChangeListener);
+            }
+            mLastCustomEndCardLayoutChangeListener = (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
+                    mLastCustomEndCardView.post(() -> ensureEndCardMatchParent(mLastCustomEndCardView));
+            mLastCustomEndCardView.addOnLayoutChangeListener(mLastCustomEndCardLayoutChangeListener);
             if (mIsFullscreen) {
                 mLastCustomEndCardView.showCloseButton(closeButtonListener);
+            } else {
+                //block WebView from holding focus so it can't pin the host feed's
+                // scroll after a click-through. Blocks focus only; CTA clicks still work.
+                mLastCustomEndCardView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
             }
         }
     }
@@ -920,11 +909,7 @@ public class ViewControllerVast implements View.OnClickListener {
 
     private SkipOffset getEndCardCloseDelay() {
         if (mRemoteEndCardCloseDelay != null) {
-            if (mRemoteEndCardCloseDelay > SkipOffsetManager.getMaximumEndcardCloseDelay()) {
-                return new SkipOffset(SkipOffsetManager.getMaximumEndcardCloseDelay(), true);
-            } else {
-                return new SkipOffset(mRemoteEndCardCloseDelay, true);
-            }
+            return new SkipOffset(mRemoteEndCardCloseDelay, true);
         } else {
             return new SkipOffset(SkipOffsetManager.getDefaultEndcardSkipOffset(), false);
         }

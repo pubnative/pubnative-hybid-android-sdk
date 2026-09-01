@@ -6,6 +6,7 @@ package net.pubnative.lite.sdk.rewarded;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -83,6 +84,8 @@ public class HyBidRewardedBroadcastReceiverTest {
                 HyBidRewardedBroadcastReceiver.Action.from("net.pubnative.hybid.rewarded.click"));
         assertEquals(HyBidRewardedBroadcastReceiver.Action.CLOSE,
                 HyBidRewardedBroadcastReceiver.Action.from("net.pubnative.hybid.rewarded.close"));
+        assertEquals(HyBidRewardedBroadcastReceiver.Action.CLOSE_WITHOUT_REWARD,
+                HyBidRewardedBroadcastReceiver.Action.from("net.pubnative.hybid.rewarded.close_without_reward"));
         assertEquals(HyBidRewardedBroadcastReceiver.Action.ERROR,
                 HyBidRewardedBroadcastReceiver.Action.from("net.pubnative.hybid.rewarded.error"));
         assertEquals(HyBidRewardedBroadcastReceiver.Action.VIDEO_ERROR,
@@ -130,6 +133,14 @@ public class HyBidRewardedBroadcastReceiverTest {
         broadcastReceiver.destroy();
         broadcastReceiver.register();
         verify(mockLocalBroadcastManager, never()).registerReceiver(any(BroadcastReceiver.class), any(IntentFilter.class));
+    }
+
+    @Test
+    public void register_includesCloseWithoutRewardAction() {
+        broadcastReceiver.register();
+        ArgumentCaptor<IntentFilter> filterArgumentCaptor = ArgumentCaptor.forClass(IntentFilter.class);
+        verify(mockLocalBroadcastManager).registerReceiver(eq(broadcastReceiver), filterArgumentCaptor.capture());
+        assertTrue(filterArgumentCaptor.getValue().matchAction(HyBidRewardedBroadcastReceiver.Action.CLOSE_WITHOUT_REWARD.getId()));
     }
 
     @Test
@@ -226,6 +237,13 @@ public class HyBidRewardedBroadcastReceiverTest {
         broadcastReceiver.handleAction(HyBidRewardedBroadcastReceiver.Action.CLOSE, mockPresenter, null, mockPresenterListener, null, null);
         verify(mockPresenterListener).onRewardedFinished(mockPresenter);
         verify(mockPresenterListener).onRewardedClosed(mockPresenter);
+    }
+
+    @Test
+    public void handleAction_forCloseWithoutReward_callsClosedListenerOnly() {
+        broadcastReceiver.handleAction(HyBidRewardedBroadcastReceiver.Action.CLOSE_WITHOUT_REWARD, mockPresenter, null, mockPresenterListener, null, null);
+        verify(mockPresenterListener).onRewardedClosed(mockPresenter);
+        verify(mockPresenterListener, never()).onRewardedFinished(any());
     }
 
     @Test

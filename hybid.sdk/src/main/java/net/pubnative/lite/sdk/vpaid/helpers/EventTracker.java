@@ -11,6 +11,8 @@ import android.util.Log;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.tracker.ReportingTracker;
 import net.pubnative.lite.sdk.network.PNHttpClient;
+import net.pubnative.lite.sdk.network.TrackingExecutor;
+import net.pubnative.lite.sdk.vpaid.enums.EventConstants;
 import net.pubnative.lite.sdk.vpaid.macros.MacroHelper;
 import net.pubnative.lite.sdk.vpaid.models.vast.Tracking;
 
@@ -26,6 +28,18 @@ public class EventTracker {
 
     private EventTracker() {
 
+    }
+
+    // Non-retryable: mute/unmute/pause/resume and progress events; quartiles and everything else stay retry-eligible.
+    private static boolean isRetryEligible(String eventName) {
+        if (TextUtils.isEmpty(eventName)) {
+            return true;
+        }
+        return !(EventConstants.MUTE.equalsIgnoreCase(eventName)
+                || EventConstants.UNMUTE.equalsIgnoreCase(eventName)
+                || EventConstants.PAUSE.equalsIgnoreCase(eventName)
+                || EventConstants.RESUME.equalsIgnoreCase(eventName)
+                || EventConstants.PROGRESS.equalsIgnoreCase(eventName));
     }
 
     public static synchronized void postEventByType(Context context, List<Tracking> events, String eventType, MacroHelper macroHelper, boolean ignoreIfExist) {
@@ -67,7 +81,8 @@ public class EventTracker {
         }
 
         String finalEventName = name;
-        PNHttpClient.makeRequest(context, processedUrl, headers, null, false, new PNHttpClient.Listener() {
+        boolean shouldRetryIfFail = isRetryEligible(eventName);
+        PNHttpClient.makeRequest(context, processedUrl, headers, null, false, shouldRetryIfFail, TrackingExecutor.getInstance(), new PNHttpClient.Listener() {
             @Override
             public void onSuccess(String response, Map<String, List<String>> headers) {
                 Log.d("onSuccess", response);

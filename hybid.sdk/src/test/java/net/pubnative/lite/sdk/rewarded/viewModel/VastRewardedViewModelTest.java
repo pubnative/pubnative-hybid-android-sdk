@@ -4,7 +4,9 @@
 //
 package net.pubnative.lite.sdk.rewarded.viewModel;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
@@ -156,6 +158,26 @@ public class VastRewardedViewModelTest {
     public void testOnVolumeChanged_delegatesToVideoAd() {
         viewModel.onVolumeChanged();
         verify(mockVideoAd).onVolumeChanged();
+    }
+
+    @Test
+    public void testIsRewardEligible_notFinishedNotSkippable_false() {
+        assertFalse(viewModel.isRewardEligible());
+    }
+
+    @Test
+    public void testIsRewardEligible_skippableNoEndCard_true() {
+        replacePrivateVariableWithMock(RewardedViewModel.class, "mIsSkippable", true);
+        assertTrue(viewModel.isRewardEligible());
+    }
+
+    @Test
+    public void testIsRewardEligible_videoFinishedEndCardPending_true() {
+        // Video finished but end-card close-timer hasn't elapsed - mIsSkippable still false.
+        replacePrivateVariableWithMock(VastRewardedViewModel.class, "mIsVideoFinished", true);
+        replacePrivateVariableWithMock(RewardedViewModel.class, "mIsSkippable", false);
+
+        assertTrue(viewModel.isRewardEligible());
     }
 
     @Test

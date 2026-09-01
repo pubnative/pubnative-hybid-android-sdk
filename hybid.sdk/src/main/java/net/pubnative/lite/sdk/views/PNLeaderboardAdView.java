@@ -4,7 +4,6 @@
 //
 package net.pubnative.lite.sdk.views;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.util.AttributeSet;
 
@@ -25,7 +24,6 @@ public class PNLeaderboardAdView extends HyBidLeaderboardAdView {
         super(context, attrs, defStyleAttr);
     }
 
-    @TargetApi(21)
     public PNLeaderboardAdView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }

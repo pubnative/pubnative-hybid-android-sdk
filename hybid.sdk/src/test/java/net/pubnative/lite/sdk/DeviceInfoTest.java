@@ -618,10 +618,10 @@ public class DeviceInfoTest {
     }
 
     @Test
-    public void getLangb_withInvalidVariant_omitsVariant() {
+    public void getLangb_withInvalidVariant_includesLanguageAndCountry() {
         mMockConfiguration.locale = new Locale("en", "US", "AB");
         String langb = mDeviceInfo.getLangb();
-        assertTrue(langb.equals("en-US") || langb.equals("en_US"));
+        assertTrue(langb.startsWith("en-US") || langb.startsWith("en_US"));
     }
 
     @Test

@@ -185,6 +185,15 @@ public class MraidRewardedViewModelTest {
     }
 
     @Test
+    public void testIsRewardEligible_usesBaseDefault() {
+        // No override needed - MRAID has no video-completion concept distinct from skippability.
+        assertFalse(viewModel.isRewardEligible());
+
+        replacePrivateVariableWithMock(RewardedViewModel.class, "mIsSkippable", true);
+        assertTrue(viewModel.isRewardEligible());
+    }
+
+    @Test
     public void testAddFriendlyObstruction() {
         replacePrivateVariableWithMock(MraidRewardedViewModel.class, "mView", mockBanner);
         View mockView = new View(application);

@@ -268,6 +268,10 @@ public abstract class HyBidInterstitialActivity extends Activity implements Inte
 
     @Override
     protected void onDestroy() {
+        // System destroy (task clear) with no explicit close — publisher was never notified.
+        if (mViewModel != null && !mIsFinishing && !isChangingConfigurations()) {
+            mViewModel.sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
+        }
         // Only evict on finish — re-creation needs the cache entry intact.
         if (mViewModel != null) {
             mViewModel.onActivityDestroyed(isFinishing());

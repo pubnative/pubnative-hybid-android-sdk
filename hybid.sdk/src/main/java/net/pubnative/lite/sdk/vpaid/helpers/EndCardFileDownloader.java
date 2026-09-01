@@ -16,9 +16,19 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+/**
+ * @deprecated No longer used by the SDK. FileLoader now decodes the end card from the same response
+ * it read the headers from, instead of opening a second request through this class. Kept only to
+ * avoid removing a public type outside a planned API change; safe to delete once that is agreed.
+ */
+@Deprecated
 public class EndCardFileDownloader {
     private static final String TAG = EndCardFileDownloader.class.getSimpleName();
 
+    /**
+     * @deprecated See {@link EndCardFileDownloader}.
+     */
+    @Deprecated
     public static Bitmap mLoad(String string) {
         URL url = mStringToURL(string);
         if (url == null) {

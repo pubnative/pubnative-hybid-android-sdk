@@ -176,17 +176,15 @@ public class VgiIdManager {
     }
 
     private long getBatteryCapacity(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            BatteryManager mBatteryManager = (BatteryManager) context.getSystemService(Context.BATTERY_SERVICE);
-            if (mBatteryManager != null) {
-                Integer chargeCounter = mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
-                Integer capacity = mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+        BatteryManager mBatteryManager = (BatteryManager) context.getSystemService(Context.BATTERY_SERVICE);
+        if (mBatteryManager != null) {
+            Integer chargeCounter = mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
+            Integer capacity = mBatteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
 
-                if (chargeCounter == Integer.MIN_VALUE || capacity == Integer.MIN_VALUE || capacity == 0)
-                    return -1;
+            if (chargeCounter == Integer.MIN_VALUE || capacity == Integer.MIN_VALUE || capacity == 0)
+                return -1;
 
-                return (chargeCounter / capacity) * 100L;
-            }
+            return (chargeCounter / capacity) * 100L;
         }
         return -1;
     }

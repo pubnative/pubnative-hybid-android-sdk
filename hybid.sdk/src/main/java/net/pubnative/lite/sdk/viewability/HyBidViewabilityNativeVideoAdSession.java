@@ -29,9 +29,20 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityAdSess
 
     private final Integer skipOffset;
 
+    private boolean rewarded = false;
+
     public HyBidViewabilityNativeVideoAdSession(BaseViewabilityManager viewabilityManager, Integer skipOffset) {
         super(viewabilityManager);
         this.skipOffset = skipOffset;
+    }
+
+    /**
+     * Rewarded video ads must always be reported as non-skippable to OM SDK,
+     * regardless of any skip offset. This is set after construction (once the ad
+     * is flagged as rewarded) but before {@link #fireLoaded()} is called.
+     */
+    public void setRewarded(boolean rewarded) {
+        this.rewarded = rewarded;
     }
 
     public void initAdSession(View view, List<BaseVerificationScriptResource> verificationScriptResources) {
@@ -78,7 +89,7 @@ public class HyBidViewabilityNativeVideoAdSession extends HyBidViewabilityAdSess
             if (shouldSkipViewabilityMeasurement())
                 return;
             Object vastProperties;
-            if (skipOffset != null && skipOffset > -1) {
+            if (!rewarded && skipOffset != null && skipOffset > -1) {
                 vastProperties = viewabilityManager.createVastPropertiesForSkippableMedia(skipOffset);
             } else {
                 vastProperties = viewabilityManager.createVastPropertiesForNonSkippableMedia();

@@ -476,4 +476,9 @@ public class VastRewardedViewModel extends RewardedViewModel implements AdPresen
     public boolean hasReducedCloseSize() {
         return false;
     }
+
+    @Override
+    public boolean isRewardEligible() {
+        return mIsSkippable || mIsVideoFinished;
+    }
 }

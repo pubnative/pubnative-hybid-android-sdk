@@ -19,6 +19,7 @@ import net.pubnative.lite.sdk.models.request.OpenRTBAdRequest;
 import net.pubnative.lite.sdk.models.response.Bid;
 import net.pubnative.lite.sdk.models.response.OpenRTBResponse;
 import net.pubnative.lite.sdk.models.response.SeatBid;
+import net.pubnative.lite.sdk.network.ApiExecutor;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.utils.AdRequestRegistry;
 import net.pubnative.lite.sdk.utils.MarkupUtils;
@@ -283,7 +284,7 @@ public final class OpenRTBApiClient implements ApiClient {
 
             if (!TextUtils.isEmpty(winUrl)) {
                 // Notify the auction win
-                PNHttpClient.makeRequest(mContext, winUrl, null, null, new PNHttpClient.Listener() {
+                makeWinNoticeRequest(winUrl, new PNHttpClient.Listener() {
 
                     @Override
                     public void onSuccess(String response, Map<String, List<String>> headers) {
@@ -298,7 +299,7 @@ public final class OpenRTBApiClient implements ApiClient {
             }
         } else {
             if (!TextUtils.isEmpty(winUrl)) {
-                PNHttpClient.makeRequest(mContext, winUrl, null, null, new PNHttpClient.Listener() {
+                makeWinNoticeRequest(winUrl, new PNHttpClient.Listener() {
                     @Override
                     public void onSuccess(String response, Map<String, List<String>> headers) {
                         if (listener != null) {
@@ -323,6 +324,10 @@ public final class OpenRTBApiClient implements ApiClient {
                 listener.onFailure(new Exception("No creative was returned on the bid"));
             }
         }
+    }
+
+    private void makeWinNoticeRequest(String winUrl, PNHttpClient.Listener listener) {
+        PNHttpClient.makeRequest(mContext, winUrl, null, null, true, false, ApiExecutor.getInstance(), listener);
     }
 
     private String replaceMacros(String text, AdRequest bidRequest, OpenRTBResponse response, Bid bid) {

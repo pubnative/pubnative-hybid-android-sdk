@@ -6,6 +6,7 @@ package net.pubnative.lite.sdk.views;
 
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
@@ -19,13 +20,16 @@ import android.os.Looper;
 import android.view.View;
 import android.widget.ImageView;
 
+import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.HyBidError;
+import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.api.BannerRequestManager;
 import net.pubnative.lite.sdk.api.LeaderboardRequestManager;
 import net.pubnative.lite.sdk.api.MRectRequestManager;
 import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.models.Ad;
+import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
 import net.pubnative.lite.sdk.utils.sdkmanager.SdkManager;
 
@@ -334,6 +338,117 @@ public class HyBidAdViewTest {
 
         // Should be called exactly once
         verify(presenterMock, org.mockito.Mockito.times(1)).addFriendlyObstruction(any(View.class));
+    }
+
+    @Test
+    public void renderVideoTag_setsListenerBeforeMakingRequest() {
+        try (MockedStatic<PNHttpClient> mockedHttpClient = mockStatic(PNHttpClient.class)) {
+            stubVastUrlUtilsDependencies();
+            HyBidAdView adView = new HyBidAdView(activity);
+
+            HyBidAdView.Listener[] listenerAtRequestTime = new HyBidAdView.Listener[1];
+            mockedHttpClient.when(() -> PNHttpClient.makeRequest(any(), any(), any(), any(), any(PNHttpClient.Listener.class)))
+                    .thenAnswer(invocation -> {
+                        listenerAtRequestTime[0] = adView.mListener;
+                        return null;
+                    });
+
+            adView.renderVideoTag("https://example.com/vast", mockListener);
+
+            MatcherAssert.assertThat(listenerAtRequestTime[0], Matchers.sameInstance(mockListener));
+        }
+    }
+
+    @Test
+    public void renderVideoTag_onFailure_invokesOnAdLoadFailed() {
+        try (MockedStatic<PNHttpClient> mockedHttpClient = mockStatic(PNHttpClient.class)) {
+            stubVastUrlUtilsDependencies();
+            mockedHttpClient.when(() -> PNHttpClient.makeRequest(any(), any(), any(), any(), any(PNHttpClient.Listener.class)))
+                    .thenAnswer(invocation -> {
+                        PNHttpClient.Listener listener = invocation.getArgument(4);
+                        listener.onFailure(new Exception("network error"));
+                        return null;
+                    });
+
+            HyBidAdView adView = new HyBidAdView(activity);
+            adView.renderVideoTag("https://example.com/vast", mockListener);
+
+            verify(mockListener).onAdLoadFailed(any(HyBidError.class));
+        }
+    }
+
+    @Test
+    public void renderVideoTag_onSuccessWithEmptyResponse_invokesOnAdLoadFailed() {
+        try (MockedStatic<PNHttpClient> mockedHttpClient = mockStatic(PNHttpClient.class)) {
+            stubVastUrlUtilsDependencies();
+            mockedHttpClient.when(() -> PNHttpClient.makeRequest(any(), any(), any(), any(), any(PNHttpClient.Listener.class)))
+                    .thenAnswer(invocation -> {
+                        PNHttpClient.Listener listener = invocation.getArgument(4);
+                        listener.onSuccess("", java.util.Collections.emptyMap());
+                        return null;
+                    });
+
+            HyBidAdView adView = new HyBidAdView(activity);
+            adView.renderVideoTag("https://example.com/vast", mockListener);
+
+            verify(mockListener).onAdLoadFailed(any(HyBidError.class));
+        }
+    }
+
+    @Test
+    public void renderVideoTag_onSuccessWithResponse_rendersCustomMarkup() {
+        try (MockedStatic<PNHttpClient> mockedHttpClient = mockStatic(PNHttpClient.class)) {
+            stubVastUrlUtilsDependencies();
+            String response = "<VAST></VAST>";
+            mockedHttpClient.when(() -> PNHttpClient.makeRequest(any(), any(), any(), any(), any(PNHttpClient.Listener.class)))
+                    .thenAnswer(invocation -> {
+                        PNHttpClient.Listener listener = invocation.getArgument(4);
+                        listener.onSuccess(response, java.util.Collections.emptyMap());
+                        return null;
+                    });
+
+            HyBidAdView adViewSpy = spy(new HyBidAdView(activity));
+            doNothing().when(adViewSpy).renderCustomMarkup(any(), any());
+
+            adViewSpy.renderVideoTag("https://example.com/vast", mockListener);
+
+            verify(adViewSpy).renderCustomMarkup(response, mockListener);
+        }
+    }
+
+    @Test
+    public void renderVideoTag_calledAgain_resetsPriorAdState() throws Exception {
+        try (MockedStatic<PNHttpClient> mockedHttpClient = mockStatic(PNHttpClient.class)) {
+            stubVastUrlUtilsDependencies();
+            net.pubnative.lite.sdk.vpaid.VideoAdCache mockVideoAdCache = mock(net.pubnative.lite.sdk.vpaid.VideoAdCache.class);
+            mHyBid.when(HyBid::getVideoAdCache).thenReturn(mockVideoAdCache);
+
+            mockedHttpClient.when(() -> PNHttpClient.makeRequest(any(), any(), any(), any(), any(PNHttpClient.Listener.class)))
+                    .thenAnswer(invocation -> null);
+
+            HyBidAdView adView = new HyBidAdView(activity);
+
+            // Simulate state left over from a prior renderVideoTag() call that already rendered an ad.
+            Ad priorAd = mock(Ad.class);
+            when(priorAd.getSessionId()).thenReturn("prior-session");
+            Field adField = HyBidAdView.class.getDeclaredField("mAd");
+            adField.setAccessible(true);
+            adField.set(adView, priorAd);
+
+            adView.renderVideoTag("https://example.com/vast", mockListener);
+
+            // cleanup() must run synchronously before the new request is even dispatched,
+            // so the prior ad's state doesn't linger while the new request is in flight.
+            MatcherAssert.assertThat(adField.get(adView), Matchers.nullValue());
+            verify(mockVideoAdCache).remove("prior-session");
+        }
+    }
+
+    private void stubVastUrlUtilsDependencies() {
+        DeviceInfo mockDeviceInfo = mock(DeviceInfo.class);
+        UserDataManager mockUserDataManager = mock(UserDataManager.class);
+        mHyBid.when(HyBid::getDeviceInfo).thenReturn(mockDeviceInfo);
+        mHyBid.when(HyBid::getUserDataManager).thenReturn(mockUserDataManager);
     }
 
     private ImageView getPrivateWatermark(HyBidAdView adView) {

@@ -6,6 +6,7 @@ package net.pubnative.lite.sdk.vpaid.helpers;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -17,6 +18,7 @@ import net.pubnative.lite.sdk.vpaid.enums.VastError;
 import net.pubnative.lite.sdk.vpaid.utils.FileUtils;
 import net.pubnative.lite.sdk.vpaid.utils.Utils;
 
+import java.io.BufferedInputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,6 +27,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class FileLoader {
 
@@ -57,9 +60,40 @@ public class FileLoader {
         }
     }
 
+    private static class InitialFetchResult {
+        final FileHeaders headers;
+        final int downloadedBytes;
+
+        InitialFetchResult(FileHeaders headers, int downloadedBytes) {
+            this.headers = headers;
+            this.downloadedBytes = downloadedBytes;
+        }
+    }
+
+    private static class AttemptState {
+        final FileHeaders headers;
+        final int downloadedBytes;
+        final int attemptsCount;
+
+        AttemptState(FileHeaders headers, int downloadedBytes, int attemptsCount) {
+            this.headers = headers;
+            this.downloadedBytes = downloadedBytes;
+            this.attemptsCount = attemptsCount;
+        }
+    }
+
+    private static class NonRetryableIOException extends RuntimeException {
+        NonRetryableIOException(Throwable cause) {
+            super(cause);
+        }
+    }
+
     private static final String LOG_TAG = FileLoader.class.getSimpleName();
     private static final int CONNECT_TIMEOUT = 10_000;
     private static final int READ_TIMEOUT = 10_000;
+    private static final int MAX_ATTEMPTS = 3;
+    private static final long BASE_BACKOFF_MS = 250;
+    private static final long MAX_BACKOFF_MS = 2_000;
 
     private static boolean useMobileNetworkForCaching;
 
@@ -71,6 +105,8 @@ public class FileLoader {
     private volatile HttpURLConnection mConnection;
     private volatile boolean mIsFileFullyDownloaded;
     private volatile boolean mStop;
+    private volatile long mLoadStartMs;
+    private final AtomicReference<Runnable> mPendingRetry = new AtomicReference<>();
 
     // progress flags
     private boolean firstQuartile;
@@ -116,59 +152,181 @@ public class FileLoader {
         ExecutorHelper.getExecutor().submit(this::load);
     }
 
+    /**
+     * Runs the first attempt synchronously; onLoadingAttemptFinished() takes it from there.
+     */
     private void load() {
         try {
             if (mStop) {
                 return;
             }
-            FileHeaders headers = obtainHeaders(mRemoteFileUrl);
-            if (headers == null) {
+
+            File parentDir = FileUtils.getParentDir(mContext);
+            if (parentDir == null || !parentDir.canWrite()) {
+                Logger.e(LOG_TAG, "Cache directory unavailable or not writable, aborting before any network request");
+                if (mCallback != null) {
+                    mCallback.onError(new PlayerInfo("Cache directory unavailable or not writable"));
+                }
+                return;
+            }
+
+            mLoadStartMs = System.currentTimeMillis();
+
+            InitialFetchResult initial;
+            try {
+                initial = fetchHeadersAndBody(mRemoteFileUrl, mLoadingFile);
+            } catch (NonRetryableIOException e) {
+                Logger.e(LOG_TAG, "Cache write failed, aborting without retry: " + e.getCause());
+                if (mCallback != null) {
+                    mCallback.onError(new PlayerInfo("Cache write failed, aborting without retry"));
+                }
+                return;
+            }
+            if (initial == null) {
                 if (mCallback != null) {
                     mCallback.onError(new PlayerInfo("Error during loading file"));
                 }
                 return;
             }
 
-            Logger.d(LOG_TAG, "File length: " + headers.fileLength);
-            int attemptsCount = 0;
-            int downloadedBytes = 0;
-            long time = System.currentTimeMillis();
-            while (!mStop && downloadedBytes < headers.fileLength) {
-                downloadedBytes = appendFile(mLoadingFile, mRemoteFileUrl, downloadedBytes, headers);
-                attemptsCount++;
-            }
-            time = System.currentTimeMillis() - time;
-            Logger.d(LOG_TAG, "Load time: " + time / 1000.0);
-            Logger.d(LOG_TAG, "AttemptsCount: " + attemptsCount);
-            if (downloadedBytes == headers.fileLength) {
-                handleFileFullDownloaded();
-            } else if (headers.bitmap != null) {
-                saveBitmapIntoFile(headers.bitmap);
-                handleFileFullDownloaded();
-            } else {
-                if (mCallback != null) {
-                    mCallback.onError(new PlayerInfo("Error during file loading, attemptsCount: " + attemptsCount));
-                }
-            }
-        } catch (Exception e) {
-            Logger.e(LOG_TAG, "Unexpected FileLoader error: " + e.getMessage());
+            Logger.d(LOG_TAG, "File length: " + initial.headers.fileLength);
+            onLoadingAttemptFinished(new AttemptState(initial.headers, initial.downloadedBytes, 1));
+        } catch (Throwable t) {
+            Logger.e(LOG_TAG, "Unexpected FileLoader error: " + t);
+            reportUnexpectedFailure();
         }
     }
 
-    private void saveBitmapIntoFile(Bitmap bitmap) {
-        new AndroidBmpUtil().save(bitmap, mLoadingFile.getAbsolutePath());
+    private void onLoadingAttemptFinished(AttemptState state) {
+        if (mStop) {
+            return;
+        }
+        // Finish (don't retry) once there is no more progress to make:
+        //  - downloadedBytes == fileLength: fully downloaded.
+        //  - fileLength < 0: no Content-Length, so there is no byte target to reach.
+        //  - bitmap != null: end card already decoded. Redundant with fileLength < 0 today, kept explicit.
+        //  - attemptsCount >= MAX_ATTEMPTS: retry budget exhausted.
+        if (state.downloadedBytes == state.headers.fileLength
+                || state.headers.fileLength < 0
+                || state.headers.bitmap != null
+                || state.attemptsCount >= MAX_ATTEMPTS) {
+            finishLoading(state, false);
+            return;
+        }
+        Runnable retry = () -> ExecutorHelper.getExecutor().submit(() -> runRetry(state));
+        mPendingRetry.set(retry);
+        RetryScheduler.postDelayed(retry, computeBackoffMs(state.attemptsCount));
+    }
+
+    private static long computeBackoffMs(int attemptsCount) {
+        return Math.min(BASE_BACKOFF_MS * (1L << (attemptsCount - 1)), MAX_BACKOFF_MS);
+    }
+
+    private void runRetry(AttemptState state) {
+        try {
+            if (mStop) {
+                return;
+            }
+            int newDownloadedBytes;
+            try {
+                newDownloadedBytes = appendFile(mLoadingFile, mRemoteFileUrl, state.downloadedBytes, state.headers);
+            } catch (NonRetryableIOException e) {
+                finishLoading(state, true);
+                return;
+            }
+            onLoadingAttemptFinished(new AttemptState(state.headers, newDownloadedBytes, state.attemptsCount + 1));
+        } catch (Throwable t) {
+            Logger.e(LOG_TAG, "Unexpected FileLoader error during retry: " + t);
+            reportUnexpectedFailure();
+        }
+    }
+
+    private void finishLoading(AttemptState state, boolean nonRetryable) {
+        long elapsedMs = System.currentTimeMillis() - mLoadStartMs;
+        Logger.d(LOG_TAG, "Load time: " + elapsedMs / 1000.0);
+        Logger.d(LOG_TAG, "AttemptsCount: " + state.attemptsCount);
+        if (state.downloadedBytes == state.headers.fileLength) {
+            handleFileFullDownloaded();
+        } else if (state.headers.bitmap != null) {
+            if (saveBitmapIntoFile(state.headers.bitmap)) {
+                handleFileFullDownloaded();
+            } else {
+                // don't report success if the decoded end card couldn't be persisted
+                deleteLoadingFile();
+                if (mCallback != null) {
+                    mCallback.onError(new PlayerInfo("Cache write failed, aborting without retry"));
+                }
+            }
+        } else {
+            // don't leave a partial file that a later load would treat as a cache hit
+            deleteLoadingFile();
+            if (mCallback != null) {
+                String reason;
+                if (nonRetryable) {
+                    reason = "Cache write failed, aborting without retry";
+                } else if (mIsEndCard && state.headers.fileLength < 0) {
+                    reason = "End card could not be decoded";
+                } else {
+                    reason = "Error during file loading, attemptsCount: " + state.attemptsCount;
+                }
+                mCallback.onError(new PlayerInfo(reason));
+            }
+        }
+    }
+
+    private boolean saveBitmapIntoFile(Bitmap bitmap) {
+        return new AndroidBmpUtil().save(bitmap, mLoadingFile.getAbsolutePath());
+    }
+
+    /** Removes a partial/failed cache file so a later load doesn't treat it as a cache hit. */
+    private void deleteLoadingFile() {
+        if (mLoadingFile != null && mLoadingFile.exists() && !mLoadingFile.delete()) {
+            Logger.w(LOG_TAG, "Failed to delete cache file: " + mLoadingFile.getAbsolutePath());
+        }
+    }
+
+    /** Last-resort callback for an unexpected Throwable, so a failed load can never end silently. */
+    private void reportUnexpectedFailure() {
+        if (mStop || mIsFileFullyDownloaded) {
+            return;
+        }
+        deleteLoadingFile();
+        if (mCallback == null) {
+            return;
+        }
+        try {
+            mCallback.onError(new PlayerInfo("Unexpected error during file loading"));
+        } catch (Throwable t) {
+            Logger.e(LOG_TAG, "Callback threw while reporting an unexpected failure: " + t);
+        }
     }
 
     /**
+     * A retry always restarts from byte 0 -- streamBody() truncates the file to match.
+     *
      * @return total progress
      */
     private int appendFile(File file, String url, int downloadedBytes, FileHeaders headers) {
-        InputStream inputStream = null;
-        FileOutputStream outputStream = null;
         try {
             mConnection = obtainGetConnection(url, downloadedBytes, headers);
-            inputStream = mConnection.getInputStream();
-            outputStream = new FileOutputStream(file, true);
+        } catch (Exception e) {
+            Logger.e(LOG_TAG, "appendFile interrupted: " + e.getMessage());
+            return downloadedBytes;
+        }
+        return streamBody(mConnection, file, headers, 0);
+    }
+
+    private int streamBody(HttpURLConnection connection, File file, FileHeaders headers, int downloadedBytes) {
+        FileOutputStream outputStream;
+        try {
+            outputStream = new FileOutputStream(file, downloadedBytes > 0);
+        } catch (IOException e) {
+            Logger.e(LOG_TAG, "Cannot write cache file, aborting: " + e.getMessage());
+            throw new NonRetryableIOException(e);
+        }
+        InputStream inputStream = null;
+        try {
+            inputStream = connection.getInputStream();
             byte[] buffer = new byte[4096];
             int length;
             while ((length = inputStream.read(buffer)) != -1) {
@@ -186,38 +344,48 @@ public class FileLoader {
         return downloadedBytes;
     }
 
-    private FileHeaders obtainHeaders(String remoteFileUrl) {
+    /**
+     * Opens a single GET connection and streams the body directly from the response used to read
+     * headers, instead of the old probe-then-download two-request flow. setRequestMethod("GET")
+     * is called before any header/response accessor since calling it after is a silent no-op on
+     * Android's OkHttp HttpURLConnection once the request is already dispatched.
+     */
+    private InitialFetchResult fetchHeadersAndBody(String remoteFileUrl, File file) {
         try {
             URL url = new URL(remoteFileUrl);
             mConnection = (HttpURLConnection) url.openConnection();
-            if (mConnection != null && mConnection.getHeaderFields() != null &&
-                    mConnection.getHeaderFields().get("content-Length") != null &&
-                    mConnection.getHeaderFields().get("content-Length").isEmpty()) {
-                Logger.e(LOG_TAG, "File not found by URL: " + mRemoteFileUrl);
-                ErrorLog.postError(mContext, VastError.TRAFFICKING);
-                return null;
-            }
+            mConnection.setReadTimeout(READ_TIMEOUT);
+            mConnection.setConnectTimeout(CONNECT_TIMEOUT);
             mConnection.setRequestMethod("GET");
-            if (mConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            int status = mConnection.getResponseCode();
+            if (status == HttpURLConnection.HTTP_OK) {
                 String eTag = mConnection.getHeaderField("ETag");
                 int fileLength = mConnection.getContentLength();
-                Bitmap bitmap = null;
                 if (fileLength == -1) {
+                    Bitmap bitmap = null;
                     if (mIsEndCard) {
-                        bitmap = EndCardFileDownloader.mLoad(mRemoteFileUrl);
+                        // Decode the end card from this response rather than a second request.
+                        // Throwable: decodeStream can throw OOM, and an Error escaping means no callback.
+                        try (InputStream endCardStream = new BufferedInputStream(mConnection.getInputStream())) {
+                            bitmap = BitmapFactory.decodeStream(endCardStream);
+                        } catch (Throwable t) {
+                            Logger.e(LOG_TAG, "End card decode failed: " + t);
+                        }
                     }
+                    return new InitialFetchResult(new FileHeaders(eTag, fileLength, bitmap), 0);
                 }
-                return new FileHeaders(eTag, fileLength, bitmap);
-            } else if (mConnection.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN ||
-                    mConnection.getResponseCode() == HttpURLConnection.HTTP_PARTIAL ||
-                    mConnection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                FileHeaders headers = new FileHeaders(eTag, fileLength);
+                int downloadedBytes = streamBody(mConnection, file, headers, 0);
+                return new InitialFetchResult(headers, downloadedBytes);
+            } else if (status == HttpURLConnection.HTTP_FORBIDDEN ||
+                    status == HttpURLConnection.HTTP_PARTIAL ||
+                    status == HttpURLConnection.HTTP_NOT_FOUND) {
                 Logger.e(LOG_TAG, "File not found by URL: " + mRemoteFileUrl);
                 ErrorLog.postError(mContext, VastError.TRAFFICKING);
                 return null;
             } else {
                 return null;
             }
-
         } catch (SocketTimeoutException e) {
             Logger.e(LOG_TAG, "Timeout by URL: " + mRemoteFileUrl);
             ErrorLog.postError(mContext, VastError.TIMEOUT);
@@ -275,6 +443,10 @@ public class FileLoader {
     public void stop() {
         Logger.e(LOG_TAG, "stop()");
         mStop = true;
+        Runnable pendingRetry = mPendingRetry.get();
+        if (pendingRetry != null) {
+            RetryScheduler.cancel(pendingRetry);
+        }
         if (mConnection != null) {
             ExecutorHelper.getExecutor().submit(() -> {
                 Logger.e(LOG_TAG, "disconnect()");

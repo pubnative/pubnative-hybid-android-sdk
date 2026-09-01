@@ -8,6 +8,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 
@@ -20,6 +21,7 @@ import android.widget.FrameLayout;
 
 import androidx.core.view.WindowInsetsCompat;
 
+import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.interstitial.viewModel.InterstitialViewModel;
 import net.pubnative.lite.sdk.vpaid.HyBidActivityInteractor;
 
@@ -51,8 +53,23 @@ public class HyBidInterstitialActivityTest {
 
 
     private static class TestInterstitialActivity extends HyBidInterstitialActivity {
+        private boolean isChangingConfigurationsOverride = false;
+
         public void setMockViewModel(InterstitialViewModel viewModel) {
             this.mViewModel = viewModel;
+        }
+
+        public void setIsFinishingFlag(boolean value) {
+            this.mIsFinishing = value;
+        }
+
+        public void setIsChangingConfigurationsOverride(boolean value) {
+            this.isChangingConfigurationsOverride = value;
+        }
+
+        @Override
+        public boolean isChangingConfigurations() {
+            return isChangingConfigurationsOverride;
         }
 
         @Override
@@ -124,6 +141,53 @@ public class HyBidInterstitialActivityTest {
 
         // Verify onActivityDestroyed was called with isFinishing parameter
         verify(mockViewModel).onActivityDestroyed(anyBoolean());
+    }
+
+    @Test
+    public void onDestroy_taskClear_sendsDismissBroadcast() {
+        Intent intent = createTestIntent();
+
+        ActivityController<TestInterstitialActivity> controller =
+                Robolectric.buildActivity(TestInterstitialActivity.class, intent);
+        TestInterstitialActivity activity = controller.create().get();
+        activity.setMockViewModel(mockViewModel);
+        // Reset: onCreate() already ran finishActivity() (test intent has no cached ad).
+        activity.setIsFinishingFlag(false);
+
+        controller.destroy();
+
+        verify(mockViewModel).sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
+    }
+
+    @Test
+    public void onDestroy_explicitClose_doesNotSendDismissBroadcast() {
+        Intent intent = createTestIntent();
+
+        ActivityController<TestInterstitialActivity> controller =
+                Robolectric.buildActivity(TestInterstitialActivity.class, intent);
+        TestInterstitialActivity activity = controller.create().get();
+        activity.setMockViewModel(mockViewModel);
+        activity.setIsFinishingFlag(true);
+
+        controller.destroy();
+
+        verify(mockViewModel, never()).sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
+    }
+
+    @Test
+    public void onDestroy_configChange_doesNotSendDismissBroadcast() {
+        Intent intent = createTestIntent();
+
+        ActivityController<TestInterstitialActivity> controller =
+                Robolectric.buildActivity(TestInterstitialActivity.class, intent);
+        TestInterstitialActivity activity = controller.create().get();
+        activity.setMockViewModel(mockViewModel);
+        activity.setIsFinishingFlag(false); // isolate isChangingConfigurations() from onCreate()'s finishActivity()
+        activity.setIsChangingConfigurationsOverride(true);
+
+        controller.destroy();
+
+        verify(mockViewModel, never()).sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.DISMISS);
     }
 
     @Test

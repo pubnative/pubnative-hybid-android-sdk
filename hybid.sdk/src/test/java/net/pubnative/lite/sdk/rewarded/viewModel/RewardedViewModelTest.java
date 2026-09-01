@@ -185,6 +185,17 @@ public class RewardedViewModelTest {
     }
 
     @Test
+    public void testIsRewardEligible_matchesIsAdSkippable_false() {
+        assertFalse(viewModel.isRewardEligible());
+    }
+
+    @Test
+    public void testIsRewardEligible_matchesIsAdSkippable_true() {
+        viewModel.mIsSkippable = true;
+        assertTrue(viewModel.isRewardEligible());
+    }
+
+    @Test
     public void testHandleURL_callsUrlHandlerWithCorrectParams() {
         when(mockAd.getLink()).thenReturn("http://test-link.com");
         when(mockAd.getNavigationMode()).thenReturn("0");
