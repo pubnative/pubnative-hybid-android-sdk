@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.models.PNAdRequest;
-import net.pubnative.lite.sdk.models.Topic;
 import net.pubnative.lite.sdk.models.bidstream.BidParam;
 import net.pubnative.lite.sdk.models.bidstream.Signal;
 
@@ -16,7 +15,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -69,6 +67,10 @@ public final class PNApiUrlComposer {
 
         if (!TextUtils.isEmpty(adRequest.deviceWidth)) {
             uriBuilder.appendQueryParameter("dw", adRequest.deviceWidth);
+        }
+
+        if (!TextUtils.isEmpty(adRequest.deviceType)) {
+            uriBuilder.appendQueryParameter("devicetype", adRequest.deviceType);
         }
 
         if (!TextUtils.isEmpty(adRequest.orientation)) {
@@ -259,6 +261,10 @@ public final class PNApiUrlComposer {
             uriBuilder.appendQueryParameter("sessionduration", adRequest.sessionduration);
         }
 
+        if (!TextUtils.isEmpty(adRequest.mediationAdUnitId)) {
+            uriBuilder.appendQueryParameter("mediationadunitid", adRequest.mediationAdUnitId);
+        }
+
         if (!adRequest.getSignals().isEmpty()) {
             for (Signal signal : adRequest.getSignals()) {
                 Map<Field, BidParam> fieldCache = getSignalFieldCache(signal.getClass());
@@ -285,29 +291,6 @@ public final class PNApiUrlComposer {
                     }
                 }
             }
-        }
-
-        if (adRequest.topics != null && !adRequest.topics.isEmpty()) {
-
-            Map<String, ArrayList<String>> sortedTopics = new HashMap<>();
-            for (Topic topic : adRequest.topics) {
-                Long taxonomyVersion = topic.getTaxonomyVersion();
-                String taxonomyVersionName = topic.getTaxonomyVersionName();
-                String key = String.valueOf(taxonomyVersion).concat(",").concat(taxonomyVersionName.replaceAll("\\s", "+"));
-                if (!sortedTopics.containsKey(key)) {
-                    sortedTopics.put(key, new ArrayList<>());
-                }
-                Objects.requireNonNull(sortedTopics.get(key)).add(String.valueOf(topic.getId()));
-            }
-            String queryParamValue = "";
-            for (Map.Entry<String, ArrayList<String>> entry : sortedTopics.entrySet()) {
-                String key = entry.getKey();
-                ArrayList<String> value = entry.getValue();
-                queryParamValue = queryParamValue.concat(key).concat(",")
-                        .concat(String.join(",", value)).concat("_");
-            }
-            queryParamValue = queryParamValue.substring(0, queryParamValue.length() - 1);
-            uriBuilder.appendQueryParameter("psut", queryParamValue);
         }
 
         if (!TextUtils.isEmpty(adRequest.vg)) {

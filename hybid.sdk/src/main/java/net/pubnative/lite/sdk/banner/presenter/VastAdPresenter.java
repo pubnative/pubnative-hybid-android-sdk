@@ -361,6 +361,11 @@ public class VastAdPresenter implements AdPresenter, ImpressionTracker.Listener,
 
     private final VideoAdListener mVideoAdListener = new VideoAdListener() {
         @Override
+        public boolean hasImpressionBeenClicked() {
+            return wasClicked;
+        }
+
+        @Override
         public void onAdLoadSuccess() {
             if (mIsDestroyed) {
                 return;

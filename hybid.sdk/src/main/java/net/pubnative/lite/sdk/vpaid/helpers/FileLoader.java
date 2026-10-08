@@ -12,6 +12,7 @@ import android.os.Looper;
 import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.RetryBackoff;
 import net.pubnative.lite.sdk.vpaid.PlayerInfo;
 import net.pubnative.lite.sdk.vpaid.enums.ConnectionType;
 import net.pubnative.lite.sdk.vpaid.enums.VastError;
@@ -27,6 +28,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class FileLoader {
@@ -94,11 +97,15 @@ public class FileLoader {
     private static final int MAX_ATTEMPTS = 3;
     private static final long BASE_BACKOFF_MS = 250;
     private static final long MAX_BACKOFF_MS = 2_000;
+    private static final int BACKOFF_MULTIPLIER = 2;
+
+    private static final AtomicLong sPartFileCounter = new AtomicLong();
 
     private static boolean useMobileNetworkForCaching;
 
     private final Context mContext;
     private final File mLoadingFile;
+    private final File mPartFile;
     private final Callback mCallback;
     private final String mRemoteFileUrl;
 
@@ -107,6 +114,7 @@ public class FileLoader {
     private volatile boolean mStop;
     private volatile long mLoadStartMs;
     private final AtomicReference<Runnable> mPendingRetry = new AtomicReference<>();
+    private final AtomicBoolean mStagedFileRegistered = new AtomicBoolean();
 
     // progress flags
     private boolean firstQuartile;
@@ -120,7 +128,10 @@ public class FileLoader {
         mRemoteFileUrl = fileUrl;
         mIsEndCard = isEndCard;
         String shortFileName = TextUtils.isEmpty(mRemoteFileUrl) ? "default_file" : FileUtils.obtainHashName(mRemoteFileUrl);
-        mLoadingFile = new File(FileUtils.getParentDir(mContext), shortFileName);
+        File parentDir = FileUtils.getParentDir(mContext);
+        mLoadingFile = new File(parentDir, shortFileName);
+        mPartFile = new File(parentDir,
+                shortFileName + "." + sPartFileCounter.getAndIncrement() + FileUtils.PART_SUFFIX);
     }
 
     public void start() {
@@ -133,12 +144,26 @@ public class FileLoader {
             return;
         }
 
-        if (mLoadingFile.exists()) {
+        if (isCachedFileValid()) {
             Logger.d(LOG_TAG, "File already exists");
             handleFileFullDownloaded();
         } else {
             maybeLoadFile();
         }
+    }
+
+    private boolean isCachedFileValid() {
+        return mLoadingFile.isFile() && mLoadingFile.length() > 0;
+    }
+
+    /**
+     * Whether an entry already at the cache path matches what this load verified and may be reported.
+     *
+     * @param expectedLength Content-Length to verify against, or negative when it was not reported
+     */
+    private boolean isPublishedEntryValid(int expectedLength) {
+        return isCachedFileValid()
+                && (expectedLength < 0 || mLoadingFile.length() == expectedLength);
     }
 
     private void maybeLoadFile() {
@@ -164,7 +189,7 @@ public class FileLoader {
             File parentDir = FileUtils.getParentDir(mContext);
             if (parentDir == null || !parentDir.canWrite()) {
                 Logger.e(LOG_TAG, "Cache directory unavailable or not writable, aborting before any network request");
-                if (mCallback != null) {
+                if (!mStop && mCallback != null) {
                     mCallback.onError(new PlayerInfo("Cache directory unavailable or not writable"));
                 }
                 return;
@@ -174,16 +199,16 @@ public class FileLoader {
 
             InitialFetchResult initial;
             try {
-                initial = fetchHeadersAndBody(mRemoteFileUrl, mLoadingFile);
+                initial = fetchHeadersAndBody(mRemoteFileUrl, mPartFile);
             } catch (NonRetryableIOException e) {
                 Logger.e(LOG_TAG, "Cache write failed, aborting without retry: " + e.getCause());
-                if (mCallback != null) {
+                if (!mStop && mCallback != null) {
                     mCallback.onError(new PlayerInfo("Cache write failed, aborting without retry"));
                 }
                 return;
             }
             if (initial == null) {
-                if (mCallback != null) {
+                if (!mStop && mCallback != null) {
                     mCallback.onError(new PlayerInfo("Error during loading file"));
                 }
                 return;
@@ -199,6 +224,7 @@ public class FileLoader {
 
     private void onLoadingAttemptFinished(AttemptState state) {
         if (mStop) {
+            deletePartFile();
             return;
         }
         // Finish (don't retry) once there is no more progress to make:
@@ -219,17 +245,18 @@ public class FileLoader {
     }
 
     private static long computeBackoffMs(int attemptsCount) {
-        return Math.min(BASE_BACKOFF_MS * (1L << (attemptsCount - 1)), MAX_BACKOFF_MS);
+        return RetryBackoff.computeBackoffMs(BASE_BACKOFF_MS, BACKOFF_MULTIPLIER, attemptsCount, MAX_BACKOFF_MS);
     }
 
     private void runRetry(AttemptState state) {
         try {
             if (mStop) {
+                deletePartFile();
                 return;
             }
             int newDownloadedBytes;
             try {
-                newDownloadedBytes = appendFile(mLoadingFile, mRemoteFileUrl, state.downloadedBytes, state.headers);
+                newDownloadedBytes = appendFile(mPartFile, mRemoteFileUrl, state.downloadedBytes, state.headers);
             } catch (NonRetryableIOException e) {
                 finishLoading(state, true);
                 return;
@@ -246,20 +273,20 @@ public class FileLoader {
         Logger.d(LOG_TAG, "Load time: " + elapsedMs / 1000.0);
         Logger.d(LOG_TAG, "AttemptsCount: " + state.attemptsCount);
         if (state.downloadedBytes == state.headers.fileLength) {
-            handleFileFullDownloaded();
+            finalizeDownload(state.headers.fileLength);
         } else if (state.headers.bitmap != null) {
             if (saveBitmapIntoFile(state.headers.bitmap)) {
-                handleFileFullDownloaded();
+                finalizeDownload(state.headers.fileLength);
             } else {
                 // don't report success if the decoded end card couldn't be persisted
-                deleteLoadingFile();
+                deletePartFile();
                 if (mCallback != null) {
                     mCallback.onError(new PlayerInfo("Cache write failed, aborting without retry"));
                 }
             }
         } else {
             // don't leave a partial file that a later load would treat as a cache hit
-            deleteLoadingFile();
+            deletePartFile();
             if (mCallback != null) {
                 String reason;
                 if (nonRetryable) {
@@ -275,14 +302,63 @@ public class FileLoader {
     }
 
     private boolean saveBitmapIntoFile(Bitmap bitmap) {
-        return new AndroidBmpUtil().save(bitmap, mLoadingFile.getAbsolutePath());
+        registerStagedFile();
+        return new AndroidBmpUtil().save(bitmap, mPartFile.getAbsolutePath());
     }
 
-    /** Removes a partial/failed cache file so a later load doesn't treat it as a cache hit. */
-    private void deleteLoadingFile() {
-        if (mLoadingFile != null && mLoadingFile.exists() && !mLoadingFile.delete()) {
-            Logger.w(LOG_TAG, "Failed to delete cache file: " + mLoadingFile.getAbsolutePath());
+    /** Marks the staged file as in use, so the cache sweep leaves an in-flight download alone. */
+    private void registerStagedFile() {
+        if (mStagedFileRegistered.compareAndSet(false, true)) {
+            FileLockManager.getInstance().acquire(mPartFile.getAbsolutePath());
         }
+    }
+
+    /** Gives the staged file up, so the next cache sweep can reclaim whatever is left of it. */
+    private void releaseStagedFile() {
+        if (mStagedFileRegistered.compareAndSet(true, false)) {
+            FileLockManager.getInstance().release(mPartFile.getAbsolutePath());
+        }
+    }
+
+    /**
+     * Publishes the staged download to the cache path. The rename is the completion marker: a file
+     * at the cache path can only exist because a download was verified complete first.
+     *
+     * @param expectedLength Content-Length to verify against, or negative when it was not reported
+     */
+    private void finalizeDownload(int expectedLength) {
+        if (mPartFile.length() == 0 || (expectedLength >= 0 && mPartFile.length() != expectedLength)) {
+            Logger.e(LOG_TAG, "Staged file is " + mPartFile.length() + " bytes, expected " + expectedLength);
+            deletePartFile();
+            if (!mStop && mCallback != null) {
+                mCallback.onError(new PlayerInfo("Downloaded file is incomplete"));
+            }
+            return;
+        }
+        // A lost rename race is fine as long as the winner left a valid entry behind.
+        if (!mPartFile.renameTo(mLoadingFile) && !isPublishedEntryValid(expectedLength)) {
+            Logger.e(LOG_TAG, "Failed to move staged file to " + mLoadingFile.getAbsolutePath());
+            deletePartFile();
+            if (!mStop && mCallback != null) {
+                mCallback.onError(new PlayerInfo("Failed to finalize cached file"));
+            }
+            return;
+        }
+        deletePartFile();
+        // A verified entry is published even for a stopped load: it is complete, and the next
+        // load for this URL should hit the cache. Only the callback is dropped.
+        if (mStop) {
+            return;
+        }
+        handleFileFullDownloaded();
+    }
+
+    /** Removes a partial/failed staged file so a later load doesn't treat it as a cache hit. */
+    private void deletePartFile() {
+        if (mPartFile.exists() && !mPartFile.delete()) {
+            Logger.w(LOG_TAG, "Failed to delete staged file: " + mPartFile.getAbsolutePath());
+        }
+        releaseStagedFile();
     }
 
     /** Last-resort callback for an unexpected Throwable, so a failed load can never end silently. */
@@ -290,7 +366,7 @@ public class FileLoader {
         if (mStop || mIsFileFullyDownloaded) {
             return;
         }
-        deleteLoadingFile();
+        deletePartFile();
         if (mCallback == null) {
             return;
         }
@@ -317,11 +393,13 @@ public class FileLoader {
     }
 
     private int streamBody(HttpURLConnection connection, File file, FileHeaders headers, int downloadedBytes) {
+        registerStagedFile();
         FileOutputStream outputStream;
         try {
             outputStream = new FileOutputStream(file, downloadedBytes > 0);
         } catch (IOException e) {
             Logger.e(LOG_TAG, "Cannot write cache file, aborting: " + e.getMessage());
+            releaseStagedFile();
             throw new NonRetryableIOException(e);
         }
         InputStream inputStream = null;
@@ -454,11 +532,7 @@ public class FileLoader {
             });
         }
 
-        //delete file if it not fully downloaded
-        if (!mIsFileFullyDownloaded && mLoadingFile != null && mLoadingFile.exists()) {
-            Logger.e(LOG_TAG, "remove bad file");
-            mLoadingFile.delete();
-        }
+        releaseStagedFile();
     }
 
     private void handleEmulator() {

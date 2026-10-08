@@ -11,7 +11,9 @@ import net.pubnative.lite.sdk.vpaid.utils.Utils;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -22,6 +24,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -43,6 +46,9 @@ public class FileLoaderTest {
     private File mockFile;
     @Mock
     private HttpURLConnection mockConnection;
+
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
 
     private FileLoader fileLoader;
     private final String testUrl = "https://example.com/test.mp4";
@@ -394,13 +400,9 @@ public class FileLoaderTest {
     }
 
     @Test
-    public void testStartWithExistingFile() {
+    public void testStartWithExistingCompleteFile() {
         try (MockedStatic<FileUtils> mockedFileUtils = Mockito.mockStatic(FileUtils.class)) {
-            // Create a real temporary directory for testing
-            File tempDir = new File(System.getProperty("java.io.tmpdir"), "test_file_loader");
-            if (!tempDir.exists()) {
-                tempDir.mkdirs();
-            }
+            File tempDir = tempFolder.getRoot();
 
             String expectedFileName = "test_hash";
             mockedFileUtils.when(() -> FileUtils.getParentDir(mockContext)).thenReturn(tempDir);
@@ -412,7 +414,7 @@ public class FileLoaderTest {
             // Now create the actual test file that matches what FileLoader expects
             File testFile = new File(tempDir, expectedFileName);
             try {
-                testFile.createNewFile();
+                writeBytes(testFile, 128);
                 assertTrue("Test file should exist", testFile.exists());
 
                 // Start the loader - it should detect the existing file
@@ -426,15 +428,119 @@ public class FileLoaderTest {
 
             } catch (IOException e) {
                 fail("IOException occurred: " + e.getMessage());
+            }
+        }
+    }
+
+    /** downloadedBytes can claim success when a swallowed close() failure lost the tail. */
+    @Test
+    public void testFinalizeDownloadRejectsSizeMismatch() {
+        try (MockedStatic<FileUtils> mockedFileUtils = Mockito.mockStatic(FileUtils.class)) {
+            File tempDir = tempFolder.getRoot();
+
+            String expectedFileName = "test_hash";
+            mockedFileUtils.when(() -> FileUtils.getParentDir(mockContext)).thenReturn(tempDir);
+            mockedFileUtils.when(() -> FileUtils.obtainHashName(testUrl)).thenReturn(expectedFileName);
+
+            fileLoader = new FileLoader(testUrl, mockContext, mockCallback, false);
+
+            File cacheFile = new File(tempDir, expectedFileName);
+            try {
+                Field partFileField = FileLoader.class.getDeclaredField("mPartFile");
+                partFileField.setAccessible(true);
+                File partFile = (File) partFileField.get(fileLoader);
+                writeBytes(partFile, 64);
+
+                Method finalizeDownload = FileLoader.class.getDeclaredMethod("finalizeDownload", int.class);
+                finalizeDownload.setAccessible(true);
+                finalizeDownload.invoke(fileLoader, 128);
+
+                shadowOf(Looper.getMainLooper()).idle();
+
+                verify(mockCallback, never()).onFileLoaded(anyString());
+                ArgumentCaptor<PlayerInfo> captor = ArgumentCaptor.forClass(PlayerInfo.class);
+                verify(mockCallback).onError(captor.capture());
+                assertEquals("Downloaded file is incomplete", captor.getValue().getMessage());
+                assertFalse("a short staged file must be discarded", partFile.exists());
+                assertFalse("nothing may be published to the cache path", cacheFile.exists());
+
+            } catch (Exception e) {
+                fail("Failed to test size mismatch: " + e.getMessage());
+            }
+        }
+    }
+
+    /** A lost rename race may only hand back an entry matching the length this load verified. */
+    @Test
+    public void testFinalizeDownloadRejectsMismatchedPublishedEntry() {
+        assertFinalizeFallback(64, 128, false);
+    }
+
+    @Test
+    public void testFinalizeDownloadAcceptsMatchingPublishedEntry() {
+        assertFinalizeFallback(128, 128, true);
+    }
+
+    private void assertFinalizeFallback(int publishedLength, int expectedLength, boolean shouldLoad) {
+        try (MockedStatic<FileUtils> mockedFileUtils = Mockito.mockStatic(FileUtils.class)) {
+            File tempDir = new File(System.getProperty("java.io.tmpdir"), "test_file_loader");
+            if (!tempDir.exists()) {
+                tempDir.mkdirs();
+            }
+
+            String expectedFileName = "test_hash";
+            mockedFileUtils.when(() -> FileUtils.getParentDir(mockContext)).thenReturn(tempDir);
+            mockedFileUtils.when(() -> FileUtils.obtainHashName(testUrl)).thenReturn(expectedFileName);
+
+            fileLoader = new FileLoader(testUrl, mockContext, mockCallback, false);
+
+            File cacheFile = new File(tempDir, expectedFileName);
+            try {
+                writeBytes(cacheFile, publishedLength);
+
+                // A staged file that passes verification but cannot be renamed over the entry
+                // another loader already published.
+                File stagedFile = mock(File.class);
+                when(stagedFile.length()).thenReturn((long) expectedLength);
+                when(stagedFile.renameTo(any(File.class))).thenReturn(false);
+                when(stagedFile.exists()).thenReturn(false);
+                Field partFileField = FileLoader.class.getDeclaredField("mPartFile");
+                partFileField.setAccessible(true);
+                partFileField.set(fileLoader, stagedFile);
+
+                Method finalizeDownload = FileLoader.class.getDeclaredMethod("finalizeDownload", int.class);
+                finalizeDownload.setAccessible(true);
+                finalizeDownload.invoke(fileLoader, expectedLength);
+
+                shadowOf(Looper.getMainLooper()).idle();
+
+                if (shouldLoad) {
+                    verify(mockCallback).onFileLoaded(cacheFile.getAbsolutePath());
+                    verify(mockCallback, never()).onError(any());
+                } else {
+                    verify(mockCallback, never()).onFileLoaded(anyString());
+                    ArgumentCaptor<PlayerInfo> captor = ArgumentCaptor.forClass(PlayerInfo.class);
+                    verify(mockCallback).onError(captor.capture());
+                    assertEquals("Failed to finalize cached file", captor.getValue().getMessage());
+                }
+
+            } catch (Exception e) {
+                fail("Failed to test the finalize fallback: " + e.getMessage());
             } finally {
                 // Clean up
-                if (testFile.exists()) {
-                    testFile.delete();
+                if (cacheFile.exists()) {
+                    cacheFile.delete();
                 }
                 if (tempDir.exists()) {
                     tempDir.delete();
                 }
             }
+        }
+    }
+
+    private static void writeBytes(File file, int count) throws IOException {
+        try (FileOutputStream out = new FileOutputStream(file)) {
+            out.write(new byte[count]);
         }
     }
 
@@ -516,8 +622,9 @@ public class FileLoaderTest {
         }
     }
 
+    /** stop() runs on the caller thread, so cleanup is left to the thread that owns the file. */
     @Test
-    public void testStopWithIncompleteFile() {
+    public void testStopDoesNoFileIo() {
         try (MockedStatic<ExecutorHelper> mockedExecutor = Mockito.mockStatic(ExecutorHelper.class)) {
             java.util.concurrent.ExecutorService mockExecutorService = mock(java.util.concurrent.ExecutorService.class);
             mockedExecutor.when(() -> ExecutorHelper.getExecutor()).thenReturn(mockExecutorService);
@@ -525,14 +632,14 @@ public class FileLoaderTest {
             fileLoader = new FileLoader(testUrl, mockContext, mockCallback, false);
 
             // Mock a file that exists but is not fully downloaded
-            File mockLoadingFile = mock(File.class);
-            when(mockLoadingFile.exists()).thenReturn(true);
+            File mockPartFile = mock(File.class);
+            when(mockPartFile.exists()).thenReturn(true);
 
             try {
                 // Set up incomplete download state
-                Field loadingFileField = FileLoader.class.getDeclaredField("mLoadingFile");
-                loadingFileField.setAccessible(true);
-                loadingFileField.set(fileLoader, mockLoadingFile);
+                Field partFileField = FileLoader.class.getDeclaredField("mPartFile");
+                partFileField.setAccessible(true);
+                partFileField.set(fileLoader, mockPartFile);
 
                 Field fullyDownloadedField = FileLoader.class.getDeclaredField("mIsFileFullyDownloaded");
                 fullyDownloadedField.setAccessible(true);
@@ -544,8 +651,8 @@ public class FileLoaderTest {
 
                 fileLoader.stop();
 
-                // Verify file deletion and connection disconnect
-                verify(mockLoadingFile).delete();
+                // Verify the staged file is left to its owner, and the connection is disconnected
+                verify(mockPartFile, never()).delete();
                 verify(mockExecutorService).submit(any(Runnable.class));
 
             } catch (Exception e) {

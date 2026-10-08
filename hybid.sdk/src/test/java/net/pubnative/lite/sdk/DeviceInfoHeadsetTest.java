@@ -21,6 +21,7 @@ import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +29,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+
+import java.lang.reflect.Field;
+import java.util.concurrent.ExecutorService;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -80,6 +84,41 @@ public class DeviceInfoHeadsetTest {
         when(mockResources.getDisplayMetrics()).thenReturn(displayMetrics);
     }
 
+    @After
+    public void tearDown() throws Exception {
+        // Drain first: an in-flight signal refresh would otherwise touch mockContext after
+        // the Mockito session and Robolectric environment are gone.
+        try {
+            waitForBackgroundTasks();
+        } finally {
+            if (mockitoCloseable != null) {
+                mockitoCloseable.close();
+            }
+        }
+    }
+
+    /**
+     * Constructs DeviceInfo and drains its snapshot prime, so tests cannot silently assert
+     * against an unpopulated snapshot by forgetting the drain.
+     */
+    private DeviceInfo createDeviceInfoWithSignals() {
+        DeviceInfo info = new DeviceInfo(mockContext);
+        waitForBackgroundTasks();
+        return info;
+    }
+
+    private void waitForBackgroundTasks() {
+        try {
+            Field executorField = DeviceInfo.class.getDeclaredField("BACKGROUND_EXECUTOR");
+            executorField.setAccessible(true);
+            ExecutorService executor = (ExecutorService) executorField.get(null);
+            executor.submit(() -> {
+            }).get();
+        } catch (Exception exception) {
+            throw new IllegalStateException("Failed to drain DeviceInfo BACKGROUND_EXECUTOR", exception);
+        }
+    }
+
     // ========== API 23+ (Marshmallow and above) Tests ==========
 
     @Test
@@ -90,7 +129,7 @@ public class DeviceInfoHeadsetTest {
         when(mockContext.getSystemService(Context.AUDIO_SERVICE)).thenReturn(mockAudioManager);
         when(mockAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)).thenReturn(null);
 
-        deviceInfo = new DeviceInfo(mockContext);
+        deviceInfo = createDeviceInfoWithSignals();
         Integer result = deviceInfo.isHeadsetOn();
 
         assertNull(result);
@@ -108,7 +147,7 @@ public class DeviceInfoHeadsetTest {
         AudioDeviceInfo[] devices = new AudioDeviceInfo[]{mockDevice};
         when(mockAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)).thenReturn(devices);
 
-        deviceInfo = new DeviceInfo(mockContext);
+        deviceInfo = createDeviceInfoWithSignals();
         Integer result = deviceInfo.isHeadsetOn();
 
         assertEquals(Integer.valueOf(1), result);
@@ -126,7 +165,7 @@ public class DeviceInfoHeadsetTest {
         AudioDeviceInfo[] devices = new AudioDeviceInfo[]{mockDevice};
         when(mockAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)).thenReturn(devices);
 
-        deviceInfo = new DeviceInfo(mockContext);
+        deviceInfo = createDeviceInfoWithSignals();
         Integer result = deviceInfo.isHeadsetOn();
 
         assertEquals(Integer.valueOf(1), result);
@@ -144,7 +183,7 @@ public class DeviceInfoHeadsetTest {
         AudioDeviceInfo[] devices = new AudioDeviceInfo[]{mockDevice};
         when(mockAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)).thenReturn(devices);
 
-        deviceInfo = new DeviceInfo(mockContext);
+        deviceInfo = createDeviceInfoWithSignals();
         Integer result = deviceInfo.isHeadsetOn();
 
         assertEquals(Integer.valueOf(0), result);
@@ -160,7 +199,7 @@ public class DeviceInfoHeadsetTest {
         AudioDeviceInfo[] devices = new AudioDeviceInfo[]{};
         when(mockAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)).thenReturn(devices);
 
-        deviceInfo = new DeviceInfo(mockContext);
+        deviceInfo = createDeviceInfoWithSignals();
         Integer result = deviceInfo.isHeadsetOn();
 
         assertEquals(Integer.valueOf(0), result);
@@ -182,7 +221,7 @@ public class DeviceInfoHeadsetTest {
         AudioDeviceInfo[] devices = new AudioDeviceInfo[]{mockDevice1, mockDevice2};
         when(mockAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)).thenReturn(devices);
 
-        deviceInfo = new DeviceInfo(mockContext);
+        deviceInfo = createDeviceInfoWithSignals();
         Integer result = deviceInfo.isHeadsetOn();
 
         assertEquals(Integer.valueOf(1), result);
@@ -207,7 +246,7 @@ public class DeviceInfoHeadsetTest {
         AudioDeviceInfo[] devices = new AudioDeviceInfo[]{mockDevice1, mockDevice2, mockDevice3};
         when(mockAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)).thenReturn(devices);
 
-        deviceInfo = new DeviceInfo(mockContext);
+        deviceInfo = createDeviceInfoWithSignals();
         Integer result = deviceInfo.isHeadsetOn();
 
         assertEquals(Integer.valueOf(0), result);
@@ -225,7 +264,7 @@ public class DeviceInfoHeadsetTest {
         AudioDeviceInfo[] devices = new AudioDeviceInfo[]{mockDevice};
         when(mockAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)).thenReturn(devices);
 
-        deviceInfo = new DeviceInfo(mockContext);
+        deviceInfo = createDeviceInfoWithSignals();
         Integer result = deviceInfo.isHeadsetOn();
 
         assertEquals(Integer.valueOf(1), result);
@@ -243,7 +282,7 @@ public class DeviceInfoHeadsetTest {
         AudioDeviceInfo[] devices = new AudioDeviceInfo[]{mockDevice};
         when(mockAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)).thenReturn(devices);
 
-        deviceInfo = new DeviceInfo(mockContext);
+        deviceInfo = createDeviceInfoWithSignals();
         Integer result = deviceInfo.isHeadsetOn();
 
         assertEquals(Integer.valueOf(1), result);
@@ -261,7 +300,7 @@ public class DeviceInfoHeadsetTest {
         AudioDeviceInfo[] devices = new AudioDeviceInfo[]{mockDevice};
         when(mockAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)).thenReturn(devices);
 
-        deviceInfo = new DeviceInfo(mockContext);
+        deviceInfo = createDeviceInfoWithSignals();
         Integer result = deviceInfo.isHeadsetOn();
 
         assertEquals(Integer.valueOf(0), result);
@@ -279,7 +318,7 @@ public class DeviceInfoHeadsetTest {
         when(mockAudioManager.isBluetoothScoOn()).thenReturn(false);
         when(mockAudioManager.isBluetoothA2dpOn()).thenReturn(false);
 
-        deviceInfo = new DeviceInfo(mockContext);
+        deviceInfo = createDeviceInfoWithSignals();
         Integer result = deviceInfo.isHeadsetOn();
 
         assertEquals(Integer.valueOf(1), result);
@@ -295,7 +334,7 @@ public class DeviceInfoHeadsetTest {
         when(mockAudioManager.isBluetoothScoOn()).thenReturn(true);
         when(mockAudioManager.isBluetoothA2dpOn()).thenReturn(false);
 
-        deviceInfo = new DeviceInfo(mockContext);
+        deviceInfo = createDeviceInfoWithSignals();
         Integer result = deviceInfo.isHeadsetOn();
 
         assertEquals(Integer.valueOf(1), result);
@@ -311,7 +350,7 @@ public class DeviceInfoHeadsetTest {
         when(mockAudioManager.isBluetoothScoOn()).thenReturn(false);
         when(mockAudioManager.isBluetoothA2dpOn()).thenReturn(true);
 
-        deviceInfo = new DeviceInfo(mockContext);
+        deviceInfo = createDeviceInfoWithSignals();
         Integer result = deviceInfo.isHeadsetOn();
 
         assertEquals(Integer.valueOf(1), result);
@@ -327,7 +366,7 @@ public class DeviceInfoHeadsetTest {
         when(mockAudioManager.isBluetoothScoOn()).thenReturn(true);
         when(mockAudioManager.isBluetoothA2dpOn()).thenReturn(true);
 
-        deviceInfo = new DeviceInfo(mockContext);
+        deviceInfo = createDeviceInfoWithSignals();
         Integer result = deviceInfo.isHeadsetOn();
 
         assertEquals(Integer.valueOf(1), result);
@@ -343,7 +382,7 @@ public class DeviceInfoHeadsetTest {
         when(mockAudioManager.isBluetoothScoOn()).thenReturn(false);
         when(mockAudioManager.isBluetoothA2dpOn()).thenReturn(false);
 
-        deviceInfo = new DeviceInfo(mockContext);
+        deviceInfo = createDeviceInfoWithSignals();
         Integer result = deviceInfo.isHeadsetOn();
 
         assertEquals(Integer.valueOf(0), result);

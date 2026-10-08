@@ -4,7 +4,9 @@
 //
 package net.pubnative.lite.sdk.interstitial.viewModel;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
@@ -21,6 +23,7 @@ import net.pubnative.lite.sdk.interstitial.InterstitialActivityInteractor;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.vpaid.VideoAd;
+import net.pubnative.lite.sdk.vpaid.VideoAdListener;
 
 
 import org.junit.After;
@@ -180,6 +183,30 @@ public class VastInterstitialViewModelTest {
             field.set(viewModel, b);
         } catch (Exception ignore) {
         }
+    }
+
+    @Test
+    public void videoAdListenerClicks_markTheImpression() {
+        VideoAdListener listener = getPrivateFieldValue(VastInterstitialViewModel.class, "mVideoAdListener");
+        assertNotNull(listener);
+
+        listener.onAdClicked();
+        listener.onCustomEndCardClick("html");
+        listener.onDefaultEndCardClick("static");
+        listener.onCustomCTACLick(true);
+
+        verify(mockAd, times(4)).setImpressionClicked(); // one per click callback
+    }
+
+    @Test
+    public void videoAdListener_hasImpressionBeenClicked_reflectsTheAd() {
+        VideoAdListener listener = getPrivateFieldValue(VastInterstitialViewModel.class, "mVideoAdListener");
+        assertNotNull(listener);
+
+        when(mockAd.isImpressionClicked()).thenReturn(false);
+        assertFalse(listener.hasImpressionBeenClicked());
+        when(mockAd.isImpressionClicked()).thenReturn(true);
+        assertTrue(listener.hasImpressionBeenClicked());
     }
 
     private <T> T getPrivateFieldValue(Class c, String fieldName) {

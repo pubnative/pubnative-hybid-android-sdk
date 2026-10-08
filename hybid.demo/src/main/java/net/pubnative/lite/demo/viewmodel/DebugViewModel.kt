@@ -30,6 +30,7 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
     val requestDebugInfo: LiveData<RequestDebugInfo> = _requestDebugInfo
     private var _eventList: ArrayList<ReportingEvent> = arrayListOf()
     private var _trackerList: ArrayList<ReportingTracker> = arrayListOf()
+    private val _firedTrackersLiveData: MutableLiveData<List<ReportingTracker>> = MutableLiveData(_trackerList)
     private var _requestUri: String? = null
     private var _response: String? = null
 
@@ -77,6 +78,7 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
 
     fun clearTrackerList() {
         _trackerList = arrayListOf()
+        _firedTrackersLiveData.postValue(ArrayList(_trackerList))
     }
 
     fun clearRequestUri() {
@@ -118,7 +120,10 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
     }
 
     override fun onFire(firedTracker: ReportingTracker?) {
-        firedTracker?.let { _trackerList.add(it) }
+        firedTracker?.let {
+            _trackerList.add(it)
+            _firedTrackersLiveData.postValue(ArrayList(_trackerList))
+        }
     }
 
     fun getEventList(): MutableLiveData<List<ReportingEvent>> {
@@ -128,9 +133,7 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
     }
 
     fun getFiredTrackersList(): MutableLiveData<List<ReportingTracker>> {
-        val liveData: MutableLiveData<List<ReportingTracker>> = MutableLiveData()
-        liveData.value = _trackerList
-        return liveData
+        return _firedTrackersLiveData
     }
 
     fun getRequestUri(): MutableLiveData<String> {
@@ -149,6 +152,7 @@ class DebugViewModel(application: Application) : AndroidViewModel(application),
         super.onCleared()
         if (HyBid.getReportingController() != null) {
             HyBid.getReportingController().removeCallback(this)
+            HyBid.getReportingController().removeTrackerCallback(this)
         }
     }
 

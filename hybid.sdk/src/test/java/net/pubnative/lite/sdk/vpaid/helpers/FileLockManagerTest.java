@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Map;
 
@@ -38,6 +39,32 @@ public class FileLockManagerTest {
         Field field = FileLockManager.class.getDeclaredField("mFileReferences");
         field.setAccessible(true);
         ((Map<?, ?>) field.get(lockManager)).clear();
+    }
+
+    @Test
+    public void deleteIfUnlocked_lockedFile_isKept() throws Exception {
+        File file = File.createTempFile("staged", ".part");
+        lockManager.acquire(file.getAbsolutePath());
+        try {
+            assertFalse(lockManager.deleteIfUnlocked(file));
+            assertTrue("a held file must survive the sweep", file.exists());
+        } finally {
+            //noinspection ResultOfMethodCallIgnored
+            file.delete();
+        }
+    }
+
+    @Test
+    public void deleteIfUnlocked_unlockedFile_isDeleted() throws Exception {
+        File file = File.createTempFile("staged", ".part");
+
+        assertTrue(lockManager.deleteIfUnlocked(file));
+        assertFalse("an unheld file must be swept", file.exists());
+    }
+
+    @Test
+    public void deleteIfUnlocked_withNullFile_doesNothing() {
+        assertFalse(lockManager.deleteIfUnlocked(null));
     }
 
     @Test

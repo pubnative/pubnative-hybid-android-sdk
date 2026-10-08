@@ -95,6 +95,23 @@ public class MRAIDViewTest {
         );
     }
 
+    @Test
+    public void testPlacementType_fullScreenBanner_isInterstitial() {
+        assertEquals("interstitial", newBanner(false, true).getPlacementType());
+        assertEquals("interstitial", newBanner(true, true).getPlacementType());
+    }
+
+    @Test
+    public void testPlacementType_inlineBanner_unchanged() {
+        assertEquals("inline", newBanner(true, false).getPlacementType());
+        assertEquals("", newBanner(false, false).getPlacementType());
+    }
+
+    private MRAIDBanner newBanner(boolean isExpandEnabled, boolean isFullScreen) {
+        return new MRAIDBanner(context, "https://example.com", null, false, isExpandEnabled,
+                new String[]{}, null, null, null, isFullScreen);
+    }
+
     @After
     public void tearDown() {
         MRAIDLog.setLoggingLevel(MRAIDLog.LOG_LEVEL.warning);

@@ -54,6 +54,10 @@ public class FileUtilsTest {
         field.set(null, null);
 
         when(mockContext.getExternalFilesDir(VpaidConstants.FILE_FOLDER)).thenReturn(mockParentDir);
+        when(mockFile1.getName()).thenReturn("cached_1");
+        when(mockFile2.getName()).thenReturn("cached_2");
+        when(mockFileExpired.getName()).thenReturn("cached_expired");
+        when(mockFileEmpty.getName()).thenReturn("cached_empty");
         currentTime = System.currentTimeMillis();
     }
 
@@ -286,5 +290,68 @@ public class FileUtilsTest {
         FileUtils.deleteExpiredFiles(mockContext);
         // Should delete
         verify(mockFileExpired, times(1)).delete();
+    }
+
+    @Test
+    public void deleteExpiredFiles_staleStagedFile_deleted() {
+        when(mockFile1.getName()).thenReturn("1154027261.0" + FileUtils.PART_SUFFIX);
+        when(mockFile1.isDirectory()).thenReturn(false);
+        when(mockFile1.lastModified()).thenReturn(currentTime - VpaidConstants.CACHED_VIDEO_LIFE_TIME - 1000);
+        when(mockFile1.getAbsolutePath()).thenReturn("/mock/1154027261.0" + FileUtils.PART_SUFFIX);
+        when(mockFile1.delete()).thenReturn(true);
+        when(mockParentDir.listFiles()).thenReturn(new File[]{mockFile1});
+
+        FileUtils.deleteExpiredFiles(mockContext);
+
+        verify(mockFile1, times(1)).delete();
+    }
+
+    @Test
+    public void deleteExpiredFiles_inFlightStagedFile_isNotDeleted() {
+        when(mockFile1.getName()).thenReturn("1154027261.0" + FileUtils.PART_SUFFIX);
+        when(mockFile1.isDirectory()).thenReturn(false);
+        when(mockFile1.lastModified()).thenReturn(currentTime);
+        when(mockFile1.length()).thenReturn(0L);
+        when(mockFile1.getAbsolutePath()).thenReturn("/mock/1154027261.0" + FileUtils.PART_SUFFIX);
+        when(mockParentDir.listFiles()).thenReturn(new File[]{mockFile1});
+        FileLockManager.getInstance().acquire("/mock/1154027261.0" + FileUtils.PART_SUFFIX);
+
+        FileUtils.deleteExpiredFiles(mockContext);
+
+        verify(mockFile1, never()).delete();
+    }
+
+    /** An orphan from a killed process holds no lock, so it need not wait out the TTL. */
+    @Test
+    public void deleteExpiredFiles_orphanedStagedFile_isDeletedEvenWhenFresh() {
+        when(mockFile1.getName()).thenReturn("1154027261.0" + FileUtils.PART_SUFFIX);
+        when(mockFile1.isDirectory()).thenReturn(false);
+        when(mockFile1.lastModified()).thenReturn(currentTime);
+        when(mockFile1.length()).thenReturn(1024L);
+        when(mockFile1.getAbsolutePath()).thenReturn("/mock/1154027261.0" + FileUtils.PART_SUFFIX);
+        when(mockFile1.delete()).thenReturn(true);
+        when(mockParentDir.listFiles()).thenReturn(new File[]{mockFile1});
+
+        FileUtils.deleteExpiredFiles(mockContext);
+
+        verify(mockFile1, times(1)).delete();
+    }
+
+    @Test
+    public void deleteExpiredFiles_expiredStagedFile_isForceReleasedAndDeleted() {
+        String path = "/mock/1154027261.0" + FileUtils.PART_SUFFIX;
+        when(mockFile1.getName()).thenReturn("1154027261.0" + FileUtils.PART_SUFFIX);
+        when(mockFile1.isDirectory()).thenReturn(false);
+        when(mockFile1.lastModified()).thenReturn(currentTime - VpaidConstants.CACHED_VIDEO_LIFE_TIME - 1000);
+        when(mockFile1.getAbsolutePath()).thenReturn(path);
+        when(mockFile1.delete()).thenReturn(true);
+        when(mockParentDir.listFiles()).thenReturn(new File[]{mockFile1});
+        FileLockManager.getInstance().acquire(path);
+
+        FileUtils.deleteExpiredFiles(mockContext);
+
+        verify(mockFile1, times(1)).delete();
+        assertFalse("a leaked lock must not survive the sweep",
+                FileLockManager.getInstance().isLocked(path));
     }
 }

@@ -40,4 +40,12 @@ public interface RewardedActivityInteractor {
     void setContentLayout();
 
     void setSkipSize(int reducedCloseButtonSize);
+
+    // Default no-ops: additive hooks that must not break third-party implementations compiled
+    // against an older SDK. The built-in activity overrides them.
+    default void setCloseTouchSize(int touchSize) { }
+
+    default void setCloseInitialTouchSize(int initialTouchSize) { }
+
+    default void setCloseClickStateProvider(net.pubnative.lite.sdk.views.TouchAreaDelegate.ClickStateProvider provider) { }
 }

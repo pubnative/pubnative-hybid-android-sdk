@@ -108,6 +108,10 @@ abstract class BaseVideoAdInternal {
         mVideoAdListener = videoAdListener;
     }
 
+    boolean hasImpressionBeenClicked() {
+        return mVideoAdListener != null && mVideoAdListener.hasImpressionBeenClicked();
+    }
+
     VideoAdController getAdController() {
         return mAdController;
     }

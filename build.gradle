@@ -165,14 +165,9 @@ sonarqube {
 // Global properties
 subprojects {
     ext {
-        branchName = null
-        if (System.getenv("GITHUB_REF_NAME") != null) {
-            branchName = "${System.getenv("GITHUB_REF_NAME")}"
-        }
-
         buildNumber = null
         if (System.getenv("GITHUB_RUN_NUMBER") != null) {
-            buildNumber = "${System.getenv("GITHUB_RUN_NUMBER")}"
+            buildNumber = System.getenv("GITHUB_RUN_NUMBER").toInteger()
         }
 
         min_android_api = 21
@@ -180,10 +175,10 @@ subprojects {
         android_build_tools = '36.0.0'
         omid_version = '1.6.7'
         wrapper_omid_version = '1.6.7'
-        wrapper_version = '23.2.2'
+        wrapper_version = '23.2.3'
     }
 
-    version = "3.9.2"
+    version = "3.9.3"
     group = "net.pubnative"
 }
 
@@ -204,4 +199,56 @@ allprojects {
 
 tasks.register('clean', Delete) {
     delete rootProject.buildDir
+}
+
+/**
+ * Custom Gradle task to move packages from 'nextgen' directory to root ng.sdk project
+ */
+
+tasks.register('moveNextgenDirectoriesFilesToNgSdkProject') {
+    doLast {
+        println "--- Starting movePackagesToNgSdkProject ---"
+        def hybidProject = rootProject.project(':hybid.sdk')
+        def ngSdkProject = rootProject.project(':ng.sdk')
+
+        def destinationDir = ngSdkProject.file('src/main/java')
+        def destinationResDir = ngSdkProject.file('src/main/res')
+        def destinationManifest = ngSdkProject.file('src/main/AndroidManifest.xml')
+
+        // Copy Java files
+        def flavourSourceDir = hybidProject.file('src/nextgen/java')
+        if (flavourSourceDir.exists() && flavourSourceDir.isDirectory()) {
+            copy {
+                from flavourSourceDir
+                into destinationDir
+            }
+            //delete flavourSourceDir after copying
+            flavourSourceDir.deleteDir()
+        }
+
+        // Copy resources
+        def flavourResDir = hybidProject.file('src/nextgen/res')
+        if (flavourResDir.exists() && flavourResDir.isDirectory()) {
+            println "Copying resources from hybid.sdk/src/nextgen/res"
+            copy {
+                from flavourResDir
+                into destinationResDir
+            }
+            //delete Resources after copying
+            flavourResDir.deleteDir()
+        }
+
+        // Copy AndroidManifest
+        def flavourManifest = hybidProject.file('src/nextgen/AndroidManifest.xml')
+        if (flavourManifest.exists()) {
+            println "Copying AndroidManifest from hybid.sdk/src/nextgen/"
+            copy {
+                from flavourManifest
+                into destinationManifest.parentFile
+            }
+            //delete nextgen/AndroidManifest after copying
+            flavourManifest.delete()
+        }
+        println "--- movePackagesToNgSdkProject Complete ---"
+    }
 }

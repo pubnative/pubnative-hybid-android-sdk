@@ -5,18 +5,23 @@
 package net.pubnative.lite.sdk.views.endcard;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -192,5 +197,84 @@ public class HyBidEndCardViewTest {
             ImageView skipView = endCardView.findViewById(R.id.end_card_skip_view);
             assertEquals(View.VISIBLE, skipView.getVisibility());
         }
+    }
+
+    @Test
+    public void dispatchTouchEvent_withFeatureOff_passesToSuper() {
+        endCardView = new HyBidEndCardView(context);
+        endCardView.layout(0, 0, 400, 600);
+
+        MotionEvent event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 40, 10, 0);
+        try {
+            // No touch size configured, so the delegate is disabled and the event is left to super.
+            assertFalse(endCardView.dispatchTouchEvent(event));
+        } finally {
+            event.recycle();
+        }
+    }
+
+    @Test
+    public void closeView_closesFromTheGrownArea() {
+        // dp -> px identity so the 60dp tap area is real under the mocked ViewUtils.
+        when(ViewUtils.convertDpToPixel(anyFloat(), any())).thenAnswer(i -> (float) (Float) i.getArgument(0));
+
+        endCardView = new HyBidEndCardView(context);
+        endCardView.setEndCardViewListener(mockListener);
+        endCardView.setTouchSize(60);
+
+        ImageView close = endCardView.findViewById(R.id.button_fullscreen_close);
+        close.setVisibility(View.VISIBLE);
+        endCardView.layout(0, 0, 400, 600);
+        close.layout(0, 0, 30, 30); // drawn 30x30 at top-left
+
+        // (10,40): below the drawn close button but inside its 60dp tap area.
+        MotionEvent down = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 10, 40, 0);
+        MotionEvent up = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 10, 40, 0);
+        try {
+            assertTrue(endCardView.dispatchTouchEvent(down));
+            assertTrue(endCardView.dispatchTouchEvent(up));
+        } finally {
+            down.recycle();
+            up.recycle();
+        }
+
+        verify(mockListener).onClose(anyBoolean());
+    }
+
+    @Test
+    public void closeView_leavesTheProtectedAreaToTheEndCard() {
+        when(ViewUtils.convertDpToPixel(anyFloat(), any())).thenAnswer(i -> (float) (Float) i.getArgument(0));
+
+        endCardView = new HyBidEndCardView(context);
+        endCardView.setEndCardViewListener(mockListener);
+        endCardView.setTouchSize(100);
+
+        final boolean[] endCardTouched = {false};
+        View endCardContent = new View(context);
+        endCardContent.setOnTouchListener((v, event) -> {
+            endCardTouched[0] = true;
+            return true;
+        });
+        endCardView.addView(endCardContent, 0);
+
+        ImageView close = endCardView.findViewById(R.id.button_fullscreen_close);
+        close.setVisibility(View.VISIBLE);
+        endCardView.layout(0, 0, 400, 600);
+        endCardContent.layout(0, 0, 400, 600);
+        close.layout(0, 0, 30, 30);
+
+        // (49,9): an AdChoices icon drawn by the end card 10dp right of the 30dp close button.
+        MotionEvent down = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 49, 9, 0);
+        MotionEvent up = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 49, 9, 0);
+        try {
+            endCardView.dispatchTouchEvent(down);
+            endCardView.dispatchTouchEvent(up);
+        } finally {
+            down.recycle();
+            up.recycle();
+        }
+
+        assertTrue(endCardTouched[0]);
+        verify(mockListener, never()).onClose(anyBoolean());
     }
 }

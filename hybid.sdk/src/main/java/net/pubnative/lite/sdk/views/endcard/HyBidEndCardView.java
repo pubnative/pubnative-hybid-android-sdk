@@ -31,6 +31,7 @@ import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.utils.SkipOffsetManager;
 import net.pubnative.lite.sdk.utils.ViewUtils;
 import net.pubnative.lite.sdk.views.CustomImageView;
+import net.pubnative.lite.sdk.views.TouchAreaDelegate;
 import net.pubnative.lite.sdk.vpaid.CloseButtonListener;
 import net.pubnative.lite.sdk.vpaid.ReplayListener;
 import net.pubnative.lite.sdk.vpaid.helpers.SimpleTimer;
@@ -71,6 +72,8 @@ public class HyBidEndCardView extends FrameLayout {
     private boolean hasReducedClose = false;
 
     private CountDownView mCloseCountdownView;
+
+    private final TouchAreaDelegate mTouchAreaDelegate = new TouchAreaDelegate();
 
     private static final CountdownStyle COUNTDOWN_STYLE_DEFAULT = CountdownStyle.PIE_CHART;
 
@@ -302,6 +305,38 @@ public class HyBidEndCardView extends FrameLayout {
         this.addView(mSkipView);
         this.addView(mCloseView);
         this.addView(mCloseCountdownView);
+
+        // Only the end card close gets a configurable tap area; the end card skip is left
+        // untouched.
+        mTouchAreaDelegate.addTarget(mCloseView);
+    }
+
+    /**
+     * Sets the tap area (dp) for the end card close control. Only changes which taps count as
+     * pressing the button; the button looks and sits the same. Skip is not affected.
+     */
+    public void setTouchSize(int touchSize) {
+        mTouchAreaDelegate.setTouchSize(getContext(), touchSize);
+    }
+
+    /** Sets the initial tap area (dp) for the end card close, used before the ad is clicked. */
+    public void setInitialTouchSize(int initialTouchSize) {
+        mTouchAreaDelegate.setInitialTouchSize(getContext(), initialTouchSize);
+    }
+
+    /** Supplies whether the ad has been clicked yet, so the end card close can switch tap sizes. */
+    public void setClickStateProvider(TouchAreaDelegate.ClickStateProvider provider) {
+        mTouchAreaDelegate.setClickStateProvider(provider);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        // Checked before the event is offered to any child, so the grown area wins over the end
+        // card creative's own click handling.
+        if (mTouchAreaDelegate.onDispatchTouchEvent(event)) {
+            return true;
+        }
+        return super.dispatchTouchEvent(event);
     }
 
     public void setSkipOffset(SkipOffset skipOffset) {
@@ -609,6 +644,7 @@ public class HyBidEndCardView extends FrameLayout {
     }
 
     public void destroy() {
+        mTouchAreaDelegate.reset();
         if (mSkipEndcardTimer != null) {
             mSkipEndcardTimer.cancel();
         }

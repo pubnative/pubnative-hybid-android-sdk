@@ -12,8 +12,6 @@ import static org.junit.Assert.assertTrue;
 
 import net.pubnative.lite.sdk.models.bidstream.Signal;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +33,6 @@ public class AdRequestTest {
         assertNull(adRequest.appToken);
         assertNull(adRequest.zoneId);
         assertFalse(adRequest.isInterstitial);
-        assertNull(adRequest.topics);
 
         // The signals list should be initialized but empty
         assertNotNull(adRequest.getSignals());
@@ -47,14 +44,10 @@ public class AdRequestTest {
         adRequest.appToken = "test_token";
         adRequest.zoneId = "test_zone";
         adRequest.isInterstitial = true;
-        List<Topic> topics = new ArrayList<>();
-        topics.add(new Topic(1, 1L, "v1"));
-        adRequest.topics = topics;
 
         assertEquals("test_token", adRequest.appToken);
         assertEquals("test_zone", adRequest.zoneId);
         assertTrue(adRequest.isInterstitial);
-        assertEquals(topics, adRequest.topics);
     }
 
     @Test

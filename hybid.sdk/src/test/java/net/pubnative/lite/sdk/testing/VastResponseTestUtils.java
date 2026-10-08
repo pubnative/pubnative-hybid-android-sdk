@@ -978,4 +978,87 @@ public class VastResponseTestUtils {
     public static String getVastResponseWithoutImpression() {
         return vast_response_without_impression;
     }
+
+    private static final String VMA1593_MEDIA_FILE = "https://example.invalid/vma1593.mp4";
+    private static final String VMA1593_ERROR_URL = "https://example.invalid/error?code=[ERRORCODE]";
+    private static final String VMA1593_IMPRESSION_URL = "https://example.invalid/impression";
+    private static final String VMA1593_TAG_URI = "https://example.invalid/inline.xml";
+
+    /** Default duration for the single-level fixtures; matches §10's 30s cases. */
+    public static final String VMA1593_DURATION_30S = "00:00:30";
+
+    /**
+     * An InLine level carrying a MediaFile, so parseResponse reaches onParseSuccess.
+     * Omitting the MediaFile makes it report "No video file found" instead.
+     *
+     * @param skipOffset value for Linear@skipoffset, or null to omit the attribute entirely
+     * @param duration   Linear <Duration> text, or null to omit the element
+     */
+    public static String vma1593Inline(String skipOffset, String duration) {
+        return "<VAST version=\"3.0\">\n" +
+                "  <Ad id=\"vma1593-inline\">\n" +
+                "    <InLine>\n" +
+                "      <AdSystem>VMA-1593</AdSystem>\n" +
+                "      <AdTitle>skipoffset fixture</AdTitle>\n" +
+                "      <Error><![CDATA[" + VMA1593_ERROR_URL + "]]></Error>\n" +
+                "      <Impression><![CDATA[" + VMA1593_IMPRESSION_URL + "]]></Impression>\n" +
+                "      <Creatives>\n" +
+                "        <Creative id=\"vma1593-inline\">\n" +
+                "          <Linear" + vma1593SkipOffsetAttribute(skipOffset) + ">\n" +
+                vma1593DurationElement(duration) +
+                "            <TrackingEvents>\n" +
+                "              <Tracking event=\"skip\"><![CDATA[https://example.invalid/skip]]></Tracking>\n" +
+                "            </TrackingEvents>\n" +
+                "            <MediaFiles>\n" +
+                "              <MediaFile delivery=\"progressive\" type=\"video/mp4\" width=\"640\" height=\"360\">" +
+                "<![CDATA[" + VMA1593_MEDIA_FILE + "]]></MediaFile>\n" +
+                "            </MediaFiles>\n" +
+                "          </Linear>\n" +
+                "        </Creative>\n" +
+                "      </Creatives>\n" +
+                "    </InLine>\n" +
+                "  </Ad>\n" +
+                "</VAST>";
+    }
+
+    /**
+     * A Wrapper level. Carries no <Duration>, which is the realistic case and exercises
+     * VastProcessor's default-duration substitution before the InLine level overrides it.
+     *
+     * @param skipOffset value for Linear@skipoffset, or null to omit the attribute entirely
+     */
+    public static String vma1593Wrapper(String skipOffset) {
+        return "<VAST version=\"3.0\">\n" +
+                "  <Ad id=\"vma1593-wrapper\">\n" +
+                "    <Wrapper>\n" +
+                "      <AdSystem>VMA-1593</AdSystem>\n" +
+                "      <VASTAdTagURI><![CDATA[" + VMA1593_TAG_URI + "]]></VASTAdTagURI>\n" +
+                "      <Error><![CDATA[" + VMA1593_ERROR_URL + "]]></Error>\n" +
+                "      <Impression><![CDATA[" + VMA1593_IMPRESSION_URL + "]]></Impression>\n" +
+                "      <Creatives>\n" +
+                "        <Creative id=\"vma1593-wrapper\">\n" +
+                "          <Linear" + vma1593SkipOffsetAttribute(skipOffset) + ">\n" +
+                "            <TrackingEvents>\n" +
+                "              <Tracking event=\"skip\"><![CDATA[https://example.invalid/wrapper-skip]]></Tracking>\n" +
+                "            </TrackingEvents>\n" +
+                "          </Linear>\n" +
+                "        </Creative>\n" +
+                "      </Creatives>\n" +
+                "    </Wrapper>\n" +
+                "  </Ad>\n" +
+                "</VAST>";
+    }
+
+    /** Single-level InLine with a 30s duration; the shape most §10 rows need. */
+    public static String vma1593InlineWithSkipOffset(String skipOffset) {
+        return vma1593Inline(skipOffset, VMA1593_DURATION_30S);
+    }
+
+    private static String vma1593SkipOffsetAttribute(String skipOffset) {
+        return skipOffset == null ? "" : " skipoffset=\"" + skipOffset + "\"";
+    }
+
+    private static String vma1593DurationElement(String duration) {
+        return duration == null ? "" : "            <Duration>" + duration + "</Duration>\n";
+    }
 }

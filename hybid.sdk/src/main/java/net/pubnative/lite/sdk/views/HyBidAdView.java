@@ -52,7 +52,6 @@ import net.pubnative.lite.sdk.utils.SignalDataProcessor;
 import net.pubnative.lite.sdk.utils.ViewUtils;
 import net.pubnative.lite.sdk.utils.WatermarkHelper;
 import net.pubnative.lite.sdk.utils.json.JsonOperations;
-import net.pubnative.lite.sdk.views.endcard.HyBidEndCardView;
 import net.pubnative.lite.sdk.vpaid.VideoAdCacheItem;
 import net.pubnative.lite.sdk.vpaid.VideoAdProcessor;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
@@ -72,7 +71,6 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     private Position mPosition;
     private WindowManager mWindowManager;
     private FrameLayout mContainer;
-    private HyBidEndCardView mEndCardView;
     private String mScreenIabCategory;
     private String mScreenKeywords;
     private String mUserIntent;
@@ -110,7 +108,9 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     private AdTracker mAdTracker;
     protected Ad mAd;
 
-    private boolean mAutoShowOnLoad = true;
+    private volatile boolean mAutoShowOnLoad = true;
+    // Set on render entry; read when presenter callbacks complete (possibly off main thread).
+    private volatile boolean mRenderCompletionCallbackPending;
     private boolean mIsDestroyed;
     private final String mAdFormat = Reporting.AdFormat.BANNER;
     private SignalDataProcessor mSignalDataProcessor;
@@ -163,15 +163,6 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         mRequestManager.setIntegrationType(IntegrationType.STANDALONE);
         mORTBRequestManager.setIntegrationType(IntegrationType.STANDALONE);
         mPlacementParams = new JSONObject();
-        initEndCardView();
-    }
-
-
-    private void initEndCardView() {
-        mEndCardView = new HyBidEndCardView(getContext());
-        LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        mEndCardView.setLayoutParams(lp);
-        this.addView(mEndCardView);
     }
 
     public void setAdSize(AdSize adSize) {
@@ -332,8 +323,10 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
             mWindowManager.addView(mContainer, localLayoutParams);
         }
 
-        if (mAutoShowOnLoad) {
-            invokeOnLoadFinished();
+        AdPresenter completedPresenter = mPresenter;
+        notifyLoadFinishedIfNeeded();
+        if (mPresenter != completedPresenter) {
+            return;
         }
 
         startTracking();
@@ -377,6 +370,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         mPlacementParams = new JSONObject();
         mInitialLoadTime = -1;
         mInitialRenderTime = -1;
+        mRenderCompletionCallbackPending = false;
 
         if (mPresenter != null) {
             mPresenter.destroy();
@@ -545,11 +539,20 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         }
     }
 
+    public void prepareAd(String adValue, Listener listener) {
+        renderAd(adValue, listener);
+    }
+
+    public void prepareAd(Ad ad, Listener listener) {
+        renderAd(ad, listener);
+    }
+
     public void renderAd(Ad ad, Listener listener) {
+        cleanup();
+        mInitialLoadTime = System.currentTimeMillis();
+        mListener = listener;
+        mRenderCompletionCallbackPending = true;
         if (ad != null) {
-            cleanup();
-            mInitialLoadTime = System.currentTimeMillis();
-            mListener = listener;
             mAd = ad;
             initializeAdTracker(ad);
             renderAd();
@@ -597,6 +600,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         cleanup();
         mInitialLoadTime = System.currentTimeMillis();
         mListener = listener;
+        mRenderCompletionCallbackPending = true;
 
         if (!TextUtils.isEmpty(adValue)) {
             mSignalDataProcessor = new SignalDataProcessor();
@@ -734,6 +738,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
         cleanup();
         mInitialLoadTime = System.currentTimeMillis();
         mListener = listener;
+        mRenderCompletionCallbackPending = true;
 
         if (!TextUtils.isEmpty(adValue) && mRequestManager != null) {
             int assetGroup;
@@ -869,6 +874,7 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
     }
 
     protected void invokeOnLoadFailed(Throwable exception) {
+        mRenderCompletionCallbackPending = false;
         long loadTime = -1;
         if (mInitialLoadTime != -1) {
             loadTime = System.currentTimeMillis() - mInitialLoadTime;
@@ -965,8 +971,12 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
                 }
             }
 
-            if (mAutoShowOnLoad) {
-                invokeOnLoadFinished();
+            AdPresenter completedPresenter = mPresenter;
+            notifyLoadFinishedIfNeeded();
+            // If the listener started a new render inside onAdLoaded(), mPresenter now belongs to that
+            // render. Skip the rest so we don't track/report against the wrong presenter.
+            if (mPresenter != completedPresenter) {
+                return;
             }
 
             startTracking();
@@ -975,6 +985,15 @@ public class HyBidAdView extends FrameLayout implements RequestManager.RequestLi
             }
         } else {
             show(view, mPosition);
+        }
+    }
+
+    private void notifyLoadFinishedIfNeeded() {
+        if (mAutoShowOnLoad || mRenderCompletionCallbackPending) {
+            // clear the mRenderCompletionCallbackPending flag before calling the listener, not after —
+            // so a listener may start a fresh renderAd(...) from inside onAdLoaded(), doesn't get their new flag wiped
+            mRenderCompletionCallbackPending = false;
+            invokeOnLoadFinished();
         }
     }
 

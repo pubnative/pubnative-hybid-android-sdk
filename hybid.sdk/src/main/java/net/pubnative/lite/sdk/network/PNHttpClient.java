@@ -9,18 +9,25 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.vpaid.helpers.ExecutorHelper;
+import net.pubnative.lite.sdk.vpaid.helpers.RetryScheduler;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,8 +35,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
+import java.util.TimeZone;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class PNHttpClient {
 
@@ -39,11 +48,23 @@ public class PNHttpClient {
 
     private static final Object sQueueLock = new Object();
     private static final Queue<PendingRequest> sPendingRequests = new ArrayDeque<>();
+    private static Runnable sWakeUpTask;
+    private static long sWakeUpAtMs;
+    private static long sNotBeforeMs;
 
     private static final int READ_TIMEOUT = 10000;
     private static final int CONNECT_TIMEOUT = 10000;
     private static final int MAX_RETRIES = 5;
     private static final int RETRY_MULTIPLIER = 2;
+    private static final int HTTP_REQUEST_TIMEOUT = 408;
+    private static final int HTTP_TOO_MANY_REQUESTS = 429;
+    private static final int HTTP_SERVICE_UNAVAILABLE = 503;
+    private static final int HTTP_TEMPORARY_REDIRECT = 307;
+    private static final int HTTP_PERMANENT_REDIRECT = 308;
+    private static final int MAX_REDIRECTS = 20;
+    private static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
+    private static final long MIN_WAKE_UP_DELAY_MS = 100L;
+    private static final long OFFLINE_RECHECK_DELAY_MS = 30000L;
 
     public interface Listener {
         void onSuccess(String response, Map<String, List<String>> headers);
@@ -60,6 +81,10 @@ public class PNHttpClient {
         private String response;
         private Map<String, List<String>> headers;
         private Exception exception;
+        private boolean transportFailure;
+        private boolean failedToConnect;
+        private boolean redirected;
+        private long retryAfterMs = -1L;
 
         private Response() {
         }
@@ -113,6 +138,22 @@ public class PNHttpClient {
                                    final boolean shouldRetryIfFail,
                                    final Executor executor,
                                    final Listener listener) {
+        makeRequest(context, url, headers, postBody, shouldReturnOnMainThread, shouldRetryIfFail, RetryPolicy.DEFAULT, executor, listener);
+    }
+
+    /**
+     * Same as the overload without a policy, but chooses which failures are retried.
+     * @param retryPolicy used only when {@code shouldRetryIfFail} is true, null means {@link RetryPolicy#DEFAULT}
+     */
+    public static void makeRequest(final Context context,
+                                   final String url,
+                                   final Map<String, String> headers,
+                                   final String postBody,
+                                   final boolean shouldReturnOnMainThread,
+                                   final boolean shouldRetryIfFail,
+                                   final RetryPolicy retryPolicy,
+                                   final Executor executor,
+                                   final Listener listener) {
         try {
             executor.execute(() -> {
                 if (!isConnected(getActiveNetworkInfo(context))) {
@@ -120,30 +161,34 @@ public class PNHttpClient {
                     return;
                 }
 
-                final Response response = sendRequest(url, headers, postBody);
-                deliverResponse(response, url, postBody, headers, shouldReturnOnMainThread, shouldRetryIfFail, executor, listener);
+                final Response response = sendRequest(url, headers, postBody, retryPolicy);
+                deliverResponse(context, response, url, postBody, headers, shouldReturnOnMainThread, shouldRetryIfFail, retryPolicy, executor, listener);
                 performPendingRequests(context);
             });
         } catch (RejectedExecutionException exception) {
-            Logger.e(TAG, url, exception);
+            Logger.w(TAG, "Executor rejected request: " + redactUrl(url), exception);
             if (shouldRetryIfFail && !TextUtils.isEmpty(url)) {
-                enqueueForRetry(new PendingRequest(url, postBody, headers, MAX_RETRIES, RETRY_MULTIPLIER, executor));
+                enqueueForRetry(context, new PendingRequest(url, postBody, headers, MAX_RETRIES, RETRY_MULTIPLIER, executor, retryPolicy));
             }
             notifyRejected(listener, shouldReturnOnMainThread);
         }
     }
 
-    private static void deliverResponse(Response response,
+    private static void deliverResponse(Context context,
+                                        Response response,
                                         String url,
                                         String postBody,
                                         Map<String, String> headers,
                                         boolean shouldReturnOnMainThread,
                                         boolean shouldRetryIfFail,
+                                        RetryPolicy retryPolicy,
                                         Executor executor,
                                         Listener listener) {
         if (response.exception != null) {
-            if (shouldRetryIfFail && !TextUtils.isEmpty(url)) {
-                enqueueForRetry(new PendingRequest(url, postBody, headers, MAX_RETRIES, RETRY_MULTIPLIER, executor));
+            if (shouldRetryIfFail && isRetryableFailure(response, retryPolicy) && !TextUtils.isEmpty(url)) {
+                PendingRequest pendingRequest = new PendingRequest(url, postBody, headers, MAX_RETRIES, RETRY_MULTIPLIER, executor, retryPolicy);
+                applyRetryAfter(pendingRequest, response);
+                enqueueForRetry(context, pendingRequest);
             }
             if (listener != null) {
                 deliver(shouldReturnOnMainThread, () -> listener.onFailure(response.exception));
@@ -188,56 +233,190 @@ public class PNHttpClient {
 
     private static Response sendRequest(String url,
                                         Map<String, String> headers,
-                                        String request) {
+                                        String request,
+                                        RetryPolicy retryPolicy) {
 
         Response result = new Response();
+        boolean followRedirectsManually = followsRedirectsManually(retryPolicy);
         HttpURLConnection urlConnection = null;
         try {
             URL requestUrl = new URL(url);
-            urlConnection = (HttpURLConnection) requestUrl.openConnection();
-            urlConnection.setReadTimeout(READ_TIMEOUT);
-            urlConnection.setConnectTimeout(CONNECT_TIMEOUT);
-            urlConnection.setInstanceFollowRedirects(true);
-            urlConnection.setRequestMethod("GET"); // optional, GET already by default
+            String body = request;
+            for (int redirects = 0; ; redirects++) {
+                urlConnection = openConnection(requestUrl, headers, !TextUtils.isEmpty(body), !followRedirectsManually);
 
-            if (headers != null) {
-                for (Map.Entry<String, String> entry : headers.entrySet()) {
-                    urlConnection.addRequestProperty(entry.getKey(), entry.getValue());
+                try {
+                    urlConnection.connect();
+                } catch (IOException e) {
+                    result.failedToConnect = true;
+                    throw e;
+                }
+
+                if (!TextUtils.isEmpty(body)) {
+                    DataOutputStream outputStream = new DataOutputStream(urlConnection.getOutputStream());
+                    outputStream.writeBytes(body);
+                    outputStream.flush();
+                    outputStream.close();
+                }
+
+                result.responseCode = urlConnection.getResponseCode();
+                Log.d("Response Code: ", String.valueOf(result.getResponseCode()));
+
+                URL redirectUrl = followRedirectsManually ? redirectTarget(urlConnection, requestUrl, result.responseCode) : null;
+                if (redirectUrl == null) {
+                    break;
+                }
+                result.redirected = true;
+                if (redirects == MAX_REDIRECTS) {
+                    throw new ProtocolException("Too many redirects: " + (redirects + 1));
+                }
+                urlConnection.disconnect();
+                requestUrl = redirectUrl;
+                if (!keepsRequestBody(result.responseCode)) {
+                    body = null;
                 }
             }
 
-            if (!TextUtils.isEmpty(request)) {
-                urlConnection.setDoOutput(true);
-                urlConnection.setRequestMethod("POST"); // optional, setDoOutput(true) set value to POST
-                DataOutputStream outputStream = new DataOutputStream(urlConnection.getOutputStream());
-                outputStream.writeBytes(request);
-                outputStream.flush();
-                outputStream.close();
-            }
-
-            int responseCode = urlConnection.getResponseCode();
-            result.responseCode = responseCode;
-            Log.d("Response Code: ", String.valueOf(result.getResponseCode()));
-
+            int responseCode = result.responseCode;
             if (isHttpSuccess(responseCode)) {
-                InputStream inputStream = urlConnection.getInputStream();
-                result.response = getStringFromStream(inputStream);
-                inputStream.close();
+                if (readsResponseBody(retryPolicy)) {
+                    InputStream inputStream = urlConnection.getInputStream();
+                    result.response = getStringFromStream(inputStream);
+                    inputStream.close();
+                }
                 Map<String, List<String>> responseHeaders = urlConnection.getHeaderFields();
                 if (responseHeaders != null && !responseHeaders.isEmpty()) {
                     result.headers = new HashMap<>(responseHeaders);
                 }
             } else {
+                if (responseCode == HTTP_TOO_MANY_REQUESTS || responseCode == HTTP_SERVICE_UNAVAILABLE) {
+                    long serverNowMs = urlConnection.getDate();
+                    result.retryAfterMs = parseRetryAfterMs(urlConnection.getHeaderField("Retry-After"),
+                            serverNowMs > 0L ? serverNowMs : System.currentTimeMillis());
+                }
                 result.exception = new Exception(String.format(Locale.ENGLISH, "Network request failed with code: %s", responseCode));
             }
         } catch (Exception e) {
             result.exception = e;
+            result.transportFailure = true;
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
         }
         return result;
+    }
+
+    private static HttpURLConnection openConnection(URL url,
+                                                    Map<String, String> headers,
+                                                    boolean hasBody,
+                                                    boolean followRedirects) throws IOException {
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setReadTimeout(READ_TIMEOUT);
+        urlConnection.setConnectTimeout(CONNECT_TIMEOUT);
+        urlConnection.setInstanceFollowRedirects(followRedirects);
+        urlConnection.setRequestMethod("GET"); // optional, GET already by default
+
+        if (headers != null) {
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                urlConnection.addRequestProperty(entry.getKey(), entry.getValue());
+            }
+        }
+
+        if (hasBody) {
+            urlConnection.setDoOutput(true);
+            urlConnection.setRequestMethod("POST"); // optional, setDoOutput(true) set value to POST
+        }
+        return urlConnection;
+    }
+
+    private static URL redirectTarget(HttpURLConnection urlConnection, URL requestUrl, int responseCode) throws MalformedURLException {
+        if (!isFollowedRedirect(responseCode)) {
+            return null;
+        }
+        String location = urlConnection.getHeaderField("Location");
+        if (TextUtils.isEmpty(location)) {
+            return null;
+        }
+        URL target = new URL(requestUrl, location);
+        return target.getProtocol().equalsIgnoreCase(requestUrl.getProtocol()) ? target : null;
+    }
+
+    private static boolean isFollowedRedirect(int responseCode) {
+        switch (responseCode) {
+            case HttpURLConnection.HTTP_MULT_CHOICE:
+            case HttpURLConnection.HTTP_MOVED_PERM:
+            case HttpURLConnection.HTTP_MOVED_TEMP:
+            case HttpURLConnection.HTTP_SEE_OTHER:
+            case HTTP_TEMPORARY_REDIRECT:
+            case HTTP_PERMANENT_REDIRECT:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private static boolean keepsRequestBody(int redirectCode) {
+        return redirectCode == HTTP_TEMPORARY_REDIRECT || redirectCode == HTTP_PERMANENT_REDIRECT;
+    }
+
+    private static long parseRetryAfterMs(String value, long nowMs) {
+        if (TextUtils.isEmpty(value)) {
+            return -1L;
+        }
+        String trimmed = value.trim();
+        if (TextUtils.isDigitsOnly(trimmed)) {
+            try {
+                return TimeUnit.SECONDS.toMillis(Long.parseLong(trimmed));
+            } catch (NumberFormatException e) {
+                return Long.MAX_VALUE;
+            }
+        }
+        SimpleDateFormat httpDate = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
+        httpDate.setTimeZone(TimeZone.getTimeZone("GMT"));
+        httpDate.setLenient(false);
+        try {
+            return Math.max(0L, httpDate.parse(trimmed).getTime() - nowMs);
+        } catch (ParseException e) {
+            return -1L;
+        }
+    }
+
+    private static void applyRetryAfter(PendingRequest pendingRequest, Response response) {
+        if (pendingRequest.getRetryPolicy() == RetryPolicy.AVOID_DUPLICATES && response.retryAfterMs >= 0L) {
+            pendingRequest.deferAtLeast(response.retryAfterMs);
+        }
+    }
+
+    private static boolean readsResponseBody(RetryPolicy retryPolicy) {
+        return retryPolicy != RetryPolicy.AVOID_DUPLICATES;
+    }
+
+    private static boolean followsRedirectsManually(RetryPolicy retryPolicy) {
+        return retryPolicy == RetryPolicy.AVOID_DUPLICATES;
+    }
+
+    private static boolean isRetryableFailure(Response response, RetryPolicy retryPolicy) {
+        if (response == null || response.exception == null) {
+            return false;
+        }
+        if (retryPolicy == RetryPolicy.AVOID_DUPLICATES) {
+            return !response.redirected
+                    && (response.failedToConnect || isRetryableWithoutDuplicates(response.responseCode));
+        }
+        if (response.transportFailure || response.responseCode == 0) {
+            return true;
+        }
+        if (response.responseCode == HTTP_REQUEST_TIMEOUT || response.responseCode == HTTP_TOO_MANY_REQUESTS) {
+            return true;
+        }
+        return response.responseCode / 100 == 5;
+    }
+
+    private static boolean isRetryableWithoutDuplicates(int responseCode) {
+        return responseCode == HTTP_REQUEST_TIMEOUT
+                || responseCode == HTTP_TOO_MANY_REQUESTS
+                || responseCode == HTTP_SERVICE_UNAVAILABLE;
     }
 
     private static boolean isHttpSuccess(int responseCode) {
@@ -278,14 +457,27 @@ public class PNHttpClient {
 
     // Snapshots and drains the pending queue under sQueueLock, then processes it outside the lock.
     private static void performPendingRequests(Context context) {
+        if (!isConnected(getActiveNetworkInfo(context))) {
+            synchronized (sQueueLock) {
+                sNotBeforeMs = SystemClock.elapsedRealtime() + OFFLINE_RECHECK_DELAY_MS;
+            }
+            scheduleQueueWakeUp(context, OFFLINE_RECHECK_DELAY_MS);
+            return;
+        }
+
         List<PendingRequest> requestsToProcess;
         synchronized (sQueueLock) {
+            sNotBeforeMs = 0L;
             requestsToProcess = new ArrayList<>(sPendingRequests);
             sPendingRequests.clear();
         }
 
-        for (PendingRequest pendingRequest : requestsToProcess) {
-            makePendingRequest(context, pendingRequest);
+        try {
+            for (PendingRequest pendingRequest : requestsToProcess) {
+                makePendingRequest(context, pendingRequest);
+            }
+        } finally {
+            scheduleQueueWakeUp(context);
         }
     }
 
@@ -296,44 +488,193 @@ public class PNHttpClient {
             return;
         }
 
-        // Every re-enqueue path below checks isLimitReached() to bound retries.
+        // Filter only: the task claims. Skips a pointless submission for a not-due entry.
         if (!pendingRequest.shouldRetry()) {
-            pendingRequest.countAttempt();
-            if (!pendingRequest.isLimitReached()) {
-                enqueueForRetry(pendingRequest);
-            }
+            requeueIfWithinLimit(context, pendingRequest);
             return;
         }
 
-        pendingRequest.countRetry();
         try {
             pendingRequest.getExecutor().execute(() -> {
-                if (isConnected(getActiveNetworkInfo(context))) {
-                    final Response response = sendRequest(pendingRequest.getUrl(), pendingRequest.getHeaders(), pendingRequest.getPostBody());
-                    if (response.exception != null
-                            && !pendingRequest.isLimitReached()
-                            && !TextUtils.isEmpty(pendingRequest.getUrl())) {
-                        enqueueForRetry(pendingRequest);
-                    }
-                } else {
-                    requeueIfWithinLimit(pendingRequest);
+                // Losing connectivity is not the request's fault, so re-space without claiming.
+                if (!isConnected(getActiveNetworkInfo(context))) {
+                    pendingRequest.deferWithoutClaiming();
+                    requeueIfWithinLimit(context, pendingRequest);
+                    return;
+                }
+                if (!pendingRequest.tryClaimAttempt()) {
+                    requeueIfWithinLimit(context, pendingRequest);
+                    return;
+                }
+                final RetryPolicy retryPolicy = pendingRequest.getRetryPolicy();
+                final Response response = sendRequest(pendingRequest.getUrl(), pendingRequest.getHeaders(), pendingRequest.getPostBody(), retryPolicy);
+                boolean willRetry = isRetryableFailure(response, retryPolicy)
+                        && !pendingRequest.isLimitReached()
+                        && !TextUtils.isEmpty(pendingRequest.getUrl());
+                logRetryOutcome(pendingRequest, response, willRetry);
+                if (willRetry) {
+                    pendingRequest.scheduleNextAttempt();
+                    applyRetryAfter(pendingRequest, response);
+                    enqueueForRetry(context, pendingRequest);
                 }
             });
         } catch (RejectedExecutionException exception) {
-            Logger.e(TAG, pendingRequest.getUrl(), exception);
-            requeueIfWithinLimit(pendingRequest);
+            Logger.w(TAG, "Executor rejected retry: " + redactUrl(pendingRequest.getUrl()), exception);
+            // A saturated executor is backpressure, so claim here and let shedding terminate.
+            pendingRequest.countRetry();
+            requeueIfWithinLimit(context, pendingRequest);
         }
     }
 
-    private static void requeueIfWithinLimit(PendingRequest pendingRequest) {
-        if (!pendingRequest.isLimitReached()) {
-            enqueueForRetry(pendingRequest);
+    private static void logRetryOutcome(PendingRequest pendingRequest, Response response, boolean willRetry) {
+        int attempts = pendingRequest.getAttemptCount();
+        if (response.exception == null) {
+            Logger.d(TAG, "Retry succeeded on attempt " + attempts + ": " + redactUrl(pendingRequest.getUrl()));
+        } else if (willRetry) {
+            Logger.d(TAG, "Retry attempt " + attempts + " failed with code " + response.responseCode
+                    + ", re-queueing: " + redactUrl(pendingRequest.getUrl()));
+        } else {
+            logDrop("Dropping request after " + attempts + " attempt(s), last code " + response.responseCode,
+                    pendingRequest, response.exception);
         }
     }
 
-    private static void enqueueForRetry(PendingRequest pendingRequest) {
+    // Tracker queries carry ad and session IDs, so redact here too even though this is debug only.
+    private static void logDrop(String reason, PendingRequest pendingRequest, Exception exception) {
+        Logger.w(TAG, reason + ": " + redactUrl(pendingRequest.getUrl()), exception);
+    }
+
+    // Keeps scheme, host and path; drops the query and fragment, where the identifiers live.
+    private static String redactUrl(String url) {
+        if (TextUtils.isEmpty(url)) {
+            return "";
+        }
+        int cut = url.length();
+        int queryStart = url.indexOf('?');
+        if (queryStart >= 0) {
+            cut = queryStart;
+        }
+        int fragmentStart = url.indexOf('#');
+        if (fragmentStart >= 0 && fragmentStart < cut) {
+            cut = fragmentStart;
+        }
+        return cut == url.length() ? url : url.substring(0, cut) + "?[redacted]";
+    }
+
+    private static void requeueIfWithinLimit(Context context, PendingRequest pendingRequest) {
+        if (pendingRequest.isLimitReached()) {
+            logDrop("Dropping unsent request after " + pendingRequest.getAttemptCount() + " attempt(s)",
+                    pendingRequest, null);
+            return;
+        }
+        enqueueForRetry(context, pendingRequest);
+    }
+
+    private static void enqueueForRetry(Context context, PendingRequest pendingRequest) {
         synchronized (sQueueLock) {
             sPendingRequests.add(pendingRequest);
+        }
+        scheduleQueueWakeUpFor(context, pendingRequest);
+    }
+
+    // An arrival can only pull the wake-up earlier, so min(armed, arrival) needs no queue scan.
+    private static void scheduleQueueWakeUpFor(Context context, PendingRequest pendingRequest) {
+        final Context appContext = applicationContextOrFallback(context);
+        if (appContext == null) {
+            return;
+        }
+
+        long targetAtMs = pendingRequest.getNextAttemptAtMs();
+        synchronized (sQueueLock) {
+            armWakeUpLocked(appContext, targetAtMs, MIN_WAKE_UP_DELAY_MS);
+        }
+    }
+
+    // One wake-up at the queue's earliest deadline; only drains need the full scan.
+    private static void scheduleQueueWakeUp(Context context) {
+        scheduleQueueWakeUp(context, MIN_WAKE_UP_DELAY_MS);
+    }
+
+    private static void scheduleQueueWakeUp(Context context, long minDelayMs) {
+        final Context appContext = applicationContextOrFallback(context);
+        if (appContext == null) {
+            return;
+        }
+
+        synchronized (sQueueLock) {
+            long earliestAtMs = earliestNextAttemptAtMsLocked();
+            if (earliestAtMs < 0L) {
+                sNotBeforeMs = 0L;
+                if (sWakeUpTask != null) {
+                    RetryScheduler.cancel(sWakeUpTask);
+                    sWakeUpTask = null;
+                    sWakeUpAtMs = 0L;
+                }
+                return;
+            }
+            armWakeUpLocked(appContext, earliestAtMs, minDelayMs);
+        }
+    }
+
+    private static Context applicationContextOrFallback(Context context) {
+        Context hyBidContext = HyBid.getApplicationContext();
+        if (hyBidContext != null) {
+            return hyBidContext;
+        }
+        return context != null ? context.getApplicationContext() : null;
+    }
+
+    private static void armWakeUpLocked(Context context, long targetAtMs, long minDelayMs) {
+        long nowMs = SystemClock.elapsedRealtime();
+        long delayMs = Math.max(minDelayMs, targetAtMs - nowMs);
+        if (sNotBeforeMs > nowMs) {
+            delayMs = Math.max(delayMs, sNotBeforeMs - nowMs);
+        }
+        long wakeUpAtMs = nowMs + delayMs;
+        if (sWakeUpTask != null && sWakeUpAtMs <= wakeUpAtMs && sWakeUpAtMs >= sNotBeforeMs) {
+            return;
+        }
+        if (sWakeUpTask != null) {
+            RetryScheduler.cancel(sWakeUpTask);
+        }
+        sWakeUpTask = new QueueWakeUp(context);
+        sWakeUpAtMs = wakeUpAtMs;
+        RetryScheduler.postDelayed(sWakeUpTask, delayMs);
+    }
+
+    private static long earliestNextAttemptAtMsLocked() {
+        long earliest = -1L;
+        for (PendingRequest pendingRequest : sPendingRequests) {
+            long nextAttemptAtMs = pendingRequest.getNextAttemptAtMs();
+            if (earliest < 0L || nextAttemptAtMs < earliest) {
+                earliest = nextAttemptAtMs;
+            }
+        }
+        return earliest;
+    }
+
+    private static final class QueueWakeUp implements Runnable {
+
+        private final Context context;
+
+        QueueWakeUp(Context context) {
+            this.context = context.getApplicationContext();
+        }
+
+        @Override
+        public void run() {
+            synchronized (sQueueLock) {
+                if (sWakeUpTask == this) {
+                    sWakeUpTask = null;
+                    sWakeUpAtMs = 0L;
+                }
+            }
+            try {
+                ExecutorHelper.getSingleExecutor().execute(() -> performPendingRequests(context));
+            } catch (RejectedExecutionException exception) {
+                Logger.w(TAG, "Could not hand off the retry drain", exception);
+                scheduleQueueWakeUp(context);
+            }
         }
     }
 }

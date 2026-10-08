@@ -6,6 +6,7 @@ package net.pubnative.lite.sdk.vpaid.helpers;
 
 import net.pubnative.lite.sdk.utils.Logger;
 
+import java.io.File;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -92,6 +93,20 @@ public class FileLockManager {
 
         Integer count = mFileReferences.get(filePath);
         return count != null && count > 0;
+    }
+
+    /**
+     * Deletes a file only if nothing holds it, without releasing the monitor in between, so a
+     * loader cannot acquire the path after the check and lose its file to the delete.
+     *
+     * @param file The file to delete
+     * @return true if the file was deleted
+     */
+    public synchronized boolean deleteIfUnlocked(File file) {
+        if (file == null || isLocked(file.getAbsolutePath())) {
+            return false;
+        }
+        return file.delete();
     }
 
     /**

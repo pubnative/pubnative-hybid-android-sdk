@@ -16,6 +16,8 @@ import java.util.concurrent.Executors;
 
 public class FileUtils {
 
+    public static final String PART_SUFFIX = ".part";
+
     private static final String LOG_TAG = FileUtils.class.getSimpleName();
     private static File cachedParentDir = null;
 
@@ -33,6 +35,17 @@ public class FileUtils {
                     long currentTime = System.currentTimeMillis();
 
                     boolean isExpired = (creationTime + VpaidConstants.CACHED_VIDEO_LIFE_TIME < currentTime);
+
+                    if (file.getName().endsWith(PART_SUFFIX)) {
+                        if (isExpired) {
+                            FileLockManager.getInstance().forceRelease(file.getAbsolutePath());
+                        }
+                        if (FileLockManager.getInstance().deleteIfUnlocked(file)) {
+                            Logger.d(LOG_TAG, "Deleted staged file: " + file.getAbsolutePath());
+                        }
+                        continue;
+                    }
+
                     boolean isEmpty = (file.length() == 0);
 
                     if (isExpired || isEmpty) {

@@ -17,7 +17,9 @@ import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.models.AdRequest;
 import net.pubnative.lite.sdk.models.AdResponse;
 import net.pubnative.lite.sdk.models.PNAdRequest;
+import net.pubnative.lite.sdk.network.ApiExecutor;
 import net.pubnative.lite.sdk.network.PNHttpClient;
+import net.pubnative.lite.sdk.network.RetryPolicy;
 import net.pubnative.lite.sdk.BuildConfig;
 import net.pubnative.lite.sdk.utils.AdRequestRegistry;
 import net.pubnative.lite.sdk.utils.PNApiUrlComposer;
@@ -113,7 +115,7 @@ public class PNApiClient implements ApiClient {
             headers.put("User-Agent", userAgent);
         }
 
-        PNHttpClient.makeRequest(mContext, url, headers, null, false, true, new PNHttpClient.Listener() {
+        PNHttpClient.makeRequest(mContext, url, headers, null, false, true, RetryPolicy.AVOID_DUPLICATES, ApiExecutor.getInstance(), new PNHttpClient.Listener() {
             @Override
             public void onSuccess(String response, Map<String, List<String>> headers) {
                 if (listener != null) {

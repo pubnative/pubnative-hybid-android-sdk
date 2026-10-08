@@ -15,6 +15,7 @@ import android.view.View;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.Reporting;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
+import net.pubnative.lite.sdk.analytics.tracker.ReportingTracker;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdExperience;
 import net.pubnative.lite.sdk.models.CustomCTAData;
@@ -26,7 +27,9 @@ import net.pubnative.lite.sdk.utils.AdEndCardManager;
 import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.MediaPlayerErrors;
+import net.pubnative.lite.sdk.utils.TouchSizeManager;
 import net.pubnative.lite.sdk.utils.SkipOffsetManager;
+import net.pubnative.lite.sdk.utils.SkipOffsetResolver;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeVideoAdSession;
@@ -138,6 +141,10 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
                 mBaseAdInternal.getAd().hasHiddenUxControls(),
                 mBaseAdInternal.getAd().getLearnMoreData()
         );
+        mViewControllerVast.setTouchSize(getTouchSize(baseAd));
+        mViewControllerVast.setInitialTouchSize(getInitialTouchSize(baseAd));
+        mViewControllerVast.setClickStateProvider(
+                () -> mBaseAdInternal != null && mBaseAdInternal.hasImpressionBeenClicked());
         mMacroHelper = new MacroHelper();
         mCreativeViewEventsTracker = new AdTracker(getAdParams().getCompanionCreativeViewEvents(), null);
 
@@ -779,104 +786,112 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
     private void initSkipTime(int duration) {
         if (mBaseAdInternal == null || mBaseAdInternal.getAd() == null) return;
 
-        Integer adParamsSkipTime = -1;
-        int publisherSkipTime = -1;
-        boolean adParamsSkipTimeToMilliseconds = false;
-
-        if (mAdParams != null) {
-            publisherSkipTime = mAdParams.getPublisherSkipSeconds();
-            if (!TextUtils.isEmpty(mAdParams.getSkipTime())) {
-                if (mAdParams.getSkipTime().contains("%")) {
-                    adParamsSkipTime = duration * Utils.parsePercent(mAdParams.getSkipTime()) / 100;
-                } else {
-                    adParamsSkipTimeToMilliseconds = true;
-                    Integer adParamsDuration = Utils.parseDuration(mAdParams.getSkipTime());
-                    if (adParamsDuration != null) {
-                        adParamsSkipTime = adParamsDuration * 1000;
-                    } else {
-                        adParamsSkipTime = null;
-                    }
-                }
-            }
-        }
-
         hasEndcard = (AdEndCardManager.isEndCardEnabled(mBaseAdInternal.getAd()) && hasNextEndCard());
 
-        if (isRewarded()) {
-            if (adParamsSkipTimeToMilliseconds && adParamsSkipTime != null) {
-                mSkipTimeMillis = SkipOffsetManager.getVideoSkipOffset(mBaseAdInternal.getAd().getVideoRewardedSkipOffset(), publisherSkipTime, adParamsSkipTime / 1000, hasEndcard, false) * 1000;
-            } else {
-                mSkipTimeMillis = SkipOffsetManager.getVideoSkipOffset(mBaseAdInternal.getAd().getVideoRewardedSkipOffset(), publisherSkipTime, adParamsSkipTime, hasEndcard, false) * 1000;
-            }
+        Integer publisherSkipSeconds = (isRewarded() && mAdParams != null)
+                ? mAdParams.getPublisherSkipSeconds()
+                : null;
+        boolean isInterstitial = !isRewarded();
 
-            // Add 500 to account for millisecond rounding
-        } else {
-            if (adParamsSkipTimeToMilliseconds && adParamsSkipTime != null) {
-                mSkipTimeMillis = SkipOffsetManager.getVideoSkipOffset(mBaseAdInternal.getAd().getVideoSkipOffset(), null, adParamsSkipTime / 1000, hasEndcard, true) * 1000;
-            } else {
-                mSkipTimeMillis = SkipOffsetManager.getVideoSkipOffset(mBaseAdInternal.getAd().getVideoSkipOffset(), null, adParamsSkipTime, hasEndcard, true) * 1000;
-            }
-
-        }
-        if (mSkipTimeMillis > duration || (duration - mSkipTimeMillis < 500 && duration - mSkipTimeMillis >= 0)) {
-            mSkipTimeMillis = -1;
-        }
+        mSkipTimeMillis = SkipOffsetResolver.resolveMillis(
+                mAdParams == null ? null : mAdParams.getSkipTime(),
+                isRewarded() ? mBaseAdInternal.getAd().getVideoRewardedSkipOffset()
+                        : mBaseAdInternal.getAd().getVideoSkipOffset(),
+                isRewarded() ? mBaseAdInternal.getAd().getVideoRewardedSkipOffsetPercentage()
+                        : mBaseAdInternal.getAd().getVideoSkipOffsetPercentage(),
+                publisherSkipSeconds,
+                duration,
+                hasEndcard,
+                isInterstitial);
     }
 
     private void createProgressPoints(int duration) {
         mTrackingEventsList.clear();
 
         if (mAdParams == null) return;
-        if (mAdParams.getImpressions() != null) {
-            for (String url : mAdParams.getImpressions()) {
-                mTrackingEventsList.add(new TrackingEvent(url));
+
+        addImpressionTrackingEvents();
+        addVastTrackingEvents(duration);
+    }
+
+    private void addImpressionTrackingEvents() {
+        if (mAdParams.getImpressions() == null) return;
+
+        for (String url : mAdParams.getImpressions()) {
+            mTrackingEventsList.add(new TrackingEvent(url));
+        }
+    }
+
+    private void addVastTrackingEvents(int duration) {
+        if (mAdParams.getEvents() == null) return;
+
+        for (Tracking tracking : mAdParams.getEvents()) {
+            TrackingEvent event = buildTrackingEvent(tracking, duration);
+            if (event != null) {
+                mTrackingEventsList.add(event);
             }
+        }
+    }
+
+    private TrackingEvent buildTrackingEvent(Tracking tracking, int duration) {
+        TrackingEvent event = new TrackingEvent(tracking.getText());
+        String name = tracking.getEvent();
+
+        if (name.equalsIgnoreCase(EventConstants.CREATIVE_VIEW)) {
+            event.timeMillis = 0;
+            event.name = EventConstants.CREATIVE_VIEW;
+            return event;
+        }
+        if (name.equalsIgnoreCase(EventConstants.START)) {
+            event.timeMillis = 0;
+            event.name = EventConstants.START;
+            containsStartEvent = true;
+            return event;
+        }
+        if (name.equalsIgnoreCase(EventConstants.FIRST_QUARTILE)) {
+            event.timeMillis = duration / 4;
+            event.name = EventConstants.FIRST_QUARTILE;
+            return event;
+        }
+        if (name.equalsIgnoreCase(EventConstants.MIDPOINT)) {
+            event.timeMillis = duration / 2;
+            event.name = EventConstants.MIDPOINT;
+            return event;
+        }
+        if (name.equalsIgnoreCase(EventConstants.THIRD_QUARTILE)) {
+            event.timeMillis = duration * 3 / 4;
+            event.name = EventConstants.THIRD_QUARTILE;
+            return event;
+        }
+        if (name.equalsIgnoreCase(EventConstants.PROGRESS)) {
+            Integer offsetMillis = resolveProgressOffsetMillis(tracking.getOffset(), duration);
+            if (offsetMillis == null) {
+                return null;
+            }
+            event.timeMillis = offsetMillis;
+            event.name = EventConstants.PROGRESS;
+            return event;
+        }
+        return null;
+    }
+
+    private Integer resolveProgressOffsetMillis(String offset, int duration) {
+        if (TextUtils.isEmpty(offset)) {
+            return null;
+        }
+        if (!Utils.isValidVastTimeOffset(offset)) {
+            Logger.w(LOG_TAG, "Ignoring unacceptable progress offset \"" + offset + "\"");
+            return null;
         }
 
-        if (mAdParams.getEvents() != null) {
-            for (Tracking tracking : mAdParams.getEvents()) {
-                TrackingEvent event = new TrackingEvent(tracking.getText());
-                if (tracking.getEvent().equalsIgnoreCase(EventConstants.CREATIVE_VIEW)) {
-                    event.timeMillis = 0;
-                    event.name = EventConstants.CREATIVE_VIEW;
-                    mTrackingEventsList.add(event);
-                }
-                if (tracking.getEvent().equalsIgnoreCase(EventConstants.START)) {
-                    event.timeMillis = 0;
-                    event.name = EventConstants.START;
-                    mTrackingEventsList.add(event);
-                    containsStartEvent = true;
-                }
-                if (tracking.getEvent().equalsIgnoreCase(EventConstants.FIRST_QUARTILE)) {
-                    event.timeMillis = duration / 4;
-                    event.name = EventConstants.FIRST_QUARTILE;
-                    mTrackingEventsList.add(event);
-                }
-                if (tracking.getEvent().equalsIgnoreCase(EventConstants.MIDPOINT)) {
-                    event.timeMillis = duration / 2;
-                    event.name = EventConstants.MIDPOINT;
-                    mTrackingEventsList.add(event);
-                }
-                if (tracking.getEvent().equalsIgnoreCase(EventConstants.THIRD_QUARTILE)) {
-                    event.timeMillis = duration * 3 / 4;
-                    event.name = EventConstants.THIRD_QUARTILE;
-                    mTrackingEventsList.add(event);
-                }
-                if (tracking.getEvent().equalsIgnoreCase(EventConstants.PROGRESS)) {
-                    if (tracking.getOffset() == null) {
-                        continue;
-                    }
-                    if (tracking.getOffset().contains("%")) {
-                        event.timeMillis = duration * Utils.parsePercent(tracking.getOffset()) / 100;
-                    } else {
-                        Integer trackingOffset = Utils.parseDuration(tracking.getOffset());
-                        if (trackingOffset != null)
-                            event.timeMillis = trackingOffset * 1000;
-                    }
-                    mTrackingEventsList.add(event);
-                }
-            }
+        String value = offset.trim();
+        if (value.endsWith("%")) {
+            Double percent = Utils.parsePercent(value);
+            return percent == null ? null : (int) Math.round(duration * percent / 100);
         }
+
+        Integer seconds = Utils.parseDuration(value);
+        return seconds == null ? null : seconds * 1000;
     }
 
     private void addMissingDefaultEvents(int duration) {
@@ -1123,11 +1138,18 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
         return clickUrl;
     }
 
-    private void trackClickThroughEvent(String url) {
+    // Local log only (demo Fired Tracker Report). Must not send a request: the navigation already hits this URL.
+    private void logClickThroughLocally(String url) {
+        String type;
         if (Objects.equals(url, mAdParams.getVideoRedirectUrl())) {
-            EventTracker.postEvent(mBaseAdInternal.getContext(), url, "ClickThrough", mMacroHelper, false);
+            type = "ClickThrough";
         } else if (Objects.equals(url, mAdParams.getEndCardRedirectUrl())) {
-            EventTracker.postEvent(mBaseAdInternal.getContext(), url, "CompanionClickThrough", mMacroHelper, false);
+            type = "CompanionClickThrough";
+        } else {
+            return;
+        }
+        if (!TextUtils.isEmpty(url) && HyBid.getReportingController() != null) {
+            HyBid.getReportingController().reportFiredTracker(new ReportingTracker(type, url, 0));
         }
     }
 
@@ -1143,16 +1165,15 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
                 break;
             case DEFAULT_END_CARD:
                 url = trackEndCardClicks();
-                String videoClickUrl = trackVideoClicks();
                 if (url == null) {
-                    url = videoClickUrl;
+                    url = mAdParams.getVideoRedirectUrl();
                 }
                 mBaseAdInternal.onAdClicked();
                 break;
             case CUSTOM_END_CARD:
-                String CustomEndCardVideoClickUrl = trackVideoClicks();
+                String videoClickUrl = trackVideoClicks();
                 if (url == null) {
-                    url = CustomEndCardVideoClickUrl;
+                    url = videoClickUrl;
                 }
                 break;
         }
@@ -1160,7 +1181,7 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
         Logger.d(LOG_TAG, "Handle external url");
         if (Utils.isOnline(mBaseAdInternal.getContext())) {
             Context context = mBaseAdInternal.getContext();
-            trackClickThroughEvent(url);
+            logClickThroughLocally(url);
             String navigationMode = null;
             String link = null;
             if (mBaseAdInternal.getAd() != null) {
@@ -1389,6 +1410,20 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
                     hasReducedIconSize != null && hasReducedIconSize;
         }
         return false;
+    }
+
+    private int getTouchSize(BaseVideoAdInternal baseAd) {
+        if (baseAd != null && baseAd.getAd() != null) {
+            return baseAd.getAd().getCloseButtonTouchSize();
+        }
+        return TouchSizeManager.NO_GROWTH;
+    }
+
+    private int getInitialTouchSize(BaseVideoAdInternal baseAd) {
+        if (baseAd != null && baseAd.getAd() != null) {
+            return baseAd.getAd().getCloseButtonInitialTouchSize();
+        }
+        return TouchSizeManager.NO_GROWTH;
     }
 
     public Integer getCloseButtonDelay(Ad ad) {

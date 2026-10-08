@@ -14,7 +14,6 @@ import org.robolectric.RobolectricTestRunner;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -32,6 +31,19 @@ public class PNApiUrlComposerTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
+    public void testBuildUrl_withLegacyTopicsSet_doesNotEmitPsut() {
+        // Topics API was removed. Even if the deprecated topics field is populated directly,
+        // the composer must never transmit the psut (topics) query parameter.
+        PNAdRequest request = new PNAdRequest();
+        request.topics = Arrays.asList(
+                new Topic(1, 100L, "TaxonomyA"),
+                new Topic(2, 200L, "TaxonomyB"));
+        String url = PNApiUrlComposer.buildUrl(BASE_URL, request);
+        assertFalse(url.contains("psut="));
+    }
+
+    @Test
     public void testBuildUrl_withAllFields() {
         PNAdRequest request = new PNAdRequest();
         request.appToken = "token";
@@ -41,6 +53,7 @@ public class PNApiUrlComposerTest {
         request.make = "Google";
         request.deviceHeight = "1920";
         request.deviceWidth = "1080";
+        request.deviceType = "4";
         request.orientation = "portrait";
         request.ppi = "400";
         request.pxratio = "2.0";
@@ -93,8 +106,17 @@ public class PNApiUrlComposerTest {
         String url = PNApiUrlComposer.buildUrl(BASE_URL, request);
         assertTrue(url.contains("apptoken=token"));
         assertTrue(url.contains("os=android"));
+        assertTrue(url.contains("devicetype=4"));
         assertTrue(url.contains("hver=hver"));
         // ... more asserts can be added for each field
+    }
+
+    @Test
+    public void testBuildUrl_withEmptyDeviceType() {
+        PNAdRequest request = new PNAdRequest();
+        request.deviceType = "";
+        String url = PNApiUrlComposer.buildUrl(BASE_URL, request);
+        assertFalse(url.contains("devicetype="));
     }
 
     @Test
@@ -257,36 +279,6 @@ public class PNApiUrlComposerTest {
     }
 
     @Test
-    public void testBuildUrl_withNullTopics() {
-        PNAdRequest request = new PNAdRequest();
-        request.topics = null;
-        String url = PNApiUrlComposer.buildUrl(BASE_URL, request);
-        assertFalse(url.contains("psut="));
-    }
-
-    @Test
-    public void testBuildUrl_withEmptyTopics() {
-        PNAdRequest request = new PNAdRequest();
-        request.topics = Collections.emptyList();
-        String url = PNApiUrlComposer.buildUrl(BASE_URL, request);
-        assertFalse(url.contains("psut="));
-    }
-
-    @Test
-    public void testBuildUrl_withMultipleTopics() {
-        PNAdRequest request = new PNAdRequest();
-        Topic t1 = new Topic(1, 100L, "TaxonomyA");
-        Topic t2 = new Topic(2, 100L, "TaxonomyA");
-        Topic t3 = new Topic(3, 200L, "TaxonomyB");
-        request.topics = Arrays.asList(t1, t2, t3);
-        String url = PNApiUrlComposer.buildUrl(BASE_URL, request);
-        // Accept either order, encoded
-        boolean order1 = url.contains("psut=100%2CTaxonomyA%2C1%2C2_200%2CTaxonomyB%2C3");
-        boolean order2 = url.contains("psut=200%2CTaxonomyB%2C3_100%2CTaxonomyA%2C1%2C2");
-        assertTrue(order1 || order2);
-    }
-
-    @Test
     public void testBuildUrl_withVgAndHverEmpty() {
         PNAdRequest request = new PNAdRequest();
         request.vg = "";
@@ -302,5 +294,77 @@ public class PNApiUrlComposerTest {
         request.appToken = "token";
         String query = PNApiUrlComposer.getUrlQuery(BASE_URL, request);
         assertTrue(query.contains("apptoken=token"));
+    }
+
+    @Test
+    public void testBuildUrl_withMediationAdUnitId() {
+        PNAdRequest request = new PNAdRequest();
+        request.mediationAdUnitId = "max_ad_unit_123";
+        String url = PNApiUrlComposer.buildUrl(BASE_URL, request);
+        assertTrue(url.contains("mediationadunitid=max_ad_unit_123"));
+    }
+
+    @Test
+    public void testBuildUrl_withMediationAdUnitIdNull() {
+        PNAdRequest request = new PNAdRequest();
+        request.mediationAdUnitId = null;
+        String url = PNApiUrlComposer.buildUrl(BASE_URL, request);
+        assertFalse(url.contains("mediationadunitid"));
+    }
+
+    @Test
+    public void testBuildUrl_withMediationAdUnitIdEmpty() {
+        PNAdRequest request = new PNAdRequest();
+        request.mediationAdUnitId = "";
+        String url = PNApiUrlComposer.buildUrl(BASE_URL, request);
+        assertFalse(url.contains("mediationadunitid"));
+    }
+
+    @Test
+    public void testBuildUrl_withMediationAdUnitIdAndZoneId() {
+        // zoneid is a separate identifier and must not be replaced by the mediation ad unit ID.
+        PNAdRequest request = new PNAdRequest();
+        request.zoneId = "zone";
+        request.mediationAdUnitId = "max_ad_unit_123";
+        String url = PNApiUrlComposer.buildUrl(BASE_URL, request);
+        assertTrue(url.contains("zoneid=zone"));
+        assertTrue(url.contains("mediationadunitid=max_ad_unit_123"));
+    }
+
+    @Test
+    public void testBuildUrl_withMediationAdUnitIdIsNotNamedGpid() {
+        // What is sent is a mediation ad unit ID, not a publisher declared GPID.
+        PNAdRequest request = new PNAdRequest();
+        request.mediationAdUnitId = "max_ad_unit_123";
+        String url = PNApiUrlComposer.buildUrl(BASE_URL, request);
+        assertFalse(url.contains("gpid="));
+        assertFalse(url.contains("tagid="));
+    }
+
+    @Test
+    public void testBuildUrl_withMediationAdUnitIdReservedCharacters() {
+        // buildUrl percent encodes reserved characters, so the parameter cannot be split apart.
+        PNAdRequest request = new PNAdRequest();
+        request.mediationAdUnitId = "a&b=c";
+        String url = PNApiUrlComposer.buildUrl(BASE_URL, request);
+        assertTrue(url.contains("mediationadunitid=a%26b%3Dc"));
+    }
+
+    @Test
+    public void testGetUrlQuery_withMediationAdUnitId() {
+        // getUrlQuery is what the mediation signal actually carries.
+        PNAdRequest request = new PNAdRequest();
+        request.mediationAdUnitId = "max_ad_unit_123";
+        String query = PNApiUrlComposer.getUrlQuery(BASE_URL, request);
+        assertTrue(query.contains("mediationadunitid=max_ad_unit_123"));
+    }
+
+    @Test
+    public void testGetUrlQuery_withMediationAdUnitIdNull() {
+        PNAdRequest request = new PNAdRequest();
+        request.appToken = "token";
+        request.mediationAdUnitId = null;
+        String query = PNApiUrlComposer.getUrlQuery(BASE_URL, request);
+        assertFalse(query.contains("mediationadunitid"));
     }
 }

@@ -11,6 +11,7 @@ import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.IntegrationType;
+import net.pubnative.lite.sdk.utils.TouchSizeManager;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
 
 import java.util.List;
@@ -21,6 +22,37 @@ public class BaseViewModel {
 
     public BaseViewModel() {
         mReportingController = HyBid.getReportingController();
+    }
+
+    /**
+     * The ad this view model is showing, or null before it is set. Subclasses that hold an ad
+     * override this so the close-control helpers below can read it.
+     */
+    protected Ad getAd() {
+        return null;
+    }
+
+    /** Normal tap area (dp) for the close control, or no growth when there is no ad. */
+    public int getTouchSize() {
+        Ad ad = getAd();
+        return ad != null ? ad.getCloseButtonTouchSize() : TouchSizeManager.NO_GROWTH;
+    }
+
+    /** Initial tap area (dp) for the close control, used before the ad is clicked. */
+    public int getInitialTouchSize() {
+        Ad ad = getAd();
+        return ad != null ? ad.getCloseButtonInitialTouchSize() : TouchSizeManager.NO_GROWTH;
+    }
+
+    /** True once the ad has been clicked (any surface). Read from the ad so it survives recreation. */
+    public boolean hasImpressionBeenClicked() {
+        Ad ad = getAd();
+        return ad != null && ad.isImpressionClicked();
+    }
+
+    public void markImpressionClicked() {
+        Ad ad = getAd();
+        if (ad != null) ad.setImpressionClicked();
     }
 
     protected void invokeOnContentInfoClick(IntegrationType integrationType, Ad ad, String adFormat) {

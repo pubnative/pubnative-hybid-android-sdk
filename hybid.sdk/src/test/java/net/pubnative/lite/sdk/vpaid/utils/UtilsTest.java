@@ -228,16 +228,116 @@ public class UtilsTest {
         assertNull(Utils.parseDuration("invalid-time"));
     }
 
-    //--------------------------------- parsePercent ---------------------------------//
+    //--------------------------------- parseDurationMillis ---------------------------------//
     @Test
-    public void parsePercent_withValidInput_returnsCorrectInteger() {
-        assertEquals(75, Utils.parsePercent("75%"));
-        assertEquals(50, Utils.parsePercent(" 50 % "));
+    public void parseDurationMillis_withValidHhMmSs_returnsMillis() {
+        assertEquals(Integer.valueOf(3723000), Utils.parseDurationMillis("01:02:03"));
     }
 
-    @Test(expected = NumberFormatException.class)
-    public void parsePercent_withInvalidInput_throwsException() {
-        Utils.parsePercent("abc");
+    @Test
+    public void parseDurationMillis_withDecimalSeconds_keepsTheFraction() {
+        assertEquals(Integer.valueOf(8500), Utils.parseDurationMillis("00:00:08.500"));
+        assertEquals(Integer.valueOf(10789), Utils.parseDurationMillis("00:00:10.789"));
+    }
+
+    @Test
+    public void parseDurationMillis_withInvalidFormat_returnsNull() {
+        assertNull(Utils.parseDurationMillis("invalid-time"));
+    }
+
+    //--------------------------------- parsePercent ---------------------------------//
+    @Test
+    public void parsePercent_withValidInput_returnsPercentageValue() {
+        assertEquals(Double.valueOf(75), Utils.parsePercent("75%"));
+        assertEquals(Double.valueOf(50), Utils.parsePercent(" 50 % "));
+        assertEquals(Double.valueOf(0), Utils.parsePercent("0%"));
+        assertEquals(Double.valueOf(100), Utils.parsePercent("100%"));
+    }
+
+    @Test
+    public void parsePercent_withDecimalInput_retainsFraction() {
+        assertEquals(Double.valueOf(20.5), Utils.parsePercent("20.5%"));
+    }
+
+    @Test
+    public void parsePercent_withoutPercentSign_isStillParsed() {
+        assertEquals(Double.valueOf(20), Utils.parsePercent("20"));
+    }
+
+    @Test
+    public void parsePercent_withInvalidInput_returnsNull() {
+        assertNull(Utils.parsePercent("abc"));
+        assertNull(Utils.parsePercent("%"));
+        assertNull(Utils.parsePercent(""));
+        assertNull(Utils.parsePercent(null));
+    }
+
+    //--------------------------------- isValidVastTimeOffset ---------------------------------//
+    @Test
+    public void isValidVastTimeOffset_withTimestamp_isValid() {
+        assertTrue(Utils.isValidVastTimeOffset("00:00:08"));
+        assertTrue(Utils.isValidVastTimeOffset("00:01:30"));
+        assertTrue(Utils.isValidVastTimeOffset("01:00:00"));
+        assertTrue(Utils.isValidVastTimeOffset("00:00:08.500"));
+    }
+
+    @Test
+    public void isValidVastTimeOffset_withUnpaddedFields_isValid() {
+        // DSPs aren't guaranteed to zero-pad; rejecting these would cost real impressions.
+        assertTrue(Utils.isValidVastTimeOffset("0:00:05"));
+        assertTrue(Utils.isValidVastTimeOffset("00:00:5"));
+        assertTrue(Utils.isValidVastTimeOffset("1:2:3"));
+    }
+
+    @Test
+    public void isValidVastTimeOffset_withFractionalDigitCountOtherThanThree_isValid() {
+        // The IAB xsd requires exactly 3 fractional digits (\.\d\d\d); we deliberately accept
+        // 1-3 so a DSP sending "00:00:08.5" isn't rejected over formatting rather than substance.
+        assertTrue(Utils.isValidVastTimeOffset("00:00:08.5"));
+        assertTrue(Utils.isValidVastTimeOffset("00:00:08.50"));
+        assertTrue(Utils.isValidVastTimeOffset("00:00:08.500"));
+    }
+
+    @Test
+    public void isValidVastTimeOffset_withPercentage_isValid() {
+        assertTrue(Utils.isValidVastTimeOffset("20%"));
+        assertTrue(Utils.isValidVastTimeOffset("0%"));
+        assertTrue(Utils.isValidVastTimeOffset("100%"));
+        assertTrue(Utils.isValidVastTimeOffset("20.5%"));
+        assertTrue(Utils.isValidVastTimeOffset(" 20% "));
+    }
+
+    @Test
+    public void isValidVastTimeOffset_withWhitespaceBeforePercentSign_isValid() {
+        assertTrue(Utils.isValidVastTimeOffset("20 %"));
+        assertTrue(Utils.isValidVastTimeOffset("20\t%"));
+        assertTrue(Utils.isValidVastTimeOffset(" 20 % "));
+    }
+
+    @Test
+    public void isValidVastTimeOffset_withPercentageOutOfRange_isInvalid() {
+        assertFalse(Utils.isValidVastTimeOffset("150%"));
+        assertFalse(Utils.isValidVastTimeOffset("-10%"));
+    }
+
+    @Test
+    public void isValidVastTimeOffset_withScientificOrJavaLiteralSuffix_isInvalid() {
+        // Double.parseDouble accepts Java literal syntax; the regex gate must reject it first.
+        assertFalse(Utils.isValidVastTimeOffset("1e1%"));
+        assertFalse(Utils.isValidVastTimeOffset("20d%"));
+    }
+
+    @Test
+    public void isValidVastTimeOffset_withMalformedValue_isInvalid() {
+        assertFalse(Utils.isValidVastTimeOffset("garbage"));
+        assertFalse(Utils.isValidVastTimeOffset("20"));
+        assertFalse(Utils.isValidVastTimeOffset("00:00"));
+        assertFalse(Utils.isValidVastTimeOffset("00:70:00"));
+        assertFalse(Utils.isValidVastTimeOffset("00:00:60"));
+        assertFalse(Utils.isValidVastTimeOffset("2 0%"));
+        assertFalse(Utils.isValidVastTimeOffset("%"));
+        assertFalse(Utils.isValidVastTimeOffset(""));
+        assertFalse(Utils.isValidVastTimeOffset(null));
     }
 
     //--------------------------------- parseContentInfo ---------------------------------//

@@ -14,6 +14,7 @@ import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.utils.AdCustomCTAManager;
 import net.pubnative.lite.sdk.utils.AdEndCardManager;
 import net.pubnative.lite.sdk.utils.ClickThroughTimerManager;
+import net.pubnative.lite.sdk.utils.TouchSizeManager;
 import net.pubnative.lite.sdk.utils.SkipOffsetManager;
 
 public class HTMLAd {
@@ -105,6 +106,20 @@ public class HTMLAd {
             return adExperience.equalsIgnoreCase(AdExperience.PERFORMANCE) && hasReducedIconSize != null && hasReducedIconSize;
         }
         return false;
+    }
+
+    public int getCloseButtonTouchSize() {
+        if (ad != null) {
+            return ad.getCloseButtonTouchSize();
+        }
+        return TouchSizeManager.NO_GROWTH;
+    }
+
+    public int getCloseButtonInitialTouchSize() {
+        if (ad != null) {
+            return ad.getCloseButtonInitialTouchSize();
+        }
+        return TouchSizeManager.NO_GROWTH;
     }
 
     public boolean shouldInitEndCardView() {

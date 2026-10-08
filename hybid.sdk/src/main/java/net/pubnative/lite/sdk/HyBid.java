@@ -8,7 +8,6 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -29,7 +28,6 @@ import net.pubnative.lite.sdk.models.PNAdRequest;
 import net.pubnative.lite.sdk.models.PNAdRequestFactory;
 import net.pubnative.lite.sdk.prefs.HyBidPreferences;
 import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
-import net.pubnative.lite.sdk.utils.AdTopicsAPIManager;
 import net.pubnative.lite.sdk.utils.AtomManager;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.PNApiUrlComposer;
@@ -67,14 +65,12 @@ public class HyBid {
     private static VideoAdCache sVideoAdCache;
     private static BrowserManager sBrowserManager;
     private static VgiIdManager sVgiIdManager;
-    private static TopicManager sTopicManager;
     private static boolean sInitialized;
     private static boolean sCoppaEnabled = false;
     private static boolean sTestMode = false;
     private static boolean sLocationUpdatesEnabled = true;
     private static boolean sLocationTrackingEnabled = true;
     private static boolean isDiagnosticsEnabled = false;
-    private static boolean sTopicsApiEnabled = false;
     private static boolean sReportingEnabled = false;
     private static boolean sAtomInitialized;
     private static String sAge;
@@ -118,10 +114,7 @@ public class HyBid {
         }
         preferences = new HyBidPreferences(application.getApplicationContext());
         preferences.setAppFirstInstalledTime(String.valueOf(installed));
-        preferences.setSessionTimeStamp(System.currentTimeMillis(), () -> {
-            SessionImpressionPrefs prefs = new SessionImpressionPrefs(application.getApplicationContext());
-            prefs.nukePrefs();
-        }, HyBidPreferences.TIMESTAMP.NORMAL);
+        new SessionImpressionPrefs(application.getApplicationContext()).applySessionBoundary();
 
         sBundleId = application.getPackageName();
         sApiClient = new PNApiClient(application);
@@ -151,13 +144,6 @@ public class HyBid {
                     .build();
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            Boolean topicsEnabled = AdTopicsAPIManager.isTopicsAPIEnabled(application.getApplicationContext());
-            if (topicsEnabled != null && topicsEnabled) {
-                setTopicsApiEnabled(true);
-                sTopicManager = new TopicManager(application.getApplicationContext());
-            }
-        }
         if (sCrashController == null)
             sCrashController = new CrashController();
         if (sDeviceInfo == null) {
@@ -295,15 +281,21 @@ public class HyBid {
         return sBrowserManager;
     }
 
+    /**
+     * @deprecated The AdServices Topics API integration has been removed.
+     * Always returns {@code null}. This method will be removed in a future major release.
+     */
+    @Deprecated
     public static TopicManager getTopicManager() {
-        if (!isInitialized()) {
-            Log.v(TAG, "HyBid SDK is not initiated yet. Please initiate it before using getTopicManager()");
-        }
-        return sTopicManager;
+        return null;
     }
 
     public static boolean isInitialized() {
         return sInitialized;
+    }
+
+    public static Context getApplicationContext() {
+        return sApplication != null ? sApplication.getApplicationContext() : null;
     }
 
     public static boolean isViewabilityMeasurementActivated() {
@@ -404,12 +396,22 @@ public class HyBid {
         return sReportingEnabled;
     }
 
+    /**
+     * @deprecated The AdServices Topics API integration has been removed.
+     * This method is now a no-op and will be removed in a future major release.
+     */
+    @Deprecated
     public static void setTopicsApiEnabled(Boolean enabled) {
-        sTopicsApiEnabled = enabled;
+        // No-op.
     }
 
+    /**
+     * @deprecated The AdServices Topics API integration has been removed.
+     * Always returns {@code false}. This method will be removed in a future major release.
+     */
+    @Deprecated
     public static Boolean isTopicsApiEnabled() {
-        return sTopicsApiEnabled;
+        return false;
     }
 
     public static void setAtomStarted(Boolean started) {
@@ -538,14 +540,26 @@ public class HyBid {
         return getCustomRequestSignalData(null, mediationVendorName);
     }
 
+    /**
+     * Before {@code initialize} has run, this collects device signals from {@code context}
+     * inline (binder and {@code StatFs}), so it should be called off the main thread.
+     */
     public static String getCustomRequestSignalData(Context context, String mediationVendorName) {
+        return getCustomRequestSignalData(context, mediationVendorName, null);
+    }
+
+    /**
+     * Same as {@link #getCustomRequestSignalData(Context, String)}, additionally carrying the
+     * @param mediationAdUnitId from the mediation adapter
+     */
+    public static String getCustomRequestSignalData(Context context, String mediationVendorName, String mediationAdUnitId) {
         PNAdRequestFactory adRequestFactory = new PNAdRequestFactory();
         String url;
         if (HyBid.isInitialized()) {
-            AdRequest adRequest = adRequestFactory.buildRequest("", "", AdSize.SIZE_INTERSTITIAL, "", true, IntegrationType.IN_APP_BIDDING, mediationVendorName, 0, false);
+            AdRequest adRequest = adRequestFactory.buildRequestForSignalData(null,"", "", AdSize.SIZE_INTERSTITIAL, "", true, IntegrationType.IN_APP_BIDDING, mediationVendorName, 0, false, mediationAdUnitId);
             url = PNApiUrlComposer.getUrlQuery(HyBid.getApiClient().getApiUrl(), (PNAdRequest) adRequest);
         } else {
-            AdRequest adRequest = adRequestFactory.buildRequest(context, "", "", AdSize.SIZE_INTERSTITIAL, "", true, IntegrationType.IN_APP_BIDDING, mediationVendorName, 0, false);
+            AdRequest adRequest = adRequestFactory.buildRequestForSignalData(context, "", "", AdSize.SIZE_INTERSTITIAL, "", true, IntegrationType.IN_APP_BIDDING, mediationVendorName, 0, false, mediationAdUnitId);
             url = PNApiUrlComposer.getUrlQuery(net.pubnative.lite.sdk.BuildConfig.BASE_URL, (PNAdRequest) adRequest);
         }
 
@@ -569,8 +583,20 @@ public class HyBid {
         return encodeSignalData(signalData);
     }
 
+    /**
+     * Base64 form of {@link #getCustomRequestSignalData(Context, String)}. Before {@code initialize}
+     * it also reads device signals inline (binder, {@code StatFs}), so call it off the main thread.
+     */
     public static String getEncodedCustomRequestSignalData(Context context, String mediationVendorName) {
-        String signalData = getCustomRequestSignalData(context, mediationVendorName);
+        return getEncodedCustomRequestSignalData(context, mediationVendorName, null);
+    }
+
+    /**
+     * Same as {@link #getEncodedCustomRequestSignalData(Context, String, String)}, additionally carrying the
+     * @param mediationAdUnitId from the mediation adapter
+     */
+    public static String getEncodedCustomRequestSignalData(Context context, String mediationVendorName, String mediationAdUnitId) {
+        String signalData = getCustomRequestSignalData(context, mediationVendorName, mediationAdUnitId);
         return encodeSignalData(signalData);
     }
 

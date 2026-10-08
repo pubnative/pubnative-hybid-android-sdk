@@ -72,9 +72,9 @@ public class MraidRewardedViewModel extends RewardedViewModel implements MRAIDVi
         MRAIDBanner adView = null;
         if (mAd != null) {
             if (mAd.getAssetUrl(APIAsset.HTML_BANNER) != null) {
-                adView = new MRAIDBanner(mContext, mAd.getAssetUrl(APIAsset.HTML_BANNER), "", true, false, mSupportedNativeFeatures, this, this, getContentInfoContainer());
+                adView = new MRAIDBanner(mContext, mAd.getAssetUrl(APIAsset.HTML_BANNER), "", true, false, mSupportedNativeFeatures, this, this, getContentInfoContainer(), true);
             } else if (mAd.getAssetHtml(APIAsset.HTML_BANNER) != null) {
-                adView = new MRAIDBanner(mContext, "", mAd.getAssetHtml(APIAsset.HTML_BANNER), true, false, mSupportedNativeFeatures, this, this, getContentInfoContainer());
+                adView = new MRAIDBanner(mContext, "", mAd.getAssetHtml(APIAsset.HTML_BANNER), true, false, mSupportedNativeFeatures, this, this, getContentInfoContainer(), true);
             }
             if (adView != null) {
                 htmlAd = new HTMLAd(mContext, mAd, HTMLAd.AdType.REWARDED);
@@ -113,7 +113,8 @@ public class MraidRewardedViewModel extends RewardedViewModel implements MRAIDVi
 
     @Override
     public boolean mraidViewResize(MRAIDView mraidView, int width, int height, int offsetX, int offsetY) {
-        return true;
+        // MRAID 3.0: resize is valid for inline ads only.
+        return false;
     }
 
     @Override
@@ -224,6 +225,7 @@ public class MraidRewardedViewModel extends RewardedViewModel implements MRAIDVi
 
     @Override
     public void onCustomEndCardClicked() {
+        markImpressionClicked();
         if (!mCustomEndCardClickTracked) {
             if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
                 ReportingEvent reportingEvent = new ReportingEvent();
@@ -273,6 +275,7 @@ public class MraidRewardedViewModel extends RewardedViewModel implements MRAIDVi
 
     @Override
     public void onCustomCTAClick() {
+        markImpressionClicked();
         if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.CUSTOM_CTA_CLICK);
@@ -309,6 +312,7 @@ public class MraidRewardedViewModel extends RewardedViewModel implements MRAIDVi
 
     @Override
     public void onClickThroughTriggered() {
+        markImpressionClicked();
         mAdTracker.trackClick();
     }
 
@@ -316,6 +320,7 @@ public class MraidRewardedViewModel extends RewardedViewModel implements MRAIDVi
 
     @Override
     public void mraidNativeFeatureCallTel(String url) {
+        markImpressionClicked();
         sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLICK);
     }
 
@@ -331,6 +336,7 @@ public class MraidRewardedViewModel extends RewardedViewModel implements MRAIDVi
 
     @Override
     public void mraidNativeFeatureOpenBrowser(String url) {
+        markImpressionClicked();
         sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLICK);
         handleURL(url);
     }
@@ -342,6 +348,7 @@ public class MraidRewardedViewModel extends RewardedViewModel implements MRAIDVi
 
     @Override
     public void mraidNativeFeatureSendSms(String url) {
+        markImpressionClicked();
         sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLICK);
     }
 

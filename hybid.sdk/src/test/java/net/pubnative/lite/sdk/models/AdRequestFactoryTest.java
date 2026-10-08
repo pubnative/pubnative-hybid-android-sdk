@@ -25,7 +25,6 @@ import android.os.Looper;
 import net.pubnative.lite.sdk.BuildConfig;
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
-import net.pubnative.lite.sdk.TopicManager;
 import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
@@ -63,8 +62,6 @@ public class AdRequestFactoryTest {
     @Mock
     private SdkManager mSdkManager;
     @Mock
-    private TopicManager mTopicManager;
-    @Mock
     private HyBidViewabilityManager mViewabilityManager;
     @Mock
     private DisplayManager mDisplayManager;
@@ -101,6 +98,7 @@ public class AdRequestFactoryTest {
         when(mMockDeviceInfo.getLocale()).thenReturn(new Locale("EN", "US"));
         when(mMockDeviceInfo.getDeviceHeight()).thenReturn("1080");
         when(mMockDeviceInfo.getDeviceWidth()).thenReturn("1920");
+        when(mMockDeviceInfo.getDeviceType()).thenReturn(4);
         when(mMockDeviceInfo.getPpi()).thenReturn("440");
         when(mMockDeviceInfo.getPxratio()).thenReturn("2.75");
         when(mMockDeviceInfo.getConnectionType()).thenReturn(2);
@@ -156,6 +154,7 @@ public class AdRequestFactoryTest {
         Assert.assertEquals("sdkandroid_hb_" + BuildConfig.SDK_VERSION, request.displaymanagerver);
         Assert.assertEquals("1920", request.deviceWidth);
         Assert.assertEquals("1080", request.deviceHeight);
+        Assert.assertEquals("4", request.deviceType);
         Assert.assertEquals("portrait", request.orientation);
         Assert.assertEquals("0", request.impdepth);
         Assert.assertEquals("440", request.ppi);
@@ -294,5 +293,81 @@ public class AdRequestFactoryTest {
             assertNotNull(capturedRequest);
             assertNull(capturedRequest.gid);
         }
+    }
+
+    @Test
+    public void buildRequest_withMediationAdUnitId_setsIt() {
+        PNAdRequest request = (PNAdRequest) mSubject.buildRequestForSignalData(null, "token", "zone", AdSize.SIZE_320x50, "adId", false, IntegrationType.IN_APP_BIDDING, "m", 0, false, "max_ad_unit_123");
+
+        assertEquals("max_ad_unit_123", request.mediationAdUnitId);
+    }
+
+    @Test
+    public void buildRequest_withPaddedMediationAdUnitId_trimsIt() {
+        PNAdRequest request = (PNAdRequest) mSubject.buildRequestForSignalData(null, "token", "zone", AdSize.SIZE_320x50, "adId", false, IntegrationType.IN_APP_BIDDING, "m", 0, false, "  max_ad_unit_123  ");
+
+        assertEquals("max_ad_unit_123", request.mediationAdUnitId);
+    }
+
+    @Test
+    public void buildRequest_withNullMediationAdUnitId_leavesItNull() {
+        PNAdRequest request = (PNAdRequest) mSubject.buildRequestForSignalData(null, "token", "zone", AdSize.SIZE_320x50, "adId", false, IntegrationType.IN_APP_BIDDING, "m", 0, false, null);
+
+        assertNull(request.mediationAdUnitId);
+    }
+
+    @Test
+    public void buildRequest_withEmptyMediationAdUnitId_leavesItNull() {
+        PNAdRequest request = (PNAdRequest) mSubject.buildRequestForSignalData(null, "token", "zone", AdSize.SIZE_320x50, "adId", false, IntegrationType.IN_APP_BIDDING, "m", 0, false, "");
+
+        assertNull(request.mediationAdUnitId);
+    }
+
+    @Test
+    public void buildRequest_withBlankMediationAdUnitId_leavesItNull() {
+        PNAdRequest request = (PNAdRequest) mSubject.buildRequestForSignalData(null, "token", "zone", AdSize.SIZE_320x50, "adId", false, IntegrationType.IN_APP_BIDDING, "m", 0, false, "   ");
+
+        assertNull(request.mediationAdUnitId);
+    }
+
+    @Test
+    public void buildRequest_withoutMediationAdUnitIdOverload_leavesItNull() {
+        PNAdRequest request = (PNAdRequest) mSubject.buildRequest("token", "zone", AdSize.SIZE_320x50, "adId", false, IntegrationType.HEADER_BIDDING, "b", 0, false);
+
+        assertNull(request.mediationAdUnitId);
+    }
+
+    @Test
+    public void buildRequest_doesNotCarryMediationAdUnitIdBetweenRequests() {
+        PNAdRequest first = (PNAdRequest) mSubject.buildRequestForSignalData(null, "token", "zone", AdSize.SIZE_320x50, "adId", false, IntegrationType.IN_APP_BIDDING, "m", 0, false, "max_ad_unit_123");
+        PNAdRequest second = (PNAdRequest) mSubject.buildRequestForSignalData(null, "token", "zone", AdSize.SIZE_320x50, "adId", false, IntegrationType.IN_APP_BIDDING, "m", 0, false, null);
+
+        assertEquals("max_ad_unit_123", first.mediationAdUnitId);
+        assertNull(second.mediationAdUnitId);
+    }
+
+    @Test
+    public void createAdRequest_leavesMediationAdUnitIdNull() {
+        mSubject.createAdRequest("token", "zone", AdSize.SIZE_320x50, false, false, mockCallback);
+
+        verify(mockCallback).onRequestCreated(adRequestCaptor.capture());
+        PNAdRequest capturedRequest = (PNAdRequest) adRequestCaptor.getValue();
+
+        assertNull(capturedRequest.mediationAdUnitId);
+    }
+
+    @Test
+    public void trimMediationAdUnitId_mapsBlankValuesToNull() {
+        assertNull(PNAdRequestFactory.trimMediationAdUnitId(null));
+        assertNull(PNAdRequestFactory.trimMediationAdUnitId(""));
+        assertNull(PNAdRequestFactory.trimMediationAdUnitId("   "));
+        assertNull(PNAdRequestFactory.trimMediationAdUnitId("\t\n"));
+    }
+
+    @Test
+    public void trimMediationAdUnitId_keepsTrimmedValue() {
+        assertEquals("max_ad_unit_123", PNAdRequestFactory.trimMediationAdUnitId("max_ad_unit_123"));
+        assertEquals("max_ad_unit_123", PNAdRequestFactory.trimMediationAdUnitId(" max_ad_unit_123 "));
+        assertEquals("max ad unit", PNAdRequestFactory.trimMediationAdUnitId("  max ad unit  "));
     }
 }

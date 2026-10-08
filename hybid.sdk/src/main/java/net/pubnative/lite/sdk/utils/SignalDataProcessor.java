@@ -161,7 +161,6 @@ public class SignalDataProcessor {
         final String sessionId = ad.getSessionId();
         mAdCache.put(sessionId, ad);
 
-        AdTopicsAPIManager.setTopicsAPIEnabled(mApiClient.getContext(), ad);
 //        AtomManager.setAtomEnabled(mApiClient.getContext(), ad);
 
         switch (ad.assetgroupid) {

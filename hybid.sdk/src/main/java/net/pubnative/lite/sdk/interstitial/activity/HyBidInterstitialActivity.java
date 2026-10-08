@@ -205,6 +205,21 @@ public abstract class HyBidInterstitialActivity extends Activity implements Inte
     }
 
     @Override
+    public void setCloseTouchSize(int touchSize) {
+        if (mCloseableContainer != null) mCloseableContainer.setTouchSize(touchSize);
+    }
+
+    @Override
+    public void setCloseInitialTouchSize(int initialTouchSize) {
+        if (mCloseableContainer != null) mCloseableContainer.setInitialTouchSize(initialTouchSize);
+    }
+
+    @Override
+    public void setCloseClickStateProvider(net.pubnative.lite.sdk.views.TouchAreaDelegate.ClickStateProvider provider) {
+        if (mCloseableContainer != null) mCloseableContainer.setClickStateProvider(provider);
+    }
+
+    @Override
     public void hideProgressBar() {
         if (mProgressBar != null) mProgressBar.setVisibility(View.INVISIBLE);
     }

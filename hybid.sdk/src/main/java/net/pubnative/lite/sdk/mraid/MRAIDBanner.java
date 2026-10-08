@@ -17,8 +17,12 @@ import android.webkit.WebView;
 public class MRAIDBanner extends MRAIDView {
 
     public MRAIDBanner(Context context, String baseUrl, String data, Boolean showTimerBeforeEndCard, Boolean isExpandEnabled, String[] supportedNativeFeatures, MRAIDViewListener viewListener, MRAIDNativeFeatureListener nativeFeatureListener, ViewGroup contentInfo) {
+        this(context, baseUrl, data, showTimerBeforeEndCard, isExpandEnabled, supportedNativeFeatures, viewListener, nativeFeatureListener, contentInfo, false);
+    }
 
-        super(context, baseUrl, data, showTimerBeforeEndCard, supportedNativeFeatures, viewListener, nativeFeatureListener, contentInfo, false, isExpandEnabled);
+    public MRAIDBanner(Context context, String baseUrl, String data, Boolean showTimerBeforeEndCard, Boolean isExpandEnabled, String[] supportedNativeFeatures, MRAIDViewListener viewListener, MRAIDNativeFeatureListener nativeFeatureListener, ViewGroup contentInfo, boolean isFullScreenPlacement) {
+
+        super(context, baseUrl, data, showTimerBeforeEndCard, supportedNativeFeatures, viewListener, nativeFeatureListener, contentInfo, false, isExpandEnabled, isFullScreenPlacement);
 
         if (webView != null) {
             webView.setBackgroundColor(Color.TRANSPARENT);

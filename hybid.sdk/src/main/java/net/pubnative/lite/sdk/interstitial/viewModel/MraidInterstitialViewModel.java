@@ -73,9 +73,9 @@ public class MraidInterstitialViewModel extends InterstitialViewModel implements
         MRAIDBanner adView = null;
         if (mAd != null) {
             if (mAd.getAssetUrl(APIAsset.HTML_BANNER) != null) {
-                adView = new MRAIDBanner(mContext, mAd.getAssetUrl(APIAsset.HTML_BANNER), "", true, false, mSupportedNativeFeatures, this, this, getContentInfoContainer());
+                adView = new MRAIDBanner(mContext, mAd.getAssetUrl(APIAsset.HTML_BANNER), "", true, false, mSupportedNativeFeatures, this, this, getContentInfoContainer(), true);
             } else if (mAd.getAssetHtml(APIAsset.HTML_BANNER) != null) {
-                adView = new MRAIDBanner(mContext, "", mAd.getAssetHtml(APIAsset.HTML_BANNER), true, false, mSupportedNativeFeatures, this, this, getContentInfoContainer());
+                adView = new MRAIDBanner(mContext, "", mAd.getAssetHtml(APIAsset.HTML_BANNER), true, false, mSupportedNativeFeatures, this, this, getContentInfoContainer(), true);
             }
             if (adView != null) {
                 htmlAd = new HTMLAd(mContext, mAd, HTMLAd.AdType.INTERSTITIAL);
@@ -116,7 +116,8 @@ public class MraidInterstitialViewModel extends InterstitialViewModel implements
 
     @Override
     public boolean mraidViewResize(MRAIDView mraidView, int width, int height, int offsetX, int offsetY) {
-        return true;
+        // MRAID 3.0: resize is valid for inline ads only.
+        return false;
     }
 
     @Override
@@ -229,6 +230,7 @@ public class MraidInterstitialViewModel extends InterstitialViewModel implements
 
     @Override
     public void onCustomEndCardClicked() {
+        markImpressionClicked();
         if (!mCustomEndCardClickTracked) {
             if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
                 ReportingEvent reportingEvent = new ReportingEvent();
@@ -278,6 +280,7 @@ public class MraidInterstitialViewModel extends InterstitialViewModel implements
 
     @Override
     public void onCustomCTAClick() {
+        markImpressionClicked();
         if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setEventType(Reporting.EventType.CUSTOM_CTA_CLICK);
@@ -314,6 +317,7 @@ public class MraidInterstitialViewModel extends InterstitialViewModel implements
 
     @Override
     public void onClickThroughTriggered() {
+        markImpressionClicked();
         mAdTracker.trackClick();
     }
 
@@ -321,6 +325,7 @@ public class MraidInterstitialViewModel extends InterstitialViewModel implements
 
     @Override
     public void mraidNativeFeatureCallTel(String url) {
+        markImpressionClicked();
         sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CLICK);
     }
 
@@ -336,6 +341,7 @@ public class MraidInterstitialViewModel extends InterstitialViewModel implements
 
     @Override
     public void mraidNativeFeatureOpenBrowser(String url) {
+        markImpressionClicked();
         sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CLICK);
         handleURL(url);
     }
@@ -347,6 +353,7 @@ public class MraidInterstitialViewModel extends InterstitialViewModel implements
 
     @Override
     public void mraidNativeFeatureSendSms(String url) {
+        markImpressionClicked();
         sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CLICK);
     }
 

@@ -10,14 +10,12 @@ import android.text.TextUtils;
 
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
-import net.pubnative.lite.sdk.TopicManager;
 import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.models.bidstream.BidstreamConstants;
 import net.pubnative.lite.sdk.models.request.App;
 import net.pubnative.lite.sdk.models.request.Banner;
 import net.pubnative.lite.sdk.models.request.Data;
-import net.pubnative.lite.sdk.models.request.DataExtension;
 import net.pubnative.lite.sdk.models.request.Device;
 import net.pubnative.lite.sdk.models.request.Ext;
 import net.pubnative.lite.sdk.models.request.Format;
@@ -27,7 +25,6 @@ import net.pubnative.lite.sdk.models.request.Metric;
 import net.pubnative.lite.sdk.models.request.Native;
 import net.pubnative.lite.sdk.models.request.OpenRTBAdRequest;
 import net.pubnative.lite.sdk.models.request.Regs;
-import net.pubnative.lite.sdk.models.request.Segment;
 import net.pubnative.lite.sdk.models.request.User;
 import net.pubnative.lite.sdk.models.request.Video;
 import net.pubnative.lite.sdk.utils.HyBidAdvertisingId;
@@ -36,10 +33,7 @@ import net.pubnative.lite.sdk.utils.sdkmanager.DisplayManager;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.RejectedExecutionException;
 
 public class OpenRTBAdRequestFactory extends BaseRequestFactory implements AdRequestFactory {
@@ -48,7 +42,6 @@ public class OpenRTBAdRequestFactory extends BaseRequestFactory implements AdReq
     private final DeviceInfo mDeviceInfo;
     private final HyBidLocationManager mLocationManager;
     private final UserDataManager mUserDataManager;
-    private final TopicManager mTopicManager;
     private final DisplayManager mDisplayManager;
     private IntegrationType mIntegrationType = IntegrationType.HEADER_BIDDING;
     private String mMediationVendor;
@@ -59,15 +52,14 @@ public class OpenRTBAdRequestFactory extends BaseRequestFactory implements AdReq
     private String mAdFormat;
 
     public OpenRTBAdRequestFactory() {
-        this(HyBid.getDeviceInfo(), HyBid.getLocationManager(), HyBid.getUserDataManager(), HyBid.getSdkManager().getDisplayManager(), HyBid.getTopicManager());
+        this(HyBid.getDeviceInfo(), HyBid.getLocationManager(), HyBid.getUserDataManager(), HyBid.getSdkManager().getDisplayManager());
     }
 
-    OpenRTBAdRequestFactory(DeviceInfo deviceInfo, HyBidLocationManager locationManager, UserDataManager userDataManager, DisplayManager displayManager, TopicManager topicManager) {
+    OpenRTBAdRequestFactory(DeviceInfo deviceInfo, HyBidLocationManager locationManager, UserDataManager userDataManager, DisplayManager displayManager) {
         mDeviceInfo = deviceInfo;
         mLocationManager = locationManager;
         mUserDataManager = userDataManager;
         mDisplayManager = displayManager;
-        mTopicManager = topicManager;
     }
 
     @Override
@@ -388,40 +380,7 @@ public class OpenRTBAdRequestFactory extends BaseRequestFactory implements AdReq
     }
 
     private List<Data> getUserData() {
-
-        ArrayList<Data> dataList = new ArrayList<>();
-
-        if (mTopicManager != null && mTopicManager.getTopics() != null && !mTopicManager.getTopics().isEmpty()) {
-
-            Map<Long, ArrayList<Topic>> sortedTopics = new HashMap<>();
-            for (Topic topic : mTopicManager.getTopics()) {
-                Long taxonomyVersion = topic.getTaxonomyVersion();
-                if (!sortedTopics.containsKey(taxonomyVersion)) {
-                    sortedTopics.put(taxonomyVersion, new ArrayList<>());
-                }
-                Objects.requireNonNull(sortedTopics.get(taxonomyVersion)).add(topic);
-            }
-
-            for (Map.Entry<Long, ArrayList<Topic>> entry : sortedTopics.entrySet()) {
-                Long key = entry.getKey();
-                ArrayList<Topic> topics = entry.getValue();
-                if (!topics.isEmpty()) {
-                    Data topicData = new Data();
-                    DataExtension ext = new DataExtension(topics.get(0).getTaxonomyVersion(), topics.get(0).getTaxonomyVersionName());
-                    topicData.setExt(ext);
-                    List<Segment> segment = new ArrayList<>();
-                    for (Topic topic : topics) {
-                        Segment seg = new Segment();
-                        seg.setId(String.valueOf(topic.getId()));
-                        segment.add(seg);
-                    }
-                    topicData.setSegment(segment);
-                    dataList.add(topicData);
-                }
-            }
-        }
-
-        return dataList;
+        return new ArrayList<>();
     }
 
     private Float getLatitude() {

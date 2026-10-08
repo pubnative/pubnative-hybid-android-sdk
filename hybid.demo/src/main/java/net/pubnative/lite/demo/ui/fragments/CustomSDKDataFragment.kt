@@ -50,6 +50,16 @@ class CustomSDKDataFragment : Fragment(R.layout.fragment_custom_sdk_data) {
                 HyBid.getEncodedCustomRequestSignalData(requireContext(), "m")
             )
         )
+        list.add(
+            SDKDataItem(
+                "Custom request signal data (with mediation ad unit ID)",
+                HyBid.getCustomRequestSignalData(
+                    requireContext(),
+                    "m",
+                    "sample_max_ad_unit_id"
+                )
+            )
+        )
         return list
     }
 }

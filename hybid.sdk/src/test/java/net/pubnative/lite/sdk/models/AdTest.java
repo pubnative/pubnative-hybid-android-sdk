@@ -10,19 +10,24 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 import net.pubnative.lite.sdk.testing.TestUtil;
 import net.pubnative.lite.sdk.utils.AtomManager;
+import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.TouchSizeManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
@@ -52,6 +57,12 @@ public class AdTest {
     public void setup() {
         mSubject = TestUtil.createTestBannerAd();
         MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void isTopicsAPIEnabled_afterRemoval_returnsFalse() {
+        assertFalse(mSubject.isTopicsAPIEnabled());
     }
 
     @Test
@@ -396,6 +407,215 @@ public class AdTest {
         adData.data = new HashMap<>();
         adData.data.put("html", html);
         ad.assets.add(adData);
+        return ad;
+    }
+
+    //-------------------- VMA-1593: video_skip_offset percentage --------------------//
+
+    @Test
+    public void getVideoSkipOffsetPercentage_withPercentageValue_returnsIt() {
+        Ad ad = createAdWithRemoteConfig("video_skip_offset", "20%");
+
+        assertEquals("20%", ad.getVideoSkipOffsetPercentage());
+    }
+
+    @Test
+    public void getVideoSkipOffset_withPercentageValue_doesNotLogDiscardWarning() {
+        // "20%" is routed to getVideoSkipOffsetPercentage(), not discarded - it must not be
+        // reported as such on the one config shape this ticket exists to support.
+        Ad ad = createAdWithRemoteConfig("video_skip_offset", "20%");
+
+        try (MockedStatic<Logger> mockedLogger = mockStatic(Logger.class)) {
+            assertNull(ad.getVideoSkipOffset());
+
+            mockedLogger.verify(() -> Logger.w(ArgumentMatchers.anyString(), ArgumentMatchers.anyString()), never());
+        }
+    }
+
+    @Test
+    public void getRemoteConfig_withPercentageValueOnNonSkipOffsetField_stillLogsDiscardWarning() {
+        // Unlike the six skip-offset fields, "endcard_close_delay" has no percentage accessor
+        // routing it elsewhere, so a "%"-suffixed value here is a genuine misconfiguration.
+        Ad ad = createAdWithRemoteConfig("endcard_close_delay", "20%");
+
+        try (MockedStatic<Logger> mockedLogger = mockStatic(Logger.class)) {
+            Integer result = ad.getRemoteConfig(RemoteConfig.END_CARD_CLOSE_DELAY);
+
+            assertNull(result);
+            mockedLogger.verify(() -> Logger.w(ArgumentMatchers.anyString(), ArgumentMatchers.anyString()));
+        }
+    }
+
+    @Test
+    public void getVideoSkipOffsetPercentage_withIntegerValue_returnsNull() {
+        Ad ad = createAdWithRemoteConfig("video_skip_offset", 5);
+
+        assertNull(ad.getVideoSkipOffsetPercentage());
+    }
+
+    @Test
+    public void getVideoSkipOffset_withUnparseableValue_logsWarningAndReturnsNull() {
+        // Neither accessor accepts it, so initSkipTime's resolver falls back to the SDK default.
+        Ad ad = createAdWithRemoteConfig("video_skip_offset", "abc");
+
+        try (MockedStatic<Logger> mockedLogger = mockStatic(Logger.class)) {
+            assertNull(ad.getVideoSkipOffset());
+
+            mockedLogger.verify(() -> Logger.w(ArgumentMatchers.anyString(), ArgumentMatchers.anyString()));
+        }
+        assertNull(ad.getVideoSkipOffsetPercentage());
+    }
+
+    @Test
+    public void getVideoSkipOffsetPercentage_forPerformanceAd_usesPcField() {
+        Ad ad = createAdWithRemoteConfigAndExperience(AdExperience.PERFORMANCE, "pc_video_skip_offset", "20%");
+
+        assertEquals("20%", ad.getVideoSkipOffsetPercentage());
+    }
+
+    @Test
+    public void getVideoSkipOffsetPercentage_forBrandAd_usesBcField() {
+        Ad ad = createAdWithRemoteConfigAndExperience(AdExperience.BRAND, "bc_video_skip_offset", "20%");
+
+        assertEquals("20%", ad.getVideoSkipOffsetPercentage());
+    }
+
+    @Test
+    public void getVideoRewardedSkipOffsetPercentage_forGenericAd_returnsIt() {
+        Ad ad = createAdWithRemoteConfig("rewarded_video_skip_offset", "20%");
+
+        assertEquals("20%", ad.getVideoRewardedSkipOffsetPercentage());
+    }
+
+    @Test
+    public void getVideoRewardedSkipOffsetPercentage_forPerformanceAd_usesPcField() {
+        Ad ad = createAdWithRemoteConfigAndExperience(
+                AdExperience.PERFORMANCE, "pc_rewarded_video_skip_offset", "20%");
+
+        assertEquals("20%", ad.getVideoRewardedSkipOffsetPercentage());
+    }
+
+    @Test
+    public void getCloseButtonTouchSize_whenAbsent_returnsNoGrowth() {
+        // Nothing served -> keep today's behaviour (tap area equals the drawn button).
+        assertEquals(TouchSizeManager.NO_GROWTH, new Ad().getCloseButtonTouchSize());
+    }
+
+    @Test
+    public void getCloseButtonTouchSize_whenServedInRange_returnsValue() {
+        Ad ad = createAdWithRemoteConfig("close_button_touch_size", 60);
+
+        assertEquals(60, ad.getCloseButtonTouchSize());
+    }
+
+    @Test
+    public void getCloseButtonTouchSize_whenAboveMax_isClampedTo100() {
+        Ad ad = createAdWithRemoteConfig("close_button_touch_size", 250);
+
+        assertEquals(100, ad.getCloseButtonTouchSize());
+    }
+
+    @Test
+    public void getCloseButtonTouchSize_whenZeroOrNegative_returnsNoGrowth() {
+        assertEquals(TouchSizeManager.NO_GROWTH,
+                createAdWithRemoteConfig("close_button_touch_size", 0).getCloseButtonTouchSize());
+        assertEquals(TouchSizeManager.NO_GROWTH,
+                createAdWithRemoteConfig("close_button_touch_size", -5).getCloseButtonTouchSize());
+    }
+
+    @Test
+    public void getCloseButtonInitialTouchSize_whenAbsent_returnsNoGrowth() {
+        assertEquals(TouchSizeManager.NO_GROWTH, new Ad().getCloseButtonInitialTouchSize());
+    }
+
+    @Test
+    public void getCloseButtonInitialTouchSize_whenZeroOrNegative_returnsNoGrowth() {
+        // Not served (0 / negative) must leave the close on the normal size, i.e. today's behaviour.
+        assertEquals(TouchSizeManager.NO_GROWTH,
+                createAdWithRemoteConfig("close_button_initial_touch_size", 0).getCloseButtonInitialTouchSize());
+        assertEquals(TouchSizeManager.NO_GROWTH,
+                createAdWithRemoteConfig("close_button_initial_touch_size", -1).getCloseButtonInitialTouchSize());
+    }
+
+    @Test
+    public void getCloseButtonInitialTouchSize_whenServedInRange_returnsValue() {
+        assertEquals(1,
+                createAdWithRemoteConfig("close_button_initial_touch_size", 1).getCloseButtonInitialTouchSize());
+        assertEquals(10,
+                createAdWithRemoteConfig("close_button_initial_touch_size", 10).getCloseButtonInitialTouchSize());
+    }
+
+    @Test
+    public void getCloseButtonInitialTouchSize_whenAboveMax_isClampedTo100() {
+        Ad ad = createAdWithRemoteConfig("close_button_initial_touch_size", 300);
+
+        assertEquals(100, ad.getCloseButtonInitialTouchSize());
+    }
+
+    @Test
+    public void getCloseButtonTouchSize_withNonNumericValue_returnsNoGrowth() {
+        // Malformed server value: getRemoteConfig discards it (null) and we fall back to no growth.
+        assertEquals(TouchSizeManager.NO_GROWTH,
+                createAdWithRemoteConfig("close_button_touch_size", "abc").getCloseButtonTouchSize());
+    }
+
+    @Test
+    public void getCloseButtonTouchSize_withNumericStringValue_isCoerced() {
+        assertEquals(50,
+                createAdWithRemoteConfig("close_button_touch_size", "50").getCloseButtonTouchSize());
+    }
+
+    @Test
+    public void getCloseButtonTouchSize_withDoubleValue_isTruncated() {
+        assertEquals(50,
+                createAdWithRemoteConfig("close_button_touch_size", 50.7).getCloseButtonTouchSize());
+    }
+
+    @Test
+    public void getCloseButtonInitialTouchSize_withNonNumericValue_returnsNoGrowth() {
+        assertEquals(TouchSizeManager.NO_GROWTH,
+                createAdWithRemoteConfig("close_button_initial_touch_size", "abc").getCloseButtonInitialTouchSize());
+    }
+
+    @Test
+    public void impressionClicked_defaultsFalse_andSticksOnceSet() {
+        Ad ad = new Ad();
+
+        assertFalse(ad.isImpressionClicked());
+        ad.setImpressionClicked();
+        assertTrue(ad.isImpressionClicked());
+    }
+
+    private Ad createAdWithRemoteConfig(String field, Object value) {
+        Ad ad = new Ad();
+        ad.meta = new ArrayList<>();
+
+        AdData remoteConfigAdData = new AdData();
+        remoteConfigAdData.type = APIMeta.REMOTE_CONFIGS;
+        remoteConfigAdData.data = new HashMap<>();
+
+        JSONObject jsonData = new JSONObject();
+        try {
+            jsonData.put(field, value);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        remoteConfigAdData.data.put("jsondata", jsonData);
+
+        ad.meta.add(remoteConfigAdData);
+        return ad;
+    }
+
+    private Ad createAdWithRemoteConfigAndExperience(String adExperience, String field, Object value) {
+        Ad ad = createAdWithRemoteConfig(field, value);
+        ad.assetgroupid = ApiAssetGroupType.VAST_INTERSTITIAL;
+
+        AdData adExperienceData = new AdData();
+        adExperienceData.type = APIMeta.AD_EXPERIENCE;
+        adExperienceData.data = new HashMap<>();
+        adExperienceData.data.put("text", adExperience);
+
+        ad.meta.add(adExperienceData);
         return ad;
     }
 }

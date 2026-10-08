@@ -11,6 +11,7 @@ import android.util.Log;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.tracker.ReportingTracker;
 import net.pubnative.lite.sdk.network.PNHttpClient;
+import net.pubnative.lite.sdk.network.RetryPolicy;
 import net.pubnative.lite.sdk.network.TrackingExecutor;
 import net.pubnative.lite.sdk.vpaid.enums.EventConstants;
 import net.pubnative.lite.sdk.vpaid.macros.MacroHelper;
@@ -82,10 +83,10 @@ public class EventTracker {
 
         String finalEventName = name;
         boolean shouldRetryIfFail = isRetryEligible(eventName);
-        PNHttpClient.makeRequest(context, processedUrl, headers, null, false, shouldRetryIfFail, TrackingExecutor.getInstance(), new PNHttpClient.Listener() {
+        PNHttpClient.makeRequest(context, processedUrl, headers, null, false, shouldRetryIfFail, RetryPolicy.AVOID_DUPLICATES, TrackingExecutor.getInstance(), new PNHttpClient.Listener() {
             @Override
             public void onSuccess(String response, Map<String, List<String>> headers) {
-                Log.d("onSuccess", response);
+                // EventTracker : response body is not used.
             }
 
             @Override
@@ -130,7 +131,7 @@ public class EventTracker {
         PNHttpClient.makeRequest(context, processedUrl, headers, null, false, new PNHttpClient.Listener() {
             @Override
             public void onSuccess(String response, Map<String, List<String>> headers) {
-                Log.d("onSuccess", response);
+                // EventTracker : response body is not used.
             }
 
             @Override

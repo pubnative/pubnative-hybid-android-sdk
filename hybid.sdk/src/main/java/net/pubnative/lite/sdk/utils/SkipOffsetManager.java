@@ -64,24 +64,40 @@ public class SkipOffsetManager {
     }
 
     public static Integer getVideoSkipOffset(Integer remoteConfigSkipOffset, Integer publisherSkipSeconds, Integer adParamsSkipSeconds, Boolean hasEndCard, Boolean isInterstitial) {
-        int defaultSkipOffset;
+        Integer skipOffsetMillis = getVideoSkipOffsetMillis(
+                secondsToMillis(remoteConfigSkipOffset),
+                secondsToMillis(publisherSkipSeconds),
+                secondsToMillis(adParamsSkipSeconds),
+                hasEndCard != null && hasEndCard,
+                isInterstitial != null && isInterstitial);
+
+        return skipOffsetMillis == null ? null : skipOffsetMillis / 1000;
+    }
+
+    /** Millisecond-domain {@link #getVideoSkipOffset}, for offsets not expressible in whole seconds. */
+    public static Integer getVideoSkipOffsetMillis(Integer remoteConfigSkipOffsetMillis, Integer publisherSkipMillis, Integer adParamsSkipMillis, boolean hasEndCard, boolean isInterstitial) {
+        int defaultSkipOffsetMillis;
         if (isInterstitial) {
-            if (hasEndCard) defaultSkipOffset = INTERSTITIAL_VIDEO_WITH_END_CARD;
-            else defaultSkipOffset = INTERSTITIAL_VIDEO_WITHOUT_END_CARD;
+            if (hasEndCard) defaultSkipOffsetMillis = INTERSTITIAL_VIDEO_WITH_END_CARD * 1000;
+            else defaultSkipOffsetMillis = INTERSTITIAL_VIDEO_WITHOUT_END_CARD * 1000;
         } else {
-            defaultSkipOffset = REWARDED_VIDEO_DEFAULT;
+            defaultSkipOffsetMillis = REWARDED_VIDEO_DEFAULT * 1000;
         }
 
         ArrayList<Integer> values = new ArrayList<>();
 
-        values.add(adParamsSkipSeconds);
-        values.add(remoteConfigSkipOffset);
-        values.add(publisherSkipSeconds);
+        values.add(adParamsSkipMillis);
+        values.add(remoteConfigSkipOffsetMillis);
+        values.add(publisherSkipMillis);
 
-        Integer skipOffset = findSkipOffset(values, defaultSkipOffset);
-        if (isInterstitial) isCustomInterstitialVideoSkipOffset = skipOffset != defaultSkipOffset;
+        Integer skipOffsetMillis = findSkipOffset(values, defaultSkipOffsetMillis);
+        if (isInterstitial) isCustomInterstitialVideoSkipOffset = skipOffsetMillis != defaultSkipOffsetMillis;
 
-        return skipOffset;
+        return skipOffsetMillis;
+    }
+
+    private static Integer secondsToMillis(Integer seconds) {
+        return seconds == null ? null : seconds * 1000;
     }
 
     private static Integer findSkipOffset(ArrayList<Integer> values, int defaultSkipOffset) {

@@ -35,7 +35,6 @@ class HyBidSettingsFragment : Fragment(R.layout.fragment_hybid_settings) {
     private lateinit var apiUrlInput: EditText
     private lateinit var coppaSwitch: SwitchCompat
     private lateinit var testModeSwitch: SwitchCompat
-    private lateinit var topicsApiSwitch: SwitchCompat
     private lateinit var reportingSwitch: SwitchCompat
     private lateinit var locationTrackingSwitch: SwitchCompat
     private lateinit var cbLocationTracking: CheckBox
@@ -56,7 +55,6 @@ class HyBidSettingsFragment : Fragment(R.layout.fragment_hybid_settings) {
         apiUrlInput = view.findViewById(R.id.input_pn_api_url)
         coppaSwitch = view.findViewById(R.id.check_coppa)
         testModeSwitch = view.findViewById(R.id.check_test_mode)
-        topicsApiSwitch = view.findViewById(R.id.check_topics_api)
         reportingSwitch = view.findViewById(R.id.check_reporting)
         locationTrackingSwitch = view.findViewById(R.id.check_location_tracking)
         locationUpdatesSwitch = view.findViewById(R.id.check_location_updates)
@@ -127,7 +125,6 @@ class HyBidSettingsFragment : Fragment(R.layout.fragment_hybid_settings) {
             ageInput.setText(settings.age)
             coppaSwitch.isChecked = settings.coppa == true
             testModeSwitch.isChecked = settings.testMode == true
-            topicsApiSwitch.isChecked = settings.topicsApi == true
             reportingSwitch.isChecked = settings.reportingEnabled == true
             locationTrackingSwitch.isChecked =
                 settingManager.getSettings().adCustomizationSettings?.locationTracking == true
@@ -154,7 +151,6 @@ class HyBidSettingsFragment : Fragment(R.layout.fragment_hybid_settings) {
         val apiUrl = apiUrlInput.text.toString()
         val coppa = coppaSwitch.isChecked
         val testMode = testModeSwitch.isChecked
-        val topicsApi = topicsApiSwitch.isChecked
         val reportingEnabled = reportingSwitch.isChecked
         val locationTracking = locationTrackingSwitch.isChecked
         val locationUpdates = locationUpdatesSwitch.isChecked
@@ -174,7 +170,6 @@ class HyBidSettingsFragment : Fragment(R.layout.fragment_hybid_settings) {
         settingManager.setCoppa(coppa)
         settingManager.setTestMode(testMode)
         settingManager.setGender(gender)
-        settingManager.setTopicsApi(topicsApi)
         settingManager.setReportingEnabled(reportingEnabled)
         settingManager.setLocationTracking(locationTracking)
         settingManager.setLocationTrackingEnabled(locationTrackingEnabled)

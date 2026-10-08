@@ -6,21 +6,19 @@ package net.pubnative.lite.sdk.vpaid.xml;
 
 import android.text.TextUtils;
 
-import net.pubnative.lite.sdk.utils.Logger;
-
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.StringReader;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Simple XML parser.
@@ -31,11 +29,26 @@ import java.util.WeakHashMap;
  * For example &lt;PIC width="7in"/&gt; and &lt;PIC WIDTH="6in"/&gt; are separate attributes.
  */
 public class XmlParser {
-    private static final Map<AnnotatedElement, Map<Class<? extends Annotation>,
-            Annotation>> ANNOTATION_CACHE = new WeakHashMap<>();
+    private static final ConcurrentHashMap<Class<?>, Descriptor> DESCRIPTOR_CACHE = new ConcurrentHashMap<>();
+
+    private static volatile XmlPullParserFactory sParserFactory;
+
+    private static XmlPullParserFactory getParserFactory() throws XmlPullParserException {
+        XmlPullParserFactory factory = sParserFactory;
+        if (factory == null) {
+            synchronized (XmlParser.class) {
+                factory = sParserFactory;
+                if (factory == null) {
+                    factory = XmlPullParserFactory.newInstance();
+                    sParserFactory = factory;
+                }
+            }
+        }
+        return factory;
+    }
+
     public static <T> T parse(String xml, Class<T> classOfT) throws Exception {
-        XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-        XmlPullParser parser = factory.newPullParser();
+        XmlPullParser parser = getParserFactory().newPullParser();
         parser.setInput(new StringReader(xml));
         parser.next();
         return parseTag(parser, classOfT);
@@ -50,39 +63,39 @@ public class XmlParser {
         return tagInstance;
     }
 
-    @SuppressWarnings("java:S3011") // Reflection accessibility bypass is required for XML parsing framework
     private static <T> void parseAttributes(XmlPullParser parser, T tagInstance) throws IllegalAccessException {
-        for (Field field : tagInstance.getClass().getDeclaredFields()) {
-            Attribute attribute = getAnnotation(field, Attribute.class);
-            if (attribute == null) {
-                continue;
-            }
-            String attributeValue = attribute.value();
-            if (TextUtils.isEmpty(attributeValue)) {
-                attributeValue = field.getName();
-            }
-            String value = parser.getAttributeValue(null, attributeValue);
-            if (TextUtils.isEmpty(value)) {
-                continue;
-            }
-            // Accessibility bypass needed to set private/protected fields from XML attributes
-            field.setAccessible(true);
-            Class fieldClass = field.getType();
-            if (fieldClass.equals(String.class)) {
-                field.set(tagInstance, value);
-            } else if (Long.class.equals(fieldClass) || long.class.equals(fieldClass)) {
-                field.setLong(tagInstance, Long.parseLong(value));
-            } else if (Integer.class.equals(fieldClass) || int.class.equals(fieldClass)) {
-                field.setInt(tagInstance, Integer.parseInt(value));
-            } else if (Byte.class.equals(fieldClass) || byte.class.equals(fieldClass)) {
-                field.setByte(tagInstance, Byte.parseByte(value));
-            } else if (Double.class.equals(fieldClass) || double.class.equals(fieldClass)) {
-                field.setDouble(tagInstance, Double.parseDouble(value));
-            } else if (Float.class.equals(fieldClass) || float.class.equals(fieldClass)) {
-                field.setFloat(tagInstance, Float.parseFloat(value));
-            } else if (Boolean.class.equals(fieldClass) || boolean.class.equals(fieldClass)) {
-                field.setBoolean(tagInstance, Boolean.parseBoolean(value));
-            }
+        for (AttributeField attributeField : getDescriptor(tagInstance.getClass()).attributeFields) {
+            String value = parser.getAttributeValue(null, attributeField.name);
+            Field field = attributeField.field;
+            bindAttributeFieldValue(tagInstance, field, value);
+        }
+    }
+
+    private static void bindAttributeFieldValue(Object tagInstance, Field field, String value) throws IllegalAccessException {
+        if (TextUtils.isEmpty(value)) {
+            return;
+        }
+
+        Class fieldClass = field.getType();
+        Object coercedValue = null;
+        if (fieldClass.equals(String.class)) {
+            coercedValue = value;
+        } else if (Long.class.equals(fieldClass) || long.class.equals(fieldClass)) {
+            coercedValue = Long.parseLong(value);
+        } else if (Integer.class.equals(fieldClass) || int.class.equals(fieldClass)) {
+            coercedValue = Integer.parseInt(value);
+        } else if (Byte.class.equals(fieldClass) || byte.class.equals(fieldClass)) {
+            coercedValue = Byte.parseByte(value);
+        } else if (Double.class.equals(fieldClass) || double.class.equals(fieldClass)) {
+            coercedValue = Double.parseDouble(value);
+        } else if (Float.class.equals(fieldClass) || float.class.equals(fieldClass)) {
+            coercedValue = Float.parseFloat(value);
+        } else if (Boolean.class.equals(fieldClass) || boolean.class.equals(fieldClass)) {
+            coercedValue = Boolean.parseBoolean(value);
+        }
+
+        if (coercedValue != null) {
+            field.set(tagInstance, coercedValue);
         }
     }
 
@@ -97,21 +110,18 @@ public class XmlParser {
         }
     }
 
-    @SuppressWarnings("java:S3011") // Reflection accessibility bypass is required for XML parsing framework
     private static <T> void parseText(XmlPullParser parser, T parent) throws Exception {
         if (parser.getEventType() != XmlPullParser.TEXT) {
             return;
         }
         Field textField = getFieldForText(parent);
         if (textField != null) {
-            // Accessibility bypass needed to set private/protected text fields from XML content
-            textField.setAccessible(true);
             textField.set(parent, parser.getText());
         }
         parser.next();
     }
 
-    @SuppressWarnings({"unchecked", "java:S3011"}) // Reflection accessibility bypass is required for XML parsing framework
+    @SuppressWarnings("unchecked")
     private static <T> void parseSubTag(XmlPullParser parser, T parent) throws Exception {
         String tagName = parser.getName();
         int tagDepth = parser.getDepth();
@@ -124,8 +134,6 @@ public class XmlParser {
                 ParameterizedType listGenericType = (ParameterizedType) tagField.getGenericType();
                 Class<?> listGenericClass = (Class<?>) listGenericType.getActualTypeArguments()[0];
                 Object tag = parseTag(parser, listGenericClass);
-                // Accessibility bypass needed to set private/protected list fields from XML tags
-                tagField.setAccessible(true);
                 List list = (List) tagField.get(parent);
                 if (list == null) {
                     list = new ArrayList();
@@ -134,37 +142,17 @@ public class XmlParser {
                 list.add(tag);
             } else {
                 Object tag = parseTag(parser, tagField.getType());
-                // Accessibility bypass needed to set private/protected fields from XML tags
-                tagField.setAccessible(true);
                 tagField.set(parent, tag);
             }
         }
     }
 
     private static <T> Field getFieldForTag(T parent, String tagName) {
-        for (Field field : parent.getClass().getDeclaredFields()) {
-            Tag tagAnnotation = getAnnotation(field, Tag.class);
-            if (tagAnnotation != null) {
-                String tagValue = tagAnnotation.value();
-                if (TextUtils.isEmpty(tagValue)) {
-                    tagValue = field.getName();
-                }
-                if (tagValue.equalsIgnoreCase(tagName)) {
-                    return field;
-                }
-            }
-        }
-        return null;
+        return getDescriptor(parent.getClass()).tagFieldsByName.get(tagName.toLowerCase(Locale.ROOT));
     }
 
     private static <T> Field getFieldForText(T parent) {
-        for (Field field : parent.getClass().getDeclaredFields()) {
-            Text textAnnotation = getAnnotation(field, Text.class);
-            if (textAnnotation != null) {
-                return field;
-            }
-        }
-        return null;
+        return getDescriptor(parent.getClass()).textField;
     }
 
     private static void skipTag(XmlPullParser parser, String name, int depth) throws Exception {
@@ -174,37 +162,89 @@ public class XmlParser {
         parser.next();
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T extends Annotation> T getAnnotation(AnnotatedElement element, Class<? extends Annotation> annotationType) {
-        try {
-            Map<Class<? extends Annotation>, Annotation> elementCache = ANNOTATION_CACHE.get(element);
-            if (elementCache != null) {
-                Annotation cachedAnnotation = elementCache.get(annotationType);
-                if (cachedAnnotation != null) {
-                    return (T) cachedAnnotation;
-                }
-            }
-
-            for (Annotation annotation : element.getDeclaredAnnotations()) {
-                if (annotationType.isInstance(annotation)) {
-                    if (elementCache == null) {
-                        elementCache = new HashMap<>();
-                        ANNOTATION_CACHE.put(element, elementCache);
-                    }
-                    elementCache.put(annotationType, annotation);
-                    return (T) annotation;
-                }
-            }
-
-            if (elementCache == null) {
-                elementCache = new HashMap<>();
-                ANNOTATION_CACHE.put(element, elementCache);
-            }
-            elementCache.put(annotationType, null);
-        } catch (OutOfMemoryError e) {
-            Logger.e(XmlParser.class.getSimpleName(), "Error getting annotation: " + e.getMessage());
+    private static Descriptor getDescriptor(Class<?> clazz) {
+        Descriptor descriptor = DESCRIPTOR_CACHE.get(clazz);
+        if (descriptor == null) {
+            Descriptor newDescriptor = Descriptor.build(clazz);
+            Descriptor existing = DESCRIPTOR_CACHE.putIfAbsent(clazz, newDescriptor);
+            descriptor = existing != null ? existing : newDescriptor;
         }
-        return null;
+        return descriptor;
     }
 
+    /**
+     * Which fields carry {@link Attribute}/{@link Tag}/{@link Text} is a fixed property of a
+     * model class, not of a parsed instance, so it is resolved once per class and cached here
+     * instead of being rediscovered by reflection on every parse.
+     */
+    private static final class Descriptor {
+        final List<AttributeField> attributeFields;
+        final Map<String, Field> tagFieldsByName;
+        final Field textField;
+
+        private Descriptor(List<AttributeField> attributeFields, Map<String, Field> tagFieldsByName, Field textField) {
+            this.attributeFields = attributeFields;
+            this.tagFieldsByName = tagFieldsByName;
+            this.textField = textField;
+        }
+
+        @SuppressWarnings("java:S3011") // Reflection accessibility bypass is required for XML parsing framework
+        private static Descriptor build(Class<?> clazz) {
+            List<AttributeField> attributeFields = new ArrayList<>();
+            Map<String, Field> tagFieldsByName = new HashMap<>();
+            Field textField = null;
+
+            for (Field field : clazz.getDeclaredFields()) {
+                field.setAccessible(true);
+
+                AttributeField attributeField = resolveAttributeField(field);
+                if (attributeField != null) {
+                    attributeFields.add(attributeField);
+                }
+
+                String tagKey = resolveTagKey(field);
+                if (tagKey != null && !tagFieldsByName.containsKey(tagKey)) {
+                    tagFieldsByName.put(tagKey, field);
+                }
+
+                if (textField == null && isTextField(field)) {
+                    textField = field;
+                }
+            }
+
+            return new Descriptor(attributeFields, tagFieldsByName, textField);
+        }
+
+        private static AttributeField resolveAttributeField(Field field) {
+            Attribute attribute = field.getAnnotation(Attribute.class);
+            if (attribute == null) {
+                return null;
+            }
+            String name = TextUtils.isEmpty(attribute.value()) ? field.getName() : attribute.value();
+            return new AttributeField(field, name);
+        }
+
+        private static String resolveTagKey(Field field) {
+            Tag tag = field.getAnnotation(Tag.class);
+            if (tag == null) {
+                return null;
+            }
+            String name = TextUtils.isEmpty(tag.value()) ? field.getName() : tag.value();
+            return name.toLowerCase(Locale.ROOT);
+        }
+
+        private static boolean isTextField(Field field) {
+            return field.getAnnotation(Text.class) != null;
+        }
+    }
+
+    private static final class AttributeField {
+        final Field field;
+        final String name;
+
+        private AttributeField(Field field, String name) {
+            this.field = field;
+            this.name = name;
+        }
+    }
 }

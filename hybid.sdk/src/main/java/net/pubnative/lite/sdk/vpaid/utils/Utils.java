@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class Utils {
 
@@ -39,6 +40,8 @@ public class Utils {
     }
 
     private static final String TAG = Utils.class.getSimpleName();
+    private static final Pattern SKIP_OFFSET_ABSOLUTE = Pattern.compile("\\d{1,2}:[0-5]?\\d:[0-5]?\\d(\\.\\d{1,3})?");
+    private static final Pattern SKIP_OFFSET_PERCENT = Pattern.compile("\\d{1,3}(\\.\\d{1,3})?\\s*%");
 
     private static boolean debugMode = true;
 
@@ -203,16 +206,26 @@ public class Utils {
     }
 
     /**
-     * @param duration in format hh:mm:ss
-     * @return in seconds
+     * @param duration in format hh:mm:ss[.mmm]
+     * @return in whole seconds; sub-second precision is lost, use
+     *         {@link #parseDurationMillis} to keep it. Null if unparseable.
      */
     public static Integer parseDuration(String duration) {
+        Integer millis = parseDurationMillis(duration);
+        return millis == null ? null : millis / 1000;
+    }
+
+    /**
+     * @param duration in format hh:mm:ss[.mmm]
+     * @return in milliseconds; null if unparseable
+     */
+    public static Integer parseDurationMillis(String duration) {
         try {
-            String[] data = duration.split(":");
+            String[] data = duration.trim().split(":");
             int hours = Integer.parseInt(data[0]);
             int minutes = Integer.parseInt(data[1]);
-            int seconds = Double.valueOf(data[2]).intValue();
-            return seconds + 60 * minutes + 3600 * hours;
+            double seconds = Double.parseDouble(data[2]);
+            return (int) Math.round(seconds * 1000) + 60_000 * minutes + 3_600_000 * hours;
         } catch (RuntimeException e) {
             HyBid.reportException(e);
             Logger.e(TAG, "Error while parsing ad duration");
@@ -220,9 +233,40 @@ public class Utils {
         return null;
     }
 
-    public static int parsePercent(String duration) {
-        String progress = duration.replace("%", "").trim();
-        return Integer.parseInt(progress);
+    /**
+     * @param percent an n% value, decimals allowed
+     * @return the numeric value; null if unparseable
+     */
+    public static Double parsePercent(String percent) {
+        if (percent == null) {
+            return null;
+        }
+        try {
+            return Double.valueOf(percent.replace("%", "").trim());
+        } catch (RuntimeException e) {
+            Logger.e(TAG, "Error while parsing percentage: " + percent);
+        }
+        return null;
+    }
+
+    /**
+     * Whether a VAST time offset (Linear@skipoffset, Tracking@offset) is acceptable:
+     * HH:MM:SS[.mmm], or a 0-100 percentage. Deliberately more lenient than the IAB xsd
+     * on zero-padding, fractional-digit count and whitespace before '%'.
+     */
+    public static boolean isValidVastTimeOffset(String timeOffset) {
+        if (TextUtils.isEmpty(timeOffset)) {
+            return false;
+        }
+        String value = timeOffset.trim();
+        if (value.endsWith("%")) {
+            if (!SKIP_OFFSET_PERCENT.matcher(value).matches()) {
+                return false;
+            }
+            Double percent = parsePercent(value);
+            return percent != null && percent >= 0 && percent <= 100;
+        }
+        return SKIP_OFFSET_ABSOLUTE.matcher(value).matches();
     }
 
     public static ContentInfo parseContentInfo(Icon icon) {

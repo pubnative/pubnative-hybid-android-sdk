@@ -13,7 +13,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -61,32 +61,46 @@ public abstract class JsonModel {
     //----------------------------------------------------------------------------------------------
     // FIELD METADATA BINDING
     //----------------------------------------------------------------------------------------------
-    protected HashMap<String, JsonModelMetadata> fields;
+
+    // Bound fields (already accessible) with their metadata, resolved once per class.
+    private List<JsonModelFieldCache.BoundField> boundFields;
 
     void bind(JsonModel modelClass) {
-        if (JsonModelFieldCache.checkIfModelCached(modelClass.getClass())) {
-            fields = JsonModelFieldCache.getFields(modelClass.getClass());
-        } else {
+        Class<?> modelType = modelClass.getClass();
+        // Lock-free read on the hot path; only the first-time miss takes the build lock.
+        List<JsonModelFieldCache.BoundField> cached = JsonModelFieldCache.get(modelType);
+        if (cached == null) {
+            cached = JsonModelFieldCache.getOrBuild(modelType, this::buildBoundFields);
+        }
+        boundFields = cached;
+    }
+
+    // Runs getDeclaredFields()/setAccessible() once per class, off the deserialization hot path.
+    private List<JsonModelFieldCache.BoundField> buildBoundFields(Class<?> modelType) {
+        List<JsonModelFieldCache.BoundField> result = new ArrayList<>();
+        for (Field field : modelType.getDeclaredFields()) {
+            final BindField bindField = field.getAnnotation(BindField.class);
+            if (bindField == null) {
+                continue;
+            }
             try {
-                fields = new HashMap<>();
-                for (Field field : modelClass.getClass().getDeclaredFields()) {
-                    final BindField bindField = field.getAnnotation(BindField.class);
-                    if (bindField != null) {
-                        Class typeClass = field.getType();
-                        if (Iterable.class.isAssignableFrom(typeClass)) {
-                            fields.put(field.getName(), parseArray(field, typeClass));
-                        } else if (Map.class.isAssignableFrom(typeClass)) {
-                            fields.put(field.getName(), parseMap(field, typeClass));
-                        } else {
-                            fields.put(field.getName(), parseLiteral(field, typeClass));
-                        }
-                    }
+                field.setAccessible(true);
+                Class typeClass = field.getType();
+                JsonModelMetadata metadata;
+                if (Iterable.class.isAssignableFrom(typeClass)) {
+                    metadata = parseArray(field, typeClass);
+                } else if (Map.class.isAssignableFrom(typeClass)) {
+                    metadata = parseMap(field, typeClass);
+                } else {
+                    metadata = parseLiteral(field, typeClass);
                 }
-                JsonModelFieldCache.setFields(modelClass.getClass(), fields);
+                result.add(new JsonModelFieldCache.BoundField(field, metadata));
             } catch (Exception exception) {
+                // Skip the offending field only; don't poison the whole class descriptor.
                 exception.printStackTrace();
             }
         }
+        return Collections.unmodifiableList(result);
     }
 
     protected JsonModelMetadata parseArray(Field field, Class typeClass) {
@@ -126,25 +140,21 @@ public abstract class JsonModel {
     public JSONObject toJson() throws Exception {
         JSONObject outputObject = new JSONObject();
 
-        for (Field field : this.getClass().getDeclaredFields()) {
-            String fieldName = field.getName();
-
-            if (fields.containsKey(fieldName)) {
-                field.setAccessible(true);
-                JsonModelMetadata t = fields.get(fieldName);
-                Object fieldValue = field.get(this);
-                if (fieldValue != null) {
-                    if (t.isArray) {
-                        outputObject.put(t.key, toJsonArray(t, fieldValue));
-                    } else if (t.isMap) {
-                        outputObject.put(t.key, toJsonMap(t, fieldValue));
+        for (JsonModelFieldCache.BoundField boundField : boundFields) {
+            Field field = boundField.field; // setAccessible(true) already applied at cache population
+            JsonModelMetadata t = boundField.meta;
+            Object fieldValue = field.get(this);
+            if (fieldValue != null) {
+                if (t.isArray) {
+                    outputObject.put(t.key, toJsonArray(t, fieldValue));
+                } else if (t.isMap) {
+                    outputObject.put(t.key, toJsonMap(t, fieldValue));
+                } else {
+                    outputObject.put(t.key, toJsonLiteral(t, fieldValue));
+                    if (t.isDescendantFromModel) {
+                        outputObject.put(t.key, ((JsonModel) fieldValue).toJson());
                     } else {
-                        outputObject.put(t.key, toJsonLiteral(t, fieldValue));
-                        if (t.isDescendantFromModel) {
-                            outputObject.put(t.key, ((JsonModel) fieldValue).toJson());
-                        } else {
-                            outputObject.put(t.key, fieldValue);
-                        }
+                        outputObject.put(t.key, fieldValue);
                     }
                 }
             }
@@ -201,37 +211,34 @@ public abstract class JsonModel {
         if (input == null) {
             Log.e(TAG, "Couldn't parse JSON object because of null input");
         } else {
-            for (Field field : this.getClass().getDeclaredFields()) {
-                String fieldName = field.getName();
-                if (fields.containsKey(fieldName)) {
-                    field.setAccessible(true);
-                    JsonModelMetadata t = fields.get(fieldName);
-                    if (input.has(t.key)) {
-                        if (t.isArray) {
-                            JSONArray array;
-                            try {
-                                array = input.getJSONArray(t.key);
-                            } catch (Exception e) {
-                                array = null;
-                            }
-
-                            if (array != null) {
-                                field.set(this, fromJsonArray(t, array));
-                            }
-                        } else if (t.isMap) {
-                            JSONObject mapObject;
-                            try {
-                                mapObject = input.getJSONObject(t.key);
-                            } catch (Exception e) {
-                                mapObject = null;
-                            }
-
-                            if (mapObject != null) {
-                                field.set(this, fromJsonMap(t, mapObject));
-                            }
-                        } else {
-                            field.set(this, castNumber(fromJsonLiteral(t, input), field.getType()));
+            for (JsonModelFieldCache.BoundField boundField : boundFields) {
+                Field field = boundField.field; // setAccessible(true) already applied at cache population
+                JsonModelMetadata t = boundField.meta;
+                if (input.has(t.key)) {
+                    if (t.isArray) {
+                        JSONArray array;
+                        try {
+                            array = input.getJSONArray(t.key);
+                        } catch (Exception e) {
+                            array = null;
                         }
+
+                        if (array != null) {
+                            field.set(this, fromJsonArray(t, array));
+                        }
+                    } else if (t.isMap) {
+                        JSONObject mapObject;
+                        try {
+                            mapObject = input.getJSONObject(t.key);
+                        } catch (Exception e) {
+                            mapObject = null;
+                        }
+
+                        if (mapObject != null) {
+                            field.set(this, fromJsonMap(t, mapObject));
+                        }
+                    } else {
+                        field.set(this, castNumber(fromJsonLiteral(t, input), field.getType()));
                     }
                 }
             }

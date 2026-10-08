@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -68,6 +69,7 @@ public class CloseableContainer extends FrameLayout {
     private final ImageButton mCloseButton;
     private final ImageButton mSkipButton;
     private ClosePosition mClosePosition;
+    private final TouchAreaDelegate mTouchAreaDelegate = new TouchAreaDelegate();
 
     public CloseableContainer(Context context) {
         this(context, null, 0);
@@ -119,6 +121,38 @@ public class CloseableContainer extends FrameLayout {
                 mOnSkipListener.onSkip();
             }
         });
+
+        // Only the close button gets a configurable tap area. The skip button is left untouched, so
+        // it keeps today's behaviour.
+        mTouchAreaDelegate.addTarget(mCloseButton);
+    }
+
+    /**
+     * Sets the tap area (dp) for the close control. Only changes which taps count as pressing the
+     * button; the button looks and sits the same. Skip is not affected.
+     */
+    public void setTouchSize(int touchSize) {
+        mTouchAreaDelegate.setTouchSize(getContext(), touchSize);
+    }
+
+    /** Sets the initial tap area (dp) for the close control, used before the ad is clicked. */
+    public void setInitialTouchSize(int initialTouchSize) {
+        mTouchAreaDelegate.setInitialTouchSize(getContext(), initialTouchSize);
+    }
+
+    /** Supplies whether the ad has been clicked yet, so the close control can switch tap sizes. */
+    public void setClickStateProvider(TouchAreaDelegate.ClickStateProvider provider) {
+        mTouchAreaDelegate.setClickStateProvider(provider);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        // Checked before the event is offered to any child, so the grown area wins over the
+        // creative's own click handling.
+        if (mTouchAreaDelegate.onDispatchTouchEvent(event)) {
+            return true;
+        }
+        return super.dispatchTouchEvent(event);
     }
 
     private void positionCloseButton() {

@@ -7,55 +7,27 @@ package net.pubnative.lite.sdk;
 import android.content.Context;
 
 import net.pubnative.lite.sdk.models.Topic;
-import net.pubnative.lite.sdk.provider.TopicProvider;
-import net.pubnative.lite.sdk.provider.TopicsApiImpl;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+/**
+ * @deprecated The AdServices Topics API integration has been removed.
+ * This class is kept as a no-op shell for binary/source compatibility and will be removed in a future major release.
+ * {@link #getTopics()} always returns an empty list.
+ */
+@Deprecated
 public class TopicManager {
 
-    private final String TAG = TopicManager.class.getSimpleName();
-    private final List<TopicProvider> providers = new ArrayList<>();
-    private List<Topic> topics = null;
-
-    public TopicManager(Context context){
-        initProviders();
-        fetchTopics(context);
+    public TopicManager(Context context) {
+        // No-op.
     }
 
-    private void initProviders() {
-        providers.add(new TopicsApiImpl());
-    }
-
-    private void fetchTopics(Context context){
-
-        if(providers.isEmpty()) return;
-        topics = new ArrayList<>();
-        TopicProvider.Callback callback = this::addTopics;
-        for (TopicProvider provider : providers) {
-            provider.getTopics(context, callback);
-        }
-    }
-
-    public List<Topic> getTopics(){
-        return topics;
-    }
-
-    private synchronized void addTopics(List<Topic> newTopics) {
-
-        if (newTopics == null || newTopics.isEmpty()) {
-            return; // Nothing to add, exit early
-        }
-
-        if (this.topics == null) {
-            this.topics = new ArrayList<>();
-        }
-
-        for (Topic topic : newTopics) {
-            if (topic != null && !this.topics.contains(topic)) {
-                this.topics.add(topic);
-            }
-        }
+    /**
+     * @deprecated Always returns an empty list.
+     */
+    @Deprecated
+    public List<Topic> getTopics() {
+        return Collections.emptyList();
     }
 }

@@ -265,6 +265,11 @@ public abstract class InterstitialViewModel extends BaseViewModel implements PNA
                     mListener.setCloseSize(REDUCED_CLOSE_BUTTON_SIZE);
                     mListener.setSkipSize(REDUCED_CLOSE_BUTTON_SIZE);
                 }
+                // Applies regardless of the reduced icon mode: a 20dp button still gets the
+                // configured tap area.
+                mListener.setCloseTouchSize(getTouchSize());
+                mListener.setCloseInitialTouchSize(getInitialTouchSize());
+                mListener.setCloseClickStateProvider(this::hasImpressionBeenClicked);
                 FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
                 params.gravity = Gravity.CENTER;
                 mListener.hideProgressBar();
@@ -302,6 +307,11 @@ public abstract class InterstitialViewModel extends BaseViewModel implements PNA
 
     public boolean isAdSkippable() {
         return mIsSkippable;
+    }
+
+    @Override
+    protected Ad getAd() {
+        return mAd;
     }
 
     public abstract void addFriendlyObstruction(View view);

@@ -18,6 +18,7 @@ import net.pubnative.lite.sdk.utils.AdExperienceManager;
 import net.pubnative.lite.sdk.utils.AtomManager;
 import net.pubnative.lite.sdk.utils.ClickThroughTimerManager;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.TouchSizeManager;
 import net.pubnative.lite.sdk.utils.SkipOffsetManager;
 import net.pubnative.lite.sdk.utils.json.BindField;
 import net.pubnative.lite.sdk.utils.json.JsonModel;
@@ -27,6 +28,7 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -38,6 +40,11 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     private static final String DATA_CONTENTINFO_ICON_KEY = "icon";
     private static final String DATA_POINTS_NUMBER_KEY = "number";
     private static final String DATA_TEXT_KEY = "text";
+    private static final String JSON_DATA_FIELD = "jsondata";
+    private static final EnumSet<RemoteConfig> PERCENTAGE_CAPABLE_SKIP_OFFSETS = EnumSet.of(
+            RemoteConfig.VIDEO_SKIP_OFFSET, RemoteConfig.REWARDED_VIDEO_SKIP_OFFSET,
+            RemoteConfig.PC_VIDEO_SKIP_OFFSET, RemoteConfig.PC_REWARDED_VIDEO_SKIP_OFFSET,
+            RemoteConfig.BC_VIDEO_SKIP_OFFSET, RemoteConfig.BC_REWARDED_VIDEO_SKIP_OFFSET);
 
     private static final String SDK_IMPRESSION_URL = "got.pubnative.net";
     private static final String SDK_IMPRESSION_QUERY_PARAM = "t";
@@ -518,14 +525,18 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         return "";
     }
 
+    private JSONObject getRemoteConfigJson() {
+        AdData data = getMeta(APIMeta.REMOTE_CONFIGS);
+
+        if (data == null || !data.hasField(JSON_DATA_FIELD)) return null;
+
+        return data.getJSONObjectField(JSON_DATA_FIELD);
+    }
+
     @SuppressWarnings("unchecked")
     public <T> T getRemoteConfig(RemoteConfig config) {
 
-        AdData data = getMeta(APIMeta.REMOTE_CONFIGS);
-
-        if (data == null || !data.hasField("jsondata")) return null;
-
-        JSONObject jsonObject = data.getJSONObjectField("jsondata");
+        JSONObject jsonObject = getRemoteConfigJson();
 
         if (jsonObject == null || !jsonObject.has(config.fieldName)) return null;
         T configValue = null;
@@ -541,15 +552,22 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
             }
             return configValue;
         } catch (Exception e) {
+            Object rawValue = jsonObject.opt(config.fieldName);
+            boolean routedAsPercentage = PERCENTAGE_CAPABLE_SKIP_OFFSETS.contains(config)
+                    && rawValue instanceof String && ((String) rawValue).trim().endsWith("%");
+            if (!routedAsPercentage) {
+                Logger.w(TAG, "Discarding remote config " + config.fieldName + ", not a valid "
+                        + config.type.getSimpleName() + ": " + rawValue);
+            }
             return null;
         }
     }
 
     public RemoteConfigsDebug getRemoteConfigDebug() {
         AdData data = getMeta(APIMeta.REMOTE_CONFIGS_DEBUG);
-        if (data == null || !data.hasField("jsondata")) return null;
+        if (data == null || !data.hasField(JSON_DATA_FIELD)) return null;
 
-        JSONObject jsonObject = data.getJSONObjectField("jsondata");
+        JSONObject jsonObject = data.getJSONObjectField(JSON_DATA_FIELD);
 
         try {
             return new RemoteConfigsDebug(jsonObject);
@@ -604,6 +622,38 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
 
     public Integer getNativeCloseButtonDelay() {
         return getRemoteConfig(RemoteConfig.NATIVE_CLOSE_BUTTON_DELAY);
+    }
+
+    /**
+     * Tappable size, in dp, for the close control. Hit testing only, the drawn size of the control
+     * is unaffected. See {@link TouchSizeManager} for the resolution rules.
+     */
+    public int getCloseButtonTouchSize() {
+        Integer touchSize = getRemoteConfig(RemoteConfig.CLOSE_BUTTON_TOUCH_SIZE);
+        return TouchSizeManager.getTouchSize(touchSize);
+    }
+
+    /**
+     * Tappable size, in dp, for the close control while the impression has had no click. Only
+     * changes which taps count as pressing the button. Absent, zero or negative returns
+     * {@link TouchSizeManager#NO_GROWTH}, i.e. no distinct initial behaviour - the close uses the
+     * normal size. A served 1-100 is used as is, above 100 is clamped to 100.
+     */
+    public int getCloseButtonInitialTouchSize() {
+        // Absent/zero/negative resolves to NO_GROWTH inside the manager, so the close just uses the
+        // normal size (today's behaviour).
+        return TouchSizeManager.getTouchSize(getRemoteConfig(RemoteConfig.CLOSE_BUTTON_INITIAL_TOUCH_SIZE));
+    }
+
+    /** Whether this ad has been clicked. Kept here so it survives activity recreation. */
+    private boolean mImpressionClicked = false;
+
+    public boolean isImpressionClicked() {
+        return mImpressionClicked;
+    }
+
+    public void setImpressionClicked() {
+        mImpressionClicked = true;
     }
 
     public Boolean needCloseInterAfterFinish() {
@@ -701,6 +751,35 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         return getRemoteConfig(remoteConfigSkipOffset);
     }
 
+    /** The raw n% literal when the skip offset is a percentage, which only a duration can resolve. */
+    public String getVideoSkipOffsetPercentage() {
+        if (isPerformanceAd()) {
+            return getSkipOffsetPercentage(RemoteConfig.PC_VIDEO_SKIP_OFFSET);
+        } else if (isBrandAd()) {
+            return getSkipOffsetPercentage(RemoteConfig.BC_VIDEO_SKIP_OFFSET);
+        } else
+            return getSkipOffsetPercentage(RemoteConfig.VIDEO_SKIP_OFFSET);
+    }
+
+    public String getVideoRewardedSkipOffsetPercentage() {
+        if (isPerformanceAd()) {
+            return getSkipOffsetPercentage(RemoteConfig.PC_REWARDED_VIDEO_SKIP_OFFSET);
+        } else if (isBrandAd()) {
+            return getSkipOffsetPercentage(RemoteConfig.BC_REWARDED_VIDEO_SKIP_OFFSET);
+        } else
+            return getSkipOffsetPercentage(RemoteConfig.REWARDED_VIDEO_SKIP_OFFSET);
+    }
+
+    private String getSkipOffsetPercentage(RemoteConfig remoteConfigSkipOffset) {
+        JSONObject jsonObject = getRemoteConfigJson();
+
+        if (jsonObject == null) return null;
+
+        String value = jsonObject.optString(remoteConfigSkipOffset.fieldName, null);
+
+        return value != null && value.trim().endsWith("%") ? value.trim() : null;
+    }
+
     public ContentInfoIconYPosition getContentInfoIconYPosition() {
 //        String verticalPosition = getRemoteConfig(RemoteConfig.CONTENT_INFO_VERTICAL_POSITION);
 //        if (TextUtils.isEmpty(verticalPosition)) {
@@ -733,9 +812,9 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
     public BuyerSignals getBuyerSignals() {
         AdData data = getMeta(APIMeta.PA_BUYER_SIGNALS);
 
-        if (data == null || !data.hasField("jsondata")) return null;
+        if (data == null || !data.hasField(JSON_DATA_FIELD)) return null;
 
-        JSONObject jsonObject = data.getJSONObjectField("jsondata");
+        JSONObject jsonObject = data.getJSONObjectField(JSON_DATA_FIELD);
 
         try {
             return new BuyerSignals(jsonObject);
@@ -839,8 +918,13 @@ public class Ad extends JsonModel implements Serializable, Comparable<Ad> {
         return getRemoteConfig(RemoteConfig.CUSTOM_CTA_TYPE);
     }
 
+    /**
+     * @deprecated The AdServices Topics API integration has been removed. Always returns {@code false}.
+     * Retained for source/binary compatibility; will be removed in a future major release.
+     */
+    @Deprecated
     public Boolean isTopicsAPIEnabled() {
-        return getRemoteConfig(RemoteConfig.TOPICS_API_ENABLED);
+        return false;
     }
 
     public Boolean isAtomEnabled() {

@@ -19,13 +19,11 @@ import static org.mockito.MockitoAnnotations.openMocks;
 import android.content.Context;
 import android.location.Location;
 import android.os.Looper;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
-import net.pubnative.lite.sdk.TopicManager;
 import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.models.request.Device;
@@ -60,8 +58,6 @@ public class OpenRTBAdRequestFactoryTest {
     @Mock
     private DisplayManager mockDisplayManager;
     @Mock
-    private TopicManager mockTopicManager;
-    @Mock
     private AdRequestFactory.Callback mockCallback;
     @Captor
     private ArgumentCaptor<AdRequest> adRequestCaptor;
@@ -73,7 +69,7 @@ public class OpenRTBAdRequestFactoryTest {
     public void setUp() {
         closeable = openMocks(this);
         // Use the injectable constructor for the class under test
-        subject = spy(new OpenRTBAdRequestFactory(mockDeviceInfo, mockLocationManager, mockUserDataManager, mockDisplayManager, mockTopicManager));
+        subject = spy(new OpenRTBAdRequestFactory(mockDeviceInfo, mockLocationManager, mockUserDataManager, mockDisplayManager));
         when(mockDeviceInfo.getOrientation()).thenReturn(DeviceInfo.Orientation.PORTRAIT);
         when(mockDeviceInfo.getOSVersion()).thenReturn("12");
         when(mockDeviceInfo.getUserAgent()).thenReturn("Test User Agent");
@@ -147,20 +143,14 @@ public class OpenRTBAdRequestFactoryTest {
     }
 
     @Test
-    public void getUser_withTopics_populatesUserData() {
+    public void getUser_populatesYearOfBirth() {
         try (MockedStatic<HyBid> mockedHyBid = Mockito.mockStatic(HyBid.class)) {
             mockedHyBid.when(HyBid::getAge).thenReturn("31");
-
-            List<Topic> topics = List.of(new Topic(1, 1L, "v1"));
-            when(mockTopicManager.getTopics()).thenReturn(topics);
 
             User user = subject.getUser();
 
             // 2026 (current year from context) - 31 = 1995
             assertEquals(Integer.valueOf(1995), user.getYearOfBirth());
-            assertNotNull(user.getData());
-            assertEquals(1, user.getData().size());
-            assertEquals("1", user.getData().get(0).getSegment().get(0).getId());
         }
     }
 
@@ -349,66 +339,16 @@ public class OpenRTBAdRequestFactoryTest {
     }
 
     // =============================================================================================
-    // getUserData Tests for Topics
+    // getUserData Tests
     // =============================================================================================
 
     @Test
-    public void getUser_withNullTopics_hasEmptyData() {
+    public void getUser_hasEmptyData() {
         try (MockedStatic<HyBid> mockedHyBid = Mockito.mockStatic(HyBid.class)) {
             mockedHyBid.when(HyBid::getAge).thenReturn(null);
             mockedHyBid.when(HyBid::getGender).thenReturn(null);
 
-            when(mockTopicManager.getTopics()).thenReturn(null);
-
             User user = subject.getUser();
-
-            assertNotNull(user);
-            assertTrue(user.getData().isEmpty());
-        }
-    }
-
-    @Test
-    public void getUser_withEmptyTopics_hasEmptyData() {
-        try (MockedStatic<HyBid> mockedHyBid = Mockito.mockStatic(HyBid.class)) {
-            mockedHyBid.when(HyBid::getAge).thenReturn(null);
-            mockedHyBid.when(HyBid::getGender).thenReturn(null);
-
-            when(mockTopicManager.getTopics()).thenReturn(new ArrayList<>());
-
-            User user = subject.getUser();
-
-            assertNotNull(user);
-            assertTrue(user.getData().isEmpty());
-        }
-    }
-
-    @Test
-    public void getUser_withMultipleTaxonomyVersions_groupsCorrectly() {
-        try (MockedStatic<HyBid> mockedHyBid = Mockito.mockStatic(HyBid.class)) {
-            mockedHyBid.when(HyBid::getAge).thenReturn(null);
-
-            List<Topic> topics = new ArrayList<>();
-            topics.add(new Topic(1, 1L, "v1"));
-            topics.add(new Topic(2, 1L, "v1"));
-            topics.add(new Topic(3, 2L, "v2"));
-            when(mockTopicManager.getTopics()).thenReturn(topics);
-
-            User user = subject.getUser();
-
-            assertNotNull(user.getData());
-            assertEquals(2, user.getData().size()); // Two taxonomy versions
-        }
-    }
-
-    @Test
-    public void getUser_withNullTopicManager_doesNotCrash() {
-        OpenRTBAdRequestFactory factoryWithNullTopicManager = new OpenRTBAdRequestFactory(
-                mockDeviceInfo, mockLocationManager, mockUserDataManager, mockDisplayManager, null);
-
-        try (MockedStatic<HyBid> mockedHyBid = Mockito.mockStatic(HyBid.class)) {
-            mockedHyBid.when(HyBid::getAge).thenReturn(null);
-
-            User user = factoryWithNullTopicManager.getUser();
 
             assertNotNull(user);
             assertTrue(user.getData().isEmpty());

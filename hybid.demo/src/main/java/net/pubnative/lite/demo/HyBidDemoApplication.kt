@@ -88,7 +88,6 @@ class HyBidDemoApplication : MultiDexApplication() {
             settings.hybidSettings!!.coppa?.let { HyBid.setCoppaEnabled(it) }
             settings.hybidSettings!!.age?.let { HyBid.setAge(it) }
             settings.hybidSettings!!.gender?.let { HyBid.setGender(it) }
-            settings.hybidSettings!!.topicsApi?.let { HyBid.setTopicsApiEnabled(it) }
             settings.hybidSettings!!.reportingEnabled?.let { HyBid.setReportingEnabled(it) }
 
             settings.hybidSettings!!.keywords?.let {
@@ -251,7 +250,6 @@ class HyBidDemoApplication : MultiDexApplication() {
                 .zoneIds(Constants.ZONE_ID_LIST).apiUrl(BuildConfig.BASE_URL).age("")
                 .keywords(ArrayList()).browserPriorities(ArrayList()).coppa(Constants.COPPA_DEFAULT)
                 .testMode(Constants.TEST_MODE_DEFAULT).gender("")
-                .topicsApi(Constants.TOPICS_API_DEFAULT)
                 .reportingEnabled(Constants.REPORTING_ENABLED_DEFAULT)
                 .build()
 

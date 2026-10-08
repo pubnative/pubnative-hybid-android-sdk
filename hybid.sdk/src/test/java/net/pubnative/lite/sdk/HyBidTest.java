@@ -16,6 +16,8 @@ import org.robolectric.RobolectricTestRunner;
 
 import static org.mockito.Mockito.when;
 
+import android.util.Base64;
+
 @RunWith(RobolectricTestRunner.class)
 public class HyBidTest {
 
@@ -190,21 +192,21 @@ public class HyBidTest {
     }
 
     @Test
-    public void testSetAndGetTopicsApiEnabled() {
-        // Save original value
-        Boolean originalValue = HyBid.isTopicsApiEnabled();
+    @SuppressWarnings("deprecation")
+    public void testTopicsApiEnabledIsNoOpAfterRemoval() {
+        // The AdServices Topics API integration was removed.
+        // The setter is a no-op and the getter always reports false, regardless of what is set.
+        HyBid.setTopicsApiEnabled(true);
+        Assert.assertFalse(HyBid.isTopicsApiEnabled());
 
-        try {
-            // Test setting and getting Topics API enabled
-            HyBid.setTopicsApiEnabled(true);
-            Assert.assertTrue(HyBid.isTopicsApiEnabled());
+        HyBid.setTopicsApiEnabled(false);
+        Assert.assertFalse(HyBid.isTopicsApiEnabled());
+    }
 
-            HyBid.setTopicsApiEnabled(false);
-            Assert.assertFalse(HyBid.isTopicsApiEnabled());
-        } finally {
-            // Restore original value
-            HyBid.setTopicsApiEnabled(originalValue);
-        }
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testGetTopicManagerReturnsNullAfterRemoval() {
+        Assert.assertNull(HyBid.getTopicManager());
     }
 
     @Test
@@ -328,6 +330,56 @@ public class HyBidTest {
         String signalData = HyBid.getCustomRequestSignalData();
         // We can only verify it doesn't throw an exception and returns something non-null
         Assert.assertNotNull(signalData);
+    }
+
+    @Test
+    public void testGetCustomRequestSignalDataWithMediationAdUnitId() {
+        String signalData = HyBid.getCustomRequestSignalData(null, "m", "max_ad_unit_123");
+
+        Assert.assertNotNull(signalData);
+        Assert.assertTrue(signalData.contains("mediationadunitid=max_ad_unit_123"));
+    }
+
+    @Test
+    public void testGetCustomRequestSignalDataWithNullMediationAdUnitId() {
+        String signalData = HyBid.getCustomRequestSignalData(null, "m", null);
+
+        Assert.assertNotNull(signalData);
+        Assert.assertFalse(signalData.contains("mediationadunitid"));
+    }
+
+    @Test
+    public void testGetCustomRequestSignalDataWithBlankMediationAdUnitId() {
+        String signalData = HyBid.getCustomRequestSignalData(null, "m", "   ");
+
+        Assert.assertNotNull(signalData);
+        Assert.assertFalse(signalData.contains("mediationadunitid"));
+    }
+
+    @Test
+    public void testGetCustomRequestSignalDataWithoutAdUnitIdOverloadsOmitTheParameter() {
+        // The overloads that predate VMA-1607 must keep behaving exactly as before.
+        Assert.assertFalse(HyBid.getCustomRequestSignalData().contains("mediationadunitid"));
+        Assert.assertFalse(HyBid.getCustomRequestSignalData("m").contains("mediationadunitid"));
+        Assert.assertFalse(HyBid.getCustomRequestSignalData(null, "m").contains("mediationadunitid"));
+    }
+
+    @Test
+    public void testGetEncodedCustomRequestSignalDataWithMediationAdUnitId() {
+        String encoded = HyBid.getEncodedCustomRequestSignalData(null, "m", "max_ad_unit_123");
+
+        Assert.assertNotNull(encoded);
+        String decoded = new String(Base64.decode(encoded, Base64.URL_SAFE | Base64.NO_WRAP));
+        Assert.assertTrue(decoded.contains("mediationadunitid=max_ad_unit_123"));
+    }
+
+    @Test
+    public void testGetEncodedCustomRequestSignalDataWithNullMediationAdUnitId() {
+        String encoded = HyBid.getEncodedCustomRequestSignalData(null, "m", null);
+
+        Assert.assertNotNull(encoded);
+        String decoded = new String(Base64.decode(encoded, Base64.URL_SAFE | Base64.NO_WRAP));
+        Assert.assertFalse(decoded.contains("mediationadunitid"));
     }
 
     @Test

@@ -5,8 +5,10 @@
 package net.pubnative.lite.sdk.utils;
 
 import android.content.Context;
+import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.DisplayCutout;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -51,12 +53,25 @@ public class ViewUtils {
         return px / ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
     }
 
+    /**
+     * Pads the container by the system bar insets. Left and right also cover the display cutout, so
+     * full-screen ad controls stay visible in both landscape directions.
+     */
     public static void applyWindowInsets(View closeableContainer) {
         if (closeableContainer != null) {
             closeableContainer.setOnApplyWindowInsetsListener((v, insets) -> {
+                int leftInset = insets.getSystemWindowInsetLeft();
+                int rightInset = insets.getSystemWindowInsetRight();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    DisplayCutout cutout = insets.getDisplayCutout();
+                    if (cutout != null) {
+                        leftInset = Math.max(leftInset, cutout.getSafeInsetLeft());
+                        rightInset = Math.max(rightInset, cutout.getSafeInsetRight());
+                    }
+                }
                 int bottomInset = insets.getSystemWindowInsetBottom();
                 int topInsets = insets.getSystemWindowInsetTop();
-                closeableContainer.setPadding(0, topInsets, 0, bottomInset);
+                closeableContainer.setPadding(leftInset, topInsets, rightInset, bottomInset);
                 return insets;
             });
             closeableContainer.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);

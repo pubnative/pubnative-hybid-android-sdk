@@ -4,8 +4,6 @@
 //
 package net.pubnative.lite.sdk.network;
 
-import net.pubnative.lite.sdk.utils.Logger;
-
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -55,12 +53,6 @@ public class ApiExecutor implements Executor {
 
     @Override
     public void execute(Runnable runnable) {
-        getExecutor().execute(() -> {
-            try {
-                runnable.run();
-            } catch (Exception exception) {
-                Logger.e(TAG, "Uncaught exception in ApiExecutor task", exception);
-            }
-        });
+        getExecutor().execute(() -> ExecutorTaskGuard.run(TAG, runnable));
     }
 }

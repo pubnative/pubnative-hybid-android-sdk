@@ -110,6 +110,11 @@ public abstract class RewardedViewModel extends BaseViewModel implements PNAPICo
                     mListener.setCloseSize(REDUCED_CLOSE_BUTTON_SIZE);
                     mListener.setSkipSize(REDUCED_CLOSE_BUTTON_SIZE);
                 }
+                // Applies regardless of the reduced icon mode: a 20dp button still gets the
+                // configured tap area.
+                mListener.setCloseTouchSize(getTouchSize());
+                mListener.setCloseInitialTouchSize(getInitialTouchSize());
+                mListener.setCloseClickStateProvider(this::hasImpressionBeenClicked);
                 FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
                 params.gravity = Gravity.CENTER;
                 mListener.hideProgressBar();
@@ -217,6 +222,11 @@ public abstract class RewardedViewModel extends BaseViewModel implements PNAPICo
 
     public boolean isRewardEligible() {
         return isAdSkippable();
+    }
+
+    @Override
+    protected Ad getAd() {
+        return mAd;
     }
 
     protected final CloseableContainer.OnCloseListener mCloseListener = this::closeButtonClicked;

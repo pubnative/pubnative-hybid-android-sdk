@@ -166,7 +166,8 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
         }
 
         if (htmlAd.shouldInitEndCardView()) {
-            initEndCardView(htmlAd.hasReducedCloseSize());
+            initEndCardView(htmlAd.hasReducedCloseSize(), htmlAd.getCloseButtonTouchSize(),
+                    htmlAd.getCloseButtonInitialTouchSize());
         }
 
         if (htmlAd.isCustomCTAEnabled()) {
@@ -301,6 +302,9 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
 
     private final boolean isInterstitial;
 
+    // Full-screen ad hosted in a banner-type view (e.g. HyBid interstitial / rewarded activities).
+    private final boolean isFullScreenPlacement;
+
     @MRAIDState
     protected int state;
 
@@ -373,6 +377,10 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
     private HyBidEndCardView mEndCardView;
 
     public MRAIDView(Context context, String baseUrl, String data, Boolean showTimerBeforeEndCard, String[] supportedNativeFeatures, MRAIDViewListener listener, MRAIDNativeFeatureListener nativeFeatureListener, ViewGroup contentInfo, boolean isInterstitial, boolean isExpandEnabled) {
+        this(context, baseUrl, data, showTimerBeforeEndCard, supportedNativeFeatures, listener, nativeFeatureListener, contentInfo, isInterstitial, isExpandEnabled, false);
+    }
+
+    public MRAIDView(Context context, String baseUrl, String data, Boolean showTimerBeforeEndCard, String[] supportedNativeFeatures, MRAIDViewListener listener, MRAIDNativeFeatureListener nativeFeatureListener, ViewGroup contentInfo, boolean isInterstitial, boolean isExpandEnabled, boolean isFullScreenPlacement) {
         super(context);
         this.context = context;
         if (context instanceof Activity) {
@@ -382,6 +390,7 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
         this.baseUrl = baseUrl == null || baseUrl.isEmpty() ? "https://example.com" : baseUrl;
         this.isInterstitial = isInterstitial;
         this.isExpandEnabled = isExpandEnabled;
+        this.isFullScreenPlacement = isFullScreenPlacement;
 
         this.contentInfo = contentInfo;
 
@@ -526,10 +535,13 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
         }
     }
 
-    private void initEndCardView(boolean hasReducedCloseSize) {
+    private void initEndCardView(boolean hasReducedCloseSize, int touchSize, int initialTouchSize) {
         mEndCardView = new HyBidEndCardView(context, hasReducedCloseSize, null);
         mEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         mEndCardView.setVisibility(View.GONE);
+        mEndCardView.setTouchSize(touchSize);
+        mEndCardView.setInitialTouchSize(initialTouchSize);
+        mEndCardView.setClickStateProvider(() -> listener != null && listener.hasImpressionBeenClicked());
         addView(mEndCardView);
     }
 
@@ -1841,6 +1853,13 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
         }
     }
 
+    String getPlacementType() {
+        if (isInterstitial || isFullScreenPlacement) {
+            return "interstitial";
+        }
+        return isExpandEnabled ? "inline" : "";
+    }
+
     private class MRAIDWebViewClient extends WebViewClient {
 
         @Override
@@ -1853,11 +1872,7 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
             MRAIDLog.d(MRAID_LOG_TAG, "onPageFinished: " + url);
             if (state == STATE_LOADING) {
                 isPageFinished = true;
-                if (isExpandEnabled) {
-                    injectJavaScript("mraid.setPlacementType('" + (isInterstitial ? "interstitial" : "inline") + "');");
-                } else {
-                    injectJavaScript("mraid.setPlacementType('" + (isInterstitial ? "interstitial" : "") + "');");
-                }
+                injectJavaScript("mraid.setPlacementType('" + getPlacementType() + "');");
                 setEnvironmentVariables();
                 setSupportedServices();
                 setLocation();

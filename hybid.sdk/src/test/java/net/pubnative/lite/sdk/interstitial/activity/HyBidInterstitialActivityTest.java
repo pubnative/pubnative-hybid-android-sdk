@@ -16,9 +16,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Insets;
+import android.graphics.Rect;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import androidx.core.view.DisplayCutoutCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
@@ -37,6 +39,7 @@ import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 29)
@@ -238,6 +241,69 @@ public class HyBidInterstitialActivityTest {
         Assert.assertEquals(0, container.getPaddingTop());
         Assert.assertEquals(0, container.getPaddingLeft());
         Assert.assertEquals(0, container.getPaddingRight());
+    }
+
+    @Test
+    public void applyWindowInsets_whenNavigationBarOnLeft_shouldSetLeftPadding() {
+        subject = Robolectric.buildActivity(TestInterstitialActivity.class, createTestIntent())
+                .create().get();
+        FrameLayout container = getContentView(subject);
+
+        dispatchInsets(container, Insets.of(132, 0, 0, 0), null);
+
+        Assert.assertEquals(132, container.getPaddingLeft());
+        Assert.assertEquals(0, container.getPaddingTop());
+        Assert.assertEquals(0, container.getPaddingRight());
+        Assert.assertEquals(0, container.getPaddingBottom());
+    }
+
+    @Test
+    public void applyWindowInsets_whenNavigationBarOnRight_shouldSetRightPadding() {
+        subject = Robolectric.buildActivity(TestInterstitialActivity.class, createTestIntent())
+                .create().get();
+        FrameLayout container = getContentView(subject);
+
+        dispatchInsets(container, Insets.of(0, 0, 132, 0), null);
+
+        Assert.assertEquals(0, container.getPaddingLeft());
+        Assert.assertEquals(0, container.getPaddingTop());
+        Assert.assertEquals(132, container.getPaddingRight());
+        Assert.assertEquals(0, container.getPaddingBottom());
+    }
+
+    @Test
+    public void applyWindowInsets_withSideDisplayCutout_shouldUseLargerInsetPerSide() {
+        subject = Robolectric.buildActivity(TestInterstitialActivity.class, createTestIntent())
+                .create().get();
+        FrameLayout container = getContentView(subject);
+
+        dispatchInsets(container, Insets.of(132, 0, 0, 0), new Rect(100, 0, 136, 0));
+
+        Assert.assertEquals(132, container.getPaddingLeft());
+        Assert.assertEquals(136, container.getPaddingRight());
+    }
+
+    @Test
+    public void applyWindowInsets_withTopDisplayCutout_shouldKeepTopAndBottomFromSystemBars() {
+        subject = Robolectric.buildActivity(TestInterstitialActivity.class, createTestIntent())
+                .create().get();
+        FrameLayout container = getContentView(subject);
+
+        dispatchInsets(container, Insets.of(0, 60, 0, 100), new Rect(0, 80, 0, 0));
+
+        Assert.assertEquals(0, container.getPaddingLeft());
+        Assert.assertEquals(60, container.getPaddingTop());
+        Assert.assertEquals(0, container.getPaddingRight());
+        Assert.assertEquals(100, container.getPaddingBottom());
+    }
+
+    private void dispatchInsets(FrameLayout container, Insets systemBars, Rect cutoutSafeInsets) {
+        WindowInsetsCompat.Builder builder = new WindowInsetsCompat.Builder()
+                .setInsets(WindowInsetsCompat.Type.systemBars(), androidx.core.graphics.Insets.wrap(systemBars));
+        if (cutoutSafeInsets != null) {
+            builder.setDisplayCutout(new DisplayCutoutCompat(cutoutSafeInsets, Collections.emptyList()));
+        }
+        container.dispatchApplyWindowInsets(new android.view.WindowInsets(builder.build().toWindowInsets()));
     }
 
     @Test

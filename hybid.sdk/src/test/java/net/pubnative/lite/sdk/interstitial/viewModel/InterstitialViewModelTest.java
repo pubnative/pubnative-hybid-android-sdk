@@ -15,8 +15,11 @@ import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.interstitial.HyBidInterstitialBroadcastReceiver;
 import net.pubnative.lite.sdk.interstitial.InterstitialActivityInteractor;
 import net.pubnative.lite.sdk.models.Ad;
-import net.pubnative.lite.sdk.models.AdExperience;
+import net.pubnative.lite.sdk.utils.TouchSizeManager;
 import net.pubnative.lite.sdk.utils.UrlHandler;
+import net.pubnative.lite.sdk.views.TouchAreaDelegate;
+
+import org.mockito.ArgumentCaptor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -192,6 +195,108 @@ public class InterstitialViewModelTest {
     @Test
     public void testIsAdSkippable_defaultFalse() {
         assertFalse(viewModel.isAdSkippable());
+    }
+
+    @Test
+    public void getTouchSize_delegatesToAd() {
+        when(mockAd.getCloseButtonTouchSize()).thenReturn(60);
+
+        assertEquals(60, viewModel.getTouchSize());
+    }
+
+    @Test
+    public void getInitialTouchSize_delegatesToAd() {
+        when(mockAd.getCloseButtonInitialTouchSize()).thenReturn(10);
+
+        assertEquals(10, viewModel.getInitialTouchSize());
+    }
+
+    @Test
+    public void touchSizes_withNullAd_returnNoGrowth() {
+        viewModel.mAd = null;
+
+        assertEquals(TouchSizeManager.NO_GROWTH, viewModel.getTouchSize());
+        assertEquals(TouchSizeManager.NO_GROWTH, viewModel.getInitialTouchSize());
+    }
+
+    @Test
+    public void hasImpressionBeenClicked_reflectsAdState() {
+        when(mockAd.isImpressionClicked()).thenReturn(false);
+        assertFalse(viewModel.hasImpressionBeenClicked());
+
+        when(mockAd.isImpressionClicked()).thenReturn(true);
+        assertTrue(viewModel.hasImpressionBeenClicked());
+    }
+
+    @Test
+    public void hasImpressionBeenClicked_withNullAd_returnsFalse() {
+        viewModel.mAd = null;
+
+        assertFalse(viewModel.hasImpressionBeenClicked());
+    }
+
+    @Test
+    public void markImpressionClicked_setsClickedOnAd() {
+        viewModel.markImpressionClicked();
+
+        verify(mockAd).setImpressionClicked();
+    }
+
+    @Test
+    public void markImpressionClicked_withNullAd_isNoOp() {
+        viewModel.mAd = null;
+
+        viewModel.markImpressionClicked(); // must not throw
+    }
+
+    @Test
+    public void processInterstitialAd_validAd_appliesTouchSizeToCloseControl() {
+        when(mockAd.getCloseButtonTouchSize()).thenReturn(60);
+        when(mockAd.getCloseButtonInitialTouchSize()).thenReturn(10);
+        InterstitialViewModel spyVm = spy(viewModel);
+        doReturn(mockView).when(spyVm).getAdView();
+        doReturn(false).when(spyVm).hasReducedCloseSize();
+
+        spyVm.processInterstitialAd();
+
+        verify(mockListener).setCloseTouchSize(60);
+        verify(mockListener).setCloseInitialTouchSize(10);
+        verify(mockListener).setCloseClickStateProvider(any());
+    }
+
+    @Test
+    public void processInterstitialAd_wiresProviderThatReflectsAdClickState() {
+        InterstitialViewModel spyVm = spy(viewModel);
+        doReturn(mockView).when(spyVm).getAdView();
+        doReturn(false).when(spyVm).hasReducedCloseSize();
+
+        spyVm.processInterstitialAd();
+
+        ArgumentCaptor<TouchAreaDelegate.ClickStateProvider> captor =
+                ArgumentCaptor.forClass(TouchAreaDelegate.ClickStateProvider.class);
+        verify(mockListener).setCloseClickStateProvider(captor.capture());
+        TouchAreaDelegate.ClickStateProvider provider = captor.getValue();
+
+        // The provider must report the ad's live click state, not a fixed value.
+        when(mockAd.isImpressionClicked()).thenReturn(false);
+        assertFalse(provider.hasImpressionBeenClicked());
+        when(mockAd.isImpressionClicked()).thenReturn(true);
+        assertTrue(provider.hasImpressionBeenClicked());
+    }
+
+    @Test
+    public void processInterstitialAd_reducedCloseSize_stillAppliesTouchSize() {
+        when(mockAd.getCloseButtonTouchSize()).thenReturn(60);
+        InterstitialViewModel spyVm = spy(viewModel);
+        doReturn(mockView).when(spyVm).getAdView();
+        doReturn(true).when(spyVm).hasReducedCloseSize();
+
+        spyVm.processInterstitialAd();
+
+        verify(mockListener).setCloseSize(20);
+        verify(mockListener).setSkipSize(20);
+        // The configured tap area still applies on top of the reduced 20dp icon.
+        verify(mockListener).setCloseTouchSize(60);
     }
 
     @Test

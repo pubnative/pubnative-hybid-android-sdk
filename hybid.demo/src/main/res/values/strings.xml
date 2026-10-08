@@ -315,7 +315,6 @@
     <string name="general" translatable="false">General</string>
     <string name="fullscreen_video" translatable="false">Fullscreen video</string>
     <string name="check_location_updates" translatable="false">Location Updates</string>
-    <string name="check_topics_api" translatable="false">Topics API</string>
     <string name="check_reporting" translatable="false">Reporting enabled</string>
     <string name="disable_ad_customization" formatted="false" translatable="false">Disable Ad Customization</string>
     <string name="enable_ad_customization" formatted="false" translatable="false">Enable Ad Customization</string>

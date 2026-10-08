@@ -35,7 +35,6 @@ import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.models.PNAdRequest;
 import net.pubnative.lite.sdk.models.PNAdRequestFactory;
 import net.pubnative.lite.sdk.models.request.OpenRTBAdRequest;
-import net.pubnative.lite.sdk.utils.AdTopicsAPIManager;
 import net.pubnative.lite.sdk.utils.AtomManager;
 import net.pubnative.lite.sdk.utils.CheckUtils;
 import net.pubnative.lite.sdk.utils.HeaderBiddingUtils;
@@ -291,7 +290,6 @@ public class RequestManager {
         // Use sessionId as cache key
         final String sessionId = ad.getSessionId();
         mAdCache.put(sessionId, ad);
-        AdTopicsAPIManager.setTopicsAPIEnabled(mApiClient.getContext(), ad);
 //        AtomManager.setAtomEnabled(mApiClient.getContext(), ad);
 
         switch (ad.assetgroupid) {

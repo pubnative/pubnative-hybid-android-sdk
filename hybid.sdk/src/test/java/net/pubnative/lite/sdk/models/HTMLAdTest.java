@@ -21,6 +21,7 @@ import net.pubnative.lite.sdk.utils.AdCustomCTAManager;
 import net.pubnative.lite.sdk.utils.AdEndCardManager;
 import net.pubnative.lite.sdk.utils.ClickThroughTimerManager;
 import net.pubnative.lite.sdk.utils.SkipOffsetManager;
+import net.pubnative.lite.sdk.utils.TouchSizeManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -442,5 +443,22 @@ public class HTMLAdTest {
         }
     }
 
+    @Test
+    public void closeButtonTouchSizes_withAd_delegateToAd() {
+        when(mockAd.getCloseButtonTouchSize()).thenReturn(60);
+        when(mockAd.getCloseButtonInitialTouchSize()).thenReturn(10);
+        HTMLAd htmlAd = new HTMLAd(mockContext, mockAd, HTMLAd.AdType.INTERSTITIAL);
+
+        assertEquals(60, htmlAd.getCloseButtonTouchSize());
+        assertEquals(10, htmlAd.getCloseButtonInitialTouchSize());
+    }
+
+    @Test
+    public void closeButtonTouchSizes_withNullAd_returnNoGrowth() {
+        HTMLAd htmlAd = new HTMLAd(mockContext, null, HTMLAd.AdType.INTERSTITIAL);
+
+        assertEquals(TouchSizeManager.NO_GROWTH, htmlAd.getCloseButtonTouchSize());
+        assertEquals(TouchSizeManager.NO_GROWTH, htmlAd.getCloseButtonInitialTouchSize());
+    }
 
 }

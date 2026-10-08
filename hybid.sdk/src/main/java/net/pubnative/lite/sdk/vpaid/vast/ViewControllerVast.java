@@ -38,11 +38,13 @@ import net.pubnative.lite.sdk.models.LearnMoreLocation;
 import net.pubnative.lite.sdk.models.LearnMoreSize;
 import net.pubnative.lite.sdk.models.SkipOffset;
 import net.pubnative.lite.sdk.utils.Logger;
+import net.pubnative.lite.sdk.utils.TouchSizeManager;
 import net.pubnative.lite.sdk.utils.ScreenDimensionsUtils;
 import net.pubnative.lite.sdk.utils.SkipOffsetManager;
 import net.pubnative.lite.sdk.utils.ViewUtils;
 import net.pubnative.lite.sdk.viewability.FriendlyObstructionReasonConstants;
 import net.pubnative.lite.sdk.viewability.baseom.BaseFriendlyObstructionPurpose;
+import net.pubnative.lite.sdk.views.TouchAreaDelegate;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
 import net.pubnative.lite.sdk.views.cta.HyBidCTAView;
 import net.pubnative.lite.sdk.views.endcard.HyBidEndCardView;
@@ -104,6 +106,9 @@ public class ViewControllerVast implements View.OnClickListener {
     private Integer mCustomCTADelay = 0;
     private final Handler mUiHandler = new Handler(Looper.getMainLooper());
     private boolean mIsDestroyed = false;
+    private int mTouchSize = TouchSizeManager.NO_GROWTH;
+    private int mInitialTouchSize = TouchSizeManager.NO_GROWTH;
+    private TouchAreaDelegate.ClickStateProvider mClickStateProvider = null;
 
     private View.OnLayoutChangeListener mVideoPlayerLayoutChangeListener;
     private View.OnLayoutChangeListener mEndCardLayoutChangeListener;
@@ -144,6 +149,23 @@ public class ViewControllerVast implements View.OnClickListener {
         mHasReducedCloseButton = reducedCloseButton;
         interactor = HyBidActivityInteractor.getInstance();
         mReplayListener = replayListener;
+    }
+
+    /**
+     * Sets the tappable size, in dp, for the end card close control. Must be called before
+     * {@link #buildVideoAdView(VideoAdView)}. Hit testing only: every control keeps the size,
+     * position and appearance it has today.
+     */
+    public void setTouchSize(int touchSize) {
+        mTouchSize = touchSize;
+    }
+
+    public void setInitialTouchSize(int initialTouchSize) {
+        mInitialTouchSize = initialTouchSize;
+    }
+
+    public void setClickStateProvider(TouchAreaDelegate.ClickStateProvider provider) {
+        mClickStateProvider = provider;
     }
 
     public void buildVideoAdView(VideoAdView bannerView) {
@@ -206,10 +228,16 @@ public class ViewControllerVast implements View.OnClickListener {
         mEndCardView = new HyBidEndCardView(context, mHasReducedCloseButton, mReplayListener);
         mEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         mEndCardView.setVisibility(View.GONE);
+        mEndCardView.setTouchSize(mTouchSize);
+        mEndCardView.setInitialTouchSize(mInitialTouchSize);
+        mEndCardView.setClickStateProvider(mClickStateProvider);
 
         mLastCustomEndCardView = new HyBidEndCardView(context, mHasReducedCloseButton, mReplayListener);
         mLastCustomEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         mLastCustomEndCardView.setVisibility(View.GONE);
+        mLastCustomEndCardView.setTouchSize(mTouchSize);
+        mLastCustomEndCardView.setInitialTouchSize(mInitialTouchSize);
+        mLastCustomEndCardView.setClickStateProvider(mClickStateProvider);
 
         mOpenUrlLayout.findViewById(R.id.openURL).setOnClickListener(this);
         mOpenUrlLayout.findViewById(R.id.openURLIcon).setOnClickListener(this);
@@ -260,6 +288,9 @@ public class ViewControllerVast implements View.OnClickListener {
         }
 
         mSkipView.setOnClickListener(this);
+
+        // The in-video skip control is left untouched, so it keeps today's behaviour (no grown tap
+        // area).
 
         mAdController.addViewabilityFriendlyObstruction(mControlsLayout, BaseFriendlyObstructionPurpose.VIDEO_CONTROLS, FriendlyObstructionReasonConstants.VIDEO_CONTROLS_OBSTRUCTION_REASON);
 

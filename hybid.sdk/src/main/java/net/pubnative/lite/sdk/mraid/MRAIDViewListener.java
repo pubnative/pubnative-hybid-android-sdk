@@ -43,6 +43,11 @@ public interface MRAIDViewListener {
 
     void onCustomEndCardClicked();
 
+    /** True once any click has been registered for this impression. */
+    default boolean hasImpressionBeenClicked() {
+        return false;
+    }
+
     void onCustomCTAShow();
 
     void onCustomCTAClick();

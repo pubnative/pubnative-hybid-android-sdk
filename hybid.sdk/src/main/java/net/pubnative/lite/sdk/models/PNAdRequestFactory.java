@@ -12,7 +12,6 @@ import android.util.Base64;
 import net.pubnative.lite.sdk.BuildConfig;
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
-import net.pubnative.lite.sdk.TopicManager;
 import net.pubnative.lite.sdk.UserDataManager;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.models.bidstream.BidstreamConstants;
@@ -52,21 +51,19 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
     private HyBidLocationManager mLocationManager;
     private UserDataManager mUserDataManager;
     private final SdkManager mSdkManager;
-    private final TopicManager mTopicManager;
     private IntegrationType mIntegrationType = IntegrationType.HEADER_BIDDING;
     private String mMediationVendor;
     private boolean mIsRewarded;
 
     public PNAdRequestFactory() {
-        this(HyBid.getDeviceInfo(), HyBid.getLocationManager(), HyBid.getUserDataManager(), HyBid.getSdkManager(), HyBid.getTopicManager());
+        this(HyBid.getDeviceInfo(), HyBid.getLocationManager(), HyBid.getUserDataManager(), HyBid.getSdkManager());
     }
 
-    PNAdRequestFactory(DeviceInfo deviceInfo, HyBidLocationManager locationManager, UserDataManager userDataManager, SdkManager sdkManager, TopicManager topicManager) {
+    PNAdRequestFactory(DeviceInfo deviceInfo, HyBidLocationManager locationManager, UserDataManager userDataManager, SdkManager sdkManager) {
         mDeviceInfo = deviceInfo;
         mLocationManager = locationManager;
         mUserDataManager = userDataManager;
         mSdkManager = sdkManager;
-        mTopicManager = topicManager;
     }
 
     @Override
@@ -121,13 +118,23 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
         return buildRequest(null, appToken, zoneid, adSize, advertisingId, limitTracking, integrationType, mediationVendor, impDepth, paAvailable);
     }
 
+    /**
+     * Same as {@link #buildRequest(Context, String, String, AdSize, String, boolean, IntegrationType, String, Integer, boolean)},
+     * additionally tagging the request with the ad unit ID of the mediation placement it is built for.
+     */
+    public AdRequest buildRequestForSignalData(Context context, final String appToken, final String zoneid, AdSize adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType, final String mediationVendor, Integer impDepth, boolean paAvailable, final String mediationAdUnitId) {
+        AdRequest adRequest = buildRequest(context, appToken, zoneid, adSize, advertisingId, limitTracking, integrationType, mediationVendor, impDepth, paAvailable);
+        ((PNAdRequest) adRequest).mediationAdUnitId = trimMediationAdUnitId(mediationAdUnitId);
+        return adRequest;
+    }
+
     public AdRequest buildRequest(Context context, final String appToken, final String zoneid, AdSize adSize, final String advertisingId, final boolean limitTracking, final IntegrationType integrationType, final String mediationVendor, Integer impDepth, boolean paAvailable) {
         if (mUserDataManager == null && context != null) {
             mUserDataManager = new UserDataManager(context);
         }
 
         if (mDeviceInfo == null && context != null) {
-            mDeviceInfo = new DeviceInfo(context);
+            mDeviceInfo = DeviceInfo.createForSynchronousRequest(context);
         }
 
         if (mLocationManager == null && context != null) {
@@ -348,11 +355,15 @@ public class PNAdRequestFactory extends BaseRequestFactory implements AdRequestF
         }
         adRequest.sessionduration = new HyBidTimeUtils().getSeconds(calculateSessionDuration());
 
-        if (mTopicManager != null) {
-            adRequest.topics = mTopicManager.getTopics();
-        }
-
         return adRequest;
+    }
+
+    static String trimMediationAdUnitId(String mediationAdUnitId) {
+        if (mediationAdUnitId == null) {
+            return null;
+        }
+        String trimmed = mediationAdUnitId.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 
     private String getAgeOfApp() {

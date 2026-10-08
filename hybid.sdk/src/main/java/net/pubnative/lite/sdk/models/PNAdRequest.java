@@ -60,4 +60,5 @@ public class PNAdRequest extends AdRequest {
     public String ae;
     public String vg;
     public String hver;
+    public String mediationAdUnitId;
 }

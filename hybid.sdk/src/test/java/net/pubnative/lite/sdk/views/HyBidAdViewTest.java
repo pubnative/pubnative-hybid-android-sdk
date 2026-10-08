@@ -6,6 +6,7 @@ package net.pubnative.lite.sdk.views;
 
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -31,6 +32,7 @@ import net.pubnative.lite.sdk.api.RequestManager;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
+import net.pubnative.lite.sdk.utils.SignalDataProcessor;
 import net.pubnative.lite.sdk.utils.sdkmanager.SdkManager;
 
 import org.hamcrest.MatcherAssert;
@@ -192,6 +194,213 @@ public class HyBidAdViewTest {
         HyBidAdView adViewSpy = spy(new HyBidAdView(activity));
         adViewSpy.onAdLoaded(mockPresenter, mockBannerView);
         verify(adViewSpy).setupAdView(mockBannerView);
+    }
+
+    @Test
+    public void renderCustomMarkup_withAutoShowDisabled_invokesOnAdLoaded_whenPresenterCompletes() {
+        HyBidAdView adViewSpy = spy(new HyBidAdView(activity));
+        adViewSpy.setAutoShowOnLoad(false);
+
+        AdPresenter capturingPresenter = mock(AdPresenter.class);
+        doAnswer(invocation -> {
+            adViewSpy.onAdLoaded(capturingPresenter, mockBannerView);
+            return null;
+        }).when(capturingPresenter).load();
+        doReturn(capturingPresenter).when(adViewSpy).createPresenter();
+        when(mockBannerView.getParent()).thenReturn(null);
+
+        adViewSpy.renderCustomMarkup("<html><body>test</body></html>", mockListener);
+
+        verify(mockListener).onAdLoaded();
+    }
+
+    @Test
+    public void renderAdSignalData_withAutoShowDisabled_invokesOnAdLoaded_whenPresenterCompletes() {
+        try (MockedConstruction<SignalDataProcessor> ignored = mockConstruction(SignalDataProcessor.class,
+                (mock, context) -> doAnswer(invocation -> {
+                    SignalDataProcessor.Listener listener = invocation.getArgument(1);
+                    listener.onProcessed(new Ad(10, "<html><body>test</body></html>", Ad.AdType.HTML));
+                    return null;
+                }).when(mock).processSignalData(any(), any()))) {
+
+            HyBidAdView adViewSpy = spy(new HyBidAdView(activity));
+            adViewSpy.setAutoShowOnLoad(false);
+
+            AdPresenter capturingPresenter = mock(AdPresenter.class);
+            doAnswer(invocation -> {
+                adViewSpy.onAdLoaded(capturingPresenter, mockBannerView);
+                return null;
+            }).when(capturingPresenter).load();
+            doReturn(capturingPresenter).when(adViewSpy).createPresenter();
+            when(mockBannerView.getParent()).thenReturn(null);
+
+            adViewSpy.renderAd("encoded-bid-response", mockListener);
+            Shadows.shadowOf(Looper.getMainLooper()).idle();
+
+            verify(mockListener).onAdLoaded();
+        }
+    }
+
+    @Test
+    public void onAdLoaded_withAutoShowDisabledAndNoRenderCompletionPending_doesNotInvokeLoadFinished() {
+        HyBidAdView adView = new HyBidAdView(activity);
+        adView.setAutoShowOnLoad(false);
+        adView.mListener = mockListener;
+
+        when(mockBannerView.getParent()).thenReturn(null);
+
+        adView.onAdLoaded(mockPresenter, mockBannerView);
+
+        verify(mockListener, org.mockito.Mockito.never()).onAdLoaded();
+    }
+
+    @Test
+    public void prepareAd_withSignalData_andAutoShowDisabled_invokesOnAdLoaded() {
+        try (MockedConstruction<SignalDataProcessor> ignored = mockConstruction(SignalDataProcessor.class,
+                (mock, context) -> doAnswer(invocation -> {
+                    SignalDataProcessor.Listener listener = invocation.getArgument(1);
+                    listener.onProcessed(new Ad(10, "<html><body>test</body></html>", Ad.AdType.HTML));
+                    return null;
+                }).when(mock).processSignalData(any(), any()))) {
+
+            HyBidAdView adViewSpy = spy(new HyBidAdView(activity));
+            adViewSpy.setAutoShowOnLoad(false);
+
+            AdPresenter capturingPresenter = mock(AdPresenter.class);
+            doAnswer(invocation -> {
+                adViewSpy.onAdLoaded(capturingPresenter, mockBannerView);
+                return null;
+            }).when(capturingPresenter).load();
+            doReturn(capturingPresenter).when(adViewSpy).createPresenter();
+            when(mockBannerView.getParent()).thenReturn(null);
+
+            // prepareAd(String, Listener) is the SDKBridge alias for renderAd(String, Listener).
+            adViewSpy.prepareAd("encoded-bid-response", mockListener);
+            Shadows.shadowOf(Looper.getMainLooper()).idle();
+
+            verify(mockListener).onAdLoaded();
+        }
+    }
+
+    @Test
+    public void prepareAd_withValidAd_andAutoShowDisabled_invokesOnAdLoaded() {
+        HyBidAdView adViewSpy = spy(new HyBidAdView(activity));
+        adViewSpy.setAutoShowOnLoad(false);
+
+        AdPresenter capturingPresenter = mock(AdPresenter.class);
+        doAnswer(invocation -> {
+            adViewSpy.onAdLoaded(capturingPresenter, mockBannerView);
+            return null;
+        }).when(capturingPresenter).load();
+        doReturn(capturingPresenter).when(adViewSpy).createPresenter();
+        when(mockBannerView.getParent()).thenReturn(null);
+
+        // prepareAd(Ad, Listener) is the SDKBridge alias for renderAd(Ad, Listener).
+        adViewSpy.prepareAd(new Ad(10, "<html><body>test</body></html>", Ad.AdType.HTML), mockListener);
+
+        verify(mockListener).onAdLoaded();
+    }
+
+    @Test
+    public void prepareAd_withNullAd_invokesOnAdLoadFailedOnProvidedListener() {
+        HyBidAdView adView = new HyBidAdView(activity);
+
+        // The provided listener must receive the failure even when the ad is null.
+        adView.prepareAd((Ad) null, mockListener);
+
+        verify(mockListener).onAdLoadFailed(any(HyBidError.class));
+    }
+
+    @Test
+    public void whenListenerStartsAnotherRenderInsideOnAdLoaded_secondRenderAlsoReportsOnAdLoaded() {
+        HyBidAdView adViewSpy = spy(new HyBidAdView(activity));
+        adViewSpy.setAutoShowOnLoad(false);
+        when(mockBannerView.getParent()).thenReturn(null);
+        mHyBid.when(HyBid::getVideoAdCache).thenReturn(mock(net.pubnative.lite.sdk.vpaid.VideoAdCache.class));
+
+        // 1st render's presenter reports loaded during load().
+        AdPresenter firstRenderPresenter = mock(AdPresenter.class);
+        doAnswer(invocation -> {
+            adViewSpy.onAdLoaded(firstRenderPresenter, mockBannerView);
+            return null;
+        }).when(firstRenderPresenter).load();
+
+        // 2nd render's presenter is completed manually below, after the first callback returns.
+        AdPresenter secondRenderPresenter = mock(AdPresenter.class);
+        doReturn(firstRenderPresenter, secondRenderPresenter).when(adViewSpy).createPresenter();
+
+        // Listener starts a 2nd render from inside onAdLoaded().
+        final boolean[] alreadyStartedSecondRender = {false};
+        doAnswer(invocation -> {
+            if (!alreadyStartedSecondRender[0]) {
+                alreadyStartedSecondRender[0] = true;
+                adViewSpy.renderCustomMarkup("<html><body>second</body></html>", mockListener);
+            }
+            return null;
+        }).when(mockListener).onAdLoaded();
+
+        adViewSpy.renderCustomMarkup("<html><body>first</body></html>", mockListener);
+        adViewSpy.onAdLoaded(secondRenderPresenter, mockBannerView);
+
+        verify(mockListener, org.mockito.Mockito.times(2)).onAdLoaded();
+    }
+
+    @Test
+    public void whenListenerStartsAnotherRenderInsideOnAdLoaded_doesNotStartTrackingOnTheNewPresenter() {
+        HyBidAdView adViewSpy = spy(new HyBidAdView(activity));
+        adViewSpy.setAutoShowOnLoad(false);
+        when(mockBannerView.getParent()).thenReturn(null);
+        mHyBid.when(HyBid::getVideoAdCache).thenReturn(mock(net.pubnative.lite.sdk.vpaid.VideoAdCache.class));
+
+        // 1st render's presenter reports loaded during load().
+        AdPresenter firstRenderPresenter = mock(AdPresenter.class);
+        doAnswer(invocation -> {
+            adViewSpy.onAdLoaded(firstRenderPresenter, mockBannerView);
+            return null;
+        }).when(firstRenderPresenter).load();
+
+        // 2nd render's presenter never completes here, so it only starts tracking if the outer flow does it.
+        AdPresenter secondRenderPresenter = mock(AdPresenter.class);
+        doReturn(firstRenderPresenter, secondRenderPresenter).when(adViewSpy).createPresenter();
+
+        // Listener starts a 2nd render from inside onAdLoaded(), swapping mPresenter.
+        final boolean[] alreadyStartedSecondRender = {false};
+        doAnswer(invocation -> {
+            if (!alreadyStartedSecondRender[0]) {
+                alreadyStartedSecondRender[0] = true;
+                adViewSpy.renderCustomMarkup("<html><body>second</body></html>", mockListener);
+            }
+            return null;
+        }).when(mockListener).onAdLoaded();
+
+        adViewSpy.renderCustomMarkup("<html><body>first</body></html>", mockListener);
+
+        // The 1st render's setupAdView must bail after the swap and not track the 2nd render's presenter.
+        verify(secondRenderPresenter, org.mockito.Mockito.never())
+                .startTracking(any(net.pubnative.lite.sdk.utils.HybidConsumer.class));
+    }
+
+    @Test
+    public void positionedBanner_withAutoShowDisabled_invokesOnAdLoaded() throws Exception {
+        HyBidAdView adViewSpy = spy(new HyBidAdView(activity));
+        adViewSpy.setAutoShowOnLoad(false);
+
+        // A non-null position routes setupAdView() into the show(View, Position) branch.
+        Field positionField = HyBidAdView.class.getDeclaredField("mPosition");
+        positionField.setAccessible(true);
+        positionField.set(adViewSpy, HyBidAdView.Position.TOP);
+
+        AdPresenter capturingPresenter = mock(AdPresenter.class);
+        doAnswer(invocation -> {
+            adViewSpy.onAdLoaded(capturingPresenter, mockBannerView);
+            return null;
+        }).when(capturingPresenter).load();
+        doReturn(capturingPresenter).when(adViewSpy).createPresenter();
+        when(mockBannerView.getParent()).thenReturn(null);
+
+        adViewSpy.renderCustomMarkup("<html><body>test</body></html>", mockListener);
+
+        verify(mockListener).onAdLoaded();
     }
 
     @Test

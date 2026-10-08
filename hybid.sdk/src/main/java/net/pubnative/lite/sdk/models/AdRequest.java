@@ -18,6 +18,12 @@ public class AdRequest extends JsonModel {
     public String appToken;
     public String zoneId;
     public Boolean isInterstitial = false;
+    /**
+     * @deprecated The AdServices Topics API integration has been removed.
+     * This field is no longer populated by the SDK nor sent in the ad request;
+     * it is retained only for source compatibility and will be removed in a future major release.
+     */
+    @Deprecated
     public List<Topic> topics;
     private final List<Signal> signals = new CopyOnWriteArrayList<>();
     public void addSignal(Signal signal){

@@ -30,7 +30,6 @@ public class Constants {
 
     public static final Boolean COPPA_DEFAULT = false;
     public static final Boolean TEST_MODE_DEFAULT = true;
-    public static final Boolean TOPICS_API_DEFAULT = false;
     public static final Boolean REPORTING_ENABLED_DEFAULT = true;
     public static final Boolean LOCATION_TRACKING_DEFAULT = true;
     public static final Boolean LOCATION_UPDATES_DEFAULT = false;

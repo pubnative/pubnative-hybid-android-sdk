@@ -1,3 +1,7 @@
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
 dependencyResolutionManagement {
     repositories {
         maven {
@@ -12,4 +16,5 @@ include ':hybid.demo',
         ':hybid.adapters.admob',
         ':hybid.adapters.ironsource',
         ':hybid.adapters.applovin',
-        ':hybid.sdk'
+        ':hybid.sdk',
+        ':ng.sdk'

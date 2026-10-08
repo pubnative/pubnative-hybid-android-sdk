@@ -31,36 +31,51 @@ public class HyBidPreferences {
         }
     }
 
+    /**
+     * @deprecated The AdServices Topics API integration has been removed.
+     * This method is now a no-op and will be removed in a future major release.
+     */
+    @Deprecated
     public void setTopicsAPIEnabled(Boolean isEnabled) {
-        if (sharedPreferences != null && isEnabled != null) {
-            editor = sharedPreferences.edit();
-            editor.putBoolean(Key.TOPICS_API_ENABLED, isEnabled);
-            editor.commit();
-        }
+        // No-op. Topics API integration has been removed.
     }
 
+    /**
+     * @deprecated The AdServices Topics API integration has been removed.
+     * Always returns {@code false}. This method will be removed in a future major release.
+     */
+    @Deprecated
     public Boolean isTopicsAPIEnabled() {
-        if (sharedPreferences == null) return null;
-        if (!sharedPreferences.contains(Key.TOPICS_API_ENABLED)) return null;
-        return sharedPreferences.getBoolean(Key.TOPICS_API_ENABLED, false);
+        return false;
     }
 
     public void setSessionTimeStamp(long milliseconds, OnDatabaseResetListener listener, TIMESTAMP timestamp) {
         long sessionTimestamp = getSessionTimeStamp();
         if (sessionTimestamp != 0L) {
-            if (new HyBidTimeUtils().IsStartingNewSession(milliseconds - sessionTimestamp)) {
+            long gap = milliseconds - sessionTimestamp;
+            if (gap < 0) {
+                // Stored anchor is in the future (clock moved back / bad RTC): re-anchor to now so rollovers resume.
+                // Without this the negative gap never rolls over and impdepth counts forever again.  No reset
+                if (sharedPreferences != null) {
+                    editor = sharedPreferences.edit();
+                    editor.putLong(Key.SESSION_TIMESTAMP, milliseconds);
+                    editor.apply();
+                }
+            } else if (new HyBidTimeUtils().IsStartingNewSession(gap)) {
                 if (listener != null) listener.onDatabaseReset();
                 if (sharedPreferences != null) {
                     editor = sharedPreferences.edit();
-                    editor.putLong(Key.SESSION_TIMESTAMP, sessionTimestamp);
-                    editor.commit();
+                    editor.putLong(Key.SESSION_TIMESTAMP, milliseconds);
+                    // apply() (not commit()) so this anchor write is queued after nukePrefs()'s reset on the shared background writer:
+                    // the list clear lands before the anchor and no synchronous disk write runs on the ad-request (main) thread.
+                    editor.apply();
                 }
             }
         } else {
             if (sharedPreferences != null) {
                 editor = sharedPreferences.edit();
                 editor.putLong(Key.SESSION_TIMESTAMP, milliseconds);
-                editor.commit();
+                editor.apply();
             }
         }
     }
@@ -82,6 +97,11 @@ public class HyBidPreferences {
         public static final String App_FIRST_INSTALLED = "app_first_installed";
         public static final String SESSION_TIMESTAMP = "session_timestamp";
         public static final String IS_App_FIRST_INSTALLED_TRACKED = "is_app_first_installed_tracked";
+        /**
+         * @deprecated The AdServices Topics API integration has been removed
+         * Retained as an inert constant for source/binary compatibility; will be removed in a future major release.
+         */
+        @Deprecated
         public static final String TOPICS_API_ENABLED = "topics_api_enabled";
     }
 

@@ -6,12 +6,7 @@ plugins {
     id 'jacoco'
 }
 
-def project_name = project.name
 def version_name = project.version
-if (branchName != null && buildNumber != null && branchName.toString() != "master" && !branchName.toString().contains("/")) {
-    version_name = "${version_name}-${branchName}"
-    project_name = "${project_name}.beta"
-}
 
 //==================================================================================================
 // ANDROID
@@ -24,7 +19,7 @@ android {
     defaultConfig {
         minSdkVersion min_android_api
         targetSdkVersion android_api
-        versionCode System.getenv("GITHUB_RUN_NUMBER") ? System.getenv("GITHUB_RUN_NUMBER").toInteger() : 1
+        versionCode buildNumber ? buildNumber : 1
         versionName version_name
     }
 
@@ -63,9 +58,7 @@ publishing {
             groupId project.group
             artifactId project.name
             version version_name
-            if (branchName.toString() == "master") {
-                artifact sourcesJar
-            }
+            artifact sourcesJar
             android.libraryVariants.all { variant ->
                 if (variant.buildType.name == "debug") return
                 artifact variant.outputs[0].packageLibrary // This is the aar library

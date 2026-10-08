@@ -63,10 +63,6 @@ class SettingsManager private constructor(context: Context) {
         preferences.edit().putBoolean(SETTINGS_KEY_LOCATION_UPDATES_ENABLED, enabled).apply()
     }
 
-    fun setTopicsApi(enabled: Boolean) {
-        preferences.edit().putBoolean(SETTINGS_KEY_TOPICS_API, enabled).apply()
-    }
-
     fun setReportingEnabled(enabled: Boolean) {
         preferences.edit().putBoolean(SETTINGS_KEY_REPORTING_ENABLED, enabled).apply()
     }
@@ -285,7 +281,6 @@ class SettingsManager private constructor(context: Context) {
                 it.testMode?.let { it1 -> editor.putBoolean(SETTINGS_KEY_TEST_MODE, it1) }
                 it.gender?.let { it1 -> editor.putString(SETTINGS_KEY_GENDER, it1) }
                 it.age?.let { it1 -> editor.putString(SETTINGS_KEY_AGE, it1) }
-                it.topicsApi?.let { it1 -> editor.putBoolean(SETTINGS_KEY_TOPICS_API, it1) }
                 it.reportingEnabled?.let { it1 ->
                     editor.putBoolean(
                         SETTINGS_KEY_REPORTING_ENABLED,
@@ -459,8 +454,6 @@ class SettingsManager private constructor(context: Context) {
             preferences.getStringSet(SETTINGS_KEY_BROWSER_PRIORITIES, emptySet())?.toList()!!
         val coppa = preferences.getBoolean(SETTINGS_KEY_COPPA, Constants.COPPA_DEFAULT)
         val testMode = preferences.getBoolean(SETTINGS_KEY_TEST_MODE, Constants.TEST_MODE_DEFAULT)
-        val topicsApi =
-            preferences.getBoolean(SETTINGS_KEY_TOPICS_API, Constants.TOPICS_API_DEFAULT)
         val reportingEnabled =
             preferences.getBoolean(
                 SETTINGS_KEY_REPORTING_ENABLED,
@@ -563,7 +556,7 @@ class SettingsManager private constructor(context: Context) {
         val hybidSettings =
             HyBidSettings.Builder().appToken(appToken).zoneIds(zoneIds).apiUrl(apiUrl).age(age)
                 .keywords(keywords).browserPriorities(browserPriorities).coppa(coppa)
-                .testMode(testMode).gender(gender).topicsApi(topicsApi)
+                .testMode(testMode).gender(gender)
                 .reportingEnabled(reportingEnabled).build()
 
         val adCustomizationSettings =

@@ -15,11 +15,13 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +38,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.BatteryManager;
 import android.os.Build;
+import android.os.PowerManager;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -56,6 +59,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -137,6 +141,9 @@ public class DeviceInfoTest {
         mDeviceInfo = new DeviceInfo(mMockContext);
 
         try {
+            // Drain the constructor's snapshot prime: it touches mMockContext off-thread,
+            // and Mockito stubbing is not thread-safe, so overlap corrupts unrelated stubs.
+            waitForBackgroundTasks();
             UserAgentProvider mockUap = mock(UserAgentProvider.class);
             setField(mDeviceInfo, "mUserAgentProvider", mockUap);
         } catch (Exception e) {
@@ -146,6 +153,12 @@ public class DeviceInfoTest {
 
     @After
     public void tearDown() {
+        // Drain before closing the static mocks: a signal refresh left in flight would
+        // otherwise touch mMockContext and Log after this test's Mockito session is gone.
+        try {
+            waitForBackgroundTasks();
+        } catch (Exception ignored) {
+        }
         if (mMockedTextUtils != null) {
             mMockedTextUtils.close();
         }
@@ -173,6 +186,53 @@ public class DeviceInfoTest {
         executorField.setAccessible(true);
         java.util.concurrent.ExecutorService executor = (java.util.concurrent.ExecutorService) executorField.get(null);
         executor.submit(() -> {}).get();
+    }
+
+    /**
+     * Re-reads the signal snapshot from the stubbed mocks and waits for it to land; the
+     * EMPTY reset zeroes fetchedAtMillis so the next read bypasses the TTL.
+     */
+    private void refreshSignals() throws Exception {
+        setAtomicReferenceField(mDeviceInfo, "mCachedDeviceSignals", DeviceInfo.DeviceSignals.EMPTY);
+        refreshSignalsInPlace();
+    }
+
+    /**
+     * Refreshes without first resetting the snapshot, so a seeded value stays in place until
+     * the refresh overwrites it. Use when the assertion must distinguish the two.
+     */
+    private void refreshSignalsInPlace() throws Exception {
+        Method fetch = DeviceInfo.class.getDeclaredMethod("fetchDeviceSignals");
+        fetch.setAccessible(true);
+        fetch.invoke(mDeviceInfo);
+        waitForBackgroundTasks();
+    }
+
+    private DeviceInfo.DeviceSignals signalsWithMemory(Integer freeMemoryMb, Integer totalMemoryMb) {
+        return new DeviceInfo.DeviceSignals(0, null, null, freeMemoryMb, totalMemoryMb, null, null,
+                0, System.currentTimeMillis());
+    }
+
+    private DeviceInfo.DeviceSignals signalsWithBatteryPercentage(Integer batteryPercentage) {
+        return new DeviceInfo.DeviceSignals(0, batteryPercentage, null, null, null, null, null,
+                0, System.currentTimeMillis());
+    }
+
+    private DeviceInfo.DeviceSignals signalsWithCharging(Integer charging) {
+        return new DeviceInfo.DeviceSignals(charging, null, null, null, null, null, null,
+                0, System.currentTimeMillis());
+    }
+
+    private DeviceInfo.DeviceSignals signalsWithAirplaneMode(Integer airplaneMode) {
+        return new DeviceInfo.DeviceSignals(0, null, null, null, null, null, null,
+                airplaneMode, System.currentTimeMillis());
+    }
+
+    private void assertBatteryBand(int percentage, int expectedBand) throws Exception {
+        setAtomicReferenceField(mDeviceInfo, "mCachedDeviceSignals",
+                signalsWithBatteryPercentage(percentage));
+        assertEquals("percentage " + percentage, Integer.valueOf(expectedBand),
+                mDeviceInfo.getBatteryLevel());
     }
 
     @Test
@@ -649,6 +709,7 @@ public class DeviceInfoTest {
         assertTrue("0".equals(soundSetting) || "1".equals(soundSetting));
     }
 
+    // Asserts the documented never-null contract; see androidTest/DeviceInfoTest.
     @Test
     public void isBatteryCharging_returnsValidValue() {
         Integer charging = mDeviceInfo.isBatteryCharging();
@@ -657,41 +718,112 @@ public class DeviceInfoTest {
     }
 
     @Test
-    public void isBatteryCharging_whenCharging_returnsOne() {
+    public void isBatteryCharging_whenCharging_returnsOne() throws Exception {
         Intent chargingIntent = mock(Intent.class);
         when(chargingIntent.getIntExtra(BatteryManager.EXTRA_STATUS, -1))
                 .thenReturn(BatteryManager.BATTERY_STATUS_CHARGING);
         when(mMockContext.registerReceiver(isNull(), any(IntentFilter.class))).thenReturn(chargingIntent);
+        refreshSignals();
 
         assertEquals(Integer.valueOf(1), mDeviceInfo.isBatteryCharging());
     }
 
+    // Guards the pre-init PNAdRequestFactory.buildRequest(Context, ...) path.
     @Test
-    public void isBatteryCharging_whenNotCharging_returnsZero() {
-        Intent dischargingIntent = mock(Intent.class);
-        when(dischargingIntent.getIntExtra(BatteryManager.EXTRA_STATUS, -1))
-                .thenReturn(BatteryManager.BATTERY_STATUS_DISCHARGING);
-        when(mMockContext.registerReceiver(isNull(), any(IntentFilter.class))).thenReturn(dischargingIntent);
+    public void createForSynchronousRequest_populatesSignalsBeforeReturning() {
+        Intent chargingIntent = mock(Intent.class);
+        when(chargingIntent.getIntExtra(BatteryManager.EXTRA_STATUS, -1))
+                .thenReturn(BatteryManager.BATTERY_STATUS_CHARGING);
+        // EMPTY has no level, so asserting it too rules out a coincidental charging==1.
+        when(chargingIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)).thenReturn(90);
+        when(chargingIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)).thenReturn(100);
+        when(mMockContext.registerReceiver(isNull(), any(IntentFilter.class))).thenReturn(chargingIntent);
 
-        assertEquals(Integer.valueOf(0), mDeviceInfo.isBatteryCharging());
+        // No waitForBackgroundTasks() here: that is the point of the assertion.
+        DeviceInfo deviceInfo = DeviceInfo.createForSynchronousRequest(mMockContext);
+
+        assertEquals(Integer.valueOf(1), deviceInfo.isBatteryCharging());
+        assertEquals(Integer.valueOf(8), deviceInfo.getBatteryLevel());
+    }
+
+    // Pins the mechanism, not just the outcome: the read must happen inline.
+    @Test
+    public void createForSynchronousRequest_readsOnCallingThread() {
+        AtomicReference<String> readThreadName = new AtomicReference<>();
+        Intent chargingIntent = mock(Intent.class);
+        when(chargingIntent.getIntExtra(BatteryManager.EXTRA_STATUS, -1))
+                .thenReturn(BatteryManager.BATTERY_STATUS_CHARGING);
+        when(mMockContext.registerReceiver(isNull(), any(IntentFilter.class))).thenAnswer(invocation -> {
+            readThreadName.set(Thread.currentThread().getName());
+            return chargingIntent;
+        });
+
+        DeviceInfo.createForSynchronousRequest(mMockContext);
+
+        assertEquals(Thread.currentThread().getName(), readThreadName.get());
+    }
+
+    // The singleton is built here, so the ad serving path must stay off the caller thread.
+    @Test
+    public void constructor_doesNotReadSignalsOnCallingThread() throws Exception {
+        AtomicReference<String> readThreadName = new AtomicReference<>();
+        Intent chargingIntent = mock(Intent.class);
+        when(chargingIntent.getIntExtra(BatteryManager.EXTRA_STATUS, -1))
+                .thenReturn(BatteryManager.BATTERY_STATUS_CHARGING);
+        when(mMockContext.registerReceiver(isNull(), any(IntentFilter.class))).thenAnswer(invocation -> {
+            readThreadName.set(Thread.currentThread().getName());
+            return chargingIntent;
+        });
+
+        new DeviceInfo(mMockContext);
+        // Drain first, so the assertions below cannot pass vacuously.
+        waitForBackgroundTasks();
+
+        assertNotNull(readThreadName.get());
+        assertNotEquals(Thread.currentThread().getName(), readThreadName.get());
     }
 
     @Test
-    public void isBatteryCharging_withNullStickyIntent_returnsZero() {
+    public void isBatteryCharging_whenNotCharging_returnsZero() throws Exception {
+        Intent dischargingIntent = mock(Intent.class);
+        when(dischargingIntent.getIntExtra(BatteryManager.EXTRA_STATUS, -1))
+                .thenReturn(BatteryManager.BATTERY_STATUS_DISCHARGING);
+        // Level comes from the same intent, and EMPTY has no level, so asserting it proves
+        // the stub drove the snapshot rather than 0 coincidentally matching EMPTY.charging.
+        when(dischargingIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)).thenReturn(90);
+        when(dischargingIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)).thenReturn(100);
+        when(mMockContext.registerReceiver(isNull(), any(IntentFilter.class))).thenReturn(dischargingIntent);
+        refreshSignals();
+
+        assertEquals(Integer.valueOf(0), mDeviceInfo.isBatteryCharging());
+        assertEquals(Integer.valueOf(8), mDeviceInfo.getBatteryLevel());
+    }
+
+    @Test
+    public void isBatteryCharging_withNullStickyIntent_returnsZero() throws Exception {
+        // Seed a charging snapshot first, so a 0 result must come from the refresh.
+        setAtomicReferenceField(mDeviceInfo, "mCachedDeviceSignals", signalsWithCharging(1));
+        assertEquals(Integer.valueOf(1), mDeviceInfo.isBatteryCharging());
+
         when(mMockContext.registerReceiver(isNull(), any(IntentFilter.class))).thenReturn(null);
+        refreshSignalsInPlace();
 
         assertEquals(Integer.valueOf(0), mDeviceInfo.isBatteryCharging());
     }
 
     @Test
     public void isBatteryCharging_withNullContext_returnsZero() throws Exception {
+        // The getter no longer touches mContext, so this asserts the refresh path: with no
+        // context the battery read is unavailable and charging must fall back to 0.
+        setAtomicReferenceField(mDeviceInfo, "mCachedDeviceSignals", signalsWithCharging(1));
         setField(mDeviceInfo, "mContext", null);
+        refreshSignalsInPlace();
 
         assertEquals(Integer.valueOf(0), mDeviceInfo.isBatteryCharging());
     }
 
     @Test
-    public void isBatteryCharging_reflectsCurrentStateEachCall() {
+    public void isBatteryCharging_servesCachedSnapshotUntilARefreshLands() throws Exception {
         Intent chargingIntent = mock(Intent.class);
         when(chargingIntent.getIntExtra(BatteryManager.EXTRA_STATUS, -1))
                 .thenReturn(BatteryManager.BATTERY_STATUS_CHARGING);
@@ -700,9 +832,15 @@ public class DeviceInfoTest {
                 .thenReturn(BatteryManager.BATTERY_STATUS_DISCHARGING);
 
         when(mMockContext.registerReceiver(isNull(), any(IntentFilter.class))).thenReturn(chargingIntent);
+        refreshSignals();
         assertEquals(Integer.valueOf(1), mDeviceInfo.isBatteryCharging());
 
+        // A mid-TTL state flip is deliberately not observed: serving the cached snapshot is
+        // what keeps the binder read off the caller's thread.
         when(mMockContext.registerReceiver(isNull(), any(IntentFilter.class))).thenReturn(dischargingIntent);
+        assertEquals(Integer.valueOf(1), mDeviceInfo.isBatteryCharging());
+
+        refreshSignals();
         assertEquals(Integer.valueOf(0), mDeviceInfo.isBatteryCharging());
     }
 
@@ -750,7 +888,10 @@ public class DeviceInfoTest {
 
     @Test
     public void isAirplaneModeEnabled_withNullContext_returns0() throws Exception {
+        setAtomicReferenceField(mDeviceInfo, "mCachedDeviceSignals", signalsWithAirplaneMode(1));
         setField(mDeviceInfo, "mContext", null);
+        refreshSignalsInPlace();
+
         assertEquals(Integer.valueOf(0), mDeviceInfo.isAirplaneModeEnabled());
     }
 
@@ -774,6 +915,85 @@ public class DeviceInfoTest {
         assertNotNull(languages);
         assertEquals(1, languages.size());
         assertEquals("en-US", languages.get(0));
+    }
+
+    // Reading every signal getter is what one fillExtensionsObject call does. The CAS guard
+    // must collapse that into a single refresh, hence a single battery binder round-trip.
+    @Test
+    public void readingEverySignalGetter_performsOneBatteryRegisterReceiver() throws Exception {
+        Intent batteryIntent = mock(Intent.class);
+        when(mMockContext.registerReceiver(isNull(), any(IntentFilter.class))).thenReturn(batteryIntent);
+        waitForBackgroundTasks();
+        clearInvocations(mMockContext);
+
+        setAtomicReferenceField(mDeviceInfo, "mCachedDeviceSignals", DeviceInfo.DeviceSignals.EMPTY);
+        mDeviceInfo.isBatteryCharging();
+        mDeviceInfo.getBatteryLevel();
+        mDeviceInfo.isPowerSaveMode();
+        mDeviceInfo.getFreeMemoryMb();
+        mDeviceInfo.getTotalMemoryMb();
+        mDeviceInfo.isDndEnabled();
+        mDeviceInfo.isHeadsetOn();
+        mDeviceInfo.isAirplaneModeEnabled();
+        waitForBackgroundTasks();
+
+        verify(mMockContext, times(1)).registerReceiver(isNull(), any(IntentFilter.class));
+    }
+
+    // Mirrors the getInputLanguages proof below: a third thread distinguishes "the caller
+    // returned" from "the mock was released", which a same-thread check cannot do.
+    @Test
+    public void isBatteryCharging_whenBackgroundReadIsSlow_runsOffCallerThreadAndDoesNotBlock() throws Exception {
+        waitForBackgroundTasks();
+        setAtomicReferenceField(mDeviceInfo, "mCachedDeviceSignals", DeviceInfo.DeviceSignals.EMPTY);
+
+        AtomicReference<String> callerThreadName = new AtomicReference<>();
+        AtomicReference<String> workerThreadName = new AtomicReference<>();
+        CountDownLatch backgroundCallStarted = new CountDownLatch(1);
+        CountDownLatch releaseSlowCall = new CountDownLatch(1);
+
+        Intent chargingIntent = mock(Intent.class);
+        when(chargingIntent.getIntExtra(BatteryManager.EXTRA_STATUS, -1))
+                .thenReturn(BatteryManager.BATTERY_STATUS_CHARGING);
+        // Resolves to CHARGING (1) while EMPTY reports 0, so returning the stale snapshot
+        // below cannot pass by coincidence.
+        when(mMockContext.registerReceiver(isNull(), any(IntentFilter.class))).thenAnswer(invocation -> {
+            workerThreadName.set(Thread.currentThread().getName());
+            backgroundCallStarted.countDown();
+            releaseSlowCall.await(5, TimeUnit.SECONDS);
+            return chargingIntent;
+        });
+
+        ExecutorService callerExecutor = Executors.newSingleThreadExecutor();
+        try {
+            Future<Integer> callerFuture = callerExecutor.submit(() -> {
+                callerThreadName.set(Thread.currentThread().getName());
+                return mDeviceInfo.isBatteryCharging();
+            });
+
+            assertTrue("background read should have started",
+                    backgroundCallStarted.await(5, TimeUnit.SECONDS));
+
+            // If the getter blocked on the parked binder call, this times out and fails.
+            Integer result = callerFuture.get(2, TimeUnit.SECONDS);
+            assertEquals("must return the stale snapshot instead of waiting on the slow read",
+                    Integer.valueOf(0), result);
+        } finally {
+            releaseSlowCall.countDown();
+            callerExecutor.shutdownNow();
+            assertTrue("caller executor should terminate", callerExecutor.awaitTermination(5, TimeUnit.SECONDS));
+            try {
+                waitForBackgroundTasks();
+            } catch (Exception ignored) {
+            }
+        }
+
+        assertNotEquals("slow binder call must not run on the caller thread",
+                callerThreadName.get(), workerThreadName.get());
+        assertTrue("slow binder call should run on the dedicated HyBid-DeviceInfo executor",
+                workerThreadName.get().startsWith("HyBid-DeviceInfo"));
+
+        assertEquals(Integer.valueOf(1), mDeviceInfo.isBatteryCharging());
     }
 
     @Test
@@ -886,24 +1106,31 @@ public class DeviceInfoTest {
     }
 
 
+    // Both memory fields come from one StatFs on the background thread, so these assert
+    // pass-through; the snapshot is injected because Environment is unavailable on this runner.
+
     @Test
-    public void getTotalMemoryMb_returnsPositiveValue() {
-        try {
-            Integer totalMemory = mDeviceInfo.getTotalMemoryMb();
-            assertTrue(totalMemory > 0);
-        } catch (RuntimeException e) {
-            assertTrue(e.getMessage() == null || e.getMessage().contains("not mocked") || e.getMessage().contains("Environment"));
-        }
+    public void getTotalMemoryMb_returnsValueFromSnapshot() throws Exception {
+        setAtomicReferenceField(mDeviceInfo, "mCachedDeviceSignals", signalsWithMemory(1024, 2048));
+
+        assertEquals(Integer.valueOf(2048), mDeviceInfo.getTotalMemoryMb());
     }
 
     @Test
-    public void getFreeMemoryMb_returnsPositiveValue() {
-        try {
-            Integer freeMemory = mDeviceInfo.getFreeMemoryMb();
-            assertTrue(freeMemory >= 0);
-        } catch (RuntimeException e) {
-            assertTrue(e.getMessage() == null || e.getMessage().contains("not mocked") || e.getMessage().contains("Environment"));
-        }
+    public void getFreeMemoryMb_returnsValueFromSnapshot() throws Exception {
+        setAtomicReferenceField(mDeviceInfo, "mCachedDeviceSignals", signalsWithMemory(1024, 2048));
+
+        assertEquals(Integer.valueOf(1024), mDeviceInfo.getFreeMemoryMb());
+    }
+
+    // Injects EMPTY rather than relying on the first fetch, which setUp already drained and
+    // which fails off-thread on this runner anyway - that would assert the runner, not us.
+    @Test
+    public void memoryGetters_withUnpopulatedSnapshot_returnNull() throws Exception {
+        setAtomicReferenceField(mDeviceInfo, "mCachedDeviceSignals", DeviceInfo.DeviceSignals.EMPTY);
+
+        assertNull(mDeviceInfo.getFreeMemoryMb());
+        assertNull(mDeviceInfo.getTotalMemoryMb());
     }
 
     @Test
@@ -932,27 +1159,72 @@ public class DeviceInfoTest {
         assertNull(mDeviceInfo.getStructuredUserAgent());
     }
 
+    // Bucketing is pure arithmetic over the cached raw percentage, so both edges of all
+    // eight bands are asserted directly with no IPC involved.
     @Test
-    public void getBatteryLevel_returnsLevel8_whenBatteryAbove85() {
-        // Battery level is retrieved via BatteryUtils which uses Android system services
-        // In unit test environment, we test the logic branches exist
-        Integer batteryLevel = mDeviceInfo.getBatteryLevel();
-        // Should return a value or null
-        assertTrue(batteryLevel == null || (batteryLevel >= 1 && batteryLevel <= 8));
+    public void getBatteryLevel_mapsRawPercentageToEightBands() throws Exception {
+        assertBatteryBand(100, 8);
+        assertBatteryBand(85, 8);
+        assertBatteryBand(84, 7);
+        assertBatteryBand(70, 7);
+        assertBatteryBand(69, 6);
+        assertBatteryBand(55, 6);
+        assertBatteryBand(54, 5);
+        assertBatteryBand(40, 5);
+        assertBatteryBand(39, 4);
+        assertBatteryBand(25, 4);
+        assertBatteryBand(24, 3);
+        assertBatteryBand(10, 3);
+        assertBatteryBand(9, 2);
+        assertBatteryBand(5, 2);
+        assertBatteryBand(4, 1);
+        assertBatteryBand(0, 1);
+    }
+
+    // Previously this returned band 1, i.e. "5% or less" - a wrong reading rather than a
+    // missing one. VMA-1576 makes an unusable sticky intent report null instead.
+    @Test
+    public void getBatteryLevel_whenPercentageUnavailable_returnsNull() throws Exception {
+        setAtomicReferenceField(mDeviceInfo, "mCachedDeviceSignals", signalsWithBatteryPercentage(null));
+
+        assertNull(mDeviceInfo.getBatteryLevel());
     }
 
     @Test
-    public void isPowerSaveMode_withNullPowerManager_returnsNull() {
-        lenient().when(mMockContext.getSystemService(Context.POWER_SERVICE)).thenReturn(null);
-        Integer powerSaveMode = mDeviceInfo.isPowerSaveMode();
-        // Should return null when PowerManager is not available
-        assertNull(powerSaveMode);
+    public void isPowerSaveMode_withNullPowerManager_returnsNull() throws Exception {
+        when(mMockContext.getSystemService(Context.POWER_SERVICE)).thenReturn(null);
+        refreshSignals();
+
+        assertNull(mDeviceInfo.isPowerSaveMode());
+    }
+
+    @Test
+    public void isPowerSaveMode_whenEnabled_returnsOneFromSnapshot() throws Exception {
+        PowerManager mockPowerManager = mock(PowerManager.class);
+        when(mockPowerManager.isPowerSaveMode()).thenReturn(true);
+        when(mMockContext.getSystemService(Context.POWER_SERVICE)).thenReturn(mockPowerManager);
+        refreshSignals();
+
+        assertEquals(Integer.valueOf(1), mDeviceInfo.isPowerSaveMode());
+    }
+
+    @Test
+    public void isPowerSaveMode_whenDisabled_returnsZeroFromSnapshot() throws Exception {
+        PowerManager mockPowerManager = mock(PowerManager.class);
+        when(mockPowerManager.isPowerSaveMode()).thenReturn(false);
+        when(mMockContext.getSystemService(Context.POWER_SERVICE)).thenReturn(mockPowerManager);
+        refreshSignals();
+
+        assertEquals(Integer.valueOf(0), mDeviceInfo.isPowerSaveMode());
     }
 
 
     @Test
     public void isAirplaneModeEnabled_withNullContentResolver_returns0() throws Exception {
+        setAtomicReferenceField(mDeviceInfo, "mCachedDeviceSignals", signalsWithAirplaneMode(1));
         when(mMockContext.getContentResolver()).thenReturn(null);
+        refreshSignalsInPlace();
+
         assertEquals(Integer.valueOf(0), mDeviceInfo.isAirplaneModeEnabled());
     }
 
@@ -1106,6 +1378,7 @@ public class DeviceInfoTest {
         when(chargingIntent.getIntExtra(BatteryManager.EXTRA_STATUS, -1))
                 .thenReturn(BatteryManager.BATTERY_STATUS_CHARGING);
         when(mMockContext.registerReceiver(isNull(), any(IntentFilter.class))).thenReturn(chargingIntent);
+        refreshSignals();
 
         mDeviceInfo.updateChargingStatus();
 

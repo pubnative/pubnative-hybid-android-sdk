@@ -117,6 +117,12 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
     }
 
     private fun initObservers() {
+        (requireActivity() as? TabActivity)?.debugViewModel?.getFiredTrackersList()?.observe(
+            viewLifecycleOwner
+        ) {
+            trackerReportAdapter?.submitData(it)
+        }
+
         // Observe request debug info
         (requireActivity() as? TabActivity)?.debugViewModel?.requestDebugInfo?.observe(
             viewLifecycleOwner
@@ -183,7 +189,7 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
 
         val builder = AlertDialog.Builder(requireActivity())
             .setOnDismissListener {
-                isOpenedEventReport = false
+                isOpenedTrackerReport = false
             }
         trackerReportAdapter = ReportingTrackerAdapter()
         val view = LayoutInflater.from(requireActivity())
@@ -219,13 +225,12 @@ class DebugFragment : Fragment(R.layout.fragment_debug) {
     }
 
     private fun displayTrackerReport() {
-        (requireActivity() as? TabActivity)?.debugViewModel?.getFiredTrackersList()
-            ?.observe(viewLifecycleOwner) {
-                trackerReportAdapter?.submitData(it)
-                trackersReportDialog?.show()
-                isOpenedTrackerReport = true
-                trackerReportToClipboard(it)
-            }
+        val firedTrackers = (requireActivity() as? TabActivity)?.debugViewModel
+            ?.getFiredTrackersList()?.value.orEmpty()
+        trackerReportAdapter?.submitData(firedTrackers)
+        trackersReportDialog?.show()
+        isOpenedTrackerReport = true
+        trackerReportToClipboard(firedTrackers)
     }
 
     private fun displayBeaconList() {

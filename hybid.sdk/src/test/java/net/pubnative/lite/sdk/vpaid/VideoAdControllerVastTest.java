@@ -10,15 +10,23 @@ import android.view.TextureView;
 
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
+import net.pubnative.lite.sdk.analytics.ReportingController;
+import net.pubnative.lite.sdk.analytics.tracker.ReportingTracker;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.CustomCTAData;
 import net.pubnative.lite.sdk.models.IntegrationType;
+import net.pubnative.lite.sdk.network.PNHttpClient;
+import net.pubnative.lite.sdk.network.RetryPolicy;
 import net.pubnative.lite.sdk.presenter.AdPresenter;
+import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeVideoAdSession;
 import net.pubnative.lite.sdk.viewability.baseom.BaseFriendlyObstructionPurpose;
+import net.pubnative.lite.sdk.vpaid.enums.EventConstants;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
 import net.pubnative.lite.sdk.vpaid.macros.MacroHelper;
+import net.pubnative.lite.sdk.vpaid.models.vast.Tracking;
+import net.pubnative.lite.sdk.vpaid.models.vpaid.TrackingEvent;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.utils.UrlClickSource;
 import net.pubnative.lite.sdk.vpaid.vast.ViewControllerVast;
@@ -27,7 +35,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
@@ -41,6 +51,7 @@ import net.pubnative.lite.sdk.views.endcard.HyBidEndCardView;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -48,6 +59,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.doAnswer;
 
@@ -180,6 +192,40 @@ public class VideoAdControllerVastTest {
     }
 
     @Test
+    public void testOpenUrl_withVastSource_postsVideoClick() {
+        //VideoClick must still fire on a video-body tap.
+        when(mockAdParams.getVideoClicks()).thenReturn(Collections.singletonList("http://video-click.com"));
+
+        try (MockedConstruction<UrlHandler> urlHandler = mockConstruction(UrlHandler.class)) {
+            videoAdControllerVast.openUrl("http://example.com", UrlClickSource.VAST);
+        }
+
+        mockedEventTracker.verify(() -> EventTracker.postEvent(
+                any(Context.class), eq("http://video-click.com"), eq("VideoClick"),
+                any(MacroHelper.class), anyBoolean()), times(1));
+    }
+
+    @Test
+    public void testOpenUrl_videoTapThenEndCardTap_postsOneVideoClickAndOneEndcardClick() {
+        // video tap then an end-card tap = 2 beacons (1 VideoClick + 1 EndcardClick), not 3.
+        when(mockAdParams.getVideoClicks()).thenReturn(Collections.singletonList("http://video-click.com"));
+        when(mockAdParams.getEndCardClicks()).thenReturn(Collections.singletonList("http://endcard-click.com"));
+        when(mockAdParams.getVideoRedirectUrl()).thenReturn("http://video-redirect.com");
+
+        try (MockedConstruction<UrlHandler> urlHandler = mockConstruction(UrlHandler.class)) {
+            videoAdControllerVast.openUrl("http://example.com", UrlClickSource.VAST);
+            videoAdControllerVast.openUrl("http://example.com", UrlClickSource.DEFAULT_END_CARD);
+        }
+
+        mockedEventTracker.verify(() -> EventTracker.postEvent(
+                any(Context.class), eq("http://video-click.com"), eq("VideoClick"),
+                any(MacroHelper.class), anyBoolean()), times(1));
+        mockedEventTracker.verify(() -> EventTracker.postEvent(
+                any(Context.class), eq("http://endcard-click.com"), eq("EndcardClick"),
+                any(MacroHelper.class), anyBoolean()), times(1));
+    }
+
+    @Test
     public void testOpenUrl_withCustomCTASource_callsBaseAdInternal() {
         String url = "http://example.com";
 
@@ -208,6 +254,167 @@ public class VideoAdControllerVastTest {
         }
 
         verify(mockBaseAdInternal, never()).onAdClicked();
+    }
+
+    @Test
+    public void testOpenUrl_withDefaultEndCardSource_postsEndcardClickNeverVideoClick_videoRedirectIsNavigationFallback() {
+        when(mockAdParams.getEndCardClicks()).thenReturn(Collections.singletonList("http://endcard-click.com"));
+        when(mockAdParams.getVideoClicks()).thenReturn(Collections.singletonList("http://video-click.com"));
+        when(mockAdParams.getVideoRedirectUrl()).thenReturn("http://video-redirect.com");
+
+        try (MockedConstruction<UrlHandler> urlHandler = mockConstruction(UrlHandler.class)) {
+            videoAdControllerVast.openUrl("http://example.com", UrlClickSource.DEFAULT_END_CARD);
+
+            // EndcardClick posted, VideoClick never.
+            mockedEventTracker.verify(() -> EventTracker.postEvent(
+                    any(Context.class), eq("http://endcard-click.com"), eq("EndcardClick"),
+                    any(MacroHelper.class), anyBoolean()));
+            mockedEventTracker.verify(() -> EventTracker.postEvent(
+                    any(Context.class), anyString(), eq("VideoClick"),
+                    any(MacroHelper.class), anyBoolean()), never());
+            // Navigation receives the video redirect fallback.
+            verify(urlHandler.constructed().get(0))
+                    .handleUrl(eq("http://video-redirect.com"), any(), any());
+        }
+        verify(mockBaseAdInternal).onAdClicked();
+    }
+
+    @Test
+    public void testOpenUrl_withCustomEndCardSource_postsVideoClickNeverEndcardClick_videoRedirectIsNavigationFallback() {
+        when(mockAdParams.getEndCardClicks()).thenReturn(Collections.singletonList("http://endcard-click.com"));
+        when(mockAdParams.getVideoClicks()).thenReturn(Collections.singletonList("http://video-click.com"));
+        when(mockAdParams.getVideoRedirectUrl()).thenReturn("http://video-redirect.com");
+
+        try (MockedConstruction<UrlHandler> urlHandler = mockConstruction(UrlHandler.class)) {
+            videoAdControllerVast.openUrl(null, UrlClickSource.CUSTOM_END_CARD);
+
+            // VideoClick posted once (iOS parity), EndcardClick never.
+            mockedEventTracker.verify(() -> EventTracker.postEvent(
+                    any(Context.class), eq("http://video-click.com"), eq("VideoClick"),
+                    any(MacroHelper.class), anyBoolean()), times(1));
+            mockedEventTracker.verify(() -> EventTracker.postEvent(
+                    any(Context.class), anyString(), eq("EndcardClick"),
+                    any(MacroHelper.class), anyBoolean()), never());
+            // Navigation receives the video redirect.
+            verify(urlHandler.constructed().get(0))
+                    .handleUrl(eq("http://video-redirect.com"), any(), any());
+        }
+    }
+
+    private void assertNoClickThroughRequest() {
+        mockedEventTracker.verify(() -> EventTracker.postEvent(
+                any(Context.class), anyString(), eq("ClickThrough"),
+                any(MacroHelper.class), anyBoolean()), never());
+        mockedEventTracker.verify(() -> EventTracker.postEvent(
+                any(Context.class), anyString(), eq("CompanionClickThrough"),
+                any(MacroHelper.class), anyBoolean()), never());
+    }
+
+    private ReportingController stubReportingController() {
+        ReportingController reportingController = mock(ReportingController.class);
+        mockedHyBid.when(HyBid::getReportingController).thenReturn(reportingController);
+        return reportingController;
+    }
+
+    @Test
+    public void testOpenUrl_withVastSource_doesNotRequestClickThroughUrl_logsLocallyOnce() {
+        when(mockAdParams.getVideoRedirectUrl()).thenReturn("http://video-redirect.com");
+        ReportingController reportingController = stubReportingController();
+
+        try (MockedConstruction<UrlHandler> urlHandler = mockConstruction(UrlHandler.class)) {
+            videoAdControllerVast.openUrl("http://example.com", UrlClickSource.VAST);
+
+            verify(urlHandler.constructed().get(0), times(1))
+                    .handleUrl(eq("http://video-redirect.com"), any(), any());
+        }
+
+        assertNoClickThroughRequest();
+        ArgumentCaptor<ReportingTracker> captor = ArgumentCaptor.forClass(ReportingTracker.class);
+        verify(reportingController, times(1)).reportFiredTracker(captor.capture());
+        assertEquals("ClickThrough", captor.getValue().getType());
+        assertEquals("http://video-redirect.com", captor.getValue().getUrl());
+    }
+
+    @Test
+    public void testOpenUrl_withCustomCTASource_doesNotRequestClickThroughUrl() {
+        when(mockAdParams.getVideoRedirectUrl()).thenReturn("http://video-redirect.com");
+        ReportingController reportingController = stubReportingController();
+
+        try (MockedConstruction<UrlHandler> urlHandler = mockConstruction(UrlHandler.class)) {
+            videoAdControllerVast.openUrl("http://example.com", UrlClickSource.CUSTOM_CTA);
+        }
+
+        assertNoClickThroughRequest();
+        verify(reportingController, times(1)).reportFiredTracker(any(ReportingTracker.class));
+    }
+
+    @Test
+    public void testOpenUrl_withDefaultEndCardSource_doesNotRequestClickThroughUrl_logsCompanionClickThrough() {
+        when(mockAdParams.getEndCardRedirectUrl()).thenReturn("http://endcard-redirect.com");
+        when(mockAdParams.getVideoRedirectUrl()).thenReturn("http://video-redirect.com");
+        ReportingController reportingController = stubReportingController();
+
+        try (MockedConstruction<UrlHandler> urlHandler = mockConstruction(UrlHandler.class)) {
+            videoAdControllerVast.openUrl("http://example.com", UrlClickSource.DEFAULT_END_CARD);
+
+            verify(urlHandler.constructed().get(0), times(1))
+                    .handleUrl(eq("http://endcard-redirect.com"), any(), any());
+        }
+
+        assertNoClickThroughRequest();
+        ArgumentCaptor<ReportingTracker> captor = ArgumentCaptor.forClass(ReportingTracker.class);
+        verify(reportingController, times(1)).reportFiredTracker(captor.capture());
+        assertEquals("CompanionClickThrough", captor.getValue().getType());
+        assertEquals("http://endcard-redirect.com", captor.getValue().getUrl());
+    }
+
+    @Test
+    public void testOpenUrl_withDefaultEndCardSourceAndNoEndCardRedirect_doesNotRequestClickThroughUrl_logsVideoClickThrough() {
+        when(mockAdParams.getEndCardRedirectUrl()).thenReturn(null);
+        when(mockAdParams.getVideoRedirectUrl()).thenReturn("http://video-redirect.com");
+        ReportingController reportingController = stubReportingController();
+
+        try (MockedConstruction<UrlHandler> urlHandler = mockConstruction(UrlHandler.class)) {
+            videoAdControllerVast.openUrl("http://example.com", UrlClickSource.DEFAULT_END_CARD);
+
+            verify(urlHandler.constructed().get(0), times(1))
+                    .handleUrl(eq("http://video-redirect.com"), any(), any());
+        }
+
+        assertNoClickThroughRequest();
+        ArgumentCaptor<ReportingTracker> captor = ArgumentCaptor.forClass(ReportingTracker.class);
+        verify(reportingController, times(1)).reportFiredTracker(captor.capture());
+        assertEquals("ClickThrough", captor.getValue().getType());
+        assertEquals("http://video-redirect.com", captor.getValue().getUrl());
+    }
+
+    @Test
+    public void testOpenUrl_withCustomEndCardSource_doesNotRequestClickThroughUrl() {
+        when(mockAdParams.getVideoRedirectUrl()).thenReturn("http://video-redirect.com");
+        ReportingController reportingController = stubReportingController();
+
+        try (MockedConstruction<UrlHandler> urlHandler = mockConstruction(UrlHandler.class)) {
+            videoAdControllerVast.openUrl(null, UrlClickSource.CUSTOM_END_CARD);
+
+            verify(urlHandler.constructed().get(0), times(1))
+                    .handleUrl(eq("http://video-redirect.com"), any(), any());
+        }
+
+        assertNoClickThroughRequest();
+        verify(reportingController, times(1)).reportFiredTracker(any(ReportingTracker.class));
+    }
+
+    @Test
+    public void testOpenUrl_withUnrelatedCustomEndCardUrl_doesNotLogClickThrough() {
+        when(mockAdParams.getVideoRedirectUrl()).thenReturn("http://video-redirect.com");
+        ReportingController reportingController = stubReportingController();
+
+        try (MockedConstruction<UrlHandler> urlHandler = mockConstruction(UrlHandler.class)) {
+            videoAdControllerVast.openUrl("http://custom-endcard.com", UrlClickSource.CUSTOM_END_CARD);
+        }
+
+        assertNoClickThroughRequest();
+        verify(reportingController, never()).reportFiredTracker(any(ReportingTracker.class));
     }
 
     @Test
@@ -766,6 +973,183 @@ public class VideoAdControllerVastTest {
         invokeInitSkipTime(videoAdControllerVast, 60000);
 
         assertEquals(10000, getSkipTimeMillis(videoAdControllerVast));
+    }
+
+    @Test
+    public void initSkipTime_withVastPercentage_resolvesAgainstDuration() throws Exception {
+        when(mockAd.getVideoSkipOffset()).thenReturn(null);
+        when(mockAdParams.getSkipTime()).thenReturn("20%");
+
+        invokeInitSkipTime(videoAdControllerVast, 30000);
+
+        assertEquals(6000, getSkipTimeMillis(videoAdControllerVast));
+    }
+
+    @Test
+    public void initSkipTime_withVastAbsoluteMilliseconds_keepsPrecision() throws Exception {
+        when(mockAd.getVideoSkipOffset()).thenReturn(null);
+        when(mockAdParams.getSkipTime()).thenReturn("00:00:08.500");
+
+        invokeInitSkipTime(videoAdControllerVast, 30000);
+
+        assertEquals(8500, getSkipTimeMillis(videoAdControllerVast));
+    }
+
+    @Test
+    public void initSkipTime_withRemoteConfigPercentage_resolvesAgainstDuration() throws Exception {
+        when(mockAd.getVideoSkipOffset()).thenReturn(null);
+        when(mockAd.getVideoSkipOffsetPercentage()).thenReturn("20%");
+
+        invokeInitSkipTime(videoAdControllerVast, 14000);
+
+        assertEquals(2800, getSkipTimeMillis(videoAdControllerVast));
+    }
+
+    @Test
+    public void initSkipTime_withRemoteConfigAndVastPercentage_resolvesToTheLower() throws Exception {
+        when(mockAd.getVideoSkipOffset()).thenReturn(null);
+        when(mockAd.getVideoSkipOffsetPercentage()).thenReturn("20%");
+        when(mockAdParams.getSkipTime()).thenReturn("50%");
+
+        invokeInitSkipTime(videoAdControllerVast, 30000);
+
+        assertEquals(6000, getSkipTimeMillis(videoAdControllerVast));
+    }
+
+    @Test
+    public void initSkipTime_forRewarded_withVastPercentage_resolvesAgainstDuration() throws Exception {
+        when(mockBaseAdInternal.isRewarded()).thenReturn(true);
+        when(mockAd.getVideoRewardedSkipOffset()).thenReturn(null);
+        when(mockAdParams.getPublisherSkipSeconds()).thenReturn(-1);
+        when(mockAdParams.getSkipTime()).thenReturn("20%");
+
+        invokeInitSkipTime(videoAdControllerVast, 30000);
+
+        assertEquals(6000, getSkipTimeMillis(videoAdControllerVast));
+    }
+
+    @Test
+    public void initSkipTime_forRewarded_withRemoteConfigPercentage_resolvesAgainstDuration() throws Exception {
+        when(mockBaseAdInternal.isRewarded()).thenReturn(true);
+        when(mockAd.getVideoRewardedSkipOffset()).thenReturn(null);
+        when(mockAd.getVideoRewardedSkipOffsetPercentage()).thenReturn("20%");
+        when(mockAdParams.getPublisherSkipSeconds()).thenReturn(-1);
+
+        invokeInitSkipTime(videoAdControllerVast, 14000);
+
+        assertEquals(2800, getSkipTimeMillis(videoAdControllerVast));
+    }
+
+    private void invokeCreateProgressPoints(int duration) throws Exception {
+        Method createProgressPointsMethod =
+                VideoAdControllerVast.class.getDeclaredMethod("createProgressPoints", int.class);
+        createProgressPointsMethod.setAccessible(true);
+        createProgressPointsMethod.invoke(videoAdControllerVast, duration);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<TrackingEvent> progressEventsFor(String offset, int duration) throws Exception {
+        Tracking tracking = mock(Tracking.class);
+        when(tracking.getEvent()).thenReturn("progress");
+        when(tracking.getOffset()).thenReturn(offset);
+        when(tracking.getText()).thenReturn("https://example.invalid/progress");
+
+        when(mockAdParams.getImpressions()).thenReturn(null);
+        when(mockAdParams.getEvents()).thenReturn(Collections.singletonList(tracking));
+
+        invokeCreateProgressPoints(duration);
+        return (List<TrackingEvent>) getTrackingEventsList();
+    }
+
+    @Test
+    public void createProgressPoints_withScientificNotationOffset_skipsTheEvent() throws Exception {
+        assertTrue(progressEventsFor("1e1%", 30000).isEmpty());
+    }
+
+    @Test
+    public void createProgressPoints_withJavaDoubleSuffixOffset_skipsTheEvent() throws Exception {
+        assertTrue(progressEventsFor("20d%", 30000).isEmpty());
+    }
+
+    @Test
+    public void createProgressPoints_withInfinityOffset_skipsTheEvent() throws Exception {
+        assertTrue(progressEventsFor("Infinity%", 30000).isEmpty());
+    }
+
+    @Test
+    public void createProgressPoints_withNaNOffset_skipsTheEvent() throws Exception {
+        assertTrue(progressEventsFor("NaN%", 30000).isEmpty());
+    }
+
+    @Test
+    public void createProgressPoints_withPercentageOutOfRange_skipsTheEvent() throws Exception {
+        assertTrue(progressEventsFor("150%", 30000).isEmpty());
+    }
+
+    @Test
+    public void createProgressPoints_withMalformedOffset_skipsTheEvent() throws Exception {
+        assertTrue(progressEventsFor("garbage", 30000).isEmpty());
+    }
+
+    @Test
+    public void createProgressPoints_withAbsentOffset_skipsTheEvent() throws Exception {
+        assertTrue(progressEventsFor(null, 30000).isEmpty());
+    }
+
+    @Test
+    public void createProgressPoints_withPercentageOffset_resolvesAgainstDuration() throws Exception {
+        List<TrackingEvent> events = progressEventsFor("25%", 30000);
+
+        assertEquals(1, events.size());
+        assertEquals(7500, events.get(0).timeMillis);
+    }
+
+    @Test
+    public void createProgressPoints_withWhitespaceBeforePercentSign_resolvesAgainstDuration() throws Exception {
+        List<TrackingEvent> events = progressEventsFor("20 %", 30000);
+
+        assertEquals(1, events.size());
+        assertEquals(6000, events.get(0).timeMillis);
+    }
+
+    @Test
+    public void createProgressPoints_withAbsoluteOffset_keepsWholeSecondResolution() throws Exception {
+        List<TrackingEvent> events = progressEventsFor("00:00:08.500", 30000);
+
+        assertEquals(1, events.size());
+        assertEquals(8000, events.get(0).timeMillis);
+    }
+
+    @Test
+    public void processTrackingEvents_postsAProgressEventUnderItsName_soItIsNotRetried() throws Exception {
+        // EventTracker treats an unnamed event as retry-eligible; "progress" is the name it excludes.
+        progressEventsFor("25%", 30000);
+        setDoneMillis(8000);
+
+        invokeProcessTrackingEvents();
+
+        mockedEventTracker.verify(() -> EventTracker.postEvent(
+                any(Context.class), eq("https://example.invalid/progress"), eq(EventConstants.PROGRESS),
+                any(), eq(false)));
+    }
+
+    @Test
+    public void processTrackingEvents_sendsAProgressEventWithRetryOff_throughTheRealEventTracker() throws Exception {
+        // Real EventTracker this time, so the chain is covered from the VAST event down to the HTTP layer.
+        mockedEventTracker.close();
+        mockedEventTracker = null;
+        try (MockedStatic<PNHttpClient> mockedHttpClient = mockStatic(PNHttpClient.class)) {
+            progressEventsFor("25%", 30000);
+            setDoneMillis(8000);
+
+            invokeProcessTrackingEvents();
+
+            mockedHttpClient.verify(() -> PNHttpClient.makeRequest(
+                    any(Context.class), eq("https://example.invalid/progress"), any(), isNull(), eq(false),
+                    eq(false), any(RetryPolicy.class), any(), any()));
+        } finally {
+            EventTracker.clear();
+        }
     }
 
     @Test

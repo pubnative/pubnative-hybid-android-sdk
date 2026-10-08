@@ -368,8 +368,12 @@ public class VastProcessor {
             }
 
             if (linear != null) {
-                if (!TextUtils.isEmpty(linear.getSkipOffset())) {
-                    adParams.setSkipTime(linear.getSkipOffset());
+                String skipOffset = linear.getSkipOffset();
+                if (!TextUtils.isEmpty(skipOffset)) {
+                    adParams.setSkipTime(skipOffset);
+                    if (!Utils.isValidVastTimeOffset(skipOffset)) {
+                        ErrorLog.postError(context, VastError.VAST_SCHEMA_VALIDATION);
+                    }
                 }
 
                 if (linear.getTrackingEvents() != null) {

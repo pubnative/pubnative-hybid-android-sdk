@@ -23,11 +23,7 @@ public class HyBidTimeUtils {
 //    }
 
     public Boolean IsStartingNewSession(long milliseconds) {
-        return calculateTimeInMinutes(milliseconds) > 30;
-    }
-
-    private int calculateTimeInMinutes(long milliseconds) {
-        return (int) ((milliseconds / (1000 * 60)) % 60);
+        return milliseconds > SESSION_RENEWAL;
     }
 
     public long updateExpirationTimeStamp(long milliseconds) {

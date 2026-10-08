@@ -262,7 +262,13 @@ public class VastInterstitialViewModel extends InterstitialViewModel implements 
         }
 
         @Override
+        public boolean hasImpressionBeenClicked() {
+            return VastInterstitialViewModel.this.hasImpressionBeenClicked();
+        }
+
+        @Override
         public void onAdClicked() {
+            markImpressionClicked();
             sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CLICK);
         }
 
@@ -303,6 +309,7 @@ public class VastInterstitialViewModel extends InterstitialViewModel implements 
 
         @Override
         public void onCustomEndCardClick(String endCardType) {
+            markImpressionClicked();
             if (!mCustomEndCardClickTracked) {
                 Bundle extras = new Bundle();
                 extras.putString(Reporting.Key.END_CARD_TYPE, endCardType);
@@ -326,6 +333,7 @@ public class VastInterstitialViewModel extends InterstitialViewModel implements 
 
         @Override
         public void onDefaultEndCardClick(String endCardType) {
+            markImpressionClicked();
             if (!mDefaultEndCardClickTracked) {
                 Bundle extras = new Bundle();
                 extras.putString(Reporting.Key.END_CARD_TYPE, endCardType);
@@ -362,6 +370,7 @@ public class VastInterstitialViewModel extends InterstitialViewModel implements 
 
         @Override
         public void onCustomCTACLick(boolean isEndcardVisible) {
+            markImpressionClicked();
             String eventType = (isEndcardVisible) ? Reporting.EventType.CUSTOM_CTA_ENDCARD_CLICK : Reporting.EventType.CUSTOM_CTA_CLICK;
             if (mCustomCTAClickTrackedEvents.contains(eventType)) return;
             invokeOnCustomCTAClick(eventType, mAd, Reporting.AdFormat.FULLSCREEN);
