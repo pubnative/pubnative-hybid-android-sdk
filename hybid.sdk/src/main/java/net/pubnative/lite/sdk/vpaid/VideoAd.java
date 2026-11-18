@@ -152,7 +152,7 @@ public class VideoAd extends BaseVideoAd {
         }
 
         if (isMuted) {
-            getAdController().toggleMute();
+            getAdController().setInitialMuteState(true);
         }
     }
 

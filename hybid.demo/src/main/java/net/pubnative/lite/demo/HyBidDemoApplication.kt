@@ -4,12 +4,10 @@
 //
 package net.pubnative.lite.demo
 
-import android.content.Context
+import android.app.Application
 import android.text.TextUtils
 import android.util.Log
 import android.webkit.WebView
-import androidx.multidex.MultiDex
-import androidx.multidex.MultiDexApplication
 import com.chartboost.chartboostmediationsdk.ChartboostMediationPreinitializationConfiguration
 import com.chartboost.chartboostmediationsdk.ChartboostMediationSdk
 import com.chartboost.core.ChartboostCore
@@ -55,7 +53,7 @@ import net.pubnative.lite.sdk.vpaid.enums.AudioState
 /**
  * Created by erosgarciaponte on 08.01.18.
  */
-class HyBidDemoApplication : MultiDexApplication() {
+class HyBidDemoApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         try {
@@ -64,11 +62,6 @@ class HyBidDemoApplication : MultiDexApplication() {
             Log.d("Exception", exception.toString())
             HyBid.reportException(exception)
         }
-    }
-
-    override fun attachBaseContext(base: Context) {
-        super.attachBaseContext(base)
-        MultiDex.install(this)
     }
 
     private fun initSettings() {

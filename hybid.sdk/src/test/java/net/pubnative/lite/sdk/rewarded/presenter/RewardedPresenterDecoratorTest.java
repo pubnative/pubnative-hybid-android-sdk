@@ -108,6 +108,20 @@ public class RewardedPresenterDecoratorTest {
     }
 
     @Test
+    public void customEndCardTap_notifiesListenerOnce() {
+        try (MockedConstruction<ReportingEvent> mockedEvent = mockConstruction(ReportingEvent.class)) {
+            when(mockRewardedPresenter.getAd()).thenReturn(mockAd);
+            // A custom end card tap sends CLICK first, then CUSTOM_END_CARD_CLICK.
+            rewardedPresenterDecorator.onRewardedClicked(mockRewardedPresenter);
+            rewardedPresenterDecorator.onCustomEndCardClick();
+            // A second tap on the same ad must not notify the publisher again.
+            rewardedPresenterDecorator.onRewardedClicked(mockRewardedPresenter);
+
+            verify(mockListener, times(1)).onRewardedClicked(mockRewardedPresenter);
+        }
+    }
+
+    @Test
     public void onRewardedError_tracksErrorAndNotifiesListener() {
         try (MockedConstruction<ReportingEvent> mockedEvent = mockConstruction(ReportingEvent.class)) {
             when(mockRewardedPresenter.getAd()).thenReturn(mockAd);

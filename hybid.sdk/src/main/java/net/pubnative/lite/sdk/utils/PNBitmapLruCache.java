@@ -8,16 +8,21 @@ import android.graphics.Bitmap;
 import android.text.TextUtils;
 import android.util.LruCache;
 
+/**
+ * @deprecated No longer used by the SDK and will be removed in a future major release.
+ */
+@Deprecated
 public class PNBitmapLruCache {
 
     private static final int BYTES_IN_KILOBYTES = 1024;
-    private static final int MAX_MEMORY_SIZE = 30 * 1024 * 1024; // 30MB
+    private static final int MAX_CACHE_SIZE_KB = 30 * 1024;
+    private static final int HEAP_FRACTION = 8;
 
     private static final LruCache<String, Bitmap> mMemoryCache;
 
     static {
-        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / BYTES_IN_KILOBYTES);
-        final int cacheSize = Math.min(maxMemory, MAX_MEMORY_SIZE);
+        final int maxMemoryKb = (int) (Runtime.getRuntime().maxMemory() / BYTES_IN_KILOBYTES);
+        final int cacheSize = Math.min(maxMemoryKb / HEAP_FRACTION, MAX_CACHE_SIZE_KB);
 
         mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
             @Override
@@ -33,7 +38,7 @@ public class PNBitmapLruCache {
         }
 
         String key = String.valueOf(url.hashCode());
-        if (getBitmapFromMemCache(key) == null) {
+        if (mMemoryCache.get(key) == null) {
             mMemoryCache.put(key, bitmap);
         }
     }

@@ -423,16 +423,20 @@ public class HyBid {
     }
 
     public static void reportException(Exception exception) {
-        if (sCrashController != null && getReportingController() != null && HyBid.isReportingEnabled()) {
-            ReportingEvent event = sCrashController.formatException(exception);
-            getReportingController().reportEvent(event);
-        }
+        reportException((Throwable) exception);
     }
 
     public static void reportException(Throwable exception) {
-        if (sCrashController != null && getReportingController() != null && HyBid.isReportingEnabled()) {
+        if (!sReportingEnabled || sCrashController == null) {
+            return;
+        }
+        try {
             ReportingEvent event = sCrashController.formatException(exception);
             getReportingController().reportEvent(event);
+        } catch (OutOfMemoryError reportingFailure) {
+            Log.e(TAG, "Failed to report exception: out of memory");
+        } catch (Throwable reportingFailure) {
+            Log.e(TAG, "Failed to report exception", reportingFailure);
         }
     }
 

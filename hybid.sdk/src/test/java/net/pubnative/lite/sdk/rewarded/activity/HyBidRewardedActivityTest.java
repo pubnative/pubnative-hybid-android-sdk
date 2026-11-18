@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import androidx.core.view.DisplayCutoutCompat;
@@ -33,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
@@ -121,6 +123,17 @@ public class HyBidRewardedActivityTest {
         View adView = getContentView(subject);
 
         Assert.assertNotNull(adView);
+    }
+
+    @Test
+    public void vastActivity_onCreate_setsKeepScreenOnFlag() {
+        Intent intent = createTestIntent().setClass(RuntimeEnvironment.getApplication(), VastRewardedActivity.class);
+
+        VastRewardedActivity vastActivity = Robolectric.buildActivity(VastRewardedActivity.class, intent)
+                .create().get();
+
+        int windowFlags = vastActivity.getWindow().getAttributes().flags;
+        assertTrue((windowFlags & WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) != 0);
     }
 
     @Test
@@ -409,6 +422,78 @@ public class HyBidRewardedActivityTest {
 
         // Should not throw exception
         Assert.assertEquals(0, getContentView(activity).getChildCount());
+    }
+
+    @Test
+    public void onSaveInstanceState_rewardEarned_persistsFlag() {
+        when(mockViewModel.isRewardEarned()).thenReturn(true);
+        android.os.Bundle outState = new android.os.Bundle();
+
+        activity.onSaveInstanceState(outState);
+
+        assertTrue(outState.getBoolean("state_pn_reward_earned", false));
+    }
+
+    @Test
+    public void onSaveInstanceState_rewardNotEarned_persistsNothing() {
+        when(mockViewModel.isRewardEarned()).thenReturn(false);
+        android.os.Bundle outState = new android.os.Bundle();
+
+        activity.onSaveInstanceState(outState);
+
+        assertFalse(outState.containsKey("state_pn_reward_earned"));
+    }
+
+    @Test
+    public void onSaveInstanceState_withNullViewModel_doesNotCrash() {
+        activity.setMockViewModel(null);
+        android.os.Bundle outState = new android.os.Bundle();
+
+        activity.onSaveInstanceState(outState);
+
+        assertFalse(outState.containsKey("state_pn_reward_earned"));
+    }
+
+    @Test
+    public void recreate_withSavedEarnedReward_newMraidViewModelIsEarned() {
+        // Real save: an earned reward is written to the bundle by the first activity.
+        when(mockViewModel.isRewardEarned()).thenReturn(true);
+        android.os.Bundle saved = new android.os.Bundle();
+        activity.onSaveInstanceState(saved);
+
+        // Real recreate: a new activity is created from that bundle and builds its own view model.
+        TestHyBidRewardedActivity recreated = Robolectric
+                .buildActivity(TestHyBidRewardedActivity.class, createTestIntent())
+                .create(saved).get();
+
+        assertTrue(recreated.mViewModel.isRewardEarned());
+    }
+
+    @Test
+    public void recreate_withSavedEarnedReward_newVastViewModelIsEarned() {
+        when(mockViewModel.isRewardEarned()).thenReturn(true);
+        android.os.Bundle saved = new android.os.Bundle();
+        activity.onSaveInstanceState(saved);
+
+        Intent intent = createTestIntent().setClass(RuntimeEnvironment.getApplication(), VastRewardedActivity.class);
+        VastRewardedActivity recreated = Robolectric
+                .buildActivity(VastRewardedActivity.class, intent)
+                .create(saved).get();
+
+        assertTrue(recreated.mViewModel.isRewardEarned());
+    }
+
+    @Test
+    public void recreate_withoutSavedReward_newViewModelIsNotEarned() {
+        when(mockViewModel.isRewardEarned()).thenReturn(false);
+        android.os.Bundle saved = new android.os.Bundle();
+        activity.onSaveInstanceState(saved);
+
+        TestHyBidRewardedActivity recreated = Robolectric
+                .buildActivity(TestHyBidRewardedActivity.class, createTestIntent())
+                .create(saved).get();
+
+        assertFalse(recreated.mViewModel.isRewardEarned());
     }
 
     protected FrameLayout getContentView(HyBidRewardedActivity subject) {

@@ -7,6 +7,7 @@ package net.pubnative.lite.sdk.interstitial.activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.WindowManager;
 
 import net.pubnative.lite.sdk.interstitial.viewModel.VastInterstitialViewModel;
 import net.pubnative.lite.sdk.vpaid.HyBidActivityInteractor;
@@ -18,6 +19,7 @@ public class VastInterstitialActivity extends HyBidInterstitialActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         fetchActivityInteractor();
         mInteractor.activityCreated();
         ((VastInterstitialViewModel) mViewModel).renderVastAd();

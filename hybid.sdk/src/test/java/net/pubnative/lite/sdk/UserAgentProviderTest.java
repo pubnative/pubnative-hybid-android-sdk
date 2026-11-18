@@ -449,8 +449,8 @@ public class UserAgentProviderTest {
     }
 
     @Test
-    @Config(sdk = Build.VERSION_CODES.LOLLIPOP)
-    public void fetchStructuredUserAgent_onLollipop_setsArchitectureCorrectly() {
+    @Config(sdk = Build.VERSION_CODES.M)
+    public void fetchStructuredUserAgent_onMarshmallow_setsArchitectureCorrectly() {
         // When
         userAgentProvider.fetchStructuredUserAgent(null);
 

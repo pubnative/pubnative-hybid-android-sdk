@@ -105,44 +105,6 @@ public class SoundUtilsTest {
         assertFalse(SoundUtils.isSoundMuted(mContext));
     }
 
-    // ===== checkMuteState: API < 23 uses getRingerMode =====
-
-    @Test
-    @Config(sdk = 22)
-    public void isSoundMuted_ringerModeSilent_belowApi23_returnsTrue() throws Exception {
-        when(mAppContext.getSystemService(Context.AUDIO_SERVICE)).thenReturn(mAudioManager);
-        when(mAudioManager.getRingerMode()).thenReturn(AudioManager.RINGER_MODE_SILENT);
-
-        SoundUtils.isSoundMuted(mContext);
-        waitForExecutor();
-
-        assertTrue(SoundUtils.isSoundMuted(mContext));
-    }
-
-    @Test
-    @Config(sdk = 22)
-    public void isSoundMuted_ringerModeVibrate_belowApi23_returnsTrue() throws Exception {
-        when(mAppContext.getSystemService(Context.AUDIO_SERVICE)).thenReturn(mAudioManager);
-        when(mAudioManager.getRingerMode()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
-
-        SoundUtils.isSoundMuted(mContext);
-        waitForExecutor();
-
-        assertTrue(SoundUtils.isSoundMuted(mContext));
-    }
-
-    @Test
-    @Config(sdk = 22)
-    public void isSoundMuted_ringerModeNormal_belowApi23_returnsFalse() throws Exception {
-        when(mAppContext.getSystemService(Context.AUDIO_SERVICE)).thenReturn(mAudioManager);
-        when(mAudioManager.getRingerMode()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
-
-        SoundUtils.isSoundMuted(mContext);
-        waitForExecutor();
-
-        assertFalse(SoundUtils.isSoundMuted(mContext));
-    }
-
     // ===== Null AudioManager =====
 
     @Test

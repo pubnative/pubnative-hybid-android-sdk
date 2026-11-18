@@ -155,6 +155,46 @@ public class HyBidEndCardViewTest {
     }
 
     @Test
+    public void show_withHtmlEndCard_initializesFullScreenBanner() {
+        when(mockEndCardData.getType()).thenReturn(EndCardData.Type.HTML_RESOURCE);
+        when(mockEndCardData.getContent()).thenReturn("<html>...</html>");
+
+        final List<List<Object>> allConstructorArgs = new ArrayList<>();
+        try (MockedConstruction<MRAIDBanner> mockedBanner = mockConstruction(MRAIDBanner.class, (mock, context) -> {
+            allConstructorArgs.add(new ArrayList<>(context.arguments()));
+        })) {
+            endCardView = new HyBidEndCardView(context);
+            endCardView.setEndCardViewListener(mockListener);
+
+            endCardView.show(mockEndCardData, null);
+
+            // Verify that the MRAIDBanner was constructed as full-screen.
+            List<?> arguments = allConstructorArgs.get(0);
+            assertEquals(true, arguments.get(9)); // isFullScreenPlacement
+        }
+    }
+
+    @Test
+    public void show_withHtmlEndCardWhenInline_initializesInlineScreenBanner() {
+        when(mockEndCardData.getType()).thenReturn(EndCardData.Type.HTML_RESOURCE);
+        when(mockEndCardData.getContent()).thenReturn("<html>...</html>");
+
+        final List<List<Object>> allConstructorArgs = new ArrayList<>();
+        try (MockedConstruction<MRAIDBanner> mockedBanner = mockConstruction(MRAIDBanner.class, (mock, context) -> {
+            allConstructorArgs.add(new ArrayList<>(context.arguments()));
+        })) {
+            endCardView = new HyBidEndCardView(context, true, null, false);
+            endCardView.setEndCardViewListener(mockListener);
+
+            endCardView.show(mockEndCardData, null);
+
+            // Verify that the MRAIDBanner was constructed as non-full-screen.
+            List<?> arguments = allConstructorArgs.get(0);
+            assertEquals(false, arguments.get(9)); // isFullScreenPlacement
+        }
+    }
+
+    @Test
     public void show_withIFrameEndCard_makesHttpRequest() {
         // Test the logic for fetching and rendering an IFrame end card.
         String iframeUrl = "https://example.com/iframe.html";

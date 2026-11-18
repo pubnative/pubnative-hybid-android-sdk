@@ -55,10 +55,10 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import net.pubnative.lite.sdk.BuildConfig;
 import net.pubnative.lite.sdk.CountdownStyle;
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
-import net.pubnative.lite.sdk.BuildConfig;
 import net.pubnative.lite.sdk.R;
 import net.pubnative.lite.sdk.location.HyBidLocationManager;
 import net.pubnative.lite.sdk.models.CustomCTAData;
@@ -536,7 +536,7 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
     }
 
     private void initEndCardView(boolean hasReducedCloseSize, int touchSize, int initialTouchSize) {
-        mEndCardView = new HyBidEndCardView(context, hasReducedCloseSize, null);
+        mEndCardView = new HyBidEndCardView(context, hasReducedCloseSize, null, isInterstitial || isFullScreenPlacement);
         mEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         mEndCardView.setVisibility(View.GONE);
         mEndCardView.setTouchSize(touchSize);
@@ -1854,10 +1854,9 @@ public class MRAIDView extends FrameLayout implements LandingPageHandler.Landing
     }
 
     String getPlacementType() {
-        if (isInterstitial || isFullScreenPlacement) {
-            return "interstitial";
-        }
-        return isExpandEnabled ? "inline" : "";
+        return (isInterstitial || isFullScreenPlacement)
+                ? "interstitial"
+                : "inline";
     }
 
     private class MRAIDWebViewClient extends WebViewClient {

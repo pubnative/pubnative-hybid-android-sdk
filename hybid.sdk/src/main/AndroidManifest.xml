@@ -19,12 +19,12 @@
             android:screenOrientation="behind" />
         <activity
             android:name=".rewarded.activity.MraidRewardedActivity"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|uiMode|fontScale|fontWeightAdjustment|locale|layoutDirection|density|keyboard|keyboardHidden"
             android:resizeableActivity="true"
             android:screenOrientation="behind" />
         <activity
             android:name=".rewarded.activity.VastRewardedActivity"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|uiMode|fontScale|fontWeightAdjustment|locale|layoutDirection|density|keyboard|keyboardHidden"
             android:resizeableActivity="true"
             android:screenOrientation="behind" />
         <activity

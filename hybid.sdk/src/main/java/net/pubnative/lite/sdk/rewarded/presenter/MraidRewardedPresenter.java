@@ -27,6 +27,7 @@ public class MraidRewardedPresenter implements RewardedPresenter, HyBidRewardedB
     private final String mWatermarkData;
 
     private Listener mListener;
+    private CustomEndCardListener mCustomEndCardListener;
     private boolean mIsDestroyed;
     private boolean mReady = false;
 
@@ -97,6 +98,7 @@ public class MraidRewardedPresenter implements RewardedPresenter, HyBidRewardedB
             mBroadcastReceiver.destroy();
         }
         mListener = null;
+        mCustomEndCardListener = null;
         mIsDestroyed = true;
         mReady = false;
     }
@@ -114,12 +116,12 @@ public class MraidRewardedPresenter implements RewardedPresenter, HyBidRewardedB
 
     @Override
     public void setCustomEndCardListener(CustomEndCardListener listener) {
-        // Not need custom end card listener for Mraid
+        mCustomEndCardListener = listener;
     }
 
     //------------------------- Rewarded Broadcast Receiver Callbacks ------------------------------
     @Override
     public void onReceivedAction(HyBidRewardedBroadcastReceiver.Action action, Bundle extras) {
-        mBroadcastReceiver.handleAction(action, this, extras, mListener, null, null);
+        mBroadcastReceiver.handleAction(action, this, extras, mListener, null, mCustomEndCardListener);
     }
 }

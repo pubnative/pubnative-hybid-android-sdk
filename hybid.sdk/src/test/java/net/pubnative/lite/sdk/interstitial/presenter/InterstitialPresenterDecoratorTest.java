@@ -19,6 +19,7 @@ import org.robolectric.annotation.Config;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -137,6 +138,17 @@ public class InterstitialPresenterDecoratorTest {
 
         verify(mMockAdTracker, never()).trackClick();
         verify(mMockListener, never()).onInterstitialClicked(any(InterstitialPresenter.class));
+    }
+
+    @Test
+    public void customEndCardTap_notifiesListenerOnce() {
+        // A custom end card tap sends CLICK first, then CUSTOM_END_CARD_CLICK.
+        mSubject.onInterstitialClicked(mMockPresenter);
+        mSubject.onCustomEndCardClick();
+        // A second tap on the same ad must not notify the publisher again.
+        mSubject.onInterstitialClicked(mMockPresenter);
+
+        verify(mMockListener, times(1)).onInterstitialClicked(mMockPresenter);
     }
 
     @Test

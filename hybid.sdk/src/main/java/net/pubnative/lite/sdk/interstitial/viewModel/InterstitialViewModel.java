@@ -64,7 +64,6 @@ public abstract class InterstitialViewModel extends BaseViewModel implements PNA
 
     protected boolean mIsSkippable = false;
 
-    protected AdTracker mAdTracker;
     protected AdTracker mCustomEndcardTracker;
     protected AdTracker mAdEventTracker;
     protected AdTracker mCustomCTATracker;
@@ -298,7 +297,6 @@ public abstract class InterstitialViewModel extends BaseViewModel implements PNA
 
     private void initTrackers() {
         if (mAd != null) {
-            mAdTracker = new AdTracker(mAd.getBeacons(Ad.Beacon.IMPRESSION), mAd.getBeacons(Ad.Beacon.CLICK));
             mCustomEndcardTracker = new AdTracker(mAd.getBeacons(Ad.Beacon.CUSTOM_END_CARD_IMPRESSION), mAd.getBeacons(Ad.Beacon.CUSTOM_END_CARD_CLICK));
             mAdEventTracker = new AdTracker(null, null, null, mAd.getBeacons(Ad.Beacon.COMPANION_AD_EVENT), mAd.getBeacons(Ad.Beacon.CUSTOM_ENDCARD_EVENT));
             mCustomCTATracker = new AdTracker(mAd.getBeacons(Ad.Beacon.CUSTOM_CTA_SHOW), mAd.getBeacons(Ad.Beacon.CUSTOM_CTA_CLICK), false);

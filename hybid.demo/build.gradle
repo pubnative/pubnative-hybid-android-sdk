@@ -1,36 +1,24 @@
 plugins {
-    id 'com.android.application'
-    id 'kotlin-android'
-    id 'kotlin-parcelize'
+    id 'hybid.android.app'
     //id 'com.fyber.fairbid-sdk-plugin' version '3.58.0'
     id 'com.google.firebase.appdistribution'
     id 'com.google.firebase.firebase-perf'
     id 'com.google.firebase.crashlytics'
     id 'com.google.gms.google-services'
     id 'org.jetbrains.kotlin.plugin.serialization'
-    id 'jacoco'
 }
 
 android {
-    compileSdk android_api
-
     defaultConfig {
         applicationId "net.pubnative.lite.demo"
-        minSdkVersion 24
-        targetSdkVersion android_api
-        versionCode buildNumber ? buildNumber : 1
-        versionName project.version
-        multiDexEnabled true
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-        vectorDrawables.useSupportLibrary = true
+        minSdk 24
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'lite.sdk.pro'
+            // TODO VMA-1659: enable minification and use proguard-rules.pro
+            // proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             buildConfigField "String", "BASE_URL", "\"https://api.pubnative.net/\""
         }
         debug {
@@ -44,10 +32,9 @@ android {
         }
         // CI-only: a minified (R8/Proguard-ON) build that is DEBUG-SIGNED — so it
         // installs on the lab device without a release keystore, yet applies the
-        // same rules as `release` (lite.sdk.pro + the SDK modules' consumer
-        // keep-rules). Purpose: give a regression suite a target that exercises
-        // the minified app so missing/incorrect keep-rules (which break real
-        // integrators who minify) surface — something the debug build never can.
+        // same rules as `release`. Purpose: give a regression suite a target that
+        // exercises the minified app so missing/incorrect keep-rules (which break
+        // real integrators who minify) surface — something the debug build never can.
         // NOTE: this repo only DEFINES the variant; nothing here assembles it.
         // Building/running `assembleMinified` is wired externally (the
         // automation-tests regression campaign), not in this repo's CI yet.
@@ -61,7 +48,8 @@ android {
             initWith debug
             minifyEnabled false
             shrinkResources false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'lite.sdk.pro'
+            // TODO VMA-1659: enable minification and use proguard-rules.pro
+            // proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             matchingFallbacks = ['release', 'debug']
             buildConfigField "String", "BASE_URL", "\"https://api.pubnative.net/\""
             // minifyEnabled makes the Crashlytics plugin register a mapping-file
@@ -73,21 +61,8 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
-    }
-
-    buildFeatures {
-        buildConfig true
-    }
-
-    packagingOptions {
+    packaging {
         resources.excludes.add("META-INF/*")
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     lint {
@@ -95,20 +70,14 @@ android {
     }
 
     buildFeatures {
+        buildConfig true
         viewBinding true
     }
 
-    testOptions {
-        unitTests {
-            includeAndroidResources = true
-        }
-    }
     namespace 'net.pubnative.lite.demo'
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-
     //Hybid Adapters
     implementation project(':hybid.adapters.admob')
     implementation project(':hybid.adapters.dfp')
@@ -121,7 +90,6 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'com.google.android.material:material:1.13.0'
-    implementation 'androidx.multidex:multidex:2.0.1'
 
     implementation "com.unity3d.ads-mediation:mediation-sdk:9.4.3"
     implementation 'com.applovin:applovin-sdk:13.6.3'
@@ -161,50 +129,4 @@ dependencies {
     testImplementation 'org.mockito:mockito-inline:4.5.1'
     testImplementation 'org.robolectric:robolectric:4.16.1'
     testImplementation 'androidx.test:core:1.7.0'
-
-    androidTestImplementation "androidx.test:core:1.5.0"
-    androidTestImplementation "androidx.test:runner:1.5.2"
-    androidTestImplementation "androidx.test.ext:junit:1.1.5"
-    androidTestImplementation "androidx.test.espresso:espresso-core:3.5.1"
-    androidTestImplementation "com.google.truth:truth:1.4.2"
-}
-
-
-//--------------------------------------------------------------------------------------------------
-// JACOCO COVERAGE
-//--------------------------------------------------------------------------------------------------
-jacoco {
-    toolVersion = "0.8.11"
-}
-
-tasks.register("jacocoTestReport", JacocoReport) {
-    dependsOn 'testDebugUnitTest'
-
-    reports {
-        xml.required = true
-        html.required = true
-    }
-
-    def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*']
-    def debugTree = fileTree(dir: "$buildDir/intermediates/javac/debug", excludes: fileFilter)
-    def kotlinDebugTree = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug", excludes: fileFilter)
-
-    sourceDirectories.setFrom(files(["src/main/java"]))
-    classDirectories.setFrom(files([debugTree, kotlinDebugTree]))
-    executionData.setFrom(fileTree(dir: buildDir, includes: [
-            "jacoco/testDebugUnitTest.exec",
-            "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec"
-    ]))
-}
-
-tasks.withType(Test).configureEach {
-    jacoco {
-        includeNoLocationClasses = true
-        excludes = ['jdk.internal.*']
-    }
-    testLogging {
-        events "passed", "skipped", "failed"
-        exceptionFormat = 'full'
-        showStandardStreams = true
-    }
 }

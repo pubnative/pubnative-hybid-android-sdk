@@ -18,6 +18,7 @@ import android.content.Intent;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import androidx.core.view.DisplayCutoutCompat;
@@ -35,6 +36,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
@@ -209,6 +211,17 @@ public class HyBidInterstitialActivityTest {
 
         // Should not throw exception
         Assert.assertEquals(0, getContentView(activity).getChildCount());
+    }
+
+    @Test
+    public void vastActivity_onCreate_setsKeepScreenOnFlag() {
+        Intent intent = createTestIntent().setClass(RuntimeEnvironment.getApplication(), VastInterstitialActivity.class);
+
+        VastInterstitialActivity vastActivity = Robolectric.buildActivity(VastInterstitialActivity.class, intent)
+                .create().get();
+
+        int flags = vastActivity.getWindow().getAttributes().flags;
+        assertTrue((flags & WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) != 0);
     }
 
     @Test

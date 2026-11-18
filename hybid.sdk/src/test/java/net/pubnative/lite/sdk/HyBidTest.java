@@ -1,5 +1,10 @@
 package net.pubnative.lite.sdk;
 
+import net.pubnative.lite.sdk.analytics.CrashController;
+import net.pubnative.lite.sdk.analytics.Reporting;
+import net.pubnative.lite.sdk.analytics.ReportingController;
+import net.pubnative.lite.sdk.analytics.ReportingEvent;
+import net.pubnative.lite.sdk.analytics.ReportingEventCallback;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.utils.sdkmanager.DisplayManager;
 import net.pubnative.lite.sdk.utils.sdkmanager.SdkManager;
@@ -13,7 +18,18 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.shadows.ShadowLooper;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import android.util.Base64;
@@ -611,5 +627,129 @@ public class HyBidTest {
         }
     }
 
+    @Test
+    public void testReportException_ReportingDisabled_DoesNotCreateControllerOrFormat() throws Exception {
+        CrashController crashController = mock(CrashController.class);
+        Object originalCrashController = setStaticField("sCrashController", crashController);
+        Object originalReportingController = setStaticField("sReportingController", null);
+        boolean originalReportingEnabled = HyBid.isReportingEnabled();
 
+        try {
+            HyBid.setReportingEnabled(false);
+            HyBid.reportException(new Exception("ignored"));
+            HyBid.reportException((Throwable) new OutOfMemoryError("ignored"));
+
+            Assert.assertNull(getStaticField("sReportingController"));
+            verifyNoInteractions(crashController);
+        } finally {
+            setStaticField("sCrashController", originalCrashController);
+            setStaticField("sReportingController", originalReportingController);
+            HyBid.setReportingEnabled(originalReportingEnabled);
+        }
+    }
+
+    @Test
+    public void testReportException_ReportingEnabled_DeliversErrorEvent() throws Exception {
+        Object originalCrashController = setStaticField("sCrashController", new CrashController());
+        Object originalReportingController = setStaticField("sReportingController", null);
+        boolean originalReportingEnabled = HyBid.isReportingEnabled();
+        List<ReportingEvent> events = new ArrayList<>();
+        ReportingEventCallback callback = events::add;
+
+        try {
+            HyBid.setReportingEnabled(true);
+            HyBid.addReportingCallback(callback);
+            HyBid.reportException(new Exception("exception message"));
+            HyBid.reportException((Throwable) new OutOfMemoryError("throwable message"));
+            ShadowLooper.idleMainLooper();
+
+            Assert.assertEquals(2, events.size());
+            Assert.assertEquals(Reporting.EventType.ERROR, events.get(0).getEventType());
+            Assert.assertEquals("exception message", events.get(0).getErrorMessage());
+            Assert.assertEquals(Reporting.EventType.ERROR, events.get(1).getEventType());
+            Assert.assertEquals("throwable message", events.get(1).getErrorMessage());
+        } finally {
+            HyBid.removeReportingCallback(callback);
+            setStaticField("sCrashController", originalCrashController);
+            setStaticField("sReportingController", originalReportingController);
+            HyBid.setReportingEnabled(originalReportingEnabled);
+        }
+    }
+
+    @Test
+    public void testReportException_Throwable_DoesNotThrow_WhenCrashControllerFails() throws Exception {
+        CrashController throwingCrashController = mock(CrashController.class);
+        when(throwingCrashController.formatException(any(Throwable.class)))
+                .thenThrow(new OutOfMemoryError("simulated secondary OOM"));
+        Object originalCrashController = setStaticField("sCrashController", throwingCrashController);
+        boolean originalReportingEnabled = HyBid.isReportingEnabled();
+
+        try {
+            HyBid.setReportingEnabled(true);
+            OutOfMemoryError original = new OutOfMemoryError("original OOM");
+            HyBid.reportException((Throwable) original);
+
+            verify(throwingCrashController).formatException((Throwable) original);
+        } finally {
+            setStaticField("sCrashController", originalCrashController);
+            HyBid.setReportingEnabled(originalReportingEnabled);
+        }
+    }
+
+    @Test
+    public void testReportException_Exception_DoesNotThrow_WhenCrashControllerFails() throws Exception {
+        CrashController throwingCrashController = mock(CrashController.class);
+        when(throwingCrashController.formatException(any(Throwable.class)))
+                .thenThrow(new RuntimeException("simulated secondary failure"));
+        Object originalCrashController = setStaticField("sCrashController", throwingCrashController);
+        boolean originalReportingEnabled = HyBid.isReportingEnabled();
+
+        try {
+            HyBid.setReportingEnabled(true);
+            Exception original = new Exception("original exception");
+            HyBid.reportException(original);
+
+            verify(throwingCrashController).formatException((Throwable) original);
+        } finally {
+            setStaticField("sCrashController", originalCrashController);
+            HyBid.setReportingEnabled(originalReportingEnabled);
+        }
+    }
+
+    @Test
+    public void testReportException_DoesNotThrow_WhenReportingControllerFails() throws Exception {
+        ReportingController throwingReportingController = mock(ReportingController.class);
+        doThrow(new OutOfMemoryError("simulated secondary OOM"))
+                .when(throwingReportingController).reportEvent(any());
+        Object originalCrashController = setStaticField("sCrashController", new CrashController());
+        Object originalReportingController = setStaticField("sReportingController", throwingReportingController);
+        boolean originalReportingEnabled = HyBid.isReportingEnabled();
+
+        try {
+            HyBid.setReportingEnabled(true);
+            HyBid.reportException(new Exception("original exception"));
+            HyBid.reportException((Throwable) new OutOfMemoryError("original OOM"));
+
+            verify(throwingReportingController, times(2)).reportEvent(any());
+        } finally {
+            setStaticField("sCrashController", originalCrashController);
+            setStaticField("sReportingController", originalReportingController);
+            HyBid.setReportingEnabled(originalReportingEnabled);
+        }
+    }
+
+    private static Object getStaticField(String name) throws Exception {
+        Field field = HyBid.class.getDeclaredField(name);
+        field.setAccessible(true);
+        return field.get(null);
+    }
+
+    /** Sets a private static field of {@link HyBid} and returns its previous value. */
+    private static Object setStaticField(String name, Object value) throws Exception {
+        Field field = HyBid.class.getDeclaredField(name);
+        field.setAccessible(true);
+        Object previous = field.get(null);
+        field.set(null, value);
+        return previous;
+    }
 }

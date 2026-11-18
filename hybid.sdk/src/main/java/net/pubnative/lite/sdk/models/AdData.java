@@ -15,6 +15,8 @@ import java.util.Map;
 
 public class AdData extends JsonModel implements Serializable {
 
+    static String FIELD_URL = "url";
+
     @BindField
     public String type;
     @BindField
@@ -51,7 +53,7 @@ public class AdData extends JsonModel implements Serializable {
 
     public String getURL() {
 
-        return getStringField("url");
+        return getStringField(FIELD_URL);
     }
 
     public String getJS() {

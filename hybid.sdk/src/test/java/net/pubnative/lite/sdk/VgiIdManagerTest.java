@@ -398,8 +398,8 @@ public class VgiIdManagerTest {
     // =============================================================================================
 
     @Test
-    @Config(sdk = 21)
-    public void testGetBatteryCapacity_onLollipop_returnsCalculatedCapacity() {
+    @Config(sdk = 23)
+    public void testGetBatteryCapacity_onMarshmallow_returnsCalculatedCapacity() {
         try (MockedStatic<HyBid> hyBidMock = mockStatic(HyBid.class);
              MockedStatic<PNCrypto> cryptoMock = mockStatic(PNCrypto.class)) {
 
@@ -436,7 +436,7 @@ public class VgiIdManagerTest {
     }
 
     @Test
-    @Config(sdk = 21)
+    @Config(sdk = 23)
     public void testGetBatteryCapacity_withMinValues_returnsNegativeOne() {
         try (MockedStatic<HyBid> hyBidMock = mockStatic(HyBid.class)) {
             hyBidMock.when(HyBid::getAppToken).thenReturn(APP_TOKEN);
@@ -464,7 +464,7 @@ public class VgiIdManagerTest {
     }
 
     @Test
-    @Config(sdk = 21)
+    @Config(sdk = 23)
     public void testGetBatteryCapacity_withNullBatteryManager_returnsNegativeOne() {
         try (MockedStatic<HyBid> hyBidMock = mockStatic(HyBid.class)) {
             hyBidMock.when(HyBid::getAppToken).thenReturn(APP_TOKEN);
@@ -801,7 +801,7 @@ public class VgiIdManagerTest {
     }
 
     @Test
-    @Config(sdk = 21)
+    @Config(sdk = 23)
     public void testGetBatteryCapacity_withValidValues_calculatesCorrectly() {
         try (MockedStatic<HyBid> hyBidMock = mockStatic(HyBid.class);
              MockedStatic<PNCrypto> cryptoMock = mockStatic(PNCrypto.class)) {
@@ -834,7 +834,7 @@ public class VgiIdManagerTest {
     }
 
     @Test
-    @Config(sdk = 21)
+    @Config(sdk = 23)
     public void testGetBatteryCapacity_withCapacityMinValue_returnsNegativeOne() {
         try (MockedStatic<HyBid> hyBidMock = mockStatic(HyBid.class);
              MockedStatic<PNCrypto> cryptoMock = mockStatic(PNCrypto.class)) {
@@ -860,32 +860,6 @@ public class VgiIdManagerTest {
             String capturedJson = jsonCaptor.getValue();
             assertNotNull(capturedJson);
             // Battery capacity should not be in JSON when calculation returns -1
-            assertTrue("Battery object should exist", capturedJson.contains("\"battery\""));
-        }
-    }
-
-    @Test
-    @Config(sdk = 22) // Below API 23
-    public void testIsBatteryCharging_belowMarshmallow_returnsNull() {
-        try (MockedStatic<HyBid> hyBidMock = mockStatic(HyBid.class);
-             MockedStatic<PNCrypto> cryptoMock = mockStatic(PNCrypto.class)) {
-
-            hyBidMock.when(HyBid::getAppToken).thenReturn(APP_TOKEN);
-            hyBidMock.when(HyBid::getUserDataManager).thenReturn(mockUserDataManager);
-            hyBidMock.when(HyBid::getDeviceInfo).thenReturn(mockDeviceInfo);
-            hyBidMock.when(HyBid::getLocationManager).thenReturn(null);
-            hyBidMock.when(HyBid::getBundleId).thenReturn(BUNDLE_ID);
-
-            ArgumentCaptor<String> jsonCaptor = ArgumentCaptor.forClass(String.class);
-            cryptoMock.when(() -> PNCrypto.encryptString(jsonCaptor.capture(), eq(APP_TOKEN)))
-                    .thenReturn("encrypted");
-
-            VgiIdManager manager = new VgiIdManager(mockContext);
-            manager.init();
-
-            // On API < 23, charging status should be null
-            String capturedJson = jsonCaptor.getValue();
-            assertNotNull(capturedJson);
             assertTrue("Battery object should exist", capturedJson.contains("\"battery\""));
         }
     }

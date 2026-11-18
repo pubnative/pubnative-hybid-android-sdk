@@ -39,6 +39,7 @@ public abstract class HyBidRewardedActivity extends Activity implements Rewarded
     public static final String EXTRA_ZONE_ID = "extra_pn_zone_id";
     public static final String EXTRA_SESSION_ID = "extra_pn_session_id";
     public static final String EXTRA_BROADCAST_ID = "extra_pn_broadcast_id";
+    private static final String STATE_REWARD_EARNED = "state_pn_reward_earned";
     public static final String EXTRA_SKIP_OFFSET = "extra_pn_skip_offset";
     public static final String EXTRA_WATERMARK_DATA = "extra_pn_watermark_data";
     public static final String INTEGRATION_TYPE = "integration_type";
@@ -60,9 +61,18 @@ public abstract class HyBidRewardedActivity extends Activity implements Rewarded
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         initializeViews();
-        initializeViewModel();
+        initializeViewModel(savedInstanceState != null && savedInstanceState.getBoolean(STATE_REWARD_EARNED, false));
         setupBackHandler();
         applyWindowInsets(mCloseableContainer);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // The system can recreate the activity (e.g. theme colour change); keep an earned reward across it.
+        if (mViewModel != null && mViewModel.isRewardEarned()) {
+            outState.putBoolean(STATE_REWARD_EARNED, true);
+        }
     }
 
     @Override
@@ -87,7 +97,7 @@ public abstract class HyBidRewardedActivity extends Activity implements Rewarded
         mWatermarkHelper = new WatermarkHelper();
     }
 
-    private void initializeViewModel() {
+    private void initializeViewModel(boolean rewardRestored) {
         Intent mIntent = getIntent();
         mInteractor = HyBidActivityInteractor.getInstance();
 
@@ -100,9 +110,9 @@ public abstract class HyBidRewardedActivity extends Activity implements Rewarded
 
 
         if (this instanceof VastRewardedActivity) {
-            mViewModel = new VastRewardedViewModel(this, cacheKey, mIntent.getStringExtra(INTEGRATION_TYPE), mIntent.getIntExtra(EXTRA_SKIP_OFFSET, -1), mIntent.getLongExtra(EXTRA_BROADCAST_ID, -1), this);
+            mViewModel = new VastRewardedViewModel(this, cacheKey, mIntent.getStringExtra(INTEGRATION_TYPE), mIntent.getIntExtra(EXTRA_SKIP_OFFSET, -1), mIntent.getLongExtra(EXTRA_BROADCAST_ID, -1), this, rewardRestored);
         } else {
-            mViewModel = new MraidRewardedViewModel(this, cacheKey, mIntent.getStringExtra(INTEGRATION_TYPE), mIntent.getIntExtra(EXTRA_SKIP_OFFSET, -1), mIntent.getLongExtra(EXTRA_BROADCAST_ID, -1), this);
+            mViewModel = new MraidRewardedViewModel(this, cacheKey, mIntent.getStringExtra(INTEGRATION_TYPE), mIntent.getIntExtra(EXTRA_SKIP_OFFSET, -1), mIntent.getLongExtra(EXTRA_BROADCAST_ID, -1), this, rewardRestored);
         }
         String watermarkData = mIntent.getStringExtra(EXTRA_WATERMARK_DATA);
         View watermarkView = WatermarkHelper.createWatermarkView(this, watermarkData);

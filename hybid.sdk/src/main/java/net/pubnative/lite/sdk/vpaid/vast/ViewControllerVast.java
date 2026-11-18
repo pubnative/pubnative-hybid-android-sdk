@@ -225,14 +225,14 @@ public class ViewControllerVast implements View.OnClickListener {
             mVideoPlayerLayout.addView(mVideoPlayerLayoutTexture, 0, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
         }
 
-        mEndCardView = new HyBidEndCardView(context, mHasReducedCloseButton, mReplayListener);
+        mEndCardView = new HyBidEndCardView(context, mHasReducedCloseButton, mReplayListener, mIsFullscreen);
         mEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         mEndCardView.setVisibility(View.GONE);
         mEndCardView.setTouchSize(mTouchSize);
         mEndCardView.setInitialTouchSize(mInitialTouchSize);
         mEndCardView.setClickStateProvider(mClickStateProvider);
 
-        mLastCustomEndCardView = new HyBidEndCardView(context, mHasReducedCloseButton, mReplayListener);
+        mLastCustomEndCardView = new HyBidEndCardView(context, mHasReducedCloseButton, mReplayListener, mIsFullscreen);
         mLastCustomEndCardView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         mLastCustomEndCardView.setVisibility(View.GONE);
         mLastCustomEndCardView.setTouchSize(mTouchSize);
@@ -749,6 +749,9 @@ public class ViewControllerVast implements View.OnClickListener {
     }
 
     public void showSkipButton() {
+        if (mcloseButtonListener != null) {
+            mcloseButtonListener.onSkipButtonShown();
+        }
         if (mSkipView != null) {
             if (mIsBrandAd) {
                 if (mUxLayout.getVisibility() == View.VISIBLE) {
@@ -923,6 +926,19 @@ public class ViewControllerVast implements View.OnClickListener {
     public void muteVideo() {
         mMuteState = !mMuteState;
         mAdController.setVolume(mMuteState);
+        updateMuteIcon();
+    }
+
+    /**
+     * Sets the mute state and the mute button icon only. Does not touch the player or fire any
+     * tracker; used for a state that comes from configuration, not from a tap on the button.
+     */
+    public void setMuteState(boolean mute) {
+        mMuteState = mute;
+        updateMuteIcon();
+    }
+
+    private void updateMuteIcon() {
         if (mMuteView != null) {
             if (mMuteState) {
                 mMuteView.setImageResource(R.mipmap.mute);

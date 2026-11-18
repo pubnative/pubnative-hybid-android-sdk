@@ -186,6 +186,7 @@ class VideoAdControllerVpaid implements VideoAdController, BridgeEventHandler {
     }
 
     @Override
+    @Deprecated
     public void toggleMute() {
 
     }

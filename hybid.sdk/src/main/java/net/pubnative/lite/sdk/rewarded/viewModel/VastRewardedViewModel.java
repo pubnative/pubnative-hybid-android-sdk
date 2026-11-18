@@ -42,6 +42,7 @@ public class VastRewardedViewModel extends RewardedViewModel implements AdPresen
     private boolean mReady = false;
     private boolean mHasEndCard = false;
     private boolean mIsVideoFinished = false;
+    private boolean mIsSkipOffsetReached = false;
     protected Boolean mDefaultEndCardClickTracked = false;
     protected Boolean mCustomEndCardClickTracked = false;
     protected List<String> mCustomCTAClickTrackedEvents = new ArrayList<>();
@@ -70,7 +71,14 @@ public class VastRewardedViewModel extends RewardedViewModel implements AdPresen
     private boolean mIsAdPausedBeforeRender = false;
 
     public VastRewardedViewModel(Context context, String zoneId, String integrationType, int skipOffset, long broadcastId, RewardedActivityInteractor listener) {
+        this(context, zoneId, integrationType, skipOffset, broadcastId, listener, false);
+    }
+
+    public VastRewardedViewModel(Context context, String zoneId, String integrationType, int skipOffset, long broadcastId, RewardedActivityInteractor listener, boolean rewardRestored) {
         super(context, zoneId, integrationType, skipOffset, broadcastId, listener);
+        if (rewardRestored) {
+            restoreRewardEarned();
+        }
         initiateCustomCTAAdTrackers();
         initiateEventTrackers();
         processRewardedAd();
@@ -143,8 +151,7 @@ public class VastRewardedViewModel extends RewardedViewModel implements AdPresen
                 extras.putInt(HyBidRewardedBroadcastReceiver.VIDEO_PROGRESS, 0);
                 sendBroadcast(HyBidRewardedBroadcastReceiver.Action.ERROR);
                 sendBroadcast(HyBidRewardedBroadcastReceiver.Action.VIDEO_ERROR, extras);
-                sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLOSE);
-                mListener.finishActivity();
+                dismissAfterError();
             }
         } catch (Exception exception) {
             Logger.e(TAG, exception.getMessage());
@@ -152,8 +159,7 @@ public class VastRewardedViewModel extends RewardedViewModel implements AdPresen
             extras.putInt(HyBidRewardedBroadcastReceiver.VIDEO_PROGRESS, 0);
             sendBroadcast(HyBidRewardedBroadcastReceiver.Action.ERROR);
             sendBroadcast(HyBidRewardedBroadcastReceiver.Action.VIDEO_ERROR, extras);
-            sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLOSE);
-            mListener.finishActivity();
+            dismissAfterError();
         }
     }
 
@@ -170,13 +176,15 @@ public class VastRewardedViewModel extends RewardedViewModel implements AdPresen
 
         @Override
         public void onAdLoadFail(PlayerInfo info) {
+            if (isClosed()) {
+                return;
+            }
             mListener.hideProgressBar();
             Bundle extras = new Bundle();
             extras.putInt(HyBidRewardedBroadcastReceiver.VIDEO_PROGRESS, 0);
             sendBroadcast(HyBidRewardedBroadcastReceiver.Action.ERROR);
             sendBroadcast(HyBidRewardedBroadcastReceiver.Action.VIDEO_ERROR, extras);
-            sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLOSE);
-            mListener.finishActivity();
+            dismissAfterError();
         }
 
         @Override
@@ -332,6 +340,7 @@ public class VastRewardedViewModel extends RewardedViewModel implements AdPresen
 
         @Override
         public void onAdStarted() {
+            mIsAdPresented = true;
             sendBroadcast(HyBidRewardedBroadcastReceiver.Action.VIDEO_START);
         }
 
@@ -392,7 +401,13 @@ public class VastRewardedViewModel extends RewardedViewModel implements AdPresen
     }
 
     @Override
+    public void onSkipButtonShown() {
+        mIsSkipOffsetReached = true;
+    }
+
+    @Override
     public void showButton() {
+        mIsSkipOffsetReached = true;
         if (!mHasEndCard)
             mIsSkippable = true;
         mListener.showRewardedCloseButton(mCloseListener);
@@ -410,8 +425,8 @@ public class VastRewardedViewModel extends RewardedViewModel implements AdPresen
             mVideoAd.skip();
         } else {
             mVideoAd.closeVideo();
-            sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLOSE);
-            mListener.finishActivity();
+            // closeVideo() normally dismisses the ad already; dismiss() is a no-op in that case.
+            dismiss();
         }
     }
 
@@ -488,6 +503,6 @@ public class VastRewardedViewModel extends RewardedViewModel implements AdPresen
 
     @Override
     public boolean isRewardEligible() {
-        return mIsSkippable || mIsVideoFinished;
+        return mIsSkippable || mIsVideoFinished || mIsSkipOffsetReached || mIsRewardRestored;
     }
 }

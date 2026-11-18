@@ -33,6 +33,7 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, HyBidI
     private final String mWatermarkData;
 
     private Listener mListener;
+    private CustomEndCardListener mCustomEndCardListener;
     private boolean mIsDestroyed;
     private boolean mReady = false;
 
@@ -62,7 +63,7 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, HyBidI
 
     @Override
     public void setCustomEndCardListener(CustomEndCardListener listener) {
-
+        mCustomEndCardListener = listener;
     }
 
     @Override
@@ -113,6 +114,7 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, HyBidI
             mBroadcastReceiver.destroy();
         }
         mListener = null;
+        mCustomEndCardListener = null;
         mIsDestroyed = true;
         mReady = false;
     }
@@ -125,6 +127,6 @@ public class MraidInterstitialPresenter implements InterstitialPresenter, HyBidI
     //----------------------- Interstitial Broadcast Receiver Callbacks ----------------------------
     @Override
     public void onReceivedAction(HyBidInterstitialBroadcastReceiver.Action action, Bundle extras) {
-        mBroadcastReceiver.handleAction(action, extras, this, mListener);
+        mBroadcastReceiver.handleAction(action, extras, this, mListener, null, mCustomEndCardListener);
     }
 }

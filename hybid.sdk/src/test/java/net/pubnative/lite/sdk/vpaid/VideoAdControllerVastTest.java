@@ -4,9 +4,37 @@
 //
 package net.pubnative.lite.sdk.vpaid;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.anyFloat;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.view.TextureView;
+import android.view.View;
+import android.view.ViewGroup;
 
 import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
@@ -14,6 +42,7 @@ import net.pubnative.lite.sdk.analytics.ReportingController;
 import net.pubnative.lite.sdk.analytics.tracker.ReportingTracker;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.CustomCTAData;
+import net.pubnative.lite.sdk.models.EndCardData;
 import net.pubnative.lite.sdk.models.IntegrationType;
 import net.pubnative.lite.sdk.network.PNHttpClient;
 import net.pubnative.lite.sdk.network.RetryPolicy;
@@ -22,6 +51,7 @@ import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeVideoAdSession;
 import net.pubnative.lite.sdk.viewability.baseom.BaseFriendlyObstructionPurpose;
+import net.pubnative.lite.sdk.views.endcard.HyBidEndCardView;
 import net.pubnative.lite.sdk.vpaid.enums.EventConstants;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
 import net.pubnative.lite.sdk.vpaid.macros.MacroHelper;
@@ -29,6 +59,7 @@ import net.pubnative.lite.sdk.vpaid.models.vast.Tracking;
 import net.pubnative.lite.sdk.vpaid.models.vpaid.TrackingEvent;
 import net.pubnative.lite.sdk.vpaid.response.AdParams;
 import net.pubnative.lite.sdk.vpaid.utils.UrlClickSource;
+import net.pubnative.lite.sdk.vpaid.utils.Utils;
 import net.pubnative.lite.sdk.vpaid.vast.ViewControllerVast;
 
 import org.junit.After;
@@ -45,23 +76,10 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowMediaPlayer;
 
-import android.view.View;
-import android.view.ViewGroup;
-import net.pubnative.lite.sdk.views.endcard.HyBidEndCardView;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
-
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.doAnswer;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = ShadowMediaPlayer.class, sdk = 28)
@@ -96,7 +114,7 @@ public class VideoAdControllerVastTest {
 
     private VideoAdControllerVast videoAdControllerVast;
     private Context context;
-    
+
     private MockedStatic<HyBid> mockedHyBid;
     private MockedStatic<EventTracker> mockedEventTracker;
 
@@ -107,10 +125,10 @@ public class VideoAdControllerVastTest {
 
         mockedHyBid = mockStatic(HyBid.class);
         mockedEventTracker = mockStatic(EventTracker.class);
-        
+
         mockedHyBid.when(HyBid::getDeviceInfo).thenReturn(mockDeviceInfo);
         when(mockDeviceInfo.getUserAgent()).thenReturn("TestUserAgent");
-        
+
         mockedEventTracker.when(() -> EventTracker.postEvent(
                 any(Context.class), anyString(), anyString(), any(MacroHelper.class), anyBoolean()
         )).thenAnswer(invocation -> null);
@@ -192,8 +210,8 @@ public class VideoAdControllerVastTest {
     }
 
     @Test
-    public void testOpenUrl_withVastSource_postsVideoClick() {
-        //VideoClick must still fire on a video-body tap.
+    public void testOpenUrl_withVastSource_postsClickTracking() {
+        //ClickTracking must still fire on a video-body tap.
         when(mockAdParams.getVideoClicks()).thenReturn(Collections.singletonList("http://video-click.com"));
 
         try (MockedConstruction<UrlHandler> urlHandler = mockConstruction(UrlHandler.class)) {
@@ -201,13 +219,13 @@ public class VideoAdControllerVastTest {
         }
 
         mockedEventTracker.verify(() -> EventTracker.postEvent(
-                any(Context.class), eq("http://video-click.com"), eq("VideoClick"),
+                any(Context.class), eq("http://video-click.com"), eq("ClickTracking"),
                 any(MacroHelper.class), anyBoolean()), times(1));
     }
 
     @Test
-    public void testOpenUrl_videoTapThenEndCardTap_postsOneVideoClickAndOneEndcardClick() {
-        // video tap then an end-card tap = 2 beacons (1 VideoClick + 1 EndcardClick), not 3.
+    public void testOpenUrl_videoTapThenEndCardTap_postsOneClickTrackingAndOneCompanionClickTracking() {
+        // video tap then an end-card tap = 2 beacons (1 ClickTracking + 1 CompanionClickTracking), not 3.
         when(mockAdParams.getVideoClicks()).thenReturn(Collections.singletonList("http://video-click.com"));
         when(mockAdParams.getEndCardClicks()).thenReturn(Collections.singletonList("http://endcard-click.com"));
         when(mockAdParams.getVideoRedirectUrl()).thenReturn("http://video-redirect.com");
@@ -218,10 +236,10 @@ public class VideoAdControllerVastTest {
         }
 
         mockedEventTracker.verify(() -> EventTracker.postEvent(
-                any(Context.class), eq("http://video-click.com"), eq("VideoClick"),
+                any(Context.class), eq("http://video-click.com"), eq("ClickTracking"),
                 any(MacroHelper.class), anyBoolean()), times(1));
         mockedEventTracker.verify(() -> EventTracker.postEvent(
-                any(Context.class), eq("http://endcard-click.com"), eq("EndcardClick"),
+                any(Context.class), eq("http://endcard-click.com"), eq("CompanionClickTracking"),
                 any(MacroHelper.class), anyBoolean()), times(1));
     }
 
@@ -244,20 +262,19 @@ public class VideoAdControllerVastTest {
     }
 
     @Test
-    public void testOpenUrl_withCustomEndCardSource_doesNotCallBaseAdInternal() {
+    public void testOpenUrl_withCustomEndCardSource_callsBaseAdInternal() {
         String url = "http://example.com";
 
-        try {
+        try (MockedConstruction<UrlHandler> ignored = mockConstruction(UrlHandler.class)) {
             videoAdControllerVast.openUrl(url, UrlClickSource.CUSTOM_END_CARD);
-        } catch (NullPointerException e) {
-            // Expected - BrowserManager is not initialized in test environment
         }
 
-        verify(mockBaseAdInternal, never()).onAdClicked();
+        // Publisher click callback must fire for the custom end card too (iOS parity).
+        verify(mockBaseAdInternal, times(1)).onAdClicked();
     }
 
     @Test
-    public void testOpenUrl_withDefaultEndCardSource_postsEndcardClickNeverVideoClick_videoRedirectIsNavigationFallback() {
+    public void testOpenUrl_withDefaultEndCardSource_postsCompanionClickTrackingNeverClickTracking_videoRedirectIsNavigationFallback() {
         when(mockAdParams.getEndCardClicks()).thenReturn(Collections.singletonList("http://endcard-click.com"));
         when(mockAdParams.getVideoClicks()).thenReturn(Collections.singletonList("http://video-click.com"));
         when(mockAdParams.getVideoRedirectUrl()).thenReturn("http://video-redirect.com");
@@ -265,22 +282,22 @@ public class VideoAdControllerVastTest {
         try (MockedConstruction<UrlHandler> urlHandler = mockConstruction(UrlHandler.class)) {
             videoAdControllerVast.openUrl("http://example.com", UrlClickSource.DEFAULT_END_CARD);
 
-            // EndcardClick posted, VideoClick never.
+            // CompanionClickTracking posted, ClickTracking never.
             mockedEventTracker.verify(() -> EventTracker.postEvent(
-                    any(Context.class), eq("http://endcard-click.com"), eq("EndcardClick"),
+                    any(Context.class), eq("http://endcard-click.com"), eq("CompanionClickTracking"),
                     any(MacroHelper.class), anyBoolean()));
             mockedEventTracker.verify(() -> EventTracker.postEvent(
-                    any(Context.class), anyString(), eq("VideoClick"),
+                    any(Context.class), anyString(), eq("ClickTracking"),
                     any(MacroHelper.class), anyBoolean()), never());
             // Navigation receives the video redirect fallback.
             verify(urlHandler.constructed().get(0))
-                    .handleUrl(eq("http://video-redirect.com"), any(), any());
+                    .handleUrlWithResult(eq("http://video-redirect.com"), any(), any());
         }
         verify(mockBaseAdInternal).onAdClicked();
     }
 
     @Test
-    public void testOpenUrl_withCustomEndCardSource_postsVideoClickNeverEndcardClick_videoRedirectIsNavigationFallback() {
+    public void testOpenUrl_withCustomEndCardSource_postsClickTrackingNeverCompanionClickTracking_videoRedirectIsNavigationFallback() {
         when(mockAdParams.getEndCardClicks()).thenReturn(Collections.singletonList("http://endcard-click.com"));
         when(mockAdParams.getVideoClicks()).thenReturn(Collections.singletonList("http://video-click.com"));
         when(mockAdParams.getVideoRedirectUrl()).thenReturn("http://video-redirect.com");
@@ -288,16 +305,16 @@ public class VideoAdControllerVastTest {
         try (MockedConstruction<UrlHandler> urlHandler = mockConstruction(UrlHandler.class)) {
             videoAdControllerVast.openUrl(null, UrlClickSource.CUSTOM_END_CARD);
 
-            // VideoClick posted once (iOS parity), EndcardClick never.
+            // ClickTracking posted once (iOS parity), CompanionClickTracking never.
             mockedEventTracker.verify(() -> EventTracker.postEvent(
-                    any(Context.class), eq("http://video-click.com"), eq("VideoClick"),
+                    any(Context.class), eq("http://video-click.com"), eq("ClickTracking"),
                     any(MacroHelper.class), anyBoolean()), times(1));
             mockedEventTracker.verify(() -> EventTracker.postEvent(
-                    any(Context.class), anyString(), eq("EndcardClick"),
+                    any(Context.class), anyString(), eq("CompanionClickTracking"),
                     any(MacroHelper.class), anyBoolean()), never());
             // Navigation receives the video redirect.
             verify(urlHandler.constructed().get(0))
-                    .handleUrl(eq("http://video-redirect.com"), any(), any());
+                    .handleUrlWithResult(eq("http://video-redirect.com"), any(), any());
         }
     }
 
@@ -321,31 +338,78 @@ public class VideoAdControllerVastTest {
         when(mockAdParams.getVideoRedirectUrl()).thenReturn("http://video-redirect.com");
         ReportingController reportingController = stubReportingController();
 
-        try (MockedConstruction<UrlHandler> urlHandler = mockConstruction(UrlHandler.class)) {
+        try (MockedConstruction<UrlHandler> urlHandler =
+                     mockConstruction(UrlHandler.class, (mock, context) -> {
+                         when(mock.handleUrlWithResult(any(), any(), any())).thenReturn(true);
+                     })) {
             videoAdControllerVast.openUrl("http://example.com", UrlClickSource.VAST);
 
             verify(urlHandler.constructed().get(0), times(1))
-                    .handleUrl(eq("http://video-redirect.com"), any(), any());
+                    .handleUrlWithResult(eq("http://video-redirect.com"), any(), any());
         }
 
         assertNoClickThroughRequest();
         ArgumentCaptor<ReportingTracker> captor = ArgumentCaptor.forClass(ReportingTracker.class);
         verify(reportingController, times(1)).reportFiredTracker(captor.capture());
-        assertEquals("ClickThrough", captor.getValue().getType());
+        assertEquals("ClickThrough - opened", captor.getValue().getType());
         assertEquals("http://video-redirect.com", captor.getValue().getUrl());
     }
 
     @Test
-    public void testOpenUrl_withCustomCTASource_doesNotRequestClickThroughUrl() {
+    public void testOpenUrl_whenOffline_logsFailedLocally() {
         when(mockAdParams.getVideoRedirectUrl()).thenReturn("http://video-redirect.com");
         ReportingController reportingController = stubReportingController();
 
-        try (MockedConstruction<UrlHandler> urlHandler = mockConstruction(UrlHandler.class)) {
+        try (MockedConstruction<UrlHandler> urlHandler =
+                     mockConstruction(UrlHandler.class, (mock, context) -> {
+                         when(mock.handleUrlWithResult(any(), any(), any())).thenReturn(true);
+                     });
+             MockedStatic<Utils> utilsMockedStatic = mockStatic(Utils.class);
+        ) {
+            utilsMockedStatic.when(() -> Utils.isOnline(any())).thenReturn(false);
+            videoAdControllerVast.openUrl("http://example.com", UrlClickSource.VAST);
+        }
+
+        ArgumentCaptor<ReportingTracker> captor = ArgumentCaptor.forClass(ReportingTracker.class);
+        verify(reportingController, times(1)).reportFiredTracker(captor.capture());
+        assertEquals("ClickThrough - failed", captor.getValue().getType());
+        assertEquals("http://video-redirect.com", captor.getValue().getUrl());
+    }
+
+    @Test
+    public void testOpenUrl_withVastSource_logsFailureLocally() {
+        when(mockAdParams.getVideoRedirectUrl()).thenReturn("http://video-redirect.com");
+        ReportingController reportingController = stubReportingController();
+
+        try (MockedConstruction<UrlHandler> urlHandler =
+                     mockConstruction(UrlHandler.class, (mock, context) -> {
+                         when(mock.handleUrlWithResult(any(), any(), any())).thenReturn(false);
+                     })) {
+            videoAdControllerVast.openUrl("http://example.com", UrlClickSource.VAST);
+        }
+
+        ArgumentCaptor<ReportingTracker> captor = ArgumentCaptor.forClass(ReportingTracker.class);
+        verify(reportingController, times(1)).reportFiredTracker(captor.capture());
+        assertEquals("ClickThrough - failed", captor.getValue().getType());
+    }
+
+    @Test
+    public void testOpenUrl_withCustomCTASource_doesNotRequestClickThroughUrl_logsClickThrough() {
+        when(mockAdParams.getVideoRedirectUrl()).thenReturn("http://video-redirect.com");
+        ReportingController reportingController = stubReportingController();
+
+        try (MockedConstruction<UrlHandler> urlHandler =
+                     mockConstruction(UrlHandler.class, (mock, context) -> {
+                         when(mock.handleUrlWithResult(any(), any(), any())).thenReturn(true);
+                     })) {
             videoAdControllerVast.openUrl("http://example.com", UrlClickSource.CUSTOM_CTA);
         }
 
         assertNoClickThroughRequest();
-        verify(reportingController, times(1)).reportFiredTracker(any(ReportingTracker.class));
+        ArgumentCaptor<ReportingTracker> captor = ArgumentCaptor.forClass(ReportingTracker.class);
+        verify(reportingController, times(1)).reportFiredTracker(captor.capture());
+        assertEquals("ClickThrough - opened", captor.getValue().getType());
+        assertEquals("http://video-redirect.com", captor.getValue().getUrl());
     }
 
     @Test
@@ -354,38 +418,67 @@ public class VideoAdControllerVastTest {
         when(mockAdParams.getVideoRedirectUrl()).thenReturn("http://video-redirect.com");
         ReportingController reportingController = stubReportingController();
 
-        try (MockedConstruction<UrlHandler> urlHandler = mockConstruction(UrlHandler.class)) {
+        try (MockedConstruction<UrlHandler> urlHandler =
+                     mockConstruction(UrlHandler.class, (mock, context) -> {
+                         when(mock.handleUrlWithResult(any(), any(), any())).thenReturn(true);
+                     })) {
             videoAdControllerVast.openUrl("http://example.com", UrlClickSource.DEFAULT_END_CARD);
 
             verify(urlHandler.constructed().get(0), times(1))
-                    .handleUrl(eq("http://endcard-redirect.com"), any(), any());
+                    .handleUrlWithResult(eq("http://endcard-redirect.com"), any(), any());
         }
 
         assertNoClickThroughRequest();
         ArgumentCaptor<ReportingTracker> captor = ArgumentCaptor.forClass(ReportingTracker.class);
         verify(reportingController, times(1)).reportFiredTracker(captor.capture());
-        assertEquals("CompanionClickThrough", captor.getValue().getType());
+        assertEquals("CompanionClickThrough - opened", captor.getValue().getType());
         assertEquals("http://endcard-redirect.com", captor.getValue().getUrl());
     }
 
     @Test
-    public void testOpenUrl_withDefaultEndCardSourceAndNoEndCardRedirect_doesNotRequestClickThroughUrl_logsVideoClickThrough() {
+    public void testOpenUrl_withDefaultEndCardSourceAndNoEndCardRedirect_doesNotRequestClickThroughUrl_logsClickThrough() {
         when(mockAdParams.getEndCardRedirectUrl()).thenReturn(null);
         when(mockAdParams.getVideoRedirectUrl()).thenReturn("http://video-redirect.com");
         ReportingController reportingController = stubReportingController();
 
-        try (MockedConstruction<UrlHandler> urlHandler = mockConstruction(UrlHandler.class)) {
+        try (MockedConstruction<UrlHandler> urlHandler =
+                     mockConstruction(UrlHandler.class, (mock, context) -> {
+                         when(mock.handleUrlWithResult(any(), any(), any())).thenReturn(true);
+                     })) {
             videoAdControllerVast.openUrl("http://example.com", UrlClickSource.DEFAULT_END_CARD);
 
             verify(urlHandler.constructed().get(0), times(1))
-                    .handleUrl(eq("http://video-redirect.com"), any(), any());
+                    .handleUrlWithResult(eq("http://video-redirect.com"), any(), any());
         }
 
         assertNoClickThroughRequest();
         ArgumentCaptor<ReportingTracker> captor = ArgumentCaptor.forClass(ReportingTracker.class);
         verify(reportingController, times(1)).reportFiredTracker(captor.capture());
-        assertEquals("ClickThrough", captor.getValue().getType());
+        assertEquals("ClickThrough - opened", captor.getValue().getType());
         assertEquals("http://video-redirect.com", captor.getValue().getUrl());
+    }
+
+    @Test
+    public void testOpenUrl_withDefaultEndCardAndVideoRedirectUrlsEqual_doesNotRequestClickThroughUrl_logsCompanionClickThrough() {
+        when(mockAdParams.getEndCardRedirectUrl()).thenReturn("http://same-redirect.com");
+        when(mockAdParams.getVideoRedirectUrl()).thenReturn("http://same-redirect.com");
+        ReportingController reportingController = stubReportingController();
+
+        try (MockedConstruction<UrlHandler> urlHandler =
+                     mockConstruction(UrlHandler.class, (mock, context) -> {
+                         when(mock.handleUrlWithResult(any(), any(), any())).thenReturn(true);
+                     })) {
+            videoAdControllerVast.openUrl("http://example.com", UrlClickSource.DEFAULT_END_CARD);
+
+            verify(urlHandler.constructed().get(0), times(1))
+                    .handleUrlWithResult(eq("http://same-redirect.com"), any(), any());
+        }
+
+        assertNoClickThroughRequest();
+        ArgumentCaptor<ReportingTracker> captor = ArgumentCaptor.forClass(ReportingTracker.class);
+        verify(reportingController, times(1)).reportFiredTracker(captor.capture());
+        assertEquals("CompanionClickThrough - opened", captor.getValue().getType());
+        assertEquals("http://same-redirect.com", captor.getValue().getUrl());
     }
 
     @Test
@@ -397,7 +490,7 @@ public class VideoAdControllerVastTest {
             videoAdControllerVast.openUrl(null, UrlClickSource.CUSTOM_END_CARD);
 
             verify(urlHandler.constructed().get(0), times(1))
-                    .handleUrl(eq("http://video-redirect.com"), any(), any());
+                    .handleUrlWithResult(eq("http://video-redirect.com"), any(), any());
         }
 
         assertNoClickThroughRequest();
@@ -1246,17 +1339,17 @@ public class VideoAdControllerVastTest {
     private Object createTrackingEvent(String url, String name, int timeMillis) throws Exception {
         Class<?> trackingEventClass = Class.forName("net.pubnative.lite.sdk.vpaid.models.vpaid.TrackingEvent");
         Object trackingEvent = trackingEventClass.getConstructor(String.class).newInstance(url);
-        
+
         if (name != null) {
             Field nameField = trackingEventClass.getDeclaredField("name");
             nameField.setAccessible(true);
             nameField.set(trackingEvent, name);
         }
-        
+
         Field timeMillisField = trackingEventClass.getDeclaredField("timeMillis");
         timeMillisField.setAccessible(true);
         timeMillisField.setInt(trackingEvent, timeMillis);
-        
+
         return trackingEvent;
     }
 
@@ -1301,7 +1394,7 @@ public class VideoAdControllerVastTest {
     @Test
     public void testProcessTrackingEvents_withStartEvent_firesImpression() throws Exception {
         Object trackingEvent = createTrackingEvent("http://example.com", "start", 1000);
-        
+
         addTrackingEvent(trackingEvent);
 
         Field containsStartEventField = VideoAdControllerVast.class.getDeclaredField("containsStartEvent");
@@ -1462,7 +1555,7 @@ public class VideoAdControllerVastTest {
 
         invokeProcessActions();
         Thread.sleep(100);
-        
+
         assertNotNull(videoAdControllerVast);
     }
 
@@ -1480,6 +1573,22 @@ public class VideoAdControllerVastTest {
         Thread.sleep(100);
 
         assertTrue(mActions.isEmpty());
+    }
+
+
+    @Test
+    public void onError_playbackErrorReportedTwice_failsTheAdOnce() throws Exception {
+        android.media.MediaPlayer player = setupMockMediaPlayer();
+        Field listenerField = VideoAdControllerVast.class.getDeclaredField("mOnErrorListener");
+        listenerField.setAccessible(true);
+        android.media.MediaPlayer.OnErrorListener listener =
+                (android.media.MediaPlayer.OnErrorListener) listenerField.get(videoAdControllerVast);
+
+        // MEDIA_ERROR_UNKNOWN / MEDIA_ERROR_IO, delivered twice as seen with a truncated video (VMA-1645)
+        listener.onError(player, 1, -1004);
+        listener.onError(player, 1, -1004);
+
+        verify(mockBaseAdInternal, times(1)).onAdLoadFailInternal(any(PlayerInfo.class));
     }
 
     // Helper methods for processPlayAction tests
@@ -2344,7 +2453,9 @@ public class VideoAdControllerVastTest {
         verify(mockMp, never()).setSurface(any());
     }
 
-    /** Attaches the view tree to a visible Activity so View.post() runnable actually run. */
+    /**
+     * Attaches the view tree to a visible Activity so View.post() runnable actually run.
+     */
     private void attachToWindow(View root) {
         org.robolectric.android.controller.ActivityController<android.app.Activity> controller =
                 org.robolectric.Robolectric.buildActivity(android.app.Activity.class).create();
@@ -2352,7 +2463,9 @@ public class VideoAdControllerVastTest {
         controller.start().resume().visible();
     }
 
-    /** Forces a layout pass on the given view so its OnLayoutChangeListener fires, then flushes. */
+    /**
+     * Forces a layout pass on the given view so its OnLayoutChangeListener fires, then flushes.
+     */
     private void forceLayout(View view, int w, int h) {
         view.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY),
                 View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY));
@@ -2435,6 +2548,30 @@ public class VideoAdControllerVastTest {
         lastCustom.setLayoutParams(new android.widget.FrameLayout.LayoutParams(100, 100));
         forceLayout(lastCustom, 300, 200);
         assertEquals(ViewGroup.LayoutParams.MATCH_PARENT, lastCustom.getLayoutParams().width);
+    }
+
+    @Test
+    public void testShowEndCard_inline_hasInlinePlacementType() throws Exception {
+        try (
+                MockedConstruction<HyBidEndCardView> hyBidEndCardViewMockedConstruction =
+                        mockConstruction(HyBidEndCardView.class, (mock, context) -> {
+                            // Verify that the HyBidEndCardView was constructed as not full-screen.
+                            assertEquals(false, context.arguments().get(3)); // isFullScreen
+                        });
+        ) {
+            VideoAdView videoAdView = new VideoAdView(context);
+            videoAdControllerVast.buildVideoAdView(videoAdView);
+            ViewControllerVast vc = getViewControllerVast();
+            EndCardData htmlEndCardData = new EndCardData(
+                    EndCardData.Type.HTML_RESOURCE,
+                    "<html></html>"
+            );
+            vc.showEndCard(htmlEndCardData, null, false, mock(CloseButtonListener.class));
+            assertFalse(
+                    "HyBidEndCardView must be created during the test",
+                    hyBidEndCardViewMockedConstruction.constructed().isEmpty()
+            );
+        }
     }
 
     private int layoutChangeListenerCount(View view) throws Exception {
@@ -2534,28 +2671,36 @@ public class VideoAdControllerVastTest {
     // Reflection helpers for ViewControllerVast internals
     // -------------------------------------------------------------------------
 
-    /** Returns the ViewControllerVast held inside the VideoAdControllerVast under test. */
+    /**
+     * Returns the ViewControllerVast held inside the VideoAdControllerVast under test.
+     */
     private ViewControllerVast getViewControllerVast() throws Exception {
         Field field = VideoAdControllerVast.class.getDeclaredField("mViewControllerVast");
         field.setAccessible(true);
         return (ViewControllerVast) field.get(videoAdControllerVast);
     }
 
-    /** Sets a boolean field on the ViewControllerVast. */
+    /**
+     * Sets a boolean field on the ViewControllerVast.
+     */
     private void setViewControllerBoolean(ViewControllerVast target, String fieldName, boolean value) throws Exception {
         Field field = ViewControllerVast.class.getDeclaredField(fieldName);
         field.setAccessible(true);
         field.setBoolean(target, value);
     }
 
-    /** Returns a View field from the ViewControllerVast. */
+    /**
+     * Returns a View field from the ViewControllerVast.
+     */
     private View getViewControllerView(ViewControllerVast target, String fieldName) throws Exception {
         Field field = ViewControllerVast.class.getDeclaredField(fieldName);
         field.setAccessible(true);
         return (View) field.get(target);
     }
 
-    /** Returns the mCreateTextureListener from the ViewControllerVast. */
+    /**
+     * Returns the mCreateTextureListener from the ViewControllerVast.
+     */
     private TextureView.SurfaceTextureListener getTextureListener() throws Exception {
         ViewControllerVast vc = getViewControllerVast();
         Field field = ViewControllerVast.class.getDeclaredField("mCreateTextureListener");
@@ -2563,7 +2708,9 @@ public class VideoAdControllerVastTest {
         return (TextureView.SurfaceTextureListener) field.get(vc);
     }
 
-    /** Returns the current mSurface from the ViewControllerVast (may be null). */
+    /**
+     * Returns the current mSurface from the ViewControllerVast (may be null).
+     */
     private android.view.Surface getVcSurface() throws Exception {
         ViewControllerVast vc = getViewControllerVast();
         Field field = ViewControllerVast.class.getDeclaredField("mSurface");
@@ -2571,7 +2718,9 @@ public class VideoAdControllerVastTest {
         return (android.view.Surface) field.get(vc);
     }
 
-    /** Returns the mVideoPlayerLayoutTexture from the ViewControllerVast (null after destroy). */
+    /**
+     * Returns the mVideoPlayerLayoutTexture from the ViewControllerVast (null after destroy).
+     */
     private android.view.TextureView getVcTextureView() throws Exception {
         ViewControllerVast vc = getViewControllerVast();
         Field field = ViewControllerVast.class.getDeclaredField("mVideoPlayerLayoutTexture");
@@ -3585,6 +3734,114 @@ public class VideoAdControllerVastTest {
 
         // Verify setVolume was attempted
         verify(mockMediaPlayer).setVolume(0f, 0f);
+    }
+
+    private android.media.MediaPlayer attachMockMediaPlayer() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = mock(android.media.MediaPlayer.class);
+        Field mediaPlayerField = VideoAdControllerVast.class.getDeclaredField("mMediaPlayer");
+        mediaPlayerField.setAccessible(true);
+        mediaPlayerField.set(videoAdControllerVast, mockMediaPlayer);
+        return mockMediaPlayer;
+    }
+
+    private ReportingController stubReportingEnabled() {
+        ReportingController reportingController = stubReportingController();
+        mockedHyBid.when(HyBid::isReportingEnabled).thenReturn(true);
+        return reportingController;
+    }
+
+    @Test
+    public void testSetInitialMuteState_muted_withPlayer_mutesSilently() throws Exception {
+        android.media.MediaPlayer mockMediaPlayer = attachMockMediaPlayer();
+        ReportingController reportingController = stubReportingEnabled();
+
+        videoAdControllerVast.setInitialMuteState(true);
+
+        verify(mockMediaPlayer).setVolume(0f, 0f);
+        verify(mockViewabilityAdSession).fireVolumeChange(true);
+        assertTrue(getViewControllerVast().isMute());
+        verify(reportingController, never()).reportEvent(any());
+        mockedEventTracker.verify(() -> EventTracker.postEventByType(
+                any(Context.class), any(), eq(EventConstants.MUTE), any(MacroHelper.class), anyBoolean()), never());
+    }
+
+    @Test
+    public void testSetInitialMuteState_muted_withoutPlayer_keepsStateForPlaybackStart() throws Exception {
+        ReportingController reportingController = stubReportingEnabled();
+
+        videoAdControllerVast.setInitialMuteState(true);
+
+        // The silent apply at playback start reads this state.
+        assertTrue(getViewControllerVast().isMute());
+        verify(reportingController, never()).reportEvent(any());
+        mockedEventTracker.verify(() -> EventTracker.postEventByType(
+                any(Context.class), any(), eq(EventConstants.MUTE), any(MacroHelper.class), anyBoolean()), never());
+    }
+
+    @Test
+    public void testSetInitialMuteState_setsMuteButtonIcon() throws Exception {
+        ViewControllerVast vc = getViewControllerVast();
+        android.widget.ImageView muteView = mock(android.widget.ImageView.class);
+        Field muteViewField = ViewControllerVast.class.getDeclaredField("mMuteView");
+        muteViewField.setAccessible(true);
+        muteViewField.set(vc, muteView);
+
+        videoAdControllerVast.setInitialMuteState(true);
+
+        verify(muteView).setContentDescription("muteButton");
+    }
+
+    @Test
+    public void testSetInitialMuteState_calledTwice_staysMuted() throws Exception {
+        attachMockMediaPlayer();
+
+        videoAdControllerVast.setInitialMuteState(true);
+        videoAdControllerVast.setInitialMuteState(true);
+
+        assertTrue(getViewControllerVast().isMute());
+    }
+
+    @Test
+    public void testMuteButtonTap_firesMuteAndUnmuteOncePerTap() throws Exception {
+        attachMockMediaPlayer();
+        ReportingController reportingController = stubReportingEnabled();
+        ViewControllerVast vc = getViewControllerVast();
+
+        vc.muteVideo();
+
+        assertTrue(vc.isMute());
+        ArgumentCaptor<net.pubnative.lite.sdk.analytics.ReportingEvent> captor =
+                ArgumentCaptor.forClass(net.pubnative.lite.sdk.analytics.ReportingEvent.class);
+        verify(reportingController, times(1)).reportEvent(captor.capture());
+        assertEquals(net.pubnative.lite.sdk.analytics.Reporting.EventType.VIDEO_MUTE, captor.getValue().getEventType());
+        mockedEventTracker.verify(() -> EventTracker.postEventByType(
+                any(Context.class), any(), eq(EventConstants.MUTE), any(MacroHelper.class), anyBoolean()), times(1));
+
+        vc.muteVideo();
+
+        assertFalse(vc.isMute());
+        verify(reportingController, times(2)).reportEvent(captor.capture());
+        assertEquals(net.pubnative.lite.sdk.analytics.Reporting.EventType.VIDEO_UNMUTE, captor.getValue().getEventType());
+        mockedEventTracker.verify(() -> EventTracker.postEventByType(
+                any(Context.class), any(), eq(EventConstants.UNMUTE), any(MacroHelper.class), anyBoolean()), times(1));
+    }
+
+    @Test
+    public void testMuteButtonTap_afterInitialMute_unmutesAndFiresUnmuteOnly() throws Exception {
+        attachMockMediaPlayer();
+        ReportingController reportingController = stubReportingEnabled();
+        ViewControllerVast vc = getViewControllerVast();
+
+        videoAdControllerVast.setInitialMuteState(true);
+        vc.muteVideo();
+
+        assertFalse(vc.isMute());
+        ArgumentCaptor<net.pubnative.lite.sdk.analytics.ReportingEvent> captor =
+                ArgumentCaptor.forClass(net.pubnative.lite.sdk.analytics.ReportingEvent.class);
+        verify(reportingController, times(1)).reportEvent(captor.capture());
+        assertEquals(net.pubnative.lite.sdk.analytics.Reporting.EventType.VIDEO_UNMUTE, captor.getValue().getEventType());
+        mockedEventTracker.verify(() -> EventTracker.postEventByType(
+                any(Context.class), any(), eq(EventConstants.MUTE), any(MacroHelper.class), anyBoolean()), never());
     }
 
     @Test

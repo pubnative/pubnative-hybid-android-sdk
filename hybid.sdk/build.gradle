@@ -1,29 +1,12 @@
 plugins {
-    id 'com.android.library'
-    id 'com.jfrog.artifactory'
-    id 'maven-publish'
+    id 'hybid.android.sdk'
+    id 'hybid.android.publishing.artifactory'
+    id 'hybid.android.coverage'
 }
 
-//==================================================================================================
-// PROJECT
-//==================================================================================================
 def version_name = project.version
-version = version_name
-
-//==================================================================================================
-// ANDROID
-//==================================================================================================
 
 android {
-    compileSdk = android_api
-    defaultConfig {
-        minSdkVersion min_android_api
-        targetSdkVersion android_api
-        versionCode buildNumber ? buildNumber : 1
-        versionName version_name
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
-
     buildTypes {
         release {
             minifyEnabled System.getenv("CI") ? true : false
@@ -50,25 +33,13 @@ android {
             buildConfigField "Boolean", "IS_WRAPPED", "false"
             buildConfigField "String", "BASE_URL", "\"https://api.pubnative.net/\""
             buildConfigField "String", "BASE_RTB_URL", "\"https://dsp.pubnative.net/\""
-            enableUnitTestCoverage true
-            enableAndroidTestCoverage true
         }
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     buildFeatures {
         buildConfig true
     }
 
-    testOptions {
-        unitTests {
-            includeAndroidResources = true
-        }
-    }
     namespace 'net.pubnative.lite.sdk'
 }
 
@@ -90,18 +61,16 @@ dependencies {
 
     implementation "net.pubnative:hybid.omsdk:$omid_version"
 
-    testImplementation "androidx.test:core:1.7.0"
     testImplementation 'androidx.core:core:1.15.0'
     testImplementation 'androidx.test:core:1.7.0'
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.robolectric:robolectric:4.15.1'
+    testImplementation 'org.robolectric:robolectric:4.16.1'
     testImplementation 'org.mockito:mockito-core:5.21.0'
     testImplementation 'org.hamcrest:hamcrest:3.0'
     testImplementation 'com.google.truth:truth:1.4.5'
     testImplementation 'org.mockito:mockito-inline:5.2.0'
 
 
-    testImplementation 'com.squareup.assertj:assertj-android:1.2.0'
     testImplementation "com.squareup.okhttp3:mockwebserver:4.12.0"
     androidTestImplementation "androidx.test:core:1.7.0"
     androidTestImplementation "androidx.test:runner:1.1.0-beta01", {
@@ -110,147 +79,6 @@ dependencies {
     androidTestImplementation "androidx.test:rules:1.1.0-beta01", {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
-    androidTestImplementation "androidx.test.espresso:espresso-core:3.1.0-beta01", {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    }
     // HTTP server for FileLoader network-behaviour tests (request count, retries, odd responses)
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:4.12.0"
-}
-//--------------------------------------------------------------------------------------------------
-// sonar
-//--------------------------------------------------------------------------------------------------
-apply plugin: 'jacoco'
-
-jacoco {
-    toolVersion = "0.8.11"
-}
-
-tasks.register("jacocoTestReport", JacocoReport) {
-    group = "verification"
-    description = "Generates JaCoCo coverage report for hybid.sdk"
-
-    dependsOn "testDebugUnitTest"
-
-    reports {
-        xml.required = true
-        html.required = true
-    }
-
-    def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*']
-    def debugTree = layout.buildDirectory.dir("intermediates/javac/debug")
-    def kotlinDebugTree = layout.buildDirectory.dir("tmp/kotlin-classes/debug")
-
-    sourceDirectories.setFrom(files([
-            "$projectDir/src/main/java",
-            "$projectDir/src/main/kotlin"
-    ]))
-
-    classDirectories.setFrom(files([
-        fileTree(dir: debugTree.get().asFile, excludes: fileFilter),
-        fileTree(dir: kotlinDebugTree.get().asFile, excludes: fileFilter)
-    ]))
-
-    executionData.setFrom(fileTree(dir: layout.buildDirectory.get().asFile, includes: [
-            "jacoco/testDebugUnitTest.exec",
-            "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec"
-    ]))
-}
-
-tasks.withType(Test).configureEach {
-    jacoco {
-        includeNoLocationClasses = true
-        excludes = ['jdk.internal.*']
-    }
-    testLogging {
-        events "passed", "skipped", "failed"
-        exceptionFormat = 'full'
-        showStandardStreams = true
-    }
-}
-
-//--------------------------------------------------------------------------------------------------
-// COVERALLS
-//--------------------------------------------------------------------------------------------------
-//cobertura.coverageFormats = ['html', 'xml']
-
-tasks.register('sourcesJar', Jar) {
-    from android.sourceSets.main.java.srcDirs
-    archiveClassifier = 'sources'
-}
-
-tasks.register('javadoc', Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    def bootClasspathFiles = android.getBootClasspath().findAll { it != null && it.toString().trim() }
-    classpath += project.rootProject.files(bootClasspathFiles)
-    options.memberLevel = JavadocMemberLevel.PUBLIC
-    failOnError false
-}
-
-tasks.register('javadocJar', Jar) {
-    dependsOn javadoc
-    archiveClassifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-static def addDependency(dependency, dependenciesNode) { //finish with dependencies
-    if (dependency.group != null && dependency.name != null) {
-        def dependencyNode = dependenciesNode.appendNode('dependency')
-        dependencyNode.appendNode('groupId', dependency.group)
-        dependencyNode.appendNode('artifactId', dependency.name)
-        dependencyNode.appendNode('version', dependency.version)
-
-        if (dependency.excludeRules.size() > 0) {
-            def exclusions = dependencyNode.appendNode('exclusions')
-            dependency.excludeRules.each { ExcludeRule ex ->
-                def exclusion = exclusions.appendNode('exclusion')
-                exclusion.appendNode('groupId', ex.group)
-                if (ex.module == null || ex.module.isEmpty()) {
-                    exclusion.appendNode('artifactId', "*")
-                } else {
-                    exclusion.appendNode('artifactId', ex.module)
-                }
-            }
-        }
-    }
-}
-
-publishing {
-    publications {
-        aar(MavenPublication) {
-            groupId project.group
-            artifactId project.name
-            version version_name
-            artifact javadocJar
-            artifact sourcesJar
-            android.libraryVariants.all { variant ->
-                if (variant.buildType.name == "debug") return
-                artifact variant.outputs[0].packageLibrary // This is the aar library
-            }
-
-            pom.withXml {
-                def dependenciesNode = asNode().appendNode('dependencies')
-
-                configurations.implementation.allDependencies.withType(ModuleDependency).each {
-                    addDependency(it, dependenciesNode)
-                }
-            }
-        }
-    }
-}
-
-artifactory {
-    contextUrl = System.getenv("ARTIFACTORY_CONTEXT_URL")
-    publish {
-        repository {
-            repoKey = System.getenv("ARTIFACTORY_REPOKEY")
-            username = System.getenv("ARTIFACTORY_USER")
-            password = System.getenv("ARTIFACTORY_PASSWORD")
-        }
-
-        defaults {
-            publications('aar')
-            publishArtifacts = true
-            publishPom = true
-        }
-    }
 }

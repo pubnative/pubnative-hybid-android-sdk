@@ -70,6 +70,7 @@ public class HyBidEndCardView extends FrameLayout {
 
     private Boolean isCustomEndCard = false;
     private boolean hasReducedClose = false;
+    private boolean isFullScreen = true;
 
     private CountDownView mCloseCountdownView;
 
@@ -235,9 +236,17 @@ public class HyBidEndCardView extends FrameLayout {
     }
 
     public HyBidEndCardView(Context context, boolean hasReducedClose, ReplayListener replayListener) {
+        this(context, hasReducedClose, replayListener, true);
+    }
+
+    public HyBidEndCardView(Context context,
+                            boolean hasReducedClose,
+                            ReplayListener replayListener,
+                            boolean isFullScreen) {
         super(context);
         this.hasReducedClose = hasReducedClose;
         this.replayListener = replayListener;
+        this.isFullScreen = isFullScreen;
         init(context);
     }
 
@@ -457,7 +466,7 @@ public class HyBidEndCardView extends FrameLayout {
             endcardViewListener.onLoadFail(isCustomEndCard);
             return;
         }
-        mHtmlEndCardView = new MRAIDBanner(this.getContext(), "", content, false, false, new String[]{}, mraidViewListener, mraidNativeFeatureListener, null);
+        mHtmlEndCardView = new MRAIDBanner(this.getContext(), "", content, false, false, new String[]{}, mraidViewListener, mraidNativeFeatureListener, null, isFullScreen);
         mHtmlEndCardView.setSkipOffset(skipOffset.getOffset());
         mHtmlEndCardView.setUseCustomClose(true);
         int height = ViewGroup.LayoutParams.WRAP_CONTENT;

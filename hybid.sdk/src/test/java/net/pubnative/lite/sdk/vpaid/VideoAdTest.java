@@ -384,7 +384,7 @@ public class VideoAdTest {
         videoAd.bindView(mockBannerView);
         videoAd.show();
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
-        verify(mockAdController).toggleMute();
+        verify(mockAdController).setInitialMuteState(true);
     }
 
     @Test
@@ -394,7 +394,7 @@ public class VideoAdTest {
         videoAd.bindView(mockBannerView);
         videoAd.show();
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
-        verify(mockAdController).toggleMute();
+        verify(mockAdController).setInitialMuteState(true);
     }
 
     @Test
@@ -405,6 +405,7 @@ public class VideoAdTest {
         videoAd.bindView(mockBannerView);
         videoAd.show();
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
+        verify(mockAdController, never()).setInitialMuteState(anyBoolean());
         verify(mockAdController, never()).toggleMute();
     }
 
@@ -416,7 +417,7 @@ public class VideoAdTest {
         videoAd.bindView(mockBannerView);
         videoAd.show();
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
-        verify(mockAdController).toggleMute();
+        verify(mockAdController).setInitialMuteState(true);
     }
 
     @Test

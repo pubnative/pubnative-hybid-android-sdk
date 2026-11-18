@@ -63,8 +63,12 @@ public abstract class RewardedViewModel extends BaseViewModel implements PNAPICo
     private static final int REDUCED_CLOSE_BUTTON_SIZE = 20;
 
     protected boolean mIsSkippable = false;
+    // True once the ad has actually been shown to the user (first frame / WebView loaded).
+    protected boolean mIsAdPresented = false;
+    // Set when the activity is recreated after the reward was already earned (state restored from the saved instance state).
+    protected boolean mIsRewardRestored = false;
+    private boolean mIsClosed = false;
 
-    protected AdTracker mAdTracker;
     protected AdTracker mCustomEndcardTracker;
     protected AdTracker mAdEventTracker;
     protected AdTracker mCustomCTATracker;
@@ -154,8 +158,26 @@ public abstract class RewardedViewModel extends BaseViewModel implements PNAPICo
         }
     }
 
+    protected boolean isClosed() {
+        return mIsClosed;
+    }
+
     protected void dismiss() {
+        if (mIsClosed) {
+            return;
+        }
         sendBroadcast(HyBidRewardedBroadcastReceiver.Action.CLOSE);
+        mListener.finishActivity();
+    }
+
+    // The show failed: close the ad, paying the reward only if the user saw the ad and had already earned it.
+    protected void dismissAfterError() {
+        if (mIsClosed) {
+            return;
+        }
+        sendBroadcast(isRewardEarned()
+                ? HyBidRewardedBroadcastReceiver.Action.CLOSE
+                : HyBidRewardedBroadcastReceiver.Action.CLOSE_WITHOUT_REWARD);
         mListener.finishActivity();
     }
 
@@ -221,7 +243,16 @@ public abstract class RewardedViewModel extends BaseViewModel implements PNAPICo
     }
 
     public boolean isRewardEligible() {
-        return isAdSkippable();
+        return isAdSkippable() || mIsRewardRestored;
+    }
+
+    public boolean isRewardEarned() {
+        return mIsAdPresented && isRewardEligible();
+    }
+
+    public void restoreRewardEarned() {
+        mIsAdPresented = true;
+        mIsRewardRestored = true;
     }
 
     @Override
@@ -299,6 +330,13 @@ public abstract class RewardedViewModel extends BaseViewModel implements PNAPICo
     }
 
     public void sendBroadcast(HyBidRewardedBroadcastReceiver.Action action) {
+        if (action == HyBidRewardedBroadcastReceiver.Action.CLOSE
+                || action == HyBidRewardedBroadcastReceiver.Action.CLOSE_WITHOUT_REWARD) {
+            if (mIsClosed) {
+                return;
+            }
+            mIsClosed = true;
+        }
         if (mBroadcastSender != null)
             mBroadcastSender.sendBroadcast(action);
     }
@@ -310,7 +348,6 @@ public abstract class RewardedViewModel extends BaseViewModel implements PNAPICo
 
     private void initTrackers() {
         if (mAd != null) {
-            mAdTracker = new AdTracker(mAd.getBeacons(Ad.Beacon.IMPRESSION), mAd.getBeacons(Ad.Beacon.CLICK));
             mCustomEndcardTracker = new AdTracker(mAd.getBeacons(Ad.Beacon.CUSTOM_END_CARD_IMPRESSION), mAd.getBeacons(Ad.Beacon.CUSTOM_END_CARD_CLICK));
             mAdEventTracker = new AdTracker(null, null, null, mAd.getBeacons(Ad.Beacon.COMPANION_AD_EVENT), mAd.getBeacons(Ad.Beacon.CUSTOM_ENDCARD_EVENT));
             mCustomCTATracker = new AdTracker(mAd.getBeacons(Ad.Beacon.CUSTOM_CTA_SHOW), mAd.getBeacons(Ad.Beacon.CUSTOM_CTA_CLICK), false);

@@ -1,20 +1,49 @@
+pluginManagement {
+    includeBuild("build-logic")
+    repositories {
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    buildscript {
+        dependencies {
+            classpath "com.android.tools:r8:8.11.18"
+        }
+    }
+}
+
+// Used by Gradle Daemon JVM criteria to download missing JDKs
 plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
 }
 
 dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        maven {
-            url 'https://android-sdk.is.com/'
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
         }
+        mavenCentral()
+        maven { url "https://verve.jfrog.io/artifactory/verve-gradle-dev" }
+        maven { url "https://verve.jfrog.io/artifactory/verve-gradle-release" }
+        maven { url "https://cboost.jfrog.io/artifactory/chartboost-mediation" }
+        maven { url "https://cboost.jfrog.io/artifactory/chartboost-core" }
     }
 }
-
 
 include ':hybid.demo',
         ':hybid.adapters.dfp',
         ':hybid.adapters.admob',
         ':hybid.adapters.ironsource',
         ':hybid.adapters.applovin',
-        ':hybid.sdk',
-        ':ng.sdk'
+        ':hybid.sdk'

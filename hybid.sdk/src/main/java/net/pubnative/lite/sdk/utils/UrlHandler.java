@@ -26,15 +26,30 @@ public class UrlHandler {
         mIntentHandler = new IntentHandler(context);
     }
 
-    public void handleUrl(String url, String adLink, String navigationMode) {
-        url = handleDeeplinkIfPresent(url, adLink);
-        if (TextUtils.isEmpty(url)) {
-            return;
+    /**
+     * @return <code>true</code> if the URL (or ad link) is handled successfully,
+     * <code>false</code> otherwise.
+     */
+    public boolean handleUrlWithResult(String url, String adLink, String navigationMode) {
+        if (TextUtils.isEmpty(url) && TextUtils.isEmpty(adLink)) {
+            return false;
         }
-        Logger.d(TAG, "Handling url: " + url);
-        handleNavigation(url, navigationMode);
+        String fallbackUrl = handleDeeplinkIfPresent(url, adLink);
+        if (TextUtils.isEmpty(fallbackUrl)) {
+            return true;
+        }
+        Logger.d(TAG, "Handling url: " + fallbackUrl);
+        return handleNavigation(fallbackUrl, navigationMode);
     }
 
+    public void handleUrl(String url, String adLink, String navigationMode) {
+        handleUrlWithResult(url, adLink, navigationMode);
+    }
+
+    /**
+     * @return <code>null</code> on success,
+     * fallback URL to handle next if <code>adLink</code> can't be handled as a deeplink.
+     */
     String handleDeeplinkIfPresent(String url, String adLink) {
         if (!TextUtils.isEmpty(adLink) && adLink.contains(DEEPLINK_URL_SCHEMA)) {
             try {
@@ -45,15 +60,14 @@ public class UrlHandler {
                     Uri deeplinkUri = Uri.parse(deeplinkUrl);
                     String scheme = deeplinkUri.getScheme();
                     if ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme)) {
-                        if (mIntentHandler.canHandleIntent(deeplinkUri)) {
-                            mIntentHandler.handleDeepLink(deeplinkUri);
+                        if (mIntentHandler.canHandleIntent(deeplinkUri) && mIntentHandler.handleDeepLink(deeplinkUri)) {
                             return null;
                         } else {
                             return TextUtils.isEmpty(fallbackUrl) ? url : fallbackUrl;
                         }
                     } else {
                         boolean isStartActivitySuccess = mIntentHandler.handleDeepLink(deeplinkUri);
-                        if(isStartActivitySuccess) {
+                        if (isStartActivitySuccess) {
                             return null;
                         } else {
                             return TextUtils.isEmpty(fallbackUrl) ? url : fallbackUrl;
@@ -69,26 +83,28 @@ public class UrlHandler {
         return url;
     }
 
-    void handleNavigation(String url, String navigationMode) {
+    boolean handleNavigation(String url, String navigationMode) {
         final Uri uri = Uri.parse(url);
         final String scheme = uri.getScheme();
         final String host = uri.getHost();
         final String uriLower = uri.toString().toLowerCase(Locale.ROOT);
 
         if (isPlayStoreLink(scheme, host, uriLower)) {
-            mIntentHandler.handleDeepLink(uri);
+            return mIntentHandler.handleDeepLink(uri);
         } else if (isHttpOrHttps(scheme)) {
             if ("internal".equalsIgnoreCase(navigationMode)) {
-                mIntentHandler.handleBrowserLinkBrowserActivity(uri);
+                return mIntentHandler.handleBrowserLinkBrowserActivity(uri);
             } else {
-                mIntentHandler.handleBrowserLink(uri);
+                return mIntentHandler.handleBrowserLink(uri);
             }
         } else if (!TextUtils.isEmpty(scheme)) {
-            mIntentHandler.handleDeepLink(uri);
+            return mIntentHandler.handleDeepLink(uri);
         }
+
+        return false;
     }
 
-    boolean isPlayStoreLink(String scheme, String host, String uriLower) {
+    private boolean isPlayStoreLink(String scheme, String host, String uriLower) {
         return "play.google.com".equalsIgnoreCase(host)
                 || "market.android.com".equalsIgnoreCase(host)
                 || "market".equalsIgnoreCase(scheme)
@@ -96,13 +112,13 @@ public class UrlHandler {
                 || uriLower.startsWith("market.android.com/");
     }
 
-    boolean isHttpOrHttps(String scheme) {
+    private boolean isHttpOrHttps(String scheme) {
         return "http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme);
     }
 
     String getDeeplinkUrl(Uri parsedLink) {
         String deeplinkString = parsedLink.getQueryParameter(DEEPLINK_PARAM);
-        if(!TextUtils.isEmpty(deeplinkString) && !deeplinkString.equalsIgnoreCase("\"\""))
+        if (!TextUtils.isEmpty(deeplinkString) && !deeplinkString.equalsIgnoreCase("\"\""))
             return deeplinkString;
         else
             return null;
@@ -110,7 +126,7 @@ public class UrlHandler {
 
     String getFallbackUrl(Uri parsedLink) {
         String fallbackString = parsedLink.getQueryParameter(FALLBACK_PARAM);
-        if(!TextUtils.isEmpty(fallbackString) && !fallbackString.equalsIgnoreCase("\"\""))
+        if (!TextUtils.isEmpty(fallbackString) && !fallbackString.equalsIgnoreCase("\"\""))
             return fallbackString;
         else
             return null;

@@ -112,6 +112,119 @@ public class PNApiUrlComposerTest {
     }
 
     @Test
+    public void testBuildUrl_goldenUrlForFullyPopulatedRequest() {
+        PNAdRequest request = new PNAdRequest();
+        request.appToken = "v_apptoken";
+        request.os = "v_os";
+        request.osver = "v_osver";
+        request.devicemodel = "v_devicemodel";
+        request.make = "v_make";
+        request.deviceHeight = "v_dh";
+        request.deviceWidth = "v_dw";
+        request.deviceType = "v_devicetype";
+        request.orientation = "v_scro";
+        request.ppi = "v_ppi";
+        request.pxratio = "v_pxratio";
+        request.js = "v_js";
+        request.soundSetting = "v_aud";
+        request.dnt = "v_dnt";
+        request.al = "v_al";
+        request.width = "v_w";
+        request.height = "v_h";
+        request.mf = "v_mf";
+        request.af = "v_af";
+        request.zoneId = "v_zoneid";
+        request.testMode = "v_test";
+        request.locale = "v_locale";
+        request.language = "v_language";
+        request.langb = "v_langb";
+        request.latitude = "v_lat";
+        request.longitude = "v_long";
+        request.gender = "v_gender";
+        request.age = "v_age";
+        request.bundleid = "v_bundleid";
+        request.keywords = "v_keywords";
+        request.coppa = "v_coppa";
+        request.gid = "v_gid";
+        request.gidmd5 = "v_gidmd5";
+        request.gidsha1 = "v_gidsha1";
+        request.displaymanager = "v_displaymanager";
+        request.displaymanagerver = "v_displaymanagerver";
+        request.omidpn = "v_omidpn";
+        request.omidpv = "v_omidpv";
+        request.rv = "v_rv";
+        request.usprivacy = "v_usprivacy";
+        request.userconsent = "v_userconsent";
+        request.gppstring = "v_gpp";
+        request.gppsid = "v_gppsid";
+        request.carrier = "v_carrier";
+        request.connectiontype = "v_connectiontype";
+        request.mccmnc = "v_mccmnc";
+        request.mccmncsim = "v_mccmncsim";
+        request.geofetch = "v_geofetch";
+        request.sua = "v_sua";
+        request.ae = "v_ae";
+        request.protocol = "v_protocol";
+        request.api = "v_api";
+        request.impdepth = "v_impdepth";
+        request.ageofapp = "v_ageofapp";
+        request.sessionduration = "v_sessionduration";
+        request.mediationAdUnitId = "v_mediationadunitid";
+        request.vg = "v_vg";
+        request.hver = "v_hver";
+        String expected = BASE_URL + "/api/v3/native?"
+                + "apptoken=v_apptoken&os=v_os&osver=v_osver&devicemodel=v_devicemodel&make=v_make&dh=v_dh&dw=v_dw&devicetype=v_devicetype&scro=v_scro&ppi=v_ppi&pxratio=v_pxratio&js=v_js&aud=v_aud&dnt=v_dnt&al=v_al&w=v_w&h=v_h&mf=v_mf&af=v_af&zoneid=v_zoneid&test=v_test&locale=v_locale&language=v_language&langb=v_langb&lat=v_lat&long=v_long&gender=v_gender&age=v_age&bundleid=v_bundleid&keywords=v_keywords&coppa=v_coppa&gid=v_gid&gidmd5=v_gidmd5&gidsha1=v_gidsha1&displaymanager=v_displaymanager&displaymanagerver=v_displaymanagerver&omidpn=v_omidpn&omidpv=v_omidpv&rv=v_rv&usprivacy=v_usprivacy&userconsent=v_userconsent&gpp=v_gpp&gppsid=v_gppsid&carrier=v_carrier&connectiontype=v_connectiontype&mccmnc=v_mccmnc&mccmncsim=v_mccmncsim&geofetch=v_geofetch&sua=v_sua&ae=v_ae&protocol=v_protocol&api=v_api&impdepth=v_impdepth&ageofapp=v_ageofapp&sessionduration=v_sessionduration&mediationadunitid=v_mediationadunitid&vg=v_vg&hver=v_hver";
+        assertEquals(expected, PNApiUrlComposer.buildUrl(BASE_URL, request));
+    }
+
+    @Test
+    public void testBuildUrl_skipsNullAndEmptyFields() {
+        PNAdRequest request = new PNAdRequest();
+        request.appToken = "";
+        request.os = null;
+        request.hver = "hver";
+        assertEquals(BASE_URL + "/api/v3/native?hver=hver", PNApiUrlComposer.buildUrl(BASE_URL, request));
+    }
+
+    @Test
+    public void testBuildUrl_everyPublicStringFieldOfRequestIsSent() throws Exception {
+        PNAdRequest request = new PNAdRequest();
+        java.util.List<Field> fields = new java.util.ArrayList<>();
+        for (Field field : PNAdRequest.class.getFields()) {
+            if (field.getType() == String.class && !java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
+                field.set(request, "x_" + field.getName());
+                fields.add(field);
+            }
+        }
+        String query = PNApiUrlComposer.getUrlQuery(BASE_URL, request);
+        java.util.List<String> sentValues = new java.util.ArrayList<>();
+        for (String pair : query.split("&")) {
+            sentValues.add(pair.substring(pair.indexOf('=') + 1));
+        }
+        // Exact value match: "x_gid" must not be satisfied by "x_gidmd5", and each field must be sent exactly once.
+        for (Field field : fields) {
+            assertEquals("PNAdRequest." + field.getName() + " must be sent exactly once",
+                    1, java.util.Collections.frequency(sentValues, "x_" + field.getName()));
+        }
+        assertEquals("Unexpected extra params in query", fields.size(), sentValues.size());
+    }
+
+    @Test
+    public void testBuildUrl_goldenUrlWithSignalSitsBetweenMediationAdUnitIdAndVg() {
+        PNAdRequest request = new PNAdRequest();
+        request.mediationAdUnitId = "v_mediationadunitid";
+        request.vg = "v_vg";
+        request.hver = "v_hver";
+        class TestSignal extends Signal {
+            @BidParam(name = "testparam")
+            public String value = "signalValue";
+        }
+        request.addSignal(new TestSignal());
+        assertEquals(BASE_URL + "/api/v3/native?mediationadunitid=v_mediationadunitid&testparam=signalValue&vg=v_vg&hver=v_hver",
+                PNApiUrlComposer.buildUrl(BASE_URL, request));
+    }
+
+    @Test
     public void testBuildUrl_withEmptyDeviceType() {
         PNAdRequest request = new PNAdRequest();
         request.deviceType = "";

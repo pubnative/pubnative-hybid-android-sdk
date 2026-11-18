@@ -4,8 +4,21 @@
 //
 package net.pubnative.lite.sdk.mraid;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.net.Uri;
@@ -13,13 +26,13 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebViewClient;
 
+import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.Ad;
 import net.pubnative.lite.sdk.models.AdData;
-import net.pubnative.lite.sdk.models.APIAsset;
 import net.pubnative.lite.sdk.models.EndCardData;
-import net.pubnative.lite.sdk.utils.AtomManager;
 import net.pubnative.lite.sdk.mraid.internal.MRAIDLog;
 import net.pubnative.lite.sdk.mraid.model.HTMLAd;
+import net.pubnative.lite.sdk.utils.AtomManager;
 import net.pubnative.lite.sdk.views.endcard.HyBidEndCardView;
 
 import org.junit.After;
@@ -27,14 +40,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.shadows.ShadowLog;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -102,9 +116,61 @@ public class MRAIDViewTest {
     }
 
     @Test
-    public void testPlacementType_inlineBanner_unchanged() {
+    public void testEndCard_fullScreenBanner_createdAsFullScreen() {
+        try (
+                MockedConstruction<HyBidEndCardView> hyBidEndCardViewMockedConstruction =
+                        mockConstruction(HyBidEndCardView.class, (mock, context) -> {
+                            // Verify that the HyBidEndCardView was constructed as full-screen.
+                            assertEquals(true, context.arguments().get(3)); // isFullScreen
+                        });
+        ) {
+            HTMLAd mockHtmlAd = mock(HTMLAd.class);
+            doReturn(true).when(mockHtmlAd).shouldInitEndCardView();
+
+            MRAIDBanner notExpandableBanner = newBanner(false, true);
+            notExpandableBanner.setHtmlAd(mockHtmlAd);
+
+            MRAIDBanner expandableBanner = newBanner(true, true);
+            expandableBanner.setHtmlAd(mockHtmlAd);
+
+            assertEquals(
+                    "HyBidEndCardView must be constructed during the test",
+                    2,
+                    hyBidEndCardViewMockedConstruction.constructed().size()
+            );
+        }
+    }
+
+    @Test
+    public void testPlacementType_inlineBanner_alwaysInline() {
         assertEquals("inline", newBanner(true, false).getPlacementType());
-        assertEquals("", newBanner(false, false).getPlacementType());
+        assertEquals("inline", newBanner(false, false).getPlacementType());
+    }
+
+    @Test
+    public void testEndCard_inlineBanner_createdAsNotFullScreen() {
+        try (
+                MockedConstruction<HyBidEndCardView> hyBidEndCardViewMockedConstruction =
+                        mockConstruction(HyBidEndCardView.class, (mock, context) -> {
+                            // Verify that the HyBidEndCardView was constructed as not full-screen.
+                            assertEquals(false, context.arguments().get(3)); // isFullScreen
+                        });
+        ) {
+            HTMLAd mockHtmlAd = mock(HTMLAd.class);
+            doReturn(true).when(mockHtmlAd).shouldInitEndCardView();
+
+            MRAIDBanner notExpandableBanner = newBanner(false, false);
+            notExpandableBanner.setHtmlAd(mockHtmlAd);
+
+            MRAIDBanner expandableBanner = newBanner(true, false);
+            expandableBanner.setHtmlAd(mockHtmlAd);
+
+            assertEquals(
+                    "HyBidEndCardView must be constructed during the test",
+                    2,
+                    hyBidEndCardViewMockedConstruction.constructed().size()
+            );
+        }
     }
 
     private MRAIDBanner newBanner(boolean isExpandEnabled, boolean isFullScreen) {
@@ -246,7 +312,7 @@ public class MRAIDViewTest {
             mockedAtom.when(AtomManager::getInstance).thenReturn(mockAtomManager);
 
             callSetAtomJsData("TestKey", "TestValue");
-            verify(mockAtomManager).putAtomJSData(eq("TestKey"),eq("TestValue"));
+            verify(mockAtomManager).putAtomJSData(eq("TestKey"), eq("TestValue"));
         }
     }
 
@@ -333,7 +399,7 @@ public class MRAIDViewTest {
 
             callSetAtomJsData("TestKey", "NewValue");
 
-            verify(mockAtomManager).putAtomJSData(eq("TestKey"),eq("NewValue"));
+            verify(mockAtomManager).putAtomJSData(eq("TestKey"), eq("NewValue"));
 
         }
     }
@@ -595,7 +661,7 @@ public class MRAIDViewTest {
             Method method = MRAIDView.class.getDeclaredMethod("putAtomJSDataFromCreative", String.class, String.class);
             method.setAccessible(true);
             method.invoke(mraidView, "MyKey", "MyValue");
-            verify(mockAtomManager).putAtomJSData(eq("MyKey"),eq("MyValue"));
+            verify(mockAtomManager).putAtomJSData(eq("MyKey"), eq("MyValue"));
         }
     }
 

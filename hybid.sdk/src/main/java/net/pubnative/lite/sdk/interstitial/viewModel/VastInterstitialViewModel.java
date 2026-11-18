@@ -301,7 +301,6 @@ public class VastInterstitialViewModel extends InterstitialViewModel implements 
             if (!mCustomEndCardImpressionTracked) {
                 Bundle extras = new Bundle();
                 extras.putString(Reporting.Key.END_CARD_TYPE, endCardType);
-                extras.putString(Reporting.Key.CLICK_SOURCE_TYPE, CLICK_SOURCE_TYPE_END_CARD);
                 sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CUSTOM_END_CARD_SHOW, extras);
                 mCustomEndCardImpressionTracked = true;
             }

@@ -70,7 +70,20 @@ public interface VideoAdController {
 
     int getProgress();
 
+    /**
+     * @deprecated Behaves like a tap on the mute button, so it fires the VAST {@code mute} /
+     * {@code unmute} trackers. Use {@link #setInitialMuteState(boolean)} to apply a configured state.
+     */
+    @Deprecated
     void toggleMute();
+
+    /**
+     * Applies a mute state that comes from configuration rather than from the user. Updates the mute
+     * button and the player volume without firing the VAST {@code mute} / {@code unmute} trackers or
+     * the {@code video_mute} / {@code video_unmute} reporting events.
+     */
+    default void setInitialMuteState(boolean muted) {
+    }
 
     void setVolume(boolean mute);
 

@@ -5,6 +5,7 @@
 package net.pubnative.lite.sdk.models;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -31,38 +32,38 @@ import android.graphics.Bitmap;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import net.pubnative.lite.sdk.DeviceInfo;
 import net.pubnative.lite.sdk.HyBid;
 import net.pubnative.lite.sdk.analytics.ReportingController;
-import net.pubnative.lite.sdk.analytics.ReportingEvent;
+import net.pubnative.lite.sdk.api.PNApiClient;
 import net.pubnative.lite.sdk.contentinfo.AdFeedbackFormHelper;
+import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.URLValidator;
 import net.pubnative.lite.sdk.viewability.FriendlyObstructionReasonConstants;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityManager;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeDisplayAdSession;
 import net.pubnative.lite.sdk.viewability.baseom.BaseFriendlyObstructionPurpose;
-import net.pubnative.lite.sdk.views.PNBeaconWebView;
 import net.pubnative.lite.sdk.visibility.ImpressionManager;
 import net.pubnative.lite.sdk.visibility.ImpressionTracker;
-import net.pubnative.lite.sdk.visibility.TrackingManager;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
+
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 public class NativeAdTest {
@@ -79,11 +80,8 @@ public class NativeAdTest {
     private ReportingController mockReportingController;
     @Mock
     private ViewTreeObserver mockViewTreeObserver;
-    @Captor
-    private ArgumentCaptor<ReportingEvent> reportingEventCaptor;
 
     private Ad spiedAd;
-    private NativeAd subject;
     private AutoCloseable closeable;
 
     @Before
@@ -92,7 +90,6 @@ public class NativeAdTest {
         applicationContext = RuntimeEnvironment.getApplication();
 
         spiedAd = spy(new AdTestModel());
-        subject = new NativeAd(spiedAd);
 
         when(mockView.getContext()).thenReturn(applicationContext);
         when(mockClickableView.getContext()).thenReturn(applicationContext);
@@ -116,6 +113,7 @@ public class NativeAdTest {
     // --------------- Data Accessor Tests ---------------
     @Test
     public void getRating_whenAssetExists_returnsCorrectValue() {
+        NativeAd subject = new NativeAd(spiedAd);
         AdData adData = new AdData();
         adData.data = new java.util.HashMap<>();
         adData.data.put("number", 5.0); // Rating is a Double
@@ -125,12 +123,14 @@ public class NativeAdTest {
 
     @Test
     public void getRating_whenAssetIsMissing_returnsZero() {
+        NativeAd subject = new NativeAd(spiedAd);
         when(spiedAd.getAsset(APIAsset.RATING)).thenReturn(null);
         assertEquals(0, subject.getRating());
     }
 
     @Test
     public void getBannerUrl_whenAssetExists_returnsUrl() {
+        NativeAd subject = new NativeAd(spiedAd);
         AdData adData = new AdData();
         adData.data = new java.util.HashMap<>();
         adData.data.put("url", "https://banner.url");
@@ -140,6 +140,8 @@ public class NativeAdTest {
 
     @Test
     public void setAndGetBitmaps_workCorrectly() {
+        NativeAd subject = new NativeAd(spiedAd);
+
         Bitmap mockIcon = mock(Bitmap.class);
         Bitmap mockBanner = mock(Bitmap.class);
 
@@ -152,6 +154,7 @@ public class NativeAdTest {
 
     @Test
     public void getTitle_whenAssetExists_returnsText() {
+        NativeAd subject = new NativeAd(spiedAd);
         AdData adData = new AdData();
         adData.data = new HashMap<>();
         adData.data.put("text", "Test Title");
@@ -161,12 +164,14 @@ public class NativeAdTest {
 
     @Test
     public void getTitle_whenAssetIsMissing_returnsNull() {
+        NativeAd subject = new NativeAd(spiedAd);
         when(spiedAd.getAsset(APIAsset.TITLE)).thenReturn(null);
         assertNull(subject.getTitle());
     }
 
     @Test
     public void getDescription_whenAssetExists_returnsText() {
+        NativeAd subject = new NativeAd(spiedAd);
         AdData adData = new AdData();
         adData.data = new HashMap<>();
         adData.data.put("text", "Test Description");
@@ -176,6 +181,7 @@ public class NativeAdTest {
 
     @Test
     public void getCallToActionText_whenAssetExists_returnsText() {
+        NativeAd subject = new NativeAd(spiedAd);
         AdData adData = new AdData();
         adData.data = new HashMap<>();
         adData.data.put("text", "Learn More");
@@ -185,12 +191,15 @@ public class NativeAdTest {
 
     @Test
     public void getBidPoints_delegatesToAd() {
+        NativeAd subject = new NativeAd(spiedAd);
         when(spiedAd.getECPM()).thenReturn(10);
         assertEquals(Integer.valueOf(10), subject.getBidPoints());
     }
 
     @Test
     public void getters_whenAdIsPopulated_delegateToAdCorrectly() {
+        NativeAd subject = new NativeAd(spiedAd);
+
         doReturn("https://icon.url").when(spiedAd).getContentInfoIconUrl();
         doReturn("https://click.url").when(spiedAd).getContentInfoClickUrl();
         doReturn("Content Info Text").when(spiedAd).getContentInfoText();
@@ -226,6 +235,7 @@ public class NativeAdTest {
 
     @Test
     public void getRating_whenAdDataNumberIsNull_returnsZero() {
+        NativeAd subject = new NativeAd(spiedAd);
         AdData adData = new AdData();
         adData.data = new HashMap<>();
         adData.data.put("number", null); // data.getNumber() will return null
@@ -238,6 +248,7 @@ public class NativeAdTest {
         // This test ensures that if the Ad object exists but is missing specific assets,
         // the getters still return their default values gracefully.
 
+        NativeAd subject = new NativeAd(spiedAd);
         when(spiedAd.getAsset(anyString())).thenReturn(null);
 
         assertNull(subject.getTitle());
@@ -251,6 +262,7 @@ public class NativeAdTest {
     // --------------- Tracking Initialization Tests ---------------
     @Test
     public void startTracking_withClickableView_setsClickListenerOnCorrectView() {
+        NativeAd subject = new NativeAd(spiedAd);
         spiedAd.link = "https://example.com";
         subject.startTracking(mockView, mockClickableView, mockListener);
         verify(mockClickableView).setOnClickListener(any(View.OnClickListener.class));
@@ -260,6 +272,7 @@ public class NativeAdTest {
     @Test
     public void stopTracking_stopsImpressionManagerAndRemovesClickListener() {
         try (MockedStatic<ImpressionManager> mockedImpressionManager = mockStatic(ImpressionManager.class)) {
+            NativeAd subject = new NativeAd(spiedAd);
             spiedAd.link = "https://example.com";
             // First, start tracking to set a listener
             subject.startTracking(mockView, mockClickableView, mockListener);
@@ -275,6 +288,7 @@ public class NativeAdTest {
     @Test
     public void startTrackingImpression_whenAlreadyConfirmed_doesNothing() {
         try (MockedStatic<ImpressionManager> mockedImpressionManager = mockStatic(ImpressionManager.class)) {
+            NativeAd subject = new NativeAd(spiedAd);
             subject.invokeOnImpression(mockView); // Confirm impression
             subject.startTrackingImpression(mockView); // Try to track again
 
@@ -289,9 +303,11 @@ public class NativeAdTest {
 
     @Test
     public void startTracking_withExtras_appendsExtrasToClickUrl() throws Exception {
+        NativeAd subject = new NativeAd(spiedAd);
         spiedAd.link = "https://destination.url";
         Map<String, String> extras = new HashMap<>();
         extras.put("param1", "value1");
+        extras.put("param2", "value 2 that needs encoding");
 
         // Use reflection to access the private getClickUrl() method
         Method getClickUrlMethod = NativeAd.class.getDeclaredMethod("getClickUrl");
@@ -301,7 +317,208 @@ public class NativeAdTest {
         String clickUrl = (String) getClickUrlMethod.invoke(subject);
 
         assertNotNull(clickUrl);
-        assertTrue(clickUrl.contains("param1=param1"));
+        assertTrue(clickUrl.contains("param1=value1"));
+        assertTrue(clickUrl.contains("param2=value%202%20that%20needs%20encoding"));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void startTracking_withExtras_appendsExtrasToBeaconUrl() {
+        AdData urlClickBeacon = new AdData();
+        urlClickBeacon.data = new HashMap<>();
+        String originalClickBeaconUrl = "https://example.com/click";
+        urlClickBeacon.data.put("url", originalClickBeaconUrl);
+        AdData jsClickBeacon = new AdData();
+        jsClickBeacon.data = new HashMap<>();
+        jsClickBeacon.data.put("js", "function click() {};");
+        doReturn(Arrays.asList(urlClickBeacon, jsClickBeacon))
+                .when(spiedAd).getBeacons(Ad.Beacon.CLICK);
+
+        AdData urlImpressionBeacon = new AdData();
+        urlImpressionBeacon.data = new HashMap<>();
+        String originalImpressionBeaconUrl = "https://example.com/imp";
+        urlImpressionBeacon.data.put("url", originalImpressionBeaconUrl);
+        AdData jsImpressionBeacon = new AdData();
+        jsImpressionBeacon.data = new HashMap<>();
+        jsImpressionBeacon.data.put("js", "function imp() {};");
+        doReturn(Arrays.asList(urlImpressionBeacon, jsImpressionBeacon))
+                .when(spiedAd).getBeacons(Ad.Beacon.IMPRESSION);
+
+        List<AdData>[] actualBeacons = new List[2];
+
+        try (
+                MockedStatic<HyBid> mockedHyBid = mockStatic(HyBid.class);
+                MockedConstruction<AdTracker> adTrackerMockedConstruction = mockConstruction(AdTracker.class, (mock, context) -> {
+                    actualBeacons[0] = (List<AdData>) context.arguments().get(0);
+                    actualBeacons[1] = (List<AdData>) context.arguments().get(1);
+                });
+        ) {
+            PNApiClient mockApiClient = mock(PNApiClient.class);
+            mockedHyBid.when(HyBid::getApiClient).thenReturn(mockApiClient);
+            DeviceInfo mockDeviceInfo = mock(DeviceInfo.class);
+            when(mockDeviceInfo.getAdvertisingId()).thenReturn("test-ad-id");
+            mockedHyBid.when(HyBid::getDeviceInfo).thenReturn(mockDeviceInfo);
+
+            NativeAd subject = new NativeAd(spiedAd);
+
+            Map<String, String> extras = new HashMap<>();
+            extras.put("param1", "value1");
+            extras.put("param2", "value 2 that needs encoding");
+
+            subject.startTracking(mockView, mockClickableView, extras, mockListener);
+
+            assertEquals(
+                    "Original impression beacon data is left intact",
+                    originalImpressionBeaconUrl,
+                    urlImpressionBeacon.getURL()
+            );
+            assertTrue(actualBeacons[0].get(0).getURL().contains("param1=value1"));
+            assertTrue(actualBeacons[0].get(0).getURL().contains("param2=value%202%20that%20needs%20encoding"));
+            assertEquals(
+                    "JavaScript impression beacon is left intact",
+                    jsImpressionBeacon.getJS(),
+                    actualBeacons[0].get(1).getJS()
+            );
+
+            assertEquals(
+                    "Original click beacon data is left intact",
+                    originalClickBeaconUrl,
+                    urlClickBeacon.getURL()
+            );
+            assertTrue(actualBeacons[1].get(0).getURL().contains("param1=value1"));
+            assertTrue(actualBeacons[1].get(0).getURL().contains("param2=value%202%20that%20needs%20encoding"));
+            assertEquals(
+                    "JavaScript click beacon is left intact",
+                    jsClickBeacon.getJS(),
+                    actualBeacons[1].get(1).getJS()
+            );
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void startTracking_withoutExtras_preservesBeacons() {
+        AdData urlClickBeacon = new AdData();
+        urlClickBeacon.data = new HashMap<>();
+        urlClickBeacon.data.put("url", "https://example.com/click");
+        AdData jsClickBeacon = new AdData();
+        jsClickBeacon.data = new HashMap<>();
+        jsClickBeacon.data.put("js", "function click() {};");
+        List<AdData> requiredClickBeacons = Arrays.asList(urlClickBeacon, jsClickBeacon);
+        doReturn(requiredClickBeacons).when(spiedAd).getBeacons(Ad.Beacon.CLICK);
+
+        AdData urlImpressionBeacon = new AdData();
+        urlImpressionBeacon.data = new HashMap<>();
+        urlImpressionBeacon.data.put("url", "https://example.com/imp");
+        AdData jsImpressionBeacon = new AdData();
+        jsImpressionBeacon.data = new HashMap<>();
+        jsImpressionBeacon.data.put("js", "function imp() {};");
+        List<AdData> requiredImpressionBeacons = Arrays.asList(urlImpressionBeacon, jsImpressionBeacon);
+        doReturn(requiredImpressionBeacons).when(spiedAd).getBeacons(Ad.Beacon.IMPRESSION);
+
+        List<AdData>[] actualBeacons = new List[2];
+
+        try (
+                MockedStatic<HyBid> mockedHyBid = mockStatic(HyBid.class);
+                MockedConstruction<AdTracker> adTrackerMockedConstruction = mockConstruction(AdTracker.class, (mock, context) -> {
+                    actualBeacons[0] = (List<AdData>) context.arguments().get(0);
+                    actualBeacons[1] = (List<AdData>) context.arguments().get(1);
+                });
+        ) {
+            PNApiClient mockApiClient = mock(PNApiClient.class);
+            mockedHyBid.when(HyBid::getApiClient).thenReturn(mockApiClient);
+            DeviceInfo mockDeviceInfo = mock(DeviceInfo.class);
+            when(mockDeviceInfo.getAdvertisingId()).thenReturn("test-ad-id");
+            mockedHyBid.when(HyBid::getDeviceInfo).thenReturn(mockDeviceInfo);
+
+            NativeAd subject = new NativeAd(spiedAd);
+
+            subject.startTracking(mockView, null);
+
+            assertEquals(actualBeacons[0], requiredImpressionBeacons);
+            assertEquals(actualBeacons[1], requiredClickBeacons);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void startTracking_withExtras_appendsLatestExtras() {
+        AdData urlClickBeacon = new AdData();
+        urlClickBeacon.data = new HashMap<>();
+        urlClickBeacon.data.put("url", "https://example.com/click");
+        doReturn(Collections.singletonList(urlClickBeacon))
+                .when(spiedAd).getBeacons(Ad.Beacon.CLICK);
+
+        AdData urlImpressionBeacon = new AdData();
+        urlImpressionBeacon.data = new HashMap<>();
+        urlImpressionBeacon.data.put("url", "https://example.com/imp");
+        doReturn(Collections.singletonList(urlImpressionBeacon))
+                .when(spiedAd).getBeacons(Ad.Beacon.IMPRESSION);
+
+        List<AdData>[] actualBeacons = new List[2];
+
+        try (
+                MockedStatic<HyBid> mockedHyBid = mockStatic(HyBid.class);
+                MockedConstruction<AdTracker> adTrackerMockedConstruction = mockConstruction(AdTracker.class, (mock, context) -> {
+                    actualBeacons[0] = (List<AdData>) context.arguments().get(0);
+                    actualBeacons[1] = (List<AdData>) context.arguments().get(1);
+                });
+        ) {
+            PNApiClient mockApiClient = mock(PNApiClient.class);
+            mockedHyBid.when(HyBid::getApiClient).thenReturn(mockApiClient);
+            DeviceInfo mockDeviceInfo = mock(DeviceInfo.class);
+            when(mockDeviceInfo.getAdvertisingId()).thenReturn("test-ad-id");
+            mockedHyBid.when(HyBid::getDeviceInfo).thenReturn(mockDeviceInfo);
+
+            NativeAd subject = new NativeAd(spiedAd);
+
+            Map<String, String> extras = new HashMap<>();
+            extras.put("param1", "value1");
+            extras.put("param2", "value 2 that needs encoding");
+
+            subject.startTracking(mockView, mockClickableView, extras, mockListener);
+
+            extras = new HashMap<>();
+            extras.put("updatedParam1", "updatedValue1");
+            subject.startTracking(mockView, mockClickableView, extras, mockListener);
+
+            assertTrue(actualBeacons[0].get(0).getURL().contains("updatedParam1=updatedValue1"));
+            assertFalse(actualBeacons[0].get(0).getURL().contains("param1=value1"));
+            assertFalse(actualBeacons[0].get(0).getURL().contains("param2=value%202%20that%20needs%20encoding"));
+
+            assertTrue(actualBeacons[1].get(0).getURL().contains("updatedParam1=updatedValue1"));
+            assertFalse(actualBeacons[1].get(0).getURL().contains("param1=value1"));
+            assertFalse(actualBeacons[1].get(0).getURL().contains("param2=value%202%20that%20needs%20encoding"));
+        }
+    }
+
+    @Test
+    public void startTracking_calledTwice_tracksClickOnce() {
+        AdData urlClickBeacon = new AdData();
+        urlClickBeacon.data = new HashMap<>();
+        urlClickBeacon.data.put("url", "https://example.com/click");
+        doReturn(Collections.singletonList(urlClickBeacon))
+                .when(spiedAd).getBeacons(Ad.Beacon.CLICK);
+
+        try (
+                MockedStatic<HyBid> mockedHyBid = mockStatic(HyBid.class);
+        ) {
+            PNApiClient mockApiClient = mock(PNApiClient.class);
+            mockedHyBid.when(HyBid::getApiClient).thenReturn(mockApiClient);
+            DeviceInfo mockDeviceInfo = mock(DeviceInfo.class);
+            when(mockDeviceInfo.getAdvertisingId()).thenReturn("test-ad-id");
+            mockedHyBid.when(HyBid::getDeviceInfo).thenReturn(mockDeviceInfo);
+
+            NativeAd subject = new NativeAd(spiedAd);
+
+            for (int i = 0; i < 2; i++) {
+                subject.startTracking(mockView, mockClickableView, mockListener);
+                subject.onNativeClick();
+            }
+
+            verify(mockApiClient, times(1))
+                    .trackUrl(eq(urlClickBeacon.getURL()), any(), any(), any());
+        }
     }
 
     @Test
@@ -310,6 +527,7 @@ public class NativeAdTest {
         try (MockedStatic<URLValidator> mockedValidator = mockStatic(URLValidator.class);
              MockedConstruction<AdFeedbackFormHelper> mockedFormHelper = mockConstruction(AdFeedbackFormHelper.class)) {
 
+            NativeAd subject = new NativeAd(spiedAd);
             String invalidUrl = "not a valid url";
 
             // 1. Explicitly define the behavior of the static method
@@ -332,54 +550,42 @@ public class NativeAdTest {
     // --------------- Callback Invocation & Listener Tests ---------------
     @Test
     public void invokeOnImpression_withValidListener_invokesCallback() {
+        NativeAd subject = new NativeAd(spiedAd);
         subject.mListener = mockListener;
         subject.invokeOnImpression(mockView);
         verify(mockListener, times(1)).onAdImpression(subject, mockView);
     }
 
     @Test
-    public void onImpression_confirmsBeaconsAndInvokesListener() {
-        try (MockedStatic<TrackingManager> mockedTrackingManager = mockStatic(TrackingManager.class)) {
+    public void onImpression_tracksAndInvokesListener() {
+        try (
+                MockedConstruction<AdTracker> adTrackerMockedConstruction = mockConstruction(AdTracker.class);
+        ) {
+            NativeAd subject = new NativeAd(spiedAd);
             AdData beacon = new AdData();
             beacon.data = new java.util.HashMap<>();
             beacon.data.put("url", "https://impression.tracker");
             when(spiedAd.getBeacons(Ad.Beacon.IMPRESSION)).thenReturn(List.of(beacon));
+
             subject.mListener = mockListener;
 
             subject.onImpression(mockView);
 
-            mockedTrackingManager.verify(() -> TrackingManager.track(any(Context.class), eq("https://impression.tracker")));
+            assertEquals(1, adTrackerMockedConstruction.constructed().size());
+            AdTracker mockedAdTracker = adTrackerMockedConstruction.constructed().get(0);
+
+            verify(mockedAdTracker, times(1)).trackImpression();
             verify(mockListener).onAdImpression(subject, mockView);
         }
     }
 
     @Test
-    public void confirmBeacons_withJSBeacon_createsPNBeaconWebView() {
-        try (MockedConstruction<PNBeaconWebView> mockedWebView = mockConstruction(PNBeaconWebView.class)) {
-            AdData beacon = new AdData();
-            beacon.type = Ad.Beacon.IMPRESSION;
-            beacon.data = new java.util.HashMap<>();
-            beacon.data.put("js", "javascript:beacon();");
-
-            // Set beacons directly on the spied Ad object
-            spiedAd.beacons = List.of(beacon);
-
-            // Act: onImpression triggers confirmBeacons
-            subject.onImpression(mockView);
-
-            // Assert that a PNBeaconWebView was constructed and loadBeacon was called
-            assertEquals(1, mockedWebView.constructed().size());
-            PNBeaconWebView mockBeaconWebView = mockedWebView.constructed().get(0);
-            verify(mockBeaconWebView).loadBeacon("javascript:beacon();");
-        }
-    }
-
-    @Test
-    public void onNativeClick_confirmsClickBeaconsAndOpensUrl() {
+    public void onNativeClick_tracksClickAndOpensUrl() {
         try (
-                MockedStatic<TrackingManager> mockedTrackingManager = mockStatic(TrackingManager.class);
-                MockedStatic<HyBid> mockedHyBid = mockStatic(HyBid.class)
+                MockedStatic<HyBid> mockedHyBid = mockStatic(HyBid.class);
+                MockedConstruction<AdTracker> adTrackerMockedConstruction = mockConstruction(AdTracker.class);
         ) {
+            NativeAd subject = new NativeAd(spiedAd);
             spiedAd.link = "https://destination.url";
             subject.startTracking(mockView, mockClickableView, mockListener);
 
@@ -396,6 +602,9 @@ public class NativeAdTest {
             assertNotNull(startedIntent);
             assertEquals(Intent.ACTION_VIEW, startedIntent.getAction());
             assertEquals("https://destination.url", startedIntent.getDataString());
+
+            AdTracker mockedAdTracker = adTrackerMockedConstruction.constructed().getLast();
+            verify(mockedAdTracker, times(1)).trackClick();
         }
     }
 
@@ -403,6 +612,7 @@ public class NativeAdTest {
 
     @Test
     public void startTracking_withNullListener_doesNotCrash() {
+        NativeAd subject = new NativeAd(spiedAd);
         spiedAd.link = "https://example.com";
         // Pass null for the listener to test the guard clause
         subject.startTracking(mockView, mockClickableView, null);
@@ -412,6 +622,7 @@ public class NativeAdTest {
     @Test
     public void startTrackingImpression_withNullView_doesNothing() {
         try (MockedStatic<ImpressionManager> mockedImpressionManager = mockStatic(ImpressionManager.class)) {
+            NativeAd subject = new NativeAd(spiedAd);
             subject.startTrackingImpression(null);
             mockedImpressionManager.verifyNoInteractions();
         }
@@ -419,35 +630,22 @@ public class NativeAdTest {
 
     @Test
     public void startTrackingClicks_withNullView_doesNothing() {
+        NativeAd subject = new NativeAd(spiedAd);
         spiedAd.link = "https://example.com";
         subject.startTrackingClicks(null);
         // Test passes if no exception is thrown, as setOnClickListener would crash on a null object
     }
 
     @Test
-    public void confirmBeacons_whenAdIsNull_doesNotCrash() throws Exception {
-        // Use reflection to call the private method
-        Method confirmBeaconsMethod = NativeAd.class.getDeclaredMethod("confirmBeacons", String.class, Context.class);
-        confirmBeaconsMethod.setAccessible(true);
-
-        subject.mAd = null; // Set the internal ad to null
-
-        // Test passes if no NullPointerException is thrown
-        confirmBeaconsMethod.invoke(subject, Ad.Beacon.IMPRESSION, applicationContext);
-    }
-
-    @Test
-    public void confirmBeacons_whenBeaconListIsNull_doesNotCrash() {
-        try (MockedStatic<TrackingManager> mockedTrackingManager = mockStatic(TrackingManager.class)) {
-            when(spiedAd.getBeacons(Ad.Beacon.IMPRESSION)).thenReturn(null); // Return a null list
-            subject.onImpression(mockView);
-            // Verify that the track method was never called
-            mockedTrackingManager.verifyNoInteractions();
-        }
+    public void trackImpression_whenBeaconListIsNull_doesNotCrash() {
+        when(spiedAd.getBeacons(Ad.Beacon.IMPRESSION)).thenReturn(null); // Return a null list
+        NativeAd subject = new NativeAd(spiedAd);
+        subject.onImpression(mockView);
     }
 
     @Test
     public void invokeOnImpression_withNullView_doesNotCrashOrInvokeListener() {
+        NativeAd subject = new NativeAd(spiedAd);
         subject.mListener = mockListener;
         subject.invokeOnImpression(null);
         verify(mockListener, never()).onAdImpression(any(), any());
@@ -456,6 +654,7 @@ public class NativeAdTest {
     @Test
     public void onIconClicked_withNullTrackers_doesNothing() {
         try (MockedStatic<EventTracker> mockedEventTracker = mockStatic(EventTracker.class)) {
+            NativeAd subject = new NativeAd(spiedAd);
             subject.startTrackingImpression(mockView);
             subject.onIconClicked(null); // Pass null list
             mockedEventTracker.verifyNoInteractions();
@@ -466,6 +665,7 @@ public class NativeAdTest {
     public void onLinkClicked_whenNotTracking_doesNothing() {
         try (MockedConstruction<AdFeedbackFormHelper> mockedFormHelper = mockConstruction(AdFeedbackFormHelper.class)) {
             // Do NOT call startTrackingImpression, so mAdView is null
+            NativeAd subject = new NativeAd(spiedAd);
             subject.onLinkClicked("https://valid.url");
 
             // Verify the form helper was never created
@@ -475,6 +675,7 @@ public class NativeAdTest {
 
     @Test
     public void openURL_withMediationClickAndAdViewContext_opensUrl() {
+        NativeAd subject = new NativeAd(spiedAd);
         spiedAd.link = "https://test.url";
         subject.startTracking(mockView, mockClickableView, mockListener);
         // Set mAdView to mockView
@@ -492,6 +693,7 @@ public class NativeAdTest {
 
     @Test
     public void openURL_withMediationClickAndNullAdViewContext_doesNothing() {
+        NativeAd subject = new NativeAd(spiedAd);
         spiedAd.link = "https://test.url";
         // mAdView is null, should not throw
         subject.openURL("https://test.url", true);
@@ -499,6 +701,7 @@ public class NativeAdTest {
 
     @Test
     public void openURL_withNonMediationClickAndClickableViewContext_opensUrl() {
+        NativeAd subject = new NativeAd(spiedAd);
         spiedAd.link = "https://test.url";
         subject.startTracking(mockView, mockClickableView, mockListener);
 
@@ -514,6 +717,7 @@ public class NativeAdTest {
 
     @Test
     public void openURL_withNonMediationClickAndNullClickableViewContext_doesNothing() {
+        NativeAd subject = new NativeAd(spiedAd);
         spiedAd.link = "https://test.url";
         // mClickableView is null, should not throw
         subject.openURL("https://test.url", false);
@@ -521,6 +725,7 @@ public class NativeAdTest {
 
     @Test
     public void invokeOnClick_withNullListener_doesNotCrash() {
+        NativeAd subject = new NativeAd(spiedAd);
         subject.mListener = null;
         // Should not throw
         subject.invokeOnClick(mockView);
@@ -529,12 +734,14 @@ public class NativeAdTest {
     @Test
     public void onNativeClick_withNullContext_doesNotCrash() {
         // mAdView is null, so context is null
+        NativeAd subject = new NativeAd(spiedAd);
         subject.onNativeClick();
         // Should not throw
     }
 
     @Test
     public void onNativeClick_withNullViewContext_doesNotCrash() {
+        NativeAd subject = new NativeAd(spiedAd);
         // mockClickableView.getContext() returns null
         when(mockClickableView.getContext()).thenReturn(null);
         spiedAd.link = "https://destination.url";
@@ -546,6 +753,7 @@ public class NativeAdTest {
 
     @Test
     public void onIconClicked_withNonEmptyTrackers_postsEvents() {
+        NativeAd subject = new NativeAd(spiedAd);
         try (MockedStatic<EventTracker> mockedEventTracker = mockStatic(EventTracker.class)) {
             subject.startTrackingImpression(mockView);
             List<String> trackers = List.of("https://tracker1", "https://tracker2");
@@ -562,6 +770,7 @@ public class NativeAdTest {
                 MockedStatic<URLValidator> mockedValidator = mockStatic(URLValidator.class);
                 MockedConstruction<AdFeedbackFormHelper> mockedFormHelper = mockConstruction(AdFeedbackFormHelper.class)
         ) {
+            NativeAd subject = new NativeAd(spiedAd);
             String validUrl = "https://valid.url";
             mockedValidator.when(() -> URLValidator.isValidURL(validUrl)).thenReturn(true);
 
@@ -580,6 +789,7 @@ public class NativeAdTest {
                 MockedStatic<URLValidator> mockedValidator = mockStatic(URLValidator.class);
                 MockedConstruction<AdFeedbackFormHelper> mockedFormHelper = mockConstruction(AdFeedbackFormHelper.class)
         ) {
+            NativeAd subject = new NativeAd(spiedAd);
             String validUrl = "https://valid.url";
             mockedValidator.when(() -> URLValidator.isValidURL(validUrl)).thenReturn(true);
 
@@ -624,7 +834,6 @@ public class NativeAdTest {
     public void onImpression_firesViewabilityImpression() {
         try (
                 MockedStatic<HyBid> mockedHyBid = mockStatic(HyBid.class);
-                MockedStatic<TrackingManager> mockedTrackingManager = mockStatic(TrackingManager.class);
                 MockedConstruction<HyBidViewabilityNativeDisplayAdSession> mockedAdSession =
                         mockConstruction(HyBidViewabilityNativeDisplayAdSession.class)
         ) {
@@ -692,23 +901,21 @@ public class NativeAdTest {
         final List<String> seq = new java.util.ArrayList<>();
         try (
                 MockedStatic<HyBid> mockedHyBid = mockStatic(HyBid.class);
-                MockedStatic<TrackingManager> mockedTrackingManager = mockStatic(TrackingManager.class);
                 MockedConstruction<HyBidViewabilityNativeDisplayAdSession> mockedAdSession =
                         mockConstruction(HyBidViewabilityNativeDisplayAdSession.class,
                                 (m, ctx) -> doAnswer(i -> {
                                     seq.add("om-impression");
                                     return null;
-                                }).when(m).fireImpression())
+                                }).when(m).fireImpression());
+                MockedConstruction<AdTracker> mockedAdTracker =
+                        mockConstruction(AdTracker.class, (m, ctx) -> doAnswer(i -> {
+                            seq.add(i.getMethod().getName());
+                            return null;
+                        }).when(m).trackImpression());
         ) {
             HyBidViewabilityManager mockViewabilityManager = mock(HyBidViewabilityManager.class);
             mockedHyBid.when(HyBid::getViewabilityManager).thenReturn(mockViewabilityManager);
             mockedHyBid.when(HyBid::getReportingController).thenReturn(mockReportingController);
-
-            mockedTrackingManager.when(() -> TrackingManager.track(any(Context.class), anyString()))
-                    .thenAnswer(i -> {
-                        seq.add("beacon:" + i.getArgument(1));
-                        return null;
-                    });
 
             // Ensure at least one impression beacon exists so TrackingManager.track is invoked
             AdData beacon = new AdData();
@@ -723,7 +930,7 @@ public class NativeAdTest {
 
             // OM impression must fire before the impression beacon (OM ordering requirement)
             assertEquals(
-                    java.util.Arrays.asList("om-impression", "beacon:https://example.com/imp"),
+                    java.util.Arrays.asList("om-impression", "trackImpression"),
                     seq);
         }
     }
@@ -780,7 +987,6 @@ public class NativeAdTest {
     public void startTrackingImpression_doesNotInitSession_whenImpressionAlreadyConfirmed() {
         try (
                 MockedStatic<HyBid> mockedHyBid = mockStatic(HyBid.class);
-                MockedStatic<TrackingManager> mockedTrackingManager = mockStatic(TrackingManager.class);
                 MockedConstruction<HyBidViewabilityNativeDisplayAdSession> mockedAdSession =
                         mockConstruction(HyBidViewabilityNativeDisplayAdSession.class)
         ) {

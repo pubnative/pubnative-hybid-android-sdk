@@ -18,6 +18,7 @@ import net.pubnative.lite.sdk.analytics.ReportingEvent;
 import net.pubnative.lite.sdk.contentinfo.AdFeedbackFormHelper;
 import net.pubnative.lite.sdk.contentinfo.listeners.AdFeedbackLoadListener;
 import net.pubnative.lite.sdk.prefs.SessionImpressionPrefs;
+import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.URLValidator;
 import net.pubnative.lite.sdk.utils.UrlHandler;
@@ -27,19 +28,18 @@ import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeDisplayAdSession
 import net.pubnative.lite.sdk.viewability.baseom.BaseFriendlyObstructionPurpose;
 import net.pubnative.lite.sdk.viewability.baseom.BaseVerificationScriptResource;
 import net.pubnative.lite.sdk.views.PNAPIContentInfoView;
-import net.pubnative.lite.sdk.views.PNBeaconWebView;
 import net.pubnative.lite.sdk.visibility.ImpressionManager;
 import net.pubnative.lite.sdk.visibility.ImpressionTracker;
-import net.pubnative.lite.sdk.visibility.TrackingManager;
 import net.pubnative.lite.sdk.vpaid.helpers.EventTracker;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoView.ContentInfoListener {
     private static final String TAG = NativeAd.class.getSimpleName();
-    private ReportingController mReportingController;
+    private final ReportingController mReportingController;
 
     // Viewability tracking
     private HyBidViewabilityNativeDisplayAdSession mViewabilityAdSession;
@@ -66,12 +66,15 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
     // Used externally to inject data for tracking
     private Map<String, String> mTrackingExtras;
 
+    private final List<AdData> mAdTrackerImpressionBeacons = new ArrayList<>();
+    private final List<AdData> mAdTrackerClickBeacons = new ArrayList<>();
+    private final AdTracker mAdTracker = new AdTracker(mAdTrackerImpressionBeacons, mAdTrackerClickBeacons);
+
     protected Ad mAd;
     protected Listener mListener;
 
     private boolean mIsImpressionConfirmed;
     private View mClickableView;
-    private List<String> mUsedAssets;
     private View mAdView;
 
     private Bitmap bannerBitmap;
@@ -81,12 +84,32 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
         this.mAd = null;
         mReportingController = HyBid.getReportingController();
         initViewabilitySession();
+        updateAdTrackerBeacons();
     }
 
     public NativeAd(Ad ad) {
         this.mAd = ad;
         mReportingController = HyBid.getReportingController();
         initViewabilitySession();
+        updateAdTrackerBeacons();
+    }
+
+    private void updateAdTrackerBeacons() {
+        if (mAd == null) {
+            return;
+        }
+
+        mAdTrackerImpressionBeacons.clear();
+        List<AdData> adImpressionBeacons = mAd.getBeacons(Ad.Beacon.IMPRESSION);
+        if (adImpressionBeacons != null) {
+            mAdTrackerImpressionBeacons.addAll(withTrackingExtras(adImpressionBeacons));
+        }
+
+        mAdTrackerClickBeacons.clear();
+        List<AdData> adClickBeacons = mAd.getBeacons(Ad.Beacon.CLICK);
+        if (adClickBeacons != null) {
+            mAdTrackerClickBeacons.addAll(withTrackingExtras(adClickBeacons));
+        }
     }
 
     private void initViewabilitySession() {
@@ -202,7 +225,7 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
      * @return String value with the url of the click, null if not present
      */
     private String getClickUrl() {
-        return injectExtras(mAd.link);
+        return withTrackingExtras(mAd.link);
     }
 
     /**
@@ -256,16 +279,48 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
         return mAd != null ? mAd.getECPM() : 0;
     }
 
-    // Used to inject extra data in urls
-    private String injectExtras(String url) {
+    /**
+     * @return URL with tracking extras injected as query parameters.
+     * @see #startTracking(View, View, Map, Listener) where the extras are specified
+     */
+    private String withTrackingExtras(String url) {
         String result = url;
-        if (!TextUtils.isEmpty(url) && mTrackingExtras != null && mTrackingExtras.size() > 0) {
+        if (!TextUtils.isEmpty(url) && mTrackingExtras != null && !mTrackingExtras.isEmpty()) {
             Uri.Builder builder = Uri.parse(url).buildUpon();
             for (Map.Entry<String, String> entry : mTrackingExtras.entrySet()) {
-                builder.appendQueryParameter(entry.getKey(), entry.getKey());
+                builder.appendQueryParameter(entry.getKey(), entry.getValue());
             }
             result = builder.build().toString();
         }
+        return result;
+    }
+
+    /**
+     * @return beacons with injected tracking extras into URLs, if there are any.
+     * Does not modify the original list and its beacons.
+     * @see #startTracking(View, View, Map, Listener) where the extras are specified
+     */
+    private List<AdData> withTrackingExtras(List<AdData> beacons) {
+        if (beacons == null || beacons.isEmpty()
+                || mTrackingExtras == null || mTrackingExtras.isEmpty()) {
+            return beacons;
+        }
+
+        List<AdData> result = new ArrayList<>(beacons.size());
+        for (int i = 0; i < beacons.size(); i++) {
+            AdData originalBeacon = beacons.get(i);
+            String url = originalBeacon.getURL();
+            if (!TextUtils.isEmpty(url)) {
+                AdData beaconWithExtras = new AdData();
+                beaconWithExtras.type = originalBeacon.type;
+                beaconWithExtras.data = new HashMap<>(originalBeacon.data);
+                beaconWithExtras.data.put(AdData.FIELD_URL, withTrackingExtras(url));
+                result.add(i, beaconWithExtras);
+            } else {
+                result.add(i, originalBeacon);
+            }
+        }
+
         return result;
     }
 
@@ -297,7 +352,9 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
         }
 
         mListener = listener;
+
         mTrackingExtras = extras;
+        updateAdTrackerBeacons();
 
         stopTracking();
 
@@ -406,48 +463,6 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
         }
     }
 
-    private void confirmImpressionBeacons(Context context) {
-        // 1. Track assets
-        if (mUsedAssets != null) {
-            for (String asset : mUsedAssets) {
-                TrackingManager.track(context, asset);
-            }
-        }
-        // 2. Track impressions
-        confirmBeacons(Ad.Beacon.IMPRESSION, context);
-    }
-
-    private void confirmClickBeacons(Context context) {
-        confirmBeacons(Ad.Beacon.CLICK, context);
-    }
-
-    private void confirmBeacons(String beaconType, Context context) {
-        if (mAd == null) {
-            Log.w(TAG, "confirmBeacons - Error: ad data not present");
-            return;
-        }
-
-        List<AdData> beacons = mAd.getBeacons(beaconType);
-        if (beacons == null) {
-            return;
-        }
-
-        for (AdData beaconData : beacons) {
-            String beaconURL = injectExtras(beaconData.getURL());
-            String beaconJS = beaconData.getStringField("js");
-            if (!TextUtils.isEmpty(beaconURL)) {
-                // URL
-                TrackingManager.track(context, beaconURL);
-            } else if (!TextUtils.isEmpty(beaconJS)) {
-                try {
-                    new PNBeaconWebView(context).loadBeacon(beaconJS);
-                } catch (Exception e) {
-                    Log.e(TAG, "confirmImpressionBeacons - JS Error: " + e);
-                }
-            }
-        }
-    }
-
     //==============================================================================================
     // Listener helpers
     //==============================================================================================
@@ -484,20 +499,20 @@ public class NativeAd implements ImpressionTracker.Listener, PNAPIContentInfoVie
             mViewabilityAdSession.fireImpression();
         }
 
-        confirmImpressionBeacons(visibleView.getContext());
+        mAdTracker.trackImpression();
         invokeOnImpression(visibleView);
     }
 
     public void onNativeClick() {
         if (mAdView != null) {
-            confirmClickBeacons(mAdView.getContext());
+            mAdTracker.trackClick();
             openURL(getClickUrl(), true);
         }
     }
 
     public void onNativeClick(View view) {
         invokeOnClick(view);
-        confirmClickBeacons(view.getContext());
+        mAdTracker.trackClick();
         openURL(getClickUrl(), false);
     }
 

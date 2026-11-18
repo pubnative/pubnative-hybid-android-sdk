@@ -7,6 +7,7 @@ package net.pubnative.lite.sdk.rewarded.activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.WindowManager;
 
 import net.pubnative.lite.sdk.rewarded.viewModel.VastRewardedViewModel;
 import net.pubnative.lite.sdk.vpaid.HyBidActivityInteractor;
@@ -18,6 +19,7 @@ public class VastRewardedActivity extends HyBidRewardedActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         ((VastRewardedViewModel) mViewModel).renderVastAd();
     }
 

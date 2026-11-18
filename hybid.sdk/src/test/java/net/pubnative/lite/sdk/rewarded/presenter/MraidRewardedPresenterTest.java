@@ -9,6 +9,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -23,6 +24,7 @@ import android.os.Bundle;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import net.pubnative.lite.sdk.CustomEndCardListener;
 import net.pubnative.lite.sdk.rewarded.HyBidRewardedBroadcastReceiver;
 import net.pubnative.lite.sdk.rewarded.activity.HyBidRewardedActivity;
 import net.pubnative.lite.sdk.rewarded.activity.MraidRewardedActivity;
@@ -56,12 +58,16 @@ public class MraidRewardedPresenterTest {
     private HyBidRewardedBroadcastReceiver mockReceiver;
     @Mock
     MraidRewardedPresenter.Listener mockListener;
+    @Mock
+    CustomEndCardListener mockCustomEndCardListener;
     @Captor
     private ArgumentCaptor<Intent> intentCaptor;
 
+    private AutoCloseable closeable;
+
     @Before
     public void setUp() {
-        openMocks(this);
+        closeable = openMocks(this);
         application = ApplicationProvider.getApplicationContext();
 
         when(mockContext.getApplicationContext()).thenReturn(application);
@@ -72,8 +78,8 @@ public class MraidRewardedPresenterTest {
     }
 
     @After
-    public void tearDown() {
-
+    public void tearDown() throws Exception {
+        closeable.close();
     }
 
     @Test
@@ -142,10 +148,11 @@ public class MraidRewardedPresenterTest {
         HyBidRewardedBroadcastReceiver.Action mockAction = HyBidRewardedBroadcastReceiver.Action.OPEN;
         Bundle bundle = new Bundle();
         presenter.setListener(mockListener);
+        presenter.setCustomEndCardListener(mockCustomEndCardListener);
 
         presenter.onReceivedAction(mockAction, bundle);
 
-        verify(mockReceiver).handleAction(eq(mockAction), eq(presenter), eq(bundle), eq(mockListener), eq(null), eq(null));
+        verify(mockReceiver).handleAction(eq(mockAction), eq(presenter), eq(bundle), eq(mockListener), any(), eq(mockCustomEndCardListener));
     }
 
     @Test

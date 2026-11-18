@@ -1,92 +1,12 @@
 plugins {
-    id 'com.android.library'
-    id 'com.jfrog.artifactory'
-    id 'maven-publish'
-    id 'kotlin-android'
-    id 'jacoco'
+    id 'hybid.android.sdk.adapter'
+    id 'hybid.android.publishing.artifactory'
 }
 
-def version_name = project.version
-//==================================================================================================
-// ANDROID
-//==================================================================================================
-version = version_name
-
 android {
-    compileSdk android_api
-
-    defaultConfig {
-        minSdkVersion min_android_api
-        targetSdkVersion android_api
-        versionCode buildNumber ? buildNumber : 1
-        versionName version_name
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-        }
-        debug {
-            minifyEnabled false
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    testOptions {
-        unitTests {
-            includeAndroidResources = true
-        }
-    }
-
     namespace 'net.pubnative.lite.adapters.dfp'
 }
 
-
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation project(':hybid.sdk')
-
     compileOnly 'com.google.android.gms:play-services-ads:25.3.0'
-}
-
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    archiveClassifier = 'sources'
-}
-
-publishing {
-    publications {
-
-        aar(MavenPublication) {
-            groupId project.group
-            artifactId project.name
-            version version_name
-            artifact sourcesJar
-            android.libraryVariants.all { variant ->
-                if (variant.buildType.name == "debug") return
-                artifact variant.outputs[0].packageLibrary // This is the aar library
-            }
-        }
-    }
-}
-
-artifactory {
-    contextUrl = System.getenv("ARTIFACTORY_CONTEXT_URL")
-    publish {
-        repository {
-            repoKey = System.getenv("ARTIFACTORY_REPOKEY")
-            username = System.getenv("ARTIFACTORY_USER")
-            password = System.getenv("ARTIFACTORY_PASSWORD")
-        }
-
-        defaults {
-            publications('aar')
-            publishArtifacts = true
-            publishPom = true
-        }
-    }
 }

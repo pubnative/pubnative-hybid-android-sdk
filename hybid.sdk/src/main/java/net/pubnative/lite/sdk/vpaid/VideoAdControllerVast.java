@@ -27,9 +27,9 @@ import net.pubnative.lite.sdk.utils.AdEndCardManager;
 import net.pubnative.lite.sdk.utils.AdTracker;
 import net.pubnative.lite.sdk.utils.Logger;
 import net.pubnative.lite.sdk.utils.MediaPlayerErrors;
-import net.pubnative.lite.sdk.utils.TouchSizeManager;
 import net.pubnative.lite.sdk.utils.SkipOffsetManager;
 import net.pubnative.lite.sdk.utils.SkipOffsetResolver;
+import net.pubnative.lite.sdk.utils.TouchSizeManager;
 import net.pubnative.lite.sdk.utils.UrlHandler;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityFriendlyObstruction;
 import net.pubnative.lite.sdk.viewability.HyBidViewabilityNativeVideoAdSession;
@@ -111,6 +111,8 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
     private Handler mActionsProcessingHandler;
     private volatile boolean isActionsProcessingRun = false;
     private volatile boolean awaitingPrepare = false;
+    // MediaPlayer may report one playback failure several times; report it once per player.
+    private volatile boolean playbackErrorReported = false;
     private volatile Action currentAction = Action.INITIAL;
     private Boolean isLastEndCardCustom = false;
 
@@ -363,6 +365,7 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
         }
 
         mMediaPlayer = new MediaPlayer();
+        playbackErrorReported = false;
         try {
             mMediaPlayer.setDataSource(mVideoUri);
             mMediaPlayer.setOnCompletionListener(mOnCompletionListener);
@@ -411,17 +414,18 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
                 return;
             }
             createTimer(duration);
-        if (!isReplay) {
-            runOnUiThread(() -> getViewabilityAdSession().fireImpression());
-        }
-        if (mBaseAdInternal != null && mBaseAdInternal.getAdListener() != null) {
-            runOnUiThread(() -> mBaseAdInternal.getAdListener().onAdStarted());
-        }
+            if (!isReplay) {
+                runOnUiThread(() -> getViewabilityAdSession().fireImpression());
+            }
+            if (mBaseAdInternal != null && mBaseAdInternal.getAdListener() != null) {
+                runOnUiThread(() -> mBaseAdInternal.getAdListener().onAdStarted());
+            }
             player.start();
         } catch (IllegalArgumentException | IllegalStateException e) {
             Logger.e(LOG_TAG, "play: failed to start: " + e.getMessage());
         }
     }
+
     private void processPauseAction() {
 
         TimerWithPause timer = mTimerWithPause;
@@ -442,7 +446,7 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
                     runOnUiThread(() -> getViewabilityAdSession().firePause());
                 }
             } catch (IllegalStateException exception) {
-                Logger.e(VideoAdControllerVast.class.getSimpleName(),"Media player is not prepared: "
+                Logger.e(VideoAdControllerVast.class.getSimpleName(), "Media player is not prepared: "
                         + exception.getMessage());
             }
         }
@@ -629,6 +633,8 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
             if (!wasAwaitingPrepare && (extra == MediaPlayerErrors.MEDIA_ERROR_SYSTEM || extra == MediaPlayerErrors.MEDIA_ERROR_SYSTEM_CALLBACK)) {
                 return false;
             }
+            if (playbackErrorReported) return true;
+            playbackErrorReported = true;
             //1 : MediaPlayer.MEDIA_ERROR_UNKNOWN
             //True if the method handled the error, false if it didn't. Returning false, or not having an OnErrorListener at all, will cause the OnCompletionListener to be called.
             ErrorLog.postError(mBaseAdInternal.getContext(), VastError.MEDIA_FILE_UNSUPPORTED);
@@ -1080,8 +1086,15 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
     }
 
     @Override
+    @Deprecated
     public void toggleMute() {
         mViewControllerVast.muteVideo();
+    }
+
+    @Override
+    public void setInitialMuteState(boolean muted) {
+        mViewControllerVast.setMuteState(muted);
+        muteVideo(muted, false);
     }
 
     @Override
@@ -1122,7 +1135,7 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
         String clickUrl = mAdParams.getVideoRedirectUrl();
 
         for (String trackUrl : mAdParams.getVideoClicks()) {
-            EventTracker.postEvent(mBaseAdInternal.getContext(), trackUrl, "VideoClick", mMacroHelper, false);
+            EventTracker.postEvent(mBaseAdInternal.getContext(), trackUrl, "ClickTracking", mMacroHelper, false);
         }
 
         return clickUrl;
@@ -1132,25 +1145,44 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
         String clickUrl = mAdParams.getEndCardRedirectUrl();
 
         for (String trackUrl : mAdParams.getEndCardClicks()) {
-            EventTracker.postEvent(mBaseAdInternal.getContext(), trackUrl, "EndcardClick", mMacroHelper, false);
+            EventTracker.postEvent(mBaseAdInternal.getContext(), trackUrl, "CompanionClickTracking", mMacroHelper, false);
         }
 
         return clickUrl;
     }
 
     // Local log only (demo Fired Tracker Report). Must not send a request: the navigation already hits this URL.
-    private void logClickThroughLocally(String url) {
+    private void logClickThroughLocally(String url,
+                                        boolean isHandledSuccessfully,
+                                        UrlClickSource clickSource) {
+        if (TextUtils.isEmpty(url) || HyBid.getReportingController() == null) {
+            return;
+        }
+
         String type;
-        if (Objects.equals(url, mAdParams.getVideoRedirectUrl())) {
-            type = "ClickThrough";
+
+        if (Objects.equals(url, mAdParams.getVideoRedirectUrl())
+                && Objects.equals(url, mAdParams.getEndCardRedirectUrl())) {
+            if (clickSource == UrlClickSource.DEFAULT_END_CARD) {
+                type = "CompanionClickThrough - ";
+            } else {
+                type = "ClickThrough - ";
+            }
+        } else if (Objects.equals(url, mAdParams.getVideoRedirectUrl())) {
+            type = "ClickThrough - ";
         } else if (Objects.equals(url, mAdParams.getEndCardRedirectUrl())) {
-            type = "CompanionClickThrough";
+            type = "CompanionClickThrough - ";
         } else {
             return;
         }
-        if (!TextUtils.isEmpty(url) && HyBid.getReportingController() != null) {
-            HyBid.getReportingController().reportFiredTracker(new ReportingTracker(type, url, 0));
+
+        if (isHandledSuccessfully) {
+            type += "opened";
+        } else {
+            type += "failed";
         }
+
+        HyBid.getReportingController().reportFiredTracker(new ReportingTracker(type, url, 0));
     }
 
     @Override
@@ -1175,23 +1207,27 @@ class VideoAdControllerVast implements VideoAdController, ReplayListener {
                 if (url == null) {
                     url = videoClickUrl;
                 }
+                mBaseAdInternal.onAdClicked();
                 break;
         }
 
         Logger.d(LOG_TAG, "Handle external url");
+
+        Context context = mBaseAdInternal.getContext();
+        String navigationMode = null;
+        String link = null;
+        if (mBaseAdInternal.getAd() != null) {
+            navigationMode = mBaseAdInternal.getAd().getNavigationMode();
+            link = mBaseAdInternal.getAd().getLink();
+        }
+
         if (Utils.isOnline(mBaseAdInternal.getContext())) {
-            Context context = mBaseAdInternal.getContext();
-            logClickThroughLocally(url);
-            String navigationMode = null;
-            String link = null;
-            if (mBaseAdInternal.getAd() != null) {
-                navigationMode = mBaseAdInternal.getAd().getNavigationMode();
-                link = mBaseAdInternal.getAd().getLink();
-            }
             UrlHandler urlHandler = new UrlHandler(context);
-            urlHandler.handleUrl(url, link, navigationMode);
+            boolean isHandledSuccessfully = urlHandler.handleUrlWithResult(url, link, navigationMode);
+            logClickThroughLocally(url, isHandledSuccessfully, urlClickSource);
         } else {
             Logger.e(LOG_TAG, "No internet connection");
+            logClickThroughLocally(url, false, urlClickSource);
         }
     }
 

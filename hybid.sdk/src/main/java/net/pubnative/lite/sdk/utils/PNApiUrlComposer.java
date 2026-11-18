@@ -12,8 +12,9 @@ import net.pubnative.lite.sdk.models.bidstream.BidParam;
 import net.pubnative.lite.sdk.models.bidstream.Signal;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,6 +25,89 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class PNApiUrlComposer {
     private static final String TAG = PNApiUrlComposer.class.getSimpleName();
     private static final Map<Class<?>, Map<Field, BidParam>> SIGNAL_FIELD_CACHE = new ConcurrentHashMap<>();
+
+    private interface ParamAccessor {
+        String get(PNAdRequest adRequest);
+    }
+
+    private static final class Param {
+        final String name;
+        final ParamAccessor accessor;
+
+        Param(String name, ParamAccessor accessor) {
+            this.name = name;
+            this.accessor = accessor;
+        }
+    }
+
+    private static Param param(String name, ParamAccessor accessor) {
+        return new Param(name, accessor);
+    }
+
+    // Order matters: it is the order of the query string sent to the ad server.
+    private static final List<Param> LEADING_PARAMS = Arrays.asList(
+            param("apptoken", r -> r.appToken),
+            param("os", r -> r.os),
+            param("osver", r -> r.osver),
+            param("devicemodel", r -> r.devicemodel),
+            param("make", r -> r.make),
+            param("dh", r -> r.deviceHeight),
+            param("dw", r -> r.deviceWidth),
+            param("devicetype", r -> r.deviceType),
+            param("scro", r -> r.orientation),
+            param("ppi", r -> r.ppi),
+            param("pxratio", r -> r.pxratio),
+            param("js", r -> r.js),
+            param("aud", r -> r.soundSetting),
+            param("dnt", r -> r.dnt),
+            param("al", r -> r.al),
+            param("w", r -> r.width),
+            param("h", r -> r.height),
+            param("mf", r -> r.mf),
+            param("af", r -> r.af),
+            param("zoneid", r -> r.zoneId),
+            param("test", r -> r.testMode),
+            param("locale", r -> r.locale),
+            param("language", r -> r.language),
+            param("langb", r -> r.langb),
+            param("lat", r -> r.latitude),
+            param("long", r -> r.longitude),
+            param("gender", r -> r.gender),
+            param("age", r -> r.age),
+            param("bundleid", r -> r.bundleid),
+            param("keywords", r -> r.keywords),
+            param("coppa", r -> r.coppa),
+            param("gid", r -> r.gid),
+            param("gidmd5", r -> r.gidmd5),
+            param("gidsha1", r -> r.gidsha1),
+            param("displaymanager", r -> r.displaymanager),
+            param("displaymanagerver", r -> r.displaymanagerver),
+            param("omidpn", r -> r.omidpn),
+            param("omidpv", r -> r.omidpv),
+            param("rv", r -> r.rv),
+            param("usprivacy", r -> r.usprivacy),
+            param("userconsent", r -> r.userconsent),
+            param("gpp", r -> r.gppstring),
+            param("gppsid", r -> r.gppsid),
+            param("carrier", r -> r.carrier),
+            param("connectiontype", r -> r.connectiontype),
+            param("mccmnc", r -> r.mccmnc),
+            param("mccmncsim", r -> r.mccmncsim),
+            param("geofetch", r -> r.geofetch),
+            param("sua", r -> r.sua),
+            param("ae", r -> r.ae),
+            param("protocol", r -> r.protocol),
+            param("api", r -> r.api),
+            param("impdepth", r -> r.impdepth),
+            param("ageofapp", r -> r.ageofapp),
+            param("sessionduration", r -> r.sessionduration),
+            param("mediationadunitid", r -> r.mediationAdUnitId)
+    );
+
+    private static final List<Param> TRAILING_PARAMS = Arrays.asList(
+            param("vg", r -> r.vg),
+            param("hver", r -> r.hver)
+    );
 
     public static String getUrlQuery(String baseUrl, PNAdRequest adRequest) {
         Uri uri = buildUri(baseUrl, adRequest);
@@ -40,268 +124,44 @@ public final class PNApiUrlComposer {
         uriBuilder.appendPath("v3");
         uriBuilder.appendPath("native");
 
-        // Appending parameters
-        if (!TextUtils.isEmpty(adRequest.appToken)) {
-            uriBuilder.appendQueryParameter("apptoken", adRequest.appToken);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.os)) {
-            uriBuilder.appendQueryParameter("os", adRequest.os);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.osver)) {
-            uriBuilder.appendQueryParameter("osver", adRequest.osver);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.devicemodel)) {
-            uriBuilder.appendQueryParameter("devicemodel", adRequest.devicemodel);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.make)) {
-            uriBuilder.appendQueryParameter("make", adRequest.make);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.deviceHeight)) {
-            uriBuilder.appendQueryParameter("dh", adRequest.deviceHeight);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.deviceWidth)) {
-            uriBuilder.appendQueryParameter("dw", adRequest.deviceWidth);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.deviceType)) {
-            uriBuilder.appendQueryParameter("devicetype", adRequest.deviceType);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.orientation)) {
-            uriBuilder.appendQueryParameter("scro", adRequest.orientation);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.ppi)) {
-            uriBuilder.appendQueryParameter("ppi", adRequest.ppi);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.pxratio)) {
-            uriBuilder.appendQueryParameter("pxratio", adRequest.pxratio);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.js)) {
-            uriBuilder.appendQueryParameter("js", adRequest.js);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.soundSetting)) {
-            uriBuilder.appendQueryParameter("aud", adRequest.soundSetting);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.dnt)) {
-            uriBuilder.appendQueryParameter("dnt", adRequest.dnt);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.al)) {
-            uriBuilder.appendQueryParameter("al", adRequest.al);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.width)) {
-            uriBuilder.appendQueryParameter("w", adRequest.width);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.height)) {
-            uriBuilder.appendQueryParameter("h", adRequest.height);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.mf)) {
-            uriBuilder.appendQueryParameter("mf", adRequest.mf);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.af)) {
-            uriBuilder.appendQueryParameter("af", adRequest.af);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.zoneId)) {
-            uriBuilder.appendQueryParameter("zoneid", adRequest.zoneId);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.testMode)) {
-            uriBuilder.appendQueryParameter("test", adRequest.testMode);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.locale)) {
-            uriBuilder.appendQueryParameter("locale", adRequest.locale);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.language)) {
-            uriBuilder.appendQueryParameter("language", adRequest.language);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.langb)) {
-            uriBuilder.appendQueryParameter("langb", adRequest.langb);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.latitude)) {
-            uriBuilder.appendQueryParameter("lat", adRequest.latitude);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.longitude)) {
-            uriBuilder.appendQueryParameter("long", adRequest.longitude);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.gender)) {
-            uriBuilder.appendQueryParameter("gender", adRequest.gender);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.age)) {
-            uriBuilder.appendQueryParameter("age", adRequest.age);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.bundleid)) {
-            uriBuilder.appendQueryParameter("bundleid", adRequest.bundleid);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.keywords)) {
-            uriBuilder.appendQueryParameter("keywords", adRequest.keywords);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.coppa)) {
-            uriBuilder.appendQueryParameter("coppa", adRequest.coppa);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.gid)) {
-            uriBuilder.appendQueryParameter("gid", adRequest.gid);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.gidmd5)) {
-            uriBuilder.appendQueryParameter("gidmd5", adRequest.gidmd5);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.gidsha1)) {
-            uriBuilder.appendQueryParameter("gidsha1", adRequest.gidsha1);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.displaymanager)) {
-            uriBuilder.appendQueryParameter("displaymanager", adRequest.displaymanager);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.displaymanagerver)) {
-            uriBuilder.appendQueryParameter("displaymanagerver", adRequest.displaymanagerver);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.omidpn)) {
-            uriBuilder.appendQueryParameter("omidpn", adRequest.omidpn);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.omidpv)) {
-            uriBuilder.appendQueryParameter("omidpv", adRequest.omidpv);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.rv)) {
-            uriBuilder.appendQueryParameter("rv", adRequest.rv);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.usprivacy)) {
-            uriBuilder.appendQueryParameter("usprivacy", adRequest.usprivacy);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.userconsent)) {
-            uriBuilder.appendQueryParameter("userconsent", adRequest.userconsent);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.gppstring)) {
-            uriBuilder.appendQueryParameter("gpp", adRequest.gppstring);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.gppsid)) {
-            uriBuilder.appendQueryParameter("gppsid", adRequest.gppsid);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.carrier)) {
-            uriBuilder.appendQueryParameter("carrier", adRequest.carrier);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.connectiontype)) {
-            uriBuilder.appendQueryParameter("connectiontype", adRequest.connectiontype);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.mccmnc)) {
-            uriBuilder.appendQueryParameter("mccmnc", adRequest.mccmnc);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.mccmncsim)) {
-            uriBuilder.appendQueryParameter("mccmncsim", adRequest.mccmncsim);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.geofetch)) {
-            uriBuilder.appendQueryParameter("geofetch", adRequest.geofetch);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.sua)) {
-            uriBuilder.appendQueryParameter("sua", adRequest.sua);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.ae)) {
-            uriBuilder.appendQueryParameter("ae", adRequest.ae);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.protocol)) {
-            uriBuilder.appendQueryParameter("protocol", adRequest.protocol);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.api)) {
-            uriBuilder.appendQueryParameter("api", adRequest.api);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.impdepth)) {
-            uriBuilder.appendQueryParameter("impdepth", adRequest.impdepth);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.ageofapp)) {
-            uriBuilder.appendQueryParameter("ageofapp", adRequest.ageofapp);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.sessionduration)) {
-            uriBuilder.appendQueryParameter("sessionduration", adRequest.sessionduration);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.mediationAdUnitId)) {
-            uriBuilder.appendQueryParameter("mediationadunitid", adRequest.mediationAdUnitId);
-        }
-
-        if (!adRequest.getSignals().isEmpty()) {
-            for (Signal signal : adRequest.getSignals()) {
-                Map<Field, BidParam> fieldCache = getSignalFieldCache(signal.getClass());
-
-                for (Map.Entry<Field, BidParam> entry : fieldCache.entrySet()) {
-                    Field field = entry.getKey();
-                    BidParam bidParam = entry.getValue();
-
-                    try {
-                        Class typeClass = field.getType();
-                        String value;
-                        if (Iterable.class.isAssignableFrom(typeClass)) {
-                            value = String.valueOf(field.get(signal));
-                            value = value.substring(1, value.length() - 1);
-                            value = value.replaceAll("\\s+", "");
-                        } else {
-                            value = String.valueOf(field.get(signal));
-                        }
-                        if (!TextUtils.isEmpty(value) && !value.equals("null") && !TextUtils.isEmpty(bidParam.name())) {
-                            uriBuilder.appendQueryParameter(bidParam.name(), value);
-                        }
-                    } catch (IllegalAccessException e) {
-
-                    }
-                }
-            }
-        }
-
-        if (!TextUtils.isEmpty(adRequest.vg)) {
-            uriBuilder.appendQueryParameter("vg", adRequest.vg);
-        }
-
-        if (!TextUtils.isEmpty(adRequest.hver)) {
-            uriBuilder.appendQueryParameter("hver", adRequest.hver);
-        }
+        appendParams(uriBuilder, adRequest, LEADING_PARAMS);
+        appendSignalParams(uriBuilder, adRequest.getSignals());
+        appendParams(uriBuilder, adRequest, TRAILING_PARAMS);
 
         return uriBuilder.build();
+    }
+
+    private static void appendParams(Uri.Builder uriBuilder, PNAdRequest adRequest, List<Param> params) {
+        for (Param param : params) {
+            String value = param.accessor.get(adRequest);
+            if (!TextUtils.isEmpty(value)) {
+                uriBuilder.appendQueryParameter(param.name, value);
+            }
+        }
+    }
+
+    private static void appendSignalParams(Uri.Builder uriBuilder, List<Signal> signals) {
+        for (Signal signal : signals) {
+            Map<Field, BidParam> fieldCache = getSignalFieldCache(signal.getClass());
+
+            for (Map.Entry<Field, BidParam> entry : fieldCache.entrySet()) {
+                appendSignalParam(uriBuilder, signal, entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    private static void appendSignalParam(Uri.Builder uriBuilder, Signal signal, Field field, BidParam bidParam) {
+        try {
+            String value = String.valueOf(field.get(signal));
+            if (Iterable.class.isAssignableFrom(field.getType())) {
+                value = value.substring(1, value.length() - 1).replaceAll("\\s+", "");
+            }
+            if (!TextUtils.isEmpty(value) && !value.equals("null") && !TextUtils.isEmpty(bidParam.name())) {
+                uriBuilder.appendQueryParameter(bidParam.name(), value);
+            }
+        } catch (IllegalAccessException e) {
+            // Field is made accessible when cached; nothing to send if access still fails.
+        }
     }
 
     private static Map<Field, BidParam> getSignalFieldCache(Class<?> signalClass) {

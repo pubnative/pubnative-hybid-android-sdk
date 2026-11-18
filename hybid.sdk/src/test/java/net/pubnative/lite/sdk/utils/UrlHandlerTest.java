@@ -7,10 +7,12 @@ package net.pubnative.lite.sdk.utils;
 import android.content.Context;
 import android.net.Uri;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedConstruction;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
@@ -26,10 +28,11 @@ public class UrlHandlerTest {
     IntentHandler mockIntentHandler;
 
     UrlHandler urlHandler;
+    AutoCloseable closeable;
 
     @Before
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         urlHandler = new UrlHandler(mockContext);
         // Inject mockIntentHandler
         try {
@@ -39,6 +42,11 @@ public class UrlHandlerTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        closeable.close();
     }
 
     @Test
@@ -106,7 +114,9 @@ public class UrlHandlerTest {
     @Test
     public void testHandleDeeplinkIfPresent_HttpDeeplinkHandled() {
         String adLink = "vrvdl://test?deeplinkUrl=http://www.example.com";
-        when(mockIntentHandler.canHandleIntent(Uri.parse("http://www.example.com"))).thenReturn(true);
+        Uri uri = Uri.parse("http://www.example.com");
+        when(mockIntentHandler.canHandleIntent(uri)).thenReturn(true);
+        when(mockIntentHandler.handleDeepLink(uri)).thenReturn(true);
         String result = urlHandler.handleDeeplinkIfPresent("http://original.com", adLink);
         assertNull(result);
     }
@@ -114,7 +124,9 @@ public class UrlHandlerTest {
     @Test
     public void testHandleDeeplinkIfPresent_HttpSDeeplinkHandled() {
         String adLink = "vrvdl://test?deeplinkUrl=https://www.example.com";
-        when(mockIntentHandler.canHandleIntent(Uri.parse("https://www.example.com"))).thenReturn(true);
+        Uri uri = Uri.parse("https://www.example.com");
+        when(mockIntentHandler.canHandleIntent(uri)).thenReturn(true);
+        when(mockIntentHandler.handleDeepLink(uri)).thenReturn(true);
         String result = urlHandler.handleDeeplinkIfPresent("http://original.com", adLink);
         assertNull(result);
     }
@@ -205,4 +217,59 @@ public class UrlHandlerTest {
         assertEquals("http://original.com", result);
     }
 
+    @Test
+    public void testHandleUrl_ifHandledViaIntentHandler() {
+        try (
+                MockedConstruction<IntentHandler> intentHandlerMockedConstruction = mockConstruction(IntentHandler.class);
+        ) {
+            UrlHandler subject = new UrlHandler(mockContext);
+            doReturn(true)
+                    .when(intentHandlerMockedConstruction.constructed().get(0))
+                    .handleBrowserLink(any());
+            boolean result = subject.handleUrlWithResult("http://test.com", null, null);
+            assertTrue(result);
+        }
+    }
+
+    @Test
+    public void testHandleUrl_ifHandledViaIntentHandlerInternalNav() {
+        try (
+                MockedConstruction<IntentHandler> intentHandlerMockedConstruction = mockConstruction(IntentHandler.class);
+        ) {
+            UrlHandler subject = new UrlHandler(mockContext);
+            doReturn(true)
+                    .when(intentHandlerMockedConstruction.constructed().get(0))
+                    .handleBrowserLinkBrowserActivity(any());
+            boolean result = subject.handleUrlWithResult("http://test.com", null, "internal");
+            assertTrue(result);
+        }
+    }
+
+    @Test
+    public void testHandleUrl_ifHandledViaIntentHandlerDeepLink() {
+        try (
+                MockedConstruction<IntentHandler> intentHandlerMockedConstruction = mockConstruction(IntentHandler.class);
+        ) {
+            UrlHandler subject = new UrlHandler(mockContext);
+            doReturn(true)
+                    .when(intentHandlerMockedConstruction.constructed().get(0))
+                    .handleDeepLink(any());
+            boolean result = subject.handleUrlWithResult("customscheme://test", null, null);
+            assertTrue(result);
+        }
+    }
+
+    @Test
+    public void testHandleUrl_ifNotHandled() {
+        try (
+                MockedConstruction<IntentHandler> intentHandlerMockedConstruction = mockConstruction(IntentHandler.class);
+        ) {
+            UrlHandler subject = new UrlHandler(mockContext);
+            doReturn(false)
+                    .when(intentHandlerMockedConstruction.constructed().get(0))
+                    .handleBrowserLink(any());
+            boolean result = subject.handleUrlWithResult("http://test.com", null, null);
+            assertFalse(result);
+        }
+    }
 }

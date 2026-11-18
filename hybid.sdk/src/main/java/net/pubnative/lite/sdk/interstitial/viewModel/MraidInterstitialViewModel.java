@@ -4,7 +4,10 @@
 //
 package net.pubnative.lite.sdk.interstitial.viewModel;
 
+import static net.pubnative.lite.sdk.analytics.Reporting.Key.CLICK_SOURCE_TYPE_END_CARD;
+
 import android.content.Context;
+import android.os.Bundle;
 import android.view.View;
 
 import net.pubnative.lite.sdk.HyBid;
@@ -31,10 +34,11 @@ public class MraidInterstitialViewModel extends InterstitialViewModel implements
 
     private MRAIDBanner mView;
 
-    private boolean mLoadCustomEndCardTracked = false;
+    private boolean mCustomEndCardLoadSuccessTracked = false;
+    private boolean mCustomEndCardLoadFailTracked = false;
     private boolean mCustomEndCardImpressionTracked = false;
-    private boolean mCustomEndCardCloseTracked = false;
     private boolean mCustomEndCardClickTracked = false;
+    private boolean mCustomEndCardCloseTracked = false;
     private boolean mCustomCTAImpressionTracked = false;
     private boolean mCustomCTAClickTracked = false;
 
@@ -149,57 +153,27 @@ public class MraidInterstitialViewModel extends InterstitialViewModel implements
 
     @Override
     public void onCustomEndCardLoadSuccess() {
-        if (mLoadCustomEndCardTracked)
+        if (mCustomEndCardLoadSuccessTracked)
             return;
-        mLoadCustomEndCardTracked = true;
-        if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
-            ReportingEvent reportingEvent = new ReportingEvent();
-            reportingEvent.setTimestamp(System.currentTimeMillis());
-            reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
-            reportingEvent.setPlatform(Reporting.Platform.ANDROID);
-            reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
-            if (mAd != null) {
-                reportingEvent.setImpId(mAd.getSessionId());
-                reportingEvent.setCampaignId(mAd.getCampaignId());
-                reportingEvent.setConfigId(mAd.getConfigId());
-            }
-            reportingEvent.setEventType(Reporting.EventType.CUSTOM_END_CARD_LOAD_SUCCESS);
-            reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE, Reporting.Key.END_CARD_TYPE_CUSTOM);
-            HyBid.getReportingController().reportEvent(reportingEvent);
-        }
+
+        mCustomEndCardLoadSuccessTracked = true;
+        Bundle extras = new Bundle();
+        extras.putBoolean(Reporting.Key.IS_CUSTOM_END_CARD, true);
+        sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.END_CARD_LOAD_SUCCESS, extras);
     }
 
     @Override
     public void onCustomEndCardShow(String endCardType) {
-        if (!mCustomEndCardImpressionTracked) {
-            if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
-                ReportingEvent reportingEvent = new ReportingEvent();
-                reportingEvent.setTimestamp(System.currentTimeMillis());
-                reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
-                reportingEvent.setPlatform(Reporting.Platform.ANDROID);
-                reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
-                if (mAd != null) {
-                    reportingEvent.setImpId(mAd.getSessionId());
-                    reportingEvent.setCampaignId(mAd.getCampaignId());
-                    reportingEvent.setConfigId(mAd.getConfigId());
-                }
-                reportingEvent.setEventType(Reporting.EventType.CUSTOM_ENDCARD_IMPRESSION);
-                reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE, endCardType);
+        if (mCustomEndCardImpressionTracked)
+            return;
 
-                HyBid.getReportingController().reportEvent(reportingEvent);
-            }
-            mCustomEndcardTracker.trackImpression();
-            mAdEventTracker.trackCustomEndcardEvent(AuxiliaryAdEventType.IMPRESSION, null);
-            mCustomEndCardImpressionTracked = true;
-        }
-    }
-
-    @Override
-    public void onCustomEndCardLoadFail() {
+        mCustomEndCardImpressionTracked = true;
+        // Report here instead of sending a broadcast to include
+        // custom end card type (iframe, HTML, etc.)
         if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
             ReportingEvent reportingEvent = new ReportingEvent();
             reportingEvent.setTimestamp(System.currentTimeMillis());
-            reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
+            reportingEvent.setAdFormat(Reporting.AdFormat.FULLSCREEN);
             reportingEvent.setPlatform(Reporting.Platform.ANDROID);
             reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
             if (mAd != null) {
@@ -207,52 +181,47 @@ public class MraidInterstitialViewModel extends InterstitialViewModel implements
                 reportingEvent.setCampaignId(mAd.getCampaignId());
                 reportingEvent.setConfigId(mAd.getConfigId());
             }
-            reportingEvent.setEventType(Reporting.EventType.CUSTOM_END_CARD_LOAD_FAILURE);
-            reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE, Reporting.Key.END_CARD_TYPE_CUSTOM);
+            reportingEvent.setEventType(Reporting.EventType.CUSTOM_ENDCARD_IMPRESSION);
+            reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE, endCardType);
+
             HyBid.getReportingController().reportEvent(reportingEvent);
         }
+        mCustomEndcardTracker.trackImpression();
+        mAdEventTracker.trackCustomEndcardEvent(AuxiliaryAdEventType.IMPRESSION, null);
+    }
+
+    @Override
+    public void onCustomEndCardLoadFail() {
+        if (mCustomEndCardLoadFailTracked)
+            return;
+
+        mCustomEndCardLoadFailTracked = true;
+        Bundle extras = new Bundle();
+        extras.putBoolean(Reporting.Key.IS_CUSTOM_END_CARD, true);
+        sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.END_CARD_LOAD_FAILURE, extras);
     }
 
     @Override
     public void onCustomEndCardClosed() {
         if (mCustomEndCardCloseTracked)
             return;
+
         mCustomEndCardCloseTracked = true;
         mAdEventTracker.trackCustomEndcardEvent(AuxiliaryAdEventType.CLOSE, null);
-        if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
-            ReportingEvent reportingEvent = new ReportingEvent();
-            reportingEvent.setTimestamp(System.currentTimeMillis());
-            reportingEvent.setEventType(Reporting.EventType.CUSTOM_ENDCARD_CLOSE);
-            reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE, Reporting.Key.END_CARD_TYPE_CUSTOM);
-            HyBid.getReportingController().reportEvent(reportingEvent);
-        }
+        invokeOnEndCardClosed(false);
     }
 
     @Override
     public void onCustomEndCardClicked() {
         markImpressionClicked();
-        if (!mCustomEndCardClickTracked) {
-            if (HyBid.getReportingController() != null && HyBid.isReportingEnabled()) {
-                ReportingEvent reportingEvent = new ReportingEvent();
-                reportingEvent.setEventType(Reporting.EventType.CUSTOM_ENDCARD_CLICK);
-                reportingEvent.setTimestamp(System.currentTimeMillis());
-                reportingEvent.setAdFormat(Reporting.AdFormat.BANNER);
-                reportingEvent.setPlatform(Reporting.Platform.ANDROID);
-                reportingEvent.setSdkVersion(HyBid.getSDKVersionInfo(mIntegrationType));
-                if (mAd != null) {
-                    reportingEvent.setImpId(mAd.getSessionId());
-                    reportingEvent.setCampaignId(mAd.getCampaignId());
-                    reportingEvent.setConfigId(mAd.getConfigId());
-                }
-                reportingEvent.setCustomString(Reporting.Key.END_CARD_TYPE, Reporting.Key.END_CARD_TYPE_CUSTOM);
 
-                HyBid.getReportingController().reportEvent(reportingEvent);
-            }
-            mAdTracker.trackClick();
-            mCustomEndcardTracker.trackClick();
-            mAdEventTracker.trackCustomEndcardEvent(AuxiliaryAdEventType.CLICK, null);
-            mCustomEndCardClickTracked = true;
-        }
+        if (mCustomEndCardClickTracked)
+            return;
+
+        mCustomEndCardClickTracked = true;
+        Bundle extras = new Bundle();
+        extras.putString(Reporting.Key.CLICK_SOURCE_TYPE, CLICK_SOURCE_TYPE_END_CARD);
+        sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CUSTOM_END_CARD_CLICK, extras);
     }
 
     @Override
@@ -318,7 +287,7 @@ public class MraidInterstitialViewModel extends InterstitialViewModel implements
     @Override
     public void onClickThroughTriggered() {
         markImpressionClicked();
-        mAdTracker.trackClick();
+        sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CLICK);
     }
 
     // ------------------------------- MRAIDNativeFeatureListener ----------------------------------
@@ -327,6 +296,7 @@ public class MraidInterstitialViewModel extends InterstitialViewModel implements
     public void mraidNativeFeatureCallTel(String url) {
         markImpressionClicked();
         sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CLICK);
+        handleURL(url);
     }
 
     @Override
@@ -355,6 +325,7 @@ public class MraidInterstitialViewModel extends InterstitialViewModel implements
     public void mraidNativeFeatureSendSms(String url) {
         markImpressionClicked();
         sendBroadcast(HyBidInterstitialBroadcastReceiver.Action.CLICK);
+        handleURL(url);
     }
 
     // ------------------------------ MRAIDViewCloseLayoutListener ---------------------------------

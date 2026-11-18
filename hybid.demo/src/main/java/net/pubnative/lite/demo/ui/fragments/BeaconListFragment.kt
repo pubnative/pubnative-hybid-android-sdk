@@ -211,10 +211,10 @@ class BeaconListFragment : Fragment(R.layout.fragment_beacon_list) {
                 beaconList.add(BeaconDescription(impression, "Impression"))
             }
             for (videoClick in videoAdCacheItem.adParams.videoClicks) {
-                beaconList.add(BeaconDescription(videoClick, "Video Click"))
+                beaconList.add(BeaconDescription(videoClick, "ClickTracking"))
             }
             for (endcardClick in videoAdCacheItem.adParams.endCardClicks) {
-                beaconList.add(BeaconDescription(endcardClick, "Endcard click"))
+                beaconList.add(BeaconDescription(endcardClick, "CompanionClickTracking"))
             }
             for (companionCreativeViewEvent in videoAdCacheItem.adParams.companionCreativeViewEvents) {
                 beaconList.add(

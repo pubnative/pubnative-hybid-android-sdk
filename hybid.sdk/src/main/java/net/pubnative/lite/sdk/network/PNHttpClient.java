@@ -65,6 +65,9 @@ public class PNHttpClient {
     private static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
     private static final long MIN_WAKE_UP_DELAY_MS = 100L;
     private static final long OFFLINE_RECHECK_DELAY_MS = 30000L;
+    private static final int READ_BUFFER_SIZE = 4096;
+    private static final int MAX_RESPONSE_BODY_BYTES = 10 * 1024 * 1024;
+    private static final int MAX_INITIAL_BUFFER_BYTES = 256 * 1024;
 
     public interface Listener {
         void onSuccess(String response, Map<String, List<String>> headers);
@@ -80,10 +83,11 @@ public class PNHttpClient {
         private int responseCode;
         private String response;
         private Map<String, List<String>> headers;
-        private Exception exception;
+        private Throwable exception;
         private boolean transportFailure;
         private boolean failedToConnect;
         private boolean redirected;
+        private boolean notRetryable;
         private long retryAfterMs = -1L;
 
         private Response() {
@@ -97,8 +101,14 @@ public class PNHttpClient {
             return response;
         }
 
-        public Exception getException() {
+        public Throwable getException() {
             return exception;
+        }
+    }
+
+    static final class ResponseTooLargeException extends IOException {
+        ResponseTooLargeException(int maxBytes) {
+            super("Response body over " + maxBytes + " bytes");
         }
     }
 
@@ -280,9 +290,13 @@ public class PNHttpClient {
             int responseCode = result.responseCode;
             if (isHttpSuccess(responseCode)) {
                 if (readsResponseBody(retryPolicy)) {
-                    InputStream inputStream = urlConnection.getInputStream();
-                    result.response = getStringFromStream(inputStream);
-                    inputStream.close();
+                    long contentLength = parseContentLength(urlConnection.getHeaderField("Content-Length"));
+                    if (contentLength > MAX_RESPONSE_BODY_BYTES) {
+                        throw new ResponseTooLargeException(MAX_RESPONSE_BODY_BYTES);
+                    }
+                    try (InputStream inputStream = urlConnection.getInputStream()) {
+                        result.response = getStringFromStream(inputStream, contentLength, MAX_RESPONSE_BODY_BYTES);
+                    }
                 }
                 Map<String, List<String>> responseHeaders = urlConnection.getHeaderFields();
                 if (responseHeaders != null && !responseHeaders.isEmpty()) {
@@ -296,15 +310,49 @@ public class PNHttpClient {
                 }
                 result.exception = new Exception(String.format(Locale.ENGLISH, "Network request failed with code: %s", responseCode));
             }
+        } catch (ResponseTooLargeException e) {
+            result.exception = e;
+            result.notRetryable = true;
+            logOversizedBestEffort(url, e);
         } catch (Exception e) {
             result.exception = e;
             result.transportFailure = true;
+        } catch (Throwable throwable) {
+            // An Error (e.g. OutOfMemoryError) must still end in onFailure, or the caller never hears back.
+            result.exception = throwable;
+            result.notRetryable = true;
+            reportBestEffort(throwable);
         } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
+            disconnectQuietly(urlConnection);
         }
         return result;
+    }
+
+    static void disconnectQuietly(HttpURLConnection urlConnection) {
+        if (urlConnection == null) {
+            return;
+        }
+        try {
+            urlConnection.disconnect();
+        } catch (Throwable ignored) {
+            // Cleanup must not replace the captured result, or the caller never hears back.
+        }
+    }
+
+    private static void logOversizedBestEffort(String url, ResponseTooLargeException exception) {
+        try {
+            Logger.w(TAG, "Dropping oversized response: " + redactUrl(url), exception);
+        } catch (Throwable ignored) {
+            // Logging must not stop the caller from getting onFailure.
+        }
+    }
+
+    private static void reportBestEffort(Throwable throwable) {
+        try {
+            HyBid.reportException(throwable);
+        } catch (Throwable ignored) {
+            // Reporting can itself fail on an exhausted heap; the listener still gets onFailure.
+        }
     }
 
     private static HttpURLConnection openConnection(URL url,
@@ -397,7 +445,7 @@ public class PNHttpClient {
     }
 
     private static boolean isRetryableFailure(Response response, RetryPolicy retryPolicy) {
-        if (response == null || response.exception == null) {
+        if (response == null || response.exception == null || response.notRetryable) {
             return false;
         }
         if (retryPolicy == RetryPolicy.AVOID_DUPLICATES) {
@@ -423,12 +471,31 @@ public class PNHttpClient {
         return responseCode / 100 == 2;
     }
 
-    private static String getStringFromStream(InputStream inputStream) throws IOException {
-        final int BUFFER_SIZE = 4096;
-        ByteArrayOutputStream resultStream = new ByteArrayOutputStream(BUFFER_SIZE);
-        byte[] buffer = new byte[BUFFER_SIZE];
+    // Returns -1 when the header is missing or malformed.
+    static long parseContentLength(String value) {
+        if (TextUtils.isEmpty(value)) {
+            return -1L;
+        }
+        try {
+            return Long.parseLong(value.trim());
+        } catch (NumberFormatException e) {
+            return -1L;
+        }
+    }
+
+    // Sizes the buffer from Content-Length, trusted only up to MAX_INITIAL_BUFFER_BYTES since the server
+    // controls it, and stops reading once maxBytes is passed.
+    static String getStringFromStream(InputStream inputStream, long contentLength, int maxBytes) throws IOException {
+        int initialSize = contentLength > 0
+                ? (int) Math.min(contentLength, Math.min(maxBytes, MAX_INITIAL_BUFFER_BYTES))
+                : READ_BUFFER_SIZE;
+        ByteArrayOutputStream resultStream = new ByteArrayOutputStream(initialSize);
+        byte[] buffer = new byte[READ_BUFFER_SIZE];
         int length;
         while ((length = inputStream.read(buffer)) != -1) {
+            if (resultStream.size() + length > maxBytes) {
+                throw new ResponseTooLargeException(maxBytes);
+            }
             resultStream.write(buffer, 0, length);
         }
         return resultStream.toString("UTF-8");
@@ -540,7 +607,7 @@ public class PNHttpClient {
     }
 
     // Tracker queries carry ad and session IDs, so redact here too even though this is debug only.
-    private static void logDrop(String reason, PendingRequest pendingRequest, Exception exception) {
+    private static void logDrop(String reason, PendingRequest pendingRequest, Throwable exception) {
         Logger.w(TAG, reason + ": " + redactUrl(pendingRequest.getUrl()), exception);
     }
 

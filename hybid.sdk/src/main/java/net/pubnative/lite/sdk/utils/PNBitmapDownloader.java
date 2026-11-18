@@ -8,7 +8,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Picture;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -19,15 +18,24 @@ import android.webkit.URLUtil;
 import net.pubnative.lite.sdk.HyBidError;
 import net.pubnative.lite.sdk.HyBidErrorCode;
 import net.pubnative.lite.sdk.utils.svgparser.SVG;
+import net.pubnative.lite.sdk.utils.svgparser.SVGParseException;
 
+import java.io.ByteArrayInputStream;
+import java.io.EOFException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.concurrent.RejectedExecutionException;
 
 public class PNBitmapDownloader {
 
     private static final String TAG = PNBitmapDownloader.class.getSimpleName();
+    private static final int MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+    private static final int BUFFER_SIZE = 8 * 1024;
+    private static final String SVG_CONTENT_TYPE = "image/svg+xml";
 
     private DownloadListener mDownloadListener;
     private String mURL;
@@ -36,34 +44,30 @@ public class PNBitmapDownloader {
     private int mWidth;
 
     private final Runnable downloadTask = new Runnable() {
-        HttpURLConnection connection = null;
-
         @Override
         public void run() {
+            HttpURLConnection connection = null;
             try {
-                URL url = new URL(mURL);
-                connection = (HttpURLConnection) url.openConnection();
+                connection = (HttpURLConnection) new URL(mURL).openConnection();
 
-                // Get InputStream for get a real size of bitmap
-                InputStream checkSizeInputStream = url.openConnection().getInputStream();
-                BitmapFactory.decodeStream(checkSizeInputStream, new Rect(), getBitmapOptionsDecodingBounds(true));
-                checkSizeInputStream.close();
-
-                // Get new InputStream second time,
-                // because it can't be reused from previous time
-                InputStream inputStream = url.openConnection().getInputStream();
-                Bitmap bitmap;
-                if(url.openConnection().getContentType().equals("image/svg+xml")){
-                    SVG svg = SVG.getFromInputStream(inputStream);
-                    Picture picture = svg.renderToPicture();
-                    bitmap = Bitmap.createBitmap(picture.getWidth(), picture.getHeight(), Bitmap.Config.ARGB_8888);
-                    Canvas canvas = new Canvas(bitmap);
-                    canvas.drawPicture(picture);
-                } else {
-                    bitmap = BitmapFactory.decodeStream(inputStream, null, getBitmapOptionsDecodingBounds(false));
+                int contentLength = connection.getContentLength();
+                ByteBuffer imageData = null;
+                if (contentLength <= MAX_IMAGE_SIZE_BYTES) {
+                    try (InputStream inputStream = connection.getInputStream()) {
+                        imageData = readImageData(inputStream, contentLength);
+                    }
                 }
-                inputStream.close();
-                PNBitmapLruCache.addBitmapToMemoryCache(mURL, bitmap);
+                if (imageData == null) {
+                    invokeFail(new HyBidError(HyBidErrorCode.RESOURCE_EXHAUSTION, "Image exceeds the maximum allowed size"));
+                    return;
+                }
+
+                Bitmap bitmap;
+                if (isSvg(connection.getContentType())) {
+                    bitmap = renderSvg(imageData);
+                } else {
+                    bitmap = decodeImageData(imageData);
+                }
                 invokeLoad(bitmap);
             } catch (RuntimeException e) {
                 invokeFail(new HyBidError(HyBidErrorCode.INTERNAL_ERROR, e));
@@ -84,8 +88,7 @@ public class PNBitmapDownloader {
         public void run() {
             try {
                 Uri uri = Uri.parse(mURL);
-                Bitmap bitmap = BitmapFactory.decodeFile(uri.getEncodedPath(), getBitmapOptionsDecodingBounds(false));
-                PNBitmapLruCache.addBitmapToMemoryCache(mURL, bitmap);
+                Bitmap bitmap = decodeImageFile(uri.getEncodedPath());
                 invokeLoad(bitmap);
             } catch (RuntimeException e) {
                 invokeFail(new HyBidError(HyBidErrorCode.INTERNAL_ERROR, e));
@@ -171,14 +174,69 @@ public class PNBitmapDownloader {
         }
     }
 
-    private BitmapFactory.Options getBitmapOptionsDecodingBounds(boolean decodeBounds) {
+    private static ByteBuffer readImageData(InputStream inputStream, int contentLength) throws IOException {
+        if (contentLength > 0) {
+            byte[] imageData = new byte[contentLength];
+            int offset = 0;
+            while (offset < contentLength) {
+                int bytesRead = inputStream.read(imageData, offset, contentLength - offset);
+                if (bytesRead == -1) {
+                    throw new EOFException("Image body is shorter than its Content-Length");
+                }
+                offset += bytesRead;
+            }
+            return ByteBuffer.wrap(imageData);
+        }
 
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        if (mWidth > 0 && mHeight > 0 && !decodeBounds) {
+        byte[] imageData = new byte[BUFFER_SIZE];
+        int length = 0;
+        int bytesRead;
+        while ((bytesRead = inputStream.read(imageData, length, imageData.length - length)) != -1) {
+            length += bytesRead;
+            if (length > MAX_IMAGE_SIZE_BYTES) {
+                return null;
+            }
+            if (length == imageData.length) {
+                imageData = Arrays.copyOf(imageData, Math.min(imageData.length * 2, MAX_IMAGE_SIZE_BYTES + 1));
+            }
+        }
+        return ByteBuffer.wrap(imageData, 0, length);
+    }
+
+    private static boolean isSvg(String contentType) {
+        return SVG_CONTENT_TYPE.equals(contentType);
+    }
+
+    private static Bitmap renderSvg(ByteBuffer imageData) throws SVGParseException {
+        SVG svg = SVG.getFromInputStream(new ByteArrayInputStream(imageData.array(), 0, imageData.limit()));
+        Picture picture = svg.renderToPicture();
+        Bitmap bitmap = Bitmap.createBitmap(picture.getWidth(), picture.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        canvas.drawPicture(picture);
+        return bitmap;
+    }
+
+    private Bitmap decodeImageData(ByteBuffer imageData) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeByteArray(imageData.array(), 0, imageData.limit(), options);
+        applySampleSize(options);
+        return BitmapFactory.decodeByteArray(imageData.array(), 0, imageData.limit(), options);
+    }
+
+    private Bitmap decodeImageFile(String path) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(path, options);
+        applySampleSize(options);
+        return BitmapFactory.decodeFile(path, options);
+    }
+
+    private void applySampleSize(BitmapFactory.Options options) {
+        if (mWidth > 0 && mHeight > 0) {
             options.inSampleSize = calculateInSampleSize(options, mWidth, mHeight);
         }
-        options.inJustDecodeBounds = decodeBounds;
-        return options;
+        options.inJustDecodeBounds = false;
     }
 
     /**
